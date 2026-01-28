@@ -1,0 +1,37 @@
+{
+  "name": "@unbody/brain",
+  "version": "0.0.1",
+  "description": "Unbody Brain - Learning agents that build understanding over time",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "vitest",
+    "test:run": "vitest run",
+    "lint": "biome check .",
+    "lint:fix": "biome check --write .",
+    "format": "biome format --write .",
+    "eval": "bun evals/run-eval.ts",
+    "eval:crisis": "bun evals/run-eval.ts crisis-hostage",
+    "eval:developer": "bun evals/run-eval.ts developer-memory",
+    "eval:therapist": "bun evals/run-eval.ts therapist-profile"
+  },
+  "keywords": ["unbody", "brain", "learning", "agents"],
+  "license": "MIT",
+  "devDependencies": {
+    "@biomejs/biome": "^2.3.13",
+    "@types/node": "^22.0.0",
+    "typescript": "^5.7.0",
+    "vitest": "^3.0.0"
+  },
+  "dependencies": {
+    "@openrouter/ai-sdk-provider": "^2.1.1",
+    "ai": "^6.0.57",
+    "zod": "^3.24.0"
+  },
+  "peerDependencies": {
+    "ai": "^6.0.0"
+  }
+}

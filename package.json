@@ -23,8 +23,10 @@
     "vitest": "^3.0.0"
   },
   "dependencies": {
-    "@ai-sdk/openai": "^3.0.21",
     "ai": "^6.0.57",
     "zod": "^3.24.0"
+  },
+  "peerDependencies": {
+    "ai": "^6.0.0"
   }
 }

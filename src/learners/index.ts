@@ -1,8 +1,14 @@
 // Core types
 
 export type {
+	LearnerEndEvent,
+	LearnerObserver,
+	LearnerStartEvent,
+	LearnerStepEvent,
+	OnStepCallback,
 	TextLearnerConfig,
 	TextLearnerMaintenance,
+	TokenUsage,
 } from './text-learner.js'
 
 // TextLearner

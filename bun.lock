@@ -5,7 +5,6 @@
     "": {
       "name": "@unbody/brain",
       "dependencies": {
-        "@ai-sdk/openai": "^3.0.21",
         "ai": "^6.0.57",
         "zod": "^3.24.0",
       },
@@ -15,12 +14,13 @@
         "typescript": "^5.7.0",
         "vitest": "^3.0.0",
       },
+      "peerDependencies": {
+        "ai": "^6.0.0",
+      },
     },
   },
   "packages": {
     "@ai-sdk/gateway": ["@ai-sdk/gateway@3.0.25", "", { "dependencies": { "@ai-sdk/provider": "3.0.5", "@ai-sdk/provider-utils": "4.0.10", "@vercel/oidc": "3.1.0" }, "peerDependencies": { "zod": "^3.25.76 || ^4.1.8" } }, "sha512-j0AQeA7hOVqwImykQlganf/Euj3uEXf0h3G0O4qKTDpEwE+EZGIPnVimCWht5W91lAetPZSfavDyvfpuPDd2PQ=="],
-
-    "@ai-sdk/openai": ["@ai-sdk/openai@3.0.21", "", { "dependencies": { "@ai-sdk/provider": "3.0.5", "@ai-sdk/provider-utils": "4.0.10" }, "peerDependencies": { "zod": "^3.25.76 || ^4.1.8" } }, "sha512-6RzVqDNoJOptlMD4Wn9D2pZytiVgzeJSpm+E3Yvb2mO51CtklqhLmNur+DW2RpP/cGKgBDCbyns3yoJUd1hIhQ=="],
 
     "@ai-sdk/provider": ["@ai-sdk/provider@3.0.5", "", { "dependencies": { "json-schema": "^0.4.0" } }, "sha512-2Xmoq6DBJqmSl80U6V9z5jJSJP7ehaJJQMy2iFUqTay06wdCqTnPVBBQbtEL8RCChenL+q5DC5H5WzU3vV3v8w=="],
 

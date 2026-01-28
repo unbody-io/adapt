@@ -8,10 +8,10 @@
  * import { TextLearner } from '@unbody/brain'
  * import { openai } from '@ai-sdk/openai'
  *
- * const learner = new TextLearner(
- *   { purpose: 'Understand user coding patterns' },
- *   openai('gpt-4o')
- * )
+ * const learner = new TextLearner({
+ *   model: openai('gpt-4o'),
+ *   purpose: 'Understand user coding patterns',
+ * })
  *
  * await learner.onData([{ event: 'user prefers functional style' }])
  * const result = await learner.onQuery('What is my coding style?')

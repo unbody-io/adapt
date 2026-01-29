@@ -352,6 +352,32 @@ This keeps the core flexible while allowing power users to opt into structure wh
 | Storage | Draft | ⚪ Needs review | [storage.spec.md](specs/storage.spec.md) |
 | Query Flow | TODO | ❌ Not started | — |
 
+## Eval Learnings (Jan 2026)
+
+Findings from multi-learner evals across 3 datasets (crisis-hostage, developer-memory, therapist-profile):
+
+### Implementation Issues to Fix
+
+1. **Confidence calibration is broken** - All 88 query responses returned "low" confidence regardless of answer quality. The model isn't using the confidence levels meaningfully. Need to investigate whether this is a prompt issue or if confidence should be computed differently (e.g., based on understanding coverage vs query scope).
+
+2. **Relevance scoring lacks discrimination** - Batches consistently score 0.95-0.99 relevance regardless of actual alignment with purpose. Either purposes are too broad or the relevance assessment prompt needs refinement.
+
+3. **Activation doesn't differentiate specialists** - Within each dataset, all learners converge to nearly identical activation levels (e.g., 0.69-0.72 for crisis). Activation should vary more if purposes are genuinely different.
+
+### What Works Well
+
+1. **Understanding synthesis** - The final understanding text is coherent, well-structured, and captures genuine patterns from the data.
+2. **Query response quality** - Responses are detailed, accurate, and include meaningful gap identification.
+3. **Token efficiency** - ~300-500 tokens/event is reasonable for the depth of processing.
+
+### Open Questions for Brain Router (Future)
+
+- When to create specialists vs use a broader generic learner
+- How much purpose overlap is acceptable before learners should merge
+- Whether query-time specialization (single learner, multiple query lenses) is more efficient than parallel learners
+
+---
+
 ## Pending Discussions
 
 Topics that need first-principles review before implementation:

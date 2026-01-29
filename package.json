@@ -12,7 +12,11 @@
     "test:run": "vitest run",
     "lint": "biome check .",
     "lint:fix": "biome check --write .",
-    "format": "biome format --write ."
+    "format": "biome format --write .",
+    "eval": "bun evals/run-eval.ts",
+    "eval:crisis": "bun evals/run-eval.ts crisis-hostage",
+    "eval:developer": "bun evals/run-eval.ts developer-memory",
+    "eval:therapist": "bun evals/run-eval.ts therapist-profile"
   },
   "keywords": ["unbody", "brain", "learning", "agents"],
   "license": "MIT",
@@ -23,6 +27,7 @@
     "vitest": "^3.0.0"
   },
   "dependencies": {
+    "@openrouter/ai-sdk-provider": "^2.1.1",
     "ai": "^6.0.57",
     "zod": "^3.24.0"
   },

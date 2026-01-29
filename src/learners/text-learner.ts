@@ -1,21 +1,32 @@
 import type { LanguageModel } from 'ai'
 import { createLearnerAgent, type LearnerAgent } from './agent.js'
+import { synthesizeSystemPrompt } from './prompts.js'
+import { applyStrategy } from './strategies.js'
 import type { CompleteParams, SynthesizeParams } from './tools/schemas.js'
 import type {
+	AskResult,
+	EvolutionEntry,
+	IngestResult,
 	Learner,
 	LearnerGovernance,
 	LearnerMetadata,
 	LearnerOrigin,
-	OnDataResult,
-	OnQueryResult,
 } from './types.js'
+
+/**
+ * Understanding management strategies
+ */
+export const STRATEGIES = ['continuous', 'rolling-summary', 'temporal-layers'] as const
+export type Strategy = (typeof STRATEGIES)[number]
 
 /**
  * Maintenance configuration for TextLearner
  */
 export interface TextLearnerMaintenance {
-	strategy: 'summarize' | 'truncate'
-	maxTokens: number
+	/** How understanding evolves over time */
+	strategy: Strategy
+	/** Max tokens before maintenance kicks in (for rolling-summary) */
+	maxTokens?: number
 }
 
 /**
@@ -31,7 +42,7 @@ export interface TokenUsage {
  * Event emitted when an operation starts
  */
 export interface LearnerStartEvent {
-	operation: 'data' | 'query'
+	operation: 'ingest' | 'ask'
 	input: unknown
 	understanding: string
 }
@@ -41,7 +52,7 @@ export interface LearnerStartEvent {
  */
 export interface LearnerStepEvent {
 	/** Which operation triggered this step */
-	operation: 'data' | 'query'
+	operation: 'ingest' | 'ask'
 	/** Step number (0-indexed) */
 	stepNumber: number
 	/** Tool calls made in this step (if any) */
@@ -61,7 +72,7 @@ export interface LearnerStepEvent {
  * Event emitted when an operation completes
  */
 export interface LearnerEndEvent {
-	operation: 'data' | 'query'
+	operation: 'ingest' | 'ask'
 	/** Total steps taken */
 	totalSteps: number
 	/** Aggregated token usage */
@@ -72,12 +83,38 @@ export interface LearnerEndEvent {
 	success: boolean
 	/** Error message if failed */
 	error?: string
+	/** Evolution entry for ingest operations (included when understanding changes) */
+	entry?: EvolutionEntry
+}
+
+/**
+ * Event emitted when system prompt initialization completes
+ */
+export interface LearnerInitializedEvent {
+	/** The synthesized system prompt */
+	systemPrompt: string
+	/** Duration of initialization in milliseconds */
+	durationMs: number
+}
+
+/**
+ * Event emitted when system prompt initialization fails
+ */
+export interface LearnerInitErrorEvent {
+	/** Error that occurred during initialization */
+	error: Error
+	/** Duration before failure in milliseconds */
+	durationMs: number
 }
 
 /**
  * Callbacks for observing learner operations
  */
 export interface LearnerObserver {
+	/** Called when system prompt is synthesized (first ingest call) */
+	onInitialized?: (event: LearnerInitializedEvent) => void | Promise<void>
+	/** Called if system prompt synthesis fails */
+	onInitError?: (event: LearnerInitErrorEvent) => void | Promise<void>
 	/** Called when an operation starts */
 	onStart?: (event: LearnerStartEvent) => void | Promise<void>
 	/** Called after each agent step */
@@ -97,8 +134,8 @@ export type OnStepCallback = (event: LearnerStepEvent) => void | Promise<void>
 export interface TextLearnerConfig {
 	/** The language model to use (from AI SDK) */
 	model: LanguageModel
-	/** Natural language description of what this learner pays attention to */
-	purpose: string
+	/** Natural language instructions for what this learner tracks and watches for */
+	instructions: string
 	/** Optional unique identifier */
 	id?: string
 	/** How the learner was created */
@@ -119,24 +156,26 @@ export interface TextLearnerConfig {
  */
 export class TextLearner implements Learner<string> {
 	readonly id: string
-	readonly purpose: string
+	readonly instructions: string
 	readonly origin: LearnerOrigin
 
 	private understanding = ''
+	private evolution: EvolutionEntry[] = []
 	private governance: LearnerGovernance
 	private agent: LearnerAgent
-	// TODO: Implement maintenance (compression/summarization when understanding exceeds maxTokens)
+	private _model: LanguageModel
 	private _maintenance: TextLearnerMaintenance
+	private _systemPrompt: string | null = null
 	private _onStep?: OnStepCallback
 	private _observer?: LearnerObserver
 
 	constructor(config: TextLearnerConfig) {
 		this.id = config.id ?? crypto.randomUUID()
-		this.purpose = config.purpose
+		this.instructions = config.instructions
 		this.origin = config.origin ?? 'developer'
+		this._model = config.model
 		this._maintenance = config.maintenance ?? {
-			strategy: 'summarize',
-			maxTokens: 4000,
+			strategy: 'continuous',
 		}
 		this._onStep = config.onStep
 		this._observer = config.observer
@@ -161,6 +200,13 @@ export class TextLearner implements Learner<string> {
 	}
 
 	/**
+	 * Get a copy of the evolution history (newest first)
+	 */
+	getEvolution(): EvolutionEntry[] {
+		return [...this.evolution]
+	}
+
+	/**
 	 * Get the maintenance configuration
 	 */
 	getMaintenance(): TextLearnerMaintenance {
@@ -175,12 +221,52 @@ export class TextLearner implements Learner<string> {
 	}
 
 	/**
-	 * Process a batch of data and update understanding
+	 * Get the synthesized system prompt (null if not yet initialized)
+	 */
+	getSystemPrompt(): string | null {
+		return this._systemPrompt
+	}
+
+	/**
+	 * Ensure system prompt is initialized (lazy initialization)
+	 * Called on first ingest() call
+	 */
+	private async ensureInitialized(): Promise<void> {
+		if (this._systemPrompt !== null) return
+
+		const initStart = Date.now()
+		try {
+			const result = await synthesizeSystemPrompt({
+				model: this._model,
+				strategy: this._maintenance.strategy,
+				instructions: this.instructions,
+			})
+			this._systemPrompt = result.systemPrompt
+
+			await this._observer?.onInitialized?.({
+				systemPrompt: this._systemPrompt,
+				durationMs: Date.now() - initStart,
+			})
+		} catch (err) {
+			const error = err instanceof Error ? err : new Error(String(err))
+			await this._observer?.onInitError?.({
+				error,
+				durationMs: Date.now() - initStart,
+			})
+			throw error
+		}
+	}
+
+	/**
+	 * Ingest a batch of data and update understanding
 	 *
-	 * The agent analyzes the data in relation to its purpose,
+	 * The agent analyzes the data in relation to its instructions,
 	 * then synthesizes an updated understanding.
 	 */
-	async onData(batch: unknown[]): Promise<OnDataResult> {
+	async ingest(batch: unknown[]): Promise<IngestResult> {
+		// Lazy initialize system prompt on first call
+		await this.ensureInitialized()
+
 		const startTime = Date.now()
 		let stepNumber = 0
 		const totalUsage: TokenUsage = {
@@ -191,7 +277,7 @@ export class TextLearner implements Learner<string> {
 
 		// Emit start event
 		await this._observer?.onStart?.({
-			operation: 'data',
+			operation: 'ingest',
 			input: batch,
 			understanding: this.understanding,
 		})
@@ -228,7 +314,7 @@ export class TextLearner implements Learner<string> {
 			}
 
 			const event: LearnerStepEvent = {
-				operation: 'data',
+				operation: 'ingest',
 				stepNumber: stepNumber++,
 				toolCalls: toolCalls?.map((tc) => ({
 					toolName: tc.toolName,
@@ -247,9 +333,9 @@ export class TextLearner implements Learner<string> {
 			const result = await this.agent.generate({
 				prompt: 'Process the provided data batch.',
 				options: {
-					operation: 'data',
+					operation: 'ingest',
 					understanding: this.understanding,
-					purpose: this.purpose,
+					instructions: this.instructions,
 					input: batch,
 				},
 				onStepFinish: handleStep,
@@ -262,29 +348,49 @@ export class TextLearner implements Learner<string> {
 			)
 
 			let relevance = 0
+			let evolutionEntry: EvolutionEntry | undefined
 			if (synthesizeCall) {
 				const input = synthesizeCall.input as SynthesizeParams
 				this.understanding = input.newUnderstanding
 				relevance = input.relevance
 
+				// Apply strategy-specific maintenance (e.g., summarization for rolling-summary)
+				const strategyResult = await applyStrategy({
+					understanding: this.understanding,
+					model: this._model,
+					config: this._maintenance,
+				})
+				this.understanding = strategyResult.understanding
+
+				// Create evolution entry with timestamp
+				evolutionEntry = {
+					summary: input.entry.summary,
+					significance: input.entry.significance,
+					timestamp: new Date().toISOString(),
+				}
+
+				// Append to evolution (newest first)
+				this.evolution.unshift(evolutionEntry)
+
 				// Update governance
 				this.updateGovernance(relevance)
 			}
 
-			// Emit end event
+			// Emit end event with evolution entry
 			await this._observer?.onEnd?.({
-				operation: 'data',
+				operation: 'ingest',
 				totalSteps: stepNumber,
 				usage: totalUsage.totalTokens > 0 ? totalUsage : undefined,
 				durationMs: Date.now() - startTime,
 				success: true,
+				entry: evolutionEntry,
 			})
 
 			return { relevance }
 		} catch (error) {
 			// Emit end event with error
 			await this._observer?.onEnd?.({
-				operation: 'data',
+				operation: 'ingest',
 				totalSteps: stepNumber,
 				usage: totalUsage.totalTokens > 0 ? totalUsage : undefined,
 				durationMs: Date.now() - startTime,
@@ -296,12 +402,12 @@ export class TextLearner implements Learner<string> {
 	}
 
 	/**
-	 * Handle a query and return insights from understanding
+	 * Ask the learner and return insights from understanding
 	 *
 	 * The agent generates a response based on its understanding
 	 * and identifies any gaps in what it couldn't answer.
 	 */
-	async onQuery(query: string): Promise<OnQueryResult> {
+	async ask(query: string): Promise<AskResult> {
 		const startTime = Date.now()
 		let stepNumber = 0
 		const totalUsage: TokenUsage = {
@@ -315,7 +421,7 @@ export class TextLearner implements Learner<string> {
 
 		// Emit start event
 		await this._observer?.onStart?.({
-			operation: 'query',
+			operation: 'ask',
 			input: query,
 			understanding: this.understanding,
 		})
@@ -352,7 +458,7 @@ export class TextLearner implements Learner<string> {
 			}
 
 			const event: LearnerStepEvent = {
-				operation: 'query',
+				operation: 'ask',
 				stepNumber: stepNumber++,
 				toolCalls: toolCalls?.map((tc) => ({
 					toolName: tc.toolName,
@@ -371,9 +477,9 @@ export class TextLearner implements Learner<string> {
 			const result = await this.agent.generate({
 				prompt: query,
 				options: {
-					operation: 'query',
+					operation: 'ask',
 					understanding: this.understanding,
-					purpose: this.purpose,
+					instructions: this.instructions,
 					input: query,
 				},
 				onStepFinish: handleStep,
@@ -385,17 +491,17 @@ export class TextLearner implements Learner<string> {
 				(call) => call.toolName === 'complete',
 			)
 
-			let queryResult: OnQueryResult
+			let askResult: AskResult
 			if (completeCall) {
 				const input = completeCall.input as CompleteParams
-				queryResult = {
+				askResult = {
 					relevant: input.relevant,
 					confidence: input.confidence,
 					insight: input.insight,
 					gaps: input.gaps,
 				}
 			} else {
-				queryResult = {
+				askResult = {
 					relevant: false,
 					confidence: 0,
 					insight: '',
@@ -405,18 +511,18 @@ export class TextLearner implements Learner<string> {
 
 			// Emit end event
 			await this._observer?.onEnd?.({
-				operation: 'query',
+				operation: 'ask',
 				totalSteps: stepNumber,
 				usage: totalUsage.totalTokens > 0 ? totalUsage : undefined,
 				durationMs: Date.now() - startTime,
 				success: true,
 			})
 
-			return queryResult
+			return askResult
 		} catch (error) {
 			// Emit end event with error
 			await this._observer?.onEnd?.({
-				operation: 'query',
+				operation: 'ask',
 				totalSteps: stepNumber,
 				usage: totalUsage.totalTokens > 0 ? totalUsage : undefined,
 				durationMs: Date.now() - startTime,
@@ -440,7 +546,7 @@ export class TextLearner implements Learner<string> {
 	getMetadata(): LearnerMetadata {
 		return {
 			id: this.id,
-			purpose: this.purpose,
+			instructions: this.instructions,
 			origin: this.origin,
 			governance: this.getGovernance(),
 		}

@@ -26,11 +26,18 @@ Learners are the core cognitive primitive of Unbody Brain. They are **learning a
 Learner {
   // Identity
   id: string
-  purpose: string              // natural language, fixed at creation
+  instructions: string         // natural language, fixed at creation (also called "purpose")
   origin: prompt | developer | emergent
 
   // Understanding
   understanding: any           // type-specific format
+  evolution: EvolutionEntry[]  // history of changes, newest first
+
+EvolutionEntry {
+  summary: string              // what changed and why
+  significance: "routine" | "notable" | "critical"
+  timestamp: timestamp
+}
 
   // Governance
   governance: {
@@ -62,10 +69,21 @@ Learners have types. Each type defines its own understanding format and maintena
 
 **Understanding format:** Free text blob (natural language narrative)
 
-**Maintenance:**
+**Understanding management strategies:**
 
-- Strategy: compression (summarization when too long)
-- Constraints: maxTokens
+| Strategy | Size | Behavior |
+|----------|------|----------|
+| `continuous` | Unbounded | Single understanding, refined on each update (default) |
+| `rolling-summary` | Fixed | When limit reached → summarize → new understanding seeded with summary |
+| `temporal-layers` | Unbounded | Sections (recent/medium/old), older sections compressed progressively |
+
+**Strategy details:**
+
+- **continuous:** The learner maintains one understanding blob that grows and gets refined over time. Simplest model, but can grow large. Current v0 implementation.
+
+- **rolling-summary:** Understanding has a max size (tokens). When reached, the entire understanding is summarized, and a new understanding starts with that summary as seed. Bounded cost, but information degrades over many cycles (summary of summary of summary).
+
+- **temporal-layers:** Understanding is structured into temporal sections (e.g., recent, medium-term, historical). Recent data stays detailed, older sections get progressively compressed. Natural decay without sharp cutoffs. More complex to implement.
 
 **Example understanding:**
 
@@ -293,7 +311,16 @@ Both levels can coexist. Developer decides the structure based on their use case
 ```typescript
 brain.addLearner({
   type: "text" | "list" | "graph",
-  purpose: "natural language description",
+  instructions: `
+    Understand [what to track].
+
+    Watch for:
+    - [condition 1]
+    - [condition 2]
+
+    Track answers to:
+    - [question 1]
+  `,
   maintenance: {
     // type-specific options
   }
@@ -306,10 +333,24 @@ brain.addLearner({
 
 ```typescript
 maintenance: {
-  strategy: "summarize" | "truncate",
-  maxTokens: number
+  // Understanding management strategy
+  strategy: "continuous" | "rolling-summary" | "temporal-layers",
+
+  // For rolling-summary: max tokens before summarization
+  maxTokens?: number,
+
+  // For temporal-layers: layer configuration (optional, has sensible defaults)
+  layers?: ("recent" | "medium" | "old")[]
 }
 ```
+
+**Strategy selection guide:**
+
+| Use case | Recommended strategy |
+|----------|---------------------|
+| Short-lived subjects (single session) | `continuous` |
+| Long-running with bounded cost | `rolling-summary` |
+| Time-sensitive understanding (recency matters) | `temporal-layers` |
 
 **ListLearner:**
 
@@ -331,6 +372,323 @@ maintenance: {
   maxEdges: number
 }
 ```
+
+---
+
+## Writing Learner Instructions
+
+The `instructions` field (also called "purpose") is the most important part of a learner definition. It tells the learner what to pay attention to, what to track, and what questions to answer.
+
+### Anatomy of Good Instructions
+
+Instructions can include three types of directives:
+
+1. **What to understand** — general patterns, themes, evolution
+2. **What to watch for** — specific conditions or events
+3. **What questions to track** — questions the learner should be able to answer
+
+All three are unified: when the learner processes data, it updates its understanding based on all directives. When any directive is satisfied (pattern found, condition met, question answered), the learner emits an update event with appropriate significance.
+
+### Template
+
+```
+[Core understanding directive]
+
+Watch for:
+- [Specific condition 1]
+- [Specific condition 2]
+
+Track answers to:
+- [Question 1]
+- [Question 2]
+```
+
+### Examples
+
+**Therapy session learner:**
+
+```
+Understand the patient's emotional patterns, triggers, and coping mechanisms
+as they evolve across sessions.
+
+Watch for:
+- Any mention of self-harm or suicidal ideation
+- Significant mood shifts between sessions
+- Recurring themes in what they avoid discussing
+- Signs of crisis or acute distress
+
+Track answers to:
+- What coping mechanisms are they developing?
+- Are they making progress on stated goals?
+- What topics cause them to deflect or shut down?
+```
+
+**Developer activity learner:**
+
+```
+Understand this developer's coding philosophy, style preferences, and
+problem-solving patterns.
+
+Watch for:
+- Explicit statements of principles or preferences
+- Repeated patterns in code reviews or discussions
+- Strong reactions (positive or negative) to specific approaches
+
+Track answers to:
+- What is their preferred error handling style?
+- Do they favor OOP or functional approaches?
+- What testing philosophy do they follow?
+```
+
+**Crisis monitoring learner:**
+
+```
+Understand patterns in who gets targeted and why.
+
+Watch for:
+- New targeting criteria emerging
+- Shifts in victim selection patterns
+- Escalation signals
+
+Track answers to:
+- Who is most at risk right now?
+- What behaviors increase targeting risk?
+- Are there patterns in timing of incidents?
+```
+
+### Significance Levels
+
+When the learner updates its understanding, it assesses significance:
+
+| Level | When to use | Example |
+|-------|-------------|---------|
+| `routine` | Normal refinement of existing understanding | "Added more examples of functional style preference" |
+| `notable` | New pattern or meaningful shift | "First clear statement about testing philosophy" |
+| `critical` | Watched condition triggered | "Patient mentioned self-harm ideation" |
+
+### Example Evolution Log
+
+```typescript
+evolution: [
+  {
+    summary: "Added error handling preference. In code review, user rejected
+              a PR using try/catch, stating 'I prefer Result types or explicit
+              error returns - exceptions hide control flow.'",
+    significance: "notable",
+    timestamp: "2024-01-15T10:30:00Z"
+  },
+  {
+    summary: "Confirmed functional style preference. Third instance of user
+              recommending map/filter over for-loops in code reviews.",
+    significance: "routine",
+    timestamp: "2024-01-14T15:20:00Z"
+  },
+  {
+    summary: "First clear signal on coding style: user prefers functional
+              patterns, explicitly stated 'I avoid OOP when possible.'",
+    significance: "notable",
+    timestamp: "2024-01-12T09:45:00Z"
+  }
+]
+```
+
+Each entry is a synthesized changelog - what changed and why. Events emit the latest entry:
+
+```typescript
+learner.on('updated', ({ understanding, entry }) => {
+  if (entry.significance === 'critical') {
+    alertImmediately(entry.summary)
+  } else if (entry.significance === 'notable') {
+    queueForReview(entry.summary)
+  }
+  // routine updates: just log for audit trail
+  log(entry.summary)
+})
+
+// Query full history
+learner.evolution.filter(e => e.significance !== 'routine')
+```
+
+### Guidelines
+
+1. **Be specific about watched conditions** — vague watches like "anything bad" won't work well
+2. **Questions should be answerable** — "What is X?" is better than "Understand X deeply"
+3. **Core understanding is the catch-all** — watched conditions and questions are specific; the core directive handles everything else
+4. **Don't over-specify** — the learner will figure out patterns; you're just guiding attention
+
+---
+
+## Agent Prompt Generation
+
+Learners are agents powered by LLMs. The quality of a learner depends heavily on its system prompt. Rather than using simple templates, learners use **intelligent prompt generation** to create optimal agent prompts.
+
+### Why Intelligent Generation?
+
+Simple template concatenation fails because:
+- User instructions may conflict with strategy requirements
+- Duplicate concerns between user instructions and system behavior
+- Formatting directives in user instructions may break strategy structure
+- Different strategies need fundamentally different prompting approaches
+
+### The Generation Process
+
+When a learner is created, the system generates its agent prompt by synthesizing:
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                  synthesizeAgentPrompt()                     │
+│                                                              │
+│  Inputs:                                                     │
+│  ├─ strategy: "continuous" | "rolling-summary" | ...        │
+│  ├─ instructions: developer's instructions (what to track)  │
+│  └─ systemDefaults: significance assessment, evolution log   │
+│                                                              │
+│  Process (LLM call):                                         │
+│  1. Parse user instructions for intent (what to track)       │
+│  2. Extract watch conditions and questions                   │
+│  3. Merge with strategy-specific structure requirements      │
+│  4. Remove duplicates and resolve conflicts                  │
+│  5. Ignore user formatting that conflicts with strategy      │
+│  6. Generate clean, optimized prompt                         │
+│                                                              │
+│  Output:                                                     │
+│  └─ Cached prompt used for all learner operations            │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Strategy-Specific Base Prompts
+
+Each strategy has different structural requirements:
+
+**continuous:**
+```
+You maintain a single understanding that grows and refines over time.
+There are no structural constraints - organize naturally based on what you learn.
+Focus on synthesis and pattern recognition across all observations.
+```
+
+**rolling-summary:**
+```
+You maintain understanding within a size limit. When understanding gets large,
+you'll be asked to summarize it. The next understanding cycle starts fresh,
+seeded only with that summary. Optimize for information density.
+Each cycle is self-contained - don't reference "previous" understanding.
+```
+
+**temporal-layers:**
+```
+Structure your understanding into temporal sections:
+- Current State: What's true right now
+- Recent Developments: What changed in the last N observations
+- Historical Context: Long-standing patterns, compressed over time
+
+When updating, promote recent → historical and compress older sections.
+Recency matters - recent observations get more detail than old ones.
+```
+
+### System Defaults (always included)
+
+Regardless of strategy, the generated prompt always includes:
+
+```
+When processing new data:
+1. Assess relevance to your instructions
+2. Update understanding if relevant
+3. Generate evolution entry:
+   - summary: what changed and why
+   - significance: routine | notable | critical
+     - routine: normal refinement
+     - notable: new pattern or meaningful shift
+     - critical: watched condition triggered
+
+Watch conditions from instructions should trigger "critical" significance.
+Questions from instructions should be tracked and answered when possible.
+```
+
+### Conflict Resolution
+
+The generation process handles conflicts intelligently:
+
+| User Instruction | Strategy | Resolution |
+|------------------|----------|------------|
+| "Structure as: Current/Historical" | rolling-summary | Ignore - rolling-summary doesn't use sections |
+| "Track mood changes over time" | any | Keep - this is intent, not formatting |
+| "Always include timestamps" | temporal-layers | Merge - aligns with strategy |
+| "Summarize everything in one paragraph" | temporal-layers | Ignore - conflicts with section structure |
+
+**Principle:** Keep the user's *intent* (what to track), ignore their *formatting* if it conflicts with strategy.
+
+### Caching
+
+The generated prompt is **cached on the learner instance**:
+
+```typescript
+// On learner creation (once)
+const agentPrompt = await synthesizeAgentPrompt({
+  strategy: config.maintenance.strategy,
+  instructions: config.instructions,
+  systemDefaults: SYSTEM_DEFAULTS
+})
+
+learner.cachedPrompt = agentPrompt
+
+// Used for all subsequent operations
+learner.onData(batch)  // uses cachedPrompt
+learner.onQuery(query) // uses cachedPrompt
+```
+
+Caching is safe because:
+- Instructions are fixed at creation
+- Strategy is fixed at creation
+- System defaults don't change
+
+### Example Generation
+
+**Input:**
+```typescript
+{
+  strategy: "temporal-layers",
+  instructions: `
+    Understand the patient's emotional patterns.
+
+    Structure as bullet points.  // ← conflicts with strategy
+
+    Watch for:
+    - Self-harm mentions
+    - Mood shifts
+
+    Track: Are they making progress?
+  `
+}
+```
+
+**Generated prompt:**
+```
+You are a learning agent that builds understanding over time.
+
+## Your Purpose
+Understand the patient's emotional patterns.
+
+## Structure (temporal-layers)
+Organize your understanding into temporal sections:
+- Current State: What's true right now about the patient's emotional patterns
+- Recent Developments: Changes observed in recent sessions
+- Historical Context: Long-standing patterns, compressed
+
+## Watch Conditions (trigger critical significance)
+- Any mention of self-harm or suicidal ideation
+- Significant mood shifts between sessions
+
+## Questions to Track
+- Are they making progress on their goals?
+
+## On Each Update
+- Assess what changed
+- Update the appropriate temporal section
+- Generate evolution entry with significance level
+```
+
+Note: "Structure as bullet points" was ignored because it conflicts with temporal-layers structure.
 
 ---
 

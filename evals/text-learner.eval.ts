@@ -555,7 +555,7 @@ async function runEval() {
 
 	const learner = new TextLearner({
 		model: openrouter(MODEL),
-		purpose:
+		instructions:
 			'Understand this developer\'s coding style, technical preferences, tooling choices, and architectural philosophy',
 		observer,
 	})
@@ -568,7 +568,7 @@ async function runEval() {
 	console.log(`Processing ${week1Activity.length} events`)
 	console.log('═'.repeat(70))
 
-	const result1 = await learner.onData(week1Activity)
+	const result1 = await learner.ingest(week1Activity)
 	console.log(`\nRelevance: ${result1.relevance}`)
 	console.log(`\n📝 Understanding after Week 1:`)
 	console.log('─'.repeat(50))
@@ -582,7 +582,7 @@ async function runEval() {
 	console.log(`Processing ${week2Activity.length} events`)
 	console.log('═'.repeat(70))
 
-	const result2 = await learner.onData(week2Activity)
+	const result2 = await learner.ingest(week2Activity)
 	console.log(`\nRelevance: ${result2.relevance}`)
 	console.log(`\n📝 Understanding after Week 2:`)
 	console.log('─'.repeat(50))
@@ -596,7 +596,7 @@ async function runEval() {
 	console.log(`Processing ${week3Activity.length} events`)
 	console.log('═'.repeat(70))
 
-	const result3 = await learner.onData(week3Activity)
+	const result3 = await learner.ingest(week3Activity)
 	console.log(`\nRelevance: ${result3.relevance}`)
 	console.log(`\n📝 Understanding after Week 3:`)
 	console.log('─'.repeat(50))
@@ -610,7 +610,7 @@ async function runEval() {
 	console.log(`Processing ${week4Activity.length} events`)
 	console.log('═'.repeat(70))
 
-	const result4 = await learner.onData(week4Activity)
+	const result4 = await learner.ingest(week4Activity)
 	console.log(`\nRelevance: ${result4.relevance}`)
 	console.log(`\n📝 Understanding after Week 4:`)
 	console.log('─'.repeat(50))
@@ -639,7 +639,7 @@ async function runEval() {
 		console.log(`Q: ${query}`)
 		console.log('─'.repeat(50))
 
-		const result = await learner.onQuery(query)
+		const result = await learner.ask(query)
 		console.log(`\nRelevant: ${result.relevant} | Confidence: ${result.confidence}`)
 		console.log(`\nInsight: ${result.insight}`)
 		if (result.gaps.length > 0) {

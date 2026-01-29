@@ -6,34 +6,34 @@ import * as schemas from './tools/schemas.js'
 /**
  * Call options schema for the learner agent
  *
- * Allows dynamic configuration per call (data processing vs query handling)
+ * Allows dynamic configuration per call (ingest vs ask)
  */
 export const callOptionsSchema = z.object({
-	operation: z.enum(['data', 'query']),
+	operation: z.enum(['ingest', 'ask']),
 	understanding: z.string(),
-	purpose: z.string(),
+	instructions: z.string(),
 	input: z.unknown(),
 })
 
 export type CallOptions = z.infer<typeof callOptionsSchema>
 
-const DATA_TOOLS = [
+const INGEST_TOOLS = [
 	'compareToUnderstanding',
 	'detectShift',
 	'detectPattern',
 	'synthesize',
 ] as const
 
-const QUERY_TOOLS = ['generateResponse', 'identifyGaps', 'complete'] as const
+const ASK_TOOLS = ['generateResponse', 'identifyGaps', 'complete'] as const
 
 /**
- * Build instructions for data processing operations
+ * Build instructions for ingest operations
  */
-function buildDataInstructions(options: CallOptions): string {
+function buildIngestInstructions(options: CallOptions): string {
 	const hasUnderstanding = options.understanding?.trim()
 
 	return `You are a learning agent. Your singular purpose:
-"${options.purpose}"
+"${options.instructions}"
 
 You build UNDERSTANDING — compressed knowledge that serves your purpose.
 You are not a fact store. You learn, synthesize, and refine.
@@ -129,17 +129,23 @@ You decide what structure best captures what you've learned.
 
 When done processing, call synthesize with:
 - Your updated understanding (the full text, not a diff)
-- A relevance score (0.0-1.0) for how useful this data was`
+- A relevance score (0.0-1.0) for how useful this data was
+- An entry describing what changed:
+  - summary: brief description of what changed and why
+  - significance: assess the importance of this change
+    - "routine" — normal refinement of existing understanding (e.g., "Added more examples of functional style preference")
+    - "notable" — new pattern or meaningful shift (e.g., "First clear statement about testing philosophy")
+    - "critical" — a watched condition from your instructions was triggered (e.g., safety concern, key milestone, urgent signal)`
 }
 
 /**
- * Build instructions for query operations
+ * Build instructions for ask operations
  */
-function buildQueryInstructions(options: CallOptions): string {
+function buildAskInstructions(options: CallOptions): string {
 	const hasUnderstanding = options.understanding?.trim()
 
 	return `You are a learning agent. Your singular purpose:
-"${options.purpose}"
+"${options.instructions}"
 
 You are being queried for insights based on your understanding.
 
@@ -159,7 +165,7 @@ HOW TO RESPOND
 
 STEP 1: ASSESS RELEVANCE
 Is this query something your understanding can address?
-- Your purpose: "${options.purpose}"
+- Your purpose: "${options.instructions}"
 - If the query is outside your purpose, say so clearly.
 - If you have no understanding yet, acknowledge that.
 
@@ -199,10 +205,10 @@ Finalize your response with:
  * Build instructions for the agent based on operation type
  */
 function buildInstructions(options: CallOptions): string {
-	if (options.operation === 'data') {
-		return buildDataInstructions(options)
+	if (options.operation === 'ingest') {
+		return buildIngestInstructions(options)
 	}
-	return buildQueryInstructions(options)
+	return buildAskInstructions(options)
 }
 
 /**
@@ -242,7 +248,7 @@ export function createLearnerAgent(model: LanguageModel) {
 
 			synthesize: tool({
 				description:
-					'Finalize updated understanding after processing. Provide the complete new understanding (not a diff) and a relevance score. Structure understanding however best serves your purpose.',
+					'Finalize updated understanding after processing. Provide the complete new understanding (not a diff), a relevance score, and an evolution entry describing what changed and its significance.',
 				inputSchema: schemas.synthesizeParams,
 				// No execute — done tool
 			}),
@@ -275,7 +281,7 @@ export function createLearnerAgent(model: LanguageModel) {
 		prepareCall: ({ options, ...settings }) => ({
 			...settings,
 			activeTools:
-				options.operation === 'data' ? [...DATA_TOOLS] : [...QUERY_TOOLS],
+				options.operation === 'ingest' ? [...INGEST_TOOLS] : [...ASK_TOOLS],
 			toolChoice: 'required' as const,
 			instructions: buildInstructions(options),
 		}),

@@ -10,11 +10,11 @@
  *
  * const learner = new TextLearner({
  *   model: openai('gpt-4o'),
- *   purpose: 'Understand user coding patterns',
+ *   instructions: 'Understand user coding patterns',
  * })
  *
- * await learner.onData([{ event: 'user prefers functional style' }])
- * const result = await learner.onQuery('What is my coding style?')
+ * await learner.ingest([{ event: 'user prefers functional style' }])
+ * const result = await learner.ask('What is my coding style?')
  * ```
  */
 

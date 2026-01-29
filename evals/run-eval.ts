@@ -24,7 +24,7 @@ import { TextLearner } from '../src/learners/index.js'
 interface LearnerConfig {
 	id: string
 	name: string
-	purpose: string
+	instructions: string
 }
 
 interface DatasetMetadata {
@@ -78,7 +78,7 @@ interface EvalError {
 interface LearnerStats {
 	id: string
 	name: string
-	purpose: string
+	instructions: string
 	totalDataTokens: number
 	totalQueryTokens: number
 	totalDataDuration: number
@@ -185,7 +185,7 @@ async function runEval(datasetName: string) {
 		const obs = createObserver(config.id)
 		const learner = new TextLearner({
 			model: openrouter(MODEL),
-			purpose: config.purpose,
+			instructions: config.instructions,
 			observer: obs.observer,
 		})
 		learners.set(config.id, { learner, config, observer: obs })
@@ -202,7 +202,7 @@ async function runEval(datasetName: string) {
 		learnerStats.set(config.id, {
 			id: config.id,
 			name: config.name,
-			purpose: config.purpose,
+			instructions: config.instructions,
 			totalDataTokens: 0,
 			totalQueryTokens: 0,
 			totalDataDuration: 0,
@@ -234,7 +234,7 @@ async function runEval(datasetName: string) {
 		// Process batch for each learner
 		for (const [learnerId, { learner, config, observer }] of learners) {
 			try {
-				const result = await learner.onData(batch)
+				const result = await learner.ingest(batch)
 				const stats = observer.getCurrentStats()
 
 				const batchResult: DataBatchResult = {
@@ -310,7 +310,7 @@ async function runEval(datasetName: string) {
 		// Query each learner
 		for (const [learnerId, { learner, config, observer }] of learners) {
 			try {
-				const result = await learner.onQuery(query)
+				const result = await learner.ask(query)
 				const stats = observer.getCurrentStats()
 
 				const queryResult: QueryResult = {
@@ -481,7 +481,7 @@ function generateReport(data: {
 
 | ID | Name | Purpose |
 |----|------|---------|
-${metadata.learners.map((l) => `| ${l.id} | ${l.name} | ${l.purpose.slice(0, 60)}... |`).join('\n')}
+${metadata.learners.map((l) => `| ${l.id} | ${l.name} | ${l.instructions.slice(0, 60)}... |`).join('\n')}
 
 ## Performance Summary
 
@@ -522,7 +522,7 @@ ${r.gaps.length > 0 ? `\n*Gaps: ${r.gaps.join('; ')}*` : ''}
 ${learnerStats.map((ls) => `
 ### ${ls.name} (${ls.id})
 
-**Purpose:** ${ls.purpose}
+**Instructions:** ${ls.instructions}
 
 \`\`\`
 ${ls.finalUnderstanding}

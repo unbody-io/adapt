@@ -21,10 +21,10 @@ describe('TextLearner', () => {
 		it('creates a learner with required config', () => {
 			const learner = new TextLearner({
 				model: mockModel,
-				purpose: 'Understand user preferences',
+				instructions: 'Understand user preferences',
 			})
 
-			expect(learner.purpose).toBe('Understand user preferences')
+			expect(learner.instructions).toBe('Understand user preferences')
 			expect(learner.origin).toBe('developer')
 			expect(learner.id).toBeDefined()
 		})
@@ -33,14 +33,14 @@ describe('TextLearner', () => {
 			const learner = new TextLearner({
 				model: mockModel,
 				id: 'custom-id',
-				purpose: 'Test purpose',
+				instructions: 'Test purpose',
 			})
 
 			expect(learner.id).toBe('custom-id')
 		})
 
 		it('initializes with dormant status and zero activation', () => {
-			const learner = new TextLearner({ model: mockModel, purpose: 'Test' })
+			const learner = new TextLearner({ model: mockModel, instructions: 'Test' })
 			const governance = learner.getGovernance()
 
 			expect(governance.status).toBe('dormant')
@@ -51,7 +51,7 @@ describe('TextLearner', () => {
 
 	describe('getUnderstanding', () => {
 		it('returns empty string initially', () => {
-			const learner = new TextLearner({ model: mockModel, purpose: 'Test' })
+			const learner = new TextLearner({ model: mockModel, instructions: 'Test' })
 
 			expect(learner.getUnderstanding()).toBe('')
 		})
@@ -59,7 +59,7 @@ describe('TextLearner', () => {
 
 	describe('getSummary', () => {
 		it('returns placeholder text when no understanding', () => {
-			const learner = new TextLearner({ model: mockModel, purpose: 'Test' })
+			const learner = new TextLearner({ model: mockModel, instructions: 'Test' })
 
 			expect(learner.getSummary()).toBe('(no understanding yet)')
 		})
@@ -70,7 +70,7 @@ describe('TextLearner', () => {
 			const learner = new TextLearner({
 				model: mockModel,
 				id: 'test-id',
-				purpose: 'Test purpose',
+				instructions: 'Test purpose',
 				origin: 'prompt',
 			})
 
@@ -78,7 +78,7 @@ describe('TextLearner', () => {
 
 			expect(metadata).toEqual({
 				id: 'test-id',
-				purpose: 'Test purpose',
+				instructions: 'Test purpose',
 				origin: 'prompt',
 				governance: expect.objectContaining({
 					status: 'dormant',
@@ -90,25 +90,24 @@ describe('TextLearner', () => {
 
 	describe('getMaintenance', () => {
 		it('returns default maintenance config', () => {
-			const learner = new TextLearner({ model: mockModel, purpose: 'Test' })
+			const learner = new TextLearner({ model: mockModel, instructions: 'Test' })
 			const maintenance = learner.getMaintenance()
 
 			expect(maintenance).toEqual({
-				strategy: 'summarize',
-				maxTokens: 4000,
+				strategy: 'continuous',
 			})
 		})
 
 		it('returns custom maintenance config when provided', () => {
 			const learner = new TextLearner({
 				model: mockModel,
-				purpose: 'Test',
-				maintenance: { strategy: 'truncate', maxTokens: 2000 },
+				instructions: 'Test',
+				maintenance: { strategy: 'rolling-summary', maxTokens: 2000 },
 			})
 			const maintenance = learner.getMaintenance()
 
 			expect(maintenance).toEqual({
-				strategy: 'truncate',
+				strategy: 'rolling-summary',
 				maxTokens: 2000,
 			})
 		})
@@ -116,7 +115,7 @@ describe('TextLearner', () => {
 
 	describe('governance', () => {
 		it('returns a copy of governance (not reference)', () => {
-			const learner = new TextLearner({ model: mockModel, purpose: 'Test' })
+			const learner = new TextLearner({ model: mockModel, instructions: 'Test' })
 
 			const gov1 = learner.getGovernance()
 			const gov2 = learner.getGovernance()

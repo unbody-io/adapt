@@ -7,6 +7,16 @@
 
 export type LearnerOrigin = 'prompt' | 'developer' | 'emergent'
 export type LearnerStatus = 'active' | 'dormant'
+export type Significance = 'routine' | 'notable' | 'critical'
+
+/**
+ * Entry tracking how understanding evolved over time
+ */
+export interface EvolutionEntry {
+	summary: string // what changed and why
+	significance: Significance
+	timestamp: string // ISO 8601
+}
 
 export interface LearnerGovernance {
 	activation: number // 0.0 - 1.0
@@ -19,22 +29,22 @@ export interface LearnerGovernance {
 
 export interface LearnerMetadata {
 	id: string
-	purpose: string
+	instructions: string
 	origin: LearnerOrigin
 	governance: LearnerGovernance
 }
 
 /**
- * Output from processing a batch of data
+ * Output from ingesting a batch of data
  */
-export interface OnDataResult {
+export interface IngestResult {
 	relevance: number // 0.0 - 1.0, used for governance updates
 }
 
 /**
- * Output from handling a query
+ * Output from asking the learner
  */
-export interface OnQueryResult {
+export interface AskResult {
 	relevant: boolean
 	confidence: number // 0.0 - 1.0
 	insight: string
@@ -46,7 +56,7 @@ export interface OnQueryResult {
  */
 export interface Learner<TUnderstanding = unknown> {
 	readonly id: string
-	readonly purpose: string
+	readonly instructions: string
 	readonly origin: LearnerOrigin
 
 	// Current state
@@ -54,8 +64,8 @@ export interface Learner<TUnderstanding = unknown> {
 	getGovernance(): LearnerGovernance
 
 	// Core operations
-	onData(batch: unknown[]): Promise<OnDataResult>
-	onQuery(query: string): Promise<OnQueryResult>
+	ingest(batch: unknown[]): Promise<IngestResult>
+	ask(query: string): Promise<AskResult>
 
 	// Introspection
 	getSummary(): string
@@ -67,7 +77,7 @@ export interface Learner<TUnderstanding = unknown> {
  */
 export interface LearnerConfig<TMaintenance = unknown> {
 	id?: string
-	purpose: string
+	instructions: string
 	origin?: LearnerOrigin
 	maintenance?: TMaintenance
 }

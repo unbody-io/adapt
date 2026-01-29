@@ -18,4 +18,4 @@
  * ```
  */
 
-export * from './learners/index.js'
+export * from './learners'

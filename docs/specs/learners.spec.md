@@ -74,16 +74,16 @@ Learners have types. Each type defines its own understanding format and maintena
 | Strategy | Size | Behavior |
 |----------|------|----------|
 | `continuous` | Unbounded | Single understanding, refined on each update (default) |
-| `rolling-summary` | Fixed | When limit reached → summarize → new understanding seeded with summary |
-| `temporal-layers` | Unbounded | Sections (recent/medium/old), older sections compressed progressively |
+| `cumulative` | Fixed | When limit reached → summarize → new understanding seeded with summary |
+| `decay` | Unbounded | Sections (recent/medium/old), older sections compressed progressively |
 
 **Strategy details:**
 
 - **continuous:** The learner maintains one understanding blob that grows and gets refined over time. Simplest model, but can grow large. Current v0 implementation.
 
-- **rolling-summary:** Understanding has a max size (tokens). When reached, the entire understanding is summarized, and a new understanding starts with that summary as seed. Bounded cost, but information degrades over many cycles (summary of summary of summary).
+- **cumulative:** Understanding has a max size (tokens). When reached, the entire understanding is summarized, and a new understanding starts with that summary as seed. Bounded cost, but information degrades over many cycles (summary of summary of summary).
 
-- **temporal-layers:** Understanding is structured into temporal sections (e.g., recent, medium-term, historical). Recent data stays detailed, older sections get progressively compressed. Natural decay without sharp cutoffs. More complex to implement.
+- **decay:** Understanding is structured into temporal sections (e.g., recent, medium-term, historical). Recent data stays detailed, older sections get progressively compressed. Natural decay without sharp cutoffs. More complex to implement.
 
 **Example understanding:**
 
@@ -334,12 +334,12 @@ brain.addLearner({
 ```typescript
 maintenance: {
   // Understanding management strategy
-  strategy: "continuous" | "rolling-summary" | "temporal-layers",
+  strategy: "continuous" | "cumulative" | "decay",
 
-  // For rolling-summary: max tokens before summarization
+  // For cumulative: max tokens before summarization
   maxTokens?: number,
 
-  // For temporal-layers: layer configuration (optional, has sensible defaults)
+  // For decay: layer configuration (optional, has sensible defaults)
   layers?: ("recent" | "medium" | "old")[]
 }
 ```
@@ -349,8 +349,8 @@ maintenance: {
 | Use case | Recommended strategy |
 |----------|---------------------|
 | Short-lived subjects (single session) | `continuous` |
-| Long-running with bounded cost | `rolling-summary` |
-| Time-sensitive understanding (recency matters) | `temporal-layers` |
+| Long-running with bounded cost | `cumulative` |
+| Time-sensitive understanding (recency matters) | `decay` |
 
 **ListLearner:**
 
@@ -539,7 +539,7 @@ When a learner is created, the system generates its agent prompt by synthesizing
 │                  synthesizeAgentPrompt()                     │
 │                                                              │
 │  Inputs:                                                     │
-│  ├─ strategy: "continuous" | "rolling-summary" | ...        │
+│  ├─ strategy: "continuous" | "cumulative" | ...             │
 │  ├─ instructions: developer's instructions (what to track)  │
 │  └─ systemDefaults: significance assessment, evolution log   │
 │                                                              │
@@ -567,7 +567,7 @@ There are no structural constraints - organize naturally based on what you learn
 Focus on synthesis and pattern recognition across all observations.
 ```
 
-**rolling-summary:**
+**cumulative:**
 ```
 You maintain understanding within a size limit. When understanding gets large,
 you'll be asked to summarize it. The next understanding cycle starts fresh,
@@ -575,7 +575,7 @@ seeded only with that summary. Optimize for information density.
 Each cycle is self-contained - don't reference "previous" understanding.
 ```
 
-**temporal-layers:**
+**decay:**
 ```
 Structure your understanding into temporal sections:
 - Current State: What's true right now
@@ -611,10 +611,10 @@ The generation process handles conflicts intelligently:
 
 | User Instruction | Strategy | Resolution |
 |------------------|----------|------------|
-| "Structure as: Current/Historical" | rolling-summary | Ignore - rolling-summary doesn't use sections |
+| "Structure as: Current/Historical" | cumulative | Ignore - cumulative doesn't use sections |
 | "Track mood changes over time" | any | Keep - this is intent, not formatting |
-| "Always include timestamps" | temporal-layers | Merge - aligns with strategy |
-| "Summarize everything in one paragraph" | temporal-layers | Ignore - conflicts with section structure |
+| "Always include timestamps" | decay | Merge - aligns with strategy |
+| "Summarize everything in one paragraph" | decay | Ignore - conflicts with section structure |
 
 **Principle:** Keep the user's *intent* (what to track), ignore their *formatting* if it conflicts with strategy.
 
@@ -647,7 +647,7 @@ Caching is safe because:
 **Input:**
 ```typescript
 {
-  strategy: "temporal-layers",
+  strategy: "decay",
   instructions: `
     Understand the patient's emotional patterns.
 
@@ -669,7 +669,7 @@ You are a learning agent that builds understanding over time.
 ## Your Purpose
 Understand the patient's emotional patterns.
 
-## Structure (temporal-layers)
+## Structure (decay)
 Organize your understanding into temporal sections:
 - Current State: What's true right now about the patient's emotional patterns
 - Recent Developments: Changes observed in recent sessions
@@ -688,7 +688,7 @@ Organize your understanding into temporal sections:
 - Generate evolution entry with significance level
 ```
 
-Note: "Structure as bullet points" was ignored because it conflicts with temporal-layers structure.
+Note: "Structure as bullet points" was ignored because it conflicts with decay structure.
 
 ---
 

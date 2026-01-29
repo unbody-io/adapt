@@ -1,17 +1,13 @@
 import type { LanguageModel } from 'ai'
 import { describe, expect, it, vi } from 'vitest'
-import { applyStrategy, strategyFunctions } from '../strategies.js'
+import { applyStrategy, strategyFunctions } from '../strategies'
 
 // Mock generateText for strategies that need LLM calls
-vi.mock('ai', async () => {
-	const actual = await vi.importActual('ai')
-	return {
-		...actual,
-		generateText: vi.fn().mockResolvedValue({
-			text: 'Summarized understanding content',
-		}),
-	}
-})
+vi.mock('ai', () => ({
+	generateText: vi.fn().mockResolvedValue({
+		text: 'Summarized understanding content',
+	}),
+}))
 
 describe('strategies', () => {
 	const mockModel = {} as LanguageModel
@@ -29,12 +25,12 @@ describe('strategies', () => {
 		})
 	})
 
-	describe('rolling-summary', () => {
+	describe('cumulative', () => {
 		it('returns unchanged when under token limit', async () => {
-			const result = await strategyFunctions['rolling-summary']({
+			const result = await strategyFunctions.cumulative({
 				understanding: 'Short understanding',
 				model: mockModel,
-				config: { strategy: 'rolling-summary', maxTokens: 4000 },
+				config: { strategy: 'cumulative', maxTokens: 4000 },
 			})
 
 			expect(result.understanding).toBe('Short understanding')
@@ -45,10 +41,10 @@ describe('strategies', () => {
 			// Create understanding that exceeds 4000 tokens (~16000 chars)
 			const longUnderstanding = 'A'.repeat(20000)
 
-			const result = await strategyFunctions['rolling-summary']({
+			const result = await strategyFunctions.cumulative({
 				understanding: longUnderstanding,
 				model: mockModel,
-				config: { strategy: 'rolling-summary', maxTokens: 4000 },
+				config: { strategy: 'cumulative', maxTokens: 4000 },
 			})
 
 			expect(result.understanding).toBe('Summarized understanding content')
@@ -58,22 +54,22 @@ describe('strategies', () => {
 		it('uses default maxTokens of 4000', async () => {
 			const shortUnderstanding = 'Short'
 
-			const result = await strategyFunctions['rolling-summary']({
+			const result = await strategyFunctions.cumulative({
 				understanding: shortUnderstanding,
 				model: mockModel,
-				config: { strategy: 'rolling-summary' }, // No maxTokens specified
+				config: { strategy: 'cumulative' }, // No maxTokens specified
 			})
 
 			expect(result.modified).toBe(false)
 		})
 	})
 
-	describe('temporal-layers', () => {
+	describe('decay', () => {
 		it('returns unchanged when well under token limit', async () => {
-			const result = await strategyFunctions['temporal-layers']({
+			const result = await strategyFunctions.decay({
 				understanding: 'Current state: all good',
 				model: mockModel,
-				config: { strategy: 'temporal-layers', maxTokens: 4000 },
+				config: { strategy: 'decay', maxTokens: 4000 },
 			})
 
 			expect(result.understanding).toBe('Current state: all good')
@@ -84,10 +80,10 @@ describe('strategies', () => {
 			// Create understanding that exceeds 80% of 4000 tokens (~12800 chars)
 			const longUnderstanding = 'B'.repeat(14000)
 
-			const result = await strategyFunctions['temporal-layers']({
+			const result = await strategyFunctions.decay({
 				understanding: longUnderstanding,
 				model: mockModel,
-				config: { strategy: 'temporal-layers', maxTokens: 4000 },
+				config: { strategy: 'decay', maxTokens: 4000 },
 			})
 
 			expect(result.understanding).toBe('Summarized understanding content')

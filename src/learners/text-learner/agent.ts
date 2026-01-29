@@ -1,12 +1,18 @@
 import type { LanguageModel } from 'ai'
-import { hasToolCall, stepCountIs, ToolLoopAgent, tool } from 'ai'
+import { hasToolCall, stepCountIs, ToolLoopAgent } from 'ai'
 import { z } from 'zod'
-import * as schemas from './tools/schemas.js'
+import {
+	compareToUnderstanding,
+	detectShift,
+	detectPattern,
+	synthesize,
+	generateResponse,
+	identifyGaps,
+	complete,
+} from './tools'
 
 /**
  * Call options schema for the learner agent
- *
- * Allows dynamic configuration per call (ingest vs ask)
  */
 export const callOptionsSchema = z.object({
 	operation: z.enum(['ingest', 'ask']),
@@ -35,8 +41,9 @@ function buildIngestInstructions(options: CallOptions): string {
 	return `You are a learning agent. Your singular purpose:
 "${options.instructions}"
 
-You build UNDERSTANDING — compressed knowledge that serves your purpose.
-You are not a fact store. You learn, synthesize, and refine.
+You build UNDERSTANDING — rich knowledge that captures nuance, evolution, and context.
+Be generous about what you record. Capture the texture of what you observe.
+Don't worry about size — maintenance strategies handle compression separately.
 
 ══════════════════════════════════════════════════════════════════════════════
 CURRENT UNDERSTANDING
@@ -52,90 +59,85 @@ ${JSON.stringify(options.input, null, 2)}
 HOW TO PROCESS
 ══════════════════════════════════════════════════════════════════════════════
 
-${Array.isArray(options.input) && options.input.length > 1 ? `NOTE: This batch contains ${options.input.length} items. You don't need to call compareToUnderstanding for every item — group similar items and classify the group. Focus on what's meaningful, not exhaustive coverage.\n\n` : ''}STEP 1: COMPARE (use compareToUnderstanding tool)
-Classify each piece of information in the data:
+IMPORTANT: Your job is to LEARN, not to filter. When in doubt, include it.
+Evolution and nuance matter — "still prefers FP but now more pragmatic" is more
+valuable than just "prefers FP". Capture the journey, not just the destination.
+
+${Array.isArray(options.input) && options.input.length > 1 ? `NOTE: This batch contains ${options.input.length} items. You can group similar items when classifying.\n\n` : ''}STEP 1: COMPARE (use compareToUnderstanding tool)
+Classify information in the data:
 
   CONFIRMS — Data supports something you already understand
-    Example: You know "prefers functional style"
-    Data shows: "used map/filter instead of loops"
-    → This CONFIRMS existing knowledge
+    → Worth noting! Confirmation strengthens confidence.
 
   CONTRADICTS — Data conflicts with current understanding
-    Example: You know "prefers dark mode"
-    Data shows: "switched to light mode"
-    → This CONTRADICTS. But note: a single contradiction may be temporary.
-      A pattern of contradictions = a shift.
+    → Important! Track this — it may signal evolution.
 
   EXTENDS — Data adds detail to existing understanding
-    Example: You know "works in tech"
-    Data shows: "works at Google as SRE"
-    → This EXTENDS with more specificity
+    → Capture the new detail. Specifics matter.
 
   NEW — Data is relevant to purpose but not yet in understanding
-    Example: Purpose is "coding preferences"
-    Data shows: "started using Vim"
-    → This is NEW and relevant
+    → Add it. New information expands your knowledge.
 
-  IRRELEVANT — Data doesn't relate to your purpose
-    → Ignore it. Don't add noise. Stay focused.
+  IRRELEVANT — Data truly doesn't relate to your purpose
+    → Only skip if genuinely off-topic.
 
-STEP 2: DETECT SHIFTS (use detectShift tool if needed)
-A SHIFT is when something fundamental has changed direction — not just updated.
+Err on the side of inclusion. If you're unsure, classify as EXTENDS or NEW.
 
-  IS a shift:
-    - "prefers tabs" → "prefers spaces" (direction reversed)
-    - "morning person" → "night owl" (pattern inverted)
-    - "junior developer" → "tech lead" (role fundamentally changed)
+STEP 2: DETECT SHIFTS (use detectShift tool)
+Look for EVOLUTION — how things are changing over time.
 
-  IS NOT a shift (just an update):
-    - "likes Python" → "likes Python and Rust" (additive)
-    - "uses VS Code" → "uses VS Code with Vim plugin" (refinement)
+  Clear shifts:
+    - Direction reversed: "prefers tabs" → "prefers spaces"
+    - Philosophy evolved: "FP purist" → "pragmatic hybrid"
+    - Role changed: "junior developer" → "tech lead"
 
-Only call detectShift when you observe a genuine reversal or fundamental change.
+  Subtle evolution (ALSO worth capturing):
+    - Deepening: "likes FP" → "actively implementing ROP patterns"
+    - Maturing: "tries new tools" → "evaluates tools against constraints"
+    - Nuancing: "prefers X" → "prefers X except when Y"
 
-STEP 3: DETECT PATTERNS (use detectPattern tool if needed)
-Patterns emerge from repetition, not single occurrences.
+Call detectShift for both clear reversals AND meaningful evolution.
 
-  IS a pattern:
-    - Same preference expressed multiple ways across data
-    - Consistent behavior observed repeatedly
-    - Trend that appears in multiple data points
+STEP 3: DETECT PATTERNS (use detectPattern tool)
+Patterns emerge from consistency or repetition.
 
-  IS NOT a pattern:
-    - One-off mention
-    - Single data point (no matter how strong)
+  Worth noting:
+    - Same preference expressed multiple ways
+    - Consistent behavior across contexts
+    - Emerging trends across data points
+    - Recurring themes or values
 
-Only call detectPattern when you see genuine recurrence.
+Even early signals of a pattern are worth capturing — you can refine later.
 
 STEP 4: SYNTHESIZE (use synthesize tool to finish)
 Update your understanding with what you learned.
 
   DO:
     - Integrate new insights into a coherent whole
-    - Resolve contradictions (decide what's true now)
-    - Compress — understanding should get more refined, not longer
-    - Organize in whatever structure best serves your purpose
+    - Capture evolution: "Initially X, now Y because Z"
+    - Preserve nuance and context
+    - Note confidence levels where appropriate
+    - Track trends and trajectories, not just current state
 
   DON'T:
-    - Append raw data (you're not a log)
-    - Keep contradictory information unresolved
-    - Let understanding grow without bound
-    - Lose important nuance in over-compression
+    - Skip updates because "nothing major changed"
+    - Lose context that explains WHY something is true
+    - Over-compress to the point of losing signal
 
-Your understanding's structure should emerge from your purpose.
-A learner about "coding style" might organize by: patterns, exceptions, evolution.
-A learner about "emotional state" might organize by: current, trajectory, triggers.
-You decide what structure best captures what you've learned.
+Your understanding should tell a story, not just list facts.
+Include: what you know, how confident you are, how things have evolved.
+
+ALWAYS call synthesize — even small updates compound into rich understanding.
 
 When done processing, call synthesize with:
 - Your updated understanding (the full text, not a diff)
-- A relevance score (0.0-1.0) for how useful this data was
+- A relevance score (0.0-1.0) — be generous here too
 - An entry describing what changed:
   - summary: brief description of what changed and why
   - significance: assess the importance of this change
-    - "routine" — normal refinement of existing understanding (e.g., "Added more examples of functional style preference")
-    - "notable" — new pattern or meaningful shift (e.g., "First clear statement about testing philosophy")
-    - "critical" — a watched condition from your instructions was triggered (e.g., safety concern, key milestone, urgent signal)`
+    - "routine" — refinement or confirmation of existing understanding
+    - "notable" — new insight, pattern emerging, or meaningful evolution
+    - "critical" — a watched condition from your instructions was triggered`
 }
 
 /**
@@ -222,60 +224,16 @@ export function createLearnerAgent(model: LanguageModel) {
 		callOptionsSchema,
 
 		tools: {
-			// ─────────────────────────────────────────────────────────────────────
 			// Data Processing Tools
-			// ─────────────────────────────────────────────────────────────────────
-			compareToUnderstanding: tool({
-				description:
-					'Classify how data relates to current understanding. Use the taxonomy: CONFIRMS (supports existing), CONTRADICTS (conflicts), EXTENDS (adds detail), NEW (relevant but unknown), IRRELEVANT (off-purpose). Call this for each meaningful piece of information.',
-				inputSchema: schemas.compareToUnderstandingParams,
-				execute: async (params) => params,
-			}),
+			compareToUnderstanding,
+			detectShift,
+			detectPattern,
+			synthesize,
 
-			detectShift: tool({
-				description:
-					'Detect fundamental change in direction. Only call when you observe a genuine reversal (e.g., preference flipped, role changed), NOT for additive updates or refinements.',
-				inputSchema: schemas.detectShiftParams,
-				execute: async (params) => params,
-			}),
-
-			detectPattern: tool({
-				description:
-					'Identify recurring themes across multiple data points. Only call when you see genuine repetition or consistency — single occurrences are not patterns.',
-				inputSchema: schemas.detectPatternParams,
-				execute: async (params) => params,
-			}),
-
-			synthesize: tool({
-				description:
-					'Finalize updated understanding after processing. Provide the complete new understanding (not a diff), a relevance score, and an evolution entry describing what changed and its significance.',
-				inputSchema: schemas.synthesizeParams,
-				// No execute — done tool
-			}),
-
-			// ─────────────────────────────────────────────────────────────────────
 			// Query Tools
-			// ─────────────────────────────────────────────────────────────────────
-			generateResponse: tool({
-				description:
-					'Formulate an answer based on your understanding. Be specific, cite what you know, express appropriate confidence, acknowledge uncertainty.',
-				inputSchema: schemas.generateResponseParams,
-				execute: async (params) => params,
-			}),
-
-			identifyGaps: tool({
-				description:
-					'Note what you could not answer — missing data, conflicting signals, or queries outside your purpose. Gaps guide future learning.',
-				inputSchema: schemas.identifyGapsParams,
-				execute: async (params) => params,
-			}),
-
-			complete: tool({
-				description:
-					'Finalize query response with relevance assessment, confidence score, insight, and identified gaps.',
-				inputSchema: schemas.completeParams,
-				// No execute — done tool
-			}),
+			generateResponse,
+			identifyGaps,
+			complete,
 		},
 
 		prepareCall: ({ options, ...settings }) => ({

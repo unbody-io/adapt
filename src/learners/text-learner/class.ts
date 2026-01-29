@@ -1,8 +1,8 @@
-import type { LanguageModel } from 'ai'
-import { createLearnerAgent, type LearnerAgent } from './agent.js'
-import { synthesizeSystemPrompt } from './prompts.js'
-import { applyStrategy } from './strategies.js'
-import type { CompleteParams, SynthesizeParams } from './tools/schemas.js'
+import { generateText, type LanguageModel } from 'ai'
+import { applyStrategy, strategyPrompts } from './strategies'
+import type { CompleteParams, SynthesizeParams } from './tools'
+import { evolutionDefaults } from './tools/synthesize/prompt.defaults'
+import { systemPromptTemplate } from './prompt.template.system'
 import type {
 	AskResult,
 	EvolutionEntry,
@@ -11,142 +11,16 @@ import type {
 	LearnerGovernance,
 	LearnerMetadata,
 	LearnerOrigin,
-} from './types.js'
-
-/**
- * Understanding management strategies
- */
-export const STRATEGIES = ['continuous', 'rolling-summary', 'temporal-layers'] as const
-export type Strategy = (typeof STRATEGIES)[number]
-
-/**
- * Maintenance configuration for TextLearner
- */
-export interface TextLearnerMaintenance {
-	/** How understanding evolves over time */
-	strategy: Strategy
-	/** Max tokens before maintenance kicks in (for rolling-summary) */
-	maxTokens?: number
-}
-
-/**
- * Token usage information
- */
-export interface TokenUsage {
-	inputTokens: number
-	outputTokens: number
-	totalTokens: number
-}
-
-/**
- * Event emitted when an operation starts
- */
-export interface LearnerStartEvent {
-	operation: 'ingest' | 'ask'
-	input: unknown
-	understanding: string
-}
-
-/**
- * Event emitted after each agent step
- */
-export interface LearnerStepEvent {
-	/** Which operation triggered this step */
-	operation: 'ingest' | 'ask'
-	/** Step number (0-indexed) */
-	stepNumber: number
-	/** Tool calls made in this step (if any) */
-	toolCalls?: Array<{
-		toolName: string
-		input: unknown
-	}>
-	/** Text generated in this step (if any) */
-	text?: string
-	/** Token usage for this step */
-	usage?: TokenUsage
-	/** Why this step finished */
-	finishReason: string
-}
-
-/**
- * Event emitted when an operation completes
- */
-export interface LearnerEndEvent {
-	operation: 'ingest' | 'ask'
-	/** Total steps taken */
-	totalSteps: number
-	/** Aggregated token usage */
-	usage?: TokenUsage
-	/** Duration in milliseconds */
-	durationMs: number
-	/** Whether the operation succeeded */
-	success: boolean
-	/** Error message if failed */
-	error?: string
-	/** Evolution entry for ingest operations (included when understanding changes) */
-	entry?: EvolutionEntry
-}
-
-/**
- * Event emitted when system prompt initialization completes
- */
-export interface LearnerInitializedEvent {
-	/** The synthesized system prompt */
-	systemPrompt: string
-	/** Duration of initialization in milliseconds */
-	durationMs: number
-}
-
-/**
- * Event emitted when system prompt initialization fails
- */
-export interface LearnerInitErrorEvent {
-	/** Error that occurred during initialization */
-	error: Error
-	/** Duration before failure in milliseconds */
-	durationMs: number
-}
-
-/**
- * Callbacks for observing learner operations
- */
-export interface LearnerObserver {
-	/** Called when system prompt is synthesized (first ingest call) */
-	onInitialized?: (event: LearnerInitializedEvent) => void | Promise<void>
-	/** Called if system prompt synthesis fails */
-	onInitError?: (event: LearnerInitErrorEvent) => void | Promise<void>
-	/** Called when an operation starts */
-	onStart?: (event: LearnerStartEvent) => void | Promise<void>
-	/** Called after each agent step */
-	onStep?: (event: LearnerStepEvent) => void | Promise<void>
-	/** Called when an operation completes */
-	onEnd?: (event: LearnerEndEvent) => void | Promise<void>
-}
-
-/**
- * Callback type for step events (simplified single-callback observer)
- */
-export type OnStepCallback = (event: LearnerStepEvent) => void | Promise<void>
-
-/**
- * Configuration for creating a TextLearner
- */
-export interface TextLearnerConfig {
-	/** The language model to use (from AI SDK) */
-	model: LanguageModel
-	/** Natural language instructions for what this learner tracks and watches for */
-	instructions: string
-	/** Optional unique identifier */
-	id?: string
-	/** How the learner was created */
-	origin?: LearnerOrigin
-	/** Maintenance settings for understanding compression */
-	maintenance?: TextLearnerMaintenance
-	/** Callback fired after each agent step (simplified observability) */
-	onStep?: OnStepCallback
-	/** Full observer for lifecycle events (start, step, end) */
-	observer?: LearnerObserver
-}
+} from '../types'
+import { createLearnerAgent, type LearnerAgent } from './agent'
+import type {
+	LearnerObserver,
+	LearnerStepEvent,
+	OnStepCallback,
+	TextLearnerConfig,
+	TextLearnerMaintenance,
+	TokenUsage,
+} from './types'
 
 /**
  * TextLearner - A learning agent that maintains understanding as narrative text
@@ -228,6 +102,25 @@ export class TextLearner implements Learner<string> {
 	}
 
 	/**
+	 * Synthesize the system prompt using LLM
+	 */
+	private async synthesizeSystemPrompt(): Promise<string> {
+		const strategyPrompt = strategyPrompts[this._maintenance.strategy]
+		const prompt = systemPromptTemplate(
+			strategyPrompt,
+			this.instructions,
+			evolutionDefaults,
+		)
+
+		const result = await generateText({
+			model: this._model,
+			prompt,
+		})
+
+		return result.text.trim()
+	}
+
+	/**
 	 * Ensure system prompt is initialized (lazy initialization)
 	 * Called on first ingest() call
 	 */
@@ -236,12 +129,7 @@ export class TextLearner implements Learner<string> {
 
 		const initStart = Date.now()
 		try {
-			const result = await synthesizeSystemPrompt({
-				model: this._model,
-				strategy: this._maintenance.strategy,
-				instructions: this.instructions,
-			})
-			this._systemPrompt = result.systemPrompt
+			this._systemPrompt = await this.synthesizeSystemPrompt()
 
 			await this._observer?.onInitialized?.({
 				systemPrompt: this._systemPrompt,
@@ -354,7 +242,7 @@ export class TextLearner implements Learner<string> {
 				this.understanding = input.newUnderstanding
 				relevance = input.relevance
 
-				// Apply strategy-specific maintenance (e.g., summarization for rolling-summary)
+				// Apply strategy-specific maintenance (e.g., summarization for cumulative)
 				const strategyResult = await applyStrategy({
 					understanding: this.understanding,
 					model: this._model,

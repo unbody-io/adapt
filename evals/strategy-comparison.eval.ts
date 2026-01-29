@@ -3,8 +3,8 @@
  *
  * Tests the same data with 3 learners using different strategies:
  * - continuous: Understanding grows without limits
- * - rolling-summary: Summarizes when exceeding token limits
- * - temporal-layers: Structures understanding into current/recent/historical
+ * - cumulative: Summarizes when exceeding token limits, carries forward
+ * - decay: Older stuff fades, recent stays detailed
  *
  * Run with: OPENROUTER_API_KEY=xxx bun evals/strategy-comparison.eval.ts
  *
@@ -14,8 +14,8 @@
  */
 
 import { createOpenRouter } from '@openrouter/ai-sdk-provider'
-import type { Strategy, LearnerObserver, LearnerEndEvent } from '../src/learners/index.js'
-import { TextLearner, STRATEGIES } from '../src/learners/index.js'
+import type { Strategy, LearnerObserver, LearnerEndEvent } from '../src/learners'
+import { TextLearner, STRATEGIES } from '../src/learners'
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Setup
@@ -161,7 +161,7 @@ async function runEval() {
 			instructions: "Understand this developer's coding style, technical preferences, tooling choices, and architectural philosophy",
 			maintenance: {
 				strategy,
-				maxTokens: 1500, // Low limit to trigger rolling-summary and temporal-layers maintenance
+				maxTokens: 1500, // Low limit to trigger cumulative and decay maintenance
 			},
 			observer: trackingObserver,
 		})

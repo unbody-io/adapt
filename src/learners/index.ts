@@ -1,35 +1,4 @@
 // Core types
-
-export type {
-	LearnerEndEvent,
-	LearnerInitErrorEvent,
-	LearnerInitializedEvent,
-	LearnerObserver,
-	LearnerStartEvent,
-	LearnerStepEvent,
-	OnStepCallback,
-	Strategy,
-	TextLearnerConfig,
-	TextLearnerMaintenance,
-	TokenUsage,
-} from './text-learner.js'
-
-export { STRATEGIES, TextLearner } from './text-learner.js'
-
-// Prompt utilities
-export {
-	STRATEGY_PROMPTS,
-	SYSTEM_DEFAULTS,
-	synthesizeSystemPrompt,
-} from './prompts.js'
-
-// Strategy utilities
-export { applyStrategy, strategyFunctions } from './strategies.js'
-export type { StrategyContext, StrategyFn, StrategyResult } from './strategies.js'
-
-// Tool schemas (for extensibility)
-export * as toolSchemas from './tools/schemas.js'
-
 export type {
 	AskResult,
 	EvolutionEntry,
@@ -41,4 +10,41 @@ export type {
 	LearnerOrigin,
 	LearnerStatus,
 	Significance,
-} from './types.js'
+} from './types'
+
+// TextLearner
+export { 
+	TextLearner
+ } from './text-learner'
+
+export type {
+	LearnerEndEvent,
+	LearnerInitErrorEvent,
+	LearnerInitializedEvent,
+	LearnerObserver,
+	LearnerStartEvent,
+	LearnerStepEvent,
+	OnStepCallback,
+	TextLearnerConfig,
+	TextLearnerMaintenance,
+	TokenUsage,
+} from './text-learner'
+
+// Strategies
+export { 
+	applyStrategy, 
+	strategyFunctions, 
+	strategyPrompts, 
+	STRATEGIES 
+} from './text-learner/strategies'
+
+export type {
+	Strategy,
+	StrategyContext,
+	StrategyFn,
+	StrategyResult,
+	MaintenanceConfig,
+} from './text-learner/strategies'
+
+// Tools (for extensibility)
+export * as tools from './text-learner/tools'

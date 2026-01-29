@@ -1,17 +1,14 @@
 import type { LanguageModel } from 'ai'
 import { describe, expect, it, vi } from 'vitest'
-import { TextLearner } from '../text-learner.js'
+import { TextLearner } from '..'
 
 // Mock the AI SDK module
-vi.mock('ai', async () => {
-	const actual = await vi.importActual('ai')
-	return {
-		...actual,
-		ToolLoopAgent: vi.fn().mockImplementation(() => ({
-			generate: vi.fn(),
-		})),
-	}
-})
+vi.mock('ai', () => ({
+	generateText: vi.fn(),
+	ToolLoopAgent: vi.fn().mockImplementation(() => ({
+		generate: vi.fn(),
+	})),
+}))
 
 describe('TextLearner', () => {
 	// Create a simple mock model
@@ -102,12 +99,12 @@ describe('TextLearner', () => {
 			const learner = new TextLearner({
 				model: mockModel,
 				instructions: 'Test',
-				maintenance: { strategy: 'rolling-summary', maxTokens: 2000 },
+				maintenance: { strategy: 'cumulative', maxTokens: 2000 },
 			})
 			const maintenance = learner.getMaintenance()
 
 			expect(maintenance).toEqual({
-				strategy: 'rolling-summary',
+				strategy: 'cumulative',
 				maxTokens: 2000,
 			})
 		})

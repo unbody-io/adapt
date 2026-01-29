@@ -1,6 +1,8 @@
 // Core types
 export type {
 	AskResult,
+	BaseLearnerEvent,
+	BaseLearnerEventMap,
 	EvolutionEntry,
 	IngestResult,
 	Learner,
@@ -10,7 +12,11 @@ export type {
 	LearnerOrigin,
 	LearnerStatus,
 	Significance,
+	TokenUsage,
 } from './types'
+
+// Schemas
+export { learnerConfigSchema, type GeneratedLearnerConfig } from './schema.config'
 
 // TextLearner
 export { 
@@ -18,16 +24,10 @@ export {
  } from './text-learner'
 
 export type {
-	LearnerEndEvent,
-	LearnerInitErrorEvent,
-	LearnerInitializedEvent,
-	LearnerObserver,
-	LearnerStartEvent,
-	LearnerStepEvent,
-	OnStepCallback,
 	TextLearnerConfig,
+	TextLearnerEventMap,
+	TextLearnerEvent,
 	TextLearnerMaintenance,
-	TokenUsage,
 } from './text-learner'
 
 // Strategies

@@ -1,0 +1,193 @@
+=== Brain Session Started: 2026-03-09T15:04:08.547Z ===
+
+
+--- CONFIGURATION ---
+Prompt: This will be a chat log of myself with Claude Code during development of different projects. Learn about my thinking patterns, interests, preferences, and how I approach problems.
+
+Also, separately make sure you track the behaviors where I get frustrated and curse at the model.
+Model: [object Object]
+---
+
+[2026-03-09T15:04:10.841Z] LEARNERS GENERATED:
+  - interaction-patterns: Understand the user's overarching cognitive patterns and preferred methods for structuring and solvi...
+  - emotional-stress-markers: Track all occurrences where the user expresses frustration, including verbal reactions, explicit com...
+  - coding-preferences: Identify and catalog the user's explicit and implicit preferences regarding programming languages, f...
+
+===== BRAIN INITIALIZED =====
+{
+  "prompt": "This will be a chat log of myself with Claude Code during development of different projects. Learn about my thinking pat...",
+  "models": {
+    "default": "google/gemini-2.5-flash-lite-preview-09-2025",
+    "blueprint": "google/gemini-2.5-flash-lite-preview-09-2025",
+    "init": "google/gemini-2.5-flash-lite-preview-09-2025",
+    "query": "google/gemini-2.5-flash-lite-preview-09-2025"
+  },
+  "evolution": {
+    "enabled": true,
+    "evaluatorSignalThreshold": 3,
+    "autoEvaluate": true,
+    "coverageGap": {
+      "relevanceThreshold": 0.3,
+      "gapCountThreshold": 5,
+      "windowSize": 20
+    }
+  },
+  "learnerConfig": {
+    "thresholds": {
+      "maxObservations": 10,
+      "maxTokens": 8000,
+      "minImportance": 0.5
+    },
+    "queryMethod": "tool-based",
+    "governance": {
+      "strategy": "cumulative",
+      "maxTokens": 16000
+    }
+  }
+}
+=============================
+
+  >> [MODEL] observe for interaction-patterns (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for emotional-stress-markers (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for coding-preferences (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-03-09T15:05:38.449Z] OBSERVED [coding-preferences] importance=0.90 buffer=3
+  User explicitly rejected previously suggested tools/concepts (e.g., 'listSiblings') as not matching available system capabilities, demanding tools that map to concrete functions like 'getLearners()', 'getLearnerMetadata()', etc. This signals a preference for concrete, available API/tool definitions over abstract cognitive frameworks when defining LLM interaction methods.,User is deeply engaged in defining the architecture for an LLM system that makes decisions based on 'signals' and 'learner understanding', specifically questioning batching/grouping of signals versus processing them individually, indicating a focus on input structuring for decision-making models.,User is exploring the necessity of different toolsets based on the source of the signal, suggesting a preference for context-aware tool availability or dynamic tool selection based on input context.
+[2026-03-09T15:05:38.645Z] OBSERVED [emotional-stress-markers] importance=0.90 buffer=2
+  [object Object],[object Object]
+[2026-03-09T15:05:39.294Z] OBSERVED [interaction-patterns] importance=0.90 buffer=9
+  User explicitly requested stepping back to analyze 'evolution flow' and signal types based on purpose/payload/occasion, indicating a focus on architectural decomposition.,User rejected immediate solution finding, emphasizing 'rethinking this whole thing from first principle', which aligns with high-level architectural pattern consideration.,User queried the balance between 'mechanically possible calculated' decisions versus 'truly semantic analysis' in governance, directly touching upon abstraction level and decision complexity.,User showed concern about scope creep, demanding focus only on 'Governance Signals coming from learners', suggesting a need for clear component boundaries.,User suggested generating numerous signals/scenarios to test the system, implying a need to validate component robustness against varied inputs.,User framed the problem using cognitive terms: 'cognitive decision making framework', an LLM making decisions based on signals, and suggested giving the model 'a set of skills or tools'. This strongly relates to component design and decoupling.,User explicitly discussed decoupling by questioning batching signals by learner ('grouping probably we are killing the naturaly growing signals over the time'), indicating a preference for maintaining temporal/relational coupling where necessary.,User debated the nature of 'tools' versus 'cognitive framework' and demanded tools that are 'helpfull and yet avaible' (e.g., getLearners(), queryBrain()), focusing on defining clear, decoupled interfaces for the decision-making agent.,User questioned the assumption that the evaluator receives only one signal at a time and whether the model should be able to request multiple understandings concurrently, probing the synchronous/asynchronous nature of component interaction.
+  >> [MODEL] observe for interaction-patterns (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for emotional-stress-markers (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for coding-preferences (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-03-09T15:05:40.185Z] DISMISSED [emotional-stress-markers]
+[2026-03-09T15:05:40.263Z] DISMISSED [coding-preferences]
+  >> [MODEL] synthesize for interaction-patterns (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-03-09T15:05:43.102Z] SYNTHESIZED [interaction-patterns] significance=critical
+  Evolution: The initial understanding is saturated. This first set of observations confirms a strong, consistent preference for structured architectural decomposition (top-down planning, interface definition, boundary control) over immediate tactical execution. The user's engagement with 'tools/skills' and 'cognitive framework' suggests a specific lean toward Agent/Tool-Use patterns in component interaction.
+  Understanding (1183 chars):
+  The user exhibits a strong top-down architectural planning preference, immediately pivoting to high-level decomposition ('rethinking this whole thing from first principle') whenever initial implementation details are introduced. Core concerns revolve around defining clear, decoupled software components (e.g., 'Learners', 'Brain', 'Signals') with explicitly defined interfaces ('tools' like getLearners()) and functional guarantees (required accuracy thresholds). There is a critical focus on managi...
+  >> [MODEL] observe for __internal_global_understanding (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for interaction-patterns (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for emotional-stress-markers (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for coding-preferences (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-03-09T15:05:43.105Z] OBSERVED [__internal_global_understanding] importance=1.00 buffer=1
+  [object Object]
+[2026-03-09T15:05:43.524Z] DISMISSED [interaction-patterns]
+[2026-03-09T15:05:44.081Z] DISMISSED [emotional-stress-markers]
+[2026-03-09T15:05:44.083Z] DISMISSED [coding-preferences]
+  >> [MODEL] observe for __internal_injection_gaps (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-03-09T15:05:44.085Z] OBSERVED [__internal_injection_gaps] importance=1.00 buffer=1
+  Data arrived that no specialist could absorb. Topics identified: Session control/continuation commands, User interruption of process, Simple continuation command, Session interruption and continuation commands. This content has been set aside for now.
+  >> [MODEL] observe for interaction-patterns (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for emotional-stress-markers (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for coding-preferences (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-03-09T15:09:44.575Z] DISMISSED [coding-preferences]
+[2026-03-09T15:09:44.928Z] DISMISSED [emotional-stress-markers]
+[2026-03-09T15:09:44.928Z] DISMISSED [interaction-patterns]
+  >> [MODEL] observe for __internal_injection_gaps (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-03-09T15:09:44.929Z] OBSERVED [__internal_injection_gaps] importance=1.00 buffer=2
+  Data arrived that no specialist could absorb. Topics identified: Software project branding and naming, Comparison of existing Personal Knowledge Management (PKM) tools, Historical essays on information retrieval (Bush), Specific software repository analysis (Logseq), Project planning and branding (Unbody, Untangle), Conceptual development (AI as cognitive exoskeleton, PKM tool comparison), Historical/Theoretical reading (Vannevar Bush, Andy Matuschak), Project conceptualization and branding (Unbody, Untangle), Cognitive science and philosophy of tools (cognitive exoskeleton, thinking partner, how tools shape cognition), Specific PKM tool comparisons (Notion, Obsidian, Roam, Logseq), Historical context of hypertext (Vannevar Bush), Learning theory (Andy Matuschak). This content has been set aside for now.
+  >> [MODEL] observe for interaction-patterns (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for emotional-stress-markers (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for coding-preferences (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-03-09T15:10:15.553Z] DISMISSED [emotional-stress-markers]
+[2026-03-09T15:10:16.229Z] OBSERVED [coding-preferences] importance=0.93 buffer=8
+  The user shows a strong preference for software that adapts to the user's workflow rather than forcing the user to adapt to the software (Malleable software, Users as routers between software silos).,There is a recurring theme endorsing user agency, specifically the ability for users to modify the tools they use (End-User Programming, Malleable software).,The user is interested in architectural patterns that prioritize data ownership and decentralization, specifically mentioning 'Local-first software' and CRDTs (automerge).,The user expresses frustration with context fragmentation and siloed applications, highlighting the need for tools that integrate across different software domains.,There is an interest in radical rethinking of interfaces, moving beyond traditional screens/apps towards more integrated or physical computing models (Dynamicland).
+[2026-03-09T15:10:16.722Z] OBSERVED [interaction-patterns] importance=0.90 buffer=6
+  Observation 1: Strong theme regarding user agency and software malleability (Ink & Switch articles), directly relating to user control over structure and workflow, which impacts architectural flexibility.,Observation 2: Explicit mention of users as creators/modifiers ('End-User Programming'), suggesting a preference for systems where the user can directly influence the internal logic or structure.,Observation 3: The concept of the human being the 'only integration layer between apps' highlights a failure in system decoupling, forcing cognitive load onto the user to bridge silos.,Observation 4: The desire for a tool that 'sees across all my apps' implies a need for highly decoupled components where data/context can be aggregated without tight coupling to any single application's structure.,Observation 5: Local-first software and CRDTs (Automerge) point towards architectural decisions favoring data independence and decentralized control, which supports decoupled component design.,Observation 6: The note about seeing the 'SHAPE' of what you care about suggests a focus on high-level conceptual modeling over granular implementation details.
+  >> [MODEL] observe for interaction-patterns (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for emotional-stress-markers (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for coding-preferences (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-03-09T15:10:23.903Z] DISMISSED [coding-preferences]
+[2026-03-09T15:10:23.923Z] DISMISSED [emotional-stress-markers]
+[2026-03-09T15:10:24.486Z] DISMISSED [interaction-patterns]
+  >> [MODEL] observe for __internal_injection_gaps (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] synthesize for __internal_injection_gaps (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-03-09T15:10:26.926Z] SYNTHESIZED [__internal_injection_gaps] significance=notable
+  Evolution: Established three primary, large, and distinct gap domains: Session/Process Management, PKM & Conceptual Tools, and ADHD/Self-Management. Every observed topic cluster constitutes a 'new' domain introduction, requiring immediate classification.
+  Understanding (1727 chars):
+  ## Current State
+
+Three distinct, large clusters of rejected data domains have been identified based on the initial observations. None have established historical context or dynamics yet.
+
+1.  **Session/Process Management Gaps (Control Flow)**: Concerns rejection related to managing ongoing processes, including interruptions and continuations (e.g., 'Session control/continuation commands', 'User interruption of process').
+
+2.  **Personal Knowledge Management (PKM) & Conceptual Tools Gaps (Meta-C...
+  >> [MODEL] observe for interaction-patterns (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for emotional-stress-markers (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for coding-preferences (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-03-09T15:10:46.389Z] DISMISSED [coding-preferences]
+[2026-03-09T15:10:46.390Z] DISMISSED [interaction-patterns]
+[2026-03-09T15:10:46.842Z] DISMISSED [emotional-stress-markers]
+  >> [MODEL] observe for __internal_injection_gaps (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-03-09T15:10:46.843Z] OBSERVED [__internal_injection_gaps] importance=1.00 buffer=1
+  Data arrived that no specialist could absorb. Topics identified: Wedding planning and event logistics, Budgeting and venue selection, Culinary preferences and potluck organization, Visual aesthetics and decor, Wedding planning details, Venue research, Event structure brainstorming, Potluck concept generation, Catering preferences, Wedding planning and personal event preferences, Venue selection and budgeting for personal events, Culinary preferences for social gatherings, Aesthetic preferences for event decoration. This content has been set aside for now.
+  >> [MODEL] observe for interaction-patterns (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for emotional-stress-markers (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for coding-preferences (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-03-09T15:10:57.924Z] DISMISSED [emotional-stress-markers]
+[2026-03-09T15:10:58.451Z] DISMISSED [coding-preferences]
+  >> [MODEL] synthesize for interaction-patterns (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-03-09T15:11:01.328Z] SYNTHESIZED [interaction-patterns] significance=notable
+  Evolution: The abstract preference for high-level structuring and decoupling has been strongly reinforced and given specific architectural manifestation preferences: local-first data persistence, user malleability/agency, and a deep-seated need to capture user intent ('why') over mere content ('what'). The aesthetic observation connects the desire for flexible architecture to a broader preference for emergent, organic structures.
+  Understanding (1149 chars):
+  The user maintains a strong top-down architectural planning preference, immediately pivoting to high-level decomposition whenever implementation complexity is encountered. Core concerns revolve around defining clear, decoupled software components with explicitly defined interfaces and functional guarantees. There is a critical focus on managing implicit coupling issues and preventing unintended side-effects, coupled with a strategic preference for architectural patterns supporting local-first da...
+  >> [MODEL] observe for __internal_global_understanding (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for interaction-patterns (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for emotional-stress-markers (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for coding-preferences (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-03-09T15:11:01.333Z] OBSERVED [__internal_global_understanding] importance=1.00 buffer=2
+  [object Object]
+[2026-03-09T15:11:02.436Z] DISMISSED [coding-preferences]
+[2026-03-09T15:11:02.464Z] DISMISSED [emotional-stress-markers]
+[2026-03-09T15:11:03.042Z] OBSERVED [interaction-patterns] importance=0.90 buffer=5
+  The conversation about 'Rhizome project handover' explicitly mentions planning architecture using the 'mycelium metaphor' and an 'underground network that connects everything invisibly,' suggesting a preference for highly decoupled, interconnected components.,The 'Rhizome ecology vision' further reinforces this by mapping system components: Soil (data) → Mycelium (processing) → Mushrooms (interfaces), which is a high-level, domain-driven abstraction for component interaction.,Multiple entries reference 'Calm Technology,' 'Digital Minimalism,' and designing for attention respect (Daylight Computer, Light Phone), which strongly implies a preference for software components that are non-intrusive and operate in the periphery—a key aspect of decoupled, context-aware design.,The comparison between 'Streams' (feeds) and 'Gardens' (curated, evolving) suggests a preference for persistent, evolving, and potentially more self-contained structures over transient, high-throughput streams, aligning with architectural choices favoring modularity over monolithic flow.,The concept of 'intentional imperfection' and 'anti-performative' design, while aesthetic, suggests a preference for components that are functional and honest about their scope, potentially favoring clear separation of concerns (decoupling) over feature bloat.
+  >> [MODEL] observe for interaction-patterns (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for emotional-stress-markers (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for coding-preferences (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-03-09T15:11:03.882Z] DISMISSED [emotional-stress-markers]
+  >> [MODEL] synthesize for coding-preferences (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] synthesize for interaction-patterns (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-03-09T15:11:06.228Z] SYNTHESIZED [coding-preferences] significance=notable
+  Evolution: Multiple strong, consistent themes (process patience, self-awareness goal, decentralized architecture, context-aware tooling) have now been cataloged, forming a cohesive philosophical and architectural vision for the 'Mycelium' project.
+  Understanding (798 chars):
+  The user prioritizes systems that are highly adaptable and context-aware, favoring concrete, available APIs ('getLearners()') over abstract descriptions. There is a strong philosophical commitment to user agency, End-User Programming, and malleable software that integrates silos (anti-fragmentation). Architecturally, the direction leans toward decentralization (Local-first, CRDTs/automerge) and emergent, interconnected structures (Mycelium metaphor replacing Rhizome). The core purpose of the sof...
+  >> [MODEL] observe for __internal_global_understanding (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] synthesize for __internal_global_understanding (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-03-09T15:11:07.150Z] SYNTHESIZED [interaction-patterns] significance=notable
+  Evolution: The core themes of decoupling and high abstraction are significantly reinforced, moving from abstract architectural statements to concrete, recurring ecological metaphors (Mycelium, Sourdough) that explicitly define the desired interaction pattern: emergent, interconnected, and foundational structures. The focus on feedback loops ('save velocity spikes' warning burnout) adds a specific implementation detail to the existing preference for adaptive, context-aware systems.
+  Understanding (1092 chars):
+  The user maintains a strong commitment to a decentralized, emergent, and highly decoupled architectural philosophy, consistently preferring organic system metaphors (mycelium, sourdough) over rigid, prescriptive structures. This preference manifests as a deep-seated need for component independence, clear functional contracts, and the avoidance of implicit coupling. The abstraction level remains critically high, focusing on modeling cognitive patterns ('self-awareness tool,' 'intent') rather than...
+  >> [MODEL] observe for __internal_global_understanding (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] synthesize for __internal_global_understanding (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-03-09T15:11:08.303Z] SYNTHESIZED [__internal_global_understanding] significance=notable
+  Evolution: The two independent streams (interaction patterns and coding preferences) have fully aligned. The abstract desire for decoupled architecture is now cemented with concrete technical preferences (Local-first/CRDTs) and a core philosophical mandate (Self-Awareness, Organic Process). The pattern is no longer just 'architectural planning' but specifically 'Organic, Agentic Decentralization'.
+  Understanding (1618 chars):
+  The collective understanding converges on a highly specific, philosophically driven architectural vision centered on **Emergent, Decentralized Systems designed for User Agency and Self-Awareness ('Mycelium')**.
+
+**Core Architectural Tenets (Confirmed Convergence):**
+1.  **Top-Down Planning & Decoupling:** A consistent preference for high-level architectural definition, explicit interface contracts, and rigorous prevention of implicit side-effects (coupling). This must manifest as a software patt...
+[2026-03-09T15:11:09.144Z] SYNTHESIZED [__internal_global_understanding] significance=notable
+  Evolution: The initial understanding of top-down planning and decoupling has been solidified by concrete, recurrent philosophical metaphors ('Mycelium,' 'Sourdough,' 'organic growth') which define the desired process and structure. Architectural preferences are now clearly rooted in decentralization (Local-first, CRDTs) and Agentic patterns. The tension between high abstraction ('why') and low-level detail ('what') is resolved in favor of abstraction, with implementation details focusing on observing system health (velocity, burnout warning) rather than traditional performance metrics.
+  Understanding (1255 chars):
+  The collective understanding converges on a user profile prioritizing decentralized, highly decoupled, and architecturally emergent systems, metaphorically described as 'Mycelium' or 'Sourdough.' This reflects a strong philosophical preference for organic growth, user agency, and self-awareness as the core purpose of the software. Architecturally, the preference is strongly top-down: immediate focus on high-level architectural decomposition, clear interface definitions (e.g., explicit 'tool' API...
+  >> [MODEL] query for interaction-patterns (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] query for emotional-stress-markers (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] query for coding-preferences (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for __internal_global_query_understanding (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-03-09T15:12:34.783Z] OBSERVED [__internal_global_query_understanding] importance=1.00 buffer=1
+  [object Object]
+[2026-03-09T15:12:35.829Z] QUERY RESPONSE:
+  You are a user whose primary focus is on designing systems that reflect complex, self-organizing, and highly decoupled cognitive models, prioritizing long-term adaptability and conceptual purity. You strongly prefer decentralized, emergent architectures (like mycelium) over rigid ones, valuing archi...
+  Gaps: The provided knowledge describes your architectural and philosophical preferences in detail but does not contain personal identification information, as the sources are focused on cataloging your interaction patterns and system design leanings.
+  >> [MODEL] query for interaction-patterns (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] query for emotional-stress-markers (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] query for coding-preferences (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for __internal_global_query_understanding (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-03-09T15:12:53.339Z] OBSERVED [__internal_global_query_understanding] importance=1.00 buffer=2
+  [object Object]
+[2026-03-09T15:12:54.490Z] QUERY RESPONSE:
+  The primary threads of attention revolve around **decentralization, decoupling, and organic emergence**. This manifests as a preference for flexible, non-rigid architectural philosophies (like mycology/sourdough) that favor malleability and conceptual modeling over strict structure. There is a stron...
+  Gaps: Preferred programming language idioms, Preferred frameworks, Preferred design patterns, Error handling strategies (e.g., Result types vs. exceptions)
+  >> [MODEL] query for __internal_global_understanding (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] query for __internal_injection_gaps (brain default: google/gemini-2.5-flash-lite-preview-09-2025)

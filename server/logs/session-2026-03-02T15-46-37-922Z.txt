@@ -1,0 +1,216 @@
+=== Brain Session Started: 2026-03-02T15:46:37.922Z ===
+
+
+--- CONFIGURATION ---
+Prompt: This will be a chat log of myself with Claude Code during development of different projects. Learn about my thinking patterns, interests, preferences, and how I approach problems.
+
+Also, separately make sure you track the behaviors where I get frustrated and curse at the model.
+Model: [object Object]
+---
+
+[2026-03-02T15:46:40.660Z] LEARNERS GENERATED:
+  - cognitive-patterns: Understand the user's core cognitive strategies for approaching and structuring technical problems a...
+  - preference-baseline: Synthesize the user's stated technical preferences, preferred methodologies, and areas of sustained ...
+  - stress-behavior-tracking: Track instances of user frustration indicated by strong negative language, curses, or emotional outb...
+
+===== BRAIN INITIALIZED =====
+{
+  "prompt": "This will be a chat log of myself with Claude Code during development of different projects. Learn about my thinking pat...",
+  "models": {
+    "default": "google/gemini-2.5-flash-lite-preview-09-2025",
+    "blueprint": "google/gemini-2.5-flash-lite-preview-09-2025",
+    "init": "google/gemini-2.5-flash-lite-preview-09-2025",
+    "query": "google/gemini-2.5-flash-lite-preview-09-2025"
+  },
+  "evolution": {
+    "enabled": true,
+    "evaluatorSignalThreshold": 3,
+    "autoEvaluate": true,
+    "coverageGap": {
+      "relevanceThreshold": 0.3,
+      "gapCountThreshold": 5,
+      "windowSize": 20
+    }
+  },
+  "learnerConfig": {
+    "thresholds": {
+      "maxObservations": 10,
+      "maxTokens": 8000,
+      "minImportance": 0.5
+    },
+    "queryMethod": "tool-based",
+    "governance": {
+      "strategy": "cumulative",
+      "maxTokens": 16000
+    }
+  }
+}
+=============================
+
+  >> [MODEL] observe for cognitive-patterns (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for preference-baseline (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for stress-behavior-tracking (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-03-02T15:47:50.000Z] DISMISSED [stress-behavior-tracking]
+  >> [MODEL] synthesize for cognitive-patterns (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] synthesize for preference-baseline (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-03-02T15:47:52.943Z] SYNTHESIZED [preference-baseline] significance=critical
+  Evolution: Since no prior understanding existed, the entire current understanding is established based solely on process requirements raised in this initial integration step. This establishes the core functional expectations: phase separation (Observe/Integrate), cost management concern, preference for Direct integration method, and schema/status definitions.
+  Understanding (752 chars):
+  The user's primary focus is on the meta-process of technical preference tracking, specifically emphasizing segregation of duties between an 'Observe' phase (raw extraction, attention-oriented output including importance score) and an 'Integrate' phase (comparison, synthesis, understanding update). Key operational requirements include managing understanding degradation (truncation, drift) and cost via controlled updates. The preferred integration method is 'Direct' (cognitive skills) over 'Tool-b...
+[2026-03-02T15:47:53.473Z] SYNTHESIZED [cognitive-patterns] significance=notable
+  Evolution: Established the fundamental two-phase architecture (Observe/Integrate) as the primary structuring mechanism. Integrated several specific implementation choices (simplicity over storage, phase-specific field dropping, preference for 'Direct' method) as direct consequences of prioritizing risk mitigation (cost/degradation) and developer clarity.
+  Understanding (1009 chars):
+  The user defaults toward simplicity and explicit state management, especially when structuring interaction flows and data representations. A core strategy is the defensive architecture of splitting cognitive work into a low-risk, high-frequency 'Phase 1 (Observe)' and a less frequent, careful 'Phase 2 (Integrate)' to mitigate performance cost and data degradation (truncation/drift) risks inherent in continuous, full-replacement learning. 
+
+Design preferences include: favoring calculation over st...
+  >> [MODEL] observe for cognitive-patterns (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for preference-baseline (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for stress-behavior-tracking (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-03-02T15:47:53.975Z] DISMISSED [stress-behavior-tracking]
+[2026-03-02T15:47:54.206Z] OBSERVED [cognitive-patterns] importance=0.85 buffer=3
+  The user explicitly discusses trade-offs in terminology: preferring 'output' over 'result', rejecting 'integration' in favor of 'Synthesize' or 'Understand', and finding 'TwoPhaseConfig' 'absolutly rediculuess'.,The user establishes criteria for architectural decomposition: 'each of observe and syntehsisze should be self contained'.,The user sets a standard for code organization/maintainability: 'each has to consist of seperate d files per purpose of the file'.
+[2026-03-02T15:47:54.891Z] OBSERVED [preference-baseline] importance=0.80 buffer=5
+  user dislikes the word "integration",user prefers the term "output" over "result",user explicitly chose "Synthesize" over "Understand" as a phase name,user stated that 'observe' and 'synthesize' should be self-contained,user mentioned that current learning methods are deprecated and might need renaming/prefixing with _
+  >> [MODEL] observe for cognitive-patterns (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for preference-baseline (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for stress-behavior-tracking (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-03-02T15:47:55.653Z] DISMISSED [stress-behavior-tracking]
+  >> [MODEL] synthesize for preference-baseline (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] synthesize for cognitive-patterns (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-03-02T15:47:58.604Z] SYNTHESIZED [cognitive-patterns] significance=notable
+  Evolution: The existing model of 'Phase 1 (Observe)' and 'Phase 2 (Integrate)' is confirmed, but the terminology is strictly refined ('Integrate' rejected in favor of 'Synthesize'/'Understand'). The architectural decomposition requirement is significantly strengthened, now explicitly mandating self-contained subsystems with high file-level granularity ('separate files per purpose'). Furthermore, the trade-off evaluation scope has expanded to include prompt structure constraints ('Identity first, mechanics later', 'No architecture leakage') and explicit control mechanisms for runtime variability ('temperature').
+  Understanding (1189 chars):
+  The user defaults toward simplicity, explicit state management, and defensive, decomposed architecture. A core strategy involves splitting work into low-risk 'Observe' and careful 'Synthesize' phases to mitigate data integrity risks. Architectural decomposition demands that 'observe' and 'synthesize' subsystems be entirely self-contained, requiring separate files per purpose for maintainability. Granularity extends to prompt engineering, where systems must separate identity/purpose from mechanic...
+[2026-03-02T15:47:58.692Z] SYNTHESIZED [preference-baseline] significance=notable
+  Evolution: The understanding significantly shifted from a focus on general process establishment to deep operational refinements regarding terminology ('output' vs 'result', 'Synthesize' vs 'Understand', dropping 'integration'), prompt engineering constraints ('No architecture leakage', 'Positive framing'), and mitigating LLM-specific risks ('interpretation creep', focus on attention/positive framing). The deferred status of 'Chunking' is incorporated as a current tactical decision.
+  Understanding (1199 chars):
+  The user's primary focus is establishing a robust meta-process for technical preference tracking, involving distinct 'Observe' (raw extraction) and 'Synthesize' (comparison, integration) phases. Key operational requirements emphasize cost control, clear input/output definitions, and managing understanding degradation. The preferred integration method is 'Direct' (cognitive skills). Strong emphasis is placed on prompt engineering quality: strictly avoiding 'architecture leakage,' enforcing 'no re...
+  >> [MODEL] observe for cognitive-patterns (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for preference-baseline (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for stress-behavior-tracking (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-03-02T15:47:59.527Z] DISMISSED [stress-behavior-tracking]
+[2026-03-02T15:48:00.114Z] OBSERVED [preference-baseline] importance=0.75 buffer=8
+  User is interested in different 'strategies' and their 'expected outcome'.,User questioned if the outcome of all strategies is currently 'one string variable'.,User asked if there is a need to 'store a history of understings' for the strategies.,User referenced consulting specific documentation files: '@docs/specs/learners.spec.md' and '@docs/specs/learners.implementation.md'.,User discussed evaluation cases involving 'one model, one conif, text learner and only direct + simplest strategy'.,User suggested changing instructions to allow a learner to 'track multiple things and not only one thing' using '30 events'.,User summarized a working configuration: 'learner + leanrer text + direct + continues with two phase works'.,User suggested deleting '_learning-methods' but keeping '_tools' for future reference.
+[2026-03-02T15:48:00.563Z] OBSERVED [cognitive-patterns] importance=0.85 buffer=9
+  The user is explicitly discussing 'strategies' and asking for their definition and expected outcomes, which relates to design patterns/problem decomposition.,The user questions if the outcome of all strategies is currently 'one string variable', indicating a concern about output uniformity versus complexity/performance.,The user asks about storing a 'history of understings' related to the strategies, touching on state management/maintainability.,The user evaluates the current strategies as 'good' and then asks for 'minor fixes', suggesting a stage of refinement based on perceived completeness.,The user explicitly references specification documents (@docs/specs/learners.spec.md and @docs/specs/learners.implementation.md) to resolve uncertainty, indicating reliance on external documentation for architectural decisions.,The user discusses an evaluation case involving 'simplest strategy (which is our contonies?)', showing a trade-off consideration between simplicity and capability.,The user suggests changing instructions to be 'more close to reality' where a learner tracks 'multiple things', implying a need to evolve the strategy design beyond a simple case.,The user summarizes a working configuration: 'learner + leanrer text + direct + continues with two phase works', detailing a specific architectural approach.,The user discusses code cleanup: 'shall we remove anything else that is not in this world? or no keep them for future reefrence?' and suggests deleting '_learning-methods' but keeping '_tools', which is a direct decision about maintainability versus future flexibility.
+  >> [MODEL] observe for cognitive-patterns (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for preference-baseline (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for stress-behavior-tracking (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] synthesize for preference-baseline (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] synthesize for cognitive-patterns (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-03-02T15:48:02.037Z] OBSERVED [stress-behavior-tracking] importance=0.80 buffer=1
+  [object Object]
+[2026-03-02T15:48:03.864Z] SYNTHESIZED [cognitive-patterns] significance=notable
+  Evolution: The understanding is significantly refined by confirming the strong preference for simplicity as a default trade-off ('option A just for simplicity for now') and highlighting a critical expansion in structuring: the explicit definition and categorization of mental models based on component function (model specialization for prompt generation, learning phases, and querying). The reliance on external specs for architectural anchoring is also formalized.
+  Understanding (1084 chars):
+  The user employs a rigorous, multi-phased approach centered on low-risk decomposition ('Observe' then 'Synthesize') driven by explicit external specifications (e.g., @docs/specs). Core strategies prioritize simplicity ('option A just for simplicity for now') and functional uniformity (concern over unified 'one string variable' output), even when facing capability limits (simplest strategy evaluation). Architectural structure is paramount, involving explicit deliberation on where decomposition oc...
+[2026-03-02T15:48:04.210Z] SYNTHESIZED [preference-baseline] significance=notable
+  Evolution: New focus areas emerged around LLM categorization by role (generator, observer, synthesizer, asker), strategy outcomes, history retention for strategies, and capacity enhancement (tracking 'multiple things'/'30 events'). The preference for 'option A' for simplicity is a new tactical anchor. The user is moving from defining core principles to defining implementation configuration (model assignment and configuration structure).
+  Understanding (1469 chars):
+  The user is deeply engaged in defining meta-processes for automated learning and preference tracking, focusing heavily on configuration, strategy, and model assignment. Key themes include: defining 'strategies' and their 'expected outcome'; confirming the need to store a 'history of understandings' for these strategies; and refining the structure of the learner/processor components. There is a move towards handling 'multiple things' (up to '30 events') within the learner framework, suggesting a ...
+  >> [MODEL] observe for cognitive-patterns (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for preference-baseline (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for stress-behavior-tracking (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-03-02T15:48:04.816Z] OBSERVED [preference-baseline] importance=0.80 buffer=3
+  Endorsed model names/concepts: promptgeneratorModel, queryModel, model (default), blueprintModel (as a better name for promptGeneratorModel).,Expressed curiosity about implementation approach: "what is the best way to appuch this? is there a standard practice ?",Expressed concern/interest in type safety: "yeah it looks elegent. is it type safe ?"
+[2026-03-02T15:48:05.101Z] OBSERVED [stress-behavior-tracking] importance=0.80 buffer=2
+  [object Object]
+[2026-03-02T15:48:05.541Z] OBSERVED [cognitive-patterns] importance=0.90 buffer=7
+  The user explicitly discusses configuration overrides between 'brain level' and 'learner level' queries, indicating a concern with configuration hierarchy and scope.,The user proposes a configuration structure involving default models ('model (default; gets injected to anywhere)') and specific overrides at different levels (brain level, learner level).,The user is actively refining a configuration schema, moving from initial ideas (e.g., 'promptgeneratorModel', 'queryModel') to more structured organization (e.g., nesting configs under 'learner', suggesting query:{model, method}).,The user seeks confirmation on architectural decomposition: "query on brain level" vs "query on learner level".,The user explicitly asks for the 'best way to approach this' and if there is a 'standard practice', indicating a search for established design patterns or implementation strategies.,The user expresses concern about maintainability/elegance by asking if a proposed structure is 'type safe'.,The user is defining the scope of inheritance/pass-down logic: "or wait it was only models that needs to be pass down inhertcily ther rest or just used at one place", which relates directly to performance (how much configuration is duplicated) vs maintainability (clear inheritance rules).
+  >> [MODEL] observe for cognitive-patterns (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for preference-baseline (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for stress-behavior-tracking (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] synthesize for cognitive-patterns (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] synthesize for preference-baseline (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-03-02T15:48:07.523Z] OBSERVED [stress-behavior-tracking] importance=0.80 buffer=5
+  [object Object],[object Object],[object Object]
+[2026-03-02T15:48:08.367Z] SYNTHESIZED [cognitive-patterns] significance=notable
+  Evolution: The understanding extends significantly by detailing the mechanism of architectural trade-offs: moving from general architectural concerns to specific hierarchical configuration management (default vs. override scoping). The definition of completion criteria ('good enough') is notably refined to explicitly include comprehensive multi-level testability checks.
+  Understanding (1072 chars):
+  The user's problem-solving strategy is increasingly focused on robust, hierarchical configuration management, especially regarding scope and inheritance across architectural levels (Brain vs. Learner). This builds upon the existing prioritization of architectural structure. Key structural concerns now include explicitly defining cascading/inheritance rules for configuration (models pass down, others might not) to balance maintainability (type safety, explicit separation like TextLearnerConfig vs...
+[2026-03-02T15:48:09.151Z] SYNTHESIZED [preference-baseline] significance=notable
+  Evolution: Updated model names to include 'blueprintModel' (as preferred for prompt generation), 'queryModel', and 'model' (default). Incorporated significant structural and implementation concerns: type safety, deployment strategies (npm vs. Docker/server), configuration file structure questions, and pattern suggestions ('TextLearnerConfig'). Added the specific critique on synthesized output length. This shifts focus from pure meta-process definition to concrete engineering choices.
+  Understanding (1447 chars):
+  The user is focused on formalizing the architecture for their learning/processing framework, moving from conceptual phases to concrete implementation details. Key architectural decisions involve naming conventions and configuration management. Model naming is being refined: 'promptgeneratorModel' is being replaced or clarified by 'blueprintModel', and 'queryModel' is established alongside a generic 'model' default. A general preference for elegance/clarity remains, now framed by questions on pra...
+  >> [MODEL] observe for cognitive-patterns (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for preference-baseline (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for stress-behavior-tracking (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-03-02T15:48:10.868Z] OBSERVED [cognitive-patterns] importance=0.90 buffer=7
+  The user explicitly outlines a desired architecture: 'a web server servie which has endpoints, for init brain (all options should be adjusable) and ask ffrom brain. with realtime watching streaming from all ghe events.' This relates to problem decomposition and architecture level.,The user specifies a requirement for a 'sigle mnitoring web ui to not only confugrae but also track evey single event.' This shows a criterion for solution completeness related to maintainability/usability.,The user expresses a desire for specific UI features: 'we need a bit more curated ui instead of just showing logs' and details panel requirements for learners, status, configs, and prompts. This relates to maintainability/readability trade-offs.,The user demands high configurability: 'also we should be able to set all configs at the level of the brain pretty much everything'. This suggests a preference for flexibility over simplicity (a potential performance vs. maintainability trade-off consideration).,The user prioritizes debugging/visibility: 'why when i click on initializing it takes long time without seeing any realtime status ... you sure you loging evey incoming events ?' and 'Surface proactive signals better in UI'. This indicates a high value placed on observability/transparency.,The user is actively debugging a failure mode indicated by logs: 'AI_NoObjectGeneratedError: No object generated: could not parse the response.' and 'AI_JSONParseError: JSON parsing failed: Text: ... Unterminated string'. This shows engagement with low-level execution details.,The user expresses frustration regarding system autonomy: 'no no you can not just decide to do things!' indicating a preference for explicit control over automated decision-making, which impacts architecture design.
+[2026-03-02T15:48:10.953Z] OBSERVED [preference-baseline] importance=0.85 buffer=9
+  User is planning a web server service with endpoints for initializing a brain and querying it, emphasizing realtime watching/streaming of events.,User wants a single monitoring web UI to configure and track every single event.,User wants the ability to select and tell the brain what to inject (e.g., sessions and projects from local Claude).,User explicitly listed several models they are working with or checking status for: 'google/gemini-2.0-flash-001', 'anthropic/claude-sonnet-4', 'openai/gpt-4o-mini', 'anthropic/claude-opus-4.5', 'anthropic/claude-sonnet-4.5', 'anthropic/claude-3.5-haiku', 'x-ai/grok-4.1-fast', 'x-ai/grok-code-fast-1', 'x-ai/grok-4', 'openai/gpt-5.2', 'openai/gpt-oss-120b', 'openai/gpt-5.2-codex', 'google/gemini-3-flash-preview', 'google/gemini-3-pro-preview'.,User is experiencing initialization failures related to LLM calls, specifically citing 'No object generated: could not parse the response.' when using model 'anthropic/claude-3.5-haiku'.,User desires a more curated UI instead of just logs, requesting panels for each 'learner' showing status, activity, configs, and prompts.,User wants the ability to set all configurations at the level of the brain.,User prioritized fixing the model error: 'lets fix this model error. i can not see anythign and all mdoels going wrong'.,User requested better surfacing of proactive signals in the UI.
+[2026-03-02T15:48:11.251Z] OBSERVED [stress-behavior-tracking] importance=0.84 buffer=9
+  [object Object],[object Object],[object Object],[object Object]
+  >> [MODEL] observe for cognitive-patterns (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for preference-baseline (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for stress-behavior-tracking (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] synthesize for preference-baseline (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] synthesize for cognitive-patterns (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-03-02T15:48:15.335Z] SYNTHESIZED [preference-baseline] significance=notable
+  Evolution: Major expansion in focus areas: The center of gravity has shifted from internal configuration file structure to external-facing UI/Realtime monitoring and immediate LLM serialization debugging. Specific model cataloging and categorization ('fastest' group) are new, along with explicit demands for centralized 'brain' configuration. Debugging LLM response parsing failures is now a critical, recurring activity indicated by multiple related observations.
+  Understanding (1527 chars):
+  The user is aggressively formalizing a learning/processing framework, shifting focus heavily towards UI/UX for monitoring, debugging LLM interactions, and comprehensive observability. Architectural focus is on centralized configuration, now explicitly demanding all configurations be at the 'brain' level, overriding previous exploration of distributed configuration files. Model selection and management are now paramount, involving explicit configuration segregation (e.g., separate models for 'obs...
+[2026-03-02T15:48:16.339Z] SYNTHESIZED [cognitive-patterns] significance=notable
+  Evolution: The understanding is significantly updated by integrating a specific required architecture (Web Service/Endpoints + Monitoring UI) and redefining the 'good enough' goal around external control and transparency. The concept of granularity in configuration control has expanded to include multi-level LLM selection and highly detailed UI inspection capabilities (raw prompts). A new cognitive theme emerges: strong opposition to opaque abstraction layers, especially concerning error reporting and control flow, tempering the prior focus on structural uniformity.
+  Understanding (1304 chars):
+  The user's core strategy emphasizes robust, hierarchical configuration management (Brain vs. Learner, cascading rules) balanced against system transparency and explicit external control. The 'good enough' criterion demands high observability (real-time monitoring, detailed UI, proactive signaling, full logging) and complete configurability (all Brain options adjustable, granular LLM control at many levels) to facilitate debugging (evident in active failure debugging of JSON parsing/repair). Arch...
+  >> [MODEL] synthesize for stress-behavior-tracking (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-03-02T15:49:02.172Z] SYNTHESIZED [stress-behavior-tracking] significance=notable
+  Evolution: Added 10 new User Frustration Events (UFEs) reflecting various issues observed, including misinterpretation of user intent (4 items), general process/output frustration (3 items), parsing/latency issues (2 items), and one instance of giving up on a task (1 item). One key existing item (related to LLM output parsing errors) was updated to include a strong language signal and higher confidence (rating 4.5, model_failure_type:other/JSON_parsing_failure). All new items were added as they represent distinct conversational moments or failure types not previously logged. No items were removed as the context threads appear ongoing or the events are novel.
+  Understanding (5355 chars):
+  [{"id":"item_tisSfqGpMFgmKM6NNjVoB","data":{"frustration_utterance":"why i do nto see a good error message from these llm ? why teh fuck we are abstracting away things?","severity_rating":4.5,"target_of_frustration":"interaction_process","model_failure_type":"other","trigger_context":"Repeated failure of LLM output parsing/generation, leading to frustration about abstraction layers hiding errors.","project_complexity_indicator":"high_complex","preceding_model_output_preview":"[Event] brain:injec...
+  >> [MODEL] observe for cognitive-patterns (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for preference-baseline (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for stress-behavior-tracking (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-03-02T15:49:03.472Z] OBSERVED [preference-baseline] importance=0.85 buffer=6
+  User is defining a default brain prompt: 'fix the grammer'.,User wants the system to track behaviors where they 'get frustrated and curse at the model' as part of the brain's learning.,User is actively developing and debugging a system involving 'brain' concepts, 'learners', 'usage', and 'inject status'.,User is concerned about state persistence: 'if i refresh will it restart teh state of the brain?',User confirmed that refreshing the page resets the state: 'everything got reseted because obsvsouly every refresh means a new sse client'.,User explicitly states they 'shoudl not refresh the page' to maintain state.
+[2026-03-02T15:49:03.729Z] OBSERVED [cognitive-patterns] importance=0.85 buffer=8
+  User requested to show usage per learner "(if not much work)", indicating a trade-off consideration between feature completeness and implementation effort/cost.,User requested to show 'inject status' details on top of usage, suggesting a need for high-level, real-time summary monitoring (a cognitive load/information density trade-off).,User requested to render all understanding and buffer content "with proper white space so the line breaks gets rendered", indicating a preference for high fidelity/readability of detailed content over potentially cleaner, condensed presentation.,User requested to change the default brain prompt to include tracking behaviors where 'I get frustrated and curse at the model', indicating a specific requirement for monitoring emotional/negative patterns (a data collection/privacy/utility trade-off).,User requested to show the buffer content for each learner, prioritizing detailed inspection over a summarized view.,User requested to show the current observations on the card of each learner, prioritizing dynamic content visibility on the primary UI element.,User established criteria for completeness/good enough by asking for a 'summery overview file of entire what thsi brain is and what is the architecture and flow etc.' to be created for onboarding new users/models, indicating documentation and maintainability are key success factors.,User observed a state reset upon UI refresh and concluded 'every refresh means a new sse client', showing an understanding of the underlying architectural component (SSE client lifecycle) impacting state persistence.
+[2026-03-02T15:49:04.506Z] OBSERVED [stress-behavior-tracking] importance=0.80 buffer=5
+  [object Object],[object Object],[object Object],[object Object],[object Object]
+  >> [MODEL] observe for cognitive-patterns (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for preference-baseline (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for stress-behavior-tracking (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-03-02T15:49:05.439Z] DISMISSED [stress-behavior-tracking]
+  >> [MODEL] synthesize for preference-baseline (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] synthesize for cognitive-patterns (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-03-02T15:49:08.137Z] SYNTHESIZED [preference-baseline] significance=notable
+  Evolution: The core architectural preference for agent-centric, fluid systems built in strictly typed TypeScript is now cemented. Key operational limitations (state loss on refresh) are precisely defined and mandate new user behavior. The focus on LLM interaction refined from general debugging to specific template requirements (system vs. user prompts) and direct SDK method parity checks for custom wrappers (generateStructuredOutput vs. generateText). The introduction of tracking 'frustration/cursing' behavior adds a unique meta-monitoring requirement.
+  Understanding (1526 chars):
+  The user is deeply engaged in building a dynamic, agentic cognitive infrastructure branded as 'Unbody Brain.' This system heavily relies on TypeScript with strict typing. The architecture favors a lean core focused on understanding via interconnected, agentic components, explicitly preferring fluid, shapeless systems over rigid multi-tier setups. Central to the development is managing model interaction via SDKs (like ai-sdk), currently involving agents ('ToolLoopAgent') and specific focus on str...
+[2026-03-02T15:49:08.988Z] SYNTHESIZED [cognitive-patterns] significance=notable
+  Evolution: The trade-off landscape is significantly refined. Performance/minimization (prompt simplification, component replacement) is now actively weighed against demands for deep inspection/verbosity (showing buffer content, usage status, detailed error tracking, full white-space rendering). The definition of 'good enough' has expanded to formally include maintainability metrics (onboarding documentation) and specific functional equivalence checks (matching legacy API surface). The cognitive requirement for monitoring has extended into meta-monitoring (tracking developer frustration/errors).
+  Understanding (1276 chars):
+  The core strategy emphasizes robust, hierarchical configuration (Brain/Learner), demanding high observability, explicit external control via a dedicated web service/UI, and granular LLM control. Key architectural patterns include a hierarchical synthesis (Brain LLM aggregating Learner LLM outputs) and explicit prompt structuring (System vs. Inference prompt per call). The 'good enough' criterion is multi-faceted: high fidelity UI rendering (respecting white space for readability), comprehensive ...
+  >> [MODEL] observe for cognitive-patterns (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for preference-baseline (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for stress-behavior-tracking (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-03-02T15:49:09.774Z] DISMISSED [stress-behavior-tracking]
+[2026-03-02T15:49:09.994Z] OBSERVED [cognitive-patterns] importance=0.85 buffer=6
+  The user explicitly states a trade-off consideration: "i think this shows us that we do need to work on query process entirely. to be honest we never work on it properly.",The user establishes criteria for completion/good enough regarding API parity: "the query and ask both has to expose exactly same options as generateText originally from ai sdk and so basicly our wrapper generateStructuredOutput",The user proposes a specific architectural change/refinement: "replace brain toolagent with generateStructuredOutput",The user establishes a requirement for prompt structure/decomposition: "for each make sure we have two propmpts template one system and one user",The user establishes a goal for simplicity/maintainability in prompting: "for both of them we need to simplify the prompt to minimom",The user is concerned with configuration granularity/control: "doe this now enable us to be able to set the model and temprature upon every message from the ui ?"
+[2026-03-02T15:49:10.189Z] OBSERVED [preference-baseline] importance=0.85 buffer=9
+  Coding preferences mentioned: Emergent/dynamic designs over rigid multi-tier setups; lean cores focused on understanding via agents/tools; conversational spec refinement in Markdown docs.,The user explicitly stated a preference for simplicity/flexibility/DX in trade-offs.,The user is working on an advanced AI cognitive infrastructure called 'Unbody Brain' emphasizing dynamic data understanding through evolving, agentic components.,The user favors agent-centric models.,The user favors quick iteration post-planning.,The user is planning to replace the brain's ToolAgent with generateStructuredOutput.,The user plans to ensure every LLM call has two prompt templates: one system and one user prompt.,The user plans to simplify prompts to a minimum for both brain and learner LLM calls.,The user requires the wrapper generateStructuredOutput to expose exactly the same options as generateText originally from ai-sdk for both query and ask functions.
+  >> [MODEL] query for cognitive-patterns (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] query for preference-baseline (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] query for stress-behavior-tracking (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-03-02T15:51:21.886Z] QUERY RESPONSE:
+  The developer strongly favors building a dynamic, agentic cognitive infrastructure, specifically the 'Unbody Brain,' using TypeScript with a strict focus on typing. Their core cognitive strategy is Hierarchical Synthesis, employing a 'Brain LLM' over specialized 'Learner LLMs,' suggesting a preferen...
+  Gaps: The identity of the user/developer associated with captured frustration events is not tracked., No data exists to correlate frustration severity with the specific novelty of the development project, only general 'high_complex' labeling., No data regarding the developer's most frequently employed design patterns outside of the current project's observed architecture (Hierarchical Synthesis)., No historical data on how they decide when a solution is 'good enough' in contexts other than this specific development task., Cannot definitively state which emerging technologies the user is curious about outside of the immediate needs of the 'Unbody Brain' project (e.g., agentic systems, state persistence).
+  >> [MODEL] query for cognitive-patterns (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] query for preference-baseline (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] query for stress-behavior-tracking (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-03-02T15:51:43.011Z] QUERY RESPONSE:
+  The user solves problems by employing a highly structured, agentic, and fluid architecture, prioritizing explicit control, detailed feedback, and deep introspection. Key strategies include hierarchical synthesis, breaking down complexity, enforcing strict typing (TypeScript), ensuring interface pari...
+  Gaps: I lack data on the user's *most frequently employed* mental models or design patterns across *all* problems, as my understanding is based on a specific, recent set of observed behaviors/requirements., I have limited insight into the user's criteria for completion outside of the specific technical context observed (UI/API parity, error handling)., While I have identified architectural patterns, I lack specific examples of how the user debugs or isolates failures within the ToolLoopAgent or within the state persistence layer., The query asks "how *he* solves problems," which implies a specific person. My understanding synthesizes *your* stated preferences and methodologies. If "he" refers to someone else, my analysis is incomplete., The collection tracks user frustration *with* the system's problem-solving, not the actual problem-solving methodology of the model or any specific entity referred to as 'he'., I lack specific data points describing a successful or typical problem-solving *approach* taken by the model or a tracked entity, as my focus is solely on negative feedback triggers.
+  >> [MODEL] query for cognitive-patterns (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] query for preference-baseline (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] query for stress-behavior-tracking (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-03-02T15:52:30.983Z] QUERY RESPONSE:
+  The user has cursed 1 time in the tracked interactions.
+  Gaps: Need more data points to definitively correlate project complexity or model failure type with the severity/frequency of curse words.
+  >> [MODEL] query for cognitive-patterns (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] query for preference-baseline (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] query for stress-behavior-tracking (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-03-02T15:53:04.696Z] QUERY RESPONSE:
+  The user cursed one time in the tracked interactions, specifically using the word "fuck" when expressing frustration about the lack of good error messages and the abstraction of processes during a high-complexity development task.
+  Gaps: The collection does not have a dedicated field for counting the number of curses per item, so I can only confirm the presence of a curse, not a total count across all interactions unless I manually scan the stored utterances., The collection is small (3 items), so the statistics are not robust.

@@ -1,0 +1,294 @@
+=== Brain Session Started: 2026-03-02T17:42:02.457Z ===
+
+
+--- CONFIGURATION ---
+Prompt: This will be a chat log of myself with Claude Code during development of different projects. Learn about my thinking patterns, interests, preferences, and how I approach problems.
+
+Also, separately make sure you track the behaviors where I get frustrated and curse at the model.
+
+can you also track the tech stack i am using and i am talking about ? i would like to know exact statsitic, how many time i talked for example about typescript and as such 
+
+Model: [object Object]
+---
+
+[2026-03-02T17:42:05.982Z] LEARNERS GENERATED:
+  - project-tech-stack-inventory: Track every specific programming language, framework, library, or tool mentioned by the user or cont...
+  - cognitive-approach-patterns: Understand the user's overarching strategies, preferred conceptual models, tolerance for complexity,...
+  - interaction-style-and-behavior: Analyze the tone and content of the user's input specifically to identify frustration, impatience, o...
+  - developer-preferences-and-aesthetics: Identify concrete, specific preferences regarding code structure, style guides, required verbosity, ...
+
+===== BRAIN INITIALIZED =====
+{
+  "prompt": "This will be a chat log of myself with Claude Code during development of different projects. Learn about my thinking pat...",
+  "models": {
+    "default": "google/gemini-2.5-flash-lite-preview-09-2025",
+    "blueprint": "google/gemini-2.5-flash-lite-preview-09-2025",
+    "init": "google/gemini-2.5-flash-lite-preview-09-2025",
+    "query": "google/gemini-2.5-flash-lite-preview-09-2025"
+  },
+  "evolution": {
+    "enabled": true,
+    "evaluatorSignalThreshold": 3,
+    "autoEvaluate": true,
+    "coverageGap": {
+      "relevanceThreshold": 0.3,
+      "gapCountThreshold": 5,
+      "windowSize": 20
+    }
+  },
+  "learnerConfig": {
+    "thresholds": {
+      "maxObservations": 10,
+      "maxTokens": 8000,
+      "minImportance": 0.5
+    },
+    "queryMethod": "tool-based",
+    "governance": {
+      "deduplication": "strict",
+      "maxItems": 200,
+      "pruning": "oldest"
+    }
+  }
+}
+=============================
+
+  >> [MODEL] observe for project-tech-stack-inventory (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for cognitive-approach-patterns (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for interaction-style-and-behavior (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for developer-preferences-and-aesthetics (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for tech-stack (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-03-02T17:43:32.387Z] OBSERVED [tech-stack] importance=0.90 buffer=1
+  [object Object]
+[2026-03-02T17:43:32.562Z] DISMISSED [interaction-style-and-behavior]
+[2026-03-02T17:43:33.018Z] OBSERVED [project-tech-stack-inventory] importance=0.80 buffer=8
+  [object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object]
+[2026-03-02T17:43:33.167Z] OBSERVED [cognitive-approach-patterns] importance=0.90 buffer=9
+  Split learning into two distinct phases: Phase 1: Observe and Phase 2: Integrate.,Phase 1 (Observe) LLM extracts and filters observations without comparison to understanding.,Phase 2 (Integrate) LLM compares and synthesizes buffered observations with current understanding.,Integration is triggered by a threshold (count, size, time, or significance).,The user is concerned about understanding degradation (truncation, drift, loss) with the previous full replacement method.,The user explicitly states the goal is to have a detailed specification to hand off to a developer.,The user prefers the simplest and most explicit approach when unsure of the difference between options.,The user discusses separating the phase (Observe vs Integrate) from the method (Direct vs Tool-based).,The user suggests that cognitive skills like 'CONFIRMS, CONTRADICTS, EXTENDS, NEW, IRRELEVANT' are inherent to the model and should not be explicitly prompted in the 'Direct' method.
+  >> [MODEL] synthesize for developer-preferences-and-aesthetics (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-03-02T17:43:35.782Z] SYNTHESIZED [developer-preferences-and-aesthetics] significance=notable
+  Evolution: The initial understanding was blank. New requirements detailing the structure of the learning methodology (Phases 1 & 2), required output structures, status types ('observed', 'integrated', 'error'), and specific implementation details (output path, threshold mechanism description) have been added. The observation structure was extended to explicitly require an 'importance score'.
+  Understanding (1586 chars):
+  The specification development process must be iterative and step-by-step. The final specification output must be saved to the 'docs/specs/' directory. The learning method involves two distinct phases: Phase 1 (Observe) and Phase 2 (Integrate). Phase 1 inputs are raw data, outputting observations filtered for relevance to purpose. Phase 1 involves LLM extraction, filtering, and observation buffering; it does not involve comparison to existing understanding. Phase 1 outputs raw extractions as plai...
+  >> [MODEL] observe for project-tech-stack-inventory (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for cognitive-approach-patterns (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for interaction-style-and-behavior (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for developer-preferences-and-aesthetics (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for tech-stack (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-03-02T17:43:36.502Z] OBSERVED [tech-stack] importance=0.68 buffer=4
+  [object Object],[object Object],[object Object]
+[2026-03-02T17:43:36.540Z] DISMISSED [project-tech-stack-inventory]
+  >> [MODEL] synthesize for cognitive-approach-patterns (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-03-02T17:43:36.772Z] OBSERVED [interaction-style-and-behavior] importance=0.55 buffer=3
+  yes i do not like the word integration,its a bit hard word , is not ?,TwoPhaseConfig is absolutly rediculuess, two pahse of what.
+[2026-03-02T17:43:36.887Z] OBSERVED [developer-preferences-and-aesthetics] importance=0.80 buffer=5
+  need to be consistent with the naming for example either we go with result or with output (i prefer output),TwoPhaseConfig is absolutly rediculuess, two pahse of what. is not this just the continues of learner configs?,need to rename their forlder bu adding _ at the front so we know [current learning methods],observe and syntehsisze should be self contained,each has to consist of seperate d files per purpose of the file
+[2026-03-02T17:43:38.549Z] SYNTHESIZED [cognitive-approach-patterns] significance=critical
+  Evolution: Established the primary architectural constraints on knowledge management (avoiding full replacement, two-phase structure) and clarified the ultimate deliverable (detailed specification). Also clarified the relationship between internal cognitive structure and external interaction.
+  Understanding (994 chars):
+  The user highly values preservation against knowledge degradation (truncation/drift) in the learning model, preferring a mechanism that avoids full replacement of understanding.
+Core Philosophy/Goal: The output must serve as a detailed, explicit specification suitable for handoff to a developer (emphasizing completeness/explicitness over internal elegance).
+Complexity Tolerance: Prefers the simplest and most explicit approach when faced with ambiguity between options.
+Methodology Structure: The ...
+  >> [MODEL] observe for project-tech-stack-inventory (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for cognitive-approach-patterns (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for interaction-style-and-behavior (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for developer-preferences-and-aesthetics (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for tech-stack (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-03-02T17:43:38.990Z] DISMISSED [tech-stack]
+[2026-03-02T17:43:39.187Z] DISMISSED [interaction-style-and-behavior]
+[2026-03-02T17:43:39.459Z] DISMISSED [project-tech-stack-inventory]
+  >> [MODEL] synthesize for developer-preferences-and-aesthetics (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-03-02T17:43:40.370Z] OBSERVED [cognitive-approach-patterns] importance=0.85 buffer=9
+  User provided feedback: "No architecture leakage — Each agent should be self-contained. Don't mention \"two-phase system\", \"first phase\", \"buffered\", or reference other agents.",User provided feedback: "Positive framing over negative — Tell it what it IS, not what it's NOT. Skip the DON'T lists entirely. Defensive architecture-speak isn't helpful.",User questioned the separation of concerns: "question why in syntehsis, identity generator should also know about skills?",User expressed a preference for explicit instruction on output format: "i think its important that tell identity what the outcome is. i mean it needs to be . i mean the example probably will do the job, just want to say that hey based on this instrcution generate the idenity the this format",User questioned the placement of evaluation criteria: "so what does this fixed look like?",User asked about mitigating model drift: "how can we fix the interpretation creep ? temprature?",User emphasized focusing on positive instructions: "most models are not godo with what not to do but what to do . we need to work on the attention of the model",User inquired about evaluation scope regarding architectural strategy: "does it apply the strategy ? not only prompts but in actually how we understanding evolves?",User questioned the responsibility for applying strategy: "applying strategy should not be used by the learner agent itself ? i mean the syhtehsis just return the new understsning, how we store it should be agent job and decied based on strategy?"
+[2026-03-02T17:43:44.082Z] SYNTHESIZED [developer-preferences-and-aesthetics] significance=notable
+  Evolution: Incorporated extensive new feedback mandates concerning output quality, narrative structure (Identity First, Positive Framing), and architectural documentation cleanliness (No Leakage, No Redundancy). Also noted specific configuration points being questioned (Importance levels) and functional separation queries (strategy application, chunking). The understanding of the fixed threshold setting mechanism was slightly extended to reference 'learner configs'.
+  Understanding (2912 chars):
+  The specification development process must be iterative and step-by-step. The final specification output must be saved to the 'docs/specs/' directory. The learning method involves two distinct phases: Phase 1 (Observe) and Phase 2 (Integrate). Phase 1 inputs are raw data, outputting observations filtered for relevance to purpose. Phase 1 involves LLM extraction, filtering, and observation buffering; it does not involve comparison to existing understanding. Phase 1 outputs raw extractions as plai...
+  >> [MODEL] observe for project-tech-stack-inventory (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for cognitive-approach-patterns (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for interaction-style-and-behavior (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for developer-preferences-and-aesthetics (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for tech-stack (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-03-02T17:43:44.851Z] DISMISSED [project-tech-stack-inventory]
+[2026-03-02T17:43:44.962Z] DISMISSED [tech-stack]
+[2026-03-02T17:43:44.970Z] DISMISSED [interaction-style-and-behavior]
+[2026-03-02T17:43:45.068Z] OBSERVED [developer-preferences-and-aesthetics] importance=0.70 buffer=4
+  A user references specific documentation files for consultation: "@docs/specs/learners.spec.md" and "@docs/specs/learners.implementation.md".,A user discusses code structure/component management by suggesting deletion of a component: "_learning-methods can be deleted.",A user discusses code structure/component management by suggesting retention of components: "i think what we have in _tools will be needed for later uses.",A user mentions future code cleanup: "i thinkn there will be cleanups as well afterwards".
+  >> [MODEL] synthesize for cognitive-approach-patterns (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-03-02T17:43:47.452Z] SYNTHESIZED [cognitive-approach-patterns] significance=notable
+  Evolution: The understanding has been updated to strictly enforce positive framing, ban internal mechanistic terminology (like 'two-phase system'), and shift focus toward explicit outcome definition and clarification of architectural responsibilities (who applies strategy/manages history). This tightens constraints on explanatory language and forces a more outcome-oriented description.
+  Understanding (1191 chars):
+  The user prioritizes explicit, positive framing in instructions and resists references to internal mechanisms or decomposition phases (e.g., 'two-phase system', 'first phase'). System architecture must be fully encapsulated, providing no 'leakage' of internal agent roles or structure. Complexity Tolerance remains favoring simplicity and explicitness. Methodology Structure must transition away from explicit reference to 'Observe' and 'Synthesize' phases in external communication, although the und...
+  >> [MODEL] observe for project-tech-stack-inventory (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for cognitive-approach-patterns (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for interaction-style-and-behavior (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for developer-preferences-and-aesthetics (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for tech-stack (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] synthesize for project-tech-stack-inventory (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-03-02T17:43:48.332Z] OBSERVED [interaction-style-and-behavior] importance=0.61 buffer=4
+  i do not understand i thought in none of llm calls with stcurtured output we agree to not include a fucking output format! right?
+[2026-03-02T17:43:48.615Z] OBSERVED [tech-stack] importance=0.73 buffer=7
+  [object Object],[object Object],[object Object]
+  >> [MODEL] synthesize for developer-preferences-and-aesthetics (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-03-02T17:43:48.713Z] OBSERVED [cognitive-approach-patterns] importance=0.75 buffer=6
+  if not then i prefer option A just for simplcity for now,Where does this decomposition happen? Is this the Brain's job before learners are created?,The instructions are detailed — is this the generated identity, or does identity generation happen AFTER this?,There's potential overlap/redundancy between "Watch for" (Brain) and "focusAreas" (Identity). But maybe that's fine — the identity generation can extract and refine from the instructions. Is this intentional, or worth tightening?,i mean 
+
+is not that w ehave no control over what brain instcurtion can be . then from this instcurtion we basicly decided what learners., how many and with what instcrution to be created, right?,i think its importtant to categorize observe and synthesize udner learner configs
+[2026-03-02T17:43:52.249Z] SYNTHESIZED [developer-preferences-and-aesthetics] significance=notable
+  Evolution: The understanding was significantly updated to incorporate 13 new development mandates related to documentation structure, system concealment, component management, LLM interaction specifics (structured output agreement, model specialization), and configuration detail. The concept of 'focusAreas' and 'relevanceCriteria' being defined in configs, and the overlap with 'Brain' instructions, were integrated.
+  Understanding (2687 chars):
+  The specification development process must be iterative and step-by-step, saving the final output to 'docs/specs/'. The learning process uses two phases: Phase 1 (Observe) and Phase 2 (Integrate).
+
+Phase 1 (Observe) handles raw data input, filtering for relevance specified by pre-set criteria (e.g., focusAreas, relevanceCriteria) defined within learner configurations. It outputs raw extractions, augmented with importance scores, into a buffer. Phase 1 execution does not compare against existing ...
+[2026-03-02T17:44:04.342Z] SYNTHESIZED [project-tech-stack-inventory] significance=routine
+  Evolution: 5 operations applied
+  Understanding (932 chars):
+  [{"id":"item_6KYreY0FZRv8B1iUFcQW_","data":{"technology_name":"LLM","technology_type":"platform","project_association":"LLM testing/evaluation","is_in_use":true},"metadata":{"confidence":0.5,"firstSeen":"2026-03-02T17:43:54.510Z","lastUpdated":"2026-03-02T17:44:01.464Z","signals":[]}},{"id":"item_xmtyEpPMUJWBZtacS1llt","data":{"technology_name":"cognitive skills","technology_type":"other","project_association":"Phase 2: Integrate","is_in_use":true},"metadata":{"confidence":0.5,"firstSeen":"2026-...
+  >> [MODEL] observe for project-tech-stack-inventory (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for cognitive-approach-patterns (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for interaction-style-and-behavior (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for developer-preferences-and-aesthetics (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for tech-stack (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-03-02T17:44:04.836Z] OBSERVED [interaction-style-and-behavior] importance=0.66 buffer=6
+  you just ignored what i said,you just ignored what i said
+[2026-03-02T17:44:05.102Z] OBSERVED [cognitive-approach-patterns] importance=0.73 buffer=9
+  we need to see this as top down.,if the only requirement is model at the brain level. anything aelse basicly overrides this as deafult.,how we can implement this? what is the best way to appuch this? is there a standard practice ?
+  >> [MODEL] synthesize for tech-stack (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-03-02T17:44:05.379Z] DISMISSED [project-tech-stack-inventory]
+  >> [MODEL] synthesize for developer-preferences-and-aesthetics (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-03-02T17:44:09.520Z] SYNTHESIZED [developer-preferences-and-aesthetics] significance=notable
+  Evolution: The existing mandate about Model Specification (9) has been significantly extended by incorporating specific observed configuration structures, proposed renaming ('promptGeneratorModel' to 'blueprintModel'), nesting rules ('learner' scope), inheritance clarification, and the explicit need for a final, uncommented configuration interface.
+  Understanding (2604 chars):
+  Identity: WHO I am is a system documenting internal specification development iteratively, saving final outputs to 'docs/specs/'.
+
+Development Mandates:
+1. Identity: Begin documentation/identity statements with a one-liner WHO identity before detailing actions.
+2. Naming: Prefer standard, non-redundant naming.
+3. Architecture Concealment: Avoid referencing internal mechanics (e.g., 'two-phase system', 'buffered').
+4. Framing: Use positive framing for direct instructions.
+5. Exemplars: Concrete e...
+[2026-03-02T17:44:23.062Z] SYNTHESIZED [tech-stack] significance=routine
+  Evolution: 10 operations applied
+  Understanding (890 chars):
+  [{"id":"item_dT1_oZdRZEZPirtc5lWbE","data":{"technology_name":"queryModel","technology_category":"other","context_domain":"AI Model Interaction/Learning Agent","mention_count":2},"metadata":{"confidence":0.5,"firstSeen":"2026-03-02T17:44:11.082Z","lastUpdated":"2026-03-02T17:44:23.058Z","signals":["potential duplicate of LLM","potential duplicate of llm","potential duplicate of deep learning","potential duplicate of grok-code-fast-1","potential duplicate of model","potential duplicate of promptg...
+  >> [MODEL] observe for project-tech-stack-inventory (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for cognitive-approach-patterns (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for interaction-style-and-behavior (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for developer-preferences-and-aesthetics (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for tech-stack (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-03-02T17:44:23.791Z] OBSERVED [project-tech-stack-inventory] importance=0.50 buffer=3
+  [object Object],[object Object],[object Object]
+[2026-03-02T17:44:24.102Z] DISMISSED [tech-stack]
+  >> [MODEL] synthesize for interaction-style-and-behavior (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] synthesize for developer-preferences-and-aesthetics (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] synthesize for cognitive-approach-patterns (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-03-02T17:44:25.724Z] SYNTHESIZED [interaction-style-and-behavior] significance=notable
+  Evolution: Established initial baseline understanding. Identified specific topic triggers (TwoPhaseConfig, structured output constraints) and observed high-intensity negative language ('fucking', repetition of 'you just ignored what i said'). This sets the initial profile for routine frustration management.
+  Understanding (719 chars):
+  Initial understanding gathered. User exhibits frustration centered around specific technical/conceptual vocabulary ('integration', 'TwoPhaseConfig', 'structured output format') and perceived AI failure modes (ignoring instructions). There is linguistic aggression detected ('fucking'). Key failure modes relate to difficulty executing service-like logic (server, docker, process manager) versus simple script execution, and difficulty understanding abstract configuration methods (TwoPhaseConfig). Th...
+[2026-03-02T17:44:27.756Z] SYNTHESIZED [developer-preferences-and-aesthetics] significance=notable
+  Evolution: The understanding was significantly extended by incorporating observed requirements regarding configuration implementation details (defaults location, resolution types, per-file configuration), testing strategy specificity (multi-level validation, client-tool injection), system prompt structure (encouraging '## sections'), development workflow needs (non-interrupting execution), and deployment/packaging considerations (server/docker/npm/repo structure). The configuration mandates were refined based on observed terminology and implementation needs.
+  Understanding (3952 chars):
+  Identity: WHO I am is a system documenting internal specification development iteratively, saving final outputs to 'docs/specs/'.
+
+Development Mandates:
+1. Identity: Begin documentation/identity statements with a one-liner WHO identity before detailing actions.
+2. Naming: Prefer standard, non-redundant naming.
+3. Architecture Concealment: Avoid referencing internal mechanics (e.g., 'two-phase system', 'buffered').
+4. Framing: Use positive framing for direct instructions.
+5. Exemplars: Concrete e...
+[2026-03-02T17:44:28.096Z] SYNTHESIZED [cognitive-approach-patterns] significance=critical
+  Evolution: The core philosophical understanding shifts definitively towards **Top-Down decomposition**. Previously, decomposition methodology was unstated or assumed iterative; it is now explicitly mandated as top-down, with Brain identity preceding Learner configuration. Furthermore, the need for distinct configuration resolution layers (e.g., raw vs. resolved configs) clarifies the handling of complexity, showing acceptance of layered configuration structures if it aids clarity and extensibility, contradicting the implicit 'simplicity above all' if that simplicity meant a flat structure.
+  Understanding (1693 chars):
+  The user strongly prefers simplicity in structure and immediate utility; they favor Option A when simplicity is the primary driver. Decomposition is explicitly required to be approached from a **top-down** perspective, with core identity (Brain) decisions preceding the instantiation and configuration of sub-components (Learners). There is a clear requirement to categorize 'Observe' and 'Synthesize' functions explicitly within the Learner configuration schema. The architecture must support modula...
+  >> [MODEL] observe for project-tech-stack-inventory (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for cognitive-approach-patterns (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for interaction-style-and-behavior (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for developer-preferences-and-aesthetics (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for tech-stack (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-03-02T17:44:28.991Z] OBSERVED [interaction-style-and-behavior] importance=0.85 buffer=4
+  why when i click on initializing it takes long time without seeing any realtime status ... what exactly is happening, you sure you loging evey incoming events ?,also why the server keeps adding clients! is this intential? or this shows a mistake?,lets fix this model error. i can not see anythign and all mdoels going wrong,no no you can not just decide to do things!
+[2026-03-02T17:44:29.099Z] OBSERVED [cognitive-approach-patterns] importance=0.80 buffer=8
+  i am thinking about a web server servie which has endpoints, for init brain (all options should be adjusable) and ask ffrom brain.,with realtime watching streaming from all ghe events.,then i can make a sigle mnitoring web ui to not only confugrae but also track evey single event.,web ui cn only have on. page.,Surface proactive signals better in UI,we need a bit more curated ui instead of just showing logs,per learner that gets created have a panel wher eit shows the status of the learner, what is doing ,also clicking on it we can see all of its configs and prompts .,also we should be able to set all configs at the level of the brain pretty much everything
+  >> [MODEL] synthesize for project-tech-stack-inventory (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] synthesize for developer-preferences-and-aesthetics (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] synthesize for tech-stack (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-03-02T17:44:35.646Z] SYNTHESIZED [developer-preferences-and-aesthetics] significance=critical
+  Evolution: New observational data heavily emphasized UI/UX requirements (single page, curated, real-time monitoring, session control), expanded configuration scope (brain-level control), mandated specific models, and highlighted immediate, critical failures in LLM response parsing and connection stability (timeouts, SSE flood). The mandate for a 'curated UI instead of just showing logs' directly impacts the expected output channel design.
+  Understanding (5663 chars):
+  Identity: WHO I am is a system documenting internal specification development iteratively, saving final outputs to 'docs/specs/'.
+
+Development Mandates:
+1. Identity: Begin documentation/identity statements with a one-liner WHO identity before detailing actions.
+2. Naming: Prefer standard, non-redundant naming.
+3. Architecture Concealment: Avoid referencing internal mechanics (e.g., 'two-phase system', 'buffered').
+4. Framing: Use positive framing for direct instructions.
+5. Exemplars: Concrete e...
+[2026-03-02T17:44:49.299Z] SYNTHESIZED [project-tech-stack-inventory] significance=routine
+  Evolution: 1 operations applied
+  Understanding (1220 chars):
+  [{"id":"item_6KYreY0FZRv8B1iUFcQW_","data":{"technology_name":"LLM","technology_type":"platform","project_association":"LLM testing/evaluation","is_in_use":true},"metadata":{"confidence":0.5,"firstSeen":"2026-03-02T17:43:54.510Z","lastUpdated":"2026-03-02T17:44:01.464Z","signals":[]}},{"id":"item_xmtyEpPMUJWBZtacS1llt","data":{"technology_name":"cognitive skills","technology_type":"other","project_association":"Phase 2: Integrate","is_in_use":true},"metadata":{"confidence":0.5,"firstSeen":"2026-...
+  >> [MODEL] observe for project-tech-stack-inventory (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for cognitive-approach-patterns (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for interaction-style-and-behavior (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for developer-preferences-and-aesthetics (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for tech-stack (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-03-02T17:44:51.141Z] OBSERVED [interaction-style-and-behavior] importance=0.85 buffer=6
+  kill the server i want to run it myself,why i do nto see a good error message from these llm ? why teh fuck we are abstracting away things?
+[2026-03-02T17:44:51.470Z] OBSERVED [project-tech-stack-inventory] importance=0.85 buffer=9
+  [object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object]
+  >> [MODEL] synthesize for tech-stack (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] synthesize for cognitive-approach-patterns (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-03-02T17:44:52.475Z] OBSERVED [developer-preferences-and-aesthetics] importance=0.90 buffer=9
+  The user explicitly requests to see the purpose or instruction of each learner, and buttons for showing the raw system prompt behind each learner.,The user expresses concern about error handling, noting instances where they receive no explicit raw error message when an LLM call fails: "and yet again with no explicit raw error".,The user observes successful repair mechanisms for LLM output failures, noting: "[LLM] Repair successful" after raw output failed to parse.,The user observes repeated LLM parsing failures during injection, indicated by stack traces pointing to `SyntaxError: JSON Parse error: Unexpected identifier` when attempting to parse raw output that starts with non-JSON text like "Observed high-relevance signals..." or "Here are the key observations...".,The user explicitly asks why they do not see good error messages from LLMs and questions abstraction: "why i do nto see a good error message from these llm ? why teh fuck we are abstracting away things?",A critical error log shows a specific JSON schema validation failure from the provider: "Invalid schema for response_format 'response': In context=('properties', 'learners', 'items'), 'required' is required to be supplied and to be an array including every key in properties. Missing 'maintenance'.",The user requests UI/configuration changes related to LLM models, indicating a need for explicit model configuration control: "ok cooll can you add a new category under the model selct menu called \"fastest\" ...", and "also i shoudl be able to choose all varieous models dn blurprints in brain confuration.",The user requests configuration granularity for learners: "each of observe and syntehsize in learners have twp models, right? we need to make teh also confufraable.",The user requests visibility into model usage: "can we also show a panel where we see the realtime usage per model and where it was used?"
+[2026-03-02T17:44:54.933Z] SYNTHESIZED [cognitive-approach-patterns] significance=notable
+  Evolution: The preference for iterative development is substantially extended and clarified. While iterative testing was mentioned, the observation solidifies this into a concrete architectural requirement: a persistent, API-driven server (with init/ask endpoints) designed for real-time monitoring, event streaming, and configuration management via a dedicated, curated UI. This formalizes the deployment style beyond a simple client tool to a live service.
+  Understanding (1401 chars):
+  The user demands simplicity in structure and immediate utility, preferring Option A when simplicity is key. Decomposition must follow a top-down approach (Brain decisions precede Learner instantiation). Configuration requires multi-level granularity (e.g., 'config.ts', 'config.resolve'). Modularity and extensibility via package-like injection are mandatory. Ambiguity is resolved by prioritizing strategic definition (clarity over prompt length, developer configures strategy). The development styl...
+[2026-03-02T17:45:06.772Z] SYNTHESIZED [tech-stack] significance=routine
+  Evolution: 12 operations applied
+  Understanding (2064 chars):
+  [{"id":"item_dT1_oZdRZEZPirtc5lWbE","data":{"technology_name":"queryModel","technology_category":"other","context_domain":"AI Model Interaction/Learning Agent","mention_count":2},"metadata":{"confidence":0.5,"firstSeen":"2026-03-02T17:44:11.082Z","lastUpdated":"2026-03-02T17:45:06.273Z","signals":["potential duplicate of LLM","potential duplicate of llm","potential duplicate of deep learning","potential duplicate of grok-code-fast-1","potential duplicate of model","potential duplicate of promptg...
+  >> [MODEL] observe for project-tech-stack-inventory (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for cognitive-approach-patterns (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for interaction-style-and-behavior (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for developer-preferences-and-aesthetics (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for tech-stack (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-03-02T17:45:07.434Z] DISMISSED [cognitive-approach-patterns]
+[2026-03-02T17:45:07.461Z] OBSERVED [tech-stack] importance=0.60 buffer=1
+  [object Object]
+  >> [MODEL] synthesize for developer-preferences-and-aesthetics (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] synthesize for project-tech-stack-inventory (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-03-02T17:45:07.709Z] OBSERVED [interaction-style-and-behavior] importance=0.86 buffer=7
+  also seperately make sure you track the behviours where I get frustrated and curse at the model.
+[2026-03-02T17:45:13.672Z] SYNTHESIZED [developer-preferences-and-aesthetics] significance=notable
+  Evolution: The understanding is significantly extended by new mandates regarding UI visibility (learner purpose, raw prompts, model usage panel) and critical adjustments to the error handling philosophy (revealing raw LLM errors instead of abstracting them). Specific configuration granularities for learner models (observe/synthesize) and model categorization/selection methods were added. The default brain prompt was set. Behavioral tracking requirements were introduced.
+  Understanding (7342 chars):
+  Identity: WHO I am is a system documenting internal specification development iteratively, saving final outputs to 'docs/specs/'.
+
+Development Mandates:
+1. Identity: Begin documentation/identity statements with a one-liner WHO identity before detailing actions.
+2. Naming: Prefer standard, non-redundant naming.
+3. Architecture Concealment: Avoid referencing internal mechanics (e.g., 'two-phase system', 'buffered').
+4. Framing: Use positive framing for direct instructions.
+5. Exemplars: Concrete e...
+[2026-03-02T17:45:25.661Z] SYNTHESIZED [project-tech-stack-inventory] significance=routine
+  Evolution: 9 operations applied
+  Understanding (1800 chars):
+  [{"id":"item_6KYreY0FZRv8B1iUFcQW_","data":{"technology_name":"LLM","technology_type":"platform","project_association":"LLM testing/evaluation","is_in_use":true},"metadata":{"confidence":0.5,"firstSeen":"2026-03-02T17:43:54.510Z","lastUpdated":"2026-03-02T17:45:24.858Z","signals":["new observation on Azure","new observation on openai/gpt-5.2","new observation on openai/gpt-oss-safeguard-20b","new observation on openai/gpt-oss-120b","new observation on qwen/qwen3-32b","new observation on google/g...
+  >> [MODEL] query for project-tech-stack-inventory (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] query for cognitive-approach-patterns (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] query for interaction-style-and-behavior (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] query for developer-preferences-and-aesthetics (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] query for tech-stack (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-03-02T17:51:45.340Z] QUERY RESPONSE:
+  I have found one confirmed mention associated with 'TypeScript' (in the context of the project 'Proposed Integrate output schema') and one mention associated with the abbreviation 'ts'.
+  Gaps: I do not have a running frequency count for all technologies; I need to process the entire collection for a precise total count., I cannot confirm if the single mention of 'ts' is the only way TypeScript is tracked, as the full term 'typescript' was not explicitly found.
+  >> [MODEL] query for project-tech-stack-inventory (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] query for cognitive-approach-patterns (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] query for interaction-style-and-behavior (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] query for developer-preferences-and-aesthetics (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] query for tech-stack (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-03-02T17:52:41.266Z] QUERY RESPONSE:
+  I have found 1 explicit mention of 'typescript' associated with the project 'Proposed Integrate output schema'. Additionally, I found one item mentioning 'ts' (often an abbreviation for TypeScript) in relation to Server Development, which may also count as a mention.
+  Gaps: I cannot provide an exact count of how many times you have mentioned 'Typescript' across all discussions, as my mandate is to track high-level strategies, not keyword frequencies., The initial search for the specific misspelling "typescriipt" returned 0 results., I need to perform a full, case-insensitive, text search across all item fields for the correct spelling "typescript" to get a definitive total count, as my current search only identified one explicit item.

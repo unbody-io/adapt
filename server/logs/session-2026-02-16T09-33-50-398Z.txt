@@ -1,0 +1,148 @@
+=== Brain Session Started: 2026-02-16T09:33:50.398Z ===
+
+
+--- CONFIGURATION ---
+Prompt: This will be a chat log of myself with Claude Code during development of different projects. Learn about my thinking patterns, interests, preferences, and how I approach problems.
+
+Also, separately make sure you track the behaviors where I get frustrated and curse at the model.
+Model: [object Object]
+---
+
+[2026-02-16T09:33:52.802Z] LEARNERS GENERATED:
+  - development-thinking-patterns: Understand the user's cognitive procedures, development interests, and habitual problem-solving meth...
+  - emotional-frustration-tracking: Track and document the specific external triggers and internal circumstances when the user exhibits ...
+
+===== BRAIN INITIALIZED =====
+{
+  "prompt": "This will be a chat log of myself with Claude Code during development of different projects. Learn about my thinking pat...",
+  "models": {
+    "default": "google/gemini-2.5-flash-lite-preview-09-2025",
+    "blueprint": "google/gemini-2.5-flash-lite-preview-09-2025",
+    "init": "google/gemini-2.5-flash-lite-preview-09-2025",
+    "query": "google/gemini-2.5-flash-lite-preview-09-2025"
+  },
+  "evolution": {
+    "enabled": true,
+    "evaluatorSignalThreshold": 3,
+    "autoEvaluate": true
+  },
+  "learnerConfig": {
+    "thresholds": {
+      "maxObservations": 10,
+      "maxTokens": 8000,
+      "minImportance": 0.5
+    },
+    "queryMethod": "tool-based",
+    "maintenanceStrategy": "continuous"
+  }
+}
+=============================
+
+  >> [MODEL] observe for development-thinking-patterns (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for emotional-frustration-tracking (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-02-16T09:34:32.042Z] OBSERVED [development-thinking-patterns] importance=0.90 buffer=1
+  Focus is on validating the architecture for 'units' against several complex use cases
+Stated preference for iterative development: "Ask me one question at a time so we can develop a thorough, step-by-...
+[2026-02-16T09:34:32.204Z] OBSERVED [emotional-frustration-tracking] importance=0.80 buffer=1
+  User explicitly states model lacks a in depth understanding of entire brain and particulary the purpose and dynamicsism behind units: "did you read all those spec files i provided? it seems you lack a...
+  >> [MODEL] observe for development-thinking-patterns (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for emotional-frustration-tracking (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-02-16T09:34:32.930Z] DISMISSED [emotional-frustration-tracking]
+[2026-02-16T09:34:33.978Z] OBSERVED [development-thinking-patterns] importance=0.90 buffer=2
+  Prefers a step-by-step specification development process.
+Prefers iterative development to dig into every relevant detail.
+Goal framing: Produce a detailed specification document.
+Procedural constrain...
+  >> [MODEL] observe for development-thinking-patterns (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for emotional-frustration-tracking (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-02-16T09:35:37.596Z] OBSERVED [emotional-frustration-tracking] importance=0.75 buffer=2
+  States "i do not know that and it does matter, lets not lose teh focus."
+Expresses concern about losing focus.
+Questions the model's previous take on augmentation/storage options.
+Expresses concern ab...
+[2026-02-16T09:35:39.106Z] OBSERVED [development-thinking-patterns] importance=0.90 buffer=3
+  Stated strategy: reduce the scope of the core and keep it lean.
+Stated principle: the core is not about how data comes in.
+Proposed architecture: Augmentation agents transform input to output.
+Propose...
+  >> [MODEL] observe for development-thinking-patterns (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for emotional-frustration-tracking (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-02-16T09:35:39.928Z] DISMISSED [emotional-frustration-tracking]
+[2026-02-16T09:35:41.536Z] OBSERVED [development-thinking-patterns] importance=0.89 buffer=4
+  Expressed concern that a proposed solution creates too much work and learning curve for developers
+Prefers simplicity and magic in the desired outcome
+Referenced existing documentation for initial spe...
+  >> [MODEL] observe for development-thinking-patterns (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for emotional-frustration-tracking (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-02-16T09:35:42.886Z] OBSERVED [emotional-frustration-tracking] importance=0.67 buffer=3
+  Questions how two separated transformers will ensure extracted entities follow the normalized version
+Questions if there will be aliases for "Bob van loijt" and "Bob Van L"
+Questions if transformers s...
+[2026-02-16T09:35:43.526Z] OBSERVED [development-thinking-patterns] importance=0.88 buffer=5
+  Asks if a raw data storage index is needed
+Prefers to make version 1 first, then dive into transformer mechanics (types, etc.)
+Proposing a new use case: building a "brain for a blog" handling markdown...
+  >> [MODEL] observe for development-thinking-patterns (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for emotional-frustration-tracking (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-02-16T09:35:44.054Z] OBSERVED [emotional-frustration-tracking] importance=0.65 buffer=4
+  States 'for this i think you really need to zoom out and read all other specs and refresh your understanding and get the whole picture'
+States 'i really do not know to be honest'
+States 'idk , does th...
+[2026-02-16T09:35:45.726Z] OBSERVED [development-thinking-patterns] importance=0.89 buffer=6
+  Prefers to proceed "question by question, so one question at a time"
+Architectural components (like perceiver) are fundamentally "an agent with tools"
+Believes a perceiver needs to be "an agent with m...
+  >> [MODEL] observe for development-thinking-patterns (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for emotional-frustration-tracking (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-02-16T09:35:46.838Z] OBSERVED [emotional-frustration-tracking] importance=0.65 buffer=5
+  Explicitly questioned model recall: "let me know if you do not recall that or its not already part of the spec"
+Expressed strong negative sentiment towards a concept: "i hate background jobs"
+Expresse...
+[2026-02-16T09:35:47.399Z] OBSERVED [development-thinking-patterns] importance=0.89 buffer=7
+  States 'perceiver is a agent and so it does have "purpose"'
+States 'Perceiver is an agent and in same fashion as learner can evolve ove rtime'
+States 'all 3 options are needed for perciver (3 complmen...
+  >> [MODEL] observe for development-thinking-patterns (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for emotional-frustration-tracking (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-02-16T09:35:48.782Z] OBSERVED [emotional-frustration-tracking] importance=0.68 buffer=6
+  Questions why the model is "soo blind sided" and asks it to see things the user misses
+Questions if the model is sure about the list of text learners, asking "so you sure these are all partcilary the ...
+[2026-02-16T09:35:50.016Z] OBSERVED [development-thinking-patterns] importance=0.89 buffer=8
+  Wants to see things the user misses or cannot see
+Focuses analysis on use cases for a single LLM, considering semantic, token limitation, performance, and logical aspects
+Expressed preference leaning ...
+  >> [MODEL] observe for development-thinking-patterns (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for emotional-frustration-tracking (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-02-16T09:35:50.309Z] DISMISSED [emotional-frustration-tracking]
+[2026-02-16T09:35:51.838Z] OBSERVED [development-thinking-patterns] importance=0.89 buffer=9
+  Prefers universal, hardcoded taxonomy (CONFIRMS/CONTRADICTS/EXTENDS/NEW/IRRELEVANT) for comparison.
+Explicitly rejects hardcoding the understanding structure template (Core Knowledge / Working Hypothe...
+  >> [MODEL] observe for development-thinking-patterns (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for emotional-frustration-tracking (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-02-16T09:35:53.278Z] OBSERVED [emotional-frustration-tracking] importance=0.70 buffer=7
+  User stated: "opps bad mistake."
+User asserted model has no idea about vocabulary term: "it seems you have no idea subject" is in our voablary?
+User explicitly recommended model look at docs/specs: i ...
+  >> [MODEL] synthesize for development-thinking-patterns (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-02-16T09:35:56.952Z] SYNTHESIZED [development-thinking-patterns] significance=notable
+  Evolution: Integrated extensive, detailed observations regarding the explicit conceptualization of Agents (Learners/Perceivers), their toolsets, the distinction between behavior (tools) and structure (type), the preference for AI SDK flexibility, and the core unresolved problem of understanding evolution/archiving strategy. This moves the understanding from vague architectural preference to concrete component definition.
+  Understanding (3351 chars):
+  The User is designing a highly modular, agent-centric cognitive system ("the brain") focused heavily on adaptive understanding ("Units" or "Learners") rather than mere data storage/recall. The core philosophy emphasizes understanding evolution over mutable state management.
+
+**Architectural Style & Principles:**
+1.  **Iterative Specification:** Prefers step-by-step development, demanding one question at a time until a detailed, actionable specification is complete, documented in external files (...
+  >> [MODEL] observe for development-thinking-patterns (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for emotional-frustration-tracking (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-02-16T09:35:57.720Z] DISMISSED [emotional-frustration-tracking]
+[2026-02-16T09:35:59.589Z] OBSERVED [development-thinking-patterns] importance=0.90 buffer=1
+  Explicitly decided to keep the design simple by deferring archive storage to a separate conversation/layer.
+Prefers keeping the scope narrow: "so lets keep it simple".
+Seeks clarification on architect...
+  >> [MODEL] observe for development-thinking-patterns (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for emotional-frustration-tracking (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-02-16T09:36:00.240Z] DISMISSED [emotional-frustration-tracking]
+[2026-02-16T09:36:00.260Z] OBSERVED [development-thinking-patterns] importance=0.80 buffer=2
+  Requests more elaborate information in the specification so it can always be referred to
+Requests application of context to @docs/tasks-today.md
+Requests context be added per task and per task group
+R...

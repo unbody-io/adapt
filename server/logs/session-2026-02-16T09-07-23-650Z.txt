@@ -1,0 +1,48 @@
+=== Brain Session Started: 2026-02-16T09:07:23.651Z ===
+
+
+--- CONFIGURATION ---
+Prompt: This will be a chat log of myself with Claude Code during development of different projects. Learn about my thinking patterns, interests, preferences, and how I approach problems.
+
+Also, separately make sure you track the behaviors where I get frustrated and curse at the model.
+Model: [object Object]
+---
+
+[2026-02-16T09:07:25.594Z] LEARNERS GENERATED:
+  - development-patterns: Understand the user's consistent cognitive approaches, project interests, and preferred reasoning st...
+  - interaction-style-and-frustration: Track the specific context (project, topic, type of error) immediately preceding sharp emotional res...
+
+===== BRAIN INITIALIZED =====
+{
+  "prompt": "This will be a chat log of myself with Claude Code during development of different projects. Learn about my thinking pat...",
+  "models": {
+    "default": "google/gemini-2.5-flash-lite-preview-09-2025",
+    "blueprint": "google/gemini-2.5-flash-lite-preview-09-2025",
+    "init": "google/gemini-2.5-flash-lite-preview-09-2025",
+    "query": "google/gemini-2.5-flash-lite-preview-09-2025"
+  },
+  "evolution": {
+    "enabled": true,
+    "evaluatorSignalThreshold": 5,
+    "autoEvaluate": true
+  },
+  "learnerConfig": {
+    "thresholds": {
+      "maxObservations": 10,
+      "maxTokens": 8000,
+      "minImportance": 0.5
+    },
+    "queryMethod": "tool-based",
+    "maintenanceStrategy": "cumulative"
+  }
+}
+=============================
+
+  >> [MODEL] observe for development-patterns (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for interaction-style-and-frustration (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-02-16T09:07:51.072Z] OBSERVED [interaction-style-and-frustration] importance=0.90 buffer=1
+  User states model seems to lack in depth understanding of entire brain and dynamicsism behind units after model response.
+User corrects model regarding units: units are only about "require having paid...
+[2026-02-16T09:07:52.828Z] OBSERVED [development-patterns] importance=0.90 buffer=1
+  Tracking declarations of preferred languages/frameworks: None explicitly declared.
+Noting initial framing of ambiguity: Initial framing was high-level architectural validation against complex use case...

@@ -1,0 +1,184 @@
+=== Brain Session Started: 2026-02-17T14:06:36.348Z ===
+
+
+--- CONFIGURATION ---
+Prompt: These are reflections and observations from a software engineer's daily work. Learn about their engineering practices, technical decision-making patterns, problem-solving approaches, and how they think about building software.
+
+Model: [object Object]
+---
+
+[2026-02-17T14:07:01.975Z] LEARNERS GENERATED:
+  - architecture-decisions: Understand how this engineer approaches system architecture and makes high-level technical decisions...
+  - code-quality-practices: Understand this engineer's approach to code quality, testing, and daily engineering practices.
+
+Watc...
+  - problem-solving-patterns: Understand how this engineer approaches problem-solving, debugging, and working through technical ch...
+  - tooling-technology-opinions: Understand this engineer's technology preferences, tooling choices, and opinions on specific languag...
+  - collaboration-communication: Understand how this engineer collaborates with teammates and communicates about technical work.
+
+Wat...
+
+===== BRAIN INITIALIZED =====
+{
+  "prompt": "These are reflections and observations from a software engineer's daily work. Learn about their engineering practices, t...",
+  "models": {
+    "default": "google/gemini-2.5-flash-lite-preview-09-2025",
+    "blueprint": "anthropic/claude-opus-4.5",
+    "init": "anthropic/claude-opus-4.5",
+    "query": "google/gemini-2.5-flash-lite-preview-09-2025"
+  },
+  "evolution": {
+    "enabled": true,
+    "evaluatorSignalThreshold": 3,
+    "autoEvaluate": true,
+    "coverageGap": {
+      "relevanceThreshold": 0.3,
+      "gapCountThreshold": 5,
+      "windowSize": 20
+    }
+  },
+  "learnerConfig": {
+    "thresholds": {
+      "maxObservations": 10,
+      "maxTokens": 8000,
+      "minImportance": 0.5
+    },
+    "queryMethod": "tool-based",
+    "maintenanceStrategy": "continuous"
+  }
+}
+=============================
+
+  >> [MODEL] observe for architecture-decisions (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for code-quality-practices (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for problem-solving-patterns (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for tooling-technology-opinions (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for collaboration-communication (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-02-17T14:10:25.505Z] OBSERVED [architecture-decisions] importance=0.85 buffer=1
+  Added a mutex lock around the critical section to fix a race condition involving two async ops modifying the same connection map.
+Split monolithic validateToken() into parseToken(), verifySignature(),...
+[2026-02-17T14:10:25.589Z] OBSERVED [code-quality-practices] importance=0.85 buffer=1
+  Spent 3 hours debugging a race condition in our WebSocket handler. Added a mutex lock around the critical section.
+Refactored the auth middleware — split monolithic validateToken() into parseToken(), ...
+[2026-02-17T14:10:25.946Z] OBSERVED [tooling-technology-opinions] importance=0.90 buffer=1
+  Debugged race condition in WebSocket handler involving simultaneous modification of connection map.
+Added a mutex lock around the critical section.
+Refactored auth middleware, splitting monolithic val...
+[2026-02-17T14:10:26.589Z] OBSERVED [collaboration-communication] importance=0.70 buffer=1
+  Added a mutex lock around the critical section when debugging a race condition (Conflict Navigation/Technical Decision).
+Refactored the auth middleware, splitting monolithic validateToken() into three...
+  >> [MODEL] observe for architecture-decisions (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for code-quality-practices (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for problem-solving-patterns (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for tooling-technology-opinions (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for collaboration-communication (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-02-17T14:12:27.475Z] OBSERVED [code-quality-practices] importance=0.85 buffer=2
+  Added a mutex lock around the critical section to fix a race condition modifying the connection map simultaneously.
+Refactored the auth middleware — split monolithic validateToken() into parseToken(),...
+[2026-02-17T14:12:27.476Z] OBSERVED [architecture-decisions] importance=0.88 buffer=2
+  Debugging a race condition in WebSocket handler led to adding a mutex lock around the critical section.
+Refactored auth middleware: split monolithic validateToken() into parseToken(), verifySignature(...
+[2026-02-17T14:12:27.498Z] OBSERVED [collaboration-communication] importance=0.65 buffer=2
+  Spent 3 hours debugging a race condition in our WebSocket handler. Two async ops modifying the same connection map simultaneously. Added a mutex lock around the critical section.
+Refactored the auth m...
+[2026-02-17T14:12:27.728Z] OBSERVED [problem-solving-patterns] importance=0.80 buffer=1
+  Spent 3 hours debugging a race condition in our WebSocket handler. Two async ops modifying the same connection map simultaneously.
+Added a mutex lock around the critical section.
+Refactored the auth m...
+[2026-02-17T14:12:28.176Z] OBSERVED [tooling-technology-opinions] importance=0.90 buffer=2
+  Debugged race condition involving two async ops modifying the same connection map simultaneously.
+Added a mutex lock around the critical section.
+Refactored auth middleware: split monolithic validateT...
+  >> [MODEL] observe for architecture-decisions (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for code-quality-practices (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for problem-solving-patterns (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for tooling-technology-opinions (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for collaboration-communication (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-02-17T14:12:30.363Z] OBSERVED [tooling-technology-opinions] importance=0.88 buffer=3
+  Monorepo migration paying off.
+Shared types between frontend/backend catch contract mismatches at compile time.
+Cross-project refactoring: days → hours.
+Designed notification data model with event sou...
+[2026-02-17T14:12:30.700Z] OBSERVED [architecture-decisions] importance=0.87 buffer=3
+  Monorepo migration paying off. Shared types between frontend/backend catch contract mismatches at compile time.
+Cross-project refactoring: days → hours.
+Designed notification data model with event sou...
+[2026-02-17T14:12:30.749Z] OBSERVED [problem-solving-patterns] importance=0.80 buffer=2
+  Shared types between frontend/backend catch contract mismatches at compile time (Debugging Strategy: Prevention/Static Analysis).
+94% of errors last month from 3 root causes: payment provider timeout,...
+  >> [MODEL] observe for architecture-decisions (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for code-quality-practices (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for problem-solving-patterns (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for tooling-technology-opinions (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for collaboration-communication (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-02-17T14:13:02.565Z] OBSERVED [code-quality-practices] importance=0.85 buffer=3
+  Shared types between frontend/backend catch contract mismatches at compile time.
+Cross-project refactoring: days 	→ hours.
+94% of errors last month from 3 root causes: payment provider timeout, invali...
+[2026-02-17T14:13:02.671Z] OBSERVED [tooling-technology-opinions] importance=0.88 buffer=4
+  Monorepo migration paying off
+Shared types between frontend/backend catch contract mismatches at compile time
+Cross-project refactoring time reduced from days to hours
+Designed notification data model...
+[2026-02-17T14:13:03.372Z] OBSERVED [collaboration-communication] importance=0.67 buffer=3
+  Monorepo migration paying off. Shared types between frontend/backend catch contract mismatches at compile time.
+Cross-project refactoring: days → hours.
+Designed notification data model with event sou...
+[2026-02-17T14:13:03.406Z] OBSERVED [architecture-decisions] importance=0.85 buffer=4
+  Monorepo migration paying off. Shared types between frontend/backend catch contract mismatches at compile time.
+Cross-project refactoring: days → hours.
+Designed notification data model with event sou...
+[2026-02-17T14:13:03.496Z] OBSERVED [problem-solving-patterns] importance=0.82 buffer=3
+  Shared types between frontend/backend catch contract mismatches at compile time (Debugging Strategy: Prevention/Static Analysis).
+94% of errors last month from 3 root causes: payment provider timeout,...
+  >> [MODEL] observe for architecture-decisions (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for code-quality-practices (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for problem-solving-patterns (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for tooling-technology-opinions (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for collaboration-communication (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-02-17T14:13:04.679Z] OBSERVED [tooling-technology-opinions] importance=0.87 buffer=5
+  Simplified Webpack config from 800 lines, 14 plugins, 3 loaders to 200 lines, cutting build time in half.
+Upgraded from Express to Fastify, achieving 2x throughput on benchmark.
+Noted schema-based val...
+[2026-02-17T14:13:05.529Z] OBSERVED [code-quality-practices] importance=0.85 buffer=4
+  Simplified Webpack config from 800 lines to 200 lines, cutting build time in half.
+Wrote a migration to add soft deletes to the user table, including a cleanup job for old records.
+Fixed naive WebSock...
+[2026-02-17T14:13:05.749Z] OBSERVED [architecture-decisions] importance=0.86 buffer=5
+  Simplified Webpack config from 800 lines to 200 lines, cutting build time in half. (Trade-off: Complexity vs Simplicity/Performance)
+Added soft deletes to the user table, updating all queries and addi...
+[2026-02-17T14:13:05.823Z] OBSERVED [collaboration-communication] importance=0.67 buffer=4
+  Simplified Webpack config from 800 lines to 200 lines, cutting build time in half. (Implies technical deep dive/optimization, relevant to technical communication/work style)
+Wrote a migration to add s...
+[2026-02-17T14:13:07.248Z] OBSERVED [problem-solving-patterns] importance=0.84 buffer=4
+  Spent a day understanding our Webpack config. 800 lines, 14 plugins, 3 loaders nobody remembers adding. Simplified to 200 lines. Build time cut in half. -> Debugging narrative: Started by investigatin...
+  >> [MODEL] observe for architecture-decisions (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for code-quality-practices (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for problem-solving-patterns (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for tooling-technology-opinions (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for collaboration-communication (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-02-17T14:13:08.060Z] DISMISSED [collaboration-communication]
+[2026-02-17T14:13:08.713Z] OBSERVED [architecture-decisions] importance=0.85 buffer=6
+  Implemented graceful degradation for our third-party analytics. If the analytics service is down, we buffer events locally and replay when it comes back. Core functionality never blocked by analytics....
+[2026-02-17T14:13:09.974Z] OBSERVED [problem-solving-patterns] importance=0.85 buffer=5
+  Wrote a pre-commit hook that runs TypeScript type checking on changed files only, showing a strategy to enforce quality checks incrementally (debugging/closure verification strategy).
+Implemented grac...
+  >> [MODEL] observe for architecture-decisions (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for code-quality-practices (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for problem-solving-patterns (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for tooling-technology-opinions (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for collaboration-communication (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-02-17T14:14:57.158Z] OBSERVED [tooling-technology-opinions] importance=0.87 buffer=6
+  Simplified Webpack config from 800 lines, 14 plugins, 3 loaders to 200 lines, cutting build time in half.
+Upgraded from Express to Fastify, resulting in 2x throughput on benchmark.
+Noted schema-based ...
+[2026-02-17T14:14:57.387Z] OBSERVED [code-quality-practices] importance=0.85 buffer=5
+  Simplified Webpack config from 800 lines, 14 plugins, 3 unknown loaders to 200 lines.
+Wrote a migration to add soft deletes to the user table, including a cleanup job for records older than 90 days.
+F...
+[2026-02-17T14:14:58.694Z] OBSERVED [architecture-decisions] importance=0.86 buffer=7
+  Simplified Webpack config from 800 lines to 200 lines, cutting build time in half (Trade-off: Complexity vs Simplicity/Performance).
+Added soft deletes to user table, updating all queries and adding a...
+[2026-02-17T14:14:58.837Z] OBSERVED [collaboration-communication] importance=0.70 buffer=5
+  Simplified Webpack config from 800 lines to 200 lines, removing plugins/loaders nobody remembers adding (Process sentiment: Implicitly views undocumented/legacy configuration as wasteful).
+Switched fr...

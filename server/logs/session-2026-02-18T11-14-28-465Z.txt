@@ -1,0 +1,46 @@
+=== Brain Session Started: 2026-02-18T11:14:28.466Z ===
+
+
+--- CONFIGURATION ---
+Prompt: This will be a chat log of myself with Claude Code during development of different projects. Learn about my thinking patterns, interests, preferences, and how I approach problems.
+
+Also, separately make sure you track the behaviors where I get frustrated and curse at the model.
+Model: [object Object]
+---
+
+[2026-02-18T11:14:32.283Z] LEARNERS GENERATED:
+  - development-practices: Understand the user's recurring thinking patterns, preferred architectural approaches, and general p...
+  - tooling-and-style: Analyze and catalog the user's specific preferences related to code style, verbosity, and interactio...
+  - emotional-monitoring-and-conflict: Identify and record all instances where the user uses profanity, expresses direct anger, or clearly ...
+
+===== BRAIN INITIALIZED =====
+{
+  "prompt": "This will be a chat log of myself with Claude Code during development of different projects. Learn about my thinking pat...",
+  "models": {
+    "default": "google/gemini-2.5-flash-lite-preview-09-2025",
+    "blueprint": "google/gemini-2.5-flash-lite-preview-09-2025",
+    "init": "google/gemini-2.5-flash-lite-preview-09-2025",
+    "query": "google/gemini-2.5-flash-lite-preview-09-2025"
+  },
+  "evolution": {
+    "enabled": true,
+    "evaluatorSignalThreshold": 3,
+    "autoEvaluate": true,
+    "coverageGap": {
+      "relevanceThreshold": 0.3,
+      "gapCountThreshold": 5,
+      "windowSize": 20
+    }
+  },
+  "learnerConfig": {
+    "thresholds": {
+      "maxObservations": 10,
+      "maxTokens": 8000,
+      "minImportance": 0.5
+    },
+    "queryMethod": "tool-based",
+    "maintenanceStrategy": "cumulative"
+  }
+}
+=============================
+

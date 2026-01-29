@@ -1,0 +1,837 @@
+=== Brain Session Started: 2026-02-17T17:24:48.188Z ===
+
+
+--- CONFIGURATION ---
+Prompt: These are reflections and observations from a software engineer's daily work. Learn about their engineering practices, technical decision-making patterns, problem-solving approaches, and how they think about building software.
+Model: [object Object]
+---
+
+[2026-02-17T17:25:16.381Z] LEARNERS GENERATED:
+  - architecture-philosophy: Understand the engineer's architectural philosophy and how they think about system structure and des...
+  - code-quality-practices: Understand the engineer's standards for code quality and their practices around writing maintainable...
+  - problem-solving-approach: Understand the engineer's problem-solving methodology and how they work through technical challenges...
+  - technical-decision-making: Understand how the engineer makes technical decisions and evaluates trade-offs.
+
+Watch for:
+- Techno...
+  - collaboration-communication: Understand the engineer's collaborative practices and how they operate within engineering teams.
+
+Wa...
+
+===== BRAIN INITIALIZED =====
+{
+  "prompt": "These are reflections and observations from a software engineer's daily work. Learn about their engineering practices, t...",
+  "models": {
+    "default": "google/gemini-2.5-flash-lite-preview-09-2025",
+    "blueprint": "anthropic/claude-opus-4.5",
+    "init": "anthropic/claude-opus-4.5",
+    "query": "google/gemini-2.5-flash-lite-preview-09-2025"
+  },
+  "evolution": {
+    "enabled": true,
+    "evaluatorSignalThreshold": 3,
+    "autoEvaluate": true,
+    "coverageGap": {
+      "relevanceThreshold": 0.3,
+      "gapCountThreshold": 5,
+      "windowSize": 20
+    }
+  },
+  "learnerConfig": {
+    "thresholds": {
+      "maxObservations": 10,
+      "maxTokens": 8000,
+      "minImportance": 0.5
+    },
+    "queryMethod": "tool-based",
+    "maintenanceStrategy": "continuous"
+  }
+}
+=============================
+
+  >> [MODEL] observe for architecture-philosophy (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for code-quality-practices (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for problem-solving-approach (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for technical-decision-making (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for collaboration-communication (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-02-17T17:26:37.972Z] OBSERVED [code-quality-practices] importance=0.85 buffer=1
+  Added a mutex lock around the critical section to fix a race condition.
+Refactored monolithic validateToken() into parseToken(), verifySignature(), and checkExpiry() for independent testability.
+Found...
+[2026-02-17T17:26:38.467Z] OBSERVED [architecture-philosophy] importance=0.85 buffer=1
+  Refactored the auth middleware — split monolithic validateToken() into parseToken(), verifySignature(), and checkExpiry(). Each independently testable now.
+Pairing session on the caching layer. Chose ...
+[2026-02-17T17:26:38.567Z] OBSERVED [collaboration-communication] importance=0.80 buffer=1
+  Added a mutex lock around the critical section when debugging a race condition.
+Refactored the auth middleware — split monolithic validateToken() into parseToken(), verifySignature(), and checkExpiry(...
+[2026-02-17T17:26:38.583Z] OBSERVED [technical-decision-making] importance=0.85 buffer=1
+  Spent 3 hours debugging a race condition in our WebSocket handler. Two async ops modifying the same connection map simultaneously. Added a mutex lock around the critical section.
+Refactored the auth m...
+  >> [MODEL] observe for architecture-philosophy (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for code-quality-practices (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for problem-solving-approach (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for technical-decision-making (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for collaboration-communication (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-02-17T17:29:26.289Z] OBSERVED [collaboration-communication] importance=0.80 buffer=2
+  Code review checklist: 1) Does it handle errors? 2) Are there tests? 3) Is it backwards compatible? 4) Will it scale to 10x current load? Simple but catches most issues.
+First ADR: why PostgreSQL over...
+[2026-02-17T17:29:26.366Z] OBSERVED [architecture-philosophy] importance=0.85 buffer=2
+  Monorepo migration paying off. Shared types between frontend/backend catch contract mismatches at compile time.
+Designed notification data model with event sourcing. Every state change is immutable ev...
+[2026-02-17T17:29:26.541Z] OBSERVED [problem-solving-approach] importance=0.85 buffer=1
+  Shared types between frontend/backend catch contract mismatches at compile time.
+Fixing 3 root causes (payment provider timeout, invalid UTF-8, stale cache) would eliminate most noise.
+Load test P99 s...
+[2026-02-17T17:29:26.933Z] OBSERVED [technical-decision-making] importance=0.88 buffer=2
+  Shared types between frontend/backend catch contract mismatches at compile time. Cross-project refactoring: days → hours.
+Query builder (Kysely) over ORM. Type safety and composability without full OR...
+[2026-02-17T17:29:27.134Z] OBSERVED [code-quality-practices] importance=0.85 buffer=2
+  Shared types between frontend/backend catch contract mismatches at compile time.
+Designed notification data model with event sourcing. Every state change is immutable event.
+Query builder (Kysely) ove...
+  >> [MODEL] observe for architecture-philosophy (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for code-quality-practices (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for problem-solving-approach (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for technical-decision-making (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for collaboration-communication (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-02-17T17:29:30.203Z] OBSERVED [problem-solving-approach] importance=0.72 buffer=2
+  Simplified Webpack config from 800 lines to 200 lines, cutting build time in half. (Relates to tool usage/optimization)
+[2026-02-17T17:29:30.713Z] OBSERVED [collaboration-communication] importance=0.80 buffer=3
+  Simplified Webpack config from 800 lines to 200 lines, cutting build time in half.
+Wrote a migration to add soft deletes to the user table, including a cleanup job for old records.
+Fixed naive WebSock...
+[2026-02-17T17:29:31.276Z] OBSERVED [architecture-philosophy] importance=0.87 buffer=3
+  Simplified Webpack config: Trade-off articulation (pragmatism/simplicity vs complexity of legacy setup).
+Added soft deletes to user table: Boundary-drawing rationale (how data lifecycle/deletion is ma...
+[2026-02-17T17:29:31.354Z] OBSERVED [code-quality-practices] importance=0.83 buffer=3
+  Simplified Webpack config from 800 lines to 200 lines, cutting build time in half. (Refactoring trigger: complexity/bloat)
+Added soft deletes to the user table, updating all queries and adding a clean...
+[2026-02-17T17:29:31.863Z] OBSERVED [technical-decision-making] importance=0.88 buffer=3
+  Simplified Webpack config from 800 lines to 200 lines, cutting build time in half (trade-off: complexity vs. performance).
+Added soft deletes to the user table, requiring updates to all queries and ad...
+  >> [MODEL] observe for architecture-philosophy (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for code-quality-practices (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for problem-solving-approach (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for technical-decision-making (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for collaboration-communication (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-02-17T17:29:34.616Z] DISMISSED [collaboration-communication]
+[2026-02-17T17:29:34.617Z] DISMISSED [architecture-philosophy]
+[2026-02-17T17:29:35.662Z] OBSERVED [technical-decision-making] importance=0.89 buffer=4
+  Wrote a pre-commit hook that runs TypeScript type checking on changed files only. Full type check takes 45 seconds; incremental takes 3 seconds. No more excuses to skip it.
+Implemented graceful degrad...
+[2026-02-17T17:29:36.227Z] OBSERVED [problem-solving-approach] importance=0.78 buffer=3
+  Wrote a pre-commit hook that runs TypeScript type checking on changed files only. Full type check takes 45 seconds; incremental takes 3 seconds. (Relates to debugging/validation efficiency and tool us...
+[2026-02-17T17:29:36.454Z] OBSERVED [code-quality-practices] importance=0.82 buffer=4
+  Wrote a pre-commit hook that runs TypeScript type checking on changed files only. Incremental takes 3 seconds. (Testing approaches/Quality gates)
+Implemented graceful degradation for our third-party a...
+  >> [MODEL] observe for architecture-philosophy (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for code-quality-practices (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for problem-solving-approach (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for technical-decision-making (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for collaboration-communication (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-02-17T17:29:38.853Z] DISMISSED [architecture-philosophy]
+[2026-02-17T17:29:39.145Z] DISMISSED [collaboration-communication]
+[2026-02-17T17:29:39.934Z] OBSERVED [code-quality-practices] importance=0.82 buffer=5
+  If error rate spikes at any stage [of gradual rollout], auto-rollback.
+Our test suite was flaky — 3 tests failed randomly due to timing issues. Replaced with deterministic event-driven assertions.
+Add...
+[2026-02-17T17:29:40.136Z] OBSERVED [technical-decision-making] importance=0.87 buffer=5
+  Implemented feature flag gradual rollout. If error rate spikes at any stage, auto-rollback.
+Added a database query analyzer to our CI pipeline. Any new query without an index gets flagged.
+Implemented...
+[2026-02-17T17:29:40.369Z] OBSERVED [problem-solving-approach] importance=0.79 buffer=4
+  Implemented feature flag gradual rollout. If error rate spikes at any stage, auto-rollback. (Implies a debugging sequence/validation loop tied to deployment.)
+Our test suite was flaky — 3 tests failed...
+  >> [MODEL] observe for architecture-philosophy (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for code-quality-practices (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for problem-solving-approach (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for technical-decision-making (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for collaboration-communication (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-02-17T17:29:42.719Z] OBSERVED [architecture-philosophy] importance=0.82 buffer=4
+  Centralized to a single config module that reads from environment variables. Changed once, applied everywhere.
+[2026-02-17T17:29:42.853Z] OBSERVED [technical-decision-making] importance=0.86 buffer=6
+  Centralized database connection string from 7 files to a single config module reading from environment variables.
+Added per-file database transactions that rollback after each test because tests were ...
+[2026-02-17T17:29:43.180Z] OBSERVED [problem-solving-approach] importance=0.79 buffer=5
+  Found that our test database wasn't being cleaned between test files.
+Tests were polluting each other's data.
+Added per-file database transactions that rollback after each test.
+[2026-02-17T17:29:43.219Z] OBSERVED [code-quality-practices] importance=0.82 buffer=6
+  Centralized database connection string from 7 files to a single config module reading from environment variables.This suggests a preference for centralized configuration management over dispersed cons...
+[2026-02-17T17:29:43.626Z] OBSERVED [collaboration-communication] importance=0.80 buffer=4
+  Centralized database connection string from 7 hardcoded locations to a single config module reading environment variables.
+  >> [MODEL] observe for architecture-philosophy (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for code-quality-practices (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for problem-solving-approach (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for technical-decision-making (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for collaboration-communication (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-02-17T17:29:49.470Z] OBSERVED [technical-decision-making] importance=0.86 buffer=7
+  Pushed back [on recommendation engine] — not enough user data. Suggested hand-curated rules first, ML after 100k+ interactions. Build simple first.
+Business team wants real-time analytics. Current bat...
+[2026-02-17T17:29:49.651Z] OBSERVED [code-quality-practices] importance=0.82 buffer=7
+  Pushed back — not enough user data. Suggested hand-curated rules first, ML after 100k+ interactions. Build simple first.
+Events should describe what happened, not what should happen next. 'OrderPlaced...
+[2026-02-17T17:29:49.979Z] OBSERVED [architecture-philosophy] importance=0.83 buffer=5
+  Suggested hand-curated rules first, ML after 100k+ interactions. Build simple first.
+Events should describe what happened, not what should happen next.
+Evaluating streaming layer vs 15-minute micro-ba...
+[2026-02-17T17:29:50.014Z] OBSERVED [collaboration-communication] importance=0.81 buffer=5
+  Shared experience of feeling lost for 3 months at every new company when mentoring a junior dev struggling with imposter syndrome.
+Suggested hand-curated rules first, ML after 100k+ interactions when ...
+[2026-02-17T17:29:50.414Z] OBSERVED [problem-solving-approach] importance=0.79 buffer=6
+  Spent a week reverse-engineering the deploy pipeline. 14 env vars, 3 unused, 2 misspelled but critical. (Indicates difficulty in debugging/understanding due to lack of documentation, a key part of pro...
+  >> [MODEL] observe for architecture-philosophy (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for code-quality-practices (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for problem-solving-approach (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for technical-decision-making (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for collaboration-communication (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-02-17T17:29:53.036Z] OBSERVED [problem-solving-approach] importance=0.79 buffer=7
+  Ran a blameless post-mortem for the outage. The key question isn't 'who caused it' but 'what made it possible for this to happen.' Found 3 systemic gaps.
+Introduced mob programming for complex feature...
+[2026-02-17T17:29:53.738Z] OBSERVED [code-quality-practices] importance=0.82 buffer=8
+  Starting to automate the regression suite — 80% of manual tests can be automated with Playwright.
+Tech debt item scoring includes blast radius, developer pain, and fix effort.
+Introduced mob programmi...
+[2026-02-17T17:29:54.072Z] OBSERVED [technical-decision-making] importance=0.87 buffer=8
+  Our microservices mirror our org structure, which isn't intentional.
+The key question [in post-mortem] isn't 'who caused it' but 'what made it possible for this to happen.'
+Promoted a senior engineer ...
+[2026-02-17T17:29:54.073Z] OBSERVED [collaboration-communication] importance=0.82 buffer=6
+  Teaching the team about Conway's Law. Our microservices mirror our org structure, which isn't intentional.
+The payment team's service is a monolith because they're one person.
+The product owner keeps ...
+[2026-02-17T17:29:54.726Z] OBSERVED [architecture-philosophy] importance=0.83 buffer=6
+  Our microservices mirror our org structure, which isn't intentional. (Signal: Conway's Law, structure rationale)
+The payment team's service is a monolith because they're one person. (Signal: Trade-off...
+  >> [MODEL] observe for architecture-philosophy (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for code-quality-practices (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for problem-solving-approach (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for technical-decision-making (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for collaboration-communication (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-02-17T17:29:57.976Z] OBSERVED [technical-decision-making] importance=0.87 buffer=9
+  Found that 60% of lead time is waiting — waiting for review, waiting for QA, waiting for deploy window.
+Switched to lightweight 'architecture advice' — teams consult an architect but make their own de...
+[2026-02-17T17:29:58.150Z] OBSERVED [code-quality-practices] importance=0.82 buffer=9
+  Introduced 'tech debt Fridays' — 20% time every Friday for paying down technical debt.
+After 2 months, build times halved and the flaky test count dropped from 15 to 2.
+Our definition of done was vagu...
+[2026-02-17T17:29:58.511Z] OBSERVED [architecture-philosophy] importance=0.84 buffer=7
+  Our architecture review board has become a bottleneck. 3-week wait for approval. Switched to lightweight 'architecture advice' — teams consult an architect but make their own decisions.
+Running a book...
+[2026-02-17T17:29:58.916Z] OBSERVED [problem-solving-approach] importance=0.79 buffer=8
+  Introduced 'tech debt Fridays' — 20% time every Friday for paying down technical debt. After 2 months, build times halved and the flaky test count dropped from 15 to 2. (Relates to tool/process improv...
+[2026-02-17T17:29:59.032Z] OBSERVED [collaboration-communication] importance=0.83 buffer=7
+  Found that 60% of lead time is waiting — waiting for review, waiting for QA, waiting for deploy window.
+Our architecture review board has become a bottleneck. Switched to lightweight 'architecture adv...
+  >> [MODEL] observe for architecture-philosophy (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for code-quality-practices (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for problem-solving-approach (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for technical-decision-making (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for collaboration-communication (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-02-17T17:30:01.665Z] OBSERVED [architecture-philosophy] importance=0.82 buffer=8
+  Consolidating everything to a single docs-as-code repo.
+Created a 'tech radar' for our organization. Categorized technologies into Adopt, Trial, Assess, Hold. Gives teams guidance without being prescr...
+  >> [MODEL] synthesize for technical-decision-making (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-02-17T17:30:01.962Z] OBSERVED [problem-solving-approach] importance=0.79 buffer=9
+  Measured our deployment frequency: 2.3 deploys per week. DORA metrics say elite teams deploy multiple times per day. The gap isn't technical — it's confidence. We don't trust our test suite enough.
+Ra...
+[2026-02-17T17:30:02.615Z] OBSERVED [collaboration-communication] importance=0.82 buffer=8
+  Users want recipes and examples in API documentation, not just reference docs.
+Coached a mid-level engineer to state their conclusions confidently in a technical blog post.
+Team shares one thing learn...
+  >> [MODEL] synthesize for code-quality-practices (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-02-17T17:30:06.321Z] SYNTHESIZED [technical-decision-making] significance=notable
+  Evolution: This is the first synthesis. The observations reveal a deep-seated engineering philosophy centered on pragmatic correctness, high investment in DX/observability, and disciplined handling of technical debt framed in business terms. The preference for explicit, testable, and reversible solutions across infrastructure, backend, and testing is now clearly established. The emphasis on operationalizing improvements (runbooks, formal processes, organizational alignment) elevates this beyond just technical choices.
+  Understanding (3763 chars):
+  The engineer prioritizes building durable, correct, and performant systems, often favoring explicit, 'boring' solutions over complex abstraction unless abstraction directly resolves a significant scaling or correctness bottleneck. 
+
+**Technology Selection & Criteria:**
+1.  **Correctness & Reliability First (High Weight):** Consistently chooses options that increase reliability, correctness, and testability, even at a minor cost to immediate velocity or performance (e.g., write-through cache over...
+[2026-02-17T17:30:06.535Z] SYNTHESIZED [code-quality-practices] significance=notable
+  Evolution: This initial synthesis integrates a large volume of observations, establishing a comprehensive profile across all five focus areas (Testing, Error Handling, Clarity, Tooling, Refactoring). The initial understanding is now highly detailed, confirming strong philosophical stances on resilience, observability, and process rigor. The 'Definition of Done' criteria are now explicitly captured.
+  Understanding (3408 chars):
+  This engineer prioritizes robust, resilient, and observable systems underpinned by strong quality gates throughout the lifecycle. 
+
+**Testing & Quality Gates:** Prefers a strong mix, leaning towards integration tests (60% of suite running against real DBs) to catch systemic issues that unit tests miss, supplemented by smoke tests in production. Strong emphasis on determinism (fixing flaky tests via state isolation, using event-driven assertions). Quality gates are strict: TypeScript strict mode ...
+  >> [MODEL] observe for architecture-philosophy (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for code-quality-practices (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for problem-solving-approach (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for technical-decision-making (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for collaboration-communication (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-02-17T17:30:12.485Z] DISMISSED [code-quality-practices]
+[2026-02-17T17:30:12.595Z] DISMISSED [architecture-philosophy]
+[2026-02-17T17:30:12.923Z] OBSERVED [collaboration-communication] importance=0.80 buffer=9
+  Setting up Kubernetes. Learning curve is steep but abstractions make sense: pods, services, deployments, ingress. YAML is verbose — considering Helm.
+Prometheus + Grafana monitoring. Tracking RED meth...
+  >> [MODEL] synthesize for problem-solving-approach (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-02-17T17:30:13.286Z] OBSERVED [technical-decision-making] importance=0.80 buffer=1
+  Bias-variance tradeoff in practice. Our recommendation model has high variance — performance varies wildly between users. Need more data or regularization.
+Setting up Kubernetes. Learning curve is ste...
+[2026-02-17T17:30:15.329Z] SYNTHESIZED [problem-solving-approach] significance=notable
+  Evolution: The understanding is significantly deepened by integrating observations focused on process debugging, decision-making structure, and measuring deployment confidence. Previously, the view was strong on technical debugging patterns. Now, evidence supports a systematic approach to process improvement (retrospective analysis, tracking velocity root causes, defining done explicitly) and formalizing decision-making (Decision Journal, Engineering Principles, RFCs). The link between trust in the test suite and deployment frequency (DORA metrics gap) is a critical synthesis point, connecting testing efficacy directly to organizational agility. Furthermore, the introduction of chaos testing and mob programming shows a move toward proactive quality strategies beyond standard CI/CD checks.
+  Understanding (1491 chars):
+  This engineer treats problem-solving as a holistic practice blending defensive coding, rigorous validation, systematic debugging tools, and continuous process refinement. A core pattern observed is shifting left for validation (TypeScript strict mode, pre-commit hooks, pre-validation middleware, CI query analysis, pair architecture sessions) to find issues early. Debugging centers on observability enhancements (structured logs, request tracing, error grouping, explicit runbooks) and performance ...
+  >> [MODEL] observe for architecture-philosophy (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for code-quality-practices (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for problem-solving-approach (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for technical-decision-making (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for collaboration-communication (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-02-17T17:30:17.842Z] OBSERVED [technical-decision-making] importance=0.85 buffer=2
+  Cross-validation: splitting data into 5 folds and training/testing on each. Our initial 95% accuracy dropped to 78% with proper validation. We were overfitting.
+[2026-02-17T17:30:18.032Z] DISMISSED [code-quality-practices]
+[2026-02-17T17:30:18.275Z] OBSERVED [problem-solving-approach] importance=0.80 buffer=1
+  Confusion matrix analysis on our spam filter. Precision is 95% but recall is only 60%. We're missing 40% of spam. Adjusting the classification threshold.
+[2026-02-17T17:30:18.280Z] DISMISSED [collaboration-communication]
+[2026-02-17T17:30:18.621Z] OBSERVED [architecture-philosophy] importance=0.82 buffer=9
+  Kubernetes pod autoscaling based on custom metrics. Instead of CPU, scaling on request queue depth. More responsive to actual load patterns. Handles traffic spikes 40% faster.
+Terraform state manageme...
+  >> [MODEL] observe for architecture-philosophy (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for code-quality-practices (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for problem-solving-approach (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for technical-decision-making (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for collaboration-communication (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] synthesize for collaboration-communication (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-02-17T17:30:21.434Z] DISMISSED [code-quality-practices]
+  >> [MODEL] synthesize for architecture-philosophy (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-02-17T17:30:22.013Z] OBSERVED [technical-decision-making] importance=0.85 buffer=3
+  Switched from node:18 to node:18-slim, reduced to 3 CVEs. (Implies a trade-off decision based on security findings, likely accepting a slightly smaller base image for significant risk reduction.)
+Impl...
+[2026-02-17T17:30:22.214Z] OBSERVED [problem-solving-approach] importance=0.80 buffer=2
+  Container image scanning in CI with Trivy. Found 23 high-severity CVEs in our base images. Switched from node:18 to node:18-slim, reduced to 3 CVEs.
+Learned about the OODA loop (Observe, Orient, Decid...
+[2026-02-17T17:30:24.366Z] SYNTHESIZED [collaboration-communication] significance=notable
+  Evolution: The understanding is significantly extended by integrating hundreds of observations related to organizational design, process measurement, and team health. Initial focus on technical refactoring is now contextually framed by an overarching goal of building highly reliable, autonomous teams (stream-aligned tenets, Conway's Law awareness). Specifics on code review (error handling, scale) and documentation (ADRs, decision journals) are now much deeper.
+  Understanding (2594 chars):
+  This engineer is a strong proponent of engineering excellence, focusing heavily on systemic improvement, operational maturity (SLOs, monitoring, GitOps, IaC), and organizational clarity (team boundaries, career paths, structure). 
+
+**Code Review & Quality:** Values thorough reviews, prioritizing error handling, testing, backward compatibility, and scalability (10x load). However, they recognize and are actively fighting review bottlenecks by establishing explicit ownership rotation and setting s...
+[2026-02-17T17:30:25.217Z] SYNTHESIZED [architecture-philosophy] significance=notable
+  Evolution: Captured initial architectural leanings from specific implementation details (refactoring, caching, query optimization). Established core philosophy revolving around explicit trade-offs, boundary enforcement, and organizational alignment (Conway's Law). This synthesis integrates many early signals into a coherent philosophy framework.
+  Understanding (3246 chars):
+  This engineer advocates for high structural discipline, prioritizing maintainability, testability, and clear boundaries, heavily guided by business context and organizational structure (Conway's Law). 
+
+**System Structure & Patterns:** Favors practices that enable independent testing and deployment via strong componentization (splitting monolithic validation logic, using factor functions for test fixtures, implementing RFCs for cross-cutting changes). While actively writing an RFC for microservi...
+  >> [MODEL] observe for architecture-philosophy (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for code-quality-practices (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for problem-solving-approach (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for technical-decision-making (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for collaboration-communication (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-02-17T17:30:28.140Z] DISMISSED [code-quality-practices]
+[2026-02-17T17:30:28.202Z] OBSERVED [collaboration-communication] importance=0.70 buffer=1
+  We can only reduce extraneous load (related to code structure/review philosophy).
+Analysis paralysis is real (related to decision making/technical disagreements).
+Walking meetings for 1-on-1s (related...
+[2026-02-17T17:30:28.369Z] OBSERVED [problem-solving-approach] importance=0.82 buffer=3
+  High intrinsic load (problem complexity) + high extraneous load (bad code structure) = overwhelmed developer. We can only reduce extraneous load.
+Evaluated 6 different state management libraries for 3...
+[2026-02-17T17:30:28.476Z] OBSERVED [technical-decision-making] importance=0.85 buffer=4
+  High intrinsic load (problem complexity) + high extraneous load (bad code structure) = overwhelmed developer. We can only reduce extraneous load.
+The paradox of choice in developer tools. Evaluated 6 ...
+[2026-02-17T17:30:28.830Z] OBSERVED [architecture-philosophy] importance=0.80 buffer=1
+  High intrinsic load (problem complexity) + high extraneous load (bad code structure) = overwhelmed developer. We can only reduce extraneous load.
+The paradox of choice in developer tools. Should have ...
+  >> [MODEL] observe for architecture-philosophy (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for code-quality-practices (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for problem-solving-approach (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for technical-decision-making (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for collaboration-communication (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-02-17T17:30:31.203Z] DISMISSED [collaboration-communication]
+[2026-02-17T17:30:31.205Z] DISMISSED [code-quality-practices]
+[2026-02-17T17:30:31.694Z] OBSERVED [architecture-philosophy] importance=0.80 buffer=2
+  Zero-trust networking philosophy: never trust, always verify.
+[2026-02-17T17:30:31.735Z] DISMISSED [problem-solving-approach]
+[2026-02-17T17:30:31.797Z] OBSERVED [technical-decision-making] importance=0.84 buffer=5
+  The adoption of zero-trust networking was explicitly chosen to eliminate the risk where "any compromised service could access everything."
+  >> [MODEL] observe for architecture-philosophy (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for code-quality-practices (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for problem-solving-approach (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for technical-decision-making (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for collaboration-communication (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-02-17T17:30:37.562Z] DISMISSED [code-quality-practices]
+[2026-02-17T17:30:37.900Z] DISMISSED [problem-solving-approach]
+[2026-02-17T17:30:37.930Z] DISMISSED [collaboration-communication]
+[2026-02-17T17:30:38.006Z] DISMISSED [architecture-philosophy]
+[2026-02-17T17:30:38.017Z] DISMISSED [technical-decision-making]
+  >> [MODEL] observe for architecture-philosophy (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for code-quality-practices (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for problem-solving-approach (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for technical-decision-making (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for collaboration-communication (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-02-17T17:30:40.389Z] DISMISSED [technical-decision-making]
+[2026-02-17T17:30:40.390Z] DISMISSED [code-quality-practices]
+[2026-02-17T17:30:40.390Z] DISMISSED [collaboration-communication]
+[2026-02-17T17:30:40.891Z] DISMISSED [architecture-philosophy]
+[2026-02-17T17:30:41.029Z] DISMISSED [problem-solving-approach]
+  >> [MODEL] observe for architecture-philosophy (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for code-quality-practices (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for problem-solving-approach (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for technical-decision-making (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for collaboration-communication (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-02-17T17:30:43.448Z] DISMISSED [problem-solving-approach]
+[2026-02-17T17:30:43.469Z] OBSERVED [architecture-philosophy] importance=0.70 buffer=3
+  Bonsai is not a species of tree 	extemdash it's a technique.
+[2026-02-17T17:30:43.735Z] DISMISSED [code-quality-practices]
+[2026-02-17T17:30:43.778Z] DISMISSED [technical-decision-making]
+[2026-02-17T17:30:43.943Z] DISMISSED [collaboration-communication]
+  >> [MODEL] observe for architecture-philosophy (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for code-quality-practices (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for problem-solving-approach (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for technical-decision-making (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for collaboration-communication (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-02-17T17:30:46.290Z] DISMISSED [problem-solving-approach]
+[2026-02-17T17:30:46.422Z] OBSERVED [code-quality-practices] importance=0.80 buffer=1
+  Authentic carbonara uses only guanciale, pecorino romano, eggs, black pepper, and pasta. No cream — ever. The sauce emulsification comes from starch water and egg technique.
+[2026-02-17T17:30:46.669Z] DISMISSED [technical-decision-making]
+[2026-02-17T17:30:46.736Z] DISMISSED [collaboration-communication]
+[2026-02-17T17:30:47.390Z] OBSERVED [architecture-philosophy] importance=0.70 buffer=4
+  The sauce balance (sweet-sour-salty) is everything. (Implies critical trade-off in flavor architecture/composition)
+Clarity comes from low heat and skimming. (Implies process control/technique is crit...
+  >> [MODEL] observe for architecture-philosophy (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for code-quality-practices (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for problem-solving-approach (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for technical-decision-making (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for collaboration-communication (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-02-17T17:30:49.764Z] DISMISSED [technical-decision-making]
+[2026-02-17T17:30:49.765Z] DISMISSED [problem-solving-approach]
+[2026-02-17T17:30:49.766Z] DISMISSED [architecture-philosophy]
+[2026-02-17T17:30:49.828Z] DISMISSED [collaboration-communication]
+[2026-02-17T17:30:50.533Z] DISMISSED [code-quality-practices]
+  >> [MODEL] observe for architecture-philosophy (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for code-quality-practices (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for problem-solving-approach (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for technical-decision-making (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for collaboration-communication (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-02-17T17:30:52.952Z] DISMISSED [architecture-philosophy]
+[2026-02-17T17:30:52.954Z] DISMISSED [technical-decision-making]
+[2026-02-17T17:30:52.967Z] DISMISSED [problem-solving-approach]
+[2026-02-17T17:30:53.330Z] DISMISSED [collaboration-communication]
+[2026-02-17T17:30:53.505Z] DISMISSED [code-quality-practices]
+  >> [MODEL] observe for architecture-philosophy (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for code-quality-practices (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for problem-solving-approach (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for technical-decision-making (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for collaboration-communication (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-02-17T17:30:56.214Z] DISMISSED [code-quality-practices]
+[2026-02-17T17:30:56.237Z] DISMISSED [problem-solving-approach]
+[2026-02-17T17:30:56.370Z] DISMISSED [collaboration-communication]
+[2026-02-17T17:30:56.387Z] OBSERVED [technical-decision-making] importance=0.83 buffer=6
+  Simone Biles' Yurchenko double pike vault was deemed so difficult that the gymnastics federation gave it a lower difficulty score to discourage others from attempting it.
+[2026-02-17T17:30:56.440Z] DISMISSED [architecture-philosophy]
+  >> [MODEL] observe for architecture-philosophy (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for code-quality-practices (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for problem-solving-approach (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for technical-decision-making (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for collaboration-communication (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-02-17T17:30:58.965Z] DISMISSED [problem-solving-approach]
+[2026-02-17T17:30:59.172Z] DISMISSED [code-quality-practices]
+[2026-02-17T17:30:59.322Z] DISMISSED [architecture-philosophy]
+[2026-02-17T17:30:59.380Z] DISMISSED [collaboration-communication]
+[2026-02-17T17:30:59.635Z] DISMISSED [technical-decision-making]
+  >> [MODEL] observe for architecture-philosophy (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for code-quality-practices (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for problem-solving-approach (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for technical-decision-making (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for collaboration-communication (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-02-17T17:31:06.831Z] OBSERVED [architecture-philosophy] importance=0.73 buffer=5
+  Functions return Success or Failure explicitly. No more invisible throw chains.
+Every state change is an immutable event. Current state = fold over event stream. Replay is trivial. Mindset shift from ...
+[2026-02-17T17:31:07.033Z] OBSERVED [problem-solving-approach] importance=0.81 buffer=4
+  Refactored entire error handling. Replaced try/catch with Result<T, E> type. Functions return Success or Failure explicitly. No more invisible throw chains.
+Distributed tracing with OpenTelemetry. Eve...
+[2026-02-17T17:31:07.081Z] OBSERVED [collaboration-communication] importance=0.75 buffer=2
+  Functions return Success or Failure explicitly, indicating a philosophy on explicit error handling over implicit throws.
+Navigator-driver pairing only works if the navigator navigates.
+Switching roles...
+[2026-02-17T17:31:07.082Z] OBSERVED [code-quality-practices] importance=0.82 buffer=2
+  Replaced try/catch with Result<T, E> type. Functions return Success or Failure explicitly.
+Every state change is an immutable event. Current state = fold over event stream.
+Distributed tracing with Op...
+[2026-02-17T17:31:07.628Z] OBSERVED [technical-decision-making] importance=0.84 buffer=7
+  Refactored error handling to use Result<T, E> type, explicitly returning Success or Failure, avoiding invisible throw chains.
+Event sourcing prototype adopted, shifting mindset from 'state' to 'facts'...
+  >> [MODEL] observe for architecture-philosophy (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for code-quality-practices (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for problem-solving-approach (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for technical-decision-making (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for collaboration-communication (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-02-17T17:31:10.491Z] DISMISSED [collaboration-communication]
+[2026-02-17T17:31:11.091Z] OBSERVED [problem-solving-approach] importance=0.83 buffer=5
+  Added a 'debug mode' to our API that includes timing breakdowns in response headers. X-Server-Timing: db=12ms, cache=2ms, auth=5ms, render=8ms. Frontend team loves it for performance debugging.
+Implem...
+[2026-02-17T17:31:11.116Z] OBSERVED [architecture-philosophy] importance=0.74 buffer=6
+  Implemented backpressure in our event processing pipeline. When the consumer falls behind, it signals the producer to slow down. Prevents memory exhaustion during traffic spikes.
+Zero-downtime databas...
+[2026-02-17T17:31:12.038Z] OBSERVED [technical-decision-making] importance=0.85 buffer=8
+  Implemented backpressure in our event processing pipeline. When the consumer falls behind, it signals the producer to slow down. Prevents memory exhaustion during traffic spikes.
+Zero-downtime databas...
+[2026-02-17T17:31:12.152Z] OBSERVED [code-quality-practices] importance=0.82 buffer=3
+  Implemented backpressure in our event processing pipeline. When the consumer falls behind, it signals the producer to slow down. Prevents memory exhaustion during traffic spikes.
+Implemented zero-down...
+  >> [MODEL] observe for architecture-philosophy (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for code-quality-practices (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for problem-solving-approach (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for technical-decision-making (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for collaboration-communication (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-02-17T17:31:14.848Z] OBSERVED [code-quality-practices] importance=0.83 buffer=4
+  Score below 70% requires manual approval for deployment confidence score
+Combines test coverage of changed files, number of files changed, whether it touches critical paths, time since last deploy int...
+[2026-02-17T17:31:14.891Z] OBSERVED [problem-solving-approach] importance=0.83 buffer=6
+  Built a deployment confidence score. Combines: test coverage of changed files, number of files changed, whether it touches critical paths, time since last deploy. Score below 70% requires manual appro...
+[2026-02-17T17:31:15.160Z] OBSERVED [architecture-philosophy] importance=0.75 buffer=7
+  Created a dependency injection container that's just a TypeScript Map with type inference. 30 lines of code, zero dependencies, full compile-time safety. Sometimes the simplest solution is the best.
+B...
+[2026-02-17T17:31:15.311Z] OBSERVED [collaboration-communication] importance=0.77 buffer=3
+  Built a deployment confidence score that requires manual approval below 70%.
+Implemented progressive rollouts with automatic rollback upon error rate increase.
+Built a lightweight service catalog cont...
+[2026-02-17T17:31:15.687Z] OBSERVED [technical-decision-making] importance=0.86 buffer=9
+  Built a deployment confidence score. Combines: test coverage of changed files, number of files changed, whether it touches critical paths, time since last deploy. Score below 70% requires manual appro...
+  >> [MODEL] observe for architecture-philosophy (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for code-quality-practices (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for problem-solving-approach (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for technical-decision-making (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for collaboration-communication (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-02-17T17:31:26.275Z] DISMISSED [architecture-philosophy]
+[2026-02-17T17:31:26.276Z] DISMISSED [problem-solving-approach]
+[2026-02-17T17:31:26.288Z] DISMISSED [code-quality-practices]
+[2026-02-17T17:31:26.288Z] DISMISSED [technical-decision-making]
+[2026-02-17T17:31:26.745Z] DISMISSED [collaboration-communication]
+  >> [MODEL] observe for architecture-philosophy (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for code-quality-practices (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for problem-solving-approach (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for technical-decision-making (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for collaboration-communication (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-02-17T17:31:29.307Z] DISMISSED [collaboration-communication]
+[2026-02-17T17:31:29.329Z] DISMISSED [architecture-philosophy]
+[2026-02-17T17:31:29.381Z] DISMISSED [technical-decision-making]
+[2026-02-17T17:31:29.770Z] DISMISSED [problem-solving-approach]
+[2026-02-17T17:31:29.869Z] DISMISSED [code-quality-practices]
+  >> [MODEL] observe for architecture-philosophy (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for code-quality-practices (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for problem-solving-approach (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for technical-decision-making (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for collaboration-communication (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-02-17T17:31:32.398Z] DISMISSED [code-quality-practices]
+[2026-02-17T17:31:32.539Z] DISMISSED [collaboration-communication]
+[2026-02-17T17:31:32.572Z] OBSERVED [architecture-philosophy] importance=0.72 buffer=8
+  Bonsai is not a species of tree — it's a technique. Almost any tree can be grown as bonsai.
+[2026-02-17T17:31:32.706Z] DISMISSED [problem-solving-approach]
+[2026-02-17T17:31:32.773Z] DISMISSED [technical-decision-making]
+  >> [MODEL] observe for architecture-philosophy (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for code-quality-practices (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for problem-solving-approach (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for technical-decision-making (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for collaboration-communication (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-02-17T17:31:35.174Z] DISMISSED [architecture-philosophy]
+[2026-02-17T17:31:35.452Z] DISMISSED [code-quality-practices]
+[2026-02-17T17:31:35.551Z] OBSERVED [problem-solving-approach] importance=0.81 buffer=7
+  Authentic carbonara uses only guanciale, pecorino romano, eggs, black pepper, and pasta. No cream — ever. The sauce emulsification comes from starch water and egg technique.
+Pho broth requires charrin...
+[2026-02-17T17:31:35.673Z] DISMISSED [technical-decision-making]
+[2026-02-17T17:31:35.692Z] DISMISSED [collaboration-communication]
+  >> [MODEL] observe for architecture-philosophy (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for code-quality-practices (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for problem-solving-approach (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for technical-decision-making (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for collaboration-communication (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-02-17T17:31:38.135Z] DISMISSED [problem-solving-approach]
+[2026-02-17T17:31:38.168Z] DISMISSED [technical-decision-making]
+[2026-02-17T17:31:38.324Z] DISMISSED [collaboration-communication]
+[2026-02-17T17:31:38.430Z] DISMISSED [architecture-philosophy]
+[2026-02-17T17:31:38.528Z] DISMISSED [code-quality-practices]
+  >> [MODEL] observe for architecture-philosophy (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for code-quality-practices (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for problem-solving-approach (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for technical-decision-making (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for collaboration-communication (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-02-17T17:31:41.053Z] DISMISSED [code-quality-practices]
+[2026-02-17T17:31:41.211Z] DISMISSED [architecture-philosophy]
+[2026-02-17T17:31:41.333Z] DISMISSED [technical-decision-making]
+[2026-02-17T17:31:41.363Z] DISMISSED [collaboration-communication]
+[2026-02-17T17:31:41.468Z] DISMISSED [problem-solving-approach]
+  >> [MODEL] observe for architecture-philosophy (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for code-quality-practices (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for problem-solving-approach (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for technical-decision-making (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for collaboration-communication (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-02-17T17:31:43.946Z] DISMISSED [architecture-philosophy]
+[2026-02-17T17:31:43.947Z] DISMISSED [collaboration-communication]
+[2026-02-17T17:31:43.992Z] DISMISSED [problem-solving-approach]
+  >> [MODEL] synthesize for technical-decision-making (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-02-17T17:31:44.409Z] OBSERVED [code-quality-practices] importance=0.78 buffer=5
+  Proper cast iron care: scrub with coarse salt, rinse with hot water, dry immediately, apply thin layer of oil, heat until smoking. Never use soap. A well-maintained pan improves with every use.
+Parmig...
+[2026-02-17T17:31:50.306Z] SYNTHESIZED [technical-decision-making] significance=critical
+  Evolution: The observations heavily reinforced the existing understanding but elevated the prioritization of **Cognitive Load Reduction** and **Automation for Operational Stability** into core pillars, often superseding immediate concerns about feature velocity or even control. The relationship between 'boring architecture' and cognitive load (the feeling that the entire system fits in one's head) is now explicitly linked to preferred architecture decisions (rejecting MS/K8s). Furthermore, the engineer shows a strong pattern of immediately seeking regularization/rigor in areas prone to statistical variance (ML performance, key generation, caching strategy).
+  Understanding (5176 chars):
+  The engineer prioritizes building durable, correct, and performant systems, strongly favoring simplicity, explicit understanding, and minimizing cognitive load, even when it requires immediate upfront investment or sacrificing immediate feature velocity.
+
+**Technology Selection & Criteria:**
+1.  **Correctness & Reliability First (Highest Weight):** Extreme focus on correctness, resilience, and security. This manifests as adopting rigorous patterns like defensive coding (Result<T, E>), strict dat...
+  >> [MODEL] observe for architecture-philosophy (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for code-quality-practices (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for problem-solving-approach (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for technical-decision-making (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for collaboration-communication (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-02-17T17:31:52.766Z] DISMISSED [code-quality-practices]
+[2026-02-17T17:31:52.956Z] DISMISSED [architecture-philosophy]
+[2026-02-17T17:31:53.114Z] DISMISSED [technical-decision-making]
+[2026-02-17T17:31:53.116Z] DISMISSED [collaboration-communication]
+[2026-02-17T17:31:53.558Z] DISMISSED [problem-solving-approach]
+  >> [MODEL] observe for architecture-philosophy (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for code-quality-practices (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for problem-solving-approach (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for technical-decision-making (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for collaboration-communication (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-02-17T17:31:59.052Z] DISMISSED [code-quality-practices]
+[2026-02-17T17:31:59.084Z] DISMISSED [architecture-philosophy]
+[2026-02-17T17:31:59.392Z] DISMISSED [technical-decision-making]
+[2026-02-17T17:31:59.566Z] DISMISSED [problem-solving-approach]
+[2026-02-17T17:31:59.631Z] DISMISSED [collaboration-communication]
+  >> [MODEL] observe for architecture-philosophy (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for code-quality-practices (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for problem-solving-approach (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for technical-decision-making (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for collaboration-communication (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-02-17T17:32:02.015Z] DISMISSED [architecture-philosophy]
+[2026-02-17T17:32:02.326Z] DISMISSED [problem-solving-approach]
+[2026-02-17T17:32:02.607Z] DISMISSED [code-quality-practices]
+[2026-02-17T17:32:02.624Z] DISMISSED [technical-decision-making]
+[2026-02-17T17:32:02.669Z] DISMISSED [collaboration-communication]
+  >> [MODEL] observe for architecture-philosophy (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for code-quality-practices (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for problem-solving-approach (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for technical-decision-making (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for collaboration-communication (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-02-17T17:32:05.061Z] DISMISSED [code-quality-practices]
+[2026-02-17T17:32:05.403Z] DISMISSED [architecture-philosophy]
+[2026-02-17T17:32:05.433Z] DISMISSED [problem-solving-approach]
+[2026-02-17T17:32:05.613Z] DISMISSED [technical-decision-making]
+[2026-02-17T17:32:05.624Z] DISMISSED [collaboration-communication]
+  >> [MODEL] observe for architecture-philosophy (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for code-quality-practices (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for problem-solving-approach (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for technical-decision-making (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for collaboration-communication (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-02-17T17:32:08.118Z] DISMISSED [technical-decision-making]
+[2026-02-17T17:32:08.151Z] DISMISSED [collaboration-communication]
+[2026-02-17T17:32:08.345Z] DISMISSED [code-quality-practices]
+[2026-02-17T17:32:08.514Z] DISMISSED [problem-solving-approach]
+[2026-02-17T17:32:09.340Z] OBSERVED [architecture-philosophy] importance=0.71 buffer=9
+  The sauce balance (sweet-sour-salty) is everything. [Implies critical trade-off in flavor composition]
+Clarity comes from low heat and skimming. [Implies process choice driven by desired outcome/quali...
+  >> [MODEL] observe for architecture-philosophy (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for code-quality-practices (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for problem-solving-approach (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for technical-decision-making (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for collaboration-communication (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-02-17T17:32:11.802Z] DISMISSED [architecture-philosophy]
+[2026-02-17T17:32:12.109Z] DISMISSED [code-quality-practices]
+[2026-02-17T17:32:12.161Z] DISMISSED [problem-solving-approach]
+[2026-02-17T17:32:12.169Z] DISMISSED [technical-decision-making]
+[2026-02-17T17:32:12.928Z] DISMISSED [collaboration-communication]
+  >> [MODEL] observe for architecture-philosophy (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for code-quality-practices (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for problem-solving-approach (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for technical-decision-making (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for collaboration-communication (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-02-17T17:32:15.405Z] DISMISSED [problem-solving-approach]
+[2026-02-17T17:32:15.467Z] DISMISSED [collaboration-communication]
+[2026-02-17T17:32:15.510Z] DISMISSED [code-quality-practices]
+[2026-02-17T17:32:15.899Z] DISMISSED [architecture-philosophy]
+[2026-02-17T17:32:15.904Z] DISMISSED [technical-decision-making]
+  >> [MODEL] observe for architecture-philosophy (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for code-quality-practices (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for problem-solving-approach (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for technical-decision-making (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for collaboration-communication (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-02-17T17:32:18.580Z] DISMISSED [architecture-philosophy]
+[2026-02-17T17:32:18.762Z] DISMISSED [problem-solving-approach]
+[2026-02-17T17:32:18.799Z] OBSERVED [code-quality-practices] importance=0.77 buffer=6
+  Proper cast iron care: scrub with coarse salt, rinse with hot water, dry immediately, apply thin layer of oil, heat until smoking. Never use soap. A well-maintained pan improves with every use.
+Proper...
+[2026-02-17T17:32:18.855Z] DISMISSED [collaboration-communication]
+[2026-02-17T17:32:19.117Z] OBSERVED [technical-decision-making] importance=0.80 buffer=1
+  Simone Biles' Yurchenko double pike vault was deemed so difficult that the gymnastics federation gave it a lower difficulty score to discourage others from attempting it.
+  >> [MODEL] observe for architecture-philosophy (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for code-quality-practices (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for problem-solving-approach (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for technical-decision-making (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for collaboration-communication (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-02-17T17:32:21.485Z] DISMISSED [collaboration-communication]
+[2026-02-17T17:32:21.571Z] DISMISSED [code-quality-practices]
+[2026-02-17T17:32:21.669Z] DISMISSED [problem-solving-approach]
+[2026-02-17T17:32:21.856Z] DISMISSED [technical-decision-making]
+[2026-02-17T17:32:22.035Z] DISMISSED [architecture-philosophy]
+  >> [MODEL] observe for architecture-philosophy (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for code-quality-practices (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for problem-solving-approach (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for technical-decision-making (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for collaboration-communication (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-02-17T17:32:27.063Z] DISMISSED [architecture-philosophy]
+[2026-02-17T17:32:27.188Z] DISMISSED [collaboration-communication]
+[2026-02-17T17:32:27.289Z] DISMISSED [technical-decision-making]
+[2026-02-17T17:32:27.354Z] DISMISSED [code-quality-practices]
+[2026-02-17T17:32:27.383Z] DISMISSED [problem-solving-approach]
+  >> [MODEL] observe for architecture-philosophy (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for code-quality-practices (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for problem-solving-approach (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for technical-decision-making (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for collaboration-communication (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-02-17T17:32:29.706Z] DISMISSED [code-quality-practices]
+[2026-02-17T17:32:29.817Z] DISMISSED [technical-decision-making]
+[2026-02-17T17:32:29.818Z] DISMISSED [architecture-philosophy]
+[2026-02-17T17:32:29.873Z] DISMISSED [problem-solving-approach]
+[2026-02-17T17:32:30.241Z] DISMISSED [collaboration-communication]
+  >> [MODEL] observe for architecture-philosophy (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for code-quality-practices (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for problem-solving-approach (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for technical-decision-making (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for collaboration-communication (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-02-17T17:32:32.796Z] DISMISSED [code-quality-practices]
+[2026-02-17T17:32:32.854Z] DISMISSED [problem-solving-approach]
+[2026-02-17T17:32:32.952Z] DISMISSED [collaboration-communication]
+[2026-02-17T17:32:33.209Z] DISMISSED [architecture-philosophy]
+[2026-02-17T17:32:33.244Z] DISMISSED [technical-decision-making]
+  >> [MODEL] observe for architecture-philosophy (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for code-quality-practices (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for problem-solving-approach (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for technical-decision-making (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for collaboration-communication (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-02-17T17:32:35.695Z] DISMISSED [technical-decision-making]
+[2026-02-17T17:32:35.730Z] DISMISSED [collaboration-communication]
+[2026-02-17T17:32:36.071Z] DISMISSED [problem-solving-approach]
+  >> [MODEL] synthesize for architecture-philosophy (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-02-17T17:32:36.362Z] DISMISSED [code-quality-practices]
+[2026-02-17T17:32:41.090Z] SYNTHESIZED [architecture-philosophy] significance=critical
+  Evolution: The understanding has deepened significantly, linking specific implementation decisions (e.g., RAG use, ULID keys, property-based testing, zero-trust) to the overarching philosophy of minimizing cognitive load and prioritizing technique-driven quality. The culinary/architectural analogies introduced a new layer: architectural correctness (clarity, texture) is achieved via mastery of underlying technique (boiling, emulsifying, subtle curves) rather than simple component assembly. This reinforces the rejection of 'easy' abstractions (cream in carbonara, naive cron jobs) in favor of rigorously executed, technique-dependent solutions (tonkotsu, Airflow DAGs). The philosophy now explicitly links complexity management (reducing extraneous load) to system comprehensibility (all engineers holding the design in their head). CAP theorem application is now explicitly noted as handled per-feature, not system-wide.
+  Understanding (3906 chars):
+  This engineer advocates for high structural discipline, prioritizing maintainability, testability, and clear boundaries, heavily guided by business context and organizational structure (Conway's Law). The core philosophy emphasizes reducing developer cognitive load (extraneous load) so engineers can focus on intrinsic complexity. 
+
+**System Structure & Patterns:** Prefers practices enabling independent testing/deployment (Strangler Fig for monolith decomposition, trunk-based development with fea...
+  >> [MODEL] observe for architecture-philosophy (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for code-quality-practices (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for problem-solving-approach (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for technical-decision-making (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for collaboration-communication (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-02-17T17:32:43.487Z] DISMISSED [problem-solving-approach]
+[2026-02-17T17:32:43.538Z] DISMISSED [architecture-philosophy]
+[2026-02-17T17:32:43.548Z] DISMISSED [code-quality-practices]
+[2026-02-17T17:32:43.642Z] DISMISSED [collaboration-communication]
+[2026-02-17T17:32:43.957Z] DISMISSED [technical-decision-making]
+  >> [MODEL] observe for architecture-philosophy (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for code-quality-practices (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for problem-solving-approach (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for technical-decision-making (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for collaboration-communication (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-02-17T17:32:46.333Z] DISMISSED [problem-solving-approach]
+[2026-02-17T17:32:46.336Z] DISMISSED [technical-decision-making]
+[2026-02-17T17:32:46.427Z] DISMISSED [architecture-philosophy]
+[2026-02-17T17:32:46.719Z] DISMISSED [code-quality-practices]
+[2026-02-17T17:32:46.739Z] DISMISSED [collaboration-communication]
+  >> [MODEL] observe for architecture-philosophy (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for code-quality-practices (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for problem-solving-approach (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for technical-decision-making (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for collaboration-communication (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-02-17T17:32:49.183Z] DISMISSED [collaboration-communication]
+[2026-02-17T17:32:49.184Z] DISMISSED [problem-solving-approach]
+[2026-02-17T17:32:49.184Z] OBSERVED [technical-decision-making] importance=0.80 buffer=2
+  Simone Biles' Yurchenko double pike vault was deemed so difficult that the gymnastics federation gave it a lower difficulty score to discourage others from attempting it.
+[2026-02-17T17:32:49.256Z] DISMISSED [architecture-philosophy]
+[2026-02-17T17:32:49.589Z] DISMISSED [code-quality-practices]
+  >> [MODEL] observe for architecture-philosophy (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for code-quality-practices (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for problem-solving-approach (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for technical-decision-making (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for collaboration-communication (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-02-17T17:32:52.047Z] DISMISSED [code-quality-practices]
+[2026-02-17T17:32:52.053Z] DISMISSED [problem-solving-approach]
+[2026-02-17T17:32:52.053Z] DISMISSED [collaboration-communication]
+[2026-02-17T17:32:52.330Z] DISMISSED [architecture-philosophy]
+[2026-02-17T17:32:52.337Z] DISMISSED [technical-decision-making]
+  >> [MODEL] observe for architecture-philosophy (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for code-quality-practices (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for problem-solving-approach (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for technical-decision-making (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for collaboration-communication (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-02-17T17:32:57.583Z] DISMISSED [problem-solving-approach]
+[2026-02-17T17:32:57.623Z] DISMISSED [architecture-philosophy]
+[2026-02-17T17:32:57.671Z] DISMISSED [technical-decision-making]
+[2026-02-17T17:32:57.872Z] DISMISSED [code-quality-practices]
+[2026-02-17T17:32:57.904Z] DISMISSED [collaboration-communication]
+  >> [MODEL] observe for architecture-philosophy (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for code-quality-practices (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for problem-solving-approach (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for technical-decision-making (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for collaboration-communication (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-02-17T17:33:00.308Z] DISMISSED [technical-decision-making]
+[2026-02-17T17:33:00.308Z] DISMISSED [code-quality-practices]
+[2026-02-17T17:33:00.313Z] DISMISSED [architecture-philosophy]
+[2026-02-17T17:33:00.320Z] DISMISSED [collaboration-communication]
+[2026-02-17T17:33:00.646Z] DISMISSED [problem-solving-approach]
+  >> [MODEL] observe for architecture-philosophy (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for code-quality-practices (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for problem-solving-approach (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for technical-decision-making (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for collaboration-communication (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-02-17T17:33:03.003Z] DISMISSED [architecture-philosophy]
+[2026-02-17T17:33:03.250Z] DISMISSED [problem-solving-approach]
+[2026-02-17T17:33:03.401Z] DISMISSED [technical-decision-making]
+[2026-02-17T17:33:03.655Z] DISMISSED [code-quality-practices]
+[2026-02-17T17:33:03.717Z] DISMISSED [collaboration-communication]
+  >> [MODEL] observe for architecture-philosophy (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for code-quality-practices (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for problem-solving-approach (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for technical-decision-making (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for collaboration-communication (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-02-17T17:33:06.077Z] DISMISSED [architecture-philosophy]
+[2026-02-17T17:33:06.259Z] OBSERVED [technical-decision-making] importance=0.70 buffer=3
+  Pho broth requires charring onions and ginger, then simmering beef bones with star anise, cinnamon, cloves, and cardamom for 12+ hours. Clarity comes from low heat and skimming.
+Proper ramen broth: po...
+[2026-02-17T17:33:06.533Z] DISMISSED [collaboration-communication]
+[2026-02-17T17:33:06.625Z] DISMISSED [code-quality-practices]
+[2026-02-17T17:33:06.812Z] DISMISSED [problem-solving-approach]
+  >> [MODEL] observe for architecture-philosophy (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for code-quality-practices (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for problem-solving-approach (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for technical-decision-making (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for collaboration-communication (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-02-17T17:33:09.177Z] DISMISSED [collaboration-communication]
+[2026-02-17T17:33:09.291Z] DISMISSED [technical-decision-making]
+[2026-02-17T17:33:09.518Z] DISMISSED [code-quality-practices]
+[2026-02-17T17:33:09.675Z] DISMISSED [architecture-philosophy]
+[2026-02-17T17:33:09.826Z] DISMISSED [problem-solving-approach]
+  >> [MODEL] observe for architecture-philosophy (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for code-quality-practices (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for problem-solving-approach (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for technical-decision-making (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for collaboration-communication (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-02-17T17:33:12.220Z] DISMISSED [problem-solving-approach]
+[2026-02-17T17:33:12.268Z] DISMISSED [code-quality-practices]
+[2026-02-17T17:33:12.562Z] DISMISSED [architecture-philosophy]
+[2026-02-17T17:33:12.586Z] DISMISSED [collaboration-communication]
+[2026-02-17T17:33:12.681Z] DISMISSED [technical-decision-making]
+  >> [MODEL] observe for architecture-philosophy (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for code-quality-practices (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for problem-solving-approach (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for technical-decision-making (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for collaboration-communication (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-02-17T17:33:15.195Z] DISMISSED [architecture-philosophy]
+[2026-02-17T17:33:15.256Z] DISMISSED [problem-solving-approach]
+[2026-02-17T17:33:15.618Z] DISMISSED [collaboration-communication]
+[2026-02-17T17:33:15.736Z] OBSERVED [code-quality-practices] importance=0.76 buffer=7
+  Proper cast iron care: scrub with coarse salt, rinse with hot water, dry immediately, apply thin layer of oil, heat until smoking. Never use soap. A well-maintained pan improves with every use.
+Proper...
+[2026-02-17T17:33:15.752Z] OBSERVED [technical-decision-making] importance=0.73 buffer=4
+  Simone Biles' Yurchenko double pike vault was deemed so difficult that the gymnastics federation gave it a lower difficulty score to discourage others from attempting it.
+  >> [MODEL] observe for architecture-philosophy (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for code-quality-practices (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for problem-solving-approach (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for technical-decision-making (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for collaboration-communication (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-02-17T17:33:18.101Z] DISMISSED [collaboration-communication]
+[2026-02-17T17:33:18.205Z] DISMISSED [technical-decision-making]
+[2026-02-17T17:33:18.207Z] DISMISSED [code-quality-practices]
+[2026-02-17T17:33:18.413Z] DISMISSED [problem-solving-approach]
+[2026-02-17T17:33:18.612Z] DISMISSED [architecture-philosophy]

@@ -1,0 +1,454 @@
+=== Brain Session Started: 2026-02-18T12:59:38.028Z ===
+
+
+--- CONFIGURATION ---
+Prompt: This will be a chat log of myself with Claude Code during development of different projects. Learn about my thinking patterns, interests, preferences, and how I approach problems.
+
+Also, separately make sure you track the behaviors where I get frustrated and curse at the model.
+Model: [object Object]
+---
+
+[2026-02-18T12:59:41.858Z] LEARNERS GENERATED:
+  - development-interests: Understand the user's core recurring technical interests, preferred programming paradigms, and gener...
+  - cognitive-patterns: Analyze and synthesize the user's preferred cognitive strategies for tackling new or complex develop...
+  - model-interaction-preferences: Understand the user's explicit and implicit preferences regarding the format, detail level, and tone...
+  - negative-behavior-tracking: Track and log all occurrences where the user expresses frustration, disappointment, or uses expletiv...
+
+===== BRAIN INITIALIZED =====
+{
+  "prompt": "This will be a chat log of myself with Claude Code during development of different projects. Learn about my thinking pat...",
+  "models": {
+    "default": "google/gemini-2.5-flash-lite-preview-09-2025",
+    "blueprint": "google/gemini-2.5-flash-lite-preview-09-2025",
+    "init": "google/gemini-2.5-flash-lite-preview-09-2025",
+    "query": "google/gemini-2.5-flash-lite-preview-09-2025"
+  },
+  "evolution": {
+    "enabled": true,
+    "evaluatorSignalThreshold": 3,
+    "autoEvaluate": true,
+    "coverageGap": {
+      "relevanceThreshold": 0.3,
+      "gapCountThreshold": 5,
+      "windowSize": 20
+    }
+  },
+  "learnerConfig": {
+    "thresholds": {
+      "maxObservations": 10,
+      "maxTokens": 8000,
+      "minImportance": 0.5
+    },
+    "queryMethod": "tool-based",
+    "maintenanceStrategy": "cumulative"
+  }
+}
+=============================
+
+  >> [MODEL] observe for development-interests (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for cognitive-patterns (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for model-interaction-preferences (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for negative-behavior-tracking (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-02-18T13:00:08.172Z] DISMISSED [negative-behavior-tracking]
+  >> [MODEL] synthesize for development-interests (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] synthesize for cognitive-patterns (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] synthesize for model-interaction-preferences (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-02-18T13:00:11.679Z] SYNTHESIZED [cognitive-patterns] significance=notable
+  Evolution: Established a primary planning preference: Bottom-up research informs implementation. Refined understanding of validation strategy: Shift from general 'tests' to specific 'Eval Cases' with stringent data requirements. Detailed the preference for structural patterns (configuration objects) and clarity in low-level interfaces (event emission).
+  Understanding (1042 chars):
+  The user follows a fundamentally synthesized approach, favoring a **bottom-up implementation informed by deep research into existing, mature patterns** (e.g., studying external SDKs and established memory systems) before committing to a high-level architecture. There is a strong aversion to unnecessary complexity, manifested by questioning new dependencies and premature optimization. Structurally, the user highly prefers **clean, type-safe infrastructure** (e.g., universal event emitters) and fa...
+[2026-02-18T13:00:11.839Z] SYNTHESIZED [development-interests] significance=notable
+  Evolution: Established the initial core domains based on the concentration of architectural discussions. The initial profile is entirely centered on building sophisticated, data-driven, LLM-powered agents ('Learner'). The importance of type-safe eventing and mirroring specific SDK behaviors (ai-sdk) are now tracked as key constraints.
+  Understanding (1659 chars):
+  Top 3 Recurring Technical Domains: 1. Large Language Model (LLM) Integration & Orchestration (including provider control, API keys, configuration). 2. Agent/Learner System Architecture (focus on memory, prompting strategies, system prompts, object definition, and output structure). 3. Observability/Eventing Systems (demanding 100% type-safe event emitter architecture). 
+
+Highest Frequency Languages/Frameworks/Tools: Primarily focused on leveraging AI SDKs (specifically mirroring 'ai-sdk' pattern...
+[2026-02-18T13:00:13.466Z] SYNTHESIZED [model-interaction-preferences] significance=notable
+  Evolution: A complex set of detailed, often conflicting, implementation and style preferences have been introduced. Key integrations include confirming adherence to 'ai-sdk' conventions (model specification, key handling via SDK), defining strict structural constraints (Learner constructor), and heavily detailing the required fidelity and format for research output (Markdown report) and testing procedures (large JSON datasets, evaluation-driven testing structure with metadata documentation). The conflict between hardcoding the taxonomy and allowing emergent structure for agent output has been noted.
+  Understanding (1673 chars):
+  The user's primary requirements revolve around strict adherence to the 'ai-sdk' interface and functionality for LLM interaction, including model specification (supporting direct model strings or OpenRouter wrappers). There is a strong preference for specific implementation details (e.g., a single object argument for the `Learner` constructor, and specific event emitter APIs) and a demand for high-quality, deeply detailed documentation and evaluation procedures.
+
+**Output Format & Detail:** Respo...
+  >> [MODEL] observe for development-interests (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for cognitive-patterns (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for model-interaction-preferences (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for negative-behavior-tracking (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-02-18T13:00:14.603Z] OBSERVED [negative-behavior-tracking] importance=0.85 buffer=2
+  user stated: "opps bad mistake. it seems you have no idea subject" is in our voablary? i recomend you to lok at the docs and specs . "subject" has a definition in this project. it does not mean subject as generic term,user explicitly rejected prior logic/understanding by stating: "opps bad mistake. it seems you have no idea subject" is in our voablary?
+[2026-02-18T13:00:15.105Z] DISMISSED [development-interests]
+[2026-02-18T13:00:15.114Z] OBSERVED [cognitive-patterns] importance=0.75 buffer=6
+  User suggests a combination approach for batching: set a batch size, and internally chunk the payload if it exceeds the token size.,User explicitly links better models with larger input size and context window capacity.,User is focused on defining structure, storage, and usage of 'understanding' data, which relates to how information is processed and retained (a form of abstraction/structure preference).,User proposes a session-based compression/rollover strategy similar to chat history limits: when a limit is hit, the conversation is compressed into an 'understanding', and a new one opens.,User asks whether 'understanding' records should be joined/merged or morphed into each other over time, indicating a preference for defining data lifecycle strategy.,User asks if compression should be fixed (e.g., always 100 things per day) or dynamically decided by the agent or determined as a strategy by the developer, revealing a preference for strategic control over dynamic behavior in data management.
+  >> [MODEL] synthesize for model-interaction-preferences (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-02-18T13:00:18.915Z] SYNTHESIZED [model-interaction-preferences] significance=notable
+  Evolution: The understanding has been significantly updated by incorporating strong meta-preferences: the absolute requirement for 'only JSON output' when specified, the need to respect project-specific vocabulary (and correct misunderstandings thereof), the preference for higher-tier models ('big gun'), and the preference for adaptive batch/chunking strategies. The decision-making interaction pattern (sequential questioning) is also a new process constraint.
+  Understanding (2066 chars):
+  The user maintains a strong preference for strict adherence to the 'ai-sdk' interface, especially regarding LLM interaction (model specification allows explicit overrides like 'claude-opus-4.5'). The core focus remains on high-quality, deeply detailed documentation and robust evaluation via large, custom 'eval cases' against real-world datasets, requiring detailed Markdown reports. A critical, overriding preference is demanding *only JSON output* when explicitly requested, superseding general fo...
+  >> [MODEL] observe for development-interests (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for cognitive-patterns (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for model-interaction-preferences (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for negative-behavior-tracking (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-02-18T13:00:19.949Z] DISMISSED [development-interests]
+[2026-02-18T13:00:20.207Z] OBSERVED [negative-behavior-tracking] importance=0.77 buffer=4
+  not sure if I agree with your strategies,i do not carew what they are called, they can be more universakl term. i just want to make sre we do have them.
+[2026-02-18T13:00:20.408Z] OBSERVED [model-interaction-preferences] importance=0.90 buffer=5
+  Explicit formatting demand: 'only JSON output' (inferred from context/role, though not explicitly in the provided user messages, the instruction set implies this is a primary constraint for the observer's response).,Implicit detail level preference: User provided extensive, detailed technical specifications regarding different 'understanding' strategies (fixed size, archiving, compression, time-based sections).,Tone requirement: The user is engaged in deep technical discussion, questioning previous assumptions ('not sure if I agree with your strategies'), proposing detailed alternatives, and seeking confirmation/feedback ('what do you think?').,User explicitly requested documentation creation: 'lets create a a doc and call it tasks for today.',User requested specific documentation content: 'add a section where we talk about how the instruction pormpt of a learner should be. provide example and templates.'
+  >> [MODEL] synthesize for cognitive-patterns (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-02-18T13:00:23.588Z] SYNTHESIZED [cognitive-patterns] significance=notable
+  Evolution: The core understanding of pragmatism and structure preference is reinforced, but the emphasis shifts. The user explicitly rejected complex state management (archiving), which refines the 'aversion to unnecessary complexity' by showing a hard limit on acceptable state complexity. The introduction of change tracking request ('diff') adds a new dimension to the validation focus: validating *changes* to core data structures, not just functional correctness (Eval Cases). Furthermore, the detailed comparison of four distinct strategies for data lifecycle management highlights a preference for selecting from known, formalized architectural approaches when solving structural definition problems.
+  Understanding (1409 chars):
+  The user maintains a pragmatic cognitive style, prioritizing simplicity and strong structural definition over complex, dynamic state management. Initial preference for bottom-up implementation informed by mature patterns remains, but is now heavily tempered by a desire to 'keep it simple' regarding lifecycle management (e.g., dropping archiving suggests aversion to complex state persistence). There is a strong, consistent requirement for extreme precision in interfaces and structure, now extendi...
+  >> [MODEL] observe for development-interests (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for cognitive-patterns (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for model-interaction-preferences (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for negative-behavior-tracking (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-02-18T13:00:24.466Z] DISMISSED [negative-behavior-tracking]
+[2026-02-18T13:00:24.571Z] DISMISSED [development-interests]
+[2026-02-18T13:00:24.860Z] OBSERVED [cognitive-patterns] importance=0.80 buffer=5
+  User explicitly asks about implementation details and structure for 'strategies': "how we are going to implement strategies? are they going to be functions, or class? if class will they have a based unfiorm shape? will the need to extend etc etc",User emphasizes the need for a standardized structure when discussing implementation: "if class will they have a based unfiorm shape? will the need to extend etc etc",User demands a review of the plan before proceeding: "wait a second you have to discuss your plan with me. what is it",User is concerned with reliability and standardization across instructions: "we want to make sure that our system handles any arbituary instrcution pretty good witha standard , fill the gap etc ...",User explicitly requires an intelligent generation/synthesis mechanism for prompts based on strategy and user instruction: "we need a real inetelegent prompt genration here."
+  >> [MODEL] synthesize for model-interaction-preferences (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-02-18T13:00:29.129Z] SYNTHESIZED [model-interaction-preferences] significance=notable
+  Evolution: Significantly expanded the architecture/processing section to incorporate detailed user requirements around intelligent, cached, generative system prompt creation based on dynamic strategies, and explicit demands for immediate plan review. Also integrated specific preferences regarding documentation workflow (file creation, context reading) and initialization patterns (lazy + OnEnd).
+  Understanding (2832 chars):
+  The user maintains a strong preference for strict adherence to the 'ai-sdk' interface, especially regarding LLM interaction (model specification allows explicit overrides like 'claude-opus-4.5'). The core focus remains on high-quality, deeply detailed documentation and robust evaluation via large, custom 'eval cases' against real-world datasets, requiring detailed Markdown reports. A critical, overriding preference is demanding *only JSON output* when explicitly requested, superseding general fo...
+  >> [MODEL] observe for development-interests (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for cognitive-patterns (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for model-interaction-preferences (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for negative-behavior-tracking (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-02-18T13:00:30.133Z] DISMISSED [development-interests]
+[2026-02-18T13:00:30.739Z] OBSERVED [negative-behavior-tracking] importance=0.74 buffer=8
+  can we also find better names for "ondata" and "onquery" they do not really make sense,nah recall does not make much sense, either. as recal is about retrieve . but here we want to see what is our understing . do we human do anythign like this> what is it calle?,you are wrong,i have the feeling that we can ask model to store a bit more context, be generious about things and stuff like that, what do you think?
+  >> [MODEL] synthesize for cognitive-patterns (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] synthesize for model-interaction-preferences (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-02-18T13:00:33.802Z] SYNTHESIZED [cognitive-patterns] significance=critical
+  Evolution: The existing understanding of strong structural constraint is heavily reinforced and quantified across multiple domains: implementation contracts (strategy shapes), file organization (specific file structure suggestions), naming conventions (rejection of vague names), and encapsulation (private methods). The observation about running cheap model evaluations first adds critical detail to the validation process, confirming a bottom-up functional check before deeper validation. The demand for immediate plan review signifies a critical need for upfront architectural governance.
+  Understanding (2053 chars):
+  The user maintains a highly pragmatic cognitive style, prioritizing simplicity and strong structural definition over complex, dynamic state management. Initial implementation preference leans bottom-up, but this is constantly checked against the principle of keeping things simple (e.g., aversion to complex state persistence). There is an overwhelming, critical focus on structural standardization, explicit interface definition, and semantic clarity across all components: code structure, file orga...
+[2026-02-18T13:00:34.609Z] SYNTHESIZED [model-interaction-preferences] significance=notable
+  Evolution: Significant updates occurred regarding naming conventions, file structure, and prompt handling, directly incorporating multiple recent observations. Specifically, lifecycle event names ('ondata', 'onquery' rejected, 'ask' preferred), utility function placement, prompt file structure ('prompt.<name>.ts'), class file naming ('class.ts' within folder), and directory organization ('tools') were established or refined. The preference for 'ask' supersedes or refines the general event handling preference.
+  Understanding (3058 chars):
+  The user maintains a strong preference for strict adherence to the 'ai-sdk' interface, especially regarding LLM interaction (model specification allows explicit overrides like 'claude-opus-4.5'). Agents require flexible configuration (Learner constructor takes one object) and the use of the most capable model unless constrained otherwise (e.g., for cheaper functionality checks).
+
+**Output Format & Detail:** Responses must be very detailed and deep, especially concerning agent behavior. General o...
+  >> [MODEL] observe for development-interests (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for cognitive-patterns (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for model-interaction-preferences (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for negative-behavior-tracking (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-02-18T13:00:35.441Z] DISMISSED [negative-behavior-tracking]
+[2026-02-18T13:00:35.756Z] DISMISSED [development-interests]
+[2026-02-18T13:00:36.357Z] OBSERVED [cognitive-patterns] importance=0.90 buffer=7
+  User explicitly requests to 'define the logic of streatgy by one setneces first', suggesting a preference for high-level definition before implementation details (Top-down initiation).,User asks for a list of what needs to be implement for the MVP brain, indicating a focus on defining requirements before coding.,User describes a development approach involving splitting learning into Phase 1 (Observe) and Phase 2 (Integrate), which is a form of architectural decomposition/abstraction.,User is concerned about understanding degradation (truncation, drift, loss), indicating a focus on robustness and edge cases related to data integrity over time.,User suggests an iterative, step-by-step specification process: 'Ask me one question at a time so we can develop a thorough, step-by-step spec for this idea. Each question should build on my previous answers... Let’s do this iteratively and dig into every relevant detail.' (Strong signal for iterative, detailed specification development).,User prefers a solution that is 'simpler and most explicit one' when faced with complexity choices.,User mentions a previous conclusion about cognitive skills ('CONFIRMS, CONTRADICTS, EXTENDS, NEW, IRRELEVANT') that 'we shoudl not tell it [the model]', suggesting a preference for emergent behavior over explicit instruction in certain contexts, possibly favoring abstraction over explicit control flow.
+  >> [MODEL] synthesize for model-interaction-preferences (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-02-18T13:00:40.804Z] SYNTHESIZED [model-interaction-preferences] significance=notable
+  Evolution: Procedural constraints on specification generation (iterative, one-question-at-a-time) and the target location ('docs/specs/') have been added to Output Format. A major, highly specific architectural pattern for text learning agents (Two-Phase Observe/Integrate cycle) regarding understanding updates has been documented. The implicit meta-cognitive skill tracking is explicitly rejected, requiring future self-correction.
+  Understanding (4245 chars):
+  The user maintains a strong preference for strict adherence to the 'ai-sdk' interface, especially regarding LLM interaction (model specification allows explicit overrides like 'claude-opus-4.5'). Agents require flexible configuration (Learner constructor takes one object) and the use of the most capable model unless constrained otherwise (e.g., for cheaper functionality checks).
+
+**Output Format & Detail (Refined):** Responses must be very detailed and deep, especially concerning agent behavior....
+  >> [MODEL] observe for development-interests (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for cognitive-patterns (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for model-interaction-preferences (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for negative-behavior-tracking (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-02-18T13:00:41.867Z] DISMISSED [negative-behavior-tracking]
+[2026-02-18T13:00:41.986Z] DISMISSED [development-interests]
+  >> [MODEL] synthesize for cognitive-patterns (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] synthesize for model-interaction-preferences (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-02-18T13:00:45.385Z] SYNTHESIZED [model-interaction-preferences] significance=notable
+  Evolution: The core two-phase process for knowledge updating is confirmed, but the output schema for the second phase ('integration') has been explicitly redefined to use a discriminated union (`status: "integrated"` containing only `newUnderstanding`, `significance`, `evolution`, and optional `reasoning`). The term 'integration' itself is rejected for this phase, aligning traceability back to method selection rather than schema output.
+  Understanding (2500 chars):
+  The existing two-phase process for text domain knowledge updates (Phase 1: Observe, Phase 2: Integrate/Finalize) is confirmed, but terminology requires significant revision.
+
+**Phase 1 (Observe):** Input Observation -> Output is a buffered array of raw string extractions (with optional importance score).
+**Phase 2 (Finalize/Understand):** Input is (Buffered Observations + Current Understanding) -> Output is updated understanding, triggered by a threshold check after every observation.
+
+**Methodo...
+[2026-02-18T13:00:45.848Z] SYNTHESIZED [cognitive-patterns] significance=notable
+  Evolution: The existing understanding of a bottom-up implementation preference is now heavily qualified and often superseded by a critical top-down requirement for high-level definition, iterative specification, and architectural decomposition (Phases/Methods). The validation focus is now understood as a controlled choice between simplicity (summary output) and traceability (detailed output).
+  Understanding (2552 chars):
+  The user maintains a highly pragmatic cognitive style, crucially balancing structure/simplicity against the need for robust, verifiable logic. While the initial preference leans bottom-up for implementation, recent observations (defining core logic in one sentence, asking for MVP definition, architectural decomposition into phases) strongly signal an overriding top-down need for high-level definition, structural planning, and mandatory iterative specification development.
+
+**Key Strategic Patter...
+  >> [MODEL] observe for development-interests (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for cognitive-patterns (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for model-interaction-preferences (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for negative-behavior-tracking (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-02-18T13:00:46.838Z] DISMISSED [development-interests]
+[2026-02-18T13:00:47.231Z] OBSERVED [model-interaction-preferences] importance=0.90 buffer=6
+  User explicitly requested an implementation plan ("ok correct, now giv eme you rimplementation plan").,User provided detailed feedback points for prompt auditing/revision, which directly relates to defining agent behavior and constraints (my domain).,Feedback points include: "No architecture leakage", "No redundancy", "Identity first, mechanics later", "Explain the inputs", "Positive framing over negative", and "Add examples".,User is actively comparing and contrasting different operational modes/prompts ("Observe" vs "Integrate").,User asked for confirmation on prompt structure ("Does this structure make sense?").,User requested an evaluation of current prompts against provided feedback criteria ("no look at the feeback and confirm that all prompts conatins them, and second evaluate our current pormpts").
+  >> [MODEL] synthesize for negative-behavior-tracking (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-02-18T13:00:47.283Z] OBSERVED [cognitive-patterns] importance=0.90 buffer=5
+  User is highly focused on architectural consistency and naming conventions ('we need to be consistent with the naming', 'TwoPhaseConfig is absolutly rediculuess').,User emphasizes modularity and separation of concerns ('no each of observe and syntehsisze should be self contained. also each has to consist of seperate d files per purpose of the file').,User is actively reviewing and refining system prompts based on explicit feedback criteria ('No architecture leakage', 'No redundancy', 'Identity first, mechanics later', 'Positive framing over negative').,User is engaged in a top-down design process, defining system structure (init, Observe, Integrate) and then refining the prompt mechanics for each component.,User explicitly requests evaluation of current prompts against a set of established feedback rules, indicating a focus on validation and refinement of the cognitive structure.
+[2026-02-18T13:00:49.184Z] SYNTHESIZED [negative-behavior-tracking] significance=critical
+  Evolution: Initial understanding established based on a cluster of strong negative feedback points across multiple interaction topics (terminology, configuration, structural rules). Identified patterns of explicit rejection and high dissatisfaction.
+  Understanding (982 chars):
+  The user exhibits frequent, strong negative sentiment directed at system reasoning, terminology, and configuration choices, suggesting low tolerance for ambiguity or non-standard naming. Key negative triggers observed include: 1. Explicit rejection of definitions/vocabulary related to system components (e.g., 'subject' definition failure, 'opps bad mistake'). 2. Strong dismissal of specific technical terms/configurations (e.g., 'TwoPhaseConfig is absolutly rediculuess', 'nah recall does not make...
+  >> [MODEL] observe for development-interests (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for cognitive-patterns (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for model-interaction-preferences (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for negative-behavior-tracking (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-02-18T13:00:49.928Z] DISMISSED [development-interests]
+[2026-02-18T13:00:50.366Z] DISMISSED [negative-behavior-tracking]
+  >> [MODEL] synthesize for cognitive-patterns (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] synthesize for model-interaction-preferences (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-02-18T13:00:53.755Z] SYNTHESIZED [cognitive-patterns] significance=notable
+  Evolution: The observations strongly reinforce the top-down structural requirement, moving it from a general preference to a mandatory process (defining *all* system components like history/strategy outcomes before detailed implementation). The focus on architectural consistency and naming conventions has escalated to a critical process requirement. New specific constraints on identity definition (Identity first, positive framing) and output stability control ('temperature' vs. 'interpretation creep') have been added.
+  Understanding (2487 chars):
+  The user maintains a highly pragmatic cognitive style, crucially balancing structure/simplicity against the need for robust, verifiable logic. The overriding preference is strongly top-down for structural planning and mandatory iterative specification development, confirmed by defining system structure (init, Observe, Integrate) before diving into prompt mechanics.
+
+**Key Strategic Patterns Refined & Integrated:**
+1.  **Strategy Definition & Phasing (Top-Down Structure):** There is an absolute c...
+[2026-02-18T13:00:54.269Z] SYNTHESIZED [model-interaction-preferences] significance=notable
+  Evolution: The understanding was significantly modified by integrating a large set of direct user requests concerning prompt auditing criteria, architectural debates (chunking, strategy scope), and state querying ('tell me how it is now'). This necessitated promoting several specific constraints into the main understanding body and explicitly defining the current directive: providing an implementation plan that satisfies the newly detailed prompt feedback criteria.
+  Understanding (3072 chars):
+  The core process architecture is defined by two phases: **Phase 1 (Observe)**, which buffers raw string extractions (with optional importance score if relevant in Observe phase), and **Phase 2 (Finalize/Understand)**, which updates the central 'understanding' state based on buffered observations. This separation of observation/integration is critical.
+
+**Output Schema (Critical Update):** The output structure is a discriminated union that varies based on the phase being executed, replacing the p...
+  >> [MODEL] observe for development-interests (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for cognitive-patterns (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for model-interaction-preferences (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for negative-behavior-tracking (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-02-18T13:00:55.352Z] OBSERVED [negative-behavior-tracking] importance=0.75 buffer=4
+  user asked system to consult specific documentation files because they were 'note sure which one is the right one',user explicitly demanded a comprehensive analysis: 'i want you to first analyss everything and tell me what is borken and what needs a FIX AND HWO',user questioned the system's prior knowledge/action: 'did you see them? you think they are not good to eval the understing?',user requested a change in approach based on perceived reality mismatch: 'can we change the instrutcion a bit more close to reality? because sometimes a learner is set to track multiple things and not only one thing'
+[2026-02-18T13:00:55.500Z] DISMISSED [development-interests]
+  >> [MODEL] synthesize for model-interaction-preferences (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-02-18T13:00:56.151Z] OBSERVED [cognitive-patterns] importance=0.75 buffer=7
+  User prefers to test specific scenarios: 'ok now lets test with a super specific one purpose instcution and see how it works there',User prefers testing against known use cases: 'ok now lets test it with the other usecase scenarios which we have data for',User explicitly prefers simplicity when faced with options: 'if not then i prefer option A just for simplcity for now',User emphasizes comprehensive analysis before fixing: 'i want you to first analyss everything and tell me what is borken and what needs a FIX AND HWO',User prioritizes validation by testing against existing data/scenarios: 'but e already have comperhensive data sets avaiable, did you see them? you think they are not good to eval the understing?',User suggests testing with increased complexity/realism: 'can you change the instrutcion a bit more close to reality? because sometimes a learner is set to track multiple things and not only one thing . you can test this with liek 30 events',User focuses on validation by observing generation output and checking for errors: 'we can just keep the test limited to the observe generation only for now. and see if it througs any errors.'
+[2026-02-18T13:00:58.402Z] SYNTHESIZED [model-interaction-preferences] significance=notable
+  Evolution: The user has established a strict pre-fix protocol (analyze, propose fix path, confirm) and temporarily narrowed the testing scope to Phase 1 ('observe generation only'). A key functional assumption about the 'learner' (tracking multiple things) has been corrected, moving away from a singular focus.
+  Understanding (2027 chars):
+  The core process architecture remains the two-phase model: **Phase 1 (Observe)** for raw data buffering and **Phase 2 (Finalize/Understand)** for state integration, adhering to the discriminated union output schema. Current focus is verifying prompt constraints (e.g., 'No architecture leakage', 'Identity first') against current configurations while implementing requested fixes.
+
+**Recent Focus & Testing Strategy:** The user is currently emphasizing testing simplicity and immediate functionality ...
+  >> [MODEL] observe for development-interests (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for cognitive-patterns (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for model-interaction-preferences (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for negative-behavior-tracking (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-02-18T13:00:59.363Z] OBSERVED [negative-behavior-tracking] importance=0.78 buffer=6
+  user expressed frustration using strong language: "i thought in none of llm calls with stcurtured output we agree to not include a fucking output format! right?",user explicitly rejected prior logic/state by demanding cleanup: "can you delete whatever old and ireelavant stuff to our current implemenetions, including the evals and tests and reports."
+[2026-02-18T13:00:59.396Z] DISMISSED [development-interests]
+  >> [MODEL] synthesize for cognitive-patterns (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-02-18T13:00:59.778Z] OBSERVED [model-interaction-preferences] importance=0.90 buffer=6
+  Explicit formatting demand: "only JSON output",Implicit detail level preference: User asks for simplification/refinement regarding structure and redundancy ('worth tightening?', 'delete whatever old and ireelavant stuff', 'sketch of all options').,Tone requirement: User expresses frustration/strong emotion regarding output format control ('do not include a fucking output format!').,User is actively refining configuration structure, discussing nesting and model overrides ('anythign related to learners needs to be nested inside `learner`', 'query:{model, method}...').,User is establishing a hierarchy for model configuration: 'model that can be used for prompt generators', 'model for learner/observe', 'model for learner/synthesize', 'model for ask'.,User is concerned about redundancy between 'Watch for' (Brain instructions) and 'focusAreas' (Identity generation).
+[2026-02-18T13:01:02.657Z] SYNTHESIZED [cognitive-patterns] significance=notable
+  Evolution: The observations strongly reinforce the existing top-down preference and highlight a detailed, structured approach to validation. Specifically, validation strategy is now clearly defined as prioritizing: 1) Comprehensive analysis of failures first; 2) Testing against known, existing data sets; 3) Proving stability under increased complexity/realism. The preference for simplicity as a tie-breaker was also explicitly confirmed.
+  Understanding (1998 chars):
+  The user maintains a highly pragmatic cognitive style, crucially balancing structure/simplicity against the need for robust, verifiable logic. The overriding preference is strongly **top-down** for structural planning and mandatory iterative specification development.
+
+**Key Strategic Patterns Refined & Integrated:**
+1.  **Strategy Definition & Phasing (Top-Down Structure):** There is an absolute commitment to structural definition before detailed mechanics (explicitly stating "top down"). This ...
+  >> [MODEL] observe for development-interests (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for cognitive-patterns (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for model-interaction-preferences (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for negative-behavior-tracking (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-02-18T13:01:03.752Z] DISMISSED [development-interests]
+  >> [MODEL] synthesize for model-interaction-preferences (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-02-18T13:01:04.170Z] OBSERVED [cognitive-patterns] importance=0.80 buffer=8
+  User explicitly asks for implementation approach: "what is the best way to appuch this? is there a standard practice ?",User shows concern for reusability and shared logic: "hmmm but we want the same logic for learner and later on for other things. we need a better approuch",User checks for type safety: "yeah it looks elegent. is it type safe ?",User is concerned with scope/completeness of a proposed solution: "but this just take care of model? not other configs?",User suggests a specific implementation pattern: "lets do cascade function.",User is focused on future extensibility/scalability: "ok and this is scaable in a way that lets say we will add a new package... they will follow teh same and can be injected to brain in similar fashion?",User suggests structural separation for configuration (unresolved vs resolved): "shluld not we have TextLearnerConfig vs ResolvedTextLearnerConfig in similar fashion?",User inquires about default values management: "where we keep the defaults?"
+  >> [MODEL] synthesize for negative-behavior-tracking (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-02-18T13:01:07.561Z] SYNTHESIZED [model-interaction-preferences] significance=notable
+  Evolution: Integrated critical, non-negotiable formatting rigidity ('only JSON output', no extra text/comments) and synthesized conflicting signals regarding detail level (high detail required for planning/structure iteration, zero verbosity for final output). Established strict configuration hierarchy rules (nesting, model tiers) as a primary focus.
+  Understanding (2963 chars):
+  The core process architecture remains the two-phase model: Phase 1 (Observe) for raw data buffering and Phase 2 (Finalize/Understand) for state integration, adhering to the discriminated union output schema. Current focus is verifying prompt constraints against configurations while implementing requested fixes.
+
+**Recent Focus & Testing Strategy:** Testing emphasizes immediate functionality and simplicity over complete architectural cleanup, currently limited to 'observe generation only' confirm...
+[2026-02-18T13:01:07.569Z] SYNTHESIZED [negative-behavior-tracking] significance=critical
+  Evolution: The understanding deepens by adding clusters related to explicit state/context cleanup demands, questioning the system's recall ('did you see them?'), and the clearest instance of critical/strong language ('fucking output format!'). This reinforces the existing assessment that instruction adherence and definition precision are paramount, but now adds system context management as a new, highly significant irritant cluster.
+  Understanding (2432 chars):
+  The user exhibits frequent, strong negative sentiment directed at system reasoning, terminology, configuration choices, and perceived failures to follow instructions. Key negative triggers remain centered on logic accuracy, naming conventions, and state management. 
+
+Observed Negative Triggers & Patterns:
+1. **Instruction/State Adherence Failure (Critical)**: Explicit rejection/accusation of ignoring instructions ("you just ignored what i said"). This suggests a pattern where the model seems to ...
+  >> [MODEL] observe for development-interests (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for cognitive-patterns (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for model-interaction-preferences (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for negative-behavior-tracking (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-02-18T13:01:08.638Z] DISMISSED [negative-behavior-tracking]
+  >> [MODEL] synthesize for cognitive-patterns (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-02-18T13:01:09.200Z] DISMISSED [development-interests]
+  >> [MODEL] synthesize for model-interaction-preferences (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-02-18T13:01:11.793Z] SYNTHESIZED [cognitive-patterns] significance=notable
+  Evolution: Detailed patterns regarding implementation methodology were added. The existing preference for top-down structure and modularity is now explicitly linked to a desire for adherence to established patterns ("best practice", "cascade function") and a strong focus on ensuring future extensibility and dependency injection compatibility (via the 'new package' inquiry). Furthermore, a crucial refinement in validation strategy emerged: favoring implementation patterns that facilitate real-world, external testing (service model, file injection) over purely internal testing.
+  Understanding (2564 chars):
+  The user maintains a highly pragmatic cognitive style, crucially balancing structure/simplicity against the need for robust, verifiable logic. The overriding preference is strongly **top-down** for structural planning and mandatory iterative specification development.
+
+**Key Strategic Patterns Refined & Integrated:**
+1.  **Strategy Definition & Phasing (Top-Down Structure):** There is an absolute commitment to structural definition before detailed mechanics (explicitly stating "top down"). This ...
+[2026-02-18T13:01:13.180Z] SYNTHESIZED [model-interaction-preferences] significance=notable
+  Evolution: A major new category regarding external testability, deployment architecture (web server, docker, client injection tool), and administrative data access (history reading) has been added, significantly expanding the scope beyond internal configuration and process flow.
+  Understanding (4466 chars):
+  The core process architecture remains the two-phase model: Phase 1 (Observe) for raw data buffering and Phase 2 (Finalize/Understand) for state integration, adhering to the discriminated union output schema. Current focus is verifying prompt constraints against configurations while implementing requested fixes.
+
+**Recent Focus & Testing Strategy:** Testing emphasizes immediate functionality and simplicity over complete architectural cleanup, currently limited to 'observe generation only' confirm...
+  >> [MODEL] observe for development-interests (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for cognitive-patterns (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for model-interaction-preferences (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for negative-behavior-tracking (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-02-18T13:01:14.038Z] DISMISSED [development-interests]
+[2026-02-18T13:01:14.465Z] DISMISSED [cognitive-patterns]
+[2026-02-18T13:01:15.022Z] OBSERVED [negative-behavior-tracking] importance=0.80 buffer=9
+  user questioned if the system provided all models: "this is not all the models i gave you, is it?",user questioned system behavior regarding status updates: "why when i click on initializing it takes long time without seeing any realtime status ... what exactly is happening, you sure you loging evey incoming events ?",user questioned system behavior regarding client connections: "also why the server keeps adding clients! is this intential? or this shows a mistake?",user reported an error state: "[Event] brain:init:failed {"error":"No object generated: could not parse the response."}",user explicitly rejected prior logic/approach: "no no you can not just decide to do things!",user demanded a fix for an error: "lets fix this model error. i can not see anythign and all mdoels going wrong",user expressed frustration/criticism about the UI: "we need a bit more curated ui instead of just showing logs",user reported a persistent issue after apparent fix: "ok brain is initilized but all learners show \"initilizing\" .. ?",user criticized the UI update timing: "also is not this the fact that as soon as we have brain generetd all configs we already know how many learners we have? so why not we show them right away? and it seems that we only show learner cards in ui on e after each other which means we perobably are adding them afterthe initlized?"
+  >> [MODEL] synthesize for model-interaction-preferences (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-02-18T13:01:18.354Z] SYNTHESIZED [model-interaction-preferences] significance=notable
+  Evolution: The focus has decisively shifted from theoretical architecture refinement (two-phase flow, configuration structure) to immediate implementation challenges centered around external tooling, robust service specification, and developing a comprehensive, learner-centric user interface. New, concrete UI/Deployment requirements (batch testing, server control, specific card displays) are now the dominant context.
+  Understanding (2322 chars):
+  The user's core preference remains the strict two-phase execution architecture (Observe/Finalize), strictly enforced by the CRITICAL constraint of **'only JSON output'** for final artifacts. This necessitates detailed preparatory planning/explanation followed by pure JSON delivery.
+
+**Recent Developments Focus Heavily on UI/Deployment/Testability:** The most significant shift involves prioritizing immediate externalization and observability via a **Client Tooling UI**. Key UI requirements are em...
+  >> [MODEL] observe for development-interests (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for cognitive-patterns (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for model-interaction-preferences (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for negative-behavior-tracking (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-02-18T13:01:19.345Z] DISMISSED [development-interests]
+  >> [MODEL] synthesize for negative-behavior-tracking (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-02-18T13:01:20.350Z] OBSERVED [model-interaction-preferences] importance=0.85 buffer=7
+  Explicit formatting demand: "only JSON output" is present in the context of generating a response (though not in the provided user input, it is a meta-instruction for this observer).,Implicit detail level preference: User requests for UI changes like "make the font size of the whole ui slightlyu bigger" and "fonts are too small" suggest a preference for larger text/visual elements.,Implicit detail level preference: User requests to show more detail, such as "show the buffer content for each leraner" and "show usage per learner".,Tone requirement: User expresses frustration regarding error handling: "why i do nto see a good error message from these llm ? why teh fuck we are abstracting away things?",Implicit detail level preference: User requests consistency in data presentation: "why model lists are not consistant accross all possoible menues? some missing some items".,Implicit detail level preference: User requests specific UI layout changes: "move the usage to the middle column above the learners.",Implicit detail level preference: User requests configuration granularity: "we need to make teh also confufraable" regarding models for learner components (observe/synthesize).
+  >> [MODEL] synthesize for cognitive-patterns (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-02-18T13:01:23.246Z] SYNTHESIZED [negative-behavior-tracking] significance=critical
+  Evolution: The understanding is significantly updated by introducing 'Error Visibility & Abstraction' as a new critical trigger cluster, directly linked to profanity. Previously critical triggers (instruction adherence) remain active, but the focus has broadened to include persistent application/UI flow failures (stuck initialization) and fundamental issues with error reporting quality.
+  Understanding (2906 chars):
+  The user exhibits frequent, strong negative sentiment directed at system reasoning, terminology, configuration choices, perceived failures to follow instructions, and critically, poor error visibility due to high levels of abstraction.
+
+Observed Negative Triggers & Patterns:
+1. **Instruction/State Adherence Failure (Critical)**: Explicit rejection/accusation of ignoring instructions ("you just ignored what i said"; "no no you can not just decide to do things!"). This confirms a pattern where the...
+[2026-02-18T13:01:24.401Z] SYNTHESIZED [cognitive-patterns] significance=notable
+  Evolution: The understanding has been significantly deepened by recognizing the explicit metacognitive layer to the user's process. While the top-down, systematic approach was known, the method of execution—characterised by constant iterative refinement, collaborative validation, high cognitive flexibility, and explicit reflection on knowledge gaps—is now explicitly modeled as a core strategic trait. Simplification is also recognized as a goal, but only as a result of reducing unnecessary complexity after systematic decomposition.
+  Understanding (2041 chars):
+  The user operates with a profoundly **systematic, iterative, and metacognitive** cognitive style, primarily executed through a **top-down structural approach**. The core goal is creating comprehensive, type-safe, modular, and highly testable systems (emphasizing extensibility and reusable logic).
+
+**Key Strategic Patterns Refined & Integrated:**
+1.  **Strategy Definition & Phasing (Top-Down Structure & Iterative Decomposition):** Commitment to top-down structure persists, but this is now framed ...
+  >> [MODEL] observe for development-interests (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for cognitive-patterns (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for model-interaction-preferences (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for negative-behavior-tracking (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-02-18T13:01:25.351Z] DISMISSED [development-interests]
+[2026-02-18T13:01:25.366Z] DISMISSED [cognitive-patterns]
+  >> [MODEL] synthesize for model-interaction-preferences (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-02-18T13:01:25.615Z] OBSERVED [negative-behavior-tracking] importance=0.70 buffer=1
+  user expressed confusion/frustration: "i just initlized the brain but the usages shows nothing all are zero! how is that ?"
+[2026-02-18T13:01:27.662Z] SYNTHESIZED [model-interaction-preferences] significance=notable
+  Evolution: The new observations heavily reinforce and specify existing UI/Observability requirements, particularly around visual size (font/textarea=170), debugging tone (demanding non-abstracted errors), and data granularity (usage at brain-level, buffer content, learner-specific component configs). This deepens the requirement scope for the UI phase significantly.
+  Understanding (1377 chars):
+  The user operates under the absolute constraint of Two-Phase Execution (Observe/Finalize) with a CRITICAL requirement for 'only JSON output' in the final phase, necessitating verbose, structurally sound justification *before* the final artifact. The focus has shifted intensely towards developing a robust, observable Client Tooling UI for learner management and deployment/testing. 
+
+**UI/Observability (High Priority):** There is significant demand for immediate visual feedback and debugging aids....
+  >> [MODEL] observe for development-interests (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for cognitive-patterns (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for negative-behavior-tracking (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for W6MyulEnkdrbUHiY5sjuP (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for 48ItkA5iagHcpjCDmAGcL (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for AC8s5TkaDNU32ZB6bCDiZ (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-02-18T13:51:38.197Z] DISMISSED [development-interests]
+[2026-02-18T13:51:38.433Z] OBSERVED [48ItkA5iagHcpjCDmAGcL] importance=0.60 buffer=3
+  minImportance 0.5 as dedfault,5 observe errors across 230 observe calls,did we also test if there are signals being send from learners as well?
+[2026-02-18T13:51:38.884Z] OBSERVED [AC8s5TkaDNU32ZB6bCDiZ] importance=0.80 buffer=7
+  reference to @evals/scripts/learner-09-comprehensive-update.ts suggests evaluation scripts related to learner configurations.,discussion about 'config cascading' during evaluation suggests changes in configuration structure.,mention of 'Evolution is too destructive on prompt changes' relates to configuration/sequencing logic changes.,discussion about how a new configuration/prompt should interact with existing state: 'it does not mean that this neccery override everything, it can mean that user just added asdke for a new thing , or adjsting another learner, or deleteing.' This relates to configuration update logic.,request to 'make sure we also log and test the scenario where signals gets called by learners' relates to data integrity/system interaction monitoring.,mention of '5 observe errors across 230 observe calls' relates to data integrity metrics.,discussion about evaluator behavior iteration relates to sequencing logic definitions.
+  >> [MODEL] synthesize for negative-behavior-tracking (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] synthesize for W6MyulEnkdrbUHiY5sjuP (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] synthesize for cognitive-patterns (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-02-18T13:51:42.107Z] SYNTHESIZED [W6MyulEnkdrbUHiY5sjuP] significance=notable
+  Evolution: The existing understanding of Two-Phase Execution and mandatory JSON output is confirmed and significantly extended to include detailed operational configurations (model specifications, batching, dataset switching, importance defaults (minImportance 0.5), specific testing scenarios, and required reporting granularity). This indicates a shift towards complex, configurable, multi-step evaluation management.
+  Understanding (1127 chars):
+  The user operates under the absolute constraint of Two-Phase Execution (Observe/Finalize). The final phase critically requires 'only JSON output' and must be preceded by a verbose, structurally sound justification block.
+
+Structural/Behavioral Constraints:
+1. Execution flow includes explicit evaluation steps, allowing for iteration ("run this eval first", "re-run", "iterate on evaluator behavior").
+2. Configuration parameters are dynamic and must be captured, including:
+    a. Specific models to...
+[2026-02-18T13:51:42.681Z] SYNTHESIZED [negative-behavior-tracking] significance=critical
+  Evolution: Several new observations reinforced existing critical failure modes (explicit cursing, instruction rejection) and introduced two new critical clusters: 1) Immediate failure/incoherence of 'brain' initialization reporting (zero usage after init) and 2) Direct challenge to the internal logic of the observation/synthesis buffering mechanism. The understanding shifts from abstraction being the *primary* visible driver to data/state coherence failures being equally catastrophic.
+  Understanding (3173 chars):
+  The user exhibits intense frustration predicated on several factors: perceived breaks in commitment, architectural opacity, and significant failures in data/state coherence.
+
+Observed Negative Triggers & Patterns:
+1. **Instruction/State Adherence Failure (Critical)**: Explicit rejection/accusation of ignoring instructions ("you just ignored what i said"; "no no you can not just decide to do things!").
+2. **Strong Explicit Frustration/Curse Words (Critical)**: Use of expletives ("fucking output f...
+[2026-02-18T13:51:43.452Z] SYNTHESIZED [cognitive-patterns] significance=notable
+  Evolution: The validation and testing pattern (formerly broad) has been significantly detailed. The user exhibits a clear preference for 'Test-Driven Development' style execution where a small-scale test run is mandatory before scaling ('run this eval first'). Furthermore, validation is not just about functional correctness but deep empirical analysis, including environmental realism (sleeps, record injection), performance metrics (token counts, call distribution), failure mode diagnosis (context mismatch), and continuous iteration on the testing framework itself (iterating on the evaluator). This confirms and significantly deepens Pattern 4.
+  Understanding (2847 chars):
+  The user operates with a profoundly **systematic, iterative, and metacognitive** cognitive style, primarily executed through a **top-down structural approach**. The core goal is creating comprehensive, type-safe, modular, and highly testable systems (emphasizing extensibility and reusable logic).
+
+**Key Strategic Patterns Refined & Integrated:**
+1.  **Strategy Definition & Phasing (Top-Down Structure & Iterative Decomposition):** Commitment to top-down structure persists, but this is now framed ...
+  >> [MODEL] observe for development-interests (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for cognitive-patterns (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for negative-behavior-tracking (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for W6MyulEnkdrbUHiY5sjuP (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for 48ItkA5iagHcpjCDmAGcL (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for AC8s5TkaDNU32ZB6bCDiZ (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-02-18T13:51:44.362Z] DISMISSED [development-interests]
+[2026-02-18T13:51:44.398Z] DISMISSED [W6MyulEnkdrbUHiY5sjuP]
+[2026-02-18T13:51:44.521Z] OBSERVED [cognitive-patterns] importance=0.80 buffer=4
+  User suggests designing a solid system that works for all models, indicating a need for robust, generalized design rather than model-specific fixes.,User explicitly asks for multi-layer thinking regarding prompt engineering for an evaluator, suggesting a preference for comprehensive, abstract design principles over simple fixes.,User proposes creating a table to map signal types to desired actions in scenarios, suggesting a structured, systematic approach to defining evaluation logic.,User mentions having a "super minimal but i thnk very powerfull guideline for the elouter" after proposing a mapping structure, suggesting a preference for starting with minimal, powerful abstractions.
+[2026-02-18T13:51:44.633Z] DISMISSED [negative-behavior-tracking]
+  >> [MODEL] synthesize for 48ItkA5iagHcpjCDmAGcL (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] synthesize for AC8s5TkaDNU32ZB6bCDiZ (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-02-18T13:51:47.291Z] SYNTHESIZED [48ItkA5iagHcpjCDmAGcL] significance=critical
+  Evolution: Significantly extended scope of understanding beyond general UI/Observability to encompass deep, specific requirements around debugging, configuring, and monitoring a core 'Evaluator' sub-system (including prompt configuration, signal tracing, and performance evaluation costs). Initial high priority is confirmed, but the specific needs around the evaluator now dominate the new information.
+  Understanding (1907 chars):
+  UI/Observability (High Priority): There is significant demand for immediate visual feedback and debugging aids. This includes: explicit preference for larger text/UI elements (font size/text area height set to 170), improved error surfacing (fixing critical model errors, demanding good LLM error messages instead of abstraction), and consistent data visualization across all menus. Specific required datastreams for the UI now include: buffer content per learner, usage per learner, and aggregated u...
+[2026-02-18T13:51:47.791Z] SYNTHESIZED [AC8s5TkaDNU32ZB6bCDiZ] significance=notable
+  Evolution: The required governance around model consistency (root model specification applying universally) is now explicitly stated, linking configuration scope to LLM invocation context. Sequencing logic complexity is detailed via signal mapping and state interaction for the evaluator component. Data integrity observation count is quantified.
+  Understanding (1190 chars):
+  Configuration must allow for granular separation between learner components (observe/synthesize tasks) and the brain scope. Governance requires model consistency: once a root model is specified (e.g., gpt-4o-mini initialization), it should apply universally across all LLM calls within the entire brain and subsequent learners, unless specific overrides are intended and controlled.
+
+Sequencing and state management are becoming complex, requiring robust logic defined via configuration, mapping sign...
+  >> [MODEL] observe for development-interests (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for cognitive-patterns (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for negative-behavior-tracking (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for W6MyulEnkdrbUHiY5sjuP (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for 48ItkA5iagHcpjCDmAGcL (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for AC8s5TkaDNU32ZB6bCDiZ (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-02-18T13:51:48.407Z] DISMISSED [development-interests]
+[2026-02-18T13:51:48.447Z] OBSERVED [negative-behavior-tracking] importance=0.80 buffer=2
+  this is terrible idea to include exact number that you are evaling with in the prompt :)) so stupid,also models can not understand numbers . thnk we need to give them range or label them.
+[2026-02-18T13:51:48.921Z] DISMISSED [48ItkA5iagHcpjCDmAGcL]
+[2026-02-18T13:51:48.922Z] OBSERVED [cognitive-patterns] importance=0.70 buffer=8
+  User suggests storing blocks in separate files with explicit naming for clarity on usage, indicating a preference for structured organization.,User suggests that instead of exact numbers for evaluation, they should use ranges or labels (e.g., 'maximum 3 range'), showing a preference for abstract categorization over precise quantification in certain contexts.,User suggests instructing the model how to reason based on signal value/metric by asking itself a list of questions and defining actions based on the answers, indicating a preference for defining procedural logic/flow control.,User asks for a summary of the latest state to transition to a new session, indicating a top-down approach where summarizing the current state/requirements is important before proceeding.
+[2026-02-18T13:51:49.281Z] OBSERVED [W6MyulEnkdrbUHiY5sjuP] importance=0.80 buffer=6
+  The user explicitly requests a summary of the latest state of the conversation to provide to a new session.,The user suggests storing blocks in a separate file or files with explicit naming.,The user discusses classifying signals and suggests the evaluator prompt can classify them if categories are known.,The user questions whether to use dynamic selection or always provide all roles/categories.,The user suggests using ranges or labels instead of exact numbers when instructing the model on evaluation counts.,The user proposes instructing the model how to reason based on signal values/metrics via a list of questions.
+[2026-02-18T13:51:49.413Z] OBSERVED [AC8s5TkaDNU32ZB6bCDiZ] importance=0.80 buffer=7
+  Signals coming from brian prompt update need to be covered, including scenarios like "rewrite everything" or "delete all you know".,There is discussion about needing a set of roles for handling signals.,There is a suggestion to store blocks in a separate file or files as fragments with explicit naming and clarity on where they are used.,There is a discussion about configuration structure: whether items (like counts or domains) will be dynamically selected or if the model will always have all of them.,There is a suggestion to use ranges or labels instead of exact numbers for evaluation metrics, such as 'maximum 3 range'.,There is a proposal to label mechanics by translating character length or other metrics into labels like 'some knowledge vs significant knowledge'.,There is a proposal to instruct the model on how to reason per signal based on its value/metric, potentially involving asking itself a list of questions and defining actions based on the answers.
+  >> [MODEL] observe for development-interests (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for cognitive-patterns (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for negative-behavior-tracking (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for W6MyulEnkdrbUHiY5sjuP (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for 48ItkA5iagHcpjCDmAGcL (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for AC8s5TkaDNU32ZB6bCDiZ (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-02-18T13:51:50.048Z] DISMISSED [development-interests]
+[2026-02-18T13:51:50.385Z] DISMISSED [48ItkA5iagHcpjCDmAGcL]
+  >> [MODEL] synthesize for W6MyulEnkdrbUHiY5sjuP (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-02-18T13:51:50.728Z] OBSERVED [negative-behavior-tracking] importance=0.77 buffer=3
+  this is becoming abt overwhelming for me
+  >> [MODEL] synthesize for AC8s5TkaDNU32ZB6bCDiZ (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] synthesize for cognitive-patterns (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-02-18T13:51:53.944Z] SYNTHESIZED [W6MyulEnkdrbUHiY5sjuP] significance=notable
+  Evolution: Significantly expanded constraints regarding the *content* and *artifact management* of the specification being built. New critical requirements include: saving the spec to 'docs/specs/', focusing the argument on 'brain.update', defining the precise return structure for 'brain.update', and establishing file separation practices. This deepens the known Two-Phase Execution structure by defining what the final specification must contain and where it lives.
+  Understanding (1996 chars):
+  The user mandates a highly structured, iterative development process focused on creating a detailed, developer-hand-off specification. This specification must explicitly focus on the 'brain.update' argument structure, requiring a return format similar to {changedFields, config, learnerResults}. The overall context framing is the Two-Phase Execution (Observe/Finalize), where the final phase demands 'only JSON output' preceded by a verbose justification block. Execution configuration parameters (m...
+[2026-02-18T13:51:55.063Z] SYNTHESIZED [AC8s5TkaDNU32ZB6bCDiZ] significance=notable
+  Evolution: The introduction of numerous interconnected observations significantly refines the understanding of Brain-Learner configuration synchronization and update semantics. Key integrations include defining the bidirectional/cascading nature of `brain.update()` impacting learners, the rejection of storing learner configs within the brain, and the proposal for abstracting configuration metrics (ranges/labels) and defining internal reasoning steps based on signals.
+  Understanding (2754 chars):
+  Configuration must maintain granular separation between learner components and the brain scope. Governance requires model consistency: a root model choice should propagate universally unless explicitly overridden. 
+
+**Configuration Structure & Evolution:**
+1. **Brain-Learner Interaction:** `brain.update()` logic must mirror `learner.update()`/`learner.method.update()`, accepting a partial update of the brain's structure (similar to the learner class structure). Updates initiated via `brain.updat...
+[2026-02-18T13:51:55.179Z] SYNTHESIZED [cognitive-patterns] significance=notable
+  Evolution: The previous understanding of 'top-down' is significantly refined. It is now clearly articulated as a **specification-first, iterative development cycle** ('Ask me one question at a time') aimed at producing a formal, executable specification document. The preference for abstraction is confirmed, extending to the specification level (ranges over precise numbers). The procedural definition of logic via internal self-questioning/flow control within components is a new, highly specific pattern integrated into the validation strategy.
+  Understanding (2756 chars):
+  The user operates with a profoundly **systematic, iterative, and metacognitive** cognitive style, primarily executed through a **top-down and highly structured specification-first approach**. The core goal is creating comprehensive, type-safe, modular, and highly testable systems (emphasizing extensibility and reusable logic).
+
+**Key Strategic Patterns Refined & Integrated:**
+1.  **Strategy Definition & Phasing (Top-Down Structure & Iterative Decomposition):** Commitment to top-down structure pe...
+  >> [MODEL] observe for development-interests (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for cognitive-patterns (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for negative-behavior-tracking (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for W6MyulEnkdrbUHiY5sjuP (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for 48ItkA5iagHcpjCDmAGcL (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+  >> [MODEL] observe for AC8s5TkaDNU32ZB6bCDiZ (brain default: google/gemini-2.5-flash-lite-preview-09-2025)
+[2026-02-18T13:51:55.882Z] DISMISSED [48ItkA5iagHcpjCDmAGcL]
+[2026-02-18T13:51:55.931Z] DISMISSED [cognitive-patterns]
+[2026-02-18T13:51:55.953Z] OBSERVED [AC8s5TkaDNU32ZB6bCDiZ] importance=0.80 buffer=2
+  all learnwrer will have these 3 essentials fields,it should use actually the blurprint model of th ebrain
+[2026-02-18T13:51:56.030Z] DISMISSED [development-interests]
+[2026-02-18T13:51:56.342Z] DISMISSED [negative-behavior-tracking]
+[2026-02-18T13:51:56.400Z] DISMISSED [W6MyulEnkdrbUHiY5sjuP]

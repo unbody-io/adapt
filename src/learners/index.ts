@@ -1,6 +1,8 @@
 // Core types
 export type {
 	AskResult,
+	BaseLearnerEvent,
+	BaseLearnerEventMap,
 	EvolutionEntry,
 	IngestResult,
 	Learner,
@@ -10,6 +12,7 @@ export type {
 	LearnerOrigin,
 	LearnerStatus,
 	Significance,
+	TokenUsage,
 } from './types'
 
 // Schemas
@@ -30,7 +33,6 @@ export type {
 	OnStepCallback,
 	TextLearnerConfig,
 	TextLearnerMaintenance,
-	TokenUsage,
 } from './text-learner'
 
 // Strategies

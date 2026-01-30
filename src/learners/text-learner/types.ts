@@ -1,6 +1,9 @@
 import type { LanguageModel } from 'ai'
 import type { Strategy } from './strategies'
-import type { EvolutionEntry, LearnerOrigin } from '../types'
+import type { EvolutionEntry, LearnerOrigin, TokenUsage } from '../types'
+
+// Re-export TokenUsage for backwards compatibility
+export type { TokenUsage } from '../types'
 
 /**
  * Maintenance configuration for TextLearner
@@ -10,15 +13,6 @@ export interface TextLearnerMaintenance {
 	strategy: Strategy
 	/** Max tokens before maintenance kicks in (for cumulative/decay) */
 	maxTokens?: number
-}
-
-/**
- * Token usage information
- */
-export interface TokenUsage {
-	inputTokens: number
-	outputTokens: number
-	totalTokens: number
 }
 
 /**
@@ -125,6 +119,8 @@ export interface TextLearnerConfig {
 	origin?: LearnerOrigin
 	/** Maintenance settings for understanding compression */
 	maintenance?: TextLearnerMaintenance
+	/** Max estimated tokens for input before chunking (default: 30000) */
+	maxInputTokens?: number
 	/** Callback fired after each agent step (simplified observability) */
 	onStep?: OnStepCallback
 	/** Full observer for lifecycle events (start, step, end) */

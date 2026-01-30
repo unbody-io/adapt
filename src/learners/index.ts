@@ -24,14 +24,9 @@ export {
  } from './text-learner'
 
 export type {
-	LearnerEndEvent,
-	LearnerInitErrorEvent,
-	LearnerInitializedEvent,
-	LearnerObserver,
-	LearnerStartEvent,
-	LearnerStepEvent,
-	OnStepCallback,
 	TextLearnerConfig,
+	TextLearnerEventMap,
+	TextLearnerEvent,
 	TextLearnerMaintenance,
 } from './text-learner'
 

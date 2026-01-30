@@ -34,7 +34,7 @@ export type UnifiedHandler<E> = (event: E) => void
  * subscriptions for all events. Emits generic 'error' event for any
  * failed events (type ending in ':failed').
  */
-export class TypedEmitter<M extends Record<string, unknown>> {
+export class TypedEmitter<M extends object> {
 	private listeners: Map<string, Function[]> = new Map()
 	private wildcardListeners: UnifiedHandler<EventsFromMap<M>>[] = []
 

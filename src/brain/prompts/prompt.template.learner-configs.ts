@@ -102,7 +102,23 @@ Proportionality: Is the number of learners proportional to the complexity of the
 OUTPUT FORMAT
 ══════════════════════════════════════════════════════════════════════════════
 
-For each learner, provide:
+IMPORTANT: Output ONLY valid JSON. No markdown, no explanation, no code blocks.
+
+Return a JSON object with this exact structure:
+{
+  "learners": [
+    {
+      "id": "kebab-case-identifier",
+      "name": "Human-readable display name",
+      "description": "Brief description for query routing",
+      "instructions": "Full structured instructions...",
+      "type": "text",
+      "maintenance": { "strategy": "continuous" }
+    }
+  ]
+}
+
+For each learner:
 - id: kebab-case identifier (e.g., "coding-style", "learning-interests")
 - name: Human-readable display name
 - description: Brief description for query routing (what questions this learner answers)
@@ -124,4 +140,4 @@ For each learner, provide:
   - cumulative: Summarize when understanding gets large (good for high-volume data)
   - decay: Weight recent observations higher (good for tracking evolving preferences)
 
-Generate the learner configurations now.`
+Output the JSON now:`

@@ -12,6 +12,9 @@ export type {
 	Significance,
 } from './types'
 
+// Schemas
+export { learnerConfigSchema, type GeneratedLearnerConfig } from './schema.config'
+
 // TextLearner
 export { 
 	TextLearner

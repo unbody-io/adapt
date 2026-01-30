@@ -273,12 +273,157 @@ It produces a unified answer that:
 
 ```
 src/
+├── learners/
+│   ├── schema.config.ts                          # Zod schema for learner config (LLM-generatable)
+│   └── ...
+│
 ├── brain/
-│   ├── index.ts              # exports
-│   ├── class.ts              # Brain class
-│   ├── types.ts              # BrainConfig, InjectResult, AskResult
-│   ├── prompt-parser.ts      # LLM prompt parsing logic
-│   └── synthesizer.ts        # Query response synthesis
+│   ├── index.ts                                  # exports
+│   ├── class.ts                                  # Brain class
+│   ├── types.ts                                  # BrainConfig, InjectResult, BrainAskResult
+│   ├── agent.ts                                  # Query synthesis agent
+│   ├── prompts/
+│   │   └── prompt.template.learner-configs.ts    # Prompt for generating learner configs (includes playbook)
+│   └── schemas/
+│       └── schema.learner-configs.ts             # Composed array schema for LLM output
+```
+
+---
+
+## Development Principles
+
+This section captures code patterns and conventions used across the codebase.
+
+### File Naming Conventions
+
+**Core module files:**
+- `class.ts` — Main class implementation
+- `types.ts` — TypeScript interfaces and type definitions
+- `agent.ts` — ToolLoopAgent factory function
+- `index.ts` — Public exports
+
+**Prompt files (2 types only):**
+- `prompt.template.<name>.ts` — Functions returning formatted prompt strings
+  ```typescript
+  export const decomposePromptTemplate = (userPrompt: string) => `...`
+  ```
+- `prompt.<name>.ts` — Static string exports (strategy descriptions, defaults, rules)
+  ```typescript
+  export const playbook = `...`
+  ```
+
+**Tool files (in `tools/<tool-name>/` subdirectory):**
+- `schema.ts` — Zod schema for tool input
+- `tool.ts` — Tool definition using AI SDK `tool()` helper
+- `index.ts` — Re-exports
+
+### AI SDK Patterns
+
+**ToolLoopAgent configuration:**
+```typescript
+import { ToolLoopAgent, hasToolCall, stepCountIs } from 'ai'
+import { z } from 'zod'
+
+export const callOptionsSchema = z.object({
+  operation: z.enum(['ingest', 'ask']),
+  understanding: z.string(),
+  // ... runtime inputs
+})
+
+export function createAgent(model: LanguageModel) {
+  return new ToolLoopAgent({
+    model,
+    callOptionsSchema,
+    tools: { /* tool definitions */ },
+
+    // Dynamic configuration per call
+    prepareCall: ({ options, ...settings }) => ({
+      ...settings,
+      activeTools: options.operation === 'x' ? [...X_TOOLS] : [...Y_TOOLS],
+      toolChoice: 'required' as const,
+      instructions: buildInstructions(options),
+    }),
+
+    // Stop conditions (any match stops the loop)
+    stopWhen: [
+      stepCountIs(15),           // Safety limit
+      hasToolCall('done'),       // Explicit completion
+    ],
+  })
+}
+```
+
+**Done tools (no execute function):**
+```typescript
+export const synthesize = tool({
+  description: 'Finalize the operation with results',
+  inputSchema: synthesizeSchema,
+  // No execute function — stops the agent loop when called
+})
+```
+
+**Structured output with generateText:**
+```typescript
+import { generateText, Output } from 'ai'
+
+const result = await generateText({
+  model,
+  prompt,
+  output: Output.object({ schema: myZodSchema }),
+})
+const parsed = result.output // Type-safe structured output
+```
+
+**Observability with onStepFinish:**
+```typescript
+const result = await agent.generate({
+  prompt: 'Process this data',
+  options: { /* call options */ },
+  onStepFinish: async ({ usage, finishReason, toolCalls }) => {
+    // Track token usage, log steps, etc.
+  },
+})
+```
+
+### Code Organization Principles
+
+1. **Lazy initialization** — Expensive operations (like LLM calls for setup) happen on first use, not in constructor
+2. **Private without underscore** — Use `private` keyword, not `_prefix` convention
+3. **Type inference over explicit types** — Let TypeScript infer where possible
+4. **Fail fast** — Errors throw immediately, no silent failures
+5. **Functional factories** — Create agents/tools via factory functions, not classes
+
+### Tool Definition Pattern
+
+```typescript
+// tools/my-tool/schema.ts
+import { z } from 'zod'
+
+export const myToolSchema = z.object({
+  input: z.string().describe('What this input is for'),
+  options: z.object({
+    flag: z.boolean().optional(),
+  }).optional(),
+})
+
+export type MyToolParams = z.infer<typeof myToolSchema>
+
+// tools/my-tool/tool.ts
+import { tool } from 'ai'
+import { myToolSchema } from './schema'
+
+export const myTool = tool({
+  description: 'What this tool does and when to use it',
+  inputSchema: myToolSchema,
+  execute: async (input) => {
+    // Implementation
+    return { result: 'done' }
+  },
+})
+
+// tools/my-tool/index.ts
+export { myTool } from './tool'
+export { myToolSchema, type MyToolParams } from './schema'
 ```
 
 ---

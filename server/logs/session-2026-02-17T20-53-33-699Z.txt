@@ -1,8 +1,0 @@
-=== Brain Session Started: 2026-02-17T20:53:33.699Z ===
-
-
---- CONFIGURATION ---
-Prompt: You are the learning system for a senior software engineering team at a startup. Track how the team works: their coding practices, architectural decisions, debugging approaches, tooling preferences, team collaboration patterns, and development workflows. Build a deep understanding of the team's engineering culture and technical patterns.
-Model: [object Object]
----
-

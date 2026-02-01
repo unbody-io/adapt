@@ -1,32 +1,28 @@
-import { generateText, type LanguageModel } from 'ai'
-import { nanoid } from 'nanoid'
-import { applyStrategy, strategyPrompts } from './strategies'
-import type { CompleteParams, SynthesizeParams } from './tools'
-import { evolutionDefaults } from './tools/synthesize/prompt.defaults'
-import { systemPromptTemplate } from './prompt.template.system'
+import { applyStrategy } from './strategies'
 import type {
-	AskResult,
 	EvolutionEntry,
-	IngestResult,
 	Learner,
 	LearnerGovernance,
 	LearnerMetadata,
-	LearnerOrigin,
-	TokenUsage,
 } from '../types'
-import { createLearnerAgent, type LearnerAgent } from './agent'
 import type {
 	TextLearnerConfig,
-	TextLearnerMaintenance,
 	TextLearnerEventMap,
+	QueryMethodName,
+	LearnOutput,
+	ResolvedTextLearnerConfig,
 } from './types'
 import { TypedEmitter } from '../../types/events'
+import { TwoPhaseMethod, type LearnOptions } from './learning-methods'
+import { createQueryMethod, type QueryMethod, type QueryResult, type QueryOptions } from './query-methods'
+import { resolveTextLearnerConfig } from './config.resolver'
+import type { ParentModels } from '../../types/config'
 
 /**
  * TextLearner - A learning agent that maintains understanding as narrative text
  *
- * The most common learner type. Understanding is stored as a free text blob
- * that gets updated through data processing and queried for insights.
+ * Uses two-phase learning: Observe → Buffer → Synthesize
+ * This reduces understanding degradation by only rewriting during synthesis.
  *
  * Extends TypedEmitter to provide event-based observability.
  */
@@ -36,33 +32,40 @@ export class TextLearner
 {
 	readonly id: string
 	readonly instructions: string
-	readonly origin: LearnerOrigin
 
-	/** Character-to-token ratio for estimation (internal constant) */
-	private static CHARS_PER_TOKEN = 4
-	/** Default max input tokens before chunking */
-	private static DEFAULT_MAX_INPUT_TOKENS = 30000
-
+	private config: ResolvedTextLearnerConfig
 	private understanding = ''
 	private evolution: EvolutionEntry[] = []
 	private governance: LearnerGovernance
-	private agent: LearnerAgent
-	private _model: LanguageModel
-	private _maintenance: TextLearnerMaintenance
-	private _maxInputTokens: number
-	private _systemPrompt: string | null = null
+	private _learningMethod: TwoPhaseMethod
+	private _queryMethod: QueryMethod
 
-	constructor(config: TextLearnerConfig) {
+	constructor(rawConfig: TextLearnerConfig, parentModels?: ParentModels) {
 		super()
-		this.id = config.id ?? crypto.randomUUID()
-		this.instructions = config.instructions
-		this.origin = config.origin ?? 'developer'
-		this._model = config.model
-		this._maintenance = config.maintenance ?? {
-			strategy: 'continuous',
-		}
-		this._maxInputTokens =
-			config.maxInputTokens ?? TextLearner.DEFAULT_MAX_INPUT_TOKENS
+		this.config = resolveTextLearnerConfig(rawConfig, parentModels)
+		this.id = this.config.id
+		this.instructions = this.config.instructions
+
+		// Create two-phase learning method with resolved config
+		this._learningMethod = new TwoPhaseMethod(this.config.model, {
+			observe: {
+				method: this.config.observe.method,
+				model: this.config.observe.model,
+				blueprintModel: this.config.observe.blueprintModel,
+			},
+			synthesize: {
+				method: this.config.synthesize.method,
+				model: this.config.synthesize.model,
+				blueprintModel: this.config.synthesize.blueprintModel,
+				thresholds: this.config.synthesize.thresholds,
+			},
+			strategy: this.config.maintenance.strategy,
+		})
+
+		this._queryMethod = createQueryMethod(
+			this.config.query.method,
+			this.config.query.model,
+		)
 
 		this.governance = {
 			activation: 0,
@@ -72,8 +75,90 @@ export class TextLearner
 			retrievalCount: 0,
 			successRate: 0,
 		}
+	}
 
-		this.agent = createLearnerAgent(config.model)
+	/**
+	 * Get the learner's origin
+	 */
+	get origin() {
+		return this.config.origin
+	}
+
+	/**
+	 * Initialize the learner
+	 *
+	 * Generates system prompts for both observe and synthesize phases.
+	 * This must be called before learn() or query().
+	 */
+	async init(): Promise<{
+		observeSystemPrompt: string
+		synthesizeSystemPrompt: string
+	}> {
+		if (this._learningMethod.observePrompt && this._learningMethod.synthesizePrompt) {
+			return {
+				observeSystemPrompt: this._learningMethod.observePrompt,
+				synthesizeSystemPrompt: this._learningMethod.synthesizePrompt,
+			}
+		}
+
+		this.emit('learner:init:started', { learnerId: this.id })
+
+		try {
+			const result = await this._learningMethod.init(this.instructions)
+
+			this.emit('learner:init:completed', {
+				learnerId: this.id,
+				systemPrompt: result.observeSystemPrompt, // For backwards compat
+				usage: { inputTokens: 0, outputTokens: 0, totalTokens: 0 },
+			})
+
+			return result
+		} catch (err) {
+			const error = err instanceof Error ? err : new Error(String(err))
+			this.emit('learner:init:failed', {
+				learnerId: this.id,
+				error: error.message,
+			})
+			throw error
+		}
+	}
+
+	/**
+	 * Check if the learner has been initialized
+	 */
+	isInitialized(): boolean {
+		return (
+			this._learningMethod.observePrompt !== null &&
+			this._learningMethod.synthesizePrompt !== null
+		)
+	}
+
+	/**
+	 * Get the observe system prompt (null if not initialized)
+	 */
+	getObserveSystemPrompt(): string | null {
+		return this._learningMethod.observePrompt
+	}
+
+	/**
+	 * Get the synthesize system prompt (null if not initialized)
+	 */
+	getSynthesizeSystemPrompt(): string | null {
+		return this._learningMethod.synthesizePrompt
+	}
+
+	/**
+	 * Get the observe identity (null if not initialized)
+	 */
+	getObserveIdentity() {
+		return this._learningMethod.observeIdentity
+	}
+
+	/**
+	 * Get the synthesize identity (null if not initialized)
+	 */
+	getSynthesizeIdentity() {
+		return this._learningMethod.synthesizeIdentity
 	}
 
 	/**
@@ -93,8 +178,8 @@ export class TextLearner
 	/**
 	 * Get the maintenance configuration
 	 */
-	getMaintenance(): TextLearnerMaintenance {
-		return { ...this._maintenance }
+	getMaintenance() {
+		return { ...this.config.maintenance }
 	}
 
 	/**
@@ -105,333 +190,84 @@ export class TextLearner
 	}
 
 	/**
-	 * Get the synthesized system prompt (null if not yet initialized)
+	 * Get the current query method name
 	 */
-	getSystemPrompt(): string | null {
-		return this._systemPrompt
+	getQueryMethodName(): QueryMethodName {
+		return this.config.query.method
 	}
 
 	/**
-	 * Synthesize the system prompt using LLM
+	 * Get current buffer state (for debugging/observability)
 	 */
-	private async synthesizeSystemPrompt(): Promise<{
-		systemPrompt: string
-		usage: TokenUsage
-	}> {
-		const strategyPrompt = strategyPrompts[this._maintenance.strategy]
-		const prompt = systemPromptTemplate(
-			strategyPrompt,
-			this.instructions,
-			evolutionDefaults,
-		)
-
-		const result = await generateText({
-			model: this._model,
-			prompt,
-		})
-
-		return {
-			systemPrompt: result.text.trim(),
-			usage: {
-				inputTokens: result.usage?.inputTokens ?? 0,
-				outputTokens: result.usage?.outputTokens ?? 0,
-				totalTokens: result.usage?.totalTokens ?? 0,
-			},
-		}
+	getBufferState(): { count: number; avgImportance: number; totalTokens: number } {
+		return this._learningMethod.getBufferState()
 	}
 
 	/**
-	 * Ensure system prompt is initialized (lazy initialization)
-	 * Called on first ingest() call
+	 * Get all buffered observations (for debugging/observability)
 	 */
-	private async ensureInitialized(): Promise<{ usage: TokenUsage }> {
-		if (this._systemPrompt !== null) {
-			return { usage: { inputTokens: 0, outputTokens: 0, totalTokens: 0 } }
-		}
-
-		this.emit('learner:init:started', { learnerId: this.id })
-
-		try {
-			const { systemPrompt, usage } = await this.synthesizeSystemPrompt()
-			this._systemPrompt = systemPrompt
-
-			this.emit('learner:init:completed', {
-				learnerId: this.id,
-				systemPrompt: this._systemPrompt,
-				usage,
-			})
-
-			return { usage }
-		} catch (err) {
-			const error = err instanceof Error ? err : new Error(String(err))
-			this.emit('learner:init:failed', {
-				learnerId: this.id,
-				error: error.message,
-			})
-			throw error
-		}
+	getBufferedObservations(): Array<{ text: string; importance: number }> {
+		return this._learningMethod.getBufferedObservations()
 	}
 
 	/**
-	 * Estimate token count for a string using character-based approximation
-	 */
-	private estimateTokens(text: string): number {
-		return Math.ceil(text.length / TextLearner.CHARS_PER_TOKEN)
-	}
-
-	/**
-	 * Process a single chunk of data through the agent
+	 * Learn from a batch of data using two-phase learning
 	 *
-	 * This is the core processing logic extracted for chunking support.
-	 * Updates understanding, applies strategy, and tracks evolution.
+	 * Phase 1 (Observe): Extract relevant observations from data
+	 * Phase 2 (Synthesize): Update understanding when thresholds met
+	 *
+	 * @param batch - Array of data items to learn from
+	 * @param options - Learn options (forceSynthesize, etc.)
+	 * @returns LearnOutput discriminated union
 	 */
-	private async processChunk(
-		items: unknown[],
-		chunkId: string,
-		chunkIndex: number,
-	): Promise<{ relevance: number; usage: TokenUsage }> {
-		const totalUsage: TokenUsage = {
-			inputTokens: 0,
-			outputTokens: 0,
-			totalTokens: 0,
-		}
-
-		this.emit('learner:ingest:chunk:started', {
-			learnerId: this.id,
-			chunkId,
-			chunkIndex,
-		})
-
-		const handleStep = ({
-			usage,
-			text,
-			toolCalls,
-		}: {
-			usage?: {
-				inputTokens?: number
-				outputTokens?: number
-				totalTokens?: number
-			}
-			text?: string
-			toolCalls?: Array<{ toolName: string; args?: unknown }>
-		}) => {
-			const stepUsage: TokenUsage =
-				usage?.inputTokens != null &&
-				usage?.outputTokens != null &&
-				usage?.totalTokens != null
-					? {
-							inputTokens: usage.inputTokens,
-							outputTokens: usage.outputTokens,
-							totalTokens: usage.totalTokens,
-						}
-					: { inputTokens: 0, outputTokens: 0, totalTokens: 0 }
-
-			// Accumulate usage
-			totalUsage.inputTokens += stepUsage.inputTokens
-			totalUsage.outputTokens += stepUsage.outputTokens
-			totalUsage.totalTokens += stepUsage.totalTokens
-
-			// Emit thinking event if there's text (reasoning)
-			if (text) {
-				this.emit('learner:ingest:thinking', {
-					learnerId: this.id,
-					chunkId,
-					thoughts: [text],
-					usage: stepUsage,
-				})
-			}
-
-			// Emit tool events
-			if (toolCalls) {
-				for (const tc of toolCalls) {
-					this.emit('learner:ingest:tool:started', {
-						learnerId: this.id,
-						chunkId,
-						toolName: tc.toolName,
-						input: tc.args,
-					})
-					// Tool completed is emitted immediately since we don't have async tool execution tracking
-					this.emit('learner:ingest:tool:completed', {
-						learnerId: this.id,
-						chunkId,
-						toolName: tc.toolName,
-						output: tc.args, // The tool input becomes output in this context
-					})
-				}
-			}
+	async learn(batch: unknown[], options?: LearnOptions): Promise<LearnOutput> {
+		if (!this.isInitialized()) {
+			throw new Error('Learner not initialized. Call init() first.')
 		}
 
 		try {
-			const result = await this.agent.generate({
-				prompt: 'Process the provided data batch.',
-				options: {
-					operation: 'ingest',
-					understanding: this.understanding,
-					instructions: this.instructions,
-					input: items,
+			const result = await this._learningMethod.learn(
+				this.id,
+				this.instructions,
+				this.understanding,
+				batch,
+				options,
+				{
+					onObserveStarted: (itemCount) => {
+						this.emit('learner:observe:started', {
+							learnerId: this.id,
+							itemCount,
+						})
+					},
+					onObserveThinking: (thoughts) => {
+						this.emit('learner:ingest:thinking', {
+							learnerId: this.id,
+							chunkId: 'observe',
+							thoughts,
+							usage: { inputTokens: 0, outputTokens: 0, totalTokens: 0 },
+						})
+					},
+					onSynthesizeStarted: (observationCount) => {
+						this.emit('learner:synthesize:started', {
+							learnerId: this.id,
+							observationCount,
+						})
+					},
+					onSynthesizeThinking: (thoughts) => {
+						this.emit('learner:ingest:thinking', {
+							learnerId: this.id,
+							chunkId: 'synthesize',
+							thoughts,
+							usage: { inputTokens: 0, outputTokens: 0, totalTokens: 0 },
+						})
+					},
 				},
-				onStepFinish: handleStep,
-			})
-
-			// Extract structured output from done tool (synthesize)
-			const synthesizeCall = result.staticToolCalls.find(
-				(call) => call.toolName === 'synthesize',
 			)
 
-			let relevance = 0
-			if (synthesizeCall) {
-				const input = synthesizeCall.input as SynthesizeParams
-				const previousUnderstanding = this.understanding
-				this.understanding = input.newUnderstanding
-				relevance = input.relevance
+			// Emit events and update state based on result status
+			await this.handleLearnResult(result)
 
-				// Apply strategy-specific maintenance (e.g., summarization for cumulative)
-				const strategyResult = await applyStrategy({
-					understanding: this.understanding,
-					model: this._model,
-					config: this._maintenance,
-				})
-				this.understanding = strategyResult.understanding
-
-				// Create evolution entry with timestamp
-				const evolutionEntry: EvolutionEntry = {
-					summary: input.entry.summary,
-					significance: input.entry.significance,
-					timestamp: new Date().toISOString(),
-				}
-
-				// Append to evolution (newest first)
-				this.evolution.unshift(evolutionEntry)
-
-				// Emit understanding updated event
-				this.emit('learner:understanding:updated', {
-					learnerId: this.id,
-					understanding: this.understanding,
-					previousUnderstanding,
-					entry: evolutionEntry,
-				})
-
-				// Update governance and emit event
-				this.updateGovernance(relevance)
-			}
-
-			this.emit('learner:ingest:chunk:completed', {
-				learnerId: this.id,
-				chunkId,
-				relevance,
-				usage: totalUsage,
-			})
-
-			return { relevance, usage: totalUsage }
-		} catch (err) {
-			const error = err instanceof Error ? err : new Error(String(err))
-			this.emit('learner:ingest:tool:failed', {
-				learnerId: this.id,
-				chunkId,
-				toolName: 'processChunk',
-				error: error.message,
-			})
-			throw error
-		}
-	}
-
-	/**
-	 * Ingest a batch of data and update understanding
-	 *
-	 * If input exceeds maxInputTokens, it's split into chunks and processed sequentially.
-	 * Each chunk updates understanding independently.
-	 */
-	async ingest(batch: unknown[]): Promise<IngestResult> {
-		// Lazy initialize system prompt on first call
-		const initResult = await this.ensureInitialized()
-
-		const serialized = JSON.stringify(batch)
-		const estimatedTokens = this.estimateTokens(serialized)
-
-		// Calculate chunk count
-		const chunkCount =
-			estimatedTokens <= this._maxInputTokens
-				? 1
-				: Math.ceil(estimatedTokens / this._maxInputTokens)
-
-		const totalUsage: TokenUsage = {
-			inputTokens: initResult.usage.inputTokens,
-			outputTokens: initResult.usage.outputTokens,
-			totalTokens: initResult.usage.totalTokens,
-		}
-
-		this.emit('learner:ingest:started', {
-			learnerId: this.id,
-			itemCount: batch.length,
-			chunkCount,
-		})
-
-		try {
-			// Single chunk - fits within token limit
-			if (chunkCount === 1) {
-				const chunkId = `chunk_${nanoid()}`
-				const result = await this.processChunk(batch, chunkId, 0)
-
-				totalUsage.inputTokens += result.usage.inputTokens
-				totalUsage.outputTokens += result.usage.outputTokens
-				totalUsage.totalTokens += result.usage.totalTokens
-
-				this.emit('learner:ingest:completed', {
-					learnerId: this.id,
-					totalRelevance: result.relevance,
-					usage: totalUsage,
-				})
-
-				return {
-					chunks: [
-						{
-							id: chunkId,
-							index: 0,
-							relevance: result.relevance,
-						},
-					],
-				}
-			}
-
-			// Multiple chunks needed - split by item count
-			const chunkSize = Math.ceil(batch.length / chunkCount)
-
-			const itemChunks: unknown[][] = []
-			for (let i = 0; i < batch.length; i += chunkSize) {
-				itemChunks.push(batch.slice(i, i + chunkSize))
-			}
-
-			// Process chunks sequentially
-			const chunkResults: IngestResult['chunks'] = []
-			let totalRelevance = 0
-
-			for (let i = 0; i < itemChunks.length; i++) {
-				const chunkId = `chunk_${nanoid()}`
-				const result = await this.processChunk(itemChunks[i], chunkId, i)
-
-				totalUsage.inputTokens += result.usage.inputTokens
-				totalUsage.outputTokens += result.usage.outputTokens
-				totalUsage.totalTokens += result.usage.totalTokens
-				totalRelevance += result.relevance
-
-				chunkResults.push({
-					id: chunkId,
-					index: i,
-					relevance: result.relevance,
-				})
-			}
-
-			// Average relevance across chunks
-			const avgRelevance =
-				chunkResults.length > 0 ? totalRelevance / chunkResults.length : 0
-
-			this.emit('learner:ingest:completed', {
-				learnerId: this.id,
-				totalRelevance: avgRelevance,
-				usage: totalUsage,
-			})
-
-			return { chunks: chunkResults }
+			return result
 		} catch (err) {
 			const error = err instanceof Error ? err : new Error(String(err))
 			this.emit('learner:ingest:failed', {
@@ -443,125 +279,141 @@ export class TextLearner
 	}
 
 	/**
-	 * Ask the learner and return insights from understanding
-	 *
-	 * The agent generates a response based on its understanding
-	 * and identifies any gaps in what it couldn't answer.
+	 * Handle learn result - emit events and update state
 	 */
-	async ask(query: string): Promise<AskResult> {
-		const totalUsage: TokenUsage = {
-			inputTokens: 0,
-			outputTokens: 0,
-			totalTokens: 0,
-		}
+	private async handleLearnResult(result: LearnOutput): Promise<void> {
+		switch (result.status) {
+			case 'observed': {
+				const bufferState = this._learningMethod.getBufferState()
+				this.emit('learner:observed', {
+					learnerId: this.id,
+					output: result.output,
+					importance: bufferState.avgImportance,
+					bufferCount: bufferState.count,
+					usage: result.usage,
+				})
+				break
+			}
 
+			case 'observe:dismissed':
+				this.emit('learner:observe:dismissed', {
+					learnerId: this.id,
+					output: result.output,
+					usage: result.usage,
+				})
+				break
+
+			case 'observe:error':
+				this.emit('learner:observe:error', {
+					learnerId: this.id,
+					error: result.error,
+				})
+				break
+
+			case 'synthesized': {
+				const previousUnderstanding = this.understanding
+
+				// Apply strategy-specific maintenance
+				const strategyResult = await applyStrategy({
+					understanding: result.newUnderstanding,
+					model: this.config.model,
+					config: this.config.maintenance,
+				})
+				this.understanding = strategyResult.understanding
+
+				// Create evolution entry
+				const evolutionEntry: EvolutionEntry = {
+					summary: result.evolution,
+					significance: result.significance,
+					timestamp: new Date().toISOString(),
+				}
+				this.evolution.unshift(evolutionEntry)
+
+				// Emit synthesized event
+				this.emit('learner:synthesized', {
+					learnerId: this.id,
+					newUnderstanding: this.understanding,
+					previousUnderstanding,
+					significance: result.significance,
+					evolution: result.evolution,
+					usage: result.usage,
+				})
+
+				// Also emit legacy understanding updated event
+				this.emit('learner:understanding:updated', {
+					learnerId: this.id,
+					understanding: this.understanding,
+					previousUnderstanding,
+					entry: evolutionEntry,
+				})
+
+				// Update governance (use 1.0 as relevance since it was synthesized)
+				this.updateGovernance(1.0)
+				break
+			}
+
+			case 'synthesize:dismissed':
+				this.emit('learner:synthesize:dismissed', {
+					learnerId: this.id,
+					output: result.output,
+					usage: result.usage,
+				})
+				break
+
+			case 'synthesize:error':
+				this.emit('learner:synthesize:error', {
+					learnerId: this.id,
+					error: result.error,
+				})
+				break
+		}
+	}
+
+	/**
+	 * Query against understanding using the configured query method
+	 *
+	 * @param question - The question or query to answer
+	 * @param options - Optional generation options (temperature, etc.)
+	 * @returns QueryResult with insight, confidence, and gaps
+	 */
+	async query(question: string, options?: QueryOptions): Promise<QueryResult> {
 		this.governance.lastAccessed = new Date()
 		this.governance.retrievalCount++
 
 		this.emit('learner:ask:started', {
 			learnerId: this.id,
-			query,
+			query: question,
 		})
 
-		const handleStep = ({
-			usage,
-			text,
-			toolCalls,
-		}: {
-			usage?: {
-				inputTokens?: number
-				outputTokens?: number
-				totalTokens?: number
-			}
-			text?: string
-			toolCalls?: Array<{ toolName: string; args?: unknown }>
-		}) => {
-			const stepUsage: TokenUsage =
-				usage?.inputTokens != null &&
-				usage?.outputTokens != null &&
-				usage?.totalTokens != null
-					? {
-							inputTokens: usage.inputTokens,
-							outputTokens: usage.outputTokens,
-							totalTokens: usage.totalTokens,
-						}
-					: { inputTokens: 0, outputTokens: 0, totalTokens: 0 }
-
-			// Accumulate usage
-			totalUsage.inputTokens += stepUsage.inputTokens
-			totalUsage.outputTokens += stepUsage.outputTokens
-			totalUsage.totalTokens += stepUsage.totalTokens
-
-			// Emit thinking event if there's text (reasoning)
-			if (text) {
-				this.emit('learner:ask:thinking', {
-					learnerId: this.id,
-					thoughts: [text],
-					usage: stepUsage,
-				})
-			}
-
-			// Emit tool events
-			if (toolCalls) {
-				for (const tc of toolCalls) {
-					this.emit('learner:ask:tool:started', {
-						learnerId: this.id,
-						toolName: tc.toolName,
-						input: tc.args,
-					})
-					this.emit('learner:ask:tool:completed', {
-						learnerId: this.id,
-						toolName: tc.toolName,
-						output: tc.args,
-					})
-				}
-			}
-		}
-
 		try {
-			const result = await this.agent.generate({
-				prompt: query,
-				options: {
-					operation: 'ask',
-					understanding: this.understanding,
+			const result = await this._queryMethod.query(
+				{
+					learnerId: this.id,
 					instructions: this.instructions,
-					input: query,
+					understanding: this.understanding,
+					question,
 				},
-				onStepFinish: handleStep,
-			})
-
-			// Extract structured output from done tool (complete)
-			const completeCall = result.staticToolCalls.find(
-				(call) => call.toolName === 'complete',
+				options,
+				{
+					onThinking: (thoughts, usage) => {
+						this.emit('learner:ask:thinking', {
+							learnerId: this.id,
+							thoughts,
+							usage,
+						})
+					},
+				},
 			)
-
-			let askResult: AskResult
-			if (completeCall) {
-				const input = completeCall.input as CompleteParams
-				askResult = {
-					relevant: input.relevant,
-					confidence: input.confidence,
-					insight: input.insight,
-					gaps: input.gaps,
-				}
-			} else {
-				askResult = {
-					relevant: false,
-					confidence: 0,
-					insight: '',
-					gaps: ['Failed to process query'],
-				}
-			}
 
 			this.emit('learner:ask:completed', {
 				learnerId: this.id,
-				insight: askResult.insight,
-				confidence: askResult.confidence,
-				gaps: askResult.gaps,
-				usage: totalUsage,
+				insight: result.insight,
+				confidence: result.confidence,
+				gaps: result.gaps ? result.gaps.split('\n').filter(Boolean) : [],
+				usage: result.usage,
 			})
 
-			return askResult
+			return result
 		} catch (err) {
 			const error = err instanceof Error ? err : new Error(String(err))
 			this.emit('learner:ask:failed', {
@@ -600,8 +452,7 @@ export class TextLearner
 		const previousStatus = this.governance.status
 
 		// EMA: weight recent relevance at 20%
-		this.governance.activation =
-			this.governance.activation * 0.8 + relevance * 0.2
+		this.governance.activation = this.governance.activation * 0.8 + relevance * 0.2
 
 		// Update status based on threshold
 		if (this.governance.activation >= this.governance.threshold) {

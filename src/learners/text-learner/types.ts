@@ -1,18 +1,85 @@
 import type { LanguageModel } from 'ai'
 import type { Strategy } from './strategies'
-import type { BaseLearnerEventMap, LearnerOrigin } from '../types'
+import type { BaseLearnerEventMap, LearnerOrigin, Significance } from '../types'
 import type { EventsFromMap } from '../../types/events'
+import type { QueryMethodName } from './query-methods/types'
+import type { ObserveConfig, SynthesizeConfig, SynthesizeThresholds } from './learning-methods/types'
+import type { CascadableConfig, ResolvedCascadableConfig } from '../../types/config'
 
 // Re-export TokenUsage for backwards compatibility
 export type { TokenUsage } from '../types'
 
+// Re-export learning method types
+export type {
+	LearnOutput,
+	ObserveConfig,
+	SynthesizeConfig,
+	SynthesizeThresholds,
+} from './learning-methods/types'
+
+// Re-export query method types
+export type { QueryMethodName, QueryResult } from './query-methods/types'
+
+/**
+ * Usage data for events
+ */
+export interface EventUsage {
+	inputTokens?: number
+	outputTokens?: number
+	totalTokens?: number
+}
+
 /**
  * TextLearner event map
  *
- * Currently uses the base learner events without extensions.
- * Can be extended with TextLearner-specific events if needed.
+ * Extends base events with two-phase learning events.
  */
-export interface TextLearnerEventMap extends BaseLearnerEventMap {}
+export interface TextLearnerEventMap extends BaseLearnerEventMap {
+	// Observe phase events
+	'learner:observe:started': {
+		learnerId: string
+		itemCount: number
+	}
+	'learner:observed': {
+		learnerId: string
+		output: string
+		importance: number
+		bufferCount: number
+		usage?: EventUsage
+	}
+	'learner:observe:dismissed': {
+		learnerId: string
+		output: string
+		usage?: EventUsage
+	}
+	'learner:observe:error': {
+		learnerId: string
+		error: unknown
+	}
+
+	// Synthesize phase events
+	'learner:synthesize:started': {
+		learnerId: string
+		observationCount: number
+	}
+	'learner:synthesized': {
+		learnerId: string
+		newUnderstanding: string
+		previousUnderstanding: string
+		significance: Significance
+		evolution: string
+		usage?: EventUsage
+	}
+	'learner:synthesize:dismissed': {
+		learnerId: string
+		output: string
+		usage?: EventUsage
+	}
+	'learner:synthesize:error': {
+		learnerId: string
+		error: unknown
+	}
+}
 
 /**
  * Union type of all TextLearner events
@@ -29,11 +96,37 @@ export interface TextLearnerMaintenance {
 	maxTokens?: number
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Query Config
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Query phase configuration
+ */
+export interface QueryConfig {
+	/** Optional model override for query phase */
+	model?: LanguageModel
+	/** Query method to use */
+	method?: QueryMethodName
+}
+
+/**
+ * Resolved query config
+ */
+export interface ResolvedQueryConfig {
+	model: LanguageModel
+	method: QueryMethodName
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// TextLearner Config (input)
+// ─────────────────────────────────────────────────────────────────────────────
+
 /**
  * Configuration for creating a TextLearner
  */
-export interface TextLearnerConfig {
-	/** The language model to use (from AI SDK) */
+export interface TextLearnerConfig extends CascadableConfig {
+	/** Default model for all operations */
 	model: LanguageModel
 	/** Natural language instructions for what this learner tracks and watches for */
 	instructions: string
@@ -43,6 +136,65 @@ export interface TextLearnerConfig {
 	origin?: LearnerOrigin
 	/** Maintenance settings for understanding compression */
 	maintenance?: TextLearnerMaintenance
-	/** Max estimated tokens for input before chunking (default: 30000) */
-	maxInputTokens?: number
+	/** Observe phase configuration */
+	observe?: Partial<ObserveConfig>
+	/** Synthesize phase configuration */
+	synthesize?: Partial<SynthesizeConfig>
+	/** Query phase configuration */
+	query?: QueryConfig
+	/** @deprecated Use query.method instead */
+	queryMethod?: QueryMethodName
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Resolved TextLearner Config
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Resolved observe config
+ */
+export interface ResolvedObserveConfig {
+	method: 'direct'
+	model: LanguageModel
+	blueprintModel: LanguageModel
+}
+
+/**
+ * Resolved synthesize config
+ */
+export interface ResolvedSynthesizeConfig {
+	method: 'direct'
+	model: LanguageModel
+	blueprintModel: LanguageModel
+	thresholds: Required<SynthesizeThresholds>
+}
+
+/**
+ * Resolved maintenance config
+ */
+export interface ResolvedMaintenanceConfig {
+	strategy: Strategy
+	maxTokens: number
+}
+
+/**
+ * Fully resolved TextLearner config
+ */
+export interface ResolvedTextLearnerConfig extends ResolvedCascadableConfig {
+	instructions: string
+	id: string
+	origin: LearnerOrigin
+	maintenance: ResolvedMaintenanceConfig
+	observe: ResolvedObserveConfig
+	synthesize: ResolvedSynthesizeConfig
+	query: ResolvedQueryConfig
+}
+
+/**
+ * Default thresholds for synthesis triggers
+ */
+export const DEFAULT_THRESHOLDS: SynthesizeThresholds = {
+	maxObservations: 10,
+	maxTokens: 8000,
+	minImportance: 0.9,
 }

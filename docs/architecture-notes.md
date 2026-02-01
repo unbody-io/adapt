@@ -391,3 +391,79 @@ Topics that need first-principles review before implementation:
 | **Query Flow** | Routing to storage vs learners, competition, synthesis |
 | **Governance** | Decay formula, split/merge triggers and execution |
 | **Subjects** | Lifecycle, isolation, cross-subject queries |
+
+
+Here's the note:
+
+---
+
+## Understanding Update Strategy: Append + Consolidate
+
+### The Problem
+
+Current design assumes the LLM receives the full `currentUnderstanding` and returns a complete `newUnderstanding`. This has risks:
+
+- **Truncation**: As understanding grows, LLM may cut it short
+- **Drift**: LLM subtly rewords things that shouldn't change
+- **Loss**: LLM forgets to include sections
+- **Token cost**: Rewriting everything even for tiny updates
+
+The longer the understanding gets, the higher these risks become.
+
+### The Solution: Separate Capture from Synthesis
+
+Split learning into two operations:
+
+**`learn(data)`** — Capture only
+- Receives new data
+- Outputs observations/insights from this batch
+- Appends to a "pending observations" buffer
+- Does NOT rewrite full understanding
+- Fast, cheap, low risk
+
+**`consolidate()`** — Synthesis
+- Triggered periodically (time, count, or size threshold)
+- Receives: current understanding + all pending observations
+- Outputs: new consolidated understanding
+- Clears pending buffer
+- More expensive, but runs less frequently
+
+```
+Data → learn() → Observations (append)
+                      ↓
+              [buffer grows]
+                      ↓
+            consolidate() → New Understanding
+```
+
+### Why This Works
+
+| Aspect | Full Replacement | Append + Consolidate |
+|--------|------------------|----------------------|
+| Per-batch risk | High (full rewrite) | Low (append only) |
+| Token cost per batch | High | Low |
+| Drift risk | Every batch | Only on consolidate |
+| Consolidate cost | N/A | Higher, but infrequent |
+| Implementation | Simpler | More complex |
+
+### Consolidation Triggers
+
+Options for when to trigger `consolidate()`:
+- **Count**: Every N observations
+- **Size**: When buffer exceeds X tokens
+- **Time**: Every N minutes/hours
+- **Significance**: When a "critical" observation arrives
+- **Manual**: Developer calls it explicitly
+
+### Trade-off
+
+This adds complexity but significantly reduces the risk of understanding degradation over time. For small/short-lived understandings, full replacement is fine. For long-lived learners with growing knowledge, append + consolidate is safer.
+
+### Status
+
+**v0**: Full replacement (simpler, acceptable risk)
+**Future**: Implement append + consolidate when understanding size becomes a concern
+
+---
+
+Want me to adjust anything?

@@ -1,15 +1,18 @@
 /**
  * Tools for TextLearner
  *
- * Data processing tools: compareToUnderstanding, detectShift, detectPattern, synthesize
+ * Learning tools:
+ * - classify: Optional traceability for how observations relate to understanding
+ * - synthesize: Terminal - commits new understanding
+ * - dismiss: Terminal - rejects data as irrelevant
+ *
  * Query tools: generateResponse, identifyGaps, complete
  */
 
-// Data Processing Tools
-export { compareToUnderstanding, compareToUnderstandingParams, type CompareToUnderstandingParams } from './compare-to-understanding'
-export { detectShift, detectShiftParams, type DetectShiftParams } from './detect-shift'
-export { detectPattern, detectPatternParams, type DetectPatternParams } from './detect-pattern'
+// Learning Tools
+export { classify, classifyParams, type ClassifyParams } from './classify'
 export { synthesize, synthesizeParams, type SynthesizeParams } from './synthesize'
+export { dismiss, dismissParams, type DismissParams } from './dismiss'
 
 // Query Tools
 export { generateResponse, generateResponseParams, type GenerateResponseParams } from './generate-response'

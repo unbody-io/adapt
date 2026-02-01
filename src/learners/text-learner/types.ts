@@ -2,9 +2,24 @@ import type { LanguageModel } from 'ai'
 import type { Strategy } from './strategies'
 import type { BaseLearnerEventMap, LearnerOrigin } from '../types'
 import type { EventsFromMap } from '../../types/events'
+import type { LearningMethodName } from './learning-methods/types'
+import type { QueryMethodName } from './query-methods/types'
 
 // Re-export TokenUsage for backwards compatibility
 export type { TokenUsage } from '../types'
+
+// Re-export learning method types
+export type {
+	LearningMethodName,
+	LearnResult,
+	ComparisonObservation,
+} from './learning-methods/types'
+
+// Re-export query method types
+export type {
+	QueryMethodName,
+	QueryResult,
+} from './query-methods/types'
 
 /**
  * TextLearner event map
@@ -43,6 +58,8 @@ export interface TextLearnerConfig {
 	origin?: LearnerOrigin
 	/** Maintenance settings for understanding compression */
 	maintenance?: TextLearnerMaintenance
-	/** Max estimated tokens for input before chunking (default: 30000) */
-	maxInputTokens?: number
+	/** Learning method to use (default: 'tool-based') */
+	learningMethod?: LearningMethodName
+	/** Query method to use (default: 'tool-based') */
+	queryMethod?: QueryMethodName
 }

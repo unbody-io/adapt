@@ -4,4 +4,19 @@
 
 export { TextLearner } from './class'
 export * from './types'
-export { createLearnerAgent, type LearnerAgent, type CallOptions } from './agent'
+
+// Learning methods
+export {
+	createLearningMethod,
+	ToolBasedMethod,
+	DirectMethod,
+	type LearningMethod,
+} from './learning-methods'
+
+// Query methods
+export {
+	createQueryMethod,
+	ToolBasedMethod as ToolBasedQueryMethod,
+	DirectMethod as DirectQueryMethod,
+	type QueryMethod,
+} from './query-methods'

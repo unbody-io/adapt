@@ -29,6 +29,8 @@ export interface StrategyContext {
 export interface StrategyResult {
 	understanding: string
 	modified: boolean
+	/** True when cumulative strategy triggers a cycle reset (understanding becomes a seed) */
+	cycleReset?: boolean
 }
 
 /**

@@ -75,17 +75,19 @@ export class TwoPhaseMethod {
 	 * Initialize the two-phase method
 	 *
 	 * Generates identities and system prompts for both phases.
+	 * Uses blueprintModel for identity generation (one-time structured output).
 	 *
 	 * @param instructions - Learner's purpose/instructions
 	 */
 	async init(instructions: string): Promise<InitOutput> {
-		const observeModel = this.config.observe.model ?? this.model
-		const synthesizeModel = this.config.synthesize.model ?? this.model
+		// Use blueprintModel for identity generation (one-time structured output)
+		const observeBlueprintModel = this.config.observe.blueprintModel ?? this.model
+		const synthesizeBlueprintModel = this.config.synthesize.blueprintModel ?? this.model
 
 		// Initialize both phases
 		const [observeResult, synthesizeResult] = await Promise.all([
-			initObserve(observeModel, instructions),
-			initSynthesize(synthesizeModel, instructions, this.config.strategy),
+			initObserve(observeBlueprintModel, instructions),
+			initSynthesize(synthesizeBlueprintModel, instructions, this.config.strategy),
 		])
 
 		this._observeIdentity = observeResult.identity
@@ -125,6 +127,33 @@ export class TwoPhaseMethod {
 
 		const observeModel = this.config.observe.model ?? this.model
 		const synthesizeModel = this.config.synthesize.model ?? this.model
+
+		// Handle forceSynthesize with empty data — skip observe, go straight to synthesis
+		if (options?.forceSynthesize && data.length === 0 && this.buffer.count > 0) {
+			const observations = this.buffer.getTexts()
+			const synthesizeResult = await synthesize(
+				synthesizeModel,
+				this.synthesizeSystemPrompt,
+				{ learnerId, instructions, currentUnderstanding, observations },
+				{ onThinking: callbacks?.onSynthesizeThinking },
+			)
+
+			this.buffer.clear()
+
+			if (synthesizeResult.status === 'error') {
+				return { status: 'synthesize:error', error: synthesizeResult.error }
+			}
+			if (synthesizeResult.status === 'dismissed') {
+				return { status: 'synthesize:dismissed', output: synthesizeResult.output }
+			}
+			return {
+				status: 'synthesized',
+				newUnderstanding: synthesizeResult.newUnderstanding,
+				significance: synthesizeResult.significance,
+				evolution: synthesizeResult.evolution,
+				reasoning: synthesizeResult.reasoning,
+			}
+		}
 
 		// Phase 1: Observe
 		const observeResult = await observe(

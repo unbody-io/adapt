@@ -1,4 +1,4 @@
-import { generateText, type LanguageModel, Output } from 'ai'
+import { generateText, Output } from 'ai'
 import { nanoid } from 'nanoid'
 import { TextLearner, type GeneratedLearnerConfig, type TokenUsage } from '../learners'
 import {
@@ -14,8 +14,10 @@ import type {
 	BrainEventMap,
 	BrainInjectOptions,
 	BrainInjectResult,
+	ResolvedBrainConfig,
 } from './types'
 import { TypedEmitter } from '../types/events'
+import { resolveBrainConfig } from './config.resolver'
 
 /**
  * Brain - A learning system that auto-generates and coordinates multiple learners
@@ -27,26 +29,17 @@ import { TypedEmitter } from '../types/events'
  */
 export class Brain extends TypedEmitter<BrainEventMap> {
 	readonly prompt: string
-	private model: LanguageModel
+	private config: ResolvedBrainConfig
 	private learners: Map<string, TextLearner> = new Map()
 	private learnerNames: Map<string, string> = new Map()
 	private initialized = false
 	private synthesisAgent: SynthesisAgent
-	private batchSize: number
-	private maxInputTokens: number
 
-	/** Default batch size for item count cap */
-	private static DEFAULT_BATCH_SIZE = 20
-	/** Default max input tokens for learner chunking */
-	private static DEFAULT_MAX_INPUT_TOKENS = 30000
-
-	constructor(config: BrainConfig) {
+	constructor(rawConfig: BrainConfig) {
 		super()
-		this.prompt = config.prompt
-		this.model = config.model
-		this.batchSize = config.batchSize ?? Brain.DEFAULT_BATCH_SIZE
-		this.maxInputTokens = config.maxInputTokens ?? Brain.DEFAULT_MAX_INPUT_TOKENS
-		this.synthesisAgent = createSynthesisAgent(config.model)
+		this.config = resolveBrainConfig(rawConfig)
+		this.prompt = this.config.prompt
+		this.synthesisAgent = createSynthesisAgent(this.config.query.model)
 	}
 
 	/**
@@ -62,7 +55,7 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 			this.emit('brain:init:config:generating', {})
 
 			const result = await generateText({
-				model: this.model,
+				model: this.config.init.model,
 				prompt: learnerConfigsPromptTemplate(this.prompt),
 				output: Output.object({ schema: learnerConfigsSchema }),
 			})
@@ -85,7 +78,7 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 			})
 
 			for (const config of result.output.learners) {
-				this.createLearnerFromConfig(config)
+				await this.createLearnerFromConfig(config)
 			}
 
 			this.initialized = true
@@ -102,20 +95,40 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 	/**
 	 * Create a TextLearner from a generated config
 	 */
-	private createLearnerFromConfig(config: GeneratedLearnerConfig): TextLearner {
+	private async createLearnerFromConfig(
+		config: GeneratedLearnerConfig,
+	): Promise<TextLearner> {
+		const { learning } = this.config
+
 		const learner = new TextLearner({
 			id: config.id,
-			model: this.model,
+			model: learning.model,
+			blueprintModel: learning.blueprintModel,
 			instructions: config.instructions,
 			origin: 'prompt',
 			maintenance: config.maintenance,
-			maxInputTokens: this.maxInputTokens,
+			observe: {
+				model: learning.observe.model,
+				blueprintModel: learning.observe.blueprintModel,
+			},
+			synthesize: {
+				model: learning.synthesize.model,
+				blueprintModel: learning.synthesize.blueprintModel,
+				thresholds: learning.synthesize.thresholds,
+			},
+			query: {
+				model: learning.query.model,
+				method: learning.query.method,
+			},
 		})
 
 		// Forward all learner events through Brain
 		learner.on((event) => {
 			this.emit(event.type as keyof BrainEventMap, event.payload as never)
 		})
+
+		// Initialize the learner (generates observe/synthesize prompts)
+		await learner.init()
 
 		this.learners.set(config.id, learner)
 		this.learnerNames.set(config.id, config.name)
@@ -141,7 +154,7 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 	/**
 	 * Add a learner manually
 	 */
-	addLearner(config: GeneratedLearnerConfig): TextLearner {
+	async addLearner(config: GeneratedLearnerConfig): Promise<TextLearner> {
 		return this.createLearnerFromConfig(config)
 	}
 
@@ -176,9 +189,10 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 		const learnerArray = this.getLearners()
 
 		// Split items into batches by batchSize
+		const batchSize = this.config.ingest.batchSize
 		const batches: unknown[][] = []
-		for (let i = 0; i < items.length; i += this.batchSize) {
-			batches.push(items.slice(i, i + this.batchSize))
+		for (let i = 0; i < items.length; i += batchSize) {
+			batches.push(items.slice(i, i + batchSize))
 		}
 
 		this.emit('brain:inject:started', {
@@ -204,10 +218,17 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 				// Send batch to all learners in parallel
 				const learnerResults = await Promise.all(
 					learnerArray.map(async (learner) => {
-						const result = await learner.ingest(batch)
+						const result = await learner.learn(batch)
+						// Map new LearnOutput to legacy format for Brain events
+						const relevance =
+							result.status === 'synthesized'
+								? 1.0
+								: result.status === 'observed'
+									? 0.5
+									: 0.0
 						return {
 							learnerId: learner.id,
-							chunks: result.chunks,
+							chunks: [{ id: `chunk_${nanoid()}`, index: 0, relevance }],
 						}
 					}),
 				)
@@ -256,14 +277,14 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 			// Query all learners in parallel
 			const learnerResults = await Promise.all(
 				learnerArray.map(async (learner) => {
-					const result = await learner.ask(query)
+					const result = await learner.query(query)
 					return {
 						learnerId: learner.id,
 						name: this.learnerNames.get(learner.id) ?? learner.id,
 						relevant: result.relevant,
 						confidence: result.confidence,
 						insight: result.insight,
-						gaps: result.gaps,
+						gaps: result.gaps ? result.gaps.split('\n').filter(Boolean) : [],
 					}
 				}),
 			)

@@ -52,8 +52,10 @@ export interface SynthesizeThresholds {
 export interface ObserveConfig {
 	/** Method to use (currently only 'direct' supported) */
 	method: 'direct'
-	/** Optional model override for observe phase */
+	/** Optional model override for observe phase runtime */
 	model?: LanguageModel
+	/** Optional model override for observe identity generation */
+	blueprintModel?: LanguageModel
 }
 
 /**
@@ -62,8 +64,10 @@ export interface ObserveConfig {
 export interface SynthesizeConfig {
 	/** Method to use (currently only 'direct' supported) */
 	method: 'direct'
-	/** Optional model override for synthesize phase */
+	/** Optional model override for synthesize phase runtime */
 	model?: LanguageModel
+	/** Optional model override for synthesize identity generation */
+	blueprintModel?: LanguageModel
 	/** Thresholds that trigger synthesis */
 	thresholds: SynthesizeThresholds
 }

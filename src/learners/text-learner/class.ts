@@ -1,37 +1,28 @@
-import type { LanguageModel } from 'ai'
-import { nanoid } from 'nanoid'
 import { applyStrategy } from './strategies'
 import type {
 	EvolutionEntry,
 	Learner,
 	LearnerGovernance,
 	LearnerMetadata,
-	LearnerOrigin,
 } from '../types'
 import type {
 	TextLearnerConfig,
-	TextLearnerMaintenance,
 	TextLearnerEventMap,
-	LearningMethodName,
 	QueryMethodName,
+	LearnOutput,
+	ResolvedTextLearnerConfig,
 } from './types'
 import { TypedEmitter } from '../../types/events'
-import {
-	createLearningMethod,
-	type LearningMethod,
-	type LearnResult,
-} from './learning-methods'
-import {
-	createQueryMethod,
-	type QueryMethod,
-	type QueryResult,
-} from './query-methods'
+import { TwoPhaseMethod, type LearnOptions } from './learning-methods'
+import { createQueryMethod, type QueryMethod, type QueryResult } from './query-methods'
+import { resolveTextLearnerConfig } from './config.resolver'
+import type { ParentModels } from '../../types/config'
 
 /**
  * TextLearner - A learning agent that maintains understanding as narrative text
  *
- * The most common learner type. Understanding is stored as a free text blob
- * that gets updated through data processing and queried for insights.
+ * Uses two-phase learning: Observe → Buffer → Synthesize
+ * This reduces understanding degradation by only rewriting during synthesis.
  *
  * Extends TypedEmitter to provide event-based observability.
  */
@@ -41,36 +32,39 @@ export class TextLearner
 {
 	readonly id: string
 	readonly instructions: string
-	readonly origin: LearnerOrigin
 
+	private config: ResolvedTextLearnerConfig
 	private understanding = ''
 	private evolution: EvolutionEntry[] = []
 	private governance: LearnerGovernance
-	private _model: LanguageModel
-	private _maintenance: TextLearnerMaintenance
-	private _learningMethod: LearningMethod
-	private _learningMethodName: LearningMethodName
+	private _learningMethod: TwoPhaseMethod
 	private _queryMethod: QueryMethod
-	private _queryMethodName: QueryMethodName
 
-	constructor(config: TextLearnerConfig) {
+	constructor(rawConfig: TextLearnerConfig, parentModels?: ParentModels) {
 		super()
-		this.id = config.id ?? crypto.randomUUID()
-		this.instructions = config.instructions
-		this.origin = config.origin ?? 'developer'
-		this._model = config.model
-		this._maintenance = config.maintenance ?? {
-			strategy: 'continuous',
-		}
-		this._learningMethodName = config.learningMethod ?? 'tool-based'
-		this._learningMethod = createLearningMethod(
-			this._learningMethodName,
-			config.model,
-		)
-		this._queryMethodName = config.queryMethod ?? 'tool-based'
+		this.config = resolveTextLearnerConfig(rawConfig, parentModels)
+		this.id = this.config.id
+		this.instructions = this.config.instructions
+
+		// Create two-phase learning method with resolved config
+		this._learningMethod = new TwoPhaseMethod(this.config.model, {
+			observe: {
+				method: this.config.observe.method,
+				model: this.config.observe.model,
+				blueprintModel: this.config.observe.blueprintModel,
+			},
+			synthesize: {
+				method: this.config.synthesize.method,
+				model: this.config.synthesize.model,
+				blueprintModel: this.config.synthesize.blueprintModel,
+				thresholds: this.config.synthesize.thresholds,
+			},
+			strategy: this.config.maintenance.strategy,
+		})
+
 		this._queryMethod = createQueryMethod(
-			this._queryMethodName,
-			config.model,
+			this.config.query.method,
+			this.config.query.model,
 		)
 
 		this.governance = {
@@ -84,33 +78,38 @@ export class TextLearner
 	}
 
 	/**
+	 * Get the learner's origin
+	 */
+	get origin() {
+		return this.config.origin
+	}
+
+	/**
 	 * Initialize the learner
 	 *
-	 * Delegates to the learning method to generate its system prompt.
+	 * Generates system prompts for both observe and synthesize phases.
 	 * This must be called before learn() or query().
-	 *
-	 * @returns The generated system prompt and token usage
 	 */
-	async init(): Promise<{ systemPrompt: string; usage: import('../types').TokenUsage }> {
-		if (this._learningMethod.systemPrompt) {
+	async init(): Promise<{
+		observeSystemPrompt: string
+		synthesizeSystemPrompt: string
+	}> {
+		if (this._learningMethod.observePrompt && this._learningMethod.synthesizePrompt) {
 			return {
-				systemPrompt: this._learningMethod.systemPrompt,
-				usage: { inputTokens: 0, outputTokens: 0, totalTokens: 0 },
+				observeSystemPrompt: this._learningMethod.observePrompt,
+				synthesizeSystemPrompt: this._learningMethod.synthesizePrompt,
 			}
 		}
 
 		this.emit('learner:init:started', { learnerId: this.id })
 
 		try {
-			const result = await this._learningMethod.init({
-				instructions: this.instructions,
-				strategy: this._maintenance.strategy,
-			})
+			const result = await this._learningMethod.init(this.instructions)
 
 			this.emit('learner:init:completed', {
 				learnerId: this.id,
-				systemPrompt: result.systemPrompt,
-				usage: result.usage,
+				systemPrompt: result.observeSystemPrompt, // For backwards compat
+				usage: { inputTokens: 0, outputTokens: 0, totalTokens: 0 },
 			})
 
 			return result
@@ -128,14 +127,38 @@ export class TextLearner
 	 * Check if the learner has been initialized
 	 */
 	isInitialized(): boolean {
-		return this._learningMethod.systemPrompt !== null
+		return (
+			this._learningMethod.observePrompt !== null &&
+			this._learningMethod.synthesizePrompt !== null
+		)
 	}
 
 	/**
-	 * Get the generated system prompt (null if not initialized)
+	 * Get the observe system prompt (null if not initialized)
 	 */
-	getSystemPrompt(): string | null {
-		return this._learningMethod.systemPrompt
+	getObserveSystemPrompt(): string | null {
+		return this._learningMethod.observePrompt
+	}
+
+	/**
+	 * Get the synthesize system prompt (null if not initialized)
+	 */
+	getSynthesizeSystemPrompt(): string | null {
+		return this._learningMethod.synthesizePrompt
+	}
+
+	/**
+	 * Get the observe identity (null if not initialized)
+	 */
+	getObserveIdentity() {
+		return this._learningMethod.observeIdentity
+	}
+
+	/**
+	 * Get the synthesize identity (null if not initialized)
+	 */
+	getSynthesizeIdentity() {
+		return this._learningMethod.synthesizeIdentity
 	}
 
 	/**
@@ -155,8 +178,8 @@ export class TextLearner
 	/**
 	 * Get the maintenance configuration
 	 */
-	getMaintenance(): TextLearnerMaintenance {
-		return { ...this._maintenance }
+	getMaintenance() {
+		return { ...this.config.maintenance }
 	}
 
 	/**
@@ -167,132 +190,72 @@ export class TextLearner
 	}
 
 	/**
-	 * Get the current learning method name
-	 */
-	getLearningMethodName(): LearningMethodName {
-		return this._learningMethodName
-	}
-
-	/**
 	 * Get the current query method name
 	 */
 	getQueryMethodName(): QueryMethodName {
-		return this._queryMethodName
+		return this.config.query.method
 	}
 
 	/**
-	 * Learn from a batch of data using the configured learning method
+	 * Get current buffer state (for debugging/observability)
+	 */
+	getBufferState(): { count: number; avgImportance: number; totalTokens: number } {
+		return this._learningMethod.getBufferState()
+	}
+
+	/**
+	 * Get all buffered observations (for debugging/observability)
+	 */
+	getBufferedObservations(): Array<{ text: string; importance: number }> {
+		return this._learningMethod.getBufferedObservations()
+	}
+
+	/**
+	 * Learn from a batch of data using two-phase learning
 	 *
-	 * This is the primary method for processing data. It delegates to the
-	 * configured learning method (tool-based or direct) and handles:
-	 * - Understanding updates
-	 * - Evolution tracking
-	 * - Event emission
+	 * Phase 1 (Observe): Extract relevant observations from data
+	 * Phase 2 (Synthesize): Update understanding when thresholds met
 	 *
 	 * @param batch - Array of data items to learn from
-	 * @returns LearnResult with updated understanding and metadata
+	 * @param options - Learn options (forceSynthesize, etc.)
+	 * @returns LearnOutput discriminated union
 	 */
-	async learn(batch: unknown[]): Promise<LearnResult & { chunkId: string }> {
-		if (!this._learningMethod.systemPrompt) {
+	async learn(batch: unknown[], options?: LearnOptions): Promise<LearnOutput> {
+		if (!this.isInitialized()) {
 			throw new Error('Learner not initialized. Call init() first.')
 		}
 
-		const chunkId = `chunk_${nanoid()}`
-
-		this.emit('learner:ingest:started', {
-			learnerId: this.id,
-			itemCount: batch.length,
-			chunkCount: 1,
-		})
-
-		this.emit('learner:ingest:chunk:started', {
-			learnerId: this.id,
-			chunkId,
-			chunkIndex: 0,
-		})
-
 		try {
 			const result = await this._learningMethod.learn(
+				this.id,
+				this.instructions,
+				this.understanding,
+				batch,
+				options,
 				{
-					learnerId: this.id,
-					instructions: this.instructions,
-					currentUnderstanding: this.understanding,
-					data: batch,
-				},
-				{
-					onThinking: (thoughts, usage) => {
+					onObserveThinking: (thoughts) => {
 						this.emit('learner:ingest:thinking', {
 							learnerId: this.id,
-							chunkId,
+							chunkId: 'observe',
 							thoughts,
-							usage,
+							usage: { inputTokens: 0, outputTokens: 0, totalTokens: 0 },
 						})
 					},
-					onComparison: (observation) => {
-						// Emit comparison for traceability (ToolBasedMethod only)
-						this.emit('learner:ingest:tool:started', {
+					onSynthesizeThinking: (thoughts) => {
+						this.emit('learner:ingest:thinking', {
 							learnerId: this.id,
-							chunkId,
-							toolName: 'classify',
-							input: observation,
-						})
-						this.emit('learner:ingest:tool:completed', {
-							learnerId: this.id,
-							chunkId,
-							toolName: 'classify',
-							output: observation,
+							chunkId: 'synthesize',
+							thoughts,
+							usage: { inputTokens: 0, outputTokens: 0, totalTokens: 0 },
 						})
 					},
 				},
 			)
 
-			// Update state if not dismissed
-			if (!result.dismissed) {
-				const previousUnderstanding = this.understanding
-				this.understanding = result.newUnderstanding
+			// Emit events and update state based on result status
+			await this.handleLearnResult(result)
 
-				// Apply strategy-specific maintenance
-				const strategyResult = await applyStrategy({
-					understanding: this.understanding,
-					model: this._model,
-					config: this._maintenance,
-				})
-				this.understanding = strategyResult.understanding
-
-				// Create evolution entry
-				const evolutionEntry: EvolutionEntry = {
-					summary: result.evolution,
-					significance: result.significance,
-					timestamp: new Date().toISOString(),
-				}
-				this.evolution.unshift(evolutionEntry)
-
-				// Emit understanding updated
-				this.emit('learner:understanding:updated', {
-					learnerId: this.id,
-					understanding: this.understanding,
-					previousUnderstanding,
-					entry: evolutionEntry,
-				})
-
-				// Update governance
-				this.updateGovernance(result.relevance)
-			}
-
-			this.emit('learner:ingest:chunk:completed', {
-				learnerId: this.id,
-				chunkId,
-				relevance: result.relevance,
-				usage: result.usage,
-			})
-
-			this.emit('learner:ingest:completed', {
-				learnerId: this.id,
-				totalRelevance: result.relevance,
-				usage: result.usage,
-			})
-
-			return { ...result, chunkId }
+			return result
 		} catch (err) {
 			const error = err instanceof Error ? err : new Error(String(err))
 			this.emit('learner:ingest:failed', {
@@ -304,13 +267,94 @@ export class TextLearner
 	}
 
 	/**
+	 * Handle learn result - emit events and update state
+	 */
+	private async handleLearnResult(result: LearnOutput): Promise<void> {
+		switch (result.status) {
+			case 'observed': {
+				const bufferState = this._learningMethod.getBufferState()
+				this.emit('learner:observed', {
+					learnerId: this.id,
+					output: result.output,
+					importance: bufferState.avgImportance,
+					bufferCount: bufferState.count,
+				})
+				break
+			}
+
+			case 'observe:dismissed':
+				this.emit('learner:observe:dismissed', {
+					learnerId: this.id,
+					output: result.output,
+				})
+				break
+
+			case 'observe:error':
+				this.emit('learner:observe:error', {
+					learnerId: this.id,
+					error: result.error,
+				})
+				break
+
+			case 'synthesized': {
+				const previousUnderstanding = this.understanding
+
+				// Apply strategy-specific maintenance
+				const strategyResult = await applyStrategy({
+					understanding: result.newUnderstanding,
+					model: this.config.model,
+					config: this.config.maintenance,
+				})
+				this.understanding = strategyResult.understanding
+
+				// Create evolution entry
+				const evolutionEntry: EvolutionEntry = {
+					summary: result.evolution,
+					significance: result.significance,
+					timestamp: new Date().toISOString(),
+				}
+				this.evolution.unshift(evolutionEntry)
+
+				// Emit synthesized event
+				this.emit('learner:synthesized', {
+					learnerId: this.id,
+					newUnderstanding: this.understanding,
+					previousUnderstanding,
+					significance: result.significance,
+					evolution: result.evolution,
+				})
+
+				// Also emit legacy understanding updated event
+				this.emit('learner:understanding:updated', {
+					learnerId: this.id,
+					understanding: this.understanding,
+					previousUnderstanding,
+					entry: evolutionEntry,
+				})
+
+				// Update governance (use 1.0 as relevance since it was synthesized)
+				this.updateGovernance(1.0)
+				break
+			}
+
+			case 'synthesize:dismissed':
+				this.emit('learner:synthesize:dismissed', {
+					learnerId: this.id,
+					output: result.output,
+				})
+				break
+
+			case 'synthesize:error':
+				this.emit('learner:synthesize:error', {
+					learnerId: this.id,
+					error: result.error,
+				})
+				break
+		}
+	}
+
+	/**
 	 * Query against understanding using the configured query method
-	 *
-	 * This is the primary method for querying. It delegates to the
-	 * configured query method (tool-based or direct) and handles:
-	 * - Response generation based on understanding
-	 * - Gap identification
-	 * - Event emission
 	 *
 	 * @param question - The question or query to answer
 	 * @returns QueryResult with insight, confidence, and gaps
@@ -390,8 +434,7 @@ export class TextLearner
 		const previousStatus = this.governance.status
 
 		// EMA: weight recent relevance at 20%
-		this.governance.activation =
-			this.governance.activation * 0.8 + relevance * 0.2
+		this.governance.activation = this.governance.activation * 0.8 + relevance * 0.2
 
 		// Update status based on threshold
 		if (this.governance.activation >= this.governance.threshold) {

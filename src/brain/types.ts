@@ -3,19 +3,174 @@ import type { IngestChunk, TokenUsage } from '../learners/types'
 import type { TextLearnerEventMap } from '../learners/text-learner/types'
 import type { EventsFromMap } from '../types/events'
 import type { GeneratedLearnerConfig } from '../learners/schema.config'
+import type { CascadableConfig, ResolvedCascadableConfig } from '../types/config'
+import type { Strategy } from '../learners/text-learner/strategies'
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Learning Config (passed to learners)
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Observe phase configuration
+ */
+export interface ObservePhaseConfig extends CascadableConfig {}
+
+/**
+ * Synthesize phase configuration
+ */
+export interface SynthesizePhaseConfig extends CascadableConfig {
+	thresholds?: {
+		maxObservations?: number
+		maxTokens?: number
+		minImportance?: number
+	}
+}
+
+/**
+ * Query phase configuration
+ */
+export interface QueryPhaseConfig {
+	model?: LanguageModel
+	method?: 'tool-based' | 'direct'
+}
+
+/**
+ * Maintenance configuration
+ */
+export interface MaintenanceConfig {
+	strategy?: Strategy
+	maxTokens?: number
+}
+
+/**
+ * Learning config - applied to all auto-generated learners
+ */
+export interface LearningConfig extends CascadableConfig {
+	observe?: ObservePhaseConfig
+	synthesize?: SynthesizePhaseConfig
+	query?: QueryPhaseConfig
+	maintenance?: MaintenanceConfig
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Brain Config (input)
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Init phase configuration (decomposition)
+ */
+export interface InitPhaseConfig {
+	model?: LanguageModel
+}
+
+/**
+ * Brain query configuration (ask synthesis)
+ */
+export interface BrainQueryConfig {
+	model?: LanguageModel
+}
+
+/**
+ * Ingest configuration
+ */
+export interface IngestConfig {
+	batchSize?: number
+}
 
 /**
  * Configuration for creating a Brain
  */
-export interface BrainConfig {
+export interface BrainConfig extends CascadableConfig {
 	/** Natural language prompt describing what to track and learn */
 	prompt: string
-	/** AI SDK language model shared by all learners */
+	/** Default model - cascades to all operations */
 	model: LanguageModel
-	/** Max items per batch sent to learners (default: 20) */
-	batchSize?: number
-	/** Max estimated tokens for learner input before chunking (default: 30000) */
-	maxInputTokens?: number
+	/** Init phase config (decomposition) */
+	init?: InitPhaseConfig
+	/** Query config (brain.ask synthesis) */
+	query?: BrainQueryConfig
+	/** Ingest config */
+	ingest?: IngestConfig
+	/** Learning config (applied to all learners) */
+	learning?: LearningConfig
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Resolved Brain Config
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Resolved observe phase config
+ */
+export interface ResolvedObservePhaseConfig extends ResolvedCascadableConfig {}
+
+/**
+ * Resolved synthesize phase config
+ */
+export interface ResolvedSynthesizePhaseConfig extends ResolvedCascadableConfig {
+	thresholds: {
+		maxObservations: number
+		maxTokens: number
+		minImportance: number
+	}
+}
+
+/**
+ * Resolved query phase config
+ */
+export interface ResolvedQueryPhaseConfig {
+	model: LanguageModel
+	method: 'tool-based' | 'direct'
+}
+
+/**
+ * Resolved maintenance config
+ */
+export interface ResolvedMaintenanceConfig {
+	strategy: Strategy
+	maxTokens: number
+}
+
+/**
+ * Resolved learning config
+ */
+export interface ResolvedLearningConfig extends ResolvedCascadableConfig {
+	observe: ResolvedObservePhaseConfig
+	synthesize: ResolvedSynthesizePhaseConfig
+	query: ResolvedQueryPhaseConfig
+	maintenance: ResolvedMaintenanceConfig
+}
+
+/**
+ * Resolved init phase config
+ */
+export interface ResolvedInitPhaseConfig {
+	model: LanguageModel
+}
+
+/**
+ * Resolved brain query config
+ */
+export interface ResolvedBrainQueryConfig {
+	model: LanguageModel
+}
+
+/**
+ * Resolved ingest config
+ */
+export interface ResolvedIngestConfig {
+	batchSize: number
+}
+
+/**
+ * Fully resolved Brain config - all values defined
+ */
+export interface ResolvedBrainConfig extends ResolvedCascadableConfig {
+	prompt: string
+	init: ResolvedInitPhaseConfig
+	query: ResolvedBrainQueryConfig
+	ingest: ResolvedIngestConfig
+	learning: ResolvedLearningConfig
 }
 
 /**

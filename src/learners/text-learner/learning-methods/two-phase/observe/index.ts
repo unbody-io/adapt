@@ -9,7 +9,7 @@ import type { LanguageModel } from 'ai'
 import type { ObserveOutput, ObserveContext, ObserveCallbacks } from './types'
 import type { ObserveIdentity } from './schema.identity'
 import { observeIdentitySchema } from './schema.identity'
-import { generateStructuredOutput } from '../../../../../utils'
+import { generate, Output } from '../../../../../llm'
 import { observeOutputSchema } from './schema.output'
 import { observeIdentityPromptTemplate } from './prompt.template.identity'
 import { observeSystemPromptTemplate } from './prompt.template.system'
@@ -36,10 +36,10 @@ export async function initObserve(
 ): Promise<ObserveInitResult> {
 	const prompt = observeIdentityPromptTemplate(instructions)
 
-	const { output: identity } = await generateStructuredOutput({
+	const { output: identity } = await generate({
 		model,
 		prompt,
-		schema: observeIdentitySchema,
+		output: Output.object({ schema: observeIdentitySchema }),
 	})
 
 	const systemPrompt = observeSystemPromptTemplate(identity)
@@ -65,17 +65,17 @@ export async function observe(
 	try {
 		const prompt = observeUserPromptTemplate(context.data)
 
-		const result = await generateStructuredOutput({
+		const result = await generate({
 			model,
 			system: systemPrompt,
 			prompt,
-			schema: observeOutputSchema,
+			output: Output.object({ schema: observeOutputSchema }),
 			temperature: 0.2,
 		})
 
 		// Emit thinking if available
 		if (callbacks?.onThinking && result.reasoning) {
-			const thoughts = result.reasoning.map((r) => r.text)
+			const thoughts = result.reasoning.map((r: { text: string }) => r.text)
 			callbacks.onThinking(thoughts)
 		}
 

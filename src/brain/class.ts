@@ -1,6 +1,7 @@
+import type { CallSettings } from 'ai'
 import { nanoid } from 'nanoid'
 import { TextLearner, type GeneratedLearnerConfig, type TokenUsage } from '../learners'
-import { generateStructuredOutput, type GenerateOptions } from '../utils'
+import { generate, Output } from '../llm'
 import { synthesize } from './agent'
 import { learnerConfigsPromptTemplate } from './prompts/prompt.template.learner-configs'
 import { learnerConfigsSchema } from './schemas/schema.learner-configs'
@@ -87,10 +88,10 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 	 * Generate learner configs from prompt via LLM
 	 */
 	private async generateLearnerConfigs() {
-		return generateStructuredOutput({
+		return generate({
 			model: this.config.init.model,
 			prompt: learnerConfigsPromptTemplate(this.prompt),
-			schema: learnerConfigsSchema,
+			output: Output.object({ schema: learnerConfigsSchema }),
 		})
 	}
 
@@ -270,7 +271,7 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 	 * @param query - The question to ask
 	 * @param options - Optional generation options (temperature, etc.)
 	 */
-	async ask(query: string, options?: GenerateOptions): Promise<BrainAskResult> {
+	async ask(query: string, options?: CallSettings & { model?: import('ai').LanguageModel }): Promise<BrainAskResult> {
 		await this.ensureInitialized()
 
 		const queryId = `query_${nanoid()}`

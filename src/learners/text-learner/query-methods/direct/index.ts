@@ -10,7 +10,7 @@ import type {
 import type { TokenUsage } from '../../../types'
 import { buildQuerySystemPrompt } from './prompt.system'
 import { buildQueryUserPrompt } from './prompt.user'
-import { generateStructuredOutput } from '../../../../utils'
+import { generate, Output } from '../../../../llm'
 
 /**
  * Schema for query response
@@ -45,11 +45,11 @@ export class DirectMethod implements QueryMethod {
 		const prompt = buildQueryUserPrompt(context)
 		const { model: modelOverride, ...generateOptions } = options ?? {}
 
-		const result = await generateStructuredOutput({
+		const result = await generate({
 			model: modelOverride ?? this.model,
 			system,
 			prompt,
-			schema: queryResponseSchema,
+			output: Output.object({ schema: queryResponseSchema }),
 			...generateOptions,
 		})
 

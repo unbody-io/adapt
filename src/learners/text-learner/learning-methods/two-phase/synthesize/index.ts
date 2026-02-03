@@ -9,7 +9,7 @@ import type { LanguageModel } from 'ai'
 import type { SynthesizeOutput, SynthesizeContext, SynthesizeCallbacks } from './types'
 import type { SynthesizeIdentity } from './schema.identity'
 import { synthesizeIdentitySchema } from './schema.identity'
-import { generateStructuredOutput } from '../../../../../utils'
+import { generate, Output } from '../../../../../llm'
 import { synthesizeOutputSchema } from './schema.output'
 import { synthesizeIdentityPromptTemplate } from './prompt.template.identity'
 import { synthesizeSystemPromptTemplate } from './prompt.template.system'
@@ -39,10 +39,10 @@ export async function initSynthesize(
 ): Promise<SynthesizeInitResult> {
 	const prompt = synthesizeIdentityPromptTemplate(instructions)
 
-	const { output: identity } = await generateStructuredOutput({
+	const { output: identity } = await generate({
 		model,
 		prompt,
-		schema: synthesizeIdentitySchema,
+		output: Output.object({ schema: synthesizeIdentitySchema }),
 	})
 
 	const systemPrompt = synthesizeSystemPromptTemplate(identity, strategy)
@@ -71,16 +71,16 @@ export async function synthesize(
 			context.observations,
 		)
 
-		const result = await generateStructuredOutput({
+		const result = await generate({
 			model,
 			system: systemPrompt,
 			prompt,
-			schema: synthesizeOutputSchema,
+			output: Output.object({ schema: synthesizeOutputSchema }),
 		})
 
 		// Emit thinking if available
 		if (callbacks?.onThinking && result.reasoning) {
-			const thoughts = result.reasoning.map((r) => r.text)
+			const thoughts = result.reasoning.map((r: { text: string }) => r.text)
 			callbacks.onThinking(thoughts)
 		}
 

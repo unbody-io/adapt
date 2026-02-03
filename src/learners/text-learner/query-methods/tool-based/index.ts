@@ -1,6 +1,4 @@
 import type { LanguageModel } from 'ai'
-import { stepCountIs, ToolLoopAgent } from 'ai'
-import { z } from 'zod'
 import type {
 	QueryMethod,
 	QueryContext,
@@ -9,26 +7,13 @@ import type {
 	QueryResult,
 } from '../types'
 import type { TokenUsage } from '../../../types'
+import { generate, stepCountIs } from '../../../../llm'
 import { buildQueryPrompt } from './prompt.template.query'
 
 // Import query tools from deprecated location
 import { generateResponse, identifyGaps, complete } from '../../_tools'
 
 import type { CompleteParams } from '../../_tools/complete/schema'
-
-/**
- * Call options schema for the tool-based query method
- */
-const callOptionsSchema = z.object({
-	learnerId: z.string(),
-	instructions: z.string(),
-	understanding: z.string(),
-	question: z.string(),
-})
-
-export type CallOptions = z.infer<typeof callOptionsSchema>
-
-const QUERY_TOOLS = ['generateResponse', 'identifyGaps', 'complete'] as const
 
 const MAX_STEPS = 10
 
@@ -41,7 +26,7 @@ const tools = {
 /**
  * Tool-based query method
  *
- * Uses a ToolLoopAgent with query tools to answer questions.
+ * Uses generateText with tools in a loop to answer questions.
  * The model decides which tools to use during the query process.
  *
  * Pros:
@@ -55,31 +40,15 @@ const tools = {
  */
 export class ToolBasedMethod implements QueryMethod {
 	readonly name = 'tool-based'
-	private agent
+	private model: LanguageModel
 
 	constructor(model: LanguageModel) {
-		this.agent = new ToolLoopAgent({
-			model,
-			callOptionsSchema,
-			tools,
-			prepareCall: ({ options, ...settings }) => ({
-				...settings,
-				activeTools: [...QUERY_TOOLS],
-				toolChoice: 'required' as const,
-				instructions: buildQueryPrompt({
-					learnerId: options.learnerId,
-					instructions: options.instructions,
-					understanding: options.understanding,
-					question: options.question,
-				}),
-			}),
-			stopWhen: stepCountIs(MAX_STEPS),
-		})
+		this.model = model
 	}
 
 	async query(
 		context: QueryContext,
-		_options?: QueryOptions,
+		options?: QueryOptions,
 		callbacks?: QueryCallbacks,
 	): Promise<QueryResult> {
 		const totalUsage: TokenUsage = {
@@ -131,22 +100,34 @@ export class ToolBasedMethod implements QueryMethod {
 			}
 		}
 
-		const result = await this.agent.generate({
-			prompt: 'Answer the query based on your understanding.',
-			options: {
-				learnerId: context.learnerId,
-				instructions: context.instructions,
-				understanding: context.understanding,
-				question: context.question,
-			},
-			onStepFinish: handleStep,
+		// Build system prompt with context
+		const system = buildQueryPrompt({
+			learnerId: context.learnerId,
+			instructions: context.instructions,
+			understanding: context.understanding,
+			question: context.question,
 		})
 
-		// Also check staticToolCalls for complete tool
-		const completeCall = result.staticToolCalls.find(
+		const { model: modelOverride, ...generateOptions } = options ?? {}
+
+		const result = await generate({
+			model: modelOverride ?? this.model,
+			system,
+			prompt: 'Answer the query based on your understanding.',
+			tools,
+			toolChoice: 'required',
+			stopWhen: stepCountIs(MAX_STEPS),
+			onStepFinish: handleStep,
+			...generateOptions,
+		})
+
+		// Also check toolCalls for complete tool
+		const completeCall = result.toolCalls.find(
 			(c) => c.toolName === 'complete',
 		)
-		if (completeCall) completeResult = completeCall.input as CompleteParams
+		if (completeCall && 'input' in completeCall) {
+			completeResult = completeCall.input as CompleteParams
+		}
 
 		// Build result
 		if (completeResult) {

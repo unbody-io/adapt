@@ -1,8 +1,8 @@
-import type { LanguageModel } from 'ai'
+import type { LanguageModel, CallSettings } from 'ai'
 import { z } from 'zod'
 import type { LearnerResponse, BrainAskResult } from './types'
 import type { TokenUsage } from '../learners/types'
-import { generateStructuredOutput, type GenerateOptions } from '../utils'
+import { generate, Output } from '../llm'
 import { buildSynthesisSystemPrompt } from './prompts/prompt.synthesis.system'
 import { buildSynthesisUserPrompt } from './prompts/prompt.synthesis.user'
 
@@ -19,7 +19,7 @@ export type SynthesisOutput = z.infer<typeof synthesisOutputSchema>
 /**
  * Options for synthesis
  */
-export interface SynthesisOptions extends GenerateOptions {
+export interface SynthesisOptions extends CallSettings {
 	brainPrompt: string
 	query: string
 	responses: LearnerResponse[]
@@ -47,11 +47,11 @@ export async function synthesize(
 	const system = buildSynthesisSystemPrompt(brainPrompt)
 	const prompt = buildSynthesisUserPrompt(query, responses)
 
-	const result = await generateStructuredOutput({
+	const result = await generate({
 		model,
 		system,
 		prompt,
-		schema: synthesisOutputSchema,
+		output: Output.object({ schema: synthesisOutputSchema }),
 		...generateOptions,
 	})
 

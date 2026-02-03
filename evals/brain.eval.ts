@@ -21,7 +21,7 @@ const openrouter = createOpenRouter({
 	apiKey: process.env.OPENROUTER_API_KEY,
 })
 
-const MODEL = process.env.MODEL ?? 'anthropic/claude-sonnet-4'
+const MODEL = process.env.MODEL ?? 'google/gemini-2.0-flash-001'
 
 console.log(`\n🧠 Brain Eval - Full Flow`)
 console.log(`Model: ${MODEL}\n`)
@@ -227,9 +227,34 @@ async function runEval() {
 	const injectDuration = Date.now() - injectStart
 
 	console.log(`\n✅ Data injected in ${(injectDuration / 1000).toFixed(1)}s`)
+	console.log(`\nInject ID: ${injectResult.id}`)
+	console.log(`Batches processed: ${injectResult.batches.length}`)
+
+	// Show relevance summary per learner (averaged across batches and chunks)
 	console.log('\nRelevance by learner:')
-	for (const r of injectResult.results) {
-		console.log(`  ${r.learnerId}: ${r.relevance.toFixed(2)}`)
+	const learnerRelevances = new Map<string, number[]>()
+	for (const batch of injectResult.batches) {
+		for (const r of batch.results) {
+			const relevances = learnerRelevances.get(r.learnerId) ?? []
+			for (const chunk of r.chunks) {
+				relevances.push(chunk.relevance)
+			}
+			learnerRelevances.set(r.learnerId, relevances)
+		}
+	}
+	for (const [learnerId, relevances] of learnerRelevances) {
+		const avgRelevance = relevances.reduce((a, b) => a + b, 0) / relevances.length
+		console.log(`  ${learnerId}: ${avgRelevance.toFixed(2)} (${relevances.length} chunks)`)
+	}
+
+	// Force synthesis on all learners to build understanding
+	console.log('\n' + '─'.repeat(70))
+	console.log('Forcing synthesis on all learners...')
+	console.log('─'.repeat(70))
+
+	for (const learner of learners) {
+		const result = await learner.learn([], { forceSynthesize: true })
+		console.log(`  [${learner.id}] → ${result.status}`)
 	}
 
 	// Show understanding from each learner
@@ -237,8 +262,9 @@ async function runEval() {
 	console.log('Understanding snapshots:')
 	console.log('─'.repeat(70))
 	for (const learner of learners) {
-		console.log(`\n[${learner.id}]`)
-		console.log(learner.getUnderstanding().slice(0, 300) + '...')
+		const understanding = learner.getUnderstanding()
+		console.log(`\n[${learner.id}] (${understanding.length} chars)`)
+		console.log(understanding.slice(0, 500) + (understanding.length > 500 ? '...' : ''))
 	}
 
 	// ─────────────────────────────────────────────────────────────────────────

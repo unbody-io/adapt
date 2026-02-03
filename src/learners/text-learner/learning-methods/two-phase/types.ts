@@ -10,16 +10,21 @@ import type { Significance } from '../../../types'
 import type { Strategy } from '../../strategies'
 
 // Re-export phase types
-export type { ObserveOutput, ObserveContext, ObserveCallbacks } from './observe/types'
+export type { ObserveOutput, ObserveContext, ObserveCallbacks, Usage } from './observe/types'
 export type { SynthesizeOutput, SynthesizeContext, SynthesizeCallbacks } from './synthesize/types'
+
+/**
+ * Usage data from LLM call (re-exported for convenience)
+ */
+import type { Usage } from './observe/types'
 
 /**
  * Output from learn() - discriminated union of all possible outcomes
  */
 export type LearnOutput =
 	// Observe outcomes
-	| { status: 'observed'; output: string }
-	| { status: 'observe:dismissed'; output: string }
+	| { status: 'observed'; output: string; usage?: Usage }
+	| { status: 'observe:dismissed'; output: string; usage?: Usage }
 	| { status: 'observe:error'; error: unknown }
 	// Synthesize outcomes
 	| {
@@ -28,8 +33,9 @@ export type LearnOutput =
 			significance: Significance
 			evolution: string
 			reasoning?: string
+			usage?: Usage
 	  }
-	| { status: 'synthesize:dismissed'; output: string }
+	| { status: 'synthesize:dismissed'; output: string; usage?: Usage }
 	| { status: 'synthesize:error'; error: unknown }
 
 /**
@@ -116,8 +122,12 @@ export interface LearnOptions {
  * Callbacks for two-phase learning observability
  */
 export interface LearnCallbacks {
+	/** Called when observe phase starts */
+	onObserveStarted?: (itemCount: number) => void
 	/** Called when observe phase thinks */
 	onObserveThinking?: (thoughts: string[]) => void
+	/** Called when synthesize phase starts */
+	onSynthesizeStarted?: (observationCount: number) => void
 	/** Called when synthesize phase thinks */
 	onSynthesizeThinking?: (thoughts: string[]) => void
 }

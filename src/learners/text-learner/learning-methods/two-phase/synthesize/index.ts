@@ -5,10 +5,11 @@
  * Uses identity generation + system prompt pattern.
  */
 
-import { generateText, Output, type LanguageModel } from 'ai'
+import type { LanguageModel } from 'ai'
 import type { SynthesizeOutput, SynthesizeContext, SynthesizeCallbacks } from './types'
 import type { SynthesizeIdentity } from './schema.identity'
 import { synthesizeIdentitySchema } from './schema.identity'
+import { generateStructuredOutput } from '../../../../../utils'
 import { synthesizeOutputSchema } from './schema.output'
 import { synthesizeIdentityPromptTemplate } from './prompt.template.identity'
 import { synthesizeSystemPromptTemplate } from './prompt.template.system'
@@ -38,16 +39,11 @@ export async function initSynthesize(
 ): Promise<SynthesizeInitResult> {
 	const prompt = synthesizeIdentityPromptTemplate(instructions)
 
-	const result = await generateText({
+	const { output: identity } = await generateStructuredOutput({
 		model,
 		prompt,
-		output: Output.object({ schema: synthesizeIdentitySchema }),
+		schema: synthesizeIdentitySchema,
 	})
-
-	const identity = result.output
-	if (!identity) {
-		throw new Error('Failed to generate synthesize identity')
-	}
 
 	const systemPrompt = synthesizeSystemPromptTemplate(identity, strategy)
 
@@ -75,11 +71,11 @@ export async function synthesize(
 			context.observations,
 		)
 
-		const result = await generateText({
+		const result = await generateStructuredOutput({
 			model,
 			system: systemPrompt,
 			prompt,
-			output: Output.object({ schema: synthesizeOutputSchema }),
+			schema: synthesizeOutputSchema,
 		})
 
 		// Emit thinking if available
@@ -89,14 +85,6 @@ export async function synthesize(
 		}
 
 		const data = result.output
-		if (!data) {
-			return {
-				status: 'error',
-				output: null,
-				error: new Error('No structured output generated'),
-			}
-		}
-
 		if (data.status === 'synthesized') {
 			return {
 				status: 'synthesized',
@@ -104,11 +92,13 @@ export async function synthesize(
 				significance: data.significance ?? 'routine',
 				evolution: data.evolution ?? '',
 				reasoning: data.reasoning,
+				usage: result.usage,
 			}
 		} else {
 			return {
 				status: 'dismissed',
 				output: data.output ?? 'No changes needed',
+				usage: result.usage,
 			}
 		}
 	} catch (error) {

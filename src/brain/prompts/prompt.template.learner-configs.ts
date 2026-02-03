@@ -99,10 +99,12 @@ Routing clarity: For each type of question the user might ask, is there a clear 
 Proportionality: Is the number of learners proportional to the complexity of the domain? Over-decomposition wastes tokens; under-decomposition loses nuance.
 
 ══════════════════════════════════════════════════════════════════════════════
-OUTPUT FORMAT
+OUTPUT FORMAT (JSON)
 ══════════════════════════════════════════════════════════════════════════════
 
-IMPORTANT: Output ONLY valid JSON. No markdown, no explanation, no code blocks.
+CRITICAL: Output ONLY valid JSON. No markdown, no explanation, no code blocks.
+- Use \\n for newlines inside string values (do NOT use actual line breaks in strings)
+- Escape all special characters properly
 
 Return a JSON object with this exact structure:
 {

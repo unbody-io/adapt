@@ -16,9 +16,18 @@
     "eval": "bun evals/run-eval.ts",
     "eval:crisis": "bun evals/run-eval.ts crisis-hostage",
     "eval:developer": "bun evals/run-eval.ts developer-memory",
-    "eval:therapist": "bun evals/run-eval.ts therapist-profile"
+    "eval:therapist": "bun evals/run-eval.ts therapist-profile",
+    "eval:learner": "bun evals/learner.eval.ts",
+    "eval:learner:list": "bun evals/learner.eval.ts --list",
+    "server": "bun server/index.ts",
+    "server:dev": "bun --watch server/index.ts"
   },
-  "keywords": ["unbody", "brain", "learning", "agents"],
+  "keywords": [
+    "unbody",
+    "brain",
+    "learning",
+    "agents"
+  ],
   "license": "MIT",
   "devDependencies": {
     "@biomejs/biome": "^2.3.13",
@@ -28,7 +37,9 @@
   },
   "dependencies": {
     "@openrouter/ai-sdk-provider": "^2.1.1",
-    "ai": "^6.0.57",
+    "ai": "^6.0.0",
+    "hono": "^4.11.7",
+    "nanoid": "^5.1.6",
     "zod": "^3.24.0"
   },
   "peerDependencies": {

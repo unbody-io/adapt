@@ -144,7 +144,7 @@ export class TwoPhaseMethod {
 				return { status: 'synthesize:error', error: synthesizeResult.error }
 			}
 			if (synthesizeResult.status === 'dismissed') {
-				return { status: 'synthesize:dismissed', output: synthesizeResult.output }
+				return { status: 'synthesize:dismissed', output: synthesizeResult.output, usage: synthesizeResult.usage }
 			}
 			return {
 				status: 'synthesized',
@@ -152,10 +152,12 @@ export class TwoPhaseMethod {
 				significance: synthesizeResult.significance,
 				evolution: synthesizeResult.evolution,
 				reasoning: synthesizeResult.reasoning,
+				usage: synthesizeResult.usage,
 			}
 		}
 
 		// Phase 1: Observe
+		callbacks?.onObserveStarted?.(data.length)
 		const observeResult = await observe(
 			observeModel,
 			this.observeSystemPrompt,
@@ -175,6 +177,7 @@ export class TwoPhaseMethod {
 			return {
 				status: 'observe:dismissed',
 				output: observeResult.output,
+				usage: observeResult.usage,
 			}
 		}
 
@@ -193,11 +196,13 @@ export class TwoPhaseMethod {
 			return {
 				status: 'observed',
 				output: observeResult.output,
+				usage: observeResult.usage,
 			}
 		}
 
 		// Phase 2: Synthesize
 		const observations = this.buffer.getTexts()
+		callbacks?.onSynthesizeStarted?.(observations.length)
 		const synthesizeResult = await synthesize(
 			synthesizeModel,
 			this.synthesizeSystemPrompt,
@@ -220,6 +225,7 @@ export class TwoPhaseMethod {
 			return {
 				status: 'synthesize:dismissed',
 				output: synthesizeResult.output,
+				usage: synthesizeResult.usage,
 			}
 		}
 
@@ -229,6 +235,7 @@ export class TwoPhaseMethod {
 			significance: synthesizeResult.significance,
 			evolution: synthesizeResult.evolution,
 			reasoning: synthesizeResult.reasoning,
+			usage: synthesizeResult.usage,
 		}
 	}
 

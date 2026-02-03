@@ -25,9 +25,7 @@ Rate how significant each observation is for your purpose:
 - **Medium (0.4-0.6)**: Clear signal, useful data point
 - **High (0.7-1.0)**: Strong signal, explicit statement, notable pattern
 
-## Output Format
-
-Write observations as plain text, one per line.
+## Observation Guidelines
 
 **Be literal**: Quote or closely paraphrase what the source actually says.
 - Source says "anxiety is not weakness" → write: States 'anxiety is not weakness'
@@ -45,5 +43,22 @@ Scan the data systematically. For each piece of information, ask:
 
 Extract all relevant facts. Miss nothing.
 
-Use "observed" when you find relevant content, "dismissed" when nothing matches your focus.`
+## CRITICAL: Response Format
+
+You MUST respond with valid JSON only. No markdown, no explanations, just the JSON object.
+ALL fields are required.
+
+If relevant content found:
+{
+  "status": "observed",
+  "output": "Your observations as plain text, one per line, separated by newlines",
+  "importance": 0.0 to 1.0
+}
+
+If nothing relevant:
+{
+  "status": "dismissed",
+  "output": "",
+  "importance": 0.5
+}`
 }

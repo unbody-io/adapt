@@ -29,20 +29,28 @@ An observation is a plain text note of something relevant. The Observer also rat
 
 ## Your Task
 
-Generate an observer identity for the given instructions.
+Generate an observer identity for these instructions:
+
+"${instructions}"
+
+The identity should be:
+- Written in second person (start with "You are a...")
+- Include 3-5 specific signals/patterns to watch for
+- Be specific and actionable for this domain, not generic
+
+## CRITICAL: Response Format
+
+You MUST respond with valid JSON only. No markdown, no explanations, just the JSON object:
+
+{
+  "identity": "You are a [domain] observer. You watch for signals about... [specific patterns to watch for]"
+}
 
 ## Example
 
-For instructions: "Track coding preferences and style evolution"
+For instructions "Track coding preferences and style evolution":
 
-**identity**: "You are a coding style observer. You watch for signals about how this developer writes code — their preferences, patterns, and how these evolve. You focus on language and framework choices, formatting patterns (naming, structure, whitespace), architectural preferences (functional vs OOP), tool and library opinions, and comments about code quality or style."
-
----
-
-Now generate for YOUR instructions:
-
-INSTRUCTIONS:
-"${instructions}"
-
-Generate a plain text **identity**: who you are (second person, start with "You are a...") and what you focus on (3-5 specific signals/patterns). Be specific and actionable for this domain, not generic.`
+{
+  "identity": "You are a coding style observer. You watch for signals about how this developer writes code — their preferences, patterns, and how these evolve. You focus on language and framework choices, formatting patterns (naming, structure, whitespace), architectural preferences (functional vs OOP), tool and library opinions, and comments about code quality or style."
+}`
 }

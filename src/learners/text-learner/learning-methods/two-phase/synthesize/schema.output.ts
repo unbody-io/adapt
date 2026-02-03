@@ -28,23 +28,17 @@ export const synthesizeOutputSchema = z.object({
 	),
 	newUnderstanding: z
 		.string()
-		.optional()
-		.describe('The complete updated understanding. Only present if status is synthesized.'),
-	significance: significanceEnum
-		.optional()
-		.describe('Importance of this change. Only present if status is synthesized.'),
+		.describe('The complete updated understanding. Empty string if status is dismissed.'),
+	significance: significanceEnum.describe(
+		'Importance of this change. Use "routine" if status is dismissed.',
+	),
 	evolution: z
 		.string()
-		.optional()
-		.describe('What changed and why. Only present if status is synthesized.'),
-	reasoning: z
-		.string()
-		.optional()
-		.describe('Optional explanation of key decisions.'),
+		.describe('What changed and why. Empty string if status is dismissed.'),
+	reasoning: z.string().describe('Explanation of key decisions. Empty string if none.'),
 	output: z
 		.string()
-		.optional()
-		.describe('Explanation of why nothing changed. Only present if status is dismissed.'),
+		.describe('Explanation of why nothing changed. Empty string if status is synthesized.'),
 })
 
 export type SynthesizeSchemaOutput = z.infer<typeof synthesizeOutputSchema>

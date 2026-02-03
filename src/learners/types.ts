@@ -81,8 +81,8 @@ export interface Learner<TUnderstanding = unknown> {
 	getGovernance(): LearnerGovernance
 
 	// Core operations
-	ingest(batch: unknown[]): Promise<IngestResult>
-	ask(query: string): Promise<AskResult>
+	learn(batch: unknown[]): Promise<unknown>
+	query(question: string): Promise<unknown>
 
 	// Introspection
 	getSummary(): string

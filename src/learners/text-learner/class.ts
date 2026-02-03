@@ -14,7 +14,7 @@ import type {
 } from './types'
 import { TypedEmitter } from '../../types/events'
 import { TwoPhaseMethod, type LearnOptions } from './learning-methods'
-import { createQueryMethod, type QueryMethod, type QueryResult } from './query-methods'
+import { createQueryMethod, type QueryMethod, type QueryResult, type QueryOptions } from './query-methods'
 import { resolveTextLearnerConfig } from './config.resolver'
 import type { ParentModels } from '../../types/config'
 
@@ -233,12 +233,24 @@ export class TextLearner
 				batch,
 				options,
 				{
+					onObserveStarted: (itemCount) => {
+						this.emit('learner:observe:started', {
+							learnerId: this.id,
+							itemCount,
+						})
+					},
 					onObserveThinking: (thoughts) => {
 						this.emit('learner:ingest:thinking', {
 							learnerId: this.id,
 							chunkId: 'observe',
 							thoughts,
 							usage: { inputTokens: 0, outputTokens: 0, totalTokens: 0 },
+						})
+					},
+					onSynthesizeStarted: (observationCount) => {
+						this.emit('learner:synthesize:started', {
+							learnerId: this.id,
+							observationCount,
 						})
 					},
 					onSynthesizeThinking: (thoughts) => {
@@ -278,6 +290,7 @@ export class TextLearner
 					output: result.output,
 					importance: bufferState.avgImportance,
 					bufferCount: bufferState.count,
+					usage: result.usage,
 				})
 				break
 			}
@@ -286,6 +299,7 @@ export class TextLearner
 				this.emit('learner:observe:dismissed', {
 					learnerId: this.id,
 					output: result.output,
+					usage: result.usage,
 				})
 				break
 
@@ -322,6 +336,7 @@ export class TextLearner
 					previousUnderstanding,
 					significance: result.significance,
 					evolution: result.evolution,
+					usage: result.usage,
 				})
 
 				// Also emit legacy understanding updated event
@@ -341,6 +356,7 @@ export class TextLearner
 				this.emit('learner:synthesize:dismissed', {
 					learnerId: this.id,
 					output: result.output,
+					usage: result.usage,
 				})
 				break
 
@@ -357,9 +373,10 @@ export class TextLearner
 	 * Query against understanding using the configured query method
 	 *
 	 * @param question - The question or query to answer
+	 * @param options - Optional generation options (temperature, etc.)
 	 * @returns QueryResult with insight, confidence, and gaps
 	 */
-	async query(question: string): Promise<QueryResult> {
+	async query(question: string, options?: QueryOptions): Promise<QueryResult> {
 		this.governance.lastAccessed = new Date()
 		this.governance.retrievalCount++
 
@@ -376,6 +393,7 @@ export class TextLearner
 					understanding: this.understanding,
 					question,
 				},
+				options,
 				{
 					onThinking: (thoughts, usage) => {
 						this.emit('learner:ask:thinking', {

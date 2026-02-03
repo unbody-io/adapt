@@ -6,12 +6,7 @@ export { TextLearner } from './class'
 export * from './types'
 
 // Learning methods
-export {
-	createLearningMethod,
-	ToolBasedMethod,
-	DirectMethod,
-	type LearningMethod,
-} from './learning-methods'
+export { TwoPhaseMethod } from './learning-methods'
 
 // Query methods
 export {

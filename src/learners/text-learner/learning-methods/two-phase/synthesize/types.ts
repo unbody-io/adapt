@@ -8,6 +8,15 @@
 import type { Significance } from '../../../../types'
 
 /**
+ * Usage data from LLM call
+ */
+export interface Usage {
+	inputTokens?: number
+	outputTokens?: number
+	totalTokens?: number
+}
+
+/**
  * Output from the synthesize phase
  *
  * - synthesized: understanding was updated
@@ -21,8 +30,9 @@ export type SynthesizeOutput =
 			significance: Significance
 			evolution: string
 			reasoning?: string
+			usage?: Usage
 	  }
-	| { status: 'dismissed'; output: string }
+	| { status: 'dismissed'; output: string; usage?: Usage }
 	| { status: 'error'; output: null; error: unknown }
 
 /**

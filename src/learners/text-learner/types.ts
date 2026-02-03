@@ -21,21 +21,36 @@ export type {
 export type { QueryMethodName, QueryResult } from './query-methods/types'
 
 /**
+ * Usage data for events
+ */
+export interface EventUsage {
+	inputTokens?: number
+	outputTokens?: number
+	totalTokens?: number
+}
+
+/**
  * TextLearner event map
  *
  * Extends base events with two-phase learning events.
  */
 export interface TextLearnerEventMap extends BaseLearnerEventMap {
 	// Observe phase events
+	'learner:observe:started': {
+		learnerId: string
+		itemCount: number
+	}
 	'learner:observed': {
 		learnerId: string
 		output: string
 		importance: number
 		bufferCount: number
+		usage?: EventUsage
 	}
 	'learner:observe:dismissed': {
 		learnerId: string
 		output: string
+		usage?: EventUsage
 	}
 	'learner:observe:error': {
 		learnerId: string
@@ -43,16 +58,22 @@ export interface TextLearnerEventMap extends BaseLearnerEventMap {
 	}
 
 	// Synthesize phase events
+	'learner:synthesize:started': {
+		learnerId: string
+		observationCount: number
+	}
 	'learner:synthesized': {
 		learnerId: string
 		newUnderstanding: string
 		previousUnderstanding: string
 		significance: Significance
 		evolution: string
+		usage?: EventUsage
 	}
 	'learner:synthesize:dismissed': {
 		learnerId: string
 		output: string
+		usage?: EventUsage
 	}
 	'learner:synthesize:error': {
 		learnerId: string

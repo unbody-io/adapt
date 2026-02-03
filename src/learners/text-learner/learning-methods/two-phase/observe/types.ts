@@ -6,6 +6,15 @@
  */
 
 /**
+ * Usage data from LLM call
+ */
+export interface Usage {
+	inputTokens?: number
+	outputTokens?: number
+	totalTokens?: number
+}
+
+/**
  * Output from the observe phase
  *
  * - observed: relevant content found, extracted with importance score
@@ -13,8 +22,8 @@
  * - error: LLM failure
  */
 export type ObserveOutput =
-	| { status: 'observed'; output: string; importance: number }
-	| { status: 'dismissed'; output: string }
+	| { status: 'observed'; output: string; importance: number; usage?: Usage }
+	| { status: 'dismissed'; output: string; usage?: Usage }
 	| { status: 'error'; output: null; error: unknown }
 
 /**

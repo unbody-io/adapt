@@ -232,6 +232,7 @@ export interface BrainAskResult {
  */
 export interface LearnerResponse {
 	learnerId: string
+	name: string
 	relevant: boolean
 	confidence: number
 	insight: string

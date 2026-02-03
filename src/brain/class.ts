@@ -1,11 +1,7 @@
-import { generateText, Output } from 'ai'
 import { nanoid } from 'nanoid'
 import { TextLearner, type GeneratedLearnerConfig, type TokenUsage } from '../learners'
-import {
-	createSynthesisAgent,
-	type SynthesisAgent,
-	type SynthesizeParams,
-} from './agent'
+import { generateStructuredOutput, type GenerateOptions } from '../utils'
+import { synthesize } from './agent'
 import { learnerConfigsPromptTemplate } from './prompts/prompt.template.learner-configs'
 import { learnerConfigsSchema } from './schemas/schema.learner-configs'
 import type {
@@ -33,13 +29,11 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 	private learners: Map<string, TextLearner> = new Map()
 	private learnerNames: Map<string, string> = new Map()
 	private initialized = false
-	private synthesisAgent: SynthesisAgent
 
 	constructor(rawConfig: BrainConfig) {
 		super()
 		this.config = resolveBrainConfig(rawConfig)
 		this.prompt = this.config.prompt
-		this.synthesisAgent = createSynthesisAgent(this.config.query.model)
 	}
 
 	/**
@@ -54,30 +48,27 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 		try {
 			this.emit('brain:init:config:generating', {})
 
-			const result = await generateText({
-				model: this.config.init.model,
-				prompt: learnerConfigsPromptTemplate(this.prompt),
-				output: Output.object({ schema: learnerConfigsSchema }),
-			})
+			// Try to generate learner configs, with JSON repair fallback
+			const { output, usage: llmUsage } = await this.generateLearnerConfigs()
 
-			if (!result.output) {
+			if (!output) {
 				const error = 'Failed to generate learner configurations'
 				this.emit('brain:init:failed', { error })
 				throw new Error(error)
 			}
 
 			const usage: TokenUsage = {
-				inputTokens: result.usage?.inputTokens ?? 0,
-				outputTokens: result.usage?.outputTokens ?? 0,
-				totalTokens: result.usage?.totalTokens ?? 0,
+				inputTokens: llmUsage?.inputTokens ?? 0,
+				outputTokens: llmUsage?.outputTokens ?? 0,
+				totalTokens: llmUsage?.totalTokens ?? 0,
 			}
 
 			this.emit('brain:init:config:generated', {
-				configs: result.output.learners,
+				configs: output.learners,
 				usage,
 			})
 
-			for (const config of result.output.learners) {
+			for (const config of output.learners) {
 				await this.createLearnerFromConfig(config)
 			}
 
@@ -90,6 +81,17 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 			this.emit('brain:init:failed', { error: errorMessage })
 			throw error
 		}
+	}
+
+	/**
+	 * Generate learner configs from prompt via LLM
+	 */
+	private async generateLearnerConfigs() {
+		return generateStructuredOutput({
+			model: this.config.init.model,
+			prompt: learnerConfigsPromptTemplate(this.prompt),
+			schema: learnerConfigsSchema,
+		})
 	}
 
 	/**
@@ -264,8 +266,11 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 	 * Ask all learners and synthesize a unified response
 	 *
 	 * Query is sent to ALL learners. Responses are synthesized via LLM.
+	 *
+	 * @param query - The question to ask
+	 * @param options - Optional generation options (temperature, etc.)
 	 */
-	async ask(query: string): Promise<BrainAskResult> {
+	async ask(query: string, options?: GenerateOptions): Promise<BrainAskResult> {
 		await this.ensureInitialized()
 
 		const queryId = `query_${nanoid()}`
@@ -277,7 +282,7 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 			// Query all learners in parallel
 			const learnerResults = await Promise.all(
 				learnerArray.map(async (learner) => {
-					const result = await learner.query(query)
+					const result = await learner.query(query, options)
 					return {
 						learnerId: learner.id,
 						name: this.learnerNames.get(learner.id) ?? learner.id,
@@ -289,75 +294,32 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 				}),
 			)
 
-			// Build sources from relevant responses
-			const sources = learnerResults
-				.filter((r) => r.relevant)
-				.map((r) => ({
-					learnerId: r.learnerId,
-					confidence: r.confidence,
-					insight: r.insight,
-				}))
-
 			this.emit('brain:ask:synthesis:started', {
 				queryId,
 				learnerResponses: learnerResults,
 			})
 
 			// Synthesize responses
-			const synthesisResult = await this.synthesisAgent.generate({
-				prompt: query,
-				options: {
-					query,
-					brainPrompt: this.prompt,
-					responses: learnerResults,
-				},
+			const { model: modelOverride, ...generateOptions } = options ?? {}
+			const result = await synthesize(modelOverride ?? this.config.query.model, {
+				brainPrompt: this.prompt,
+				query,
+				responses: learnerResults,
+				...generateOptions,
 			})
-
-			const usage: TokenUsage = {
-				inputTokens: synthesisResult.usage?.inputTokens ?? 0,
-				outputTokens: synthesisResult.usage?.outputTokens ?? 0,
-				totalTokens: synthesisResult.usage?.totalTokens ?? 0,
-			}
-
-			// Extract synthesized output from done tool
-			const synthesizeCall = synthesisResult.staticToolCalls.find(
-				(call) => call.toolName === 'synthesize',
-			)
-
-			if (!synthesizeCall) {
-				// Fallback if synthesis failed
-				const allGaps = learnerResults.flatMap((r) => r.gaps)
-				const result = {
-					insight: 'Unable to synthesize response from learners.',
-					sources,
-					gaps: [...new Set(allGaps)],
-				}
-
-				this.emit('brain:ask:completed', {
-					queryId,
-					insight: result.insight,
-					sources,
-					gaps: result.gaps,
-					usage,
-				})
-
-				return result
-			}
-
-			const synthesis = synthesizeCall.input as SynthesizeParams
 
 			this.emit('brain:ask:completed', {
 				queryId,
-				insight: synthesis.insight,
-				sources,
-				gaps: synthesis.gaps,
-				usage,
+				insight: result.insight,
+				sources: result.sources,
+				gaps: result.gaps,
+				usage: result.usage,
 			})
 
 			return {
-				insight: synthesis.insight,
-				sources,
-				gaps: synthesis.gaps,
+				insight: result.insight,
+				sources: result.sources,
+				gaps: result.gaps,
 			}
 		} catch (error) {
 			const errorMessage = error instanceof Error ? error.message : String(error)

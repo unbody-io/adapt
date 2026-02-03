@@ -5,10 +5,11 @@
  * Uses identity generation + system prompt pattern.
  */
 
-import { generateText, Output, type LanguageModel } from 'ai'
+import type { LanguageModel } from 'ai'
 import type { ObserveOutput, ObserveContext, ObserveCallbacks } from './types'
 import type { ObserveIdentity } from './schema.identity'
 import { observeIdentitySchema } from './schema.identity'
+import { generateStructuredOutput } from '../../../../../utils'
 import { observeOutputSchema } from './schema.output'
 import { observeIdentityPromptTemplate } from './prompt.template.identity'
 import { observeSystemPromptTemplate } from './prompt.template.system'
@@ -35,16 +36,11 @@ export async function initObserve(
 ): Promise<ObserveInitResult> {
 	const prompt = observeIdentityPromptTemplate(instructions)
 
-	const result = await generateText({
+	const { output: identity } = await generateStructuredOutput({
 		model,
 		prompt,
-		output: Output.object({ schema: observeIdentitySchema }),
+		schema: observeIdentitySchema,
 	})
-
-	const identity = result.output
-	if (!identity) {
-		throw new Error('Failed to generate observe identity')
-	}
 
 	const systemPrompt = observeSystemPromptTemplate(identity)
 
@@ -69,12 +65,12 @@ export async function observe(
 	try {
 		const prompt = observeUserPromptTemplate(context.data)
 
-		const result = await generateText({
+		const result = await generateStructuredOutput({
 			model,
 			system: systemPrompt,
 			prompt,
-			output: Output.object({ schema: observeOutputSchema }),
-			temperature: 0.2, // Low temperature for factual extraction
+			schema: observeOutputSchema,
+			temperature: 0.2,
 		})
 
 		// Emit thinking if available
@@ -84,24 +80,18 @@ export async function observe(
 		}
 
 		const data = result.output
-		if (!data) {
-			return {
-				status: 'error',
-				output: null,
-				error: new Error('No structured output generated'),
-			}
-		}
-
 		if (data.status === 'observed') {
 			return {
 				status: 'observed',
 				output: data.output,
 				importance: data.importance ?? 0.5,
+				usage: result.usage,
 			}
 		} else {
 			return {
 				status: 'dismissed',
 				output: data.output,
+				usage: result.usage,
 			}
 		}
 	} catch (error) {

@@ -1,0 +1,2440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Brain Monitor</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #0a0a0a;
+      color: #e0e0e0;
+      min-height: 100vh;
+      font-size: 14px;
+    }
+
+    .container {
+      display: grid;
+      grid-template-columns: 320px 1fr 280px;
+      grid-template-rows: auto 1fr;
+      height: 100vh;
+      gap: 1px;
+      background: #222;
+    }
+
+    .panel {
+      background: #111;
+      overflow-y: auto;
+    }
+
+    .panel-header {
+      padding: 12px 16px;
+      border-bottom: 1px solid #222;
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #666;
+      position: sticky;
+      top: 0;
+      background: #111;
+      z-index: 10;
+    }
+
+    .panel-content {
+      padding: 16px;
+    }
+
+    /* Header */
+    .header {
+      grid-column: 1 / -1;
+      background: #111;
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid #222;
+    }
+
+    .header h1 { font-size: 16px; font-weight: 600; }
+
+    .status {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      color: #666;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #444;
+    }
+
+    .status-dot.connected { background: #4ade80; }
+    .status-dot.processing { background: #facc15; animation: pulse 1s infinite; }
+    .status-dot.error { background: #f87171; }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    /* Forms */
+    .form-group {
+      margin-bottom: 14px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 11px;
+      color: #666;
+      margin-bottom: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    input, textarea, select {
+      width: 100%;
+      background: #1a1a1a;
+      border: 1px solid #333;
+      color: #e0e0e0;
+      padding: 8px 10px;
+      border-radius: 4px;
+      font-size: 13px;
+      font-family: inherit;
+    }
+
+    input:focus, textarea:focus, select:focus {
+      outline: none;
+      border-color: #4a9eff;
+    }
+
+    textarea { resize: vertical; min-height: 170px; }
+
+    input[type="number"] { width: 100%; }
+
+    button {
+      background: #2563eb;
+      color: white;
+      border: none;
+      padding: 10px 16px;
+      border-radius: 4px;
+      font-size: 12px;
+      cursor: pointer;
+      width: 100%;
+      font-weight: 500;
+    }
+
+    button:hover { background: #1d4ed8; }
+    button:disabled { background: #333; color: #666; cursor: not-allowed; }
+    button.secondary { background: #333; }
+    button.secondary:hover { background: #444; }
+
+    .section-title {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #4a9eff;
+      margin: 16px 0 8px;
+      padding-bottom: 4px;
+      border-bottom: 1px solid #222;
+    }
+
+    .section-title:first-child { margin-top: 0; }
+
+    /* Learner Cards */
+    .learners-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 12px;
+      padding: 16px;
+    }
+
+    .learner-card {
+      background: #1a1a1a;
+      border-radius: 8px;
+      border: 1px solid #333;
+      overflow: hidden;
+      cursor: pointer;
+      transition: border-color 0.2s;
+    }
+
+    .learner-card:hover { border-color: #4a9eff; }
+    .learner-card.active { border-color: #4ade80; }
+
+    .learner-card-header {
+      padding: 12px;
+      border-bottom: 1px solid #222;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .learner-card-header h3 {
+      font-size: 14px;
+      font-weight: 600;
+      color: #4ade80;
+    }
+
+    .learner-header-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .learner-stat-badge {
+      font-size: 10px;
+      padding: 2px 6px;
+      border-radius: 4px;
+      background: #222;
+      color: #666;
+    }
+
+    .learner-status {
+      font-size: 11px;
+      padding: 3px 8px;
+      border-radius: 10px;
+      background: #333;
+      color: #888;
+    }
+
+    .learner-status.observing { background: #1e3a5f; color: #4a9eff; }
+    .learner-status.synthesizing { background: #3f2f1a; color: #facc15; }
+    .learner-status.ready { background: #1a3f1a; color: #4ade80; }
+
+    .learner-card-body {
+      padding: 12px;
+    }
+
+    .learner-instructions {
+      font-size: 12px;
+      color: #aaa;
+      line-height: 1.5;
+      margin-bottom: 10px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #222;
+    }
+
+    /* Observations - Primary content on card */
+    .learner-observations {
+      margin-bottom: 10px;
+    }
+
+    .learner-observations .label {
+      font-size: 11px;
+      color: #4a9eff;
+      font-weight: 500;
+      display: block;
+      margin-bottom: 6px;
+    }
+
+    .learner-observations .content {
+      background: #111;
+      border: 1px solid #222;
+      border-radius: 6px;
+      padding: 8px;
+      max-height: 140px;
+      overflow-y: auto;
+    }
+
+    .learner-observations.empty .content {
+      background: transparent;
+      border: 1px dashed #333;
+    }
+
+    .learner-observations .empty-text {
+      color: #444;
+      font-size: 11px;
+      font-style: italic;
+      text-align: center;
+      padding: 8px;
+    }
+
+    .learner-observations .observation {
+      font-size: 11px;
+      color: #aaa;
+      line-height: 1.4;
+      padding: 6px 0;
+      border-bottom: 1px solid #222;
+    }
+
+    .learner-observations .observation:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+
+    .learner-observations .observation:first-child {
+      padding-top: 0;
+    }
+
+    .learner-observations .importance {
+      color: #f5a623;
+      font-size: 10px;
+      font-weight: 500;
+      margin-right: 6px;
+    }
+
+    /* Understanding preview - Secondary content */
+    .learner-understanding-preview {
+      font-size: 11px;
+      color: #555;
+      line-height: 1.4;
+      padding-top: 8px;
+      border-top: 1px solid #222;
+    }
+
+    .learner-understanding-preview .label {
+      color: #666;
+      margin-right: 4px;
+    }
+
+    .learner-understanding-preview .preview-text {
+      color: #888;
+    }
+
+    /* Last synthesis indicator */
+    .learner-last-synthesis {
+      font-size: 11px;
+      padding: 6px 8px;
+      background: #1a2a1a;
+      border-radius: 4px;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+    }
+
+    .learner-last-synthesis .significance {
+      font-size: 9px;
+      padding: 2px 6px;
+      border-radius: 3px;
+      text-transform: uppercase;
+      font-weight: 600;
+      flex-shrink: 0;
+    }
+
+    .learner-last-synthesis .significance.routine {
+      background: #333;
+      color: #888;
+    }
+
+    .learner-last-synthesis .significance.notable {
+      background: #3f2f1a;
+      color: #facc15;
+    }
+
+    .learner-last-synthesis .significance.critical {
+      background: #3f1a1a;
+      color: #f87171;
+    }
+
+    .learner-last-synthesis .evolution-text {
+      color: #6b8;
+      line-height: 1.3;
+    }
+
+    /* Legacy styles kept for modal */
+    .learner-understanding {
+      font-size: 12px;
+      color: #666;
+      line-height: 1.4;
+      margin-bottom: 8px;
+    }
+
+    .learner-understanding .label {
+      color: #4a9eff;
+      font-weight: 500;
+      margin-right: 4px;
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .learner-understanding .content {
+      white-space: pre-wrap;
+      display: block;
+      max-height: 80px;
+      overflow-y: auto;
+      background: #1a1a1a;
+      padding: 6px 8px;
+      border-radius: 4px;
+      font-family: monospace;
+      font-size: 11px;
+    }
+
+    .learner-buffer {
+      font-size: 12px;
+      color: #666;
+      line-height: 1.4;
+      margin-bottom: 8px;
+    }
+
+    .learner-buffer .label {
+      color: #f5a623;
+      font-weight: 500;
+      margin-right: 4px;
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .learner-buffer .content {
+      white-space: pre-wrap;
+      display: block;
+      max-height: 80px;
+      overflow-y: auto;
+      background: #1a1a1a;
+      padding: 6px 8px;
+      border-radius: 4px;
+      font-family: monospace;
+      font-size: 11px;
+    }
+
+    .learner-buffer .observation {
+      padding: 4px 0;
+      border-bottom: 1px dashed #333;
+    }
+
+    .learner-buffer .observation:last-child {
+      border-bottom: none;
+    }
+
+    .learner-buffer .importance {
+      color: #888;
+      font-size: 10px;
+    }
+
+    .learner-card-body p {
+      font-size: 12px;
+      color: #888;
+      line-height: 1.5;
+      margin-bottom: 8px;
+    }
+
+    .learner-stats {
+      display: flex;
+      gap: 12px;
+      font-size: 12px;
+      color: #666;
+    }
+
+    .learner-stats span {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    /* Learner Detail Modal */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.8);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+    }
+
+    .modal-overlay.open { display: flex; }
+
+    .modal {
+      background: #111;
+      border-radius: 12px;
+      border: 1px solid #333;
+      width: 90%;
+      max-width: 800px;
+      max-height: 90vh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .modal-header {
+      padding: 16px;
+      border-bottom: 1px solid #222;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .modal-header h2 { font-size: 16px; color: #4ade80; }
+
+    .modal-close {
+      background: none;
+      border: none;
+      color: #666;
+      font-size: 24px;
+      cursor: pointer;
+      width: auto;
+      padding: 0;
+    }
+
+    .modal-close:hover { color: #fff; }
+
+    .modal-body {
+      padding: 16px;
+      overflow-y: auto;
+      flex: 1;
+    }
+
+    .modal-tabs {
+      display: flex;
+      gap: 4px;
+      margin-bottom: 16px;
+    }
+
+    .modal-tab {
+      padding: 8px 16px;
+      font-size: 12px;
+      color: #666;
+      background: #1a1a1a;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      width: auto;
+    }
+
+    .modal-tab:hover { color: #888; }
+    .modal-tab.active { background: #2563eb; color: white; }
+
+    .modal-tab-content { display: none; }
+    .modal-tab-content.active { display: block; }
+
+    pre {
+      background: #0a0a0a;
+      padding: 12px;
+      border-radius: 4px;
+      font-size: 11px;
+      line-height: 1.5;
+      overflow-x: auto;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    /* Chat Area */
+    .main-panel {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .chat-area {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px;
+      border-top: 1px solid #222;
+    }
+
+    .message {
+      margin-bottom: 16px;
+      max-width: 80%;
+    }
+
+    .message.user {
+      margin-left: auto;
+      text-align: right;
+    }
+
+    .message-content {
+      display: inline-block;
+      padding: 10px 14px;
+      border-radius: 12px;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .message.user .message-content {
+      background: #2563eb;
+      color: white;
+    }
+
+    .message.assistant .message-content {
+      background: #222;
+    }
+
+    .message .sources {
+      font-size: 10px;
+      color: #666;
+      margin-top: 6px;
+    }
+
+    .chat-options {
+      padding: 8px 16px;
+      border-top: 1px solid #222;
+      display: flex;
+      gap: 16px;
+      align-items: center;
+      background: #0d0d0d;
+    }
+
+    .chat-option {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .chat-option label {
+      font-size: 11px;
+      color: #666;
+      white-space: nowrap;
+    }
+
+    .chat-option select {
+      font-size: 11px;
+      padding: 4px 8px;
+      background: #1a1a1a;
+      border: 1px solid #333;
+      color: #ccc;
+      border-radius: 4px;
+    }
+
+    .chat-option input[type="range"] {
+      width: 80px;
+      height: 4px;
+    }
+
+    .chat-input {
+      padding: 12px 16px;
+      border-top: 1px solid #222;
+      display: flex;
+      gap: 8px;
+    }
+
+    .chat-input input { flex: 1; }
+    .chat-input button { width: auto; padding: 8px 20px; }
+
+    /* Events Panel */
+    .event-log {
+      font-family: 'SF Mono', Monaco, monospace;
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .event {
+      padding: 4px 0;
+      border-bottom: 1px solid #1a1a1a;
+    }
+
+    .event-type { color: #4a9eff; }
+    .event-time { color: #444; margin-right: 6px; }
+    .event-data { color: #666; display: block; margin-left: 12px; word-break: break-all; font-size: 9px; }
+
+    /* Session List */
+    .session-list {
+      max-height: 150px;
+      overflow-y: auto;
+      border: 1px solid #333;
+      border-radius: 4px;
+      margin-bottom: 8px;
+    }
+
+    .session-item {
+      padding: 6px 10px;
+      border-bottom: 1px solid #222;
+      cursor: pointer;
+      font-size: 11px;
+    }
+
+    .session-item:hover { background: #1a1a1a; }
+    .session-item.selected { background: #1e3a5f; }
+    .session-item .meta { color: #666; font-size: 9px; margin-top: 2px; }
+
+    /* Empty State */
+    .empty-state {
+      text-align: center;
+      padding: 40px 20px;
+      color: #444;
+    }
+
+    .empty-state h3 { font-size: 14px; margin-bottom: 8px; }
+
+    /* Loading */
+    .loading {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      color: #666;
+      font-size: 12px;
+    }
+
+    .spinner {
+      width: 14px;
+      height: 14px;
+      border: 2px solid #333;
+      border-top-color: #4a9eff;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin-right: 8px;
+      display: inline-block;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Collapsible */
+    .collapsible-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      padding: 8px 0;
+    }
+
+    .collapsible-header:hover { color: #fff; }
+
+    .collapsible-content {
+      display: none;
+      padding-top: 8px;
+    }
+
+    .collapsible-content.open { display: block; }
+
+    .chevron {
+      transition: transform 0.2s;
+    }
+
+    .chevron.open { transform: rotate(180deg); }
+
+    /* Toast Notifications */
+    .toast-container {
+      position: fixed;
+      top: 60px;
+      right: 16px;
+      z-index: 200;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      max-width: 360px;
+    }
+
+    .toast {
+      background: #1a1a1a;
+      border: 1px solid #333;
+      border-radius: 8px;
+      padding: 12px 16px;
+      animation: slideIn 0.3s ease-out;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+    }
+
+    .toast.observed { border-left: 3px solid #4a9eff; }
+    .toast.synthesized { border-left: 3px solid #facc15; }
+    .toast.critical { border-left: 3px solid #f87171; }
+
+    @keyframes slideIn {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+
+    @keyframes fadeOut {
+      from { opacity: 1; }
+      to { opacity: 0; transform: translateY(-10px); }
+    }
+
+    .toast.removing {
+      animation: fadeOut 0.3s ease-out forwards;
+    }
+
+    .toast-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 6px;
+    }
+
+    .toast-type {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      font-weight: 600;
+    }
+
+    .toast.observed .toast-type { color: #4a9eff; }
+    .toast.synthesized .toast-type { color: #facc15; }
+
+    .toast-learner {
+      font-size: 10px;
+      color: #666;
+    }
+
+    .toast-content {
+      font-size: 12px;
+      color: #ccc;
+      line-height: 1.4;
+    }
+
+    .toast-meta {
+      font-size: 10px;
+      color: #666;
+      margin-top: 6px;
+      display: flex;
+      gap: 12px;
+    }
+
+    /* Activity indicator on cards */
+    .learner-activity {
+      margin-top: 8px;
+      padding-top: 8px;
+      border-top: 1px solid #222;
+      font-size: 10px;
+    }
+
+    .learner-activity-label {
+      color: #4a9eff;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 4px;
+    }
+
+    .learner-activity-text {
+      color: #888;
+      line-height: 1.4;
+    }
+
+    /* Significance badges */
+    .significance {
+      display: inline-block;
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .significance.routine { background: #1a3f1a; color: #4ade80; }
+    .significance.notable { background: #3f2f1a; color: #facc15; }
+    .significance.critical { background: #3f1a1a; color: #f87171; }
+
+    /* Learner Models Display */
+    .learner-models {
+      margin-top: 8px;
+      padding-top: 8px;
+      border-top: 1px solid #222;
+      font-size: 11px;
+    }
+
+    .learner-models-label {
+      color: #666;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 4px;
+    }
+
+    .learner-model-row {
+      display: flex;
+      gap: 4px;
+      margin-bottom: 2px;
+      color: #555;
+    }
+
+    .learner-model-row .phase {
+      color: #666;
+      min-width: 55px;
+    }
+
+    .learner-model-row .model-name {
+      color: #4a9eff;
+      word-break: break-all;
+    }
+
+    /* Usage Panel */
+    .usage-panel {
+      border-bottom: 1px solid #222;
+      padding-bottom: 12px;
+      margin-bottom: 12px;
+    }
+
+    .usage-section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      padding: 4px 0;
+      font-size: 12px;
+      color: #666;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .usage-section-header:hover { color: #888; }
+
+    .usage-grid {
+      display: grid;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .usage-model {
+      background: #1a1a1a;
+      border-radius: 4px;
+      padding: 8px;
+      font-size: 12px;
+    }
+
+    .usage-model-name {
+      color: #4a9eff;
+      font-weight: 500;
+      margin-bottom: 4px;
+      word-break: break-all;
+    }
+
+    .usage-model-stats {
+      display: flex;
+      gap: 12px;
+      color: #888;
+      margin-bottom: 4px;
+    }
+
+    .usage-model-stats span {
+      display: flex;
+      align-items: center;
+      gap: 3px;
+    }
+
+    .usage-model-phases {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      margin-top: 4px;
+    }
+
+    .usage-phase-badge {
+      font-size: 10px;
+      padding: 2px 6px;
+      border-radius: 6px;
+      background: #222;
+      color: #666;
+    }
+
+    .usage-phase-badge.init { background: #1e3a5f; color: #4a9eff; }
+    .usage-phase-badge.observe { background: #1a3f1a; color: #4ade80; }
+    .usage-phase-badge.synthesize { background: #3f2f1a; color: #facc15; }
+    .usage-phase-badge.query { background: #3f1a3f; color: #e879f9; }
+
+    .usage-latest {
+      margin-top: 8px;
+      padding-top: 8px;
+      border-top: 1px dashed #333;
+    }
+
+    .usage-latest-label {
+      font-size: 11px;
+      color: #666;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 4px;
+    }
+
+    .usage-latest-item {
+      font-size: 12px;
+      color: #aaa;
+      line-height: 1.4;
+    }
+
+    .usage-latest-item .model { color: #4a9eff; }
+    .usage-latest-item .phase { color: #facc15; }
+    .usage-latest-item .tokens { color: #4ade80; }
+
+    .usage-empty {
+      font-size: 12px;
+      color: #444;
+      text-align: center;
+      padding: 12px;
+    }
+
+    /* Brain Monitor Panel */
+    .brain-monitor {
+      background: #0d0d0d;
+      border-bottom: 1px solid #222;
+      padding: 12px 16px;
+    }
+
+    .brain-monitor-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+
+    .brain-monitor-title {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #666;
+    }
+
+    .brain-monitor-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 12px;
+    }
+
+    .monitor-card {
+      background: #1a1a1a;
+      border-radius: 6px;
+      padding: 10px;
+    }
+
+    .monitor-card-title {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #666;
+      margin-bottom: 6px;
+    }
+
+    /* Inject Status */
+    .inject-status {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .inject-progress-bar {
+      height: 4px;
+      background: #333;
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    .inject-progress-fill {
+      height: 100%;
+      background: #4a9eff;
+      transition: width 0.3s ease;
+    }
+
+    .inject-stats {
+      display: flex;
+      gap: 12px;
+      font-size: 12px;
+      color: #888;
+    }
+
+    .inject-stats .value {
+      color: #4ade80;
+      font-weight: 500;
+    }
+
+    .inject-idle {
+      font-size: 12px;
+      color: #555;
+    }
+
+    /* Usage Summary */
+    .usage-summary {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .usage-summary-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+    }
+
+    .usage-summary-row .label { color: #666; }
+    .usage-summary-row .value { color: #4a9eff; font-weight: 500; }
+    .usage-summary-row .value.input { color: #4ade80; }
+    .usage-summary-row .value.output { color: #facc15; }
+
+    /* Learner Usage */
+    .learner-usage-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      max-height: 80px;
+      overflow-y: auto;
+    }
+
+    .learner-usage-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+    }
+
+    .learner-usage-item .name {
+      color: #4ade80;
+      font-weight: 500;
+    }
+
+    .learner-usage-item .tokens {
+      color: #888;
+    }
+
+    .learner-usage-item .tokens span {
+      margin-left: 6px;
+    }
+
+    .learner-usage-item .tokens .in { color: #4ade80; }
+    .learner-usage-item .tokens .out { color: #facc15; }
+  </style>
+</head>
+<body>
+  <!-- Toast Container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <div class="container">
+    <header class="header">
+      <h1>Brain Monitor</h1>
+      <div class="status">
+        <span class="status-dot" id="statusDot"></span>
+        <span id="statusText">Disconnected</span>
+      </div>
+    </header>
+
+    <!-- Left Panel: Config -->
+    <div class="panel">
+      <div class="panel-header">Configuration</div>
+      <div class="panel-content">
+        <!-- Brain Prompt -->
+        <div class="section-title">Brain Prompt</div>
+        <div class="form-group">
+          <textarea id="brainPrompt" placeholder="What should the brain learn about?">This will be a chat log of myself with Claude Code during development of different projects. Learn about my thinking patterns, interests, preferences, and how I approach problems.
+
+Also, separately make sure you track the behaviors where I get frustrated and curse at the model.</textarea>
+        </div>
+
+        <!-- Model Config -->
+        <div class="section-title">Models</div>
+        <div class="form-group">
+          <label>Primary Model (runtime)</label>
+          <select id="model" class="model-select">
+            <optgroup label="Fastest">
+              <option value="openai/gpt-4o-mini">openai/gpt-4o-mini</option>
+              <option value="openai/gpt-oss-safeguard-20b">openai/gpt-oss-safeguard-20b</option>
+              <option value="openai/gpt-oss-120b">openai/gpt-oss-120b</option>
+              <option value="google/gemini-2.5-flash-lite-preview-09-2025">google/gemini-2.5-flash-lite-preview-09-2025</option>
+              <option value="qwen/qwen3-32b">qwen/qwen3-32b</option>
+            </optgroup>
+            <optgroup label="Anthropic">
+              <option value="anthropic/claude-3.5-haiku">anthropic/claude-3.5-haiku</option>
+              <option value="anthropic/claude-sonnet-4" selected>anthropic/claude-sonnet-4</option>
+              <option value="anthropic/claude-sonnet-4.5">anthropic/claude-sonnet-4.5</option>
+              <option value="anthropic/claude-opus-4.5">anthropic/claude-opus-4.5</option>
+            </optgroup>
+            <optgroup label="Google">
+              <option value="google/gemini-2.0-flash-001">google/gemini-2.0-flash-001</option>
+              <option value="google/gemini-3-flash-preview">google/gemini-3-flash-preview</option>
+              <option value="google/gemini-3-pro-preview">google/gemini-3-pro-preview</option>
+            </optgroup>
+            <optgroup label="OpenAI">
+              <option value="openai/gpt-5.2">openai/gpt-5.2</option>
+              <option value="openai/gpt-5.2-codex">openai/gpt-5.2-codex</option>
+            </optgroup>
+            <optgroup label="xAI">
+              <option value="x-ai/grok-4">x-ai/grok-4</option>
+              <option value="x-ai/grok-4.1-fast">x-ai/grok-4.1-fast</option>
+            </optgroup>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Blueprint Model (one-time generation)</label>
+          <select id="blueprintModel" class="model-select">
+            <option value="">(same as primary)</option>
+            <optgroup label="Fastest">
+              <option value="openai/gpt-4o-mini">openai/gpt-4o-mini</option>
+              <option value="openai/gpt-oss-safeguard-20b">openai/gpt-oss-safeguard-20b</option>
+              <option value="openai/gpt-oss-120b">openai/gpt-oss-120b</option>
+              <option value="google/gemini-2.5-flash-lite-preview-09-2025">google/gemini-2.5-flash-lite-preview-09-2025</option>
+              <option value="qwen/qwen3-32b">qwen/qwen3-32b</option>
+            </optgroup>
+            <optgroup label="Anthropic">
+              <option value="anthropic/claude-3.5-haiku">anthropic/claude-3.5-haiku</option>
+              <option value="anthropic/claude-sonnet-4">anthropic/claude-sonnet-4</option>
+              <option value="anthropic/claude-sonnet-4.5">anthropic/claude-sonnet-4.5</option>
+              <option value="anthropic/claude-opus-4.5">anthropic/claude-opus-4.5</option>
+            </optgroup>
+            <optgroup label="Google">
+              <option value="google/gemini-2.0-flash-001">google/gemini-2.0-flash-001</option>
+              <option value="google/gemini-3-flash-preview">google/gemini-3-flash-preview</option>
+              <option value="google/gemini-3-pro-preview">google/gemini-3-pro-preview</option>
+            </optgroup>
+            <optgroup label="OpenAI">
+              <option value="openai/gpt-5.2">openai/gpt-5.2</option>
+              <option value="openai/gpt-5.2-codex">openai/gpt-5.2-codex</option>
+            </optgroup>
+            <optgroup label="xAI">
+              <option value="x-ai/grok-4">x-ai/grok-4</option>
+              <option value="x-ai/grok-4.1-fast">x-ai/grok-4.1-fast</option>
+            </optgroup>
+          </select>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Observe Model</label>
+            <select id="observeModel" class="model-select">
+              <option value="">(same as primary)</option>
+              <optgroup label="Fastest">
+                <option value="openai/gpt-4o-mini">openai/gpt-4o-mini</option>
+                <option value="openai/gpt-oss-safeguard-20b">openai/gpt-oss-safeguard-20b</option>
+                <option value="openai/gpt-oss-120b">openai/gpt-oss-120b</option>
+                <option value="google/gemini-2.5-flash-lite-preview-09-2025">google/gemini-2.5-flash-lite-preview-09-2025</option>
+                <option value="qwen/qwen3-32b">qwen/qwen3-32b</option>
+              </optgroup>
+              <optgroup label="Anthropic">
+                <option value="anthropic/claude-3.5-haiku">anthropic/claude-3.5-haiku</option>
+                <option value="anthropic/claude-sonnet-4">anthropic/claude-sonnet-4</option>
+                <option value="anthropic/claude-sonnet-4.5">anthropic/claude-sonnet-4.5</option>
+                <option value="anthropic/claude-opus-4.5">anthropic/claude-opus-4.5</option>
+              </optgroup>
+              <optgroup label="Google">
+                <option value="google/gemini-2.0-flash-001">google/gemini-2.0-flash-001</option>
+                <option value="google/gemini-3-flash-preview">google/gemini-3-flash-preview</option>
+                <option value="google/gemini-3-pro-preview">google/gemini-3-pro-preview</option>
+              </optgroup>
+              <optgroup label="OpenAI">
+                <option value="openai/gpt-5.2">openai/gpt-5.2</option>
+                <option value="openai/gpt-5.2-codex">openai/gpt-5.2-codex</option>
+              </optgroup>
+              <optgroup label="xAI">
+                <option value="x-ai/grok-4">x-ai/grok-4</option>
+                <option value="x-ai/grok-4.1-fast">x-ai/grok-4.1-fast</option>
+              </optgroup>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Synthesize Model</label>
+            <select id="synthesizeModel" class="model-select">
+              <option value="">(same as primary)</option>
+              <optgroup label="Fastest">
+                <option value="openai/gpt-4o-mini">openai/gpt-4o-mini</option>
+                <option value="openai/gpt-oss-safeguard-20b">openai/gpt-oss-safeguard-20b</option>
+                <option value="openai/gpt-oss-120b">openai/gpt-oss-120b</option>
+                <option value="google/gemini-2.5-flash-lite-preview-09-2025">google/gemini-2.5-flash-lite-preview-09-2025</option>
+                <option value="qwen/qwen3-32b">qwen/qwen3-32b</option>
+              </optgroup>
+              <optgroup label="Anthropic">
+                <option value="anthropic/claude-3.5-haiku">anthropic/claude-3.5-haiku</option>
+                <option value="anthropic/claude-sonnet-4">anthropic/claude-sonnet-4</option>
+                <option value="anthropic/claude-sonnet-4.5">anthropic/claude-sonnet-4.5</option>
+                <option value="anthropic/claude-opus-4.5">anthropic/claude-opus-4.5</option>
+              </optgroup>
+              <optgroup label="Google">
+                <option value="google/gemini-2.0-flash-001">google/gemini-2.0-flash-001</option>
+                <option value="google/gemini-3-flash-preview">google/gemini-3-flash-preview</option>
+                <option value="google/gemini-3-pro-preview">google/gemini-3-pro-preview</option>
+              </optgroup>
+              <optgroup label="OpenAI">
+                <option value="openai/gpt-5.2">openai/gpt-5.2</option>
+                <option value="openai/gpt-5.2-codex">openai/gpt-5.2-codex</option>
+              </optgroup>
+              <optgroup label="xAI">
+                <option value="x-ai/grok-4">x-ai/grok-4</option>
+                <option value="x-ai/grok-4.1-fast">x-ai/grok-4.1-fast</option>
+              </optgroup>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Observe Blueprint</label>
+            <select id="observeBlueprintModel" class="model-select">
+              <option value="">(same as blueprint)</option>
+              <optgroup label="Fastest">
+                <option value="openai/gpt-4o-mini">openai/gpt-4o-mini</option>
+                <option value="openai/gpt-oss-safeguard-20b">openai/gpt-oss-safeguard-20b</option>
+                <option value="openai/gpt-oss-120b">openai/gpt-oss-120b</option>
+                <option value="google/gemini-2.5-flash-lite-preview-09-2025">google/gemini-2.5-flash-lite-preview-09-2025</option>
+                <option value="qwen/qwen3-32b">qwen/qwen3-32b</option>
+              </optgroup>
+              <optgroup label="Anthropic">
+                <option value="anthropic/claude-3.5-haiku">anthropic/claude-3.5-haiku</option>
+                <option value="anthropic/claude-sonnet-4">anthropic/claude-sonnet-4</option>
+                <option value="anthropic/claude-sonnet-4.5">anthropic/claude-sonnet-4.5</option>
+                <option value="anthropic/claude-opus-4.5">anthropic/claude-opus-4.5</option>
+              </optgroup>
+              <optgroup label="Google">
+                <option value="google/gemini-2.0-flash-001">google/gemini-2.0-flash-001</option>
+                <option value="google/gemini-3-flash-preview">google/gemini-3-flash-preview</option>
+                <option value="google/gemini-3-pro-preview">google/gemini-3-pro-preview</option>
+              </optgroup>
+              <optgroup label="OpenAI">
+                <option value="openai/gpt-5.2">openai/gpt-5.2</option>
+                <option value="openai/gpt-5.2-codex">openai/gpt-5.2-codex</option>
+              </optgroup>
+              <optgroup label="xAI">
+                <option value="x-ai/grok-4">x-ai/grok-4</option>
+                <option value="x-ai/grok-4.1-fast">x-ai/grok-4.1-fast</option>
+              </optgroup>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Synthesize Blueprint</label>
+            <select id="synthesizeBlueprintModel" class="model-select">
+              <option value="">(same as blueprint)</option>
+              <optgroup label="Fastest">
+                <option value="openai/gpt-4o-mini">openai/gpt-4o-mini</option>
+                <option value="openai/gpt-oss-safeguard-20b">openai/gpt-oss-safeguard-20b</option>
+                <option value="openai/gpt-oss-120b">openai/gpt-oss-120b</option>
+                <option value="google/gemini-2.5-flash-lite-preview-09-2025">google/gemini-2.5-flash-lite-preview-09-2025</option>
+                <option value="qwen/qwen3-32b">qwen/qwen3-32b</option>
+              </optgroup>
+              <optgroup label="Anthropic">
+                <option value="anthropic/claude-3.5-haiku">anthropic/claude-3.5-haiku</option>
+                <option value="anthropic/claude-sonnet-4">anthropic/claude-sonnet-4</option>
+                <option value="anthropic/claude-sonnet-4.5">anthropic/claude-sonnet-4.5</option>
+                <option value="anthropic/claude-opus-4.5">anthropic/claude-opus-4.5</option>
+              </optgroup>
+              <optgroup label="Google">
+                <option value="google/gemini-2.0-flash-001">google/gemini-2.0-flash-001</option>
+                <option value="google/gemini-3-flash-preview">google/gemini-3-flash-preview</option>
+                <option value="google/gemini-3-pro-preview">google/gemini-3-pro-preview</option>
+              </optgroup>
+              <optgroup label="OpenAI">
+                <option value="openai/gpt-5.2">openai/gpt-5.2</option>
+                <option value="openai/gpt-5.2-codex">openai/gpt-5.2-codex</option>
+              </optgroup>
+              <optgroup label="xAI">
+                <option value="x-ai/grok-4">x-ai/grok-4</option>
+                <option value="x-ai/grok-4.1-fast">x-ai/grok-4.1-fast</option>
+              </optgroup>
+            </select>
+          </div>
+        </div>
+
+        <!-- Learning Config -->
+        <div class="section-title">Learning</div>
+        <div class="form-group">
+          <label>Strategy</label>
+          <select id="strategy">
+            <option value="continuous">Continuous (single growing text)</option>
+            <option value="cumulative">Cumulative (summarize when large)</option>
+            <option value="decay">Decay (recent items weighted higher)</option>
+          </select>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Batch Size</label>
+            <input type="number" id="batchSize" value="20" min="1" max="100">
+          </div>
+          <div class="form-group">
+            <label>Max Observations</label>
+            <input type="number" id="maxObservations" value="10" min="1" max="50">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Min Importance</label>
+            <input type="number" id="minImportance" value="0.3" min="0" max="1" step="0.1">
+          </div>
+          <div class="form-group">
+            <label>Query Method</label>
+            <select id="queryMethod">
+              <option value="direct">Direct</option>
+              <option value="tool-based">Tool-based</option>
+            </select>
+          </div>
+        </div>
+
+        <button id="initBtn">Initialize Brain</button>
+
+        <!-- Data Injection -->
+        <div class="section-title">Data Injection</div>
+        <div class="form-group">
+          <label>Project</label>
+          <select id="projectSelect">
+            <option value="">Select a project...</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Sessions</label>
+          <div class="session-list" id="sessionList">
+            <div class="empty-state" style="padding:12px;"><p>Select a project</p></div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label style="display:flex;align-items:center;gap:6px;">
+            <input type="checkbox" id="userMessagesOnly" checked style="width:auto;">
+            User messages only
+          </label>
+        </div>
+
+        <button id="injectBtn" disabled>Inject Selected</button>
+      </div>
+    </div>
+
+    <!-- Main Panel: Learners + Chat -->
+    <div class="panel main-panel">
+      <!-- Brain Monitor -->
+      <div class="brain-monitor" id="brainMonitor">
+        <div class="brain-monitor-header">
+          <span class="brain-monitor-title">Brain Status</span>
+        </div>
+        <div class="brain-monitor-grid">
+          <!-- Inject Status -->
+          <div class="monitor-card">
+            <div class="monitor-card-title">Injection</div>
+            <div class="inject-status" id="injectStatusPanel">
+              <div class="inject-idle">Idle</div>
+            </div>
+          </div>
+
+          <!-- Usage Summary -->
+          <div class="monitor-card">
+            <div class="monitor-card-title">Token Usage</div>
+            <div class="usage-summary" id="usageSummaryPanel">
+              <div class="usage-summary-row">
+                <span class="label">Total</span>
+                <span class="value">0</span>
+              </div>
+              <div class="usage-summary-row">
+                <span class="label">In / Out</span>
+                <span><span class="value input">0</span> / <span class="value output">0</span></span>
+              </div>
+              <div class="usage-summary-row">
+                <span class="label">Requests</span>
+                <span class="value">0</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Per-Learner Usage -->
+          <div class="monitor-card">
+            <div class="monitor-card-title">By Learner</div>
+            <div class="learner-usage-list" id="learnerUsagePanel">
+              <div class="inject-idle">No data yet</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel-header">
+        Learners <span id="learnerCount" style="color:#4ade80;margin-left:8px;">0</span>
+      </div>
+
+      <div class="learners-grid" id="learnersGrid">
+        <div class="empty-state">
+          <h3>No learners yet</h3>
+          <p>Initialize the brain to create learners</p>
+        </div>
+      </div>
+
+      <div class="chat-area" id="chatArea">
+        <div class="empty-state">
+          <h3>Ask the Brain</h3>
+          <p>Initialize and inject data first</p>
+        </div>
+      </div>
+
+      <div class="chat-options">
+        <div class="chat-option">
+          <label>Model</label>
+          <select id="queryModel">
+            <option value="">(use default)</option>
+            <optgroup label="Fastest">
+              <option value="openai/gpt-4o-mini">openai/gpt-4o-mini</option>
+              <option value="google/gemini-2.5-flash-lite-preview-09-2025">google/gemini-2.5-flash-lite</option>
+              <option value="qwen/qwen3-32b">qwen/qwen3-32b</option>
+            </optgroup>
+            <optgroup label="Anthropic">
+              <option value="anthropic/claude-3.5-haiku">anthropic/claude-3.5-haiku</option>
+              <option value="anthropic/claude-sonnet-4">anthropic/claude-sonnet-4</option>
+              <option value="anthropic/claude-sonnet-4.5">anthropic/claude-sonnet-4.5</option>
+              <option value="anthropic/claude-opus-4.5">anthropic/claude-opus-4.5</option>
+            </optgroup>
+            <optgroup label="Google">
+              <option value="google/gemini-2.0-flash-001">google/gemini-2.0-flash-001</option>
+              <option value="google/gemini-3-flash-preview">google/gemini-3-flash-preview</option>
+              <option value="google/gemini-3-pro-preview">google/gemini-3-pro-preview</option>
+            </optgroup>
+            <optgroup label="OpenAI">
+              <option value="openai/gpt-5.2">openai/gpt-5.2</option>
+              <option value="openai/gpt-5.2-codex">openai/gpt-5.2-codex</option>
+            </optgroup>
+            <optgroup label="xAI">
+              <option value="x-ai/grok-4">x-ai/grok-4</option>
+              <option value="x-ai/grok-4.1-fast">x-ai/grok-4.1-fast</option>
+            </optgroup>
+          </select>
+        </div>
+        <div class="chat-option">
+          <label>Temp: <span id="tempValue">0.7</span></label>
+          <input type="range" id="queryTemp" min="0" max="1" step="0.1" value="0.7">
+        </div>
+      </div>
+      <div class="chat-input">
+        <input type="text" id="queryInput" placeholder="Ask a question..." disabled>
+        <button id="askBtn" disabled>Ask</button>
+      </div>
+    </div>
+
+    <!-- Right Panel: Events -->
+    <div class="panel">
+      <div class="panel-header">Events</div>
+      <div class="panel-content">
+        <div class="event-log" id="eventLog"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Learner Detail Modal -->
+  <div class="modal-overlay" id="learnerModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 id="modalTitle">Learner Details</h2>
+        <button class="modal-close" onclick="closeModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="modal-tabs">
+          <button class="modal-tab active" data-tab="overview">Overview</button>
+          <button class="modal-tab" data-tab="observe">Observe Prompt</button>
+          <button class="modal-tab" data-tab="synthesize">Synthesize Prompt</button>
+          <button class="modal-tab" data-tab="understanding">Understanding</button>
+          <button class="modal-tab" data-tab="config">Config</button>
+        </div>
+
+        <div class="modal-tab-content active" id="modal-overview">
+          <div class="form-group">
+            <label>Instructions</label>
+            <pre id="modalInstructions"></pre>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Status</label>
+              <pre id="modalStatus"></pre>
+            </div>
+            <div class="form-group">
+              <label>Buffer</label>
+              <pre id="modalBuffer"></pre>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Evolution History</label>
+            <pre id="modalEvolution"></pre>
+          </div>
+        </div>
+
+        <div class="modal-tab-content" id="modal-observe">
+          <pre id="modalObservePrompt"></pre>
+        </div>
+
+        <div class="modal-tab-content" id="modal-synthesize">
+          <pre id="modalSynthesizePrompt"></pre>
+        </div>
+
+        <div class="modal-tab-content" id="modal-understanding">
+          <pre id="modalUnderstanding"></pre>
+        </div>
+
+        <div class="modal-tab-content" id="modal-config">
+          <pre id="modalConfig"></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // --- State ---
+    let selectedSessions = new Set()
+    let currentProject = null
+    let brainInitialized = false
+    let learnerStates = {} // Track per-learner status
+    let injectProgress = null // Track injection progress
+    let eventSource = null
+    const toastContainer = document.getElementById('toastContainer')
+
+    // Usage tracking state
+    let usageByModel = {} // { model: { inputTokens, outputTokens, phases: Set, requestCount } }
+    let usageByLearner = {} // { learnerId: { inputTokens, outputTokens, requestCount } }
+    let totalUsage = { inputTokens: 0, outputTokens: 0, totalTokens: 0, requestCount: 0 }
+    let configuredModels = {} // Store model config: { primary, blueprint, observe, synthesize }
+
+    // --- Utility Functions ---
+    function escapeHtml(text) {
+      if (!text) return ''
+      const div = document.createElement('div')
+      div.textContent = text
+      return div.innerHTML
+    }
+
+    // --- Toast Notifications ---
+    function showToast(type, learnerId, content, meta = {}) {
+      const toast = document.createElement('div')
+      toast.className = `toast ${type}`
+
+      const typeLabels = {
+        'observed': 'Observed',
+        'synthesized': 'Understanding Updated',
+        'critical': 'Critical Update'
+      }
+
+      let metaHtml = ''
+      if (meta.importance !== undefined) {
+        metaHtml += `<span>Importance: ${(meta.importance * 100).toFixed(0)}%</span>`
+      }
+      if (meta.significance) {
+        metaHtml += `<span class="significance ${meta.significance}">${meta.significance}</span>`
+      }
+      if (meta.bufferCount !== undefined) {
+        metaHtml += `<span>Buffer: ${meta.bufferCount}</span>`
+      }
+
+      toast.innerHTML = `
+        <div class="toast-header">
+          <span class="toast-type">${typeLabels[type] || type}</span>
+          <span class="toast-learner">${learnerId}</span>
+        </div>
+        <div class="toast-content">${content}</div>
+        ${metaHtml ? `<div class="toast-meta">${metaHtml}</div>` : ''}
+      `
+
+      toastContainer.appendChild(toast)
+
+      // Auto-remove after 5 seconds
+      setTimeout(() => {
+        toast.classList.add('removing')
+        setTimeout(() => toast.remove(), 300)
+      }, 5000)
+
+      // Keep max 5 toasts
+      while (toastContainer.children.length > 5) {
+        toastContainer.firstChild.remove()
+      }
+    }
+
+    // --- Usage Tracking ---
+    function trackUsage(model, phase, usage, learnerId) {
+      if (!usage) return
+      const inputTokens = usage.inputTokens || 0
+      const outputTokens = usage.outputTokens || 0
+      const total = usage.totalTokens || (inputTokens + outputTokens)
+
+      // Update total usage
+      totalUsage.inputTokens += inputTokens
+      totalUsage.outputTokens += outputTokens
+      totalUsage.totalTokens += total
+      totalUsage.requestCount++
+
+      // Update per-model usage
+      if (model) {
+        if (!usageByModel[model]) {
+          usageByModel[model] = { inputTokens: 0, outputTokens: 0, totalTokens: 0, phases: new Set(), requestCount: 0 }
+        }
+        usageByModel[model].inputTokens += inputTokens
+        usageByModel[model].outputTokens += outputTokens
+        usageByModel[model].totalTokens += total
+        usageByModel[model].phases.add(phase)
+        usageByModel[model].requestCount++
+      }
+
+      // Update per-learner usage
+      if (learnerId) {
+        if (!usageByLearner[learnerId]) {
+          usageByLearner[learnerId] = { inputTokens: 0, outputTokens: 0, requestCount: 0 }
+        }
+        usageByLearner[learnerId].inputTokens += inputTokens
+        usageByLearner[learnerId].outputTokens += outputTokens
+        usageByLearner[learnerId].requestCount++
+      }
+
+      updateBrainMonitor()
+    }
+
+    function updateBrainMonitor() {
+      updateUsageSummary()
+      updateLearnerUsage()
+    }
+
+    function updateUsageSummary() {
+      const panel = document.getElementById('usageSummaryPanel')
+      panel.innerHTML = `
+        <div class="usage-summary-row">
+          <span class="label">Total</span>
+          <span class="value">${formatTokens(totalUsage.totalTokens)}</span>
+        </div>
+        <div class="usage-summary-row">
+          <span class="label">In / Out</span>
+          <span><span class="value input">${formatTokens(totalUsage.inputTokens)}</span> / <span class="value output">${formatTokens(totalUsage.outputTokens)}</span></span>
+        </div>
+        <div class="usage-summary-row">
+          <span class="label">Requests</span>
+          <span class="value">${totalUsage.requestCount}</span>
+        </div>
+      `
+    }
+
+    function updateLearnerUsage() {
+      const panel = document.getElementById('learnerUsagePanel')
+      const learners = Object.keys(usageByLearner)
+
+      if (learners.length === 0) {
+        panel.innerHTML = '<div class="inject-idle">No data yet</div>'
+        return
+      }
+
+      // Sort by total tokens (highest first)
+      learners.sort((a, b) => {
+        const aTotal = usageByLearner[a].inputTokens + usageByLearner[a].outputTokens
+        const bTotal = usageByLearner[b].inputTokens + usageByLearner[b].outputTokens
+        return bTotal - aTotal
+      })
+
+      panel.innerHTML = learners.map(id => {
+        const u = usageByLearner[id]
+        return `
+          <div class="learner-usage-item">
+            <span class="name">${id}</span>
+            <span class="tokens">
+              <span class="in">↓${formatTokens(u.inputTokens)}</span>
+              <span class="out">↑${formatTokens(u.outputTokens)}</span>
+            </span>
+          </div>
+        `
+      }).join('')
+    }
+
+    function updateInjectStatus() {
+      const panel = document.getElementById('injectStatusPanel')
+
+      if (!injectProgress) {
+        panel.innerHTML = '<div class="inject-idle">Idle</div>'
+        return
+      }
+
+      const progress = injectProgress.processed / injectProgress.total * 100
+      panel.innerHTML = `
+        <div class="inject-progress-bar">
+          <div class="inject-progress-fill" style="width: ${progress}%"></div>
+        </div>
+        <div class="inject-stats">
+          <span><span class="value">${injectProgress.processed}</span> / ${injectProgress.total} items</span>
+          <span>Batch <span class="value">${injectProgress.currentBatch}</span> / ${injectProgress.batchCount}</span>
+        </div>
+      `
+    }
+
+    function formatTokens(n) {
+      if (n >= 1000000) return (n / 1000000).toFixed(1) + 'M'
+      if (n >= 1000) return (n / 1000).toFixed(1) + 'k'
+      return n.toString()
+    }
+
+    // --- DOM Elements ---
+    const statusDot = document.getElementById('statusDot')
+    const statusText = document.getElementById('statusText')
+    const brainPrompt = document.getElementById('brainPrompt')
+    const model = document.getElementById('model')
+    const blueprintModel = document.getElementById('blueprintModel')
+    const observeModel = document.getElementById('observeModel')
+    const observeBlueprintModel = document.getElementById('observeBlueprintModel')
+    const synthesizeModel = document.getElementById('synthesizeModel')
+    const synthesizeBlueprintModel = document.getElementById('synthesizeBlueprintModel')
+    const strategy = document.getElementById('strategy')
+    const batchSize = document.getElementById('batchSize')
+    const maxObservations = document.getElementById('maxObservations')
+    const minImportance = document.getElementById('minImportance')
+    const queryMethod = document.getElementById('queryMethod')
+    const initBtn = document.getElementById('initBtn')
+    const projectSelect = document.getElementById('projectSelect')
+    const sessionList = document.getElementById('sessionList')
+    const userMessagesOnly = document.getElementById('userMessagesOnly')
+    const injectBtn = document.getElementById('injectBtn')
+    const learnersGrid = document.getElementById('learnersGrid')
+    const learnerCount = document.getElementById('learnerCount')
+    const chatArea = document.getElementById('chatArea')
+    const queryInput = document.getElementById('queryInput')
+    const queryModelSelect = document.getElementById('queryModel')
+    const queryTempSlider = document.getElementById('queryTemp')
+    const tempValueDisplay = document.getElementById('tempValue')
+    const askBtn = document.getElementById('askBtn')
+    const eventLog = document.getElementById('eventLog')
+    const learnerModal = document.getElementById('learnerModal')
+
+    // --- Modal Tabs ---
+    document.querySelectorAll('.modal-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.modal-tab').forEach(t => t.classList.remove('active'))
+        document.querySelectorAll('.modal-tab-content').forEach(c => c.classList.remove('active'))
+        tab.classList.add('active')
+        document.getElementById('modal-' + tab.dataset.tab).classList.add('active')
+      })
+    })
+
+    function closeModal() {
+      learnerModal.classList.remove('open')
+    }
+
+    learnerModal.addEventListener('click', (e) => {
+      if (e.target === learnerModal) closeModal()
+    })
+
+    // --- SSE Connection ---
+    function connectSSE() {
+      if (eventSource) {
+        eventSource.close()
+        eventSource = null
+      }
+
+      const es = new EventSource('/brain/events')
+      eventSource = es
+
+      es.onopen = () => {
+        statusDot.className = 'status-dot connected'
+        statusText.textContent = 'Connected'
+      }
+
+      es.onerror = () => {
+        statusDot.className = 'status-dot error'
+        statusText.textContent = 'Reconnecting...'
+        es.close()
+        eventSource = null
+        setTimeout(connectSSE, 3000)
+      }
+
+      es.addEventListener('ping', () => {})
+
+      const eventTypes = [
+        'brain:init:started', 'brain:init:config:generating', 'brain:init:config:generated',
+        'brain:init:completed', 'brain:init:failed', 'brain:learner:added',
+        'brain:inject:started', 'brain:inject:batch:started', 'brain:inject:batch:completed',
+        'brain:inject:completed', 'brain:inject:failed',
+        'brain:ask:started', 'brain:ask:synthesis:started', 'brain:ask:completed', 'brain:ask:failed',
+        'learner:init:started', 'learner:init:completed', 'learner:init:failed',
+        'learner:observe:started', 'learner:observed', 'learner:observe:dismissed', 'learner:observe:error',
+        'learner:synthesize:started', 'learner:synthesized', 'learner:synthesize:dismissed', 'learner:synthesize:error',
+        'learner:understanding:updated', 'learner:governance:updated',
+        'learner:ingest:thinking', 'learner:ask:started', 'learner:ask:thinking',
+        'learner:ask:completed', 'learner:ask:failed',
+        'server:brain:creating', 'server:brain:ready', 'server:brain:error',
+        'server:parsing:started', 'server:parsing:completed',
+        'server:inject:started', 'server:inject:completed', 'server:inject:error',
+        'server:ask:started', 'server:ask:completed', 'server:ask:error'
+      ]
+
+      eventTypes.forEach(type => {
+        es.addEventListener(type, (e) => {
+          const data = JSON.parse(e.data)
+          logEvent(type, data)
+          handleEvent(type, data)
+        })
+      })
+    }
+
+    function handleEvent(type, data) {
+      // Update status bar
+      const statusMap = {
+        'server:brain:creating': 'Creating brain...',
+        'brain:init:config:generating': 'Generating configs...',
+        'brain:init:config:generated': 'Configs ready',
+        'brain:init:completed': 'Ready',
+        'server:brain:ready': 'Ready',
+        'server:parsing:started': 'Parsing sessions...',
+        'brain:inject:started': 'Injecting...',
+        'brain:inject:completed': 'Ready',
+        'brain:ask:started': 'Thinking...',
+        'brain:ask:completed': 'Ready',
+      }
+
+      if (statusMap[type]) {
+        statusDot.className = type.includes('completed') || type.includes('ready')
+          ? 'status-dot connected'
+          : 'status-dot processing'
+        statusText.textContent = statusMap[type]
+      }
+
+      if (type.includes('error') || type.includes('failed')) {
+        statusDot.className = 'status-dot error'
+        statusText.textContent = 'Error'
+      }
+
+      // Update init button
+      if (type.startsWith('brain:init:') || type.startsWith('learner:init:')) {
+        if (initBtn.disabled && !type.includes('completed') && !type.includes('failed')) {
+          initBtn.innerHTML = '<span class="spinner"></span>' + (statusMap[type] || 'Initializing...')
+        }
+      }
+
+      // Brain ready
+      if (type === 'brain:init:completed' || type === 'server:brain:ready') {
+        brainInitialized = true
+        queryInput.disabled = false
+        askBtn.disabled = false
+        initBtn.textContent = 'Initialized'
+        initBtn.classList.add('secondary')
+        updateLearners()
+
+        // Store configured models for usage tracking
+        configuredModels = {
+          primary: model.value,
+          blueprint: blueprintModel.value || model.value,
+          observe: observeModel.value || model.value,
+          observeBlueprint: observeBlueprintModel.value || blueprintModel.value || model.value,
+          synthesize: synthesizeModel.value || model.value,
+          synthesizeBlueprint: synthesizeBlueprintModel.value || blueprintModel.value || model.value
+        }
+      }
+
+      // Injection progress tracking
+      if (type === 'brain:inject:started') {
+        injectProgress = {
+          total: data.itemCount,
+          batchCount: data.batchCount,
+          currentBatch: 0,
+          processed: 0
+        }
+        statusText.textContent = `Injecting 0/${data.itemCount} items...`
+        injectBtn.innerHTML = `<span class="spinner"></span>0/${data.itemCount}`
+        updateInjectStatus()
+      }
+
+      if (type === 'brain:inject:batch:started') {
+        if (injectProgress) {
+          injectProgress.currentBatch = data.batchIndex + 1
+          injectProgress.processed = Math.floor(data.batchIndex * (injectProgress.total / injectProgress.batchCount))
+          statusText.textContent = `Injecting ${injectProgress.processed}/${injectProgress.total} items...`
+          injectBtn.innerHTML = `<span class="spinner"></span>${injectProgress.processed}/${injectProgress.total}`
+          updateInjectStatus()
+        }
+      }
+
+      if (type === 'brain:inject:batch:completed') {
+        if (injectProgress) {
+          injectProgress.processed = Math.min(Math.floor((data.batchIndex + 1) * (injectProgress.total / injectProgress.batchCount)), injectProgress.total)
+          statusText.textContent = `Injecting ${injectProgress.processed}/${injectProgress.total} items...`
+          injectBtn.innerHTML = `<span class="spinner"></span>${injectProgress.processed}/${injectProgress.total}`
+          updateInjectStatus()
+        }
+      }
+
+      if (type === 'brain:inject:completed') {
+        const total = injectProgress?.total || '?'
+        injectProgress = null
+        injectBtn.disabled = false
+        injectBtn.textContent = 'Inject Data'
+        statusText.textContent = `Injection complete (${total} items)`
+        updateInjectStatus()
+      }
+
+      // Configs generated - show all learners immediately
+      if (type === 'brain:init:config:generated') {
+        data.configs.forEach(config => {
+          learnerStates[config.id] = {
+            status: 'initializing',
+            action: 'Setting up...',
+            data: { instructions: config.instructions }
+          }
+        })
+        updateLearnersUI()
+      }
+
+      // Learner added - update with full data (instructions already shown from configs)
+      if (type === 'brain:learner:added') {
+        if (!learnerStates[data.learnerId]) {
+          learnerStates[data.learnerId] = { status: 'initializing', action: 'Setting up...' }
+        }
+        learnerStates[data.learnerId].data = {
+          ...learnerStates[data.learnerId].data,
+          instructions: data.instructions
+        }
+        updateLearnersUI()
+      }
+
+      // Learner init complete
+      if (type === 'learner:init:completed') {
+        learnerStates[data.learnerId] = { status: 'ready', action: 'Idle' }
+        updateLearnersUI()
+
+        // Track usage for init (uses blueprint model)
+        if (data.usage) {
+          trackUsage(configuredModels.blueprint || configuredModels.primary, 'init', data.usage, data.learnerId)
+        }
+      }
+
+      // Learner observe started
+      if (type === 'learner:observe:started') {
+        if (learnerStates[data.learnerId]) {
+          learnerStates[data.learnerId].status = 'observing'
+          learnerStates[data.learnerId].action = `Observing ${data.itemCount} items...`
+        }
+        updateLearnersUI()
+      }
+
+      // Learner observed (completed - data buffered)
+      if (type === 'learner:observed') {
+        if (learnerStates[data.learnerId]) {
+          learnerStates[data.learnerId].status = 'ready'
+          learnerStates[data.learnerId].action = `Buffered (${data.bufferCount} obs)`
+          // Track recent observations (keep last 10, newest first)
+          if (!learnerStates[data.learnerId].recentObservations) {
+            learnerStates[data.learnerId].recentObservations = []
+          }
+          learnerStates[data.learnerId].recentObservations.unshift({
+            text: data.output,
+            importance: data.importance,
+            timestamp: Date.now()
+          })
+          learnerStates[data.learnerId].recentObservations =
+            learnerStates[data.learnerId].recentObservations.slice(0, 10)
+          learnerStates[data.learnerId].lastObservation = {
+            text: data.output,
+            importance: data.importance,
+            bufferCount: data.bufferCount,
+            time: new Date()
+          }
+        }
+        // Show toast for observations
+        const preview = data.output?.slice(0, 120) + (data.output?.length > 120 ? '...' : '')
+        showToast('observed', data.learnerId, preview || 'New observation', {
+          importance: data.importance,
+          bufferCount: data.bufferCount
+        })
+        // Track usage for observe phase
+        if (data.usage) {
+          trackUsage(configuredModels.observe || configuredModels.primary, 'observe', data.usage, data.learnerId)
+        }
+        updateLearnersUI()
+      }
+
+      if (type === 'learner:observe:dismissed') {
+        if (learnerStates[data.learnerId]) {
+          learnerStates[data.learnerId].status = 'ready'
+          learnerStates[data.learnerId].action = 'Dismissed (irrelevant)'
+        }
+        updateLearnersUI()
+      }
+
+      // Learner synthesize started
+      if (type === 'learner:synthesize:started') {
+        if (learnerStates[data.learnerId]) {
+          learnerStates[data.learnerId].status = 'synthesizing'
+          learnerStates[data.learnerId].action = `Synthesizing ${data.observationCount} observations...`
+        }
+        updateLearnersUI()
+      }
+
+      // Learner synthesized (completed)
+      if (type === 'learner:synthesized') {
+        if (learnerStates[data.learnerId]) {
+          learnerStates[data.learnerId].status = 'ready'
+          learnerStates[data.learnerId].action = 'Understanding updated'
+          learnerStates[data.learnerId].lastSynthesis = {
+            evolution: data.evolution,
+            significance: data.significance,
+            time: new Date()
+          }
+        }
+        // Show toast for synthesis
+        const toastType = data.significance === 'critical' ? 'critical' : 'synthesized'
+        showToast(toastType, data.learnerId, data.evolution || 'Understanding updated', {
+          significance: data.significance
+        })
+        // Track usage for synthesize phase
+        if (data.usage) {
+          trackUsage(configuredModels.synthesize || configuredModels.primary, 'synthesize', data.usage, data.learnerId)
+        }
+        updateLearnersUI()
+        updateLearners()
+      }
+
+      // Injection complete - reset learner states
+      if (type === 'brain:inject:completed') {
+        Object.keys(learnerStates).forEach(id => {
+          learnerStates[id].status = 'ready'
+          learnerStates[id].action = 'Idle'
+        })
+        updateLearnersUI()
+      }
+
+      // Learner query completed - track usage
+      if (type === 'learner:ask:completed') {
+        if (data.usage) {
+          trackUsage(configuredModels.primary, 'query', data.usage, data.learnerId)
+        }
+      }
+
+      // Brain ask completed - track usage
+      if (type === 'brain:ask:completed') {
+        if (data.usage) {
+          trackUsage(configuredModels.primary, 'query', data.usage, null)
+        }
+      }
+    }
+
+    function logEvent(type, data) {
+      const time = new Date().toLocaleTimeString('en-US', { hour12: false })
+      const el = document.createElement('div')
+      el.className = 'event'
+
+      let dataStr = ''
+      if (data && Object.keys(data).length > 0) {
+        dataStr = JSON.stringify(data).slice(0, 150)
+        if (JSON.stringify(data).length > 150) dataStr += '...'
+      }
+
+      el.innerHTML = `
+        <span class="event-time">${time}</span>
+        <span class="event-type">${type.split(':').pop()}</span>
+        ${dataStr ? `<span class="event-data">${dataStr}</span>` : ''}
+      `
+
+      eventLog.insertBefore(el, eventLog.firstChild)
+      while (eventLog.children.length > 50) {
+        eventLog.removeChild(eventLog.lastChild)
+      }
+    }
+
+    // --- API Calls ---
+    async function initBrain() {
+      initBtn.disabled = true
+      initBtn.innerHTML = '<span class="spinner"></span>Initializing...'
+      learnerStates = {}
+
+      try {
+        const res = await fetch('/brain/init', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            prompt: brainPrompt.value,
+            model: model.value,
+            blueprintModel: blueprintModel.value || undefined,
+            observeModel: observeModel.value || undefined,
+            observeBlueprintModel: observeBlueprintModel.value || undefined,
+            synthesizeModel: synthesizeModel.value || undefined,
+            synthesizeBlueprintModel: synthesizeBlueprintModel.value || undefined,
+            strategy: strategy.value,
+            batchSize: parseInt(batchSize.value),
+            maxObservations: parseInt(maxObservations.value),
+            minImportance: parseFloat(minImportance.value),
+            queryMethod: queryMethod.value
+          })
+        })
+
+        const data = await res.json()
+        if (!res.ok) {
+          alert('Error: ' + data.error)
+          initBtn.disabled = false
+          initBtn.textContent = 'Initialize Brain'
+        }
+      } catch (err) {
+        alert('Error: ' + err.message)
+        initBtn.disabled = false
+        initBtn.textContent = 'Initialize Brain'
+      }
+    }
+
+    async function loadProjects() {
+      projectSelect.innerHTML = '<option value="">Loading...</option>'
+      try {
+        const res = await fetch('/claude/projects')
+        const projects = await res.json()
+        projectSelect.innerHTML = '<option value="">Select a project...</option>'
+        projects.forEach(p => {
+          const opt = document.createElement('option')
+          opt.value = p.path
+          opt.textContent = p.name || p.path.split('/').pop()
+          projectSelect.appendChild(opt)
+        })
+      } catch (err) {
+        projectSelect.innerHTML = '<option value="">Error loading</option>'
+      }
+    }
+
+    async function loadSessions(projectPath) {
+      sessionList.innerHTML = '<div class="loading"><span class="spinner"></span>Loading...</div>'
+      selectedSessions.clear()
+      injectBtn.disabled = true
+
+      try {
+        const res = await fetch('/claude/sessions?project=' + encodeURIComponent(projectPath))
+        const sessions = await res.json()
+
+        sessionList.innerHTML = ''
+        if (sessions.length === 0) {
+          sessionList.innerHTML = '<div class="empty-state" style="padding:12px;"><p>No sessions</p></div>'
+          return
+        }
+
+        sessions.forEach(s => {
+          const el = document.createElement('div')
+          el.className = 'session-item'
+          const prompt = s.firstPrompt.slice(0, 60) + (s.firstPrompt.length > 60 ? '...' : '')
+          el.innerHTML = `<div>${prompt}</div><div class="meta">${s.messageCount} msgs</div>`
+
+          el.addEventListener('click', () => {
+            if (selectedSessions.has(s.sessionId)) {
+              selectedSessions.delete(s.sessionId)
+              el.classList.remove('selected')
+            } else {
+              selectedSessions.add(s.sessionId)
+              el.classList.add('selected')
+            }
+            injectBtn.disabled = selectedSessions.size === 0 || !brainInitialized
+          })
+
+          sessionList.appendChild(el)
+        })
+      } catch (err) {
+        sessionList.innerHTML = '<div class="empty-state" style="padding:12px;"><p>Error</p></div>'
+      }
+    }
+
+    async function injectSessions() {
+      if (selectedSessions.size === 0) return
+
+      injectBtn.disabled = true
+      injectBtn.innerHTML = '<span class="spinner"></span>Injecting...'
+
+      try {
+        const res = await fetch('/brain/inject', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            sessionIds: Array.from(selectedSessions),
+            projectPath: currentProject,
+            userMessagesOnly: userMessagesOnly.checked
+          })
+        })
+
+        const data = await res.json()
+        if (!res.ok) {
+          alert('Error: ' + data.error)
+        } else {
+          selectedSessions.clear()
+          document.querySelectorAll('.session-item.selected').forEach(el => el.classList.remove('selected'))
+        }
+      } catch (err) {
+        alert('Error: ' + err.message)
+      } finally {
+        injectBtn.disabled = selectedSessions.size === 0
+        injectBtn.textContent = 'Inject Selected'
+      }
+    }
+
+    async function askBrain() {
+      const query = queryInput.value.trim()
+      if (!query) return
+
+      addMessage('user', query)
+      queryInput.value = ''
+      askBtn.disabled = true
+      askBtn.innerHTML = '<span class="spinner"></span>'
+
+      // Build request with options
+      const requestBody = { query }
+      if (queryModelSelect.value) requestBody.model = queryModelSelect.value
+      requestBody.temperature = parseFloat(queryTempSlider.value)
+
+      try {
+        const res = await fetch('/brain/ask', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(requestBody)
+        })
+
+        const data = await res.json()
+        if (res.ok) {
+          addMessage('assistant', data.insight, data.sources)
+        } else {
+          addMessage('assistant', 'Error: ' + data.error)
+        }
+      } catch (err) {
+        addMessage('assistant', 'Error: ' + err.message)
+      } finally {
+        askBtn.disabled = false
+        askBtn.textContent = 'Ask'
+      }
+    }
+
+    function addMessage(type, content, sources = []) {
+      const empty = chatArea.querySelector('.empty-state')
+      if (empty) empty.remove()
+
+      const el = document.createElement('div')
+      el.className = 'message ' + type
+
+      let sourcesHtml = ''
+      if (sources.length > 0) {
+        sourcesHtml = `<div class="sources">Sources: ${sources.map(s => s.learnerId).join(', ')}</div>`
+      }
+
+      el.innerHTML = `<div class="message-content">${content}</div>${sourcesHtml}`
+      chatArea.appendChild(el)
+      chatArea.scrollTop = chatArea.scrollHeight
+    }
+
+    // --- Learners UI ---
+    async function updateLearners() {
+      try {
+        const res = await fetch('/brain/status')
+        const data = await res.json()
+
+        if (data.status !== 'initialized') return
+
+        // Update state if brain already initialized
+        brainInitialized = true
+        initBtn.disabled = true
+        initBtn.textContent = 'Initialized'
+        initBtn.classList.add('secondary')
+
+        learnerCount.textContent = data.learners.length
+
+        data.learners.forEach(l => {
+          if (!learnerStates[l.id]) {
+            learnerStates[l.id] = { status: 'ready', action: 'Idle' }
+          }
+          learnerStates[l.id].data = l
+        })
+
+        updateLearnersUI()
+      } catch (err) {
+        console.error('Failed to update learners:', err)
+      }
+    }
+
+    function updateLearnersUI() {
+      const ids = Object.keys(learnerStates)
+      learnerCount.textContent = ids.length
+
+      if (ids.length === 0) {
+        learnersGrid.innerHTML = '<div class="empty-state"><h3>No learners yet</h3><p>Initialize the brain</p></div>'
+        return
+      }
+
+      learnersGrid.innerHTML = ''
+
+      ids.forEach(id => {
+        const state = learnerStates[id]
+        const data = state.data || {}
+
+        const card = document.createElement('div')
+        card.className = 'learner-card'
+        if (state.status === 'observing' || state.status === 'synthesizing') {
+          card.classList.add('active')
+        }
+
+        const understanding = data.understanding || 'No understanding yet'
+        const bufferCount = data.buffer?.count || 0
+        const bufferObservations = data.bufferObservations || []
+        const evolutionCount = data.evolution?.length || 0
+
+        // Build observations HTML (use recentObservations from UI state, fallback to buffer)
+        const recentObs = state.recentObservations || []
+        const displayObs = recentObs.length > 0 ? recentObs : bufferObservations
+        let observationsHtml = ''
+        if (displayObs.length > 0) {
+          const obsHtml = displayObs.slice(0, 5).map(obs =>
+            `<div class="observation"><span class="importance">[${(obs.importance * 100).toFixed(0)}%]</span> ${escapeHtml(obs.text.slice(0, 120))}${obs.text.length > 120 ? '...' : ''}</div>`
+          ).join('')
+          observationsHtml = `
+            <div class="learner-observations">
+              <span class="label">Recent Observations (${displayObs.length})${bufferCount > 0 ? ` · ${bufferCount} buffered` : ''}</span>
+              <div class="content">${obsHtml}</div>
+            </div>
+          `
+        } else {
+          observationsHtml = `
+            <div class="learner-observations empty">
+              <span class="label">Observations</span>
+              <div class="content empty-text">No observations yet</div>
+            </div>
+          `
+        }
+
+        // Build compact understanding preview
+        const understandingPreview = understanding.slice(0, 100) + (understanding.length > 100 ? '...' : '')
+
+        // Build last synthesis info if available
+        let synthesisHtml = ''
+        if (state.lastSynthesis) {
+          const sig = state.lastSynthesis.significance
+          synthesisHtml = `
+            <div class="learner-last-synthesis">
+              <span class="significance ${sig}">${sig}</span>
+              <span class="evolution-text">${state.lastSynthesis.evolution?.slice(0, 60) || 'Updated'}${state.lastSynthesis.evolution?.length > 60 ? '...' : ''}</span>
+            </div>
+          `
+        }
+
+        card.innerHTML = `
+          <div class="learner-card-header">
+            <h3>${id}</h3>
+            <div class="learner-header-right">
+              <span class="learner-stat-badge">${evolutionCount} updates</span>
+              <span class="learner-status ${state.status}">${state.status}</span>
+            </div>
+          </div>
+          <div class="learner-card-body">
+            ${observationsHtml}
+            ${synthesisHtml}
+            <div class="learner-understanding-preview">
+              <span class="label">Understanding:</span>
+              <span class="preview-text">${escapeHtml(understandingPreview)}</span>
+            </div>
+          </div>
+        `
+
+        card.addEventListener('click', () => openLearnerModal(id))
+        learnersGrid.appendChild(card)
+      })
+    }
+
+    async function openLearnerModal(learnerId) {
+      const state = learnerStates[learnerId]
+      const data = state?.data || {}
+
+      document.getElementById('modalTitle').textContent = learnerId
+      document.getElementById('modalInstructions').textContent = data.instructions || 'N/A'
+      document.getElementById('modalStatus').textContent = JSON.stringify(data.governance || {}, null, 2)
+
+      // Format buffer observations nicely
+      const bufferObs = data.bufferObservations || []
+      let bufferText = `Count: ${data.buffer?.count || 0}, Avg Importance: ${(data.buffer?.avgImportance || 0).toFixed(2)}, Total Tokens: ${data.buffer?.totalTokens || 0}\n\n`
+      if (bufferObs.length > 0) {
+        bufferText += 'Observations:\n' + bufferObs.map((obs, i) =>
+          `${i + 1}. [${(obs.importance * 100).toFixed(0)}%] ${obs.text}`
+        ).join('\n\n')
+      } else {
+        bufferText += '(No observations in buffer)'
+      }
+      document.getElementById('modalBuffer').textContent = bufferText
+
+      document.getElementById('modalEvolution').textContent = JSON.stringify(data.evolution || [], null, 2)
+      document.getElementById('modalUnderstanding').textContent = data.understanding || 'No understanding yet'
+      document.getElementById('modalObservePrompt').textContent = data.observePrompt || 'Not initialized yet'
+      document.getElementById('modalSynthesizePrompt').textContent = data.synthesizePrompt || 'Not initialized yet'
+      document.getElementById('modalConfig').textContent = JSON.stringify({
+        id: data.id,
+        instructions: data.instructions,
+        maintenance: data.maintenance,
+        queryMethod: data.queryMethod,
+        governance: data.governance,
+        buffer: data.buffer
+      }, null, 2)
+
+      learnerModal.classList.add('open')
+    }
+
+    // --- Event Listeners ---
+    initBtn.addEventListener('click', initBrain)
+    projectSelect.addEventListener('change', (e) => {
+      currentProject = e.target.value
+      if (currentProject) loadSessions(currentProject)
+    })
+    injectBtn.addEventListener('click', injectSessions)
+    askBtn.addEventListener('click', askBrain)
+    queryInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') askBrain()
+    })
+    queryTempSlider.addEventListener('input', (e) => {
+      tempValueDisplay.textContent = e.target.value
+    })
+
+    // --- Init ---
+    connectSSE()
+    loadProjects()
+    updateLearners() // Fetch existing brain state on page load
+  </script>
+</body>
+</html>

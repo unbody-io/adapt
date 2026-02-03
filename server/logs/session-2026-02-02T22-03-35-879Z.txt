@@ -1,0 +1,129 @@
+=== Brain Session Started: 2026-02-02T22:03:35.882Z ===
+
+
+--- CONFIGURATION ---
+Prompt: This will be a chat log of myself with Claude Code during development of different projects. Learn about my thinking patterns, interests, preferences, and how I approach problems.
+
+Also, separately make sure you track the behaviors where I get frustrated and curse at the model.
+Model: [object Object]
+Learning config: {
+  "observe": {
+    "blueprintModel": {
+      "specificationVersion": "v3",
+      "provider": "openrouter",
+      "defaultObjectGenerationMode": "tool",
+      "supportsImageUrls": true,
+      "supportedUrls": {
+        "image/*": [
+          {},
+          {}
+        ],
+        "application/*": [
+          {},
+          {}
+        ]
+      },
+      "modelId": "anthropic/claude-opus-4.5",
+      "settings": {},
+      "config": {
+        "provider": "openrouter.chat",
+        "compatibility": "compatible"
+      }
+    }
+  },
+  "synthesize": {
+    "blueprintModel": {
+      "specificationVersion": "v3",
+      "provider": "openrouter",
+      "defaultObjectGenerationMode": "tool",
+      "supportsImageUrls": true,
+      "supportedUrls": {
+        "image/*": [
+          {},
+          {}
+        ],
+        "application/*": [
+          {},
+          {}
+        ]
+      },
+      "modelId": "anthropic/claude-opus-4.5",
+      "settings": {},
+      "config": {
+        "provider": "openrouter.chat",
+        "compatibility": "compatible"
+      }
+    },
+    "thresholds": {
+      "maxObservations": 10,
+      "minImportance": 0.3
+    }
+  },
+  "maintenance": {
+    "strategy": "continuous"
+  },
+  "query": {
+    "method": "direct"
+  }
+}
+---
+
+[2026-02-02T22:04:01.543Z] LEARNERS GENERATED:
+  - thinking-patterns: Understand how this developer thinks through problems, makes decisions, and approaches debugging and...
+  - technical-preferences: Understand this developer's technical preferences, interests, and opinions about languages, tools, p...
+  - project-context: Understand the projects this developer is working on, their purposes, architecture decisions, and cu...
+  - frustration-triggers: Track instances where this user becomes frustrated, angry, or curses at the model to understand what...
+  - collaboration-style: Understand how this developer prefers to collaborate with AI assistants, including communication sty...
+[2026-02-02T22:05:42.715Z] SYNTHESIZED [collaboration-style] significance=notable
+  Evolution: Created initial understanding from observations.
+  Understanding (1419 chars):
+  The developer prefers a highly structured, step‑by‑step collaborative workflow. They provide extensive, often unstructured use‑case context up front, then ask a focused question. The assistant should respond by asking only one clarification question at a time, building a detailed specification incrementally, and finally saving the spec to docs/specs/. Precise terminology matters: they distinguish Units (attention‑based understanding components) from recall/storage, and expect the assistant to re...
+[2026-02-02T22:05:42.802Z] SYNTHESIZED [thinking-patterns] significance=notable
+  Evolution: Created the initial comprehensive understanding based on the first set of observations, synthesizing the developer's iterative, top‑down, detail‑focused, and reflective problem‑solving style.
+  Understanding (1290 chars):
+  The developer favors an iterative, single‑question workflow, asking one precise question at a time and building each answer onto the previous one to gradually construct a detailed specification. They decompose complex problems top‑down: start from high‑level goals (e.g., insightful data, predictions) and break them into discrete requirements (victims, killer strategy, hostages, etc.), mapping each to concrete unit types (ListUnit, TextUnit, GraphUnit). When a gap is perceived they step back, ask...
+[2026-02-02T22:05:47.938Z] SYNTHESIZED [project-context] significance=notable
+  Evolution: Created initial comprehensive understanding of the unit architecture, its purpose, unit types, storage design, distinction from recall, and the key use cases and open questions. No prior understanding existed, so this forms the baseline.
+  Understanding (1715 chars):
+  The team is defining a "unit" system to enable organic memory for large‑scale, multi‑domain AI agents. Units are distinct from recall: they are created proactively ("in order to be able to answer" queries) and require continuous attention, while recall is a fallback using storage layers. Three unit categories are identified: ListUnits (simple enumerations, stored in a single PostgreSQL table), TextUnits (semantic chunks, stored in a vector store), and GraphUnits (entity‑relationship graphs, stor...
+[2026-02-02T22:05:49.290Z] SYNTHESIZED [technical-preferences] significance=notable
+  Evolution: Created an initial comprehensive understanding of the developer's unit-based architecture from the provided observations, as no prior model existed.
+  Understanding (1177 chars):
+  The developer envisions a unit-centric system where 'units' represent live, continuously updated understandings rather than static recall. Units are typed (e.g., ListUnit, TextUnit, GraphUnit) and share generic storage per type: a PostgreSQL table for ListUnits, a vector store for TextUnits, and a graph database for GraphUnits. Each unit processes data in batches, comparing newly injected data against its existing state to evolve its understanding. A Unit Manager determines the quantity and type...
+[2026-02-02T22:05:51.694Z] SYNTHESIZED [frustration-triggers] significance=notable
+  Evolution: Added new observations about user frustration regarding the model's failure to read provided spec files and understand the system's flow. Recognized repeated complaints and requests for reformulation as indicators of escalating annoyance.
+  Understanding (450 chars):
+  The user expresses frustration when the model does not read or incorporate the provided specification documents (e.g., @docs/units.spec.md) and misunderstands the system's flow, particularly the distinction between "units" and "recall" mechanisms. The user repeatedly points out the oversight, asks for reformulation, and shows escalating annoyance, indicating a trigger related to ignored technical docs and misinterpretation of system architecture.
+[2026-02-02T22:05:53.822Z] DISMISSED [project-context]
+[2026-02-02T22:05:58.307Z] SYNTHESIZED [frustration-triggers] significance=routine
+  Evolution: Integrated new observations indicating the user explicitly states lack of knowledge and importance of staying on topic, which reinforces and slightly expands the prior understanding of frustration triggers related to ignored specifications and misinterpretation.
+  Understanding (520 chars):
+  The user expresses frustration when the model does not read or incorporate the provided specification documents (e.g., @docs/units.spec.md) and misunderstands the system's flow, particularly the distinction between "units" and "recall" mechanisms. The user explicitly states "i do not know that and it does matter, lets not lose teh focus" and "i really do not know, all i know are these", highlighting that the user perceives the model's lack of knowledge as a critical issue and is upset upset upse...
+[2026-02-02T22:06:01.221Z] SYNTHESIZED [collaboration-style] significance=notable
+  Evolution: The developer's preferences are confirmed and refined: they emphasize a one‑question‑at‑a‑time, iterative specification process, expect the assistant to acknowledge and summarise any referenced spec files, prefer concise modular designs, favour generic schema option B for storage, and require the final spec saved to docs/specs/. Their informal style is noted but they still demand precise, structured responses. No contradictions found; this deepens the existing model with explicit detail on storage schema preference and file‑handling expectations.
+  Understanding (1193 chars):
+  The developer follows a highly structured, iterative workflow: they provide extensive, often unstructured context, then ask a focused question. The assistant should respond with only one clarification question at a time, incrementally building a detailed specification, and finally save the spec to docs/specs/. Precise terminology is crucial; Units (attention‑based understanding components) must be distinguished from recall/storage, avoiding conflation with augmentation. The assistant must explic...
+[2026-02-02T22:06:03.708Z] SYNTHESIZED [thinking-patterns] significance=notable
+  Evolution: The new observations reinforce and expand the existing understanding of the developer's iterative, top‑down, and modular approach. They confirm a strong preference for lean core design, modular augmentation, and generic storage schema, while also illustrating how the developer handles uncertainty through clarification questions and anticipates future migration concerns. The integrated view now emphasizes the developer’s explicit focus on minimal viable design, modular extensibility, and forward‑looking adaptability alongside their established systematic decomposition and incremental planning.
+  Understanding (955 chars):
+  The developer consistently employs a top‑down, iterative workflow that emphasizes lean core responsibilities and modular extensibility. They decompose systems into distinct layers—core logic, augmentation agents, and storage—favoring a generic, minimal‑viable storage schema (option B) to keep the design adaptable. Their process involves asking precise, one‑question‑at‑a‑time queries to refine specifications incrementally, stepping back to clarify ambiguities (e.g., metadata placement, filterabil...
+[2026-02-02T22:06:18.834Z] SYNTHESIZED [technical-preferences] significance=notable
+  Evolution: Added explicit emphasis on a "lean core" strategy that keeps the core minimal and agnostic to data ingestion, distinguishing stateful Units from stateless Augmentation agents. Integrated the preference for a generic, metadata‑driven storage schema (option B) as an "escape hatch" allowing plug‑in storage backends (Postgres, vector store, graph DB, etc.) via a BYODB (bring‑your‑own‑database) approach. Noted the use of Zod for schema validation of storage tool definitions and the desire for filterable metadata queries. Clarified that augmentation agents are pure transforms that define database structure, while Units manage evolving understanding. Highlighted modularity: augmentators and attention units operate in isolation and developers may swap in their own databases, evaluation systems, or LLMs. These details extend the prior model with concrete architectural constraints and tooling choices.
+  Understanding (1401 chars):
+  The developer envisions a unit‑centric architecture where Units (stateful, live understandings) evolve by processing incoming data in batches, while Augmentation agents are stateless transforms that extract structured data and shape storage. The core is intentionally lean: it does not handle data ingestion, storage specifics, or LLM orchestration, adhering to a "reduce the scope of the core" principle. Storage is designed to be agnostic to data shape, using a generic schema (option B) that store...
+[2026-02-02T22:06:20.799Z] DISMISSED [frustration-triggers]
+[2026-02-02T22:06:31.274Z] SYNTHESIZED [thinking-patterns] significance=notable
+  Evolution: Integrated new observations that elaborate the developer's emphasis on flexibility and extensibility, revealing concrete concerns about lock‑in (dislike for "configure once and reuse forever"), top‑down constraints (adding storage later, compile‑time checks), and detailed planning steps (sketching specs, renaming augmentation to transformers, considering storage for transformer output, schema flexibility, query/filter usage, embedding strategies, chunking media, performance trade‑offs). These details extend the prior model of a top‑down, iterative, modular approach, highlighting the developer's iterative questioning of architecture and concrete design decisions around storage and data representation.
+  Understanding (1379 chars):
+  The developer follows a top‑down, iterative workflow that prioritizes flexible, extensible architecture over rigid, fixed designs. They decompose systems into clear layers—core logic, "transformers" (formerly augmentation), and storage—while continuously questioning assumptions about each component. They dislike "configure once and reuse forever" due to fear of lock‑in, and they explicitly consider how to add storage later and enforce compile‑time checks for missing storage. Planning precedes im...
+[2026-02-02T22:06:34.563Z] SYNTHESIZED [technical-preferences] significance=notable
+  Evolution: Added several nuanced preferences: (1) rejection of permanent once‑only configuration in favor of simple, magical setup; (2) renaming and reframing of Augmentation agents as "Transformers" that both extract and transform data; (3) explicit requirement to store transformer outputs (with optional raw data) and embed each output field; (4) modeling content as typed chunks rather than a flat namespace, with performance concerns about flattening; (5) compile‑time checks to ensure storage is registered before runtime; (6) acknowledgment that each raw record may generate multiple storage tables/classes. These extend the prior model of Units and optional storage, providing richer detail on storage semantics and developer ergonomics.
+  Understanding (2563 chars):
+  The developer advocates a unit‑centric architecture where **Units** (stateful, live understandings) process batched data, while **Transformers** (formerly called Augmentation agents) are stateless, pluggable components that both extract structure and perform field‑level transformations. The core (brain A) remains intentionally narrow: it does not perform data ingestion, storage specifics, or LLM orchestration, adhering to a "reduce the scope of the core" philosophy. 
+
+**Configuration philosophy*...
+[2026-02-02T22:07:00.344Z] SYNTHESIZED [project-context] significance=notable
+  Evolution: Integrated a set of developer concerns, clarifications, and design proposals that expand and modify the existing understanding of the unit system. Added details about the developer's dislike for a static "configure once and reuse forever" model, the need for flexible storage strategies, the possible renaming of augmentation to "transformers", and the requirement for storing transformer outputs. Included uncertainty about transformer output schemas, embedding strategies, handling multimodal content, and performance considerations. Clarified questions about DB integration and whether the brain needs its own storage, as well as the potential use of transformers as query filters. These additions extend the prior model with richer architectural debates and practical implementation concerns.
+  Understanding (4062 chars):
+  The team is defining a "unit" system to enable organic memory for large‑scale, multi‑domain AI agents. Units are distinct from recall: they are created proactively ("in order to be able to answer" queries) and require continuous attention, while recall is a fallback using storage layers. Three unit categories are identified: ListUnits (simple enumerations, stored in a single PostgreSQL table), TextUnits (semantic chunks, stored in a vector store), and GraphUnits (entity‑relationship graphs, stor...
+[2026-02-02T22:07:02.368Z] DISMISSED [frustration-triggers]

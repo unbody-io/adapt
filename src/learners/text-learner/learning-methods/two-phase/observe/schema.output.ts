@@ -25,14 +25,13 @@ export const observeOutputSchema = z.object({
 	output: z
 		.string()
 		.describe(
-			'Plain text observations, one per line. Just state what you see — no markers, no importance ratings, no interpretation.',
+			'Plain text observations, one per line. Just state what you see — no markers, no importance ratings, no interpretation. Empty string if dismissed.',
 		),
 	importance: z
 		.number()
 		.min(0)
 		.max(1)
-		.optional()
-		.describe('How important this observation is (0.0 to 1.0). Only present if status is observed.'),
+		.describe('How important this observation is (0.0 to 1.0). Use 0.5 if dismissed.'),
 })
 
 export type ObserveSchemaOutput = z.infer<typeof observeOutputSchema>

@@ -43,5 +43,28 @@ For each observation, ask: "How does this relate to my current understanding?"
 - Preserve important existing information while incorporating new signals
 - Track what changed and why it matters
 
-Use "synthesized" when understanding evolves, "dismissed" when observations add nothing new.`
+## CRITICAL: Response Format
+
+You MUST respond with valid JSON only. No markdown, no explanations, just the JSON object.
+ALL fields are required.
+
+If understanding changed:
+{
+  "status": "synthesized",
+  "newUnderstanding": "The complete updated understanding text",
+  "significance": "routine" or "notable" or "critical",
+  "evolution": "What changed and why",
+  "reasoning": "Explanation of key decisions",
+  "output": ""
+}
+
+If nothing changed:
+{
+  "status": "dismissed",
+  "newUnderstanding": "",
+  "significance": "routine",
+  "evolution": "",
+  "reasoning": "",
+  "output": "Why observations didn't change understanding"
+}`
 }

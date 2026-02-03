@@ -22,6 +22,11 @@
       height: 100vh;
       gap: 1px;
       background: #222;
+      transition: grid-template-columns 0.3s ease;
+    }
+
+    .container.config-collapsed {
+      grid-template-columns: 40px 1fr 280px;
     }
 
     .panel {
@@ -40,10 +45,50 @@
       top: 0;
       background: #111;
       z-index: 10;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .panel-header .toggle-btn {
+      background: none;
+      border: none;
+      color: #666;
+      cursor: pointer;
+      padding: 4px;
+      display: flex;
+      align-items: center;
+      transition: color 0.2s;
+    }
+
+    .panel-header .toggle-btn:hover {
+      color: #e0e0e0;
+    }
+
+    .panel-header .toggle-btn svg {
+      width: 16px;
+      height: 16px;
+      transition: transform 0.3s ease;
+    }
+
+    .container.config-collapsed .panel-header .toggle-btn svg {
+      transform: rotate(180deg);
     }
 
     .panel-content {
       padding: 16px;
+      transition: opacity 0.3s ease;
+    }
+
+    .container.config-collapsed .panel:first-of-type .panel-content {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .container.config-collapsed .panel:first-of-type .panel-header {
+      writing-mode: vertical-rl;
+      text-orientation: mixed;
+      padding: 16px 12px;
     }
 
     /* Header */
@@ -548,6 +593,9 @@
       border-radius: 12px;
       font-size: 14px;
       line-height: 1.5;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      text-align: left;
     }
 
     .message.user .message-content {
@@ -701,6 +749,130 @@
     }
 
     .chevron.open { transform: rotate(180deg); }
+
+    /* Inject Tabs */
+    .inject-tabs {
+      display: flex;
+      gap: 4px;
+      margin-bottom: 16px;
+      border-bottom: 1px solid #222;
+    }
+
+    .inject-tab {
+      background: transparent;
+      border: none;
+      color: #666;
+      padding: 10px 16px;
+      cursor: pointer;
+      font-size: 12px;
+      border-bottom: 2px solid transparent;
+      transition: all 0.2s;
+    }
+
+    .inject-tab:hover {
+      color: #e0e0e0;
+    }
+
+    .inject-tab.active {
+      color: #4a9eff;
+      border-bottom-color: #4a9eff;
+    }
+
+    .inject-tab-content {
+      display: none;
+    }
+
+    .inject-tab-content.active {
+      display: block;
+    }
+
+    /* File Upload */
+    .file-upload-area {
+      border: 2px dashed #333;
+      border-radius: 8px;
+      padding: 24px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-bottom: 16px;
+    }
+
+    .file-upload-area:hover {
+      border-color: #4a9eff;
+      background: #0a0a0a;
+    }
+
+    .file-upload-area.drag-over {
+      border-color: #4a9eff;
+      background: #0f1a2a;
+    }
+
+    .file-upload-prompt svg {
+      color: #666;
+      margin-bottom: 12px;
+    }
+
+    .file-upload-prompt p {
+      margin: 0;
+      color: #e0e0e0;
+      font-size: 14px;
+    }
+
+    .file-upload-hint {
+      color: #666 !important;
+      font-size: 12px !important;
+      margin-top: 4px !important;
+    }
+
+    .file-list {
+      margin-top: 16px;
+      text-align: left;
+    }
+
+    .file-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 12px;
+      background: #1a1a1a;
+      border-radius: 6px;
+      margin-bottom: 8px;
+    }
+
+    .file-item-info {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex: 1;
+      min-width: 0;
+    }
+
+    .file-item-name {
+      font-size: 13px;
+      color: #e0e0e0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .file-item-size {
+      font-size: 11px;
+      color: #666;
+    }
+
+    .file-item-remove {
+      background: none;
+      border: none;
+      color: #f87171;
+      cursor: pointer;
+      padding: 4px 8px;
+      font-size: 11px;
+      transition: opacity 0.2s;
+    }
+
+    .file-item-remove:hover {
+      opacity: 0.7;
+    }
 
     /* Toast Notifications */
     .toast-container {
@@ -1092,7 +1264,14 @@
 
     <!-- Left Panel: Config -->
     <div class="panel">
-      <div class="panel-header">Configuration</div>
+      <div class="panel-header">
+        <span>Configuration</span>
+        <button class="toggle-btn" id="configToggle" title="Toggle configuration panel">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M15 18l-6-6 6-6"/>
+          </svg>
+        </button>
+      </div>
       <div class="panel-content">
         <!-- Brain Prompt -->
         <div class="section-title">Brain Prompt</div>
@@ -1340,28 +1519,63 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
 
         <!-- Data Injection -->
         <div class="section-title">Data Injection</div>
-        <div class="form-group">
-          <label>Project</label>
-          <select id="projectSelect">
-            <option value="">Select a project...</option>
-          </select>
+
+        <!-- Injection Method Tabs -->
+        <div class="inject-tabs">
+          <button class="inject-tab active" data-tab="sessions">Claude Sessions</button>
+          <button class="inject-tab" data-tab="files">Files</button>
+          <button class="inject-tab" data-tab="text">Text</button>
         </div>
 
-        <div class="form-group">
-          <label>Sessions</label>
-          <div class="session-list" id="sessionList">
-            <div class="empty-state" style="padding:12px;"><p>Select a project</p></div>
+        <!-- Sessions Tab -->
+        <div class="inject-tab-content active" id="sessionsTab">
+          <div class="form-group">
+            <label>Project</label>
+            <select id="projectSelect">
+              <option value="">Select a project...</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Sessions</label>
+            <div class="session-list" id="sessionList">
+              <div class="empty-state" style="padding:12px;"><p>Select a project</p></div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label style="display:flex;align-items:center;gap:6px;">
+              <input type="checkbox" id="userMessagesOnly" checked style="width:auto;">
+              User messages only
+            </label>
           </div>
         </div>
 
-        <div class="form-group">
-          <label style="display:flex;align-items:center;gap:6px;">
-            <input type="checkbox" id="userMessagesOnly" checked style="width:auto;">
-            User messages only
-          </label>
+        <!-- Files Tab -->
+        <div class="inject-tab-content" id="filesTab">
+          <div class="file-upload-area" id="fileUploadArea">
+            <input type="file" id="fileInput" accept=".md,.json,.txt" multiple style="display:none;">
+            <div class="file-upload-prompt">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="17 8 12 3 7 8"></polyline>
+                <line x1="12" y1="3" x2="12" y2="15"></line>
+              </svg>
+              <p>Drop files here or click to select</p>
+              <p class="file-upload-hint">.md, .json, .txt files</p>
+            </div>
+            <div class="file-list" id="fileList"></div>
+          </div>
         </div>
 
-        <button id="injectBtn" disabled>Inject Selected</button>
+        <!-- Text Tab -->
+        <div class="inject-tab-content" id="textTab">
+          <div class="form-group">
+            <textarea id="textInput" placeholder="Paste text, markdown, or JSON here..." rows="12"></textarea>
+          </div>
+        </div>
+
+        <button id="injectBtn" disabled>Inject Data</button>
       </div>
     </div>
 
@@ -1550,6 +1764,21 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
     let usageByLearner = {} // { learnerId: { inputTokens, outputTokens, requestCount } }
     let totalUsage = { inputTokens: 0, outputTokens: 0, totalTokens: 0, requestCount: 0 }
     let configuredModels = {} // Store model config: { primary, blueprint, observe, synthesize }
+
+    // --- Configuration Panel Toggle ---
+    const container = document.querySelector('.container')
+    const configToggle = document.getElementById('configToggle')
+    const configCollapsedKey = 'brain-config-collapsed'
+
+    // Restore collapsed state from localStorage
+    if (localStorage.getItem(configCollapsedKey) === 'true') {
+      container.classList.add('config-collapsed')
+    }
+
+    configToggle.addEventListener('click', () => {
+      const isCollapsed = container.classList.toggle('config-collapsed')
+      localStorage.setItem(configCollapsedKey, isCollapsed)
+    })
 
     // --- Utility Functions ---
     function escapeHtml(text) {
@@ -2170,45 +2399,13 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
               selectedSessions.add(s.sessionId)
               el.classList.add('selected')
             }
-            injectBtn.disabled = selectedSessions.size === 0 || !brainInitialized
+            updateInjectButtonState()
           })
 
           sessionList.appendChild(el)
         })
       } catch (err) {
         sessionList.innerHTML = '<div class="empty-state" style="padding:12px;"><p>Error</p></div>'
-      }
-    }
-
-    async function injectSessions() {
-      if (selectedSessions.size === 0) return
-
-      injectBtn.disabled = true
-      injectBtn.innerHTML = '<span class="spinner"></span>Injecting...'
-
-      try {
-        const res = await fetch('/brain/inject', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            sessionIds: Array.from(selectedSessions),
-            projectPath: currentProject,
-            userMessagesOnly: userMessagesOnly.checked
-          })
-        })
-
-        const data = await res.json()
-        if (!res.ok) {
-          alert('Error: ' + data.error)
-        } else {
-          selectedSessions.clear()
-          document.querySelectorAll('.session-item.selected').forEach(el => el.classList.remove('selected'))
-        }
-      } catch (err) {
-        alert('Error: ' + err.message)
-      } finally {
-        injectBtn.disabled = selectedSessions.size === 0
-        injectBtn.textContent = 'Inject Selected'
       }
     }
 
@@ -2259,7 +2456,8 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
         sourcesHtml = `<div class="sources">Sources: ${sources.map(s => s.learnerId).join(', ')}</div>`
       }
 
-      el.innerHTML = `<div class="message-content">${content}</div>${sourcesHtml}`
+      // Properly escape HTML and preserve whitespace/line breaks
+      el.innerHTML = `<div class="message-content">${escapeHtml(content)}</div>${sourcesHtml}`
       chatArea.appendChild(el)
       chatArea.scrollTop = chatArea.scrollHeight
     }
@@ -2416,13 +2614,211 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
       learnerModal.classList.add('open')
     }
 
+    // --- Tab Switching ---
+    let activeInjectTab = 'sessions'
+    let uploadedFiles = []
+
+    function switchInjectTab(tabName) {
+      activeInjectTab = tabName
+
+      // Update tab buttons
+      document.querySelectorAll('.inject-tab').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.tab === tabName)
+      })
+
+      // Update tab content
+      document.querySelectorAll('.inject-tab-content').forEach(content => {
+        content.classList.toggle('active', content.id === tabName + 'Tab')
+      })
+
+      // Update inject button state
+      updateInjectButtonState()
+    }
+
+    function updateInjectButtonState() {
+      let hasData = false
+
+      if (activeInjectTab === 'sessions') {
+        hasData = selectedSessions.size > 0
+        injectBtn.textContent = 'Inject Selected'
+      } else if (activeInjectTab === 'files') {
+        hasData = uploadedFiles.length > 0
+        injectBtn.textContent = 'Inject Files'
+      } else if (activeInjectTab === 'text') {
+        hasData = textInput.value.trim().length > 0
+        injectBtn.textContent = 'Inject Text'
+      }
+
+      injectBtn.disabled = !hasData || !brainInitialized
+    }
+
+    // --- File Upload ---
+    const fileUploadArea = document.getElementById('fileUploadArea')
+    const fileInput = document.getElementById('fileInput')
+    const fileList = document.getElementById('fileList')
+    const textInput = document.getElementById('textInput')
+
+    fileUploadArea.addEventListener('click', () => fileInput.click())
+
+    fileUploadArea.addEventListener('dragover', (e) => {
+      e.preventDefault()
+      fileUploadArea.classList.add('drag-over')
+    })
+
+    fileUploadArea.addEventListener('dragleave', () => {
+      fileUploadArea.classList.remove('drag-over')
+    })
+
+    fileUploadArea.addEventListener('drop', (e) => {
+      e.preventDefault()
+      fileUploadArea.classList.remove('drag-over')
+      handleFiles(e.dataTransfer.files)
+    })
+
+    fileInput.addEventListener('change', (e) => {
+      handleFiles(e.target.files)
+    })
+
+    function handleFiles(files) {
+      uploadedFiles = Array.from(files).filter(f => {
+        const ext = f.name.split('.').pop().toLowerCase()
+        return ['md', 'json', 'txt'].includes(ext)
+      })
+
+      renderFileList()
+      updateInjectButtonState()
+    }
+
+    function renderFileList() {
+      if (uploadedFiles.length === 0) {
+        fileList.innerHTML = ''
+        return
+      }
+
+      fileList.innerHTML = uploadedFiles.map((file, index) => `
+        <div class="file-item">
+          <div class="file-item-info">
+            <span class="file-item-name">${escapeHtml(file.name)}</span>
+            <span class="file-item-size">${formatFileSize(file.size)}</span>
+          </div>
+          <button class="file-item-remove" onclick="removeFile(${index})">Remove</button>
+        </div>
+      `).join('')
+    }
+
+    function removeFile(index) {
+      uploadedFiles.splice(index, 1)
+      renderFileList()
+      updateInjectButtonState()
+    }
+
+    function formatFileSize(bytes) {
+      if (bytes < 1024) return bytes + ' B'
+      if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB'
+      return (bytes / (1024 * 1024)).toFixed(1) + ' MB'
+    }
+
+    async function parseFileContent(file) {
+      const content = await file.text()
+      const ext = file.name.split('.').pop().toLowerCase()
+
+      if (ext === 'json') {
+        try {
+          const parsed = JSON.parse(content)
+          // If JSON is already an array, return it; otherwise wrap in array
+          return Array.isArray(parsed) ? parsed : [parsed]
+        } catch (err) {
+          throw new Error(`Failed to parse ${file.name}: ${err.message}`)
+        }
+      }
+
+      // For .md and .txt, return as single string in array
+      return [content]
+    }
+
+    // --- Universal Inject Function ---
+    async function injectData() {
+      injectBtn.disabled = true
+      injectBtn.innerHTML = '<span class="spinner"></span>Injecting...'
+
+      try {
+        let requestBody
+
+        if (activeInjectTab === 'sessions') {
+          // Claude sessions injection
+          requestBody = {
+            sessionIds: Array.from(selectedSessions),
+            projectPath: currentProject,
+            userMessagesOnly: userMessagesOnly.checked
+          }
+        } else if (activeInjectTab === 'files') {
+          // File injection
+          const allData = []
+          for (const file of uploadedFiles) {
+            const parsed = await parseFileContent(file)
+            allData.push(...parsed)
+          }
+          requestBody = { data: allData }
+        } else if (activeInjectTab === 'text') {
+          // Text injection
+          const text = textInput.value.trim()
+          try {
+            // Try parsing as JSON first
+            const parsed = JSON.parse(text)
+            requestBody = { data: Array.isArray(parsed) ? parsed : [parsed] }
+          } catch {
+            // Not JSON, send as plain text
+            requestBody = { data: [text] }
+          }
+        }
+
+        const res = await fetch('/brain/inject', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(requestBody)
+        })
+
+        const data = await res.json()
+        if (!res.ok) {
+          alert('Error: ' + data.error)
+        } else {
+          // Clear data after successful injection
+          if (activeInjectTab === 'sessions') {
+            selectedSessions.clear()
+            document.querySelectorAll('.session-item.selected').forEach(el => el.classList.remove('selected'))
+          } else if (activeInjectTab === 'files') {
+            uploadedFiles = []
+            fileInput.value = ''
+            renderFileList()
+          } else if (activeInjectTab === 'text') {
+            textInput.value = ''
+          }
+        }
+      } catch (err) {
+        alert('Error: ' + err.message)
+      } finally {
+        updateInjectButtonState()
+        injectBtn.textContent = activeInjectTab === 'sessions' ? 'Inject Selected' :
+                                activeInjectTab === 'files' ? 'Inject Files' : 'Inject Text'
+      }
+    }
+
+    // Make removeFile globally accessible
+    window.removeFile = removeFile
+
     // --- Event Listeners ---
+    document.querySelectorAll('.inject-tab').forEach(btn => {
+      btn.addEventListener('click', () => switchInjectTab(btn.dataset.tab))
+    })
+
+    textInput.addEventListener('input', updateInjectButtonState)
+
     initBtn.addEventListener('click', initBrain)
     projectSelect.addEventListener('change', (e) => {
       currentProject = e.target.value
       if (currentProject) loadSessions(currentProject)
     })
-    injectBtn.addEventListener('click', injectSessions)
+    injectBtn.addEventListener('click', injectData)
     askBtn.addEventListener('click', askBrain)
     queryInput.addEventListener('keypress', (e) => {
       if (e.key === 'Enter') askBrain()

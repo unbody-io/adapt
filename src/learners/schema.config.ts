@@ -14,7 +14,9 @@ export const learnerConfigSchema = z.object({
 		.describe(
 			'Brief description of what this learner tracks, used for query routing',
 		),
-	instructions: z.string().describe(`Full structured instructions following the format:
+	instructions: z
+		.string()
+		.describe(`Full structured instructions following the format:
 [Core understanding directive]
 
 Watch for:
@@ -24,9 +26,13 @@ Watch for:
 Track answers to:
 - [Question 1]
 - [Question 2]`),
+	focus: z
+		.string()
+		.optional()
+		.describe('Optional focus areas to narrow observation filtering'),
 	type: z
 		.literal('text')
-		.describe('Learner type (MVP supports only TextLearner)'),
+		.describe('Learner type - must be "text"'),
 	maintenance: z
 		.object({
 			strategy: z
@@ -35,7 +41,9 @@ Track answers to:
 					'How understanding evolves: continuous (single growing text), cumulative (summarize when large), decay (recent items weighted higher)',
 				),
 		})
-		.describe('Maintenance configuration. Use { strategy: "continuous" } as default.'),
+		.describe(
+			'Maintenance configuration. Use { strategy: "continuous" } as default.',
+		),
 })
 
 export type GeneratedLearnerConfig = z.infer<typeof learnerConfigSchema>

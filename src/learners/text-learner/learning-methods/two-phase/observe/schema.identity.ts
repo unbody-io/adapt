@@ -19,6 +19,12 @@ export const observeIdentitySchema = z.object({
 		.describe(
 			'Plain text identity: who you are (second person) and what you focus on when observing data',
 		),
+	domain: z
+		.string()
+		.optional()
+		.describe(
+			'The broad subject area this observer covers, if applicable. Omit if the observer is cross-domain or general-purpose.',
+		),
 })
 
 export type ObserveIdentity = z.infer<typeof observeIdentitySchema>

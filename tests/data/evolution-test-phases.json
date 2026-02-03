@@ -1,0 +1,12 @@
+{
+  "description": "5-phase evolution test data. 500 items total. Inject phases sequentially via POST /brain/inject { data: phase.items }",
+  "usage": "Load each phase file and POST its items array to /brain/inject. Wait for each phase to complete before starting the next.",
+  "phases": [
+    { "file": "phase-1-foundation.json", "items": 100, "purpose": "Build baseline understanding. All items relevant." },
+    { "file": "phase-2-domain-stretch.json", "items": 70, "purpose": "Adjacent topics. Some accepted, some dismissed." },
+    { "file": "phase-3-coverage-gaps.json", "items": 80, "purpose": "New domains. High dismissal. Should trigger create signals." },
+    { "file": "phase-4-noise.json", "items": 150, "purpose": "Completely irrelevant. 100% dismissal. Stagnation signals." },
+    { "file": "phase-5-recovery.json", "items": 50, "purpose": "Back to relevant dev topics. Tests recovery." }
+  ],
+  "totalItems": 500
+}

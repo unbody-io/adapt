@@ -1,10 +1,22 @@
 import type { LanguageModel } from 'ai'
-import type { Strategy } from './strategies'
-import type { BaseLearnerEventMap, LearnerOrigin, Significance } from '../types'
+import type {
+	CascadableConfig,
+	ResolvedCascadableConfig,
+} from '../../types/config'
 import type { EventsFromMap } from '../../types/events'
+import type {
+	BaseLearnerEventMap,
+	LearnerOrigin,
+	Significance,
+	TokenUsage,
+} from '../types'
+import type {
+	ObserveConfig,
+	SynthesizeConfig,
+	SynthesizeThresholds,
+} from './learning-methods/types'
 import type { QueryMethodName } from './query-methods/types'
-import type { ObserveConfig, SynthesizeConfig, SynthesizeThresholds } from './learning-methods/types'
-import type { CascadableConfig, ResolvedCascadableConfig } from '../../types/config'
+import type { Strategy } from './strategies'
 
 // Re-export TokenUsage for backwards compatibility
 export type { TokenUsage } from '../types'
@@ -40,16 +52,21 @@ export interface TextLearnerEventMap extends BaseLearnerEventMap {
 		learnerId: string
 		itemCount: number
 	}
+	'learner:observe:thinking': {
+		learnerId: string
+		thoughts: string[]
+		usage: TokenUsage
+	}
 	'learner:observed': {
 		learnerId: string
-		output: string
+		output: string[]
 		importance: number
 		bufferCount: number
 		usage?: EventUsage
 	}
 	'learner:observe:dismissed': {
 		learnerId: string
-		output: string
+		output: string[]
 		usage?: EventUsage
 	}
 	'learner:observe:error': {
@@ -61,6 +78,11 @@ export interface TextLearnerEventMap extends BaseLearnerEventMap {
 	'learner:synthesize:started': {
 		learnerId: string
 		observationCount: number
+	}
+	'learner:synthesize:thinking': {
+		learnerId: string
+		thoughts: string[]
+		usage: TokenUsage
 	}
 	'learner:synthesized': {
 		learnerId: string
@@ -78,6 +100,52 @@ export interface TextLearnerEventMap extends BaseLearnerEventMap {
 	'learner:synthesize:error': {
 		learnerId: string
 		error: unknown
+	}
+
+	// Learn phase errors
+	'learner:learn:failed': {
+		learnerId: string
+		error: string
+	}
+
+	// Query phase events
+	'learner:query:thinking': {
+		learnerId: string
+		thoughts: string[]
+		usage: TokenUsage
+	}
+
+	// Signal events (Living Brain)
+	'learner:signal': {
+		learnerId: string
+		description: string
+		timestamp: Date
+		metrics?: {
+			dismissalRate?: number
+			avgRelevance?: number
+			avgConfidence?: number
+			gapCount?: number
+			bufferCount?: number
+			activation?: number
+		}
+	}
+
+	// Config update events (Living Brain)
+	'learner:config:updated': {
+		learnerId: string
+		changedFields: string[]
+		config: ResolvedTextLearnerConfig
+	}
+
+	'learner:prompts:regenerated': {
+		learnerId: string
+		observePrompt: string
+		synthesizePrompt: string
+	}
+
+	'learner:understanding:set': {
+		learnerId: string
+		understanding: string
 	}
 }
 
@@ -130,8 +198,14 @@ export interface TextLearnerConfig extends CascadableConfig {
 	model: LanguageModel
 	/** Natural language instructions for what this learner tracks and watches for */
 	instructions: string
+	/** Optional focus areas to narrow observation filtering */
+	focus?: string
 	/** Optional unique identifier */
 	id?: string
+	/** Optional display name */
+	name?: string
+	/** Optional description of learner purpose */
+	description?: string
 	/** How the learner was created */
 	origin?: LearnerOrigin
 	/** Maintenance settings for understanding compression */
@@ -142,8 +216,8 @@ export interface TextLearnerConfig extends CascadableConfig {
 	synthesize?: Partial<SynthesizeConfig>
 	/** Query phase configuration */
 	query?: QueryConfig
-	/** @deprecated Use query.method instead */
-	queryMethod?: QueryMethodName
+	/** Governance configuration (Living Brain) */
+	governance?: Partial<import('../types').LearnerGovernance>
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -191,10 +265,18 @@ export interface ResolvedTextLearnerConfig extends ResolvedCascadableConfig {
 }
 
 /**
+ * Result from TextLearner.update()
+ */
+export interface TextLearnerUpdateResult {
+	changedFields: string[]
+	config: ResolvedTextLearnerConfig
+}
+
+/**
  * Default thresholds for synthesis triggers
  */
 export const DEFAULT_THRESHOLDS: SynthesizeThresholds = {
 	maxObservations: 10,
 	maxTokens: 8000,
-	minImportance: 0.9,
+	minImportance: 0.5,
 }

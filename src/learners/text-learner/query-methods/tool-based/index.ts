@@ -1,19 +1,18 @@
 import type { LanguageModel } from 'ai'
+import { generate, stepCountIs } from '../../../../llm'
+import type { TokenUsage } from '../../../types'
+// Import query tools from deprecated location
+import { complete, generateResponse, identifyGaps } from '../../_tools'
+import type { CompleteParams } from '../../_tools/complete/schema'
 import type {
-	QueryMethod,
-	QueryContext,
-	QueryOptions,
 	QueryCallbacks,
+	QueryContext,
+	QueryMethod,
+	QueryMethodUpdateConfig,
+	QueryOptions,
 	QueryResult,
 } from '../types'
-import type { TokenUsage } from '../../../types'
-import { generate, stepCountIs } from '../../../../llm'
 import { buildQueryPrompt } from './prompt.template.query'
-
-// Import query tools from deprecated location
-import { generateResponse, identifyGaps, complete } from '../../_tools'
-
-import type { CompleteParams } from '../../_tools/complete/schema'
 
 const MAX_STEPS = 10
 
@@ -44,6 +43,12 @@ export class ToolBasedMethod implements QueryMethod {
 
 	constructor(model: LanguageModel) {
 		this.model = model
+	}
+
+	update(config: QueryMethodUpdateConfig): void {
+		if (config.model !== undefined) {
+			this.model = config.model
+		}
 	}
 
 	async query(
@@ -122,9 +127,7 @@ export class ToolBasedMethod implements QueryMethod {
 		})
 
 		// Also check toolCalls for complete tool
-		const completeCall = result.toolCalls.find(
-			(c) => c.toolName === 'complete',
-		)
+		const completeCall = result.toolCalls.find((c) => c.toolName === 'complete')
 		if (completeCall && 'input' in completeCall) {
 			completeResult = completeCall.input as CompleteParams
 		}
@@ -133,9 +136,10 @@ export class ToolBasedMethod implements QueryMethod {
 		if (completeResult) {
 			return {
 				relevant: completeResult.relevant,
+				relevance: completeResult.relevance,
 				confidence: completeResult.confidence,
 				insight: completeResult.insight,
-				gaps: completeResult.gaps.join('\n'),
+				gaps: (completeResult.gaps || []).join('\n'),
 				usage: totalUsage,
 			}
 		}
@@ -143,6 +147,7 @@ export class ToolBasedMethod implements QueryMethod {
 		// Fallback if no complete tool was called
 		return {
 			relevant: false,
+			relevance: 0,
 			confidence: 0,
 			insight: 'Unable to generate response',
 			gaps: 'Query processing did not complete',

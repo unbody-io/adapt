@@ -30,6 +30,7 @@ Is this query something your understanding can address?
 - Your purpose: "${context.instructions}"
 - If the query is outside your purpose, say so clearly.
 - If you have no understanding yet, acknowledge that.
+- If outside your scope: skip directly to STEP 4 (complete). Set relevant to false, keep insight to one brief sentence. Do not explain your purpose or capabilities.
 
 STEP 2: GENERATE RESPONSE (use generateResponse tool)
 Draw insights from your understanding to answer the query.

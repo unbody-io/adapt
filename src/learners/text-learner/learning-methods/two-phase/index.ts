@@ -6,18 +6,20 @@
  */
 
 import type { LanguageModel } from 'ai'
-import type {
-	TwoPhaseConfig,
-	LearnOutput,
-	LearnOptions,
-	LearnCallbacks,
-	InitOutput,
-} from './types'
-import type { ObserveIdentity } from './observe/schema.identity'
-import type { SynthesizeIdentity } from './synthesize/schema.identity'
 import { ObservationBuffer } from './buffer'
 import { initObserve, observe } from './observe'
+import type { ObserveIdentity } from './observe/schema.identity'
 import { initSynthesize, synthesize } from './synthesize'
+import type { SynthesizeIdentity } from './synthesize/schema.identity'
+import type {
+	InitOutput,
+	LearnCallbacks,
+	LearnOptions,
+	LearnOutput,
+	TwoPhaseConfig,
+	TwoPhaseUpdateConfig,
+	TwoPhaseUpdateResult,
+} from './types'
 
 /**
  * Two-phase learning method
@@ -30,6 +32,8 @@ export class TwoPhaseMethod {
 	private model: LanguageModel
 	private config: TwoPhaseConfig
 	private buffer: ObservationBuffer
+	private instructions: string = ''
+	private focus: string = ''
 
 	// Generated during init (identities stored for potential debugging/introspection)
 	private _observeIdentity: ObserveIdentity | null = null
@@ -75,30 +79,124 @@ export class TwoPhaseMethod {
 	 * Initialize the two-phase method
 	 *
 	 * Generates identities and system prompts for both phases.
-	 * Uses blueprintModel for identity generation (one-time structured output).
+	 * Delegates to update() internally.
 	 *
 	 * @param instructions - Learner's purpose/instructions
 	 */
 	async init(instructions: string): Promise<InitOutput> {
-		// Use blueprintModel for identity generation (one-time structured output)
-		const observeBlueprintModel = this.config.observe.blueprintModel ?? this.model
-		const synthesizeBlueprintModel = this.config.synthesize.blueprintModel ?? this.model
-
-		// Initialize both phases
-		const [observeResult, synthesizeResult] = await Promise.all([
-			initObserve(observeBlueprintModel, instructions),
-			initSynthesize(synthesizeBlueprintModel, instructions, this.config.strategy),
-		])
-
-		this._observeIdentity = observeResult.identity
-		this.observeSystemPrompt = observeResult.systemPrompt
-		this._synthesizeIdentity = synthesizeResult.identity
-		this.synthesizeSystemPrompt = synthesizeResult.systemPrompt
+		await this.update({ instructions })
 
 		return {
-			observeSystemPrompt: this.observeSystemPrompt,
-			synthesizeSystemPrompt: this.synthesizeSystemPrompt,
+			observeSystemPrompt: this.observeSystemPrompt!,
+			synthesizeSystemPrompt: this.synthesizeSystemPrompt!,
 		}
+	}
+
+	/**
+	 * Update config with dependency-driven re-derivation
+	 *
+	 * Raw constants (models, thresholds) are stored immediately.
+	 * Derived values (prompts/identity) are re-generated when their
+	 * inputs change (instructions, blueprintModel, strategy).
+	 * If prompts are null (first init), regeneration is forced.
+	 */
+	async update(config: TwoPhaseUpdateConfig): Promise<TwoPhaseUpdateResult> {
+		const changedFields: string[] = []
+		let needsObserveRegen = false
+		let needsSynthesizeRegen = false
+
+		// Default model swap
+		if (config.model !== undefined) {
+			this.model = config.model
+			changedFields.push('model')
+		}
+
+		// Instructions change → both prompts need regen
+		if (config.instructions !== undefined && config.instructions !== this.instructions) {
+			this.instructions = config.instructions
+			changedFields.push('instructions')
+			needsObserveRegen = true
+			needsSynthesizeRegen = true
+		}
+
+		// Focus change → observe prompt needs regen
+		if (config.focus !== undefined && config.focus !== this.focus) {
+			this.focus = config.focus
+			changedFields.push('focus')
+			needsObserveRegen = true
+		}
+
+		// Observe config updates
+		if (config.observe) {
+			if (config.observe.model !== undefined) {
+				this.config.observe.model = config.observe.model
+				changedFields.push('observe.model')
+			}
+			if (config.observe.blueprintModel !== undefined) {
+				this.config.observe.blueprintModel = config.observe.blueprintModel
+				changedFields.push('observe.blueprintModel')
+				needsObserveRegen = true
+			}
+		}
+
+		// Synthesize config updates
+		if (config.synthesize) {
+			if (config.synthesize.model !== undefined) {
+				this.config.synthesize.model = config.synthesize.model
+				changedFields.push('synthesize.model')
+			}
+			if (config.synthesize.blueprintModel !== undefined) {
+				this.config.synthesize.blueprintModel = config.synthesize.blueprintModel
+				changedFields.push('synthesize.blueprintModel')
+				needsSynthesizeRegen = true
+			}
+			if (config.synthesize.thresholds !== undefined) {
+				Object.assign(this.config.synthesize.thresholds, config.synthesize.thresholds)
+				changedFields.push('synthesize.thresholds')
+			}
+		}
+
+		// Strategy change → synthesize prompt needs regen
+		if (config.strategy !== undefined && config.strategy !== this.config.strategy) {
+			this.config.strategy = config.strategy
+			changedFields.push('strategy')
+			needsSynthesizeRegen = true
+		}
+
+		// Force regen if prompts don't exist yet (first init)
+		if (this.observeSystemPrompt === null) needsObserveRegen = true
+		if (this.synthesizeSystemPrompt === null) needsSynthesizeRegen = true
+
+		const promptsRegenerated = needsObserveRegen || needsSynthesizeRegen
+
+		if (promptsRegenerated) {
+			const observeBlueprintModel = this.config.observe.blueprintModel ?? this.model
+			const synthesizeBlueprintModel = this.config.synthesize.blueprintModel ?? this.model
+
+			const promises: Promise<void>[] = []
+
+			if (needsObserveRegen) {
+				promises.push(
+					initObserve(observeBlueprintModel, this.instructions, this.focus || undefined).then((result) => {
+						this._observeIdentity = result.identity
+						this.observeSystemPrompt = result.systemPrompt
+					}),
+				)
+			}
+
+			if (needsSynthesizeRegen) {
+				promises.push(
+					initSynthesize(synthesizeBlueprintModel, this.instructions, this.config.strategy).then((result) => {
+						this._synthesizeIdentity = result.identity
+						this.synthesizeSystemPrompt = result.systemPrompt
+					}),
+				)
+			}
+
+			await Promise.all(promises)
+		}
+
+		return { changedFields, promptsRegenerated }
 	}
 
 	/**
@@ -129,7 +227,11 @@ export class TwoPhaseMethod {
 		const synthesizeModel = this.config.synthesize.model ?? this.model
 
 		// Handle forceSynthesize with empty data — skip observe, go straight to synthesis
-		if (options?.forceSynthesize && data.length === 0 && this.buffer.count > 0) {
+		if (
+			options?.forceSynthesize &&
+			data.length === 0 &&
+			this.buffer.count > 0
+		) {
 			const observations = this.buffer.getTexts()
 			const synthesizeResult = await synthesize(
 				synthesizeModel,
@@ -144,7 +246,11 @@ export class TwoPhaseMethod {
 				return { status: 'synthesize:error', error: synthesizeResult.error }
 			}
 			if (synthesizeResult.status === 'dismissed') {
-				return { status: 'synthesize:dismissed', output: synthesizeResult.output, usage: synthesizeResult.usage }
+				return {
+					status: 'synthesize:dismissed',
+					output: synthesizeResult.output,
+					usage: synthesizeResult.usage,
+				}
 			}
 			return {
 				status: 'synthesized',
@@ -181,11 +287,20 @@ export class TwoPhaseMethod {
 			}
 		}
 
-		// Buffer the observation
-		this.buffer.add({
-			text: observeResult.output,
-			importance: observeResult.importance,
-		})
+		// Filter by importance threshold — low-importance observations don't get buffered
+		const minImportance = this.config.synthesize.thresholds.minImportance
+		if (minImportance !== undefined && observeResult.importance < minImportance) {
+			return {
+				status: 'observe:dismissed',
+				output: observeResult.output,
+				usage: observeResult.usage,
+			}
+		}
+
+		// Buffer each observation individually
+		for (const text of observeResult.output) {
+			this.buffer.add({ text, importance: observeResult.importance })
+		}
 
 		// Check if synthesis should happen
 		const shouldSynthesize =
@@ -262,19 +377,21 @@ export class TwoPhaseMethod {
 	}
 }
 
+export type { ObserveIdentity } from './observe/schema.identity'
+
+export type { ObserveContext, ObserveOutput } from './observe/types'
+export type { SynthesizeIdentity } from './synthesize/schema.identity'
+export type { SynthesizeContext, SynthesizeOutput } from './synthesize/types'
 // Re-export types
 export type {
-	TwoPhaseConfig,
-	LearnOutput,
-	LearnOptions,
-	LearnCallbacks,
 	InitOutput,
+	LearnCallbacks,
+	LearnOptions,
+	LearnOutput,
 	ObserveConfig,
 	SynthesizeConfig,
 	SynthesizeThresholds,
+	TwoPhaseConfig,
+	TwoPhaseUpdateConfig,
+	TwoPhaseUpdateResult,
 } from './types'
-
-export type { ObserveOutput, ObserveContext } from './observe/types'
-export type { SynthesizeOutput, SynthesizeContext } from './synthesize/types'
-export type { ObserveIdentity } from './observe/schema.identity'
-export type { SynthesizeIdentity } from './synthesize/schema.identity'

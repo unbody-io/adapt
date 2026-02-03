@@ -1,22 +1,31 @@
-import { applyStrategy } from './strategies'
+import type { ParentModels } from '../../types/config'
+import { TypedEmitter } from '../../types/events'
+import type { LearnerActivity } from '../../brain/evaluator/types'
 import type {
 	EvolutionEntry,
 	Learner,
 	LearnerGovernance,
 	LearnerMetadata,
+	LearnerMetrics,
 } from '../types'
+import { resolveTextLearnerConfig } from './config.resolver'
+import { type LearnOptions, TwoPhaseMethod } from './learning-methods'
+import {
+	createQueryMethod,
+	type QueryMethod,
+	type QueryOptions,
+	type QueryResult,
+} from './query-methods'
+import { applyStrategy } from './strategies'
 import type {
+	LearnOutput,
+	QueryMethodName,
+	ResolvedTextLearnerConfig,
 	TextLearnerConfig,
 	TextLearnerEventMap,
-	QueryMethodName,
-	LearnOutput,
-	ResolvedTextLearnerConfig,
+	TextLearnerUpdateResult,
 } from './types'
-import { TypedEmitter } from '../../types/events'
-import { TwoPhaseMethod, type LearnOptions } from './learning-methods'
-import { createQueryMethod, type QueryMethod, type QueryResult, type QueryOptions } from './query-methods'
-import { resolveTextLearnerConfig } from './config.resolver'
-import type { ParentModels } from '../../types/config'
+import type { TwoPhaseUpdateConfig } from './learning-methods'
 
 /**
  * TextLearner - A learning agent that maintains understanding as narrative text
@@ -31,7 +40,10 @@ export class TextLearner
 	implements Learner<string>
 {
 	readonly id: string
-	readonly instructions: string
+	name!: string
+	instructions!: string
+	focus?: string
+	description?: string
 
 	private config: ResolvedTextLearnerConfig
 	private understanding = ''
@@ -40,11 +52,35 @@ export class TextLearner
 	private _learningMethod: TwoPhaseMethod
 	private _queryMethod: QueryMethod
 
+	// Signal fire-once flags (reset when condition clears)
+	private stagnationSignalFired = false
+	private dismissalSignalFired = false
+
+	// Runtime metrics (Living Brain)
+	private metrics: LearnerMetrics = {
+		ingestion: {
+			observationCount: 0,
+			dismissalCount: 0,
+			dismissalRate: 0,
+			synthesisCount: 0,
+			observationsSinceLastSynthesis: 0,
+		},
+		query: {
+			count: 0,
+			relevanceScores: [],
+			confidenceScores: [],
+			gaps: [],
+		},
+	}
+
 	constructor(rawConfig: TextLearnerConfig, parentModels?: ParentModels) {
 		super()
 		this.config = resolveTextLearnerConfig(rawConfig, parentModels)
 		this.id = this.config.id
+		this.name = rawConfig.name || this.config.id
 		this.instructions = this.config.instructions
+		this.focus = rawConfig.focus
+		this.description = rawConfig.description
 
 		// Create two-phase learning method with resolved config
 		this._learningMethod = new TwoPhaseMethod(this.config.model, {
@@ -72,8 +108,14 @@ export class TextLearner
 			threshold: 0.3,
 			status: 'dormant',
 			lastAccessed: new Date(),
-			retrievalCount: 0,
-			successRate: 0,
+			signalThresholds: {
+				maxDismissalRate: 0.8,
+				minRelevance: 0.3,
+				minConfidence: 0.3,
+				maxObservationsWithoutSynthesis:
+					3 * (this.config.synthesize.thresholds.maxObservations ?? 10),
+				...rawConfig.governance?.signalThresholds,
+			},
 		}
 	}
 
@@ -88,13 +130,20 @@ export class TextLearner
 	 * Initialize the learner
 	 *
 	 * Generates system prompts for both observe and synthesize phases.
+	 * Delegates to update() internally — prompts are generated because
+	 * they are null on first call.
+	 *
 	 * This must be called before learn() or query().
 	 */
 	async init(): Promise<{
 		observeSystemPrompt: string
 		synthesizeSystemPrompt: string
 	}> {
-		if (this._learningMethod.observePrompt && this._learningMethod.synthesizePrompt) {
+		// Already initialized — return existing prompts
+		if (
+			this._learningMethod.observePrompt &&
+			this._learningMethod.synthesizePrompt
+		) {
 			return {
 				observeSystemPrompt: this._learningMethod.observePrompt,
 				synthesizeSystemPrompt: this._learningMethod.synthesizePrompt,
@@ -104,15 +153,20 @@ export class TextLearner
 		this.emit('learner:init:started', { learnerId: this.id })
 
 		try {
-			const result = await this._learningMethod.init(this.instructions)
+			// Delegate to update — prompts are null so TwoPhaseMethod
+			// will force regeneration even though instructions haven't "changed"
+			await this.update({ instructions: this.instructions })
 
 			this.emit('learner:init:completed', {
 				learnerId: this.id,
-				systemPrompt: result.observeSystemPrompt, // For backwards compat
+				systemPrompt: this._learningMethod.observePrompt!, // For backwards compat
 				usage: { inputTokens: 0, outputTokens: 0, totalTokens: 0 },
 			})
 
-			return result
+			return {
+				observeSystemPrompt: this._learningMethod.observePrompt!,
+				synthesizeSystemPrompt: this._learningMethod.synthesizePrompt!,
+			}
 		} catch (err) {
 			const error = err instanceof Error ? err : new Error(String(err))
 			this.emit('learner:init:failed', {
@@ -169,6 +223,21 @@ export class TextLearner
 	}
 
 	/**
+	 * Set understanding directly (used by evolution system)
+	 *
+	 * This bypasses normal learning flow and directly sets the understanding text.
+	 * Primarily used by merge/split handlers to transfer understanding between learners.
+	 */
+	setUnderstanding(understanding: string): void {
+		this.understanding = understanding
+
+		this.emit('learner:understanding:set', {
+			learnerId: this.id,
+			understanding,
+		})
+	}
+
+	/**
 	 * Get a copy of the evolution history (newest first)
 	 */
 	getEvolution(): EvolutionEntry[] {
@@ -190,6 +259,21 @@ export class TextLearner
 	}
 
 	/**
+	 * Get a copy of runtime metrics
+	 */
+	getMetrics(): LearnerMetrics {
+		return {
+			ingestion: { ...this.metrics.ingestion },
+			query: {
+				...this.metrics.query,
+				relevanceScores: [...this.metrics.query.relevanceScores],
+				confidenceScores: [...this.metrics.query.confidenceScores],
+				gaps: [...this.metrics.query.gaps],
+			},
+		}
+	}
+
+	/**
 	 * Get the current query method name
 	 */
 	getQueryMethodName(): QueryMethodName {
@@ -199,7 +283,11 @@ export class TextLearner
 	/**
 	 * Get current buffer state (for debugging/observability)
 	 */
-	getBufferState(): { count: number; avgImportance: number; totalTokens: number } {
+	getBufferState(): {
+		count: number
+		avgImportance: number
+		totalTokens: number
+	} {
 		return this._learningMethod.getBufferState()
 	}
 
@@ -208,6 +296,252 @@ export class TextLearner
 	 */
 	getBufferedObservations(): Array<{ text: string; importance: number }> {
 		return this._learningMethod.getBufferedObservations()
+	}
+
+	/**
+	 * Get activity data for evaluator investigation
+	 */
+	getActivity(): LearnerActivity {
+		return {
+			ingestion: { ...this.metrics.ingestion },
+			recentObservations: this.getBufferedObservations(),
+		}
+	}
+
+	/**
+	 * Get synthesis thresholds (used by evolution system)
+	 */
+	getSynthesizeThresholds() {
+		return { ...this.config.synthesize.thresholds }
+	}
+
+	/**
+	 * Update learner configuration
+	 *
+	 * Accepts the same shape as the constructor config (but partial).
+	 * Any config field can be updated. Only `id` is truly immutable.
+	 *
+	 * Raw constants (models, thresholds) are stored immediately.
+	 * Derived values (prompts/identity) are re-generated when their
+	 * inputs change (instructions, blueprintModel, strategy).
+	 *
+	 * @param updates - Partial config updates (same shape as TextLearnerConfig)
+	 * @returns Changed fields and full resolved config
+	 * @throws Error if attempting to modify `id`
+	 */
+	async update(updates: Partial<TextLearnerConfig>): Promise<TextLearnerUpdateResult> {
+		// Only id is truly immutable
+		if (updates.id !== undefined && updates.id !== this.id) {
+			throw new Error(
+				'Cannot update immutable field "id". Learner identity cannot be changed.',
+			)
+		}
+
+		const changedFields: string[] = []
+		const twoPhaseUpdate: TwoPhaseUpdateConfig = {}
+		let queryModelChanged = false
+		let queryMethodChanged = false
+
+		// ── Metadata fields (no downstream effects) ──
+
+		if (updates.name !== undefined && updates.name !== this.name) {
+			this.name = updates.name
+			changedFields.push('name')
+		}
+
+		if (updates.description !== undefined && updates.description !== this.description) {
+			this.description = updates.description
+			changedFields.push('description')
+		}
+
+		if (updates.origin !== undefined && updates.origin !== this.config.origin) {
+			this.config.origin = updates.origin
+			changedFields.push('origin')
+		}
+
+		// ── Model changes ──
+
+		if (updates.model !== undefined) {
+			this.config.model = updates.model
+			changedFields.push('model')
+			twoPhaseUpdate.model = updates.model
+		}
+
+		if (updates.blueprintModel !== undefined) {
+			this.config.blueprintModel = updates.blueprintModel
+			changedFields.push('blueprintModel')
+			// Cascade to observe/synthesize blueprintModel unless explicitly overridden
+			if (!updates.observe?.blueprintModel) {
+				twoPhaseUpdate.observe = twoPhaseUpdate.observe || {}
+				twoPhaseUpdate.observe.blueprintModel = updates.blueprintModel
+			}
+			if (!updates.synthesize?.blueprintModel) {
+				twoPhaseUpdate.synthesize = twoPhaseUpdate.synthesize || {}
+				twoPhaseUpdate.synthesize.blueprintModel = updates.blueprintModel
+			}
+		}
+
+		// ── Instructions ──
+
+		if (updates.instructions !== undefined) {
+			this.instructions = updates.instructions
+			this.config.instructions = updates.instructions
+			changedFields.push('instructions')
+			twoPhaseUpdate.instructions = updates.instructions
+		}
+
+		// ── Focus ──
+
+		if (updates.focus !== undefined && updates.focus !== this.focus) {
+			this.focus = updates.focus
+			changedFields.push('focus')
+			twoPhaseUpdate.focus = updates.focus
+		}
+
+		// ── Observe config ──
+
+		if (updates.observe) {
+			if (updates.observe.model !== undefined) {
+				this.config.observe.model = updates.observe.model
+				changedFields.push('observe.model')
+				twoPhaseUpdate.observe = twoPhaseUpdate.observe || {}
+				twoPhaseUpdate.observe.model = updates.observe.model
+			}
+			if (updates.observe.blueprintModel !== undefined) {
+				this.config.observe.blueprintModel = updates.observe.blueprintModel
+				changedFields.push('observe.blueprintModel')
+				twoPhaseUpdate.observe = twoPhaseUpdate.observe || {}
+				twoPhaseUpdate.observe.blueprintModel = updates.observe.blueprintModel
+			}
+		}
+
+		// ── Synthesize config ──
+
+		if (updates.synthesize) {
+			if (updates.synthesize.model !== undefined) {
+				this.config.synthesize.model = updates.synthesize.model
+				changedFields.push('synthesize.model')
+				twoPhaseUpdate.synthesize = twoPhaseUpdate.synthesize || {}
+				twoPhaseUpdate.synthesize.model = updates.synthesize.model
+			}
+			if (updates.synthesize.blueprintModel !== undefined) {
+				this.config.synthesize.blueprintModel = updates.synthesize.blueprintModel
+				changedFields.push('synthesize.blueprintModel')
+				twoPhaseUpdate.synthesize = twoPhaseUpdate.synthesize || {}
+				twoPhaseUpdate.synthesize.blueprintModel = updates.synthesize.blueprintModel
+			}
+			if (updates.synthesize.thresholds) {
+				const t = updates.synthesize.thresholds
+				if (t.minImportance !== undefined) {
+					this.config.synthesize.thresholds.minImportance = t.minImportance
+					changedFields.push('synthesize.thresholds.minImportance')
+				}
+				if (t.maxObservations !== undefined) {
+					this.config.synthesize.thresholds.maxObservations = t.maxObservations
+					changedFields.push('synthesize.thresholds.maxObservations')
+				}
+				if (t.maxTokens !== undefined) {
+					this.config.synthesize.thresholds.maxTokens = t.maxTokens
+					changedFields.push('synthesize.thresholds.maxTokens')
+				}
+				twoPhaseUpdate.synthesize = twoPhaseUpdate.synthesize || {}
+				twoPhaseUpdate.synthesize.thresholds = updates.synthesize.thresholds
+			}
+		}
+
+		// ── Maintenance / strategy ──
+
+		if (updates.maintenance?.strategy !== undefined && updates.maintenance.strategy !== this.config.maintenance.strategy) {
+			this.config.maintenance.strategy = updates.maintenance.strategy
+			changedFields.push('maintenance.strategy')
+			twoPhaseUpdate.strategy = updates.maintenance.strategy
+		}
+		if (updates.maintenance?.maxTokens !== undefined && updates.maintenance.maxTokens !== this.config.maintenance.maxTokens) {
+			this.config.maintenance.maxTokens = updates.maintenance.maxTokens
+			changedFields.push('maintenance.maxTokens')
+		}
+
+		// ── Query config ──
+
+		if (updates.query) {
+			if (updates.query.model !== undefined) {
+				this.config.query.model = updates.query.model
+				changedFields.push('query.model')
+				queryModelChanged = true
+			}
+			if (updates.query.method !== undefined && updates.query.method !== this.config.query.method) {
+				this.config.query.method = updates.query.method
+				changedFields.push('query.method')
+				queryMethodChanged = true
+			}
+		}
+
+		// ── Governance config (signal thresholds only — metrics are state) ──
+
+		if (updates.governance) {
+			if (updates.governance.threshold !== undefined) {
+				this.governance.threshold = updates.governance.threshold
+				changedFields.push('governance.threshold')
+			}
+			if (updates.governance.signalThresholds) {
+				const st = updates.governance.signalThresholds
+				if (st.maxDismissalRate !== undefined) {
+					this.governance.signalThresholds.maxDismissalRate = st.maxDismissalRate
+					changedFields.push('governance.signalThresholds.maxDismissalRate')
+				}
+				if (st.minConfidence !== undefined) {
+					this.governance.signalThresholds.minConfidence = st.minConfidence
+					changedFields.push('governance.signalThresholds.minConfidence')
+				}
+				if (st.maxObservationsWithoutSynthesis !== undefined) {
+					this.governance.signalThresholds.maxObservationsWithoutSynthesis = st.maxObservationsWithoutSynthesis
+					changedFields.push('governance.signalThresholds.maxObservationsWithoutSynthesis')
+				}
+			}
+		}
+
+		// ── Delegate to sub-components ──
+
+		let promptsRegenerated = false
+
+		if (Object.keys(twoPhaseUpdate).length > 0) {
+			const result = await this._learningMethod.update(twoPhaseUpdate)
+			promptsRegenerated = result.promptsRegenerated
+
+			if (promptsRegenerated) {
+				this.emit('learner:prompts:regenerated', {
+					learnerId: this.id,
+					observePrompt: this._learningMethod.observePrompt!,
+					synthesizePrompt: this._learningMethod.synthesizePrompt!,
+				})
+			}
+		}
+
+		if (queryMethodChanged) {
+			this._queryMethod = createQueryMethod(
+				this.config.query.method,
+				this.config.query.model,
+			)
+		} else if (queryModelChanged) {
+			this._queryMethod.update({ 
+				model: this.config.query.model 
+			})
+		}
+
+		// ── Emit event ──
+
+		if (changedFields.length > 0) {
+			this.emit('learner:config:updated', {
+				learnerId: this.id,
+				changedFields,
+				config: { ...this.config },
+			})
+		}
+
+		return {
+			changedFields,
+			config: { ...this.config },
+		}
 	}
 
 	/**
@@ -240,9 +574,8 @@ export class TextLearner
 						})
 					},
 					onObserveThinking: (thoughts) => {
-						this.emit('learner:ingest:thinking', {
+						this.emit('learner:observe:thinking', {
 							learnerId: this.id,
-							chunkId: 'observe',
 							thoughts,
 							usage: { inputTokens: 0, outputTokens: 0, totalTokens: 0 },
 						})
@@ -254,9 +587,8 @@ export class TextLearner
 						})
 					},
 					onSynthesizeThinking: (thoughts) => {
-						this.emit('learner:ingest:thinking', {
+						this.emit('learner:synthesize:thinking', {
 							learnerId: this.id,
-							chunkId: 'synthesize',
 							thoughts,
 							usage: { inputTokens: 0, outputTokens: 0, totalTokens: 0 },
 						})
@@ -270,7 +602,7 @@ export class TextLearner
 			return result
 		} catch (err) {
 			const error = err instanceof Error ? err : new Error(String(err))
-			this.emit('learner:ingest:failed', {
+			this.emit('learner:learn:failed', {
 				learnerId: this.id,
 				error: error.message,
 			})
@@ -284,6 +616,7 @@ export class TextLearner
 	private async handleLearnResult(result: LearnOutput): Promise<void> {
 		switch (result.status) {
 			case 'observed': {
+				this.trackIngestion()
 				const bufferState = this._learningMethod.getBufferState()
 				this.emit('learner:observed', {
 					learnerId: this.id,
@@ -292,15 +625,20 @@ export class TextLearner
 					bufferCount: bufferState.count,
 					usage: result.usage,
 				})
+				// Check signals after observation
+				this.checkAndEmitSignals()
 				break
 			}
 
 			case 'observe:dismissed':
+				this.trackIngestion(true)
 				this.emit('learner:observe:dismissed', {
 					learnerId: this.id,
 					output: result.output,
 					usage: result.usage,
 				})
+				// Check signals after dismissal
+				this.checkAndEmitSignals()
 				break
 
 			case 'observe:error':
@@ -311,6 +649,11 @@ export class TextLearner
 				break
 
 			case 'synthesized': {
+				// The observation was made (it triggered synthesis), so count it
+				this.trackIngestion()
+				this.metrics.ingestion.synthesisCount++
+				this.metrics.ingestion.observationsSinceLastSynthesis = 0
+				this.stagnationSignalFired = false
 				const previousUnderstanding = this.understanding
 
 				// Apply strategy-specific maintenance
@@ -339,32 +682,32 @@ export class TextLearner
 					usage: result.usage,
 				})
 
-				// Also emit legacy understanding updated event
-				this.emit('learner:understanding:updated', {
-					learnerId: this.id,
-					understanding: this.understanding,
-					previousUnderstanding,
-					entry: evolutionEntry,
-				})
-
 				// Update governance (use 1.0 as relevance since it was synthesized)
 				this.updateGovernance(1.0)
+				// Check signals after observation+synthesis
+				this.checkAndEmitSignals()
 				break
 			}
 
 			case 'synthesize:dismissed':
+				// The observation was made (it triggered synthesis attempt), so count it
+				this.trackIngestion()
 				this.emit('learner:synthesize:dismissed', {
 					learnerId: this.id,
 					output: result.output,
 					usage: result.usage,
 				})
+				this.checkAndEmitSignals()
 				break
 
 			case 'synthesize:error':
+				// The observation was made but synthesis failed — still count it
+				this.trackIngestion()
 				this.emit('learner:synthesize:error', {
 					learnerId: this.id,
 					error: result.error,
 				})
+				this.checkAndEmitSignals()
 				break
 		}
 	}
@@ -378,25 +721,56 @@ export class TextLearner
 	 */
 	async query(question: string, options?: QueryOptions): Promise<QueryResult> {
 		this.governance.lastAccessed = new Date()
-		this.governance.retrievalCount++
+		this.metrics.query.count++
 
-		this.emit('learner:ask:started', {
+		this.emit('learner:query:started', {
 			learnerId: this.id,
 			query: question,
 		})
+
+		// Short-circuit if learner has no knowledge at all
+		if (!this.understanding && this.getBufferState().count === 0) {
+			const emptyResult: QueryResult = {
+				relevant: false,
+				relevance: 0,
+				confidence: 0,
+				insight: '',
+				gaps: '',
+				usage: { inputTokens: 0, outputTokens: 0, totalTokens: 0 },
+			}
+			this.emit('learner:query:completed', {
+				learnerId: this.id,
+				insight: '',
+				relevant: false,
+				relevance: 0,
+				confidence: 0,
+				gaps: [],
+				usage: emptyResult.usage,
+			})
+			return emptyResult
+		}
+
+		// Use buffered observations as fallback when understanding is empty
+		let knowledge = this.understanding
+		if (!knowledge) {
+			const observations = this.getBufferedObservations()
+			knowledge =
+				'Note: This knowledge has not been synthesized yet. These are raw observations.\n\n---\n' +
+				observations.map((obs) => obs.text).join('\n---\n')
+		}
 
 		try {
 			const result = await this._queryMethod.query(
 				{
 					learnerId: this.id,
 					instructions: this.instructions,
-					understanding: this.understanding,
+					understanding: knowledge,
 					question,
 				},
 				options,
 				{
 					onThinking: (thoughts, usage) => {
-						this.emit('learner:ask:thinking', {
+						this.emit('learner:query:thinking', {
 							learnerId: this.id,
 							thoughts,
 							usage,
@@ -405,18 +779,26 @@ export class TextLearner
 				},
 			)
 
-			this.emit('learner:ask:completed', {
+			// Track query metrics for signal detection
+			this.trackQueryMetrics(result)
+
+			this.emit('learner:query:completed', {
 				learnerId: this.id,
 				insight: result.insight,
+				relevant: result.relevant,
+				relevance: result.relevance,
 				confidence: result.confidence,
 				gaps: result.gaps ? result.gaps.split('\n').filter(Boolean) : [],
 				usage: result.usage,
 			})
 
+			// Check signals after query
+			this.checkAndEmitSignals()
+
 			return result
 		} catch (err) {
 			const error = err instanceof Error ? err : new Error(String(err))
-			this.emit('learner:ask:failed', {
+			this.emit('learner:query:failed', {
 				learnerId: this.id,
 				error: error.message,
 			})
@@ -444,6 +826,48 @@ export class TextLearner
 	}
 
 	/**
+	 * Track an ingestion event (observation received)
+	 */
+	private trackIngestion(dismissed = false): void {
+		this.metrics.ingestion.observationCount++
+		this.metrics.ingestion.observationsSinceLastSynthesis++
+		if (dismissed) {
+			this.metrics.ingestion.dismissalCount++
+		}
+		this.metrics.ingestion.dismissalRate =
+			this.metrics.ingestion.observationCount > 0
+				? this.metrics.ingestion.dismissalCount /
+					this.metrics.ingestion.observationCount
+				: 0
+	}
+
+	/**
+	 * Track query metrics (relevance, confidence, gaps)
+	 */
+	private trackQueryMetrics(result: QueryResult): void {
+		const WINDOW_SIZE = 10
+		const MAX_GAPS = 50
+
+		this.metrics.query.relevanceScores.push(result.relevance)
+		if (this.metrics.query.relevanceScores.length > WINDOW_SIZE) {
+			this.metrics.query.relevanceScores.shift()
+		}
+
+		this.metrics.query.confidenceScores.push(result.confidence)
+		if (this.metrics.query.confidenceScores.length > WINDOW_SIZE) {
+			this.metrics.query.confidenceScores.shift()
+		}
+
+		if (result.gaps) {
+			const gaps = result.gaps.split('\n').filter(Boolean)
+			this.metrics.query.gaps.push(...gaps)
+			if (this.metrics.query.gaps.length > MAX_GAPS) {
+				this.metrics.query.gaps = this.metrics.query.gaps.slice(-MAX_GAPS)
+			}
+		}
+	}
+
+	/**
 	 * Update governance based on relevance of processed data
 	 *
 	 * Uses exponential moving average to smooth activation changes
@@ -452,7 +876,8 @@ export class TextLearner
 		const previousStatus = this.governance.status
 
 		// EMA: weight recent relevance at 20%
-		this.governance.activation = this.governance.activation * 0.8 + relevance * 0.2
+		this.governance.activation =
+			this.governance.activation * 0.8 + relevance * 0.2
 
 		// Update status based on threshold
 		if (this.governance.activation >= this.governance.threshold) {
@@ -469,5 +894,77 @@ export class TextLearner
 			previousStatus:
 				previousStatus !== this.governance.status ? previousStatus : undefined,
 		})
+	}
+
+	/**
+	 * Check signal thresholds and emit signals if crossed (Living Brain)
+	 */
+	private checkAndEmitSignals(): void {
+		const { signalThresholds } = this.governance
+		const { ingestion, query } = this.metrics
+
+		// Check dismissal rate — fire once, reset when rate drops below threshold
+		if (ingestion.observationCount > 10) {
+			if (ingestion.dismissalRate > signalThresholds.maxDismissalRate) {
+				if (!this.dismissalSignalFired) {
+					this.dismissalSignalFired = true
+					this.emit('learner:signal', {
+						learnerId: this.id,
+						description: `High dismissal rate: rejecting ${(ingestion.dismissalRate * 100).toFixed(0)}% of observations`,
+						timestamp: new Date(),
+						metrics: { dismissalRate: ingestion.dismissalRate },
+					})
+				}
+			} else {
+				this.dismissalSignalFired = false
+			}
+		}
+
+		// Check relevance floor
+		if (query.relevanceScores.length >= 5) {
+			const avgRelevance =
+				query.relevanceScores.reduce((a, b) => a + b, 0) /
+				query.relevanceScores.length
+			if (avgRelevance < signalThresholds.minRelevance) {
+				this.emit('learner:signal', {
+					learnerId: this.id,
+					description: `Low relevance: avg ${avgRelevance.toFixed(2)} over last ${query.relevanceScores.length} queries`,
+					timestamp: new Date(),
+					metrics: { avgRelevance },
+				})
+				this.metrics.query.relevanceScores = []
+			}
+		}
+
+		// Check confidence floor
+		if (query.confidenceScores.length >= 5) {
+			const avgConfidence =
+				query.confidenceScores.reduce((a, b) => a + b, 0) /
+				query.confidenceScores.length
+			if (avgConfidence < signalThresholds.minConfidence) {
+				this.emit('learner:signal', {
+					learnerId: this.id,
+					description: `Low confidence: avg ${avgConfidence.toFixed(2)} over last ${query.confidenceScores.length} queries — has knowledge gaps in its domain`,
+					timestamp: new Date(),
+					metrics: { avgConfidence },
+				})
+				this.metrics.query.confidenceScores = []
+			}
+		}
+
+		// Check synthesis gap (stagnation) — fire once, reset on synthesis
+		if (
+			!this.stagnationSignalFired &&
+			ingestion.observationsSinceLastSynthesis >
+			signalThresholds.maxObservationsWithoutSynthesis
+		) {
+			this.stagnationSignalFired = true
+			this.emit('learner:signal', {
+				learnerId: this.id,
+				description: `Stagnation: no synthesis in ${ingestion.observationsSinceLastSynthesis} observations`,
+				timestamp: new Date(),
+			})
+		}
+
 	}
 }

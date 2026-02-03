@@ -1,5 +1,6 @@
 export { Brain } from './class'
 export type {
+	BatchResult,
 	BrainAskResult,
 	BrainConfig,
 	BrainEvent,
@@ -7,7 +8,6 @@ export type {
 	BrainInjectOptions,
 	BrainInjectResult,
 	BrainOwnEventMap,
-	BatchResult,
 	LearnerBatchResult,
 	LearnerResponse,
 } from './types'

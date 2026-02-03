@@ -48,9 +48,6 @@ function logConfig(config: BrainConfig) {
 	appendToLog('\n--- CONFIGURATION ---')
 	appendToLog(`Prompt: ${config.prompt}`)
 	appendToLog(`Model: ${config.model}`)
-	if (config.learning) {
-		appendToLog(`Learning config: ${JSON.stringify(config.learning, null, 2)}`)
-	}
 	appendToLog('---\n')
 }
 
@@ -85,6 +82,47 @@ function logEvent(event: string, data: unknown) {
 			appendToLog(`  Gaps: ${d.gaps.join(', ')}`)
 		}
 	}
+}
+
+// --- Config Logging Helpers ---
+
+function getModelId(model: LanguageModel | undefined): string {
+	if (!model) return '(not set)'
+	// LanguageModel objects have modelId at runtime; the type union may include string literals
+	const m = model as unknown as { modelId?: string }
+	return m.modelId || String(model) || '(unknown)'
+}
+
+function getBrainConfigSnapshot(b: Brain) {
+	const c = b.config
+	// Read learner-level config from first learner (representative sample)
+	const firstLearner = b.getLearners()[0]
+	const learnerConfig = firstLearner ? {
+		thresholds: firstLearner.getSynthesizeThresholds(),
+		queryMethod: firstLearner.getQueryMethodName(),
+		maintenanceStrategy: firstLearner.getMaintenance().strategy,
+	} : null
+	return {
+		prompt: b.prompt.slice(0, 120) + (b.prompt.length > 120 ? '...' : ''),
+		models: {
+			default: getModelId(c.model),
+			blueprint: getModelId(c.blueprintModel),
+			init: getModelId(c.init.model),
+			query: getModelId(c.query.model),
+		},
+		evolution: c.evolution,
+		learnerConfig,
+	}
+}
+
+function logBrainConfig(label: string, b: Brain) {
+	const snap = getBrainConfigSnapshot(b)
+	console.log(`\n===== ${label} =====`)
+	console.log(JSON.stringify(snap, null, 2))
+	console.log('='.repeat(label.length + 12) + '\n')
+	appendToLog(`\n===== ${label} =====`)
+	appendToLog(JSON.stringify(snap, null, 2))
+	appendToLog('='.repeat(label.length + 12) + '\n')
 }
 
 // --- Helpers ---
@@ -156,6 +194,12 @@ interface InitRequest {
 	maxObservations?: number
 	minImportance?: number
 	queryMethod?: 'direct' | 'tool-based'
+	maintenanceMaxTokens?: number
+	evolution?: {
+		enabled?: boolean
+		autoEvaluate?: boolean
+		evaluatorSignalThreshold?: number
+	}
 }
 
 interface InjectRequest {
@@ -225,7 +269,32 @@ app.get('/brain/events', (c) => {
 })
 
 function broadcast(event: string, data: unknown) {
-	console.log(`[Event] ${event}`, JSON.stringify(data).slice(0, 100))
+	// Log full error details for error events
+	if (event.includes('error') || event.includes('failed')) {
+		console.error(`[Event] ${event}`, JSON.stringify(data, null, 2).slice(0, 500))
+	} else {
+		console.log(`[Event] ${event}`, JSON.stringify(data).slice(0, 100))
+	}
+
+	// Log which model is configured for phase-related events
+	if (brain && (
+		event === 'learner:observe:started' ||
+		event === 'learner:synthesize:started' ||
+		event === 'learner:query:started'
+	)) {
+		const c = brain.config
+		const phase = event.includes('observe') ? 'observe' : event.includes('synthesize') ? 'synthesize' : 'query'
+		const d = data as { learnerId?: string }
+		console.log(`  >> [MODEL] ${phase} for ${d.learnerId || '?'} (brain default: ${getModelId(c.model)})`)
+		appendToLog(`  >> [MODEL] ${phase} for ${d.learnerId || '?'} (brain default: ${getModelId(c.model)})`)
+	}
+
+	// Log config update events
+	if (event === 'brain:config:updated') {
+		console.log(`  >> [CONFIG CHANGED]`, JSON.stringify(data, null, 2).slice(0, 500))
+		appendToLog(`  >> [CONFIG CHANGED] ${JSON.stringify(data, null, 2).slice(0, 500)}`)
+	}
+
 	logEvent(event, data) // Write to session log file
 	for (const send of sseClients) {
 		try {
@@ -278,11 +347,13 @@ app.post('/brain/init', async (c) => {
 			},
 			maintenance: {
 				strategy: body.strategy,
+				...(body.maintenanceMaxTokens ? { maxTokens: body.maintenanceMaxTokens } : {}),
 			},
 			query: {
 				method: body.queryMethod,
 			},
 		},
+		...(body.evolution ? { evolution: body.evolution } : {}),
 	}
 
 	// Start session log
@@ -300,6 +371,8 @@ app.post('/brain/init', async (c) => {
 
 	try {
 		await brain.initialize()
+		logBrainConfig('BRAIN INITIALIZED', brain)
+
 		const learners = brain.getLearners().map((l) => ({
 			id: l.id,
 			instructions: l.instructions,
@@ -401,6 +474,8 @@ app.get('/brain/status', (c) => {
 
 	const learners = brain.getLearners().map((l) => ({
 		id: l.id,
+		name: l.name,
+		description: l.description,
 		instructions: l.instructions,
 		understanding: l.getUnderstanding(),
 		evolution: l.getEvolution(),
@@ -408,6 +483,7 @@ app.get('/brain/status', (c) => {
 		bufferObservations: l.getBufferedObservations(),
 		governance: l.getGovernance(),
 		maintenance: l.getMaintenance(),
+		synthesizeThresholds: l.getSynthesizeThresholds(),
 		observePrompt: l.getObserveSystemPrompt(),
 		synthesizePrompt: l.getSynthesizeSystemPrompt(),
 		queryMethod: l.getQueryMethodName(),
@@ -416,8 +492,369 @@ app.get('/brain/status', (c) => {
 	return c.json({
 		status: 'initialized',
 		prompt: brain.prompt,
+		evolution: brain.config.evolution,
 		learners,
 	})
+})
+
+// --- Brain Update Endpoint ---
+
+app.post('/brain/update', async (c) => {
+	if (!brain) {
+		return c.json({ error: 'Brain not initialized. Call /brain/init first.' }, 400)
+	}
+
+	const body = await c.req.json<{
+		prompt?: string
+		model?: string
+		blueprintModel?: string
+		init?: { model?: string }
+		query?: { model?: string }
+		ingest?: { batchSize?: number }
+		learning?: {
+			model?: string
+			blueprintModel?: string
+			instructions?: string
+			name?: string
+			description?: string
+			observe?: { model?: string; blueprintModel?: string }
+			synthesize?: {
+				model?: string
+				blueprintModel?: string
+				thresholds?: { maxObservations?: number; maxTokens?: number; minImportance?: number }
+			}
+			query?: { model?: string; method?: 'tool-based' | 'direct' }
+			maintenance?: { strategy?: 'continuous' | 'cumulative' | 'decay'; maxTokens?: number }
+		}
+		evolution?: {
+			enabled?: boolean
+			evaluatorSignalThreshold?: number
+			autoEvaluate?: boolean
+		}
+	}>()
+
+	const openrouter = createOpenRouter({ apiKey: process.env.OPENROUTER_API_KEY })
+
+	// Build the updates object, converting string model IDs to LanguageModel instances
+	const updates: Parameters<typeof brain.update>[0] = {}
+	if (body.prompt !== undefined) updates.prompt = body.prompt
+	if (body.model) updates.model = openrouter(body.model)
+	if (body.blueprintModel) updates.blueprintModel = openrouter(body.blueprintModel)
+	if (body.init?.model) updates.init = { model: openrouter(body.init.model) }
+	if (body.query?.model) updates.query = { model: openrouter(body.query.model) }
+	if (body.ingest) updates.ingest = body.ingest
+	if (body.learning) {
+		updates.learning = {
+			...(body.learning.model ? { model: openrouter(body.learning.model) } : {}),
+			...(body.learning.blueprintModel ? { blueprintModel: openrouter(body.learning.blueprintModel) } : {}),
+			...(body.learning.instructions ? { instructions: body.learning.instructions } : {}),
+			...(body.learning.name ? { name: body.learning.name } : {}),
+			...(body.learning.description ? { description: body.learning.description } : {}),
+			...(body.learning.observe ? {
+				observe: {
+					...(body.learning.observe.model ? { model: openrouter(body.learning.observe.model) } : {}),
+					...(body.learning.observe.blueprintModel ? { blueprintModel: openrouter(body.learning.observe.blueprintModel) } : {}),
+				},
+			} : {}),
+			...(body.learning.synthesize ? {
+				synthesize: {
+					...(body.learning.synthesize.model ? { model: openrouter(body.learning.synthesize.model) } : {}),
+					...(body.learning.synthesize.blueprintModel ? { blueprintModel: openrouter(body.learning.synthesize.blueprintModel) } : {}),
+					...(body.learning.synthesize.thresholds ? { thresholds: body.learning.synthesize.thresholds } : {}),
+				},
+			} : {}),
+			...(body.learning.query ? {
+				query: {
+					...(body.learning.query.model ? { model: openrouter(body.learning.query.model) } : {}),
+					...(body.learning.query.method ? { method: body.learning.query.method } : {}),
+				},
+			} : {}),
+			...(body.learning.maintenance ? { maintenance: body.learning.maintenance } : {}),
+		}
+	}
+	if (body.evolution) updates.evolution = body.evolution
+
+	try {
+		logBrainConfig('BEFORE brain.update()', brain)
+		const result = await brain.update(updates)
+		logBrainConfig('AFTER brain.update()', brain)
+		broadcast('server:brain:updated', { updates: { ...body }, changedFields: result.changedFields })
+		return c.json(result)
+	} catch (error) {
+		const message = extractErrorMessage(error)
+		console.error('[Brain Update Error]', error)
+		return c.json({ error: message }, 500)
+	}
+})
+
+// --- Per-Learner Update Endpoint ---
+
+app.post('/brain/learners/:id/update', async (c) => {
+	if (!brain) {
+		return c.json({ error: 'Brain not initialized. Call /brain/init first.' }, 400)
+	}
+
+	const learnerId = c.req.param('id')
+	const learner = brain.getLearner(learnerId)
+	if (!learner) {
+		return c.json({ error: `Learner ${learnerId} not found` }, 404)
+	}
+
+	const body = await c.req.json<{
+		name?: string
+		description?: string
+		instructions?: string
+		model?: string
+		observe?: { model?: string }
+		synthesize?: { model?: string; thresholds?: { maxObservations?: number; minImportance?: number } }
+		query?: { method?: 'tool-based' | 'direct' }
+		maintenance?: { strategy?: 'continuous' | 'cumulative' | 'decay'; maxTokens?: number }
+		governance?: { signalThresholds?: { maxDismissalRate?: number; minConfidence?: number; maxObservationsWithoutSynthesis?: number } }
+	}>()
+
+	const openrouter = createOpenRouter({ apiKey: process.env.OPENROUTER_API_KEY })
+
+	const updates: Record<string, any> = {}
+	if (body.name !== undefined) updates.name = body.name
+	if (body.description !== undefined) updates.description = body.description
+	if (body.instructions !== undefined) updates.instructions = body.instructions
+	if (body.model) updates.model = openrouter(body.model)
+	if (body.observe?.model) updates.observe = { model: openrouter(body.observe.model) }
+	if (body.synthesize) {
+		updates.synthesize = {
+			...(body.synthesize.model ? { model: openrouter(body.synthesize.model) } : {}),
+			...(body.synthesize.thresholds ? { thresholds: body.synthesize.thresholds } : {}),
+		}
+	}
+	if (body.query) updates.query = body.query
+	if (body.maintenance) updates.maintenance = body.maintenance
+	if (body.governance) updates.governance = body.governance
+
+	try {
+		const result = await learner.update(updates)
+		broadcast('server:learner:updated', { learnerId, changedFields: result.changedFields })
+		return c.json({ changedFields: result.changedFields })
+	} catch (error) {
+		const message = extractErrorMessage(error)
+		console.error('[Learner Update Error]', error)
+		return c.json({ error: message }, 500)
+	}
+})
+
+// --- Evolution Endpoints ---
+
+app.post('/brain/signal', async (c) => {
+	if (!brain) {
+		return c.json({ error: 'Brain not initialized. Call /brain/init first.' }, 400)
+	}
+
+	const body = await c.req.json<{ source: string; description: string }>()
+	if (!body.source || !body.description) {
+		return c.json({ error: 'source and description are required' }, 400)
+	}
+
+	brain.signal({ source: body.source, description: body.description })
+	return c.json({ ok: true })
+})
+
+app.post('/brain/evaluate', async (c) => {
+	if (!brain) {
+		return c.json({ error: 'Brain not initialized. Call /brain/init first.' }, 400)
+	}
+
+	broadcast('server:evaluate:started', {})
+
+	try {
+		const { decisions, results } = await brain.evaluateEvolution()
+		broadcast('server:evaluate:completed', { decisionCount: decisions.length, results })
+		return c.json({ decisions, results })
+	} catch (error) {
+		const message = extractErrorMessage(error)
+		console.error('[Brain Evaluate Error]', error)
+		broadcast('server:evaluate:error', { error: message })
+		return c.json({ error: message }, 500)
+	}
+})
+
+app.post('/brain/learners/create', async (c) => {
+	if (!brain) {
+		return c.json({ error: 'Brain not initialized. Call /brain/init first.' }, 400)
+	}
+
+	const body = await c.req.json<{
+		name: string
+		instructions: string
+		description?: string
+	}>()
+
+	if (!body.name || !body.instructions) {
+		return c.json({ error: 'name and instructions are required' }, 400)
+	}
+
+	try {
+		const id = body.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
+		const learner = await brain.createLearnerFromConfig({
+			id,
+			name: body.name,
+			instructions: body.instructions,
+			description: body.description,
+		})
+		broadcast('server:learner:created', { learnerId: learner.id, name: body.name })
+		return c.json({ learnerId: learner.id })
+	} catch (error) {
+		const message = extractErrorMessage(error)
+		console.error('[Learner Create Error]', error)
+		return c.json({ error: message }, 500)
+	}
+})
+
+app.post('/brain/evolve/create', async (c) => {
+	if (!brain) {
+		return c.json({ error: 'Brain not initialized. Call /brain/init first.' }, 400)
+	}
+
+	const body = await c.req.json<{ guidance: string }>()
+	if (!body.guidance) {
+		return c.json({ error: 'guidance is required' }, 400)
+	}
+
+	try {
+		const learner = await brain.createLearner(body.guidance)
+		return c.json({ learnerId: learner.id })
+	} catch (error) {
+		const message = extractErrorMessage(error)
+		console.error('[Brain Create Error]', error)
+		return c.json({ error: message }, 500)
+	}
+})
+
+app.post('/brain/evolve/merge', async (c) => {
+	if (!brain) {
+		return c.json({ error: 'Brain not initialized. Call /brain/init first.' }, 400)
+	}
+
+	const body = await c.req.json<{ learnerIds: string[]; guidance: string }>()
+	if (!body.learnerIds?.length || !body.guidance) {
+		return c.json({ error: 'learnerIds and guidance are required' }, 400)
+	}
+
+	try {
+		const learner = await brain.mergeLearners(body.learnerIds, body.guidance)
+		return c.json({ learnerId: learner.id })
+	} catch (error) {
+		const message = extractErrorMessage(error)
+		console.error('[Brain Merge Error]', error)
+		return c.json({ error: message }, 500)
+	}
+})
+
+app.post('/brain/evolve/split', async (c) => {
+	if (!brain) {
+		return c.json({ error: 'Brain not initialized. Call /brain/init first.' }, 400)
+	}
+
+	const body = await c.req.json<{ learnerId: string; guidance: string }>()
+	if (!body.learnerId || !body.guidance) {
+		return c.json({ error: 'learnerId and guidance are required' }, 400)
+	}
+
+	try {
+		const learners = await brain.splitLearner(body.learnerId, body.guidance)
+		return c.json({ learnerIds: learners.map(l => l.id) })
+	} catch (error) {
+		const message = extractErrorMessage(error)
+		console.error('[Brain Split Error]', error)
+		return c.json({ error: message }, 500)
+	}
+})
+
+app.post('/brain/evolve/update', async (c) => {
+	if (!brain) {
+		return c.json({ error: 'Brain not initialized. Call /brain/init first.' }, 400)
+	}
+
+	const body = await c.req.json<{ learnerId: string; guidance: string }>()
+	if (!body.learnerId || !body.guidance) {
+		return c.json({ error: 'learnerId and guidance are required' }, 400)
+	}
+
+	try {
+		const learner = await brain.updateLearner(body.learnerId, body.guidance)
+		return c.json({ learnerId: learner.id })
+	} catch (error) {
+		const message = extractErrorMessage(error)
+		console.error('[Brain Update Error]', error)
+		return c.json({ error: message }, 500)
+	}
+})
+
+app.post('/brain/evolve/delete', async (c) => {
+	if (!brain) {
+		return c.json({ error: 'Brain not initialized. Call /brain/init first.' }, 400)
+	}
+
+	const body = await c.req.json<{ learnerId: string }>()
+	if (!body.learnerId) {
+		return c.json({ error: 'learnerId is required' }, 400)
+	}
+
+	try {
+		await brain.deleteLearner(body.learnerId)
+		return c.json({ ok: true })
+	} catch (error) {
+		const message = extractErrorMessage(error)
+		console.error('[Brain Delete Error]', error)
+		return c.json({ error: message }, 500)
+	}
+})
+
+// --- Learner Action Endpoints ---
+
+app.post('/brain/learners/:id/synthesize', async (c) => {
+	if (!brain) {
+		return c.json({ error: 'Brain not initialized. Call /brain/init first.' }, 400)
+	}
+
+	const learnerId = c.req.param('id')
+	const learner = brain.getLearner(learnerId)
+	if (!learner) {
+		return c.json({ error: `Learner ${learnerId} not found` }, 404)
+	}
+
+	try {
+		const result = await learner.learn([], { forceSynthesize: true })
+		return c.json({ ok: true, result })
+	} catch (error) {
+		const message = extractErrorMessage(error)
+		console.error('[Force Synthesis Error]', error)
+		return c.json({ error: message }, 500)
+	}
+})
+
+app.post('/brain/learners/:id/query', async (c) => {
+	if (!brain) {
+		return c.json({ error: 'Brain not initialized. Call /brain/init first.' }, 400)
+	}
+
+	const learnerId = c.req.param('id')
+	const learner = brain.getLearner(learnerId)
+	if (!learner) {
+		return c.json({ error: `Learner ${learnerId} not found` }, 404)
+	}
+
+	const body = await c.req.json<{ query: string }>()
+	if (!body.query) {
+		return c.json({ error: 'query is required' }, 400)
+	}
+
+	try {
+		const result = await learner.query(body.query)
+		return c.json(result)
+	} catch (error) {
+		const message = extractErrorMessage(error)
+		console.error('[Learner Query Error]', error)
+		return c.json({ error: message }, 500)
+	}
 })
 
 // --- Claude Session Endpoints ---

@@ -2,19 +2,30 @@
  * Tools for TextLearner
  *
  * Learning tools:
- * - classify: Optional traceability for how observations relate to understanding
  * - synthesize: Terminal - commits new understanding
  * - dismiss: Terminal - rejects data as irrelevant
+ * - complete: Terminal - completes tool loop
  *
- * Query tools: generateResponse, identifyGaps, complete
+ * Query tools: generateResponse, identifyGaps
  */
 
 // Learning Tools
-export { classify, classifyParams, type ClassifyParams } from './classify'
-export { synthesize, synthesizeParams, type SynthesizeParams } from './synthesize'
-export { dismiss, dismissParams, type DismissParams } from './dismiss'
+export { type CompleteParams, complete, completeParams } from './complete'
+export { type DismissParams, dismiss, dismissParams } from './dismiss'
+export {
+	type SynthesizeParams,
+	synthesize,
+	synthesizeParams,
+} from './synthesize'
 
 // Query Tools
-export { generateResponse, generateResponseParams, type GenerateResponseParams } from './generate-response'
-export { identifyGaps, identifyGapsParams, type IdentifyGapsParams } from './identify-gaps'
-export { complete, completeParams, type CompleteParams } from './complete'
+export {
+	type GenerateResponseParams,
+	generateResponse,
+	generateResponseParams,
+} from './generate-response'
+export {
+	type IdentifyGapsParams,
+	identifyGaps,
+	identifyGapsParams,
+} from './identify-gaps'

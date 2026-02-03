@@ -1,6 +1,6 @@
 import { generateText } from 'ai'
-import { estimateTokens } from '../utils'
 import type { StrategyFn } from '../types'
+import { estimateTokens } from '../utils'
 import { decayCompressPromptTemplate } from './prompt.template.compress'
 
 /**

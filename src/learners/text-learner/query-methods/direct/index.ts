@@ -1,23 +1,39 @@
 import type { LanguageModel } from 'ai'
 import { z } from 'zod'
+import { generate, Output } from '../../../../llm'
+import type { TokenUsage } from '../../../types'
 import type {
-	QueryMethod,
-	QueryContext,
-	QueryOptions,
 	QueryCallbacks,
+	QueryContext,
+	QueryMethod,
+	QueryMethodUpdateConfig,
+	QueryOptions,
 	QueryResult,
 } from '../types'
-import type { TokenUsage } from '../../../types'
 import { buildQuerySystemPrompt } from './prompt.system'
 import { buildQueryUserPrompt } from './prompt.user'
-import { generate, Output } from '../../../../llm'
 
 /**
  * Schema for query response
  */
 const queryResponseSchema = z.object({
-	relevant: z.boolean().describe('Can you answer this from your understanding?'),
-	confidence: z.number().describe('How confident are you? 0.0-1.0'),
+	relevant: z
+		.boolean()
+		.describe('Is this query within your area of expertise/purpose?'),
+	relevance: z
+		.number()
+		.min(0)
+		.max(1)
+		.describe(
+			'How related is this query to your domain/purpose? 0.0 = completely outside your scope, 1.0 = core to what you do',
+		),
+	confidence: z
+		.number()
+		.min(0)
+		.max(1)
+		.describe(
+			'How well could you answer from your understanding? 0.0 = you have nothing on this topic, 1.0 = you fully answered. If outside your scope, this should be 0.0',
+		),
 	insight: z.string().describe('Your answer based on your understanding'),
 	gaps: z.string().describe('What you could not answer (empty if none)'),
 })
@@ -36,6 +52,12 @@ export class DirectMethod implements QueryMethod {
 		this.model = model
 	}
 
+	update(config: QueryMethodUpdateConfig): void {
+		if (config.model !== undefined) {
+			this.model = config.model
+		}
+	}
+
 	async query(
 		context: QueryContext,
 		options?: QueryOptions,
@@ -50,6 +72,7 @@ export class DirectMethod implements QueryMethod {
 			system,
 			prompt,
 			output: Output.object({ schema: queryResponseSchema }),
+			repairSchema: queryResponseSchema,
 			...generateOptions,
 		})
 
@@ -61,6 +84,7 @@ export class DirectMethod implements QueryMethod {
 
 		return {
 			relevant: result.output.relevant,
+			relevance: result.output.relevance,
 			confidence: result.output.confidence,
 			insight: result.output.insight,
 			gaps: result.output.gaps,

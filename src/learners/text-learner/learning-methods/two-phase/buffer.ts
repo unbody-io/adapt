@@ -74,7 +74,10 @@ export class ObservationBuffer {
 	 * Uses rough estimate of 4 characters per token.
 	 */
 	get totalTokens(): number {
-		const totalChars = this.observations.reduce((acc, o) => acc + o.text.length, 0)
+		const totalChars = this.observations.reduce(
+			(acc, o) => acc + o.text.length,
+			0,
+		)
 		return Math.ceil(totalChars / 4)
 	}
 
@@ -82,17 +85,13 @@ export class ObservationBuffer {
 	 * Check if any synthesis threshold is met
 	 */
 	shouldSynthesize(thresholds: SynthesizeThresholds): boolean {
-		const { maxObservations, maxTokens, minImportance } = thresholds
+		const { maxObservations, maxTokens } = thresholds
 
 		if (maxObservations !== undefined && this.count >= maxObservations) {
 			return true
 		}
 
 		if (maxTokens !== undefined && this.totalTokens >= maxTokens) {
-			return true
-		}
-
-		if (minImportance !== undefined && this.avgImportance >= minImportance) {
 			return true
 		}
 

@@ -5,14 +5,14 @@
  */
 
 export type {
-	TwoPhaseConfig,
-	LearnOutput,
-	LearnOptions,
-	LearnCallbacks,
 	InitOutput,
+	LearnCallbacks,
+	LearnOptions,
+	LearnOutput,
 	ObserveConfig,
 	SynthesizeConfig,
 	SynthesizeThresholds,
+	TwoPhaseConfig,
 } from './two-phase'
 
 // Learning method name is now just 'two-phase'

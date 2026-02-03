@@ -12,9 +12,22 @@ import type { ZodSchema } from 'zod'
 type GenerateTextParams = Parameters<typeof generateText>[0]
 type GenerateTextResult = Awaited<ReturnType<typeof generateText>>
 
+export type {
+	CallSettings,
+	LanguageModel,
+	LanguageModelUsage,
+	StopCondition,
+} from 'ai'
 // Re-export for convenience
 export { Output, stepCountIs } from 'ai'
-export type { LanguageModelUsage, LanguageModel, CallSettings, StopCondition } from 'ai'
+
+/**
+ * Extended params that accept a repair schema
+ */
+type GenerateParams = GenerateTextParams & {
+	/** Zod schema for JSON repair fallback (Output.object doesn't expose it) */
+	repairSchema?: ZodSchema
+}
 
 /**
  * Generate text with optional structured output and JSON repair
@@ -24,93 +37,78 @@ export type { LanguageModelUsage, LanguageModel, CallSettings, StopCondition } f
  * const result = await generate({ model, prompt: 'Hello' })
  *
  * @example
- * // Structured output
+ * // Structured output with repair
  * const result = await generate({
  *   model,
  *   prompt: 'Extract data',
- *   output: Output.object({ schema: mySchema })
- * })
- *
- * @example
- * // Multi-step tool loop
- * const result = await generate({
- *   model,
- *   prompt: 'Do task',
- *   tools: { ... },
- *   stopWhen: stepCountIs(10),
- *   onStepFinish: ({ usage }) => { ... }
+ *   output: Output.object({ schema: mySchema }),
+ *   repairSchema: mySchema
  * })
  */
-export async function generate(params: GenerateTextParams): Promise<GenerateTextResult> {
+export async function generate(
+	params: GenerateParams,
+): Promise<GenerateTextResult> {
+	const { repairSchema, ...generateParams } = params
 	try {
-		return await generateText(params)
+		return await generateText(generateParams)
 	} catch (error) {
 		// JSON repair fallback for structured output
-		if (error instanceof NoObjectGeneratedError && error.text && params.output) {
+		if (
+			error instanceof NoObjectGeneratedError &&
+			error.text &&
+			repairSchema
+		) {
+			console.error('[LLM] NoObjectGeneratedError — raw text (%d chars):', error.text.length, error.text.slice(0, 500))
 			const repaired = repairJson(error.text)
 
 			try {
-				// Extract schema from output config and validate
-				const schema = extractSchema(params.output)
-				if (schema) {
-					const parsed = JSON.parse(repaired)
-					const validated = schema.parse(parsed)
+				const parsed = JSON.parse(repaired)
+				const validated = repairSchema.parse(parsed)
 
-					// Return a minimal result with repaired output
-					// Note: usage is lost when repair succeeds
-					return {
-						output: validated,
-						text: '',
-						reasoning: [],
-						reasoningDetails: [],
-						reasoningText: undefined,
-						files: [],
-						sources: [],
-						toolCalls: [],
-						toolResults: [],
-						staticToolCalls: [],
-						staticToolResults: [],
-						dynamicToolCalls: [],
-						dynamicToolResults: [],
-						content: [],
-						finishReason: 'stop',
-						usage: {
-							inputTokens: 0,
-							outputTokens: 0,
-							totalTokens: 0,
-							inputTokenDetails: { cachedTokens: undefined },
-							outputTokenDetails: { reasoningTokens: undefined },
-						},
-						steps: [],
-						response: {
-							id: '',
-							timestamp: new Date(),
-							modelId: '',
-							headers: undefined,
-							messages: [],
-						},
-						request: {},
-						warnings: [],
-						providerMetadata: undefined,
-					} as unknown as GenerateTextResult
-				}
-			} catch {
-				// Repair failed, fall through to throw original error
+				// Return a minimal result with repaired output
+				return {
+					output: validated,
+					text: '',
+					reasoning: [],
+					reasoningDetails: [],
+					reasoningText: undefined,
+					files: [],
+					sources: [],
+					toolCalls: [],
+					toolResults: [],
+					staticToolCalls: [],
+					staticToolResults: [],
+					dynamicToolCalls: [],
+					dynamicToolResults: [],
+					content: [],
+					finishReason: 'stop',
+					usage: {
+						inputTokens: 0,
+						outputTokens: 0,
+						totalTokens: 0,
+						inputTokenDetails: { cachedTokens: undefined },
+						outputTokenDetails: { reasoningTokens: undefined },
+					},
+					steps: [],
+					response: {
+						id: '',
+						timestamp: new Date(),
+						modelId: '',
+						headers: undefined,
+						messages: [],
+					},
+					request: {},
+					warnings: [],
+					providerMetadata: undefined,
+				} as unknown as GenerateTextResult
+			} catch (repairError) {
+				console.error('[LLM] JSON repair failed:', repairError instanceof Error ? repairError.message : repairError)
+				// Fall through to throw original error
 			}
 		}
 
 		throw error
 	}
-}
-
-/**
- * Extract Zod schema from Output config
- */
-function extractSchema(output: unknown): ZodSchema | null {
-	if (output && typeof output === 'object' && 'schema' in output) {
-		return (output as { schema: ZodSchema }).schema
-	}
-	return null
 }
 
 // ============================================================================
@@ -125,6 +123,7 @@ function repairJson(text: string): string {
 	repaired = stripMarkdownCodeBlock(repaired)
 	repaired = stripGarbagePrefix(repaired)
 	repaired = fixDoubleBrace(repaired)
+	repaired = fixQuotedObjectPrefix(repaired)
 	repaired = repairJsonNewlines(repaired)
 	return repaired
 }
@@ -144,11 +143,19 @@ function stripMarkdownCodeBlock(text: string): string {
  * Handles cases like: `.{`, `craft.{`, `).{`, `{\n{`
  */
 function stripGarbagePrefix(text: string): string {
-	const jsonStartPattern = /\{\s*"/
+	// Look for { followed by a real JSON key (starts with a letter/underscore)
+	const jsonStartPattern = /\{\s*"[a-zA-Z_]/
 	const match = text.match(jsonStartPattern)
 
 	if (match && match.index !== undefined) {
 		return text.slice(match.index)
+	}
+
+	// Fallback: any { followed by "
+	const loosePattern = /\{\s*"/
+	const looseMatch = text.match(loosePattern)
+	if (looseMatch && looseMatch.index !== undefined) {
+		return text.slice(looseMatch.index)
 	}
 
 	const firstBrace = text.indexOf('{')
@@ -169,6 +176,19 @@ function fixDoubleBrace(text: string): string {
 		if (secondBrace !== -1) {
 			return text.slice(secondBrace)
 		}
+	}
+	return text
+}
+
+/**
+ * Fix pattern like: { "{ "key": value -> {"key": value
+ * The model sometimes outputs the JSON object wrapped in an extra brace+quote
+ */
+function fixQuotedObjectPrefix(text: string): string {
+	// Pattern: { "{ "realKey" -> {"realKey"
+	const brokenPrefix = /^\{\s*"\{\s*"/
+	if (brokenPrefix.test(text)) {
+		return text.replace(brokenPrefix, '{"')
 	}
 	return text
 }

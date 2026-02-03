@@ -1,14 +1,13 @@
+export type {
+	CascadableConfig,
+	ConfigResolver,
+	ParentModels,
+	ResolvedCascadableConfig,
+} from './config'
 export {
-	TypedEmitter,
 	type BaseEvent,
 	type EventsFromMap,
+	TypedEmitter,
 	type TypedHandler,
 	type UnifiedHandler,
 } from './events'
-
-export type {
-	CascadableConfig,
-	ResolvedCascadableConfig,
-	ParentModels,
-	ConfigResolver,
-} from './config'

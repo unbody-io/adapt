@@ -36,6 +36,8 @@ export function cascade<T>(...values: (T | undefined)[]): T {
  *   config.model,
  * )
  */
-export function cascadeOptional<T>(...values: (T | undefined)[]): T | undefined {
+export function cascadeOptional<T>(
+	...values: (T | undefined)[]
+): T | undefined {
 	return values.find((v) => v !== undefined)
 }

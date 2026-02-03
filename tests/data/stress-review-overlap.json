@@ -1,0 +1,31 @@
+{
+  "name": "Code Review Practices (Overlap)",
+  "purpose": "Content overlapping with existing code-quality-practices learner. Should trigger merge signal.",
+  "items": [
+    "PR review policy: every change needs at least 2 approvals. One from a domain expert, one from a senior engineer. No self-merging even for trivial changes.",
+    "Code review checklist: correctness, edge cases, naming, test coverage, docs. Reviewers should focus on logic and design, not style — that's what linters are for.",
+    "Review turnaround goal: first feedback within 4 hours during business hours. If a PR sits for a day, it blocks the author and kills momentum.",
+    "Adopted conventional comments in reviews: prefix with suggestion:, nitpick:, question:, or blocking:. Removes ambiguity about severity.",
+    "Found that PRs over 400 lines get rubber-stamped. Team agreed to hard limit of 300 lines per PR. Encourages incremental, reviewable changes.",
+    "Review comment: 'This function does too many things.' Refactored into 3 functions: validateInput(), processPayment(), sendConfirmation(). Each testable independently.",
+    "Pair programming replaced formal review for complex features. Two people write it together, merge without separate review. Faster and higher quality.",
+    "Automated code review with linting: ESLint for style, Prettier for formatting, custom rules for import ordering. CI blocks merge if any rule fails.",
+    "Review revealed a subtle race condition: two async handlers reading and writing to the same cache key. Added optimistic locking with version stamps.",
+    "Added code ownership rules via CODEOWNERS file. Database changes require DBA review. Auth changes require security team. Infra changes require platform team.",
+    "Tracking code review metrics: time-to-first-review, comments-per-PR, approval-to-merge time. Avg first review down from 12h to 3h after making it visible.",
+    "Review patterns to watch for: magic numbers, hardcoded strings, missing error handling, N+1 queries, unbounded arrays, leaked secrets in logs.",
+    "Team retrospective: reviews are becoming rubber stamps. Solution: rotate review assignments, add review quality scores, celebrate thorough reviews.",
+    "Static analysis in PR pipeline: SonarQube reports code smells, complexity, duplication. Blocks merge if quality gate fails. Reduced tech debt by 30% in 3 months.",
+    "Pull request templates with sections: What changed, Why, How to test, Screenshots, Breaking changes. Reviewers know exactly what to focus on.",
+    "Code review anti-patterns: nitpicking style, blocking on personal preference, drive-by reviews without context, approving without reading.",
+    "Introduced architecture decision records (ADRs) for significant design choices. Linked from PRs. Reviewers can understand the 'why' behind structural changes.",
+    "Review found that error messages expose internal state to users. Standardized error responses: user-friendly message + internal error code. Details only in logs.",
+    "Pre-commit hooks catch obvious issues before review: no console.log, no TODO without ticket, no imports from internal packages, type checking passes.",
+    "Code quality dashboards: per-team metrics on test coverage, lint violations, complexity trends, review velocity. Teams compete on improvement, not absolute numbers.",
+    "Review comment templates for common feedback: 'Consider extracting this to a utility function', 'This could be simplified using X pattern', 'Missing test for edge case Y'.",
+    "Adopted trunk-based development: short-lived branches, frequent small merges. Average PR age dropped from 3 days to 6 hours. Merge conflicts nearly eliminated.",
+    "Code review for test quality: are tests testing behavior or implementation? Are assertions meaningful? Is the test name descriptive? Can the test fail for the right reasons?",
+    "Review checklist for database changes: migration reversibility, index impact, query plan analysis, data backfill strategy, rollback procedure documented.",
+    "Team norm: 'If you approve it, you own it.' Reviewers share responsibility for bugs that pass review. Changed review culture from checkbox to ownership."
+  ]
+}

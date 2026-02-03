@@ -10,8 +10,17 @@ import type { Significance } from '../../../types'
 import type { Strategy } from '../../strategies'
 
 // Re-export phase types
-export type { ObserveOutput, ObserveContext, ObserveCallbacks, Usage } from './observe/types'
-export type { SynthesizeOutput, SynthesizeContext, SynthesizeCallbacks } from './synthesize/types'
+export type {
+	ObserveCallbacks,
+	ObserveContext,
+	ObserveOutput,
+	Usage,
+} from './observe/types'
+export type {
+	SynthesizeCallbacks,
+	SynthesizeContext,
+	SynthesizeOutput,
+} from './synthesize/types'
 
 /**
  * Usage data from LLM call (re-exported for convenience)
@@ -23,8 +32,8 @@ import type { Usage } from './observe/types'
  */
 export type LearnOutput =
 	// Observe outcomes
-	| { status: 'observed'; output: string; usage?: Usage }
-	| { status: 'observe:dismissed'; output: string; usage?: Usage }
+	| { status: 'observed'; output: string[]; usage?: Usage }
+	| { status: 'observe:dismissed'; output: string[]; usage?: Usage }
 	| { status: 'observe:error'; error: unknown }
 	// Synthesize outcomes
 	| {
@@ -88,6 +97,35 @@ export interface TwoPhaseConfig {
 	synthesize: SynthesizeConfig
 	/** Strategy for maintaining understanding (applied after synthesis) */
 	strategy: Strategy
+}
+
+/**
+ * Config accepted by TwoPhaseMethod.update()
+ *
+ * Same shape as constructor params but all optional.
+ * `instructions` and `model` are top-level since they come from the learner.
+ */
+export interface TwoPhaseUpdateConfig {
+	/** Default model override */
+	model?: LanguageModel
+	/** Learner instructions (triggers prompt regen) */
+	instructions?: string
+	/** Focus areas (triggers observe prompt regen) */
+	focus?: string
+	/** Observe phase config updates */
+	observe?: Partial<ObserveConfig>
+	/** Synthesize phase config updates */
+	synthesize?: Partial<SynthesizeConfig>
+	/** Strategy update (triggers synthesize prompt regen) */
+	strategy?: Strategy
+}
+
+/**
+ * Result from TwoPhaseMethod.update()
+ */
+export interface TwoPhaseUpdateResult {
+	changedFields: string[]
+	promptsRegenerated: boolean
 }
 
 /**

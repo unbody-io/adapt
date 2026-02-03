@@ -2,9 +2,9 @@
  * Default values for TextLearner configuration
  */
 
-import type { Strategy } from './strategies'
-import type { QueryMethodName } from './query-methods/types'
 import type { SynthesizeThresholds } from './learning-methods/types'
+import type { QueryMethodName } from './query-methods/types'
+import type { Strategy } from './strategies'
 
 export const TEXT_LEARNER_DEFAULTS = {
 	origin: 'developer' as const,
@@ -16,7 +16,7 @@ export const TEXT_LEARNER_DEFAULTS = {
 		thresholds: {
 			maxObservations: 10,
 			maxTokens: 8000,
-			minImportance: 0.9,
+			minImportance: 0.5,
 		} satisfies Required<SynthesizeThresholds>,
 	},
 	query: {
@@ -25,5 +25,12 @@ export const TEXT_LEARNER_DEFAULTS = {
 	maintenance: {
 		strategy: 'cumulative' as Strategy,
 		maxTokens: 16000,
+	},
+	governance: {
+		signalThresholds: {
+			maxDismissalRate: 0.8,
+			minConfidence: 0.3,
+			maxObservationsWithoutSynthesis: 100,
+		},
 	},
 } as const

@@ -6,15 +6,19 @@
  */
 
 import type { LanguageModel } from 'ai'
-import type { SynthesizeOutput, SynthesizeContext, SynthesizeCallbacks } from './types'
-import type { SynthesizeIdentity } from './schema.identity'
-import { synthesizeIdentitySchema } from './schema.identity'
 import { generate, Output } from '../../../../../llm'
-import { synthesizeOutputSchema } from './schema.output'
+import type { Strategy } from '../../../strategies'
 import { synthesizeIdentityPromptTemplate } from './prompt.template.identity'
 import { synthesizeSystemPromptTemplate } from './prompt.template.system'
 import { synthesizeUserPromptTemplate } from './prompt.template.user'
-import type { Strategy } from '../../../strategies'
+import type { SynthesizeIdentity } from './schema.identity'
+import { synthesizeIdentitySchema } from './schema.identity'
+import { synthesizeOutputSchema } from './schema.output'
+import type {
+	SynthesizeCallbacks,
+	SynthesizeContext,
+	SynthesizeOutput,
+} from './types'
 
 /**
  * Result from synthesize init
@@ -43,6 +47,7 @@ export async function initSynthesize(
 		model,
 		prompt,
 		output: Output.object({ schema: synthesizeIdentitySchema }),
+		repairSchema: synthesizeIdentitySchema,
 	})
 
 	const systemPrompt = synthesizeSystemPromptTemplate(identity, strategy)
@@ -76,6 +81,7 @@ export async function synthesize(
 			system: systemPrompt,
 			prompt,
 			output: Output.object({ schema: synthesizeOutputSchema }),
+			repairSchema: synthesizeOutputSchema,
 		})
 
 		// Emit thinking if available

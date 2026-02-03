@@ -25,8 +25,31 @@ export interface LearnerGovernance {
 	threshold: number // gates participation
 	status: LearnerStatus
 	lastAccessed: Date
-	retrievalCount: number
-	successRate: number // responses that were useful
+	signalThresholds: {
+		maxDismissalRate: number // Default: 0.8 - alert when dismissal rate exceeds this
+		minRelevance: number // Default: 0.3 - alert when query relevance falls below this
+		minConfidence: number // Default: 0.3 - alert when query confidence falls below this
+		maxObservationsWithoutSynthesis: number // Default: 3 * maxObservations
+	}
+}
+
+/**
+ * Runtime metrics for learner operations, separated by phase
+ */
+export interface LearnerMetrics {
+	ingestion: {
+		observationCount: number
+		dismissalCount: number
+		dismissalRate: number
+		synthesisCount: number
+		observationsSinceLastSynthesis: number
+	}
+	query: {
+		count: number
+		relevanceScores: number[] // rolling window of last 10
+		confidenceScores: number[] // rolling window of last 10
+		gaps: string[] // accumulated gap descriptions
+	}
 }
 
 export interface LearnerMetadata {
@@ -37,33 +60,12 @@ export interface LearnerMetadata {
 }
 
 /**
- * Result from processing a single ingest chunk
- *
- * When input exceeds token limits, it's split into chunks.
- * Each chunk is processed independently and returns this result.
- */
-export interface IngestChunk {
-	id: string // chunk_xxx - unique identifier for this chunk
-	index: number // 0-indexed position within the ingest operation
-	relevance: number // 0.0 - 1.0, how relevant this chunk was to learner's purpose
-}
-
-/**
- * Output from ingesting a batch of data
- *
- * Returns array of chunks - if input fit in token limit, single chunk.
- * If input exceeded token limit, multiple chunks processed sequentially.
- */
-export interface IngestResult {
-	chunks: IngestChunk[]
-}
-
-/**
  * Output from asking the learner
  */
 export interface AskResult {
 	relevant: boolean
-	confidence: number // 0.0 - 1.0
+	relevance: number // 0.0 - 1.0: how related is this query to my domain
+	confidence: number // 0.0 - 1.0: how well could I answer from my understanding
 	insight: string
 	gaps: string[]
 }
@@ -79,6 +81,7 @@ export interface Learner<TUnderstanding = unknown> {
 	// Current state
 	getUnderstanding(): TUnderstanding
 	getGovernance(): LearnerGovernance
+	getMetrics(): LearnerMetrics
 
 	// Core operations
 	learn(batch: unknown[]): Promise<unknown>
@@ -116,42 +119,27 @@ export interface TokenUsage {
 export interface BaseLearnerEventMap {
 	// Init
 	'learner:init:started': { learnerId: string }
-	'learner:init:completed': { learnerId: string; systemPrompt: string; usage: TokenUsage }
+	'learner:init:completed': {
+		learnerId: string
+		systemPrompt: string
+		usage: TokenUsage
+	}
 	'learner:init:failed': { learnerId: string; error: string }
 
-	// Ingest
-	'learner:ingest:started': { learnerId: string; itemCount: number; chunkCount: number }
-	'learner:ingest:chunk:started': { learnerId: string; chunkId: string; chunkIndex: number }
-	'learner:ingest:thinking': { learnerId: string; chunkId: string; thoughts: string[]; usage: TokenUsage }
-	'learner:ingest:tool:started': { learnerId: string; chunkId: string; toolName: string; input: unknown }
-	'learner:ingest:tool:completed': { learnerId: string; chunkId: string; toolName: string; output: unknown }
-	'learner:ingest:tool:failed': { learnerId: string; chunkId: string; toolName: string; error: string }
-	'learner:ingest:chunk:completed': { learnerId: string; chunkId: string; relevance: number; usage: TokenUsage }
-	'learner:ingest:completed': { learnerId: string; totalRelevance: number; usage: TokenUsage }
-	'learner:ingest:failed': { learnerId: string; error: string }
-
-	// Ask
-	'learner:ask:started': { learnerId: string; query: string }
-	'learner:ask:thinking': { learnerId: string; thoughts: string[]; usage: TokenUsage }
-	'learner:ask:tool:started': { learnerId: string; toolName: string; input: unknown }
-	'learner:ask:tool:completed': { learnerId: string; toolName: string; output: unknown }
-	'learner:ask:tool:failed': { learnerId: string; toolName: string; error: string }
-	'learner:ask:completed': {
+	// Query
+	'learner:query:started': { learnerId: string; query: string }
+	'learner:query:completed': {
 		learnerId: string
 		insight: string
+		relevant: boolean
+		relevance: number
 		confidence: number
 		gaps: string[]
 		usage: TokenUsage
 	}
-	'learner:ask:failed': { learnerId: string; error: string }
+	'learner:query:failed': { learnerId: string; error: string }
 
 	// State changes
-	'learner:understanding:updated': {
-		learnerId: string
-		understanding: string
-		previousUnderstanding: string
-		entry: EvolutionEntry
-	}
 	'learner:governance:updated': {
 		learnerId: string
 		activation: number

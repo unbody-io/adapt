@@ -1,13 +1,17 @@
 import { generateText } from 'ai'
-import { estimateTokens } from '../utils'
 import type { StrategyFn } from '../types'
+import { estimateTokens } from '../utils'
 import { cumulativeSeedPromptTemplate } from './prompt.template.compress'
 
 /**
  * Cumulative strategy - when limit reached, create a seed and reset the cycle
  * The seed becomes the foundation for a fresh learning cycle
  */
-export const cumulative: StrategyFn = async ({ understanding, model, config }) => {
+export const cumulative: StrategyFn = async ({
+	understanding,
+	model,
+	config,
+}) => {
 	const maxTokens = config.maxTokens ?? 4000
 	const currentTokens = estimateTokens(understanding)
 

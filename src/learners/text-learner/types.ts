@@ -1,10 +1,22 @@
 import type { LanguageModel } from 'ai'
-import type { Strategy } from './strategies'
-import type { BaseLearnerEventMap, LearnerOrigin, Significance } from '../types'
+import type {
+	CascadableConfig,
+	ResolvedCascadableConfig,
+} from '../../types/config'
 import type { EventsFromMap } from '../../types/events'
+import type {
+	BaseLearnerEventMap,
+	LearnerOrigin,
+	Significance,
+	TokenUsage,
+} from '../types'
+import type {
+	ObserveConfig,
+	SynthesizeConfig,
+	SynthesizeThresholds,
+} from './learning-methods/types'
 import type { QueryMethodName } from './query-methods/types'
-import type { ObserveConfig, SynthesizeConfig, SynthesizeThresholds } from './learning-methods/types'
-import type { CascadableConfig, ResolvedCascadableConfig } from '../../types/config'
+import type { Strategy } from './strategies'
 
 // Re-export TokenUsage for backwards compatibility
 export type { TokenUsage } from '../types'
@@ -40,6 +52,11 @@ export interface TextLearnerEventMap extends BaseLearnerEventMap {
 		learnerId: string
 		itemCount: number
 	}
+	'learner:observe:thinking': {
+		learnerId: string
+		thoughts: string[]
+		usage: TokenUsage
+	}
 	'learner:observed': {
 		learnerId: string
 		output: string
@@ -62,6 +79,11 @@ export interface TextLearnerEventMap extends BaseLearnerEventMap {
 		learnerId: string
 		observationCount: number
 	}
+	'learner:synthesize:thinking': {
+		learnerId: string
+		thoughts: string[]
+		usage: TokenUsage
+	}
 	'learner:synthesized': {
 		learnerId: string
 		newUnderstanding: string
@@ -78,6 +100,19 @@ export interface TextLearnerEventMap extends BaseLearnerEventMap {
 	'learner:synthesize:error': {
 		learnerId: string
 		error: unknown
+	}
+
+	// Learn phase errors
+	'learner:learn:failed': {
+		learnerId: string
+		error: string
+	}
+
+	// Query phase events
+	'learner:ask:thinking': {
+		learnerId: string
+		thoughts: string[]
+		usage: TokenUsage
 	}
 }
 
@@ -142,8 +177,6 @@ export interface TextLearnerConfig extends CascadableConfig {
 	synthesize?: Partial<SynthesizeConfig>
 	/** Query phase configuration */
 	query?: QueryConfig
-	/** @deprecated Use query.method instead */
-	queryMethod?: QueryMethodName
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

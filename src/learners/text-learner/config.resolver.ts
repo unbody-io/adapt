@@ -6,10 +6,10 @@
  */
 
 import { nanoid } from 'nanoid'
+import type { ParentModels } from '../../types/config'
 import { cascade } from '../../utils/cascade'
 import { TEXT_LEARNER_DEFAULTS } from './config.defaults'
-import type { TextLearnerConfig, ResolvedTextLearnerConfig } from './types'
-import type { ParentModels } from '../../types/config'
+import type { ResolvedTextLearnerConfig, TextLearnerConfig } from './types'
 
 /**
  * Resolve TextLearnerConfig to ResolvedTextLearnerConfig
@@ -47,9 +47,13 @@ export function resolveTextLearnerConfig(
 			blueprintModel: cascade(config.observe?.blueprintModel, blueprintModel),
 		},
 		synthesize: {
-			method: config.synthesize?.method ?? TEXT_LEARNER_DEFAULTS.synthesize.method,
+			method:
+				config.synthesize?.method ?? TEXT_LEARNER_DEFAULTS.synthesize.method,
 			model: cascade(config.synthesize?.model, model),
-			blueprintModel: cascade(config.synthesize?.blueprintModel, blueprintModel),
+			blueprintModel: cascade(
+				config.synthesize?.blueprintModel,
+				blueprintModel,
+			),
 			thresholds: {
 				maxObservations:
 					config.synthesize?.thresholds?.maxObservations ??
@@ -64,11 +68,15 @@ export function resolveTextLearnerConfig(
 		},
 		query: {
 			model: cascade(config.query?.model, model),
-			method: config.query?.method ?? config.queryMethod ?? TEXT_LEARNER_DEFAULTS.query.method,
+			method: config.query?.method ?? TEXT_LEARNER_DEFAULTS.query.method,
 		},
 		maintenance: {
-			strategy: config.maintenance?.strategy ?? TEXT_LEARNER_DEFAULTS.maintenance.strategy,
-			maxTokens: config.maintenance?.maxTokens ?? TEXT_LEARNER_DEFAULTS.maintenance.maxTokens,
+			strategy:
+				config.maintenance?.strategy ??
+				TEXT_LEARNER_DEFAULTS.maintenance.strategy,
+			maxTokens:
+				config.maintenance?.maxTokens ??
+				TEXT_LEARNER_DEFAULTS.maintenance.maxTokens,
 		},
 	}
 }

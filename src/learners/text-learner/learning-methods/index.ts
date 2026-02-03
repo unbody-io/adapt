@@ -4,16 +4,16 @@
  * Currently only two-phase method is supported.
  */
 
-export { TwoPhaseMethod } from './two-phase'
 export type {
-	TwoPhaseConfig,
-	LearnOutput,
-	LearnOptions,
-	LearnCallbacks,
 	InitOutput,
+	LearnCallbacks,
+	LearnOptions,
+	LearnOutput,
 	ObserveConfig,
-	SynthesizeConfig,
-	SynthesizeThresholds,
 	ObserveOutput,
+	SynthesizeConfig,
 	SynthesizeOutput,
+	SynthesizeThresholds,
+	TwoPhaseConfig,
 } from './two-phase'
+export { TwoPhaseMethod } from './two-phase'

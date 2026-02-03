@@ -1,8 +1,14 @@
 import type { CallSettings } from 'ai'
 import { nanoid } from 'nanoid'
-import { TextLearner, type GeneratedLearnerConfig, type TokenUsage } from '../learners'
+import {
+	type GeneratedLearnerConfig,
+	TextLearner,
+	type TokenUsage,
+} from '../learners'
 import { generate, Output } from '../llm'
+import { TypedEmitter } from '../types/events'
 import { synthesize } from './agent'
+import { resolveBrainConfig } from './config.resolver'
 import { learnerConfigsPromptTemplate } from './prompts/prompt.template.learner-configs'
 import { learnerConfigsSchema } from './schemas/schema.learner-configs'
 import type {
@@ -13,8 +19,6 @@ import type {
 	BrainInjectResult,
 	ResolvedBrainConfig,
 } from './types'
-import { TypedEmitter } from '../types/events'
-import { resolveBrainConfig } from './config.resolver'
 
 /**
  * Brain - A learning system that auto-generates and coordinates multiple learners
@@ -78,7 +82,8 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 				learnerIds: Array.from(this.learners.keys()),
 			})
 		} catch (error) {
-			const errorMessage = error instanceof Error ? error.message : String(error)
+			const errorMessage =
+				error instanceof Error ? error.message : String(error)
 			this.emit('brain:init:failed', { error: errorMessage })
 			throw error
 		}
@@ -222,16 +227,9 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 				const learnerResults = await Promise.all(
 					learnerArray.map(async (learner) => {
 						const result = await learner.learn(batch)
-						// Map new LearnOutput to legacy format for Brain events
-						const relevance =
-							result.status === 'synthesized'
-								? 1.0
-								: result.status === 'observed'
-									? 0.5
-									: 0.0
 						return {
 							learnerId: learner.id,
-							chunks: [{ id: `chunk_${nanoid()}`, index: 0, relevance }],
+							result,
 						}
 					}),
 				)
@@ -257,7 +255,8 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 
 			return { id: injectId, batches: batchResults }
 		} catch (error) {
-			const errorMessage = error instanceof Error ? error.message : String(error)
+			const errorMessage =
+				error instanceof Error ? error.message : String(error)
 			this.emit('brain:inject:failed', { injectId, error: errorMessage })
 			throw error
 		}
@@ -271,7 +270,10 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 	 * @param query - The question to ask
 	 * @param options - Optional generation options (temperature, etc.)
 	 */
-	async ask(query: string, options?: CallSettings & { model?: import('ai').LanguageModel }): Promise<BrainAskResult> {
+	async ask(
+		query: string,
+		options?: CallSettings & { model?: import('ai').LanguageModel },
+	): Promise<BrainAskResult> {
 		await this.ensureInitialized()
 
 		const queryId = `query_${nanoid()}`
@@ -302,12 +304,15 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 
 			// Synthesize responses
 			const { model: modelOverride, ...generateOptions } = options ?? {}
-			const result = await synthesize(modelOverride ?? this.config.query.model, {
-				brainPrompt: this.prompt,
-				query,
-				responses: learnerResults,
-				...generateOptions,
-			})
+			const result = await synthesize(
+				modelOverride ?? this.config.query.model,
+				{
+					brainPrompt: this.prompt,
+					query,
+					responses: learnerResults,
+					...generateOptions,
+				},
+			)
 
 			this.emit('brain:ask:completed', {
 				queryId,
@@ -323,7 +328,8 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 				gaps: result.gaps,
 			}
 		} catch (error) {
-			const errorMessage = error instanceof Error ? error.message : String(error)
+			const errorMessage =
+				error instanceof Error ? error.message : String(error)
 			this.emit('brain:ask:failed', { queryId, error: errorMessage })
 			throw error
 		}

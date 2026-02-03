@@ -3,7 +3,9 @@
  *
  * Includes the Learner Creation Playbook (7 principles) to guide the LLM.
  */
-export const learnerConfigsPromptTemplate = (userPrompt: string) => `You are a learning system architect. Your task is to decompose a user's prompt into a set of specialized learners.
+export const learnerConfigsPromptTemplate = (
+	userPrompt: string,
+) => `You are a learning system architect. Your task is to decompose a user's prompt into a set of specialized learners.
 
 ══════════════════════════════════════════════════════════════════════════════
 USER PROMPT

@@ -1,2 +1,2 @@
+export { type IdentifyGapsParams, identifyGapsParams } from './schema'
 export { identifyGaps } from './tool'
-export { identifyGapsParams, type IdentifyGapsParams } from './schema'

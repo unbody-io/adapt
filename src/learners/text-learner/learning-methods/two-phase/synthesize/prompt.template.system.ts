@@ -4,9 +4,9 @@
  * Combines generated identity with fixed synthesis framework.
  */
 
-import type { SynthesizeIdentity } from './schema.identity'
 import { compare } from '../../../cognitive-skills'
-import { strategyPrompts, type Strategy } from '../../../strategies'
+import { type Strategy, strategyPrompts } from '../../../strategies'
+import type { SynthesizeIdentity } from './schema.identity'
 
 /**
  * Build system prompt from generated identity and strategy
@@ -20,7 +20,9 @@ export function synthesizeSystemPromptTemplate(
 ): string {
 	const skills = Object.entries(compare.skills).map(([key, value]) => ({
 		skill: key,
-		description: identity.skills.find((s) => s.skill === key)?.description || value.meaning,
+		description:
+			identity.skills.find((s) => s.skill === key)?.description ||
+			value.meaning,
 	}))
 
 	const strategyGuidance = strategyPrompts[strategy]

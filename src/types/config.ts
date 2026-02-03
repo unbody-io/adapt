@@ -41,7 +41,7 @@ export interface ParentModels {
  *
  * Each component implements its own resolver following this pattern.
  */
-export type ConfigResolver<TInput extends CascadableConfig, TOutput extends ResolvedCascadableConfig> = (
-	config: TInput,
-	parentModels?: ParentModels,
-) => TOutput
+export type ConfigResolver<
+	TInput extends CascadableConfig,
+	TOutput extends ResolvedCascadableConfig,
+> = (config: TInput, parentModels?: ParentModels) => TOutput

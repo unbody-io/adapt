@@ -10,8 +10,17 @@ import type { Significance } from '../../../types'
 import type { Strategy } from '../../strategies'
 
 // Re-export phase types
-export type { ObserveOutput, ObserveContext, ObserveCallbacks, Usage } from './observe/types'
-export type { SynthesizeOutput, SynthesizeContext, SynthesizeCallbacks } from './synthesize/types'
+export type {
+	ObserveCallbacks,
+	ObserveContext,
+	ObserveOutput,
+	Usage,
+} from './observe/types'
+export type {
+	SynthesizeCallbacks,
+	SynthesizeContext,
+	SynthesizeOutput,
+} from './synthesize/types'
 
 /**
  * Usage data from LLM call (re-exported for convenience)

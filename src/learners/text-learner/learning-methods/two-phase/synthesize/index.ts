@@ -6,15 +6,19 @@
  */
 
 import type { LanguageModel } from 'ai'
-import type { SynthesizeOutput, SynthesizeContext, SynthesizeCallbacks } from './types'
-import type { SynthesizeIdentity } from './schema.identity'
-import { synthesizeIdentitySchema } from './schema.identity'
 import { generate, Output } from '../../../../../llm'
-import { synthesizeOutputSchema } from './schema.output'
+import type { Strategy } from '../../../strategies'
 import { synthesizeIdentityPromptTemplate } from './prompt.template.identity'
 import { synthesizeSystemPromptTemplate } from './prompt.template.system'
 import { synthesizeUserPromptTemplate } from './prompt.template.user'
-import type { Strategy } from '../../../strategies'
+import type { SynthesizeIdentity } from './schema.identity'
+import { synthesizeIdentitySchema } from './schema.identity'
+import { synthesizeOutputSchema } from './schema.output'
+import type {
+	SynthesizeCallbacks,
+	SynthesizeContext,
+	SynthesizeOutput,
+} from './types'
 
 /**
  * Result from synthesize init

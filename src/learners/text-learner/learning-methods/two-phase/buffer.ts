@@ -74,7 +74,10 @@ export class ObservationBuffer {
 	 * Uses rough estimate of 4 characters per token.
 	 */
 	get totalTokens(): number {
-		const totalChars = this.observations.reduce((acc, o) => acc + o.text.length, 0)
+		const totalChars = this.observations.reduce(
+			(acc, o) => acc + o.text.length,
+			0,
+		)
 		return Math.ceil(totalChars / 4)
 	}
 

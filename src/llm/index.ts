@@ -12,9 +12,14 @@ import type { ZodSchema } from 'zod'
 type GenerateTextParams = Parameters<typeof generateText>[0]
 type GenerateTextResult = Awaited<ReturnType<typeof generateText>>
 
+export type {
+	CallSettings,
+	LanguageModel,
+	LanguageModelUsage,
+	StopCondition,
+} from 'ai'
 // Re-export for convenience
 export { Output, stepCountIs } from 'ai'
-export type { LanguageModelUsage, LanguageModel, CallSettings, StopCondition } from 'ai'
 
 /**
  * Generate text with optional structured output and JSON repair
@@ -41,12 +46,18 @@ export type { LanguageModelUsage, LanguageModel, CallSettings, StopCondition } f
  *   onStepFinish: ({ usage }) => { ... }
  * })
  */
-export async function generate(params: GenerateTextParams): Promise<GenerateTextResult> {
+export async function generate(
+	params: GenerateTextParams,
+): Promise<GenerateTextResult> {
 	try {
 		return await generateText(params)
 	} catch (error) {
 		// JSON repair fallback for structured output
-		if (error instanceof NoObjectGeneratedError && error.text && params.output) {
+		if (
+			error instanceof NoObjectGeneratedError &&
+			error.text &&
+			params.output
+		) {
 			const repaired = repairJson(error.text)
 
 			try {

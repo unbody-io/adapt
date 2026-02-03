@@ -14,7 +14,9 @@ export const learnerConfigSchema = z.object({
 		.describe(
 			'Brief description of what this learner tracks, used for query routing',
 		),
-	instructions: z.string().describe(`Full structured instructions following the format:
+	instructions: z
+		.string()
+		.describe(`Full structured instructions following the format:
 [Core understanding directive]
 
 Watch for:
@@ -35,7 +37,9 @@ Track answers to:
 					'How understanding evolves: continuous (single growing text), cumulative (summarize when large), decay (recent items weighted higher)',
 				),
 		})
-		.describe('Maintenance configuration. Use { strategy: "continuous" } as default.'),
+		.describe(
+			'Maintenance configuration. Use { strategy: "continuous" } as default.',
+		),
 })
 
 export type GeneratedLearnerConfig = z.infer<typeof learnerConfigSchema>

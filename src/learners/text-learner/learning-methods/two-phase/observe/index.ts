@@ -6,14 +6,14 @@
  */
 
 import type { LanguageModel } from 'ai'
-import type { ObserveOutput, ObserveContext, ObserveCallbacks } from './types'
-import type { ObserveIdentity } from './schema.identity'
-import { observeIdentitySchema } from './schema.identity'
 import { generate, Output } from '../../../../../llm'
-import { observeOutputSchema } from './schema.output'
 import { observeIdentityPromptTemplate } from './prompt.template.identity'
 import { observeSystemPromptTemplate } from './prompt.template.system'
 import { observeUserPromptTemplate } from './prompt.template.user'
+import type { ObserveIdentity } from './schema.identity'
+import { observeIdentitySchema } from './schema.identity'
+import { observeOutputSchema } from './schema.output'
+import type { ObserveCallbacks, ObserveContext, ObserveOutput } from './types'
 
 /**
  * Result from observe init

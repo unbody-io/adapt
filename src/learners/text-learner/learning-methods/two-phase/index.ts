@@ -6,18 +6,18 @@
  */
 
 import type { LanguageModel } from 'ai'
-import type {
-	TwoPhaseConfig,
-	LearnOutput,
-	LearnOptions,
-	LearnCallbacks,
-	InitOutput,
-} from './types'
-import type { ObserveIdentity } from './observe/schema.identity'
-import type { SynthesizeIdentity } from './synthesize/schema.identity'
 import { ObservationBuffer } from './buffer'
 import { initObserve, observe } from './observe'
+import type { ObserveIdentity } from './observe/schema.identity'
 import { initSynthesize, synthesize } from './synthesize'
+import type { SynthesizeIdentity } from './synthesize/schema.identity'
+import type {
+	InitOutput,
+	LearnCallbacks,
+	LearnOptions,
+	LearnOutput,
+	TwoPhaseConfig,
+} from './types'
 
 /**
  * Two-phase learning method
@@ -81,13 +81,19 @@ export class TwoPhaseMethod {
 	 */
 	async init(instructions: string): Promise<InitOutput> {
 		// Use blueprintModel for identity generation (one-time structured output)
-		const observeBlueprintModel = this.config.observe.blueprintModel ?? this.model
-		const synthesizeBlueprintModel = this.config.synthesize.blueprintModel ?? this.model
+		const observeBlueprintModel =
+			this.config.observe.blueprintModel ?? this.model
+		const synthesizeBlueprintModel =
+			this.config.synthesize.blueprintModel ?? this.model
 
 		// Initialize both phases
 		const [observeResult, synthesizeResult] = await Promise.all([
 			initObserve(observeBlueprintModel, instructions),
-			initSynthesize(synthesizeBlueprintModel, instructions, this.config.strategy),
+			initSynthesize(
+				synthesizeBlueprintModel,
+				instructions,
+				this.config.strategy,
+			),
 		])
 
 		this._observeIdentity = observeResult.identity
@@ -129,7 +135,11 @@ export class TwoPhaseMethod {
 		const synthesizeModel = this.config.synthesize.model ?? this.model
 
 		// Handle forceSynthesize with empty data — skip observe, go straight to synthesis
-		if (options?.forceSynthesize && data.length === 0 && this.buffer.count > 0) {
+		if (
+			options?.forceSynthesize &&
+			data.length === 0 &&
+			this.buffer.count > 0
+		) {
 			const observations = this.buffer.getTexts()
 			const synthesizeResult = await synthesize(
 				synthesizeModel,
@@ -144,7 +154,11 @@ export class TwoPhaseMethod {
 				return { status: 'synthesize:error', error: synthesizeResult.error }
 			}
 			if (synthesizeResult.status === 'dismissed') {
-				return { status: 'synthesize:dismissed', output: synthesizeResult.output, usage: synthesizeResult.usage }
+				return {
+					status: 'synthesize:dismissed',
+					output: synthesizeResult.output,
+					usage: synthesizeResult.usage,
+				}
 			}
 			return {
 				status: 'synthesized',
@@ -262,19 +276,19 @@ export class TwoPhaseMethod {
 	}
 }
 
+export type { ObserveIdentity } from './observe/schema.identity'
+
+export type { ObserveContext, ObserveOutput } from './observe/types'
+export type { SynthesizeIdentity } from './synthesize/schema.identity'
+export type { SynthesizeContext, SynthesizeOutput } from './synthesize/types'
 // Re-export types
 export type {
-	TwoPhaseConfig,
-	LearnOutput,
-	LearnOptions,
-	LearnCallbacks,
 	InitOutput,
+	LearnCallbacks,
+	LearnOptions,
+	LearnOutput,
 	ObserveConfig,
 	SynthesizeConfig,
 	SynthesizeThresholds,
+	TwoPhaseConfig,
 } from './types'
-
-export type { ObserveOutput, ObserveContext } from './observe/types'
-export type { SynthesizeOutput, SynthesizeContext } from './synthesize/types'
-export type { ObserveIdentity } from './observe/schema.identity'
-export type { SynthesizeIdentity } from './synthesize/schema.identity'

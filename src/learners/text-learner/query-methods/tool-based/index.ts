@@ -1,19 +1,17 @@
 import type { LanguageModel } from 'ai'
+import { generate, stepCountIs } from '../../../../llm'
+import type { TokenUsage } from '../../../types'
+// Import query tools from deprecated location
+import { complete, generateResponse, identifyGaps } from '../../_tools'
+import type { CompleteParams } from '../../_tools/complete/schema'
 import type {
-	QueryMethod,
-	QueryContext,
-	QueryOptions,
 	QueryCallbacks,
+	QueryContext,
+	QueryMethod,
+	QueryOptions,
 	QueryResult,
 } from '../types'
-import type { TokenUsage } from '../../../types'
-import { generate, stepCountIs } from '../../../../llm'
 import { buildQueryPrompt } from './prompt.template.query'
-
-// Import query tools from deprecated location
-import { generateResponse, identifyGaps, complete } from '../../_tools'
-
-import type { CompleteParams } from '../../_tools/complete/schema'
 
 const MAX_STEPS = 10
 
@@ -122,9 +120,7 @@ export class ToolBasedMethod implements QueryMethod {
 		})
 
 		// Also check toolCalls for complete tool
-		const completeCall = result.toolCalls.find(
-			(c) => c.toolName === 'complete',
-		)
+		const completeCall = result.toolCalls.find((c) => c.toolName === 'complete')
 		if (completeCall && 'input' in completeCall) {
 			completeResult = completeCall.input as CompleteParams
 		}

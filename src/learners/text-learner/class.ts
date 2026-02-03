@@ -1,22 +1,27 @@
-import { applyStrategy } from './strategies'
+import type { ParentModels } from '../../types/config'
+import { TypedEmitter } from '../../types/events'
 import type {
 	EvolutionEntry,
 	Learner,
 	LearnerGovernance,
 	LearnerMetadata,
 } from '../types'
+import { resolveTextLearnerConfig } from './config.resolver'
+import { type LearnOptions, TwoPhaseMethod } from './learning-methods'
+import {
+	createQueryMethod,
+	type QueryMethod,
+	type QueryOptions,
+	type QueryResult,
+} from './query-methods'
+import { applyStrategy } from './strategies'
 import type {
+	LearnOutput,
+	QueryMethodName,
+	ResolvedTextLearnerConfig,
 	TextLearnerConfig,
 	TextLearnerEventMap,
-	QueryMethodName,
-	LearnOutput,
-	ResolvedTextLearnerConfig,
 } from './types'
-import { TypedEmitter } from '../../types/events'
-import { TwoPhaseMethod, type LearnOptions } from './learning-methods'
-import { createQueryMethod, type QueryMethod, type QueryResult, type QueryOptions } from './query-methods'
-import { resolveTextLearnerConfig } from './config.resolver'
-import type { ParentModels } from '../../types/config'
 
 /**
  * TextLearner - A learning agent that maintains understanding as narrative text
@@ -94,7 +99,10 @@ export class TextLearner
 		observeSystemPrompt: string
 		synthesizeSystemPrompt: string
 	}> {
-		if (this._learningMethod.observePrompt && this._learningMethod.synthesizePrompt) {
+		if (
+			this._learningMethod.observePrompt &&
+			this._learningMethod.synthesizePrompt
+		) {
 			return {
 				observeSystemPrompt: this._learningMethod.observePrompt,
 				synthesizeSystemPrompt: this._learningMethod.synthesizePrompt,
@@ -199,7 +207,11 @@ export class TextLearner
 	/**
 	 * Get current buffer state (for debugging/observability)
 	 */
-	getBufferState(): { count: number; avgImportance: number; totalTokens: number } {
+	getBufferState(): {
+		count: number
+		avgImportance: number
+		totalTokens: number
+	} {
 		return this._learningMethod.getBufferState()
 	}
 
@@ -240,9 +252,8 @@ export class TextLearner
 						})
 					},
 					onObserveThinking: (thoughts) => {
-						this.emit('learner:ingest:thinking', {
+						this.emit('learner:observe:thinking', {
 							learnerId: this.id,
-							chunkId: 'observe',
 							thoughts,
 							usage: { inputTokens: 0, outputTokens: 0, totalTokens: 0 },
 						})
@@ -254,9 +265,8 @@ export class TextLearner
 						})
 					},
 					onSynthesizeThinking: (thoughts) => {
-						this.emit('learner:ingest:thinking', {
+						this.emit('learner:synthesize:thinking', {
 							learnerId: this.id,
-							chunkId: 'synthesize',
 							thoughts,
 							usage: { inputTokens: 0, outputTokens: 0, totalTokens: 0 },
 						})
@@ -270,7 +280,7 @@ export class TextLearner
 			return result
 		} catch (err) {
 			const error = err instanceof Error ? err : new Error(String(err))
-			this.emit('learner:ingest:failed', {
+			this.emit('learner:learn:failed', {
 				learnerId: this.id,
 				error: error.message,
 			})
@@ -337,14 +347,6 @@ export class TextLearner
 					significance: result.significance,
 					evolution: result.evolution,
 					usage: result.usage,
-				})
-
-				// Also emit legacy understanding updated event
-				this.emit('learner:understanding:updated', {
-					learnerId: this.id,
-					understanding: this.understanding,
-					previousUnderstanding,
-					entry: evolutionEntry,
 				})
 
 				// Update governance (use 1.0 as relevance since it was synthesized)
@@ -452,7 +454,8 @@ export class TextLearner
 		const previousStatus = this.governance.status
 
 		// EMA: weight recent relevance at 20%
-		this.governance.activation = this.governance.activation * 0.8 + relevance * 0.2
+		this.governance.activation =
+			this.governance.activation * 0.8 + relevance * 0.2
 
 		// Update status based on threshold
 		if (this.governance.activation >= this.governance.threshold) {

@@ -50,7 +50,7 @@ export class TypedEmitter<M extends object> {
 
 	on<K extends keyof M>(
 		typeOrHandler: K | UnifiedHandler<EventsFromMap<M>>,
-		handler?: TypedHandler<M[K]>
+		handler?: TypedHandler<M[K]>,
 	): this {
 		if (typeof typeOrHandler === 'function') {
 			this.wildcardListeners.push(typeOrHandler)

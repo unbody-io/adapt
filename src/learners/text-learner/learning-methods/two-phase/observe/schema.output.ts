@@ -31,7 +31,9 @@ export const observeOutputSchema = z.object({
 		.number()
 		.min(0)
 		.max(1)
-		.describe('How important this observation is (0.0 to 1.0). Use 0.5 if dismissed.'),
+		.describe(
+			'How important this observation is (0.0 to 1.0). Use 0.5 if dismissed.',
+		),
 })
 
 export type ObserveSchemaOutput = z.infer<typeof observeOutputSchema>

@@ -2,9 +2,9 @@
  * Default values for TextLearner configuration
  */
 
-import type { Strategy } from './strategies'
-import type { QueryMethodName } from './query-methods/types'
 import type { SynthesizeThresholds } from './learning-methods/types'
+import type { QueryMethodName } from './query-methods/types'
+import type { Strategy } from './strategies'
 
 export const TEXT_LEARNER_DEFAULTS = {
 	origin: 'developer' as const,

@@ -8,7 +8,6 @@
 import { z } from 'zod'
 import { compare } from '../../../cognitive-skills'
 
-
 /**
  * Schema for generated synthesize identity
  *
@@ -23,16 +22,19 @@ export const synthesizeIdentitySchema = z.object({
 	skills: z
 		.array(
 			z.object({
-				skill: compare
-					.compareSkillEnum
-					.describe('The skill name from the compare skill-set'),
-				description: 
-					z
+				skill: compare.compareSkillEnum.describe(
+					'The skill name from the compare skill-set',
+				),
+				description: z
 					.string()
-					.describe('The skill description - original or customized for domain'),
-			})
+					.describe(
+						'The skill description - original or customized for domain',
+					),
+			}),
 		)
-		.describe('Cognitive skills with descriptions - original or customized for this domain'),
+		.describe(
+			'Cognitive skills with descriptions - original or customized for this domain',
+		),
 })
 
 export type SynthesizeIdentity = z.infer<typeof synthesizeIdentitySchema>

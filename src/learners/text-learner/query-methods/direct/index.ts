@@ -1,22 +1,24 @@
 import type { LanguageModel } from 'ai'
 import { z } from 'zod'
+import { generate, Output } from '../../../../llm'
+import type { TokenUsage } from '../../../types'
 import type {
-	QueryMethod,
-	QueryContext,
-	QueryOptions,
 	QueryCallbacks,
+	QueryContext,
+	QueryMethod,
+	QueryOptions,
 	QueryResult,
 } from '../types'
-import type { TokenUsage } from '../../../types'
 import { buildQuerySystemPrompt } from './prompt.system'
 import { buildQueryUserPrompt } from './prompt.user'
-import { generate, Output } from '../../../../llm'
 
 /**
  * Schema for query response
  */
 const queryResponseSchema = z.object({
-	relevant: z.boolean().describe('Can you answer this from your understanding?'),
+	relevant: z
+		.boolean()
+		.describe('Can you answer this from your understanding?'),
 	confidence: z.number().describe('How confident are you? 0.0-1.0'),
 	insight: z.string().describe('Your answer based on your understanding'),
 	gaps: z.string().describe('What you could not answer (empty if none)'),

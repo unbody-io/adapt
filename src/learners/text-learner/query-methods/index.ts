@@ -1,10 +1,10 @@
 import type { LanguageModel } from 'ai'
-import type { QueryMethod, QueryMethodName } from './types'
-import { ToolBasedMethod } from './tool-based'
 import { DirectMethod } from './direct'
+import { ToolBasedMethod } from './tool-based'
+import type { QueryMethod, QueryMethodName } from './types'
 
-export { ToolBasedMethod } from './tool-based'
 export { DirectMethod } from './direct'
+export { ToolBasedMethod } from './tool-based'
 export * from './types'
 
 /**

@@ -5,15 +5,15 @@
  * cascade logic for models and defaults for other values.
  */
 
+import type { LanguageModel } from 'ai'
 import { cascade } from '../utils/cascade'
 import { BRAIN_DEFAULTS } from './config.defaults'
 import type {
 	BrainConfig,
+	LearningConfig,
 	ResolvedBrainConfig,
 	ResolvedLearningConfig,
-	LearningConfig,
 } from './types'
-import type { LanguageModel } from 'ai'
 
 /**
  * Resolve learning config with model cascade
@@ -36,7 +36,10 @@ function resolveLearningConfig(
 		},
 		synthesize: {
 			model: cascade(config?.synthesize?.model, model),
-			blueprintModel: cascade(config?.synthesize?.blueprintModel, blueprintModel),
+			blueprintModel: cascade(
+				config?.synthesize?.blueprintModel,
+				blueprintModel,
+			),
 			thresholds: {
 				maxObservations:
 					config?.synthesize?.thresholds?.maxObservations ??
@@ -54,8 +57,12 @@ function resolveLearningConfig(
 			method: config?.query?.method ?? BRAIN_DEFAULTS.learning.query.method,
 		},
 		maintenance: {
-			strategy: config?.maintenance?.strategy ?? BRAIN_DEFAULTS.learning.maintenance.strategy,
-			maxTokens: config?.maintenance?.maxTokens ?? BRAIN_DEFAULTS.learning.maintenance.maxTokens,
+			strategy:
+				config?.maintenance?.strategy ??
+				BRAIN_DEFAULTS.learning.maintenance.strategy,
+			maxTokens:
+				config?.maintenance?.maxTokens ??
+				BRAIN_DEFAULTS.learning.maintenance.maxTokens,
 		},
 	}
 }

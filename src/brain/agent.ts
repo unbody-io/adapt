@@ -1,10 +1,10 @@
-import type { LanguageModel, CallSettings } from 'ai'
+import type { CallSettings, LanguageModel } from 'ai'
 import { z } from 'zod'
-import type { LearnerResponse, BrainAskResult } from './types'
 import type { TokenUsage } from '../learners/types'
 import { generate, Output } from '../llm'
 import { buildSynthesisSystemPrompt } from './prompts/prompt.synthesis.system'
 import { buildSynthesisUserPrompt } from './prompts/prompt.synthesis.user'
+import type { BrainAskResult, LearnerResponse } from './types'
 
 /**
  * Schema for synthesis output

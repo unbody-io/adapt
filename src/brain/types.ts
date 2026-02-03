@@ -1,10 +1,14 @@
 import type { LanguageModel } from 'ai'
-import type { IngestChunk, TokenUsage } from '../learners/types'
-import type { TextLearnerEventMap } from '../learners/text-learner/types'
-import type { EventsFromMap } from '../types/events'
 import type { GeneratedLearnerConfig } from '../learners/schema.config'
-import type { CascadableConfig, ResolvedCascadableConfig } from '../types/config'
 import type { Strategy } from '../learners/text-learner/strategies'
+import type { TextLearnerEventMap } from '../learners/text-learner/types'
+import type { TokenUsage } from '../learners/types'
+import type { LearnOutput } from '../learners/text-learner/learning-methods/two-phase/types'
+import type {
+	CascadableConfig,
+	ResolvedCascadableConfig,
+} from '../types/config'
+import type { EventsFromMap } from '../types/events'
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Learning Config (passed to learners)
@@ -107,7 +111,8 @@ export interface ResolvedObservePhaseConfig extends ResolvedCascadableConfig {}
 /**
  * Resolved synthesize phase config
  */
-export interface ResolvedSynthesizePhaseConfig extends ResolvedCascadableConfig {
+export interface ResolvedSynthesizePhaseConfig
+	extends ResolvedCascadableConfig {
 	thresholds: {
 		maxObservations: number
 		maxTokens: number
@@ -186,7 +191,7 @@ export interface BrainInjectOptions {
  */
 export interface LearnerBatchResult {
 	learnerId: string
-	chunks: IngestChunk[]
+	result: LearnOutput
 }
 
 /**
@@ -246,25 +251,55 @@ export interface BrainOwnEventMap {
 	// Init
 	'brain:init:started': Record<string, never>
 	'brain:init:config:generating': Record<string, never>
-	'brain:init:config:generated': { configs: GeneratedLearnerConfig[]; usage: TokenUsage }
+	'brain:init:config:generated': {
+		configs: GeneratedLearnerConfig[]
+		usage: TokenUsage
+	}
 	'brain:init:completed': { learnerIds: string[] }
 	'brain:init:failed': { error: string }
 
 	// Inject
-	'brain:inject:started': { injectId: string; itemCount: number; batchCount: number }
-	'brain:inject:batch:started': { injectId: string; batchId: string; batchIndex: number; itemCount: number }
-	'brain:inject:batch:completed': { injectId: string; batchId: string; batchIndex: number; results: LearnerBatchResult[] }
+	'brain:inject:started': {
+		injectId: string
+		itemCount: number
+		batchCount: number
+	}
+	'brain:inject:batch:started': {
+		injectId: string
+		batchId: string
+		batchIndex: number
+		itemCount: number
+	}
+	'brain:inject:batch:completed': {
+		injectId: string
+		batchId: string
+		batchIndex: number
+		results: LearnerBatchResult[]
+	}
 	'brain:inject:completed': { injectId: string; batches: BatchResult[] }
 	'brain:inject:failed': { injectId: string; error: string }
 
 	// Ask
 	'brain:ask:started': { queryId: string; query: string }
-	'brain:ask:synthesis:started': { queryId: string; learnerResponses: LearnerResponse[] }
-	'brain:ask:completed': { queryId: string; insight: string; sources: BrainAskResult['sources']; gaps: string[]; usage: TokenUsage }
+	'brain:ask:synthesis:started': {
+		queryId: string
+		learnerResponses: LearnerResponse[]
+	}
+	'brain:ask:completed': {
+		queryId: string
+		insight: string
+		sources: BrainAskResult['sources']
+		gaps: string[]
+		usage: TokenUsage
+	}
 	'brain:ask:failed': { queryId: string; error: string }
 
 	// Learner management
-	'brain:learner:added': { learnerId: string; name: string; instructions: string }
+	'brain:learner:added': {
+		learnerId: string
+		name: string
+		instructions: string
+	}
 }
 
 /**

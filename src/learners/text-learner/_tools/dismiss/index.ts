@@ -1,2 +1,2 @@
+export { type DismissParams, dismissParams } from './schema'
 export { dismiss } from './tool'
-export { dismissParams, type DismissParams } from './schema'

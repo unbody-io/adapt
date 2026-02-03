@@ -10,7 +10,12 @@ export * from './types'
 import { continuous, continuousStrategyPrompt } from './continuous'
 import { cumulative, cumulativeStrategyPrompt } from './cumulative'
 import { decay, decayStrategyPrompt } from './decay'
-import type { Strategy, StrategyContext, StrategyFn, StrategyResult } from './types'
+import type {
+	Strategy,
+	StrategyContext,
+	StrategyFn,
+	StrategyResult,
+} from './types'
 
 /**
  * Map of strategy names to their implementation functions
@@ -33,7 +38,9 @@ export const strategyPrompts: Record<Strategy, string> = {
 /**
  * Apply the appropriate strategy to maintain understanding
  */
-export async function applyStrategy(ctx: StrategyContext): Promise<StrategyResult> {
+export async function applyStrategy(
+	ctx: StrategyContext,
+): Promise<StrategyResult> {
 	const fn = strategyFunctions[ctx.config.strategy]
 	return fn(ctx)
 }

@@ -3,15 +3,13 @@
  */
 
 export { TextLearner } from './class'
-export * from './types'
-
 // Learning methods
 export { TwoPhaseMethod } from './learning-methods'
-
 // Query methods
 export {
 	createQueryMethod,
-	ToolBasedMethod as ToolBasedQueryMethod,
 	DirectMethod as DirectQueryMethod,
 	type QueryMethod,
+	ToolBasedMethod as ToolBasedQueryMethod,
 } from './query-methods'
+export * from './types'

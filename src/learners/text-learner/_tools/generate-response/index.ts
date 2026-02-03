@@ -1,2 +1,2 @@
+export { type GenerateResponseParams, generateResponseParams } from './schema'
 export { generateResponse } from './tool'
-export { generateResponseParams, type GenerateResponseParams } from './schema'

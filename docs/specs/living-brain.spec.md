@@ -40,7 +40,7 @@ All evolution decisions are triggered by observable signals from:
 - Brain monitor analysis (TBD - future enhancement)
 
 **3. Intelligent Decision Making**
-A centralized **Judge** component receives signals, analyzes system state, and makes evolution decisions using LLM intelligence.
+A centralized **Evaluator** component receives signals, analyzes system state, and makes evolution decisions using LLM intelligence.
 
 **4. Consistent Execution Pattern**
 All evolution actions follow the same pattern:
@@ -64,7 +64,7 @@ Every parameter of every learner can be updated at runtime. The system is never 
 │         └────────────────┼───────────────────┘          │
 │                          ▼                              │
 │                    ┌───────────┐                        │
-│                    │   Judge   │                        │
+│                    │   Evaluator   │                        │
 │                    │ (buffers  │                        │
 │                    │  signals) │                        │
 │                    └─────┬─────┘                        │
@@ -91,19 +91,19 @@ Every parameter of every learner can be updated at runtime. The system is never 
 1. Signal Emission
    ├─ Learner mechanical threshold crossed → emit signal event
    ├─ External source → brain.signal(description)
-   └─ Brain forwards to Judge
+   └─ Brain forwards to Evaluator
 
-2. Judge Buffering
+2. Evaluator Buffering
    └─ Accumulate signals until buffer threshold reached (fixed: 5 signals)
 
-3. Judge Evaluation
+3. Evaluator Evaluation
    ├─ Receive full system context (lightweight learner overview)
    ├─ Tools available to fetch detailed learner state
    ├─ LLM analyzes signals + context
    └─ Output: 0 to N evolution decisions
 
 4. Brain Execution
-   ├─ Receive decisions from Judge
+   ├─ Receive decisions from Evaluator
    ├─ Execute sequentially in order
    ├─ Each action uses LLM to generate configs/understandings
    └─ Emit evolution events
@@ -114,7 +114,7 @@ Every parameter of every learner can be updated at runtime. The system is never 
 
 ### 2.2 Decision → Execution Mapping
 
-| Judge Decision | Brain Action | LLM Usage |
+| Evaluator Decision | Brain Action | LLM Usage |
 |----------------|--------------|-----------|
 | `spawn` | Create new learner | Generate learner config from guidance |
 | `merge` | Merge 2+ learners | Synthesize configs + understandings into one |
@@ -126,7 +126,7 @@ Every parameter of every learner can be updated at runtime. The system is never 
 
 **Organic (Autonomous)**
 - Learners self-report via mechanical thresholds
-- Judge automatically evaluates buffered signals
+- Evaluator automatically evaluates buffered signals
 - Evolution happens without human intervention
 
 **Manual (Steered)**
@@ -138,11 +138,11 @@ Every parameter of every learner can be updated at runtime. The system is never 
 
 ## 3. Detailed Component Specs
 
-### 3.1 Judge Component
+### 3.1 Evaluator Component
 
 #### 3.1.1 Responsibilities
 
-The Judge is a centralized decision-making component that:
+The Evaluator is a centralized decision-making component that:
 1. Receives signals from any source (learners, Brain, external)
 2. Buffers signals until evaluation threshold
 3. Analyzes system state with LLM intelligence
@@ -194,7 +194,7 @@ The Judge is a centralized decision-making component that:
 
 ```typescript
 interface EvolutionDecision {
-  action: 'spawn' | 'merge' | 'split' | 'adjust' | 'prune'
+  action: 'create' | 'merge' | 'split' | 'adjust' | 'delete'
   reasoning: string          // Why this decision
   guidance: string           // Natural language guidance for LLM action handler
   targets: string[]          // Affected learner IDs (empty for spawn)
@@ -206,7 +206,7 @@ interface EvolutionDecision {
 ```typescript
 // Spawn
 {
-  action: 'spawn',
+  action: 'create',
   reasoning: 'Queries about error handling consistently get low confidence responses',
   guidance: 'Track user error handling preferences and patterns',
   targets: []
@@ -238,7 +238,7 @@ interface EvolutionDecision {
 
 // Prune
 {
-  action: 'prune',
+  action: 'delete',
   reasoning: 'Learner "temp-tracker" has been dormant for 1000+ operations',
   guidance: '',  // No guidance needed for deletion
   targets: ['temp-tracker']
@@ -253,12 +253,12 @@ interface EvolutionDecision {
 
 Learners monitor their own performance metrics and emit signals when thresholds are crossed:
 
-| Metric | Threshold | Signal Description |
-|--------|-----------|-------------------|
-| Dismissal Rate | > 80% | "I'm dismissing {X}% of observations" |
-| Low Confidence | Avg < 0.3 over last 5 queries | "My query confidence is consistently low ({X})" |
-| Buffer Overflow | Buffer exceeds maxObservations * 1.5 | "My buffer is consistently overflowing ({X} observations)" |
-| Stagnation | No synthesis in last 100 observations | "No synthesis in {X} observations" |
+| Metric | Threshold Config | Signal Description |
+|--------|------------------|-------------------|
+| Dismissal Rate | `maxDismissalRate` > 80% | "I'm dismissing {X}% of observations" |
+| Query Confidence | `minConfidence` < 0.3 (avg over last 5 queries) | "My query confidence is consistently low ({X})" |
+| Buffer Overflow | Buffer exceeds `maxObservations * bufferOverflowMultiplier` (1.5x) | "My buffer is consistently overflowing ({X} observations)" |
+| Synthesis Gap | `maxObservationsWithoutSynthesis` (default 100) | "No synthesis in {X} observations" |
 | Activation Decay | Activation drops below threshold | "I've become dormant (activation: {X})" |
 
 **2. Manual Signals (External)**
@@ -280,19 +280,19 @@ An LLM-based analyzer that watches Brain operations and detects patterns. Buffer
 **From Learners:**
 ```typescript
 learner.emit('signal', { description: '...' })
-→ Brain listens and forwards to Judge
+→ Brain listens and forwards to Evaluator
 ```
 
 **From External:**
 ```typescript
 brain.signal({ source: 'user', description: '...' })
-→ Brain forwards to Judge
+→ Brain forwards to Evaluator
 ```
 
-**To Judge:**
+**To Evaluator:**
 ```typescript
 judge.signal({ source, description, timestamp })
-→ Judge buffers signal
+→ Evaluator buffers signal
 → When buffer threshold reached, triggers evaluation
 ```
 
@@ -307,7 +307,7 @@ All actions follow the pattern: **Guidance → LLM → Execute**
 **Input:**
 ```typescript
 {
-  action: 'spawn',
+  action: 'create',
   guidance: string  // "Track user error handling preferences"
 }
 ```
@@ -525,7 +525,7 @@ Output the config changes as JSON.
 **Input:**
 ```typescript
 {
-  action: 'prune',
+  action: 'delete',
   guidance: '',  // Not needed for deletion
   targets: string[]  // ['temp-tracker']
 }
@@ -540,7 +540,7 @@ async prune(learnerId: string): Promise<void> {
 ```
 
 **Events:**
-- `evolution:action:executed` with prune details
+- `evolution:action:executed` with delete details
 - `brain:learner:removed` for deleted learner
 
 ### 3.4 Learner Update Mechanism
@@ -611,7 +611,7 @@ brain.signal(signal: {
 **Manual Evolution Trigger:**
 ```typescript
 brain.evaluateEvolution(): Promise<void>
-// Forces Judge to evaluate buffered signals immediately
+// Forces Evaluator to evaluate buffered signals immediately
 ```
 
 **Direct Evolution Actions:**
@@ -636,10 +636,10 @@ brain.adjust(
 brain.prune(learnerId: string): Promise<void>
 ```
 
-### 4.2 Judge API
+### 4.2 Evaluator API
 
 ```typescript
-interface Judge {
+interface Evaluator {
   // Add signal to buffer
   signal(signal: {
     source: string
@@ -664,7 +664,7 @@ interface Judge {
 class TextLearner {
   async update(updates: Partial<GeneratedLearnerConfig>): Promise<void>
 
-  // Emit signal to Judge
+  // Emit signal to Evaluator
   signal(description: string): void
 }
 ```
@@ -678,7 +678,7 @@ class TextLearner {
 **Generic Evolution Event:**
 ```typescript
 'evolution:action:executed': {
-  action: 'spawn' | 'merge' | 'split' | 'adjust' | 'prune'
+  action: 'create' | 'merge' | 'split' | 'adjust' | 'delete'
   reasoning: string
   guidance: string
   targets: string[]
@@ -706,7 +706,7 @@ class TextLearner {
   timestamp: Date
   metrics?: {
     // Optional contextual metrics
-    dismissalRate?: number
+    maxDismissalRate?: number
     avgConfidence?: number
     bufferCount?: number
     activation?: number
@@ -723,7 +723,7 @@ class TextLearner {
 }
 ```
 
-### 5.3 Judge Events
+### 5.3 Evaluator Events
 
 ```typescript
 'judge:evaluation:started': {
@@ -761,10 +761,10 @@ interface LearnerGovernance {
 
   // NEW: Signal thresholds
   signalThresholds: {
-    dismissalRate: number        // Default: 0.8
-    lowConfidence: number         // Default: 0.3
-    bufferOverflow: number        // Default: 1.5 (multiplier of maxObservations)
-    stagnationWindow: number      // Default: 100 observations
+    maxDismissalRate: number        // Default: 0.8
+    minConfidence: number         // Default: 0.3
+    bufferOverflowMultiplier: number        // Default: 1.5 (multiplier of maxObservations)
+    maxObservationsWithoutSynthesis: number      // Default: 100 observations
   }
 }
 ```
@@ -781,7 +781,7 @@ interface BrainConfig {
     // NEW: Evolution config
     evolution?: {
       enabled: boolean              // Default: true
-      judgeSignalThreshold: number  // Default: 5
+      evaluatorSignalThreshold: number  // Default: 5
       autoEvaluate: boolean         // Default: true (auto eval when threshold reached)
     }
   }
@@ -804,10 +804,10 @@ interface GeneratedLearnerConfig {
   // NEW: Governance config (optional, defaults provided)
   governance?: {
     signalThresholds?: {
-      dismissalRate?: number
-      lowConfidence?: number
-      bufferOverflow?: number
-      stagnationWindow?: number
+      maxDismissalRate?: number
+      minConfidence?: number
+      bufferOverflowMultiplier?: number
+      maxObservationsWithoutSynthesis?: number
     }
   }
 }
@@ -815,7 +815,7 @@ interface GeneratedLearnerConfig {
 
 ### 6.4 Config Mutability Matrix
 
-| Field | Category | Adjustable by Judge? | Notes |
+| Field | Category | Adjustable by Evaluator? | Notes |
 |-------|----------|---------------------|-------|
 | `id` | Identity | ❌ No | Immutable identifier |
 | `origin` | Metadata | ❌ No | Historical record |
@@ -833,17 +833,17 @@ interface GeneratedLearnerConfig {
 
 ### 7.1 Execution Order
 
-Evolution decisions execute **sequentially** in the order Judge outputs them to prevent conflicts.
+Evolution decisions execute **sequentially** in the order Evaluator outputs them to prevent conflicts.
 
 Example conflict scenario:
 ```typescript
 // If executed in parallel, these would conflict:
 decisions = [
   { action: 'adjust', targets: ['learner-a'], ... },
-  { action: 'prune', targets: ['learner-a'], ... }
+  { action: 'delete', targets: ['learner-a'], ... }
 ]
 
-// Sequential execution ensures adjust completes before prune attempts deletion
+// Sequential execution ensures adjust completes before delete attempts deletion
 ```
 
 ### 7.2 LLM Failure Handling
@@ -853,7 +853,7 @@ All evolution actions involve LLM calls. Failure modes:
 **Spawn/Merge/Split/Adjust:**
 - LLM fails to generate valid config → emit `evolution:action:failed` event
 - Leave system state unchanged
-- Log error and signal to Judge (creates feedback loop)
+- Log error and signal to Evaluator (creates feedback loop)
 
 **Prune:**
 - No LLM involved, direct deletion
@@ -862,7 +862,7 @@ All evolution actions involve LLM calls. Failure modes:
 ### 7.3 Testing Strategy
 
 **Unit Tests:**
-- Judge signal buffering and threshold logic
+- Evaluator signal buffering and threshold logic
 - Config mutability enforcement
 - Action handlers (mock LLM responses)
 
@@ -872,7 +872,7 @@ All evolution actions involve LLM calls. Failure modes:
 - Manual evolution triggers
 
 **LLM Evals:**
-- Judge decision quality given various signals
+- Evaluator decision quality given various signals
 - Config generation quality (spawn, merge, split, adjust)
 - Understanding merge/split quality
 
@@ -882,12 +882,12 @@ All evolution actions involve LLM calls. Failure modes:
 - Dedicated LLM analyzer watching Brain operations
 - Buffers understandings, queries, and learner responses
 - Detects systemic patterns (e.g., "learners A and B always respond similarly")
-- Emits high-level signals to Judge
+- Emits high-level signals to Evaluator
 
 **Evolution History:**
 - Track all evolution decisions and outcomes
 - Enable rollback or replay
-- Feed into Judge as context ("past decisions led to X outcome")
+- Feed into Evaluator as context ("past decisions led to X outcome")
 
 **Soft Delete / Archive:**
 - Currently pruned learners are hard deleted
@@ -895,7 +895,7 @@ All evolution actions involve LLM calls. Failure modes:
 - Archived learners don't participate but can be revived
 
 **Evolution Confidence:**
-- Judge outputs confidence score with each decision
+- Evaluator outputs confidence score with each decision
 - Enable human approval mode for low-confidence decisions
 - Automatic execution only for high-confidence decisions
 
@@ -907,7 +907,7 @@ All evolution actions involve LLM calls. Failure modes:
 
 ## 8. Open Questions
 
-1. **Judge LLM Selection:** Should Judge use a specific model or inherit from Brain config?
+1. **Evaluator LLM Selection:** Should Evaluator use a specific model or inherit from Brain config?
 2. **Evolution Rate Limits:** Should there be limits on evolution frequency (e.g., max 10 evolutions per hour)?
 3. **Learner Lifecycle Stages:** Should learners have states like `probation` (newly spawned, under evaluation)?
 4. **Signal Prioritization:** Should certain signals have higher priority than others?
@@ -919,7 +919,7 @@ All evolution actions involve LLM calls. Failure modes:
 
 **Brain:** Orchestration layer managing multiple learners
 **Learner:** Independent learning agent with specific purpose
-**Judge:** Centralized decision-maker for evolution actions
+**Evaluator:** Centralized decision-maker for evolution actions
 **Signal:** Observable event indicating potential need for evolution
 **Evolution Action:** Structural change to learner set (spawn/merge/split/adjust/prune)
 **Guidance:** Natural language directive for LLM action handlers

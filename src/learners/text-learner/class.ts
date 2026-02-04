@@ -36,7 +36,9 @@ export class TextLearner
 	implements Learner<string>
 {
 	readonly id: string
-	readonly instructions: string
+	name!: string
+	instructions!: string
+	description?: string
 
 	private config: ResolvedTextLearnerConfig
 	private understanding = ''
@@ -45,11 +47,19 @@ export class TextLearner
 	private _learningMethod: TwoPhaseMethod
 	private _queryMethod: QueryMethod
 
+	// Signal tracking state (Living Brain)
+	private dismissalCount = 0
+	private observationCount = 0
+	private queryConfidences: number[] = []
+	private lastSynthesisObservationCount = 0
+
 	constructor(rawConfig: TextLearnerConfig, parentModels?: ParentModels) {
 		super()
 		this.config = resolveTextLearnerConfig(rawConfig, parentModels)
 		this.id = this.config.id
+		this.name = (rawConfig as any).name || this.config.id // Use name from config if available
 		this.instructions = this.config.instructions
+		this.description = rawConfig.description
 
 		// Create two-phase learning method with resolved config
 		this._learningMethod = new TwoPhaseMethod(this.config.model, {
@@ -79,6 +89,12 @@ export class TextLearner
 			lastAccessed: new Date(),
 			retrievalCount: 0,
 			successRate: 0,
+			signalThresholds: {
+				maxDismissalRate: 0.8,
+				minConfidence: 0.3,
+				bufferOverflowMultiplier: 1.5,
+				maxObservationsWithoutSynthesis: 100,
+			},
 		}
 	}
 
@@ -177,6 +193,21 @@ export class TextLearner
 	}
 
 	/**
+	 * Set understanding directly (used by evolution system)
+	 *
+	 * This bypasses normal learning flow and directly sets the understanding text.
+	 * Primarily used by merge/split handlers to transfer understanding between learners.
+	 */
+	setUnderstanding(understanding: string): void {
+		this.understanding = understanding
+
+		this.emit('learner:understanding:set', {
+			learnerId: this.id,
+			understanding,
+		})
+	}
+
+	/**
 	 * Get a copy of the evolution history (newest first)
 	 */
 	getEvolution(): EvolutionEntry[] {
@@ -220,6 +251,125 @@ export class TextLearner
 	 */
 	getBufferedObservations(): Array<{ text: string; importance: number }> {
 		return this._learningMethod.getBufferedObservations()
+	}
+
+	/**
+	 * Get synthesis thresholds (used by evolution system)
+	 */
+	getSynthesizeThresholds() {
+		return { ...this.config.synthesize.thresholds }
+	}
+
+	/**
+	 * Update learner configuration (used by evolution system)
+	 *
+	 * Accepts partial config updates and applies them with validation:
+	 * - Immutable fields (id, origin, type, model, blueprintModel) cannot be changed
+	 * - Instructions changes trigger prompt regeneration
+	 * - Emits events for updates and prompt regeneration
+	 *
+	 * @param updates - Partial config updates
+	 * @throws Error if attempting to modify immutable fields
+	 */
+	async update(updates: {
+		name?: string
+		description?: string
+		instructions?: string
+		thresholds?: {
+			minImportance?: number
+			maxObservations?: number
+		}
+	}): Promise<void> {
+		// Validate that no immutable fields are being changed
+		this.validateImmutability(updates)
+
+		// Track what changed for event emission
+		const appliedUpdates: typeof updates = {}
+
+		// Apply mutable field updates
+		if (updates.name !== undefined && updates.name !== this.name) {
+			this.name = updates.name
+			appliedUpdates.name = updates.name
+		}
+
+		if (
+			updates.description !== undefined &&
+			updates.description !== this.description
+		) {
+			this.description = updates.description
+			appliedUpdates.description = updates.description
+		}
+
+		// Instructions update requires prompt regeneration
+		if (
+			updates.instructions !== undefined &&
+			updates.instructions !== this.instructions
+		) {
+			this.instructions = updates.instructions
+			appliedUpdates.instructions = updates.instructions
+
+			// Regenerate prompts with new instructions
+			const result = await this._learningMethod.init(updates.instructions)
+
+			this.emit('learner:prompts:regenerated', {
+				learnerId: this.id,
+				observePrompt: result.observeSystemPrompt,
+				synthesizePrompt: result.synthesizeSystemPrompt,
+			})
+		}
+
+		// Threshold updates
+		if (updates.thresholds) {
+			const currentThresholds = this.config.synthesize.thresholds
+
+			// Only update if something actually changed
+			if (
+				updates.thresholds.minImportance !== undefined &&
+				updates.thresholds.minImportance !== currentThresholds.minImportance
+			) {
+				this.config.synthesize.thresholds.minImportance =
+					updates.thresholds.minImportance
+				appliedUpdates.thresholds = appliedUpdates.thresholds || {}
+				appliedUpdates.thresholds.minImportance =
+					updates.thresholds.minImportance
+			}
+
+			if (
+				updates.thresholds.maxObservations !== undefined &&
+				updates.thresholds.maxObservations !== currentThresholds.maxObservations
+			) {
+				this.config.synthesize.thresholds.maxObservations =
+					updates.thresholds.maxObservations
+				appliedUpdates.thresholds = appliedUpdates.thresholds || {}
+				appliedUpdates.thresholds.maxObservations =
+					updates.thresholds.maxObservations
+			}
+		}
+
+		// Emit config updated event if any changes were made
+		if (Object.keys(appliedUpdates).length > 0) {
+			this.emit('learner:config:updated', {
+				learnerId: this.id,
+				updates: appliedUpdates,
+			})
+		}
+	}
+
+	/**
+	 * Validate that no immutable fields are being changed
+	 *
+	 * @throws Error if attempting to modify immutable fields
+	 */
+	private validateImmutability(updates: any): void {
+		const IMMUTABLE_FIELDS = ['id', 'origin', 'type', 'model', 'blueprintModel']
+
+		for (const field of IMMUTABLE_FIELDS) {
+			if (updates[field] !== undefined) {
+				throw new Error(
+					`Cannot update immutable field "${field}". Learner identity and core configuration cannot be changed.`,
+				)
+			}
+		}
 	}
 
 	/**
@@ -294,6 +444,7 @@ export class TextLearner
 	private async handleLearnResult(result: LearnOutput): Promise<void> {
 		switch (result.status) {
 			case 'observed': {
+				this.observationCount++
 				const bufferState = this._learningMethod.getBufferState()
 				this.emit('learner:observed', {
 					learnerId: this.id,
@@ -302,15 +453,21 @@ export class TextLearner
 					bufferCount: bufferState.count,
 					usage: result.usage,
 				})
+				// Check signals after observation
+				this.checkAndEmitSignals()
 				break
 			}
 
 			case 'observe:dismissed':
+				this.observationCount++
+				this.dismissalCount++
 				this.emit('learner:observe:dismissed', {
 					learnerId: this.id,
 					output: result.output,
 					usage: result.usage,
 				})
+				// Check signals after dismissal
+				this.checkAndEmitSignals()
 				break
 
 			case 'observe:error':
@@ -321,6 +478,7 @@ export class TextLearner
 				break
 
 			case 'synthesized': {
+				this.lastSynthesisObservationCount = this.observationCount
 				const previousUnderstanding = this.understanding
 
 				// Apply strategy-specific maintenance
@@ -407,6 +565,13 @@ export class TextLearner
 				},
 			)
 
+			// Track confidence for signal detection
+			this.queryConfidences.push(result.confidence)
+			// Keep only last 10 confidences
+			if (this.queryConfidences.length > 10) {
+				this.queryConfidences.shift()
+			}
+
 			this.emit('learner:ask:completed', {
 				learnerId: this.id,
 				insight: result.insight,
@@ -414,6 +579,9 @@ export class TextLearner
 				gaps: result.gaps ? result.gaps.split('\n').filter(Boolean) : [],
 				usage: result.usage,
 			})
+
+			// Check signals after query
+			this.checkAndEmitSignals()
 
 			return result
 		} catch (err) {
@@ -472,5 +640,67 @@ export class TextLearner
 			previousStatus:
 				previousStatus !== this.governance.status ? previousStatus : undefined,
 		})
+	}
+
+	/**
+	 * Check signal thresholds and emit signals if crossed (Living Brain)
+	 */
+	private checkAndEmitSignals(): void {
+		// Check dismissal rate
+		if (this.observationCount > 10) {
+			const dismissalRate = this.dismissalCount / this.observationCount
+			if (dismissalRate > this.governance.signalThresholds.maxDismissalRate) {
+				this.emit('learner:signal', {
+					learnerId: this.id,
+					description: `I'm dismissing ${(dismissalRate * 100).toFixed(1)}% of observations`,
+					timestamp: new Date(),
+					metrics: { dismissalRate },
+				})
+			}
+		}
+
+		// Check confidence floor
+		if (this.queryConfidences.length >= 5) {
+			const avg =
+				this.queryConfidences.reduce((a, b) => a + b, 0) /
+				this.queryConfidences.length
+			if (avg < this.governance.signalThresholds.minConfidence) {
+				this.emit('learner:signal', {
+					learnerId: this.id,
+					description: `My query confidence is consistently low (${avg.toFixed(2)})`,
+					timestamp: new Date(),
+					metrics: { avgConfidence: avg },
+				})
+				this.queryConfidences = [] // Reset after signaling
+			}
+		}
+
+		// Check buffer overflow
+		const bufferState = this._learningMethod.getBufferState()
+		const threshold =
+			this.config.synthesize.thresholds.maxObservations *
+			this.governance.signalThresholds.bufferOverflowMultiplier
+		if (bufferState.count > threshold) {
+			this.emit('learner:signal', {
+				learnerId: this.id,
+				description: `My buffer is consistently overflowing (${bufferState.count} observations)`,
+				timestamp: new Date(),
+				metrics: { bufferCount: bufferState.count },
+			})
+		}
+
+		// Check synthesis gap
+		const observationsSinceLastSynthesis =
+			this.observationCount - this.lastSynthesisObservationCount
+		if (
+			observationsSinceLastSynthesis >
+			this.governance.signalThresholds.maxObservationsWithoutSynthesis
+		) {
+			this.emit('learner:signal', {
+				learnerId: this.id,
+				description: `No synthesis in ${observationsSinceLastSynthesis} observations`,
+				timestamp: new Date(),
+			})
+		}
 	}
 }

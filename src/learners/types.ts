@@ -27,6 +27,12 @@ export interface LearnerGovernance {
 	lastAccessed: Date
 	retrievalCount: number
 	successRate: number // responses that were useful
+	signalThresholds: {
+		maxDismissalRate: number // Default: 0.8 - alert when dismissal rate exceeds this
+		minConfidence: number // Default: 0.3 - alert when confidence falls below this
+		bufferOverflowMultiplier: number // Default: 1.5 (multiplier of maxObservations)
+		maxObservationsWithoutSynthesis: number // Default: 100 - alert after this many observations without synthesis
+	}
 }
 
 export interface LearnerMetadata {

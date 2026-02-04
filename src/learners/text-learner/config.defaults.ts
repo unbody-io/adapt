@@ -26,4 +26,12 @@ export const TEXT_LEARNER_DEFAULTS = {
 		strategy: 'cumulative' as Strategy,
 		maxTokens: 16000,
 	},
+	governance: {
+		signalThresholds: {
+			maxDismissalRate: 0.8,
+			minConfidence: 0.3,
+			bufferOverflowMultiplier: 1.5,
+			maxObservationsWithoutSynthesis: 100,
+		},
+	},
 } as const

@@ -114,6 +114,36 @@ export interface TextLearnerEventMap extends BaseLearnerEventMap {
 		thoughts: string[]
 		usage: TokenUsage
 	}
+
+	// Signal events (Living Brain)
+	'learner:signal': {
+		learnerId: string
+		description: string
+		timestamp: Date
+		metrics?: {
+			dismissalRate?: number
+			avgConfidence?: number
+			bufferCount?: number
+			activation?: number
+		}
+	}
+
+	// Config update events (Living Brain)
+	'learner:config:updated': {
+		learnerId: string
+		updates: Partial<any> // Will be Partial<GeneratedLearnerConfig>
+	}
+
+	'learner:prompts:regenerated': {
+		learnerId: string
+		observePrompt: string
+		synthesizePrompt: string
+	}
+
+	'learner:understanding:set': {
+		learnerId: string
+		understanding: string
+	}
 }
 
 /**
@@ -167,6 +197,8 @@ export interface TextLearnerConfig extends CascadableConfig {
 	instructions: string
 	/** Optional unique identifier */
 	id?: string
+	/** Optional description of learner purpose */
+	description?: string
 	/** How the learner was created */
 	origin?: LearnerOrigin
 	/** Maintenance settings for understanding compression */

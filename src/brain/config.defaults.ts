@@ -22,4 +22,9 @@ export const BRAIN_DEFAULTS = {
 			maxTokens: 16000,
 		},
 	},
+	evolution: {
+		enabled: true,
+		evaluatorSignalThreshold: 5,
+		autoEvaluate: true,
+	},
 } as const

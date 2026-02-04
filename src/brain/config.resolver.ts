@@ -90,5 +90,13 @@ export function resolveBrainConfig(config: BrainConfig): ResolvedBrainConfig {
 			batchSize: config.ingest?.batchSize ?? BRAIN_DEFAULTS.ingest.batchSize,
 		},
 		learning: resolveLearningConfig(config.learning, model, blueprintModel),
+		evolution: {
+			enabled: config.evolution?.enabled ?? BRAIN_DEFAULTS.evolution.enabled,
+			evaluatorSignalThreshold:
+				config.evolution?.evaluatorSignalThreshold ??
+				BRAIN_DEFAULTS.evolution.evaluatorSignalThreshold,
+			autoEvaluate:
+				config.evolution?.autoEvaluate ?? BRAIN_DEFAULTS.evolution.autoEvaluate,
+		},
 	}
 }

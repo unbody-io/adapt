@@ -4,7 +4,7 @@ Design a staged implementation plan for the Living Brain specification based on 
 
 **Core Features:**
 1. **Judge Component**: Centralized decision-maker that receives signals, buffers them (threshold: 5), and evaluates to make evolution decisions
-2. **Signal System**: Learners self-report via mechanical thresholds (dismissal rate >80%, low confidence <0.3, buffer overflow, stagnation), external signals via brain.signal()
+2. **Signal System**: Learners self-report via mechanical thresholds (dismissal rate >80%, low confidence <0.3, stagnation), external signals via brain.signal()
 3. **Evolution Actions**: spawn, merge, split, adjust, prune - all follow pattern "Guidance → LLM → Execute"
 4. **Learner Updates**: learner.update() method for runtime config changes with immutability constraints
 5. **Event System**: evolution:action:executed, learner:signal, judge:evaluation events

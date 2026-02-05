@@ -84,7 +84,6 @@ You receive an **array of signals** and must output an **array of decisions**. F
 1. **Buffered Signals**: Descriptions of issues from learners and external sources
    - High dismissal rate: Learner rejecting most observations during observe phase
    - Low confidence: Query responses consistently uncertain
-   - Buffer overflow: Observations accumulating faster than synthesis can process
    - Stagnation: Many observations but no synthesis triggered (all deemed irrelevant)
 
 2. **Learner Overview**: For each learner you see:
@@ -152,29 +151,7 @@ All examples show actual signal format: { source, description, timestamp, metric
   ]
 }
 
-## Example 3: Buffer Overflow (Split Candidate)
-
-**Signal Received:**
-- Source: learner_api456
-- Description: "My buffer is consistently overflowing (23 observations)"
-- Metrics: bufferCount = 23
-- Timestamp: 2026-02-04T12:00:00Z
-
-**Analysis**: Buffer has 23 observations when max is 10 and overflow threshold is 15 (10 × 1.5). Observations are accumulating faster than synthesis - learner is likely too broad.
-
-**Your Decision:**
-{
-  "decisions": [
-    {
-      "action": "split",
-      "reasoning": "Buffer overflow (23 observations, threshold 15) indicates learner covers too many distinct topics to synthesize efficiently",
-      "guidance": "Split into focused learners based on API domains (e.g., REST patterns vs GraphQL patterns)",
-      "targets": ["learner_api456"]
-    }
-  ]
-}
-
-## Example 4: Stagnation (Delete Candidate)
+## Example 3: Stagnation (Delete Candidate)
 
 **Signal Received:**
 - Source: learner_legacy999
@@ -195,25 +172,25 @@ All examples show actual signal format: { source, description, timestamp, metric
   ]
 }
 
-## Example 5: Multiple Signals - Holistic Analysis
+## Example 4: Multiple Signals - Holistic Analysis
 
 **Signals Received:**
 1. Source: learner_frontend101, Description: "I'm dismissing 88.0% of observations", Metrics: dismissalRate = 0.88
 2. Source: learner_backend202, Description: "I'm dismissing 82.0% of observations", Metrics: dismissalRate = 0.82
-3. Source: learner_testing303, Description: "My buffer is consistently overflowing (18 observations)", Metrics: bufferCount = 18
-4. Source: learner_testing404, Description: "My buffer is consistently overflowing (16 observations)", Metrics: bufferCount = 16
+3. Source: learner_testing303, Description: "No synthesis in 120 observations"
+4. Source: learner_testing404, Description: "No synthesis in 115 observations"
 
 **Analysis**:
 - Frontend & backend learners both high dismissal (88%, 82%) - data stream may have shifted focus away from these topics
-- Two testing learners both overflow - likely significant overlap causing redundant observation collection
-- Consider: merge testing learners (redundancy), create new learner for emerging topic (frontend/backend dismissals suggest gap)
+- Two testing learners both stagnating - possibly overlapping scopes causing both to reject similar observations
+- Consider: merge testing learners (reduce overlap), create new learner for emerging topic (frontend/backend dismissals suggest gap)
 
 **Your Decision:**
 {
   "decisions": [
     {
       "action": "merge",
-      "reasoning": "Two testing learners both showing buffer overflow suggests significant overlap and redundant coverage of same topics",
+      "reasoning": "Two testing learners both stagnating suggests overlapping scopes where each rejects what might be relevant to the other",
       "guidance": "Merge into single comprehensive testing learner, combining their understandings and expanding scope to handle all testing patterns",
       "targets": ["learner_testing303", "learner_testing404"]
     },
@@ -226,7 +203,7 @@ All examples show actual signal format: { source, description, timestamp, metric
   ]
 }
 
-## Example 6: No Action Needed
+## Example 5: No Action Needed
 
 **Signal Received:**
 - Source: learner_patterns555

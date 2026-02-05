@@ -28,7 +28,7 @@ Track answers to:
 - [Question 2]`),
 	type: z
 		.literal('text')
-		.describe('Learner type (MVP supports only TextLearner)'),
+		.describe('Learner type - must be "text"'),
 	maintenance: z
 		.object({
 			strategy: z

@@ -327,11 +327,7 @@ Learners continuously monitor their own effectiveness and emit **signals** when 
    - Query responses consistently have low confidence
    - Suggests inadequate understanding or scope issues
 
-3. **Buffer Overflow**: `bufferCount > maxObservations × bufferOverflowMultiplier (1.5)`
-   - Observations accumulating faster than synthesis can process
-   - Suggests learner is overwhelmed or too broad
-
-4. **Stagnation**: `observationsSinceLastSynthesis > maxObservationsWithoutSynthesis (100)`
+3. **Stagnation**: `observationsSinceLastSynthesis > maxObservationsWithoutSynthesis (100)`
    - No synthesis happening despite many observations
    - Suggests all observations deemed irrelevant
 
@@ -454,7 +450,6 @@ Signal thresholds are configurable at the learner level:
     signalThresholds: {
       maxDismissalRate: 0.8,                    // Ceiling threshold
       minConfidence: 0.3,                        // Floor threshold
-      bufferOverflowMultiplier: 1.5,             // Multiplier of maxObservations
       maxObservationsWithoutSynthesis: 100       // Stagnation detection
     }
   }

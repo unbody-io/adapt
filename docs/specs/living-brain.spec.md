@@ -257,7 +257,6 @@ Learners monitor their own performance metrics and emit signals when thresholds 
 |--------|------------------|-------------------|
 | Dismissal Rate | `maxDismissalRate` > 80% | "I'm dismissing {X}% of observations" |
 | Query Confidence | `minConfidence` < 0.3 (avg over last 5 queries) | "My query confidence is consistently low ({X})" |
-| Buffer Overflow | Buffer exceeds `maxObservations * bufferOverflowMultiplier` (1.5x) | "My buffer is consistently overflowing ({X} observations)" |
 | Synthesis Gap | `maxObservationsWithoutSynthesis` (default 100) | "No synthesis in {X} observations" |
 | Activation Decay | Activation drops below threshold | "I've become dormant (activation: {X})" |
 
@@ -763,7 +762,6 @@ interface LearnerGovernance {
   signalThresholds: {
     maxDismissalRate: number        // Default: 0.8
     minConfidence: number         // Default: 0.3
-    bufferOverflowMultiplier: number        // Default: 1.5 (multiplier of maxObservations)
     maxObservationsWithoutSynthesis: number      // Default: 100 observations
   }
 }
@@ -806,7 +804,6 @@ interface GeneratedLearnerConfig {
     signalThresholds?: {
       maxDismissalRate?: number
       minConfidence?: number
-      bufferOverflowMultiplier?: number
       maxObservationsWithoutSynthesis?: number
     }
   }

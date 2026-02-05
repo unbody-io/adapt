@@ -33,19 +33,23 @@ async function main() {
 	await brain.initialize()
 
 	const learner = await brain.createLearnerFromConfig({
+		id: 'python-learner',
 		name: 'Python Learner',
 		description: 'Tracks Python best practices',
 		instructions: 'You track Python programming patterns and idioms.',
+		type: 'text' as const,
+		maintenance: {
+			strategy: 'continuous' as const,
+		},
 		thresholds: {
 			minImportance: 0.6,
 			maxObservations: 10,
 		},
 		governance: {
 			signalThresholds: {
-				dismissalRate: 0.8,
-				lowConfidence: 0.4, // Higher threshold to trigger more easily
-				bufferOverflow: 1.5,
-				stagnationWindow: 100,
+				maxDismissalRate: 0.8,
+				minConfidence: 0.4, // Higher threshold to trigger more easily
+				maxObservationsWithoutSynthesis: 100,
 			},
 		},
 	})
@@ -66,7 +70,7 @@ async function main() {
 	logger.logState('Learner State', {
 		name: learner.name,
 		understanding: learner.getUnderstanding()?.substring(0, 100) + '...',
-		confidenceThreshold: learner.getGovernance().signalThresholds.lowConfidence,
+		confidenceThreshold: learner.getGovernance().signalThresholds.minConfidence,
 	})
 
 	logger.logSection('Action: Ask complex questions to trigger low confidence')
@@ -80,7 +84,7 @@ async function main() {
 	]
 
 	for (const question of complexQuestions) {
-		await learner.ask(question)
+		await learner.query(question)
 		logger.logState('Asked', { question: question.substring(0, 50) + '...' })
 	}
 

@@ -56,7 +56,7 @@ async function main() {
 
 	logger.logState('Creation Guidance', { guidance })
 
-	const newLearner = await brain.create(guidance)
+	const newLearner = await brain.createLearner(guidance)
 
 	logger.logSection('After State')
 
@@ -69,8 +69,8 @@ async function main() {
 			name: newLearner.name,
 			description: newLearner.description,
 			instructions: newLearner.instructions,
-			activation: newLearner.governance.activation,
-			status: newLearner.governance.status,
+			activation: newLearner.getGovernance().activation,
+			status: newLearner.getGovernance().status,
 		},
 	}
 
@@ -100,9 +100,9 @@ async function main() {
 		'Learner instructions are relevant to Python guidance',
 	)
 
-	// Governance assertions
-	assertEqual(newLearner.governance.status, 'active', 'New learner is active')
-	assertEqual(newLearner.governance.activation, 1.0, 'New learner activation is 1.0')
+	// Governance assertions (new learners start dormant, earn activation through learning)
+	assertEqual(newLearner.getGovernance().status, 'dormant', 'New learner starts dormant')
+	assertEqual(newLearner.getGovernance().activation, 0, 'New learner activation starts at 0')
 
 	// Verify learner is registered in brain
 	const retrieved = brain.learners.get(newLearner.id)

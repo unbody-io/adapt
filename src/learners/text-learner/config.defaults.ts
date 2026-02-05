@@ -30,7 +30,6 @@ export const TEXT_LEARNER_DEFAULTS = {
 		signalThresholds: {
 			maxDismissalRate: 0.8,
 			minConfidence: 0.3,
-			bufferOverflowMultiplier: 1.5,
 			maxObservationsWithoutSynthesis: 100,
 		},
 	},

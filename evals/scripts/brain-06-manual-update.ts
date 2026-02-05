@@ -8,9 +8,7 @@ import { logger } from '../helpers/logger'
 import {
 	assertEqual,
 	assertTrue,
-	assertGreaterThan,
 	assertEventEmitted,
-	assertContains,
 } from '../helpers/assertions'
 import { createOpenRouter } from '@openrouter/ai-sdk-provider'
 
@@ -42,9 +40,14 @@ async function main() {
 
 	// Create a learner
 	const learner = await brain.createLearnerFromConfig({
+		id: 'typescript-learner',
 		name: 'TypeScript Learner',
 		description: 'Tracks TypeScript basics',
 		instructions: 'You track basic TypeScript syntax and type system features.',
+		type: 'text' as const,
+		maintenance: {
+			strategy: 'continuous' as const,
+		},
 		thresholds: {
 			minImportance: 0.6,
 			maxObservations: 10,
@@ -76,7 +79,7 @@ async function main() {
 		name: updatedLearner.name,
 		description: updatedLearner.description,
 		instructions: updatedLearner.instructions,
-		thresholds: updatedLearner.synthesize.thresholds,
+		thresholds: updatedLearner.getSynthesizeThresholds(),
 	}
 
 	logger.logState('Learner After Update', afterState)

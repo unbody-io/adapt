@@ -33,20 +33,22 @@ async function main() {
 	await brain.initialize()
 
 	const learner = await brain.createLearnerFromConfig({
+		id: 'typescript-learner',
 		name: 'TypeScript Learner',
 		description: 'Only tracks TypeScript syntax and type system features',
 		instructions:
 			'You ONLY track TypeScript syntax, type system features, and compiler behavior. Dismiss anything about React, APIs, databases, or other topics.',
+		type: 'text',
+		maintenance: { strategy: 'continuous' },
 		thresholds: {
 			minImportance: 0.6,
 			maxObservations: 10,
 		},
 		governance: {
 			signalThresholds: {
-				dismissalRate: 0.7, // Low threshold to trigger easily
-				lowConfidence: 0.3,
-				bufferOverflow: 1.5,
-				stagnationWindow: 100,
+				maxDismissalRate: 0.7, // Low threshold to trigger easily
+				minConfidence: 0.3,
+				maxObservationsWithoutSynthesis: 100,
 			},
 		},
 	})
@@ -62,11 +64,12 @@ async function main() {
 	logger.logState('Learner State', {
 		name: learner.name,
 		instructions: learner.instructions.substring(0, 100) + '...',
-		dismissalThreshold: learner.getGovernance().signalThresholds.dismissalRate,
+		dismissalThreshold: learner.getGovernance().signalThresholds.maxDismissalRate,
 	})
 
 	logger.logSection('Action: Ingest irrelevant observations to trigger dismissals')
 
+	// Need >10 observations before dismissal rate check triggers (sample size guard)
 	const irrelevantObservations = [
 		'React hooks are a powerful way to manage component state.',
 		'REST APIs should follow HATEOAS principles for discoverability.',
@@ -78,10 +81,12 @@ async function main() {
 		'Redis can be used as a cache or message broker.',
 		'AWS Lambda supports serverless function execution.',
 		'Microservices architecture enables independent deployment.',
+		'Nginx is a high-performance reverse proxy server.',
+		'Apache Kafka handles real-time data streaming.',
 	]
 
 	for (const text of irrelevantObservations) {
-		await learner.ingest({ text })
+		await learner.learn([text])
 		logger.logState('Ingested', { text: text.substring(0, 50) + '...' })
 	}
 

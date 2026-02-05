@@ -27,10 +27,13 @@ async function main() {
 
 	// Create learner config
 	const learnerConfig = {
+		id: 'test-learner',
 		name: 'Test Learner',
 		description: 'A learner for testing lifecycle',
 		instructions:
 			'You are responsible for tracking information about TypeScript best practices and design patterns.',
+		type: 'text' as const,
+		maintenance: { strategy: 'continuous' as const },
 		thresholds: {
 			minImportance: 0.6,
 			maxObservations: 10,

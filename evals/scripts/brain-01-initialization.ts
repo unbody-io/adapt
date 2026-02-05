@@ -40,7 +40,6 @@ You should track:
 
 	logger.logState('Pre-initialization', {
 		learnersCount: 0,
-		evaluatorExists: false,
 	})
 
 	logger.logSection('Action: Initialize Brain')
@@ -48,12 +47,10 @@ You should track:
 	const brain = new Brain({
 		prompt: brainPrompt,
 		model: openrouter(MODEL),
-		config: {
-			evolution: {
-				enabled: true,
-				evaluatorSignalThreshold: 5,
-				autoEvaluate: true,
-			},
+		evolution: {
+			enabled: true,
+			evaluatorSignalThreshold: 5,
+			autoEvaluate: true,
 		},
 	})
 
@@ -71,14 +68,13 @@ You should track:
 
 	const afterState = {
 		learnersCount: learners.length,
-		evaluatorExists: !!brain.evaluator,
 		learners: learners.map((l) => ({
 			id: l.id,
 			name: l.name,
 			description: l.description,
 			instructionsPreview: l.instructions.substring(0, 100) + '...',
-			activation: l.governance.activation,
-			status: l.governance.status,
+			activation: l.getGovernance().activation,
+			status: l.getGovernance().status,
 		})),
 	}
 
@@ -89,7 +85,6 @@ You should track:
 	logger.logSection('Assertions')
 
 	// Brain state assertions
-	assertDefined(brain.evaluator, 'Evaluator was initialized')
 	assertEqual(brain.prompt, brainPrompt, 'Brain prompt set correctly')
 
 	// Learner decomposition assertions
@@ -110,8 +105,9 @@ You should track:
 			20,
 			`Learner ${learner.name} has meaningful instructions`,
 		)
-		assertEqual(learner.getGovernance().status, 'active', `Learner ${learner.name} is active`)
-		assertEqual(learner.getGovernance().activation, 1.0, `Learner ${learner.name} activation is 1.0`)
+		// Newly created learners start dormant with activation 0 (earn activation through learning)
+		assertEqual(learner.getGovernance().status, 'dormant', `Learner ${learner.name} starts dormant`)
+		assertEqual(learner.getGovernance().activation, 0, `Learner ${learner.name} activation starts at 0`)
 	}
 
 	// Verify learners cover different aspects of the brain prompt
@@ -126,8 +122,8 @@ You should track:
 	)
 
 	// Event assertions
-	assertEventEmitted(events, 'brain:initializing')
-	assertEventEmitted(events, 'brain:initialized')
+	assertEventEmitted(events, 'brain:init:started')
+	assertEventEmitted(events, 'brain:init:completed')
 	assertEventEmitted(events, 'brain:learner:added')
 
 	// Verify learner creation events

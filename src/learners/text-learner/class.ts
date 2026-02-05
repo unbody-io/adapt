@@ -92,8 +92,8 @@ export class TextLearner
 			signalThresholds: {
 				maxDismissalRate: 0.8,
 				minConfidence: 0.3,
-				bufferOverflowMultiplier: 1.5,
 				maxObservationsWithoutSynthesis: 100,
+				...rawConfig.governance?.signalThresholds,
 			},
 		}
 	}
@@ -540,7 +540,7 @@ export class TextLearner
 		this.governance.lastAccessed = new Date()
 		this.governance.retrievalCount++
 
-		this.emit('learner:ask:started', {
+		this.emit('learner:query:started', {
 			learnerId: this.id,
 			query: question,
 		})
@@ -556,7 +556,7 @@ export class TextLearner
 				options,
 				{
 					onThinking: (thoughts, usage) => {
-						this.emit('learner:ask:thinking', {
+						this.emit('learner:query:thinking', {
 							learnerId: this.id,
 							thoughts,
 							usage,
@@ -572,7 +572,7 @@ export class TextLearner
 				this.queryConfidences.shift()
 			}
 
-			this.emit('learner:ask:completed', {
+			this.emit('learner:query:completed', {
 				learnerId: this.id,
 				insight: result.insight,
 				confidence: result.confidence,
@@ -586,7 +586,7 @@ export class TextLearner
 			return result
 		} catch (err) {
 			const error = err instanceof Error ? err : new Error(String(err))
-			this.emit('learner:ask:failed', {
+			this.emit('learner:query:failed', {
 				learnerId: this.id,
 				error: error.message,
 			})
@@ -675,21 +675,7 @@ export class TextLearner
 			}
 		}
 
-		// Check buffer overflow
-		const bufferState = this._learningMethod.getBufferState()
-		const threshold =
-			this.config.synthesize.thresholds.maxObservations *
-			this.governance.signalThresholds.bufferOverflowMultiplier
-		if (bufferState.count > threshold) {
-			this.emit('learner:signal', {
-				learnerId: this.id,
-				description: `My buffer is consistently overflowing (${bufferState.count} observations)`,
-				timestamp: new Date(),
-				metrics: { bufferCount: bufferState.count },
-			})
-		}
-
-		// Check synthesis gap
+		// Check synthesis gap (stagnation)
 		const observationsSinceLastSynthesis =
 			this.observationCount - this.lastSynthesisObservationCount
 		if (

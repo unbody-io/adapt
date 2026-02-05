@@ -43,9 +43,14 @@ async function main() {
 
 	// Create two learners with overlapping domains
 	const learner1 = await brain.createLearnerFromConfig({
+		id: 'react-hooks-learner',
 		name: 'React Hooks Learner',
 		description: 'Tracks React hooks patterns',
 		instructions: 'You track React hooks usage patterns and best practices.',
+		type: 'text' as const,
+		maintenance: {
+			strategy: 'continuous' as const,
+		},
 		thresholds: {
 			minImportance: 0.6,
 			maxObservations: 10,
@@ -53,9 +58,14 @@ async function main() {
 	})
 
 	const learner2 = await brain.createLearnerFromConfig({
+		id: 'react-state-learner',
 		name: 'React State Learner',
 		description: 'Tracks React state management',
 		instructions: 'You track React state management approaches and patterns.',
+		type: 'text' as const,
+		maintenance: {
+			strategy: 'continuous' as const,
+		},
 		thresholds: {
 			minImportance: 0.6,
 			maxObservations: 10,
@@ -88,7 +98,7 @@ async function main() {
 
 	const guidance = 'Merge these two learners into a unified React learner that covers both hooks and state management.'
 
-	const mergedLearner = await brain.merge([learner1.id, learner2.id], guidance)
+	const mergedLearner = await brain.mergeLearners([learner1.id, learner2.id], guidance)
 
 	logger.logSection('After State')
 

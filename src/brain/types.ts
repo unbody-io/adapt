@@ -324,6 +324,9 @@ export interface BrainOwnEventMap {
 		name: string
 		instructions: string
 	}
+	'brain:learner:removed': {
+		learnerId: string
+	}
 
 	// Signal events (Living Brain)
 	'brain:signal:received': {

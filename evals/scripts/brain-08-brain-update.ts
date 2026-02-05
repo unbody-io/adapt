@@ -31,12 +31,10 @@ async function main() {
 	const brain = new Brain({
 		prompt: initialPrompt,
 		model: openrouter(MODEL),
-		config: {
-			evolution: {
-				enabled: true,
-				evaluatorSignalThreshold: 5,
-				autoEvaluate: true,
-			},
+		evolution: {
+			enabled: true,
+			evaluatorSignalThreshold: 5,
+			autoEvaluate: true,
 		},
 	})
 

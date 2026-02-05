@@ -4,6 +4,7 @@
  */
 
 import { Brain } from '../../src/brain/class'
+import { TextLearner } from '../../src/learners'
 import { logger } from '../helpers/logger'
 import {
 	assertEqual,
@@ -42,9 +43,14 @@ async function main() {
 
 	// Create a broad learner
 	const broadLearner = await brain.createLearnerFromConfig({
+		id: 'web-dev-learner',
 		name: 'Web Development Learner',
 		description: 'Tracks everything about web development',
 		instructions: 'You track all aspects of web development including frontend, backend, databases, and deployment.',
+		type: 'text' as const,
+		maintenance: {
+			strategy: 'continuous' as const,
+		},
 		thresholds: {
 			minImportance: 0.6,
 			maxObservations: 10,
@@ -79,7 +85,7 @@ Deployment: Docker containers, Kubernetes orchestration, AWS/GCP cloud platforms
 
 	const guidance = 'Split this overly broad learner into two focused learners: one for frontend development (React, state, UI) and one for backend development (APIs, databases, deployment).'
 
-	const newLearners = await brain.split(broadLearner.id, guidance)
+	const newLearners = await brain.splitLearner(broadLearner.id, guidance)
 
 	logger.logSection('After State')
 
@@ -87,7 +93,7 @@ Deployment: Docker containers, Kubernetes orchestration, AWS/GCP cloud platforms
 
 	const afterState = {
 		learnersCount: afterLearnerCount,
-		newLearners: newLearners.map((l) => ({
+		newLearners: newLearners.map((l: TextLearner) => ({
 			id: l.id,
 			name: l.name,
 			description: l.description,
@@ -120,7 +126,7 @@ Deployment: Docker containers, Kubernetes orchestration, AWS/GCP cloud platforms
 	}
 
 	// Verify learners have different focuses
-	const allInstructions = newLearners.map((l) => l.instructions.toLowerCase()).join(' ')
+	const allInstructions = newLearners.map((l: TextLearner) => l.instructions.toLowerCase()).join(' ')
 	assertTrue(
 		allInstructions.includes('frontend') || allInstructions.includes('react') || allInstructions.includes('ui'),
 		'At least one learner covers frontend',

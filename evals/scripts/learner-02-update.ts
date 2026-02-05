@@ -34,9 +34,14 @@ async function main() {
 	await brain.initialize()
 
 	const learner = await brain.createLearnerFromConfig({
+		id: 'original-learner',
 		name: 'Original Name',
 		description: 'Original description',
 		instructions: 'Original instructions about tracking TypeScript patterns.',
+		type: 'text' as const,
+		maintenance: {
+			strategy: 'continuous' as const,
+		},
 		thresholds: {
 			minImportance: 0.5,
 			maxObservations: 10,
@@ -56,8 +61,8 @@ async function main() {
 		description: learner.description,
 		instructions: learner.instructions,
 		thresholds: learner.getSynthesizeThresholds(),
-		hasObservePrompt: !!learner.getConfig().prompts?.observeSystemPrompt,
-		hasSynthesizePrompt: !!learner.getConfig().prompts?.synthesizeSystemPrompt,
+		hasObservePrompt: !!learner.getObserveSystemPrompt(),
+		hasSynthesizePrompt: !!learner.getSynthesizeSystemPrompt(),
 	}
 
 	logger.logState('Learner Before Update', beforeState)
@@ -84,8 +89,8 @@ async function main() {
 
 	logger.logSection('Action 2: Update instructions (triggers prompt regeneration)')
 
-	const oldObservePrompt = learner.getConfig().prompts?.observeSystemPrompt
-	const oldSynthesizePrompt = learner.getConfig().prompts?.synthesizeSystemPrompt
+	const oldObservePrompt = learner.getObserveSystemPrompt()
+	const oldSynthesizePrompt = learner.getSynthesizeSystemPrompt()
 
 	await learner.update({
 		instructions:
@@ -99,9 +104,9 @@ async function main() {
 		description: learner.description,
 		instructions: learner.instructions,
 		thresholds: learner.getSynthesizeThresholds(),
-		observePromptChanged: oldObservePrompt !== learner.getConfig().prompts?.observeSystemPrompt,
+		observePromptChanged: oldObservePrompt !== learner.getObserveSystemPrompt(),
 		synthesizePromptChanged:
-			oldSynthesizePrompt !== learner.getConfig().prompts?.synthesizeSystemPrompt,
+			oldSynthesizePrompt !== learner.getSynthesizeSystemPrompt(),
 	}
 
 	logger.logState('Learner After Instructions Update', afterState2)

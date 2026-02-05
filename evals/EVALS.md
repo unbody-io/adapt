@@ -196,23 +196,6 @@ Each script MUST log:
 
 ---
 
-### `07-signal-buffer-overflow.ts`
-
-**Tests**: Buffer overflow threshold crossing
-
-**Verifies**:
-- Thresholds: `maxObservations: 10`, `bufferOverflowMultiplier: 1.5`
-- Fill buffer with 16+ observations (exceeds 10 * 1.5 = 15)
-- `learner:signal` emitted with bufferCount metric
-- Signal description mentions buffer overflow
-
-**Key Logs**:
-- Buffer state after each batch
-- When overflow threshold crossed
-- Signal event payload
-
----
-
 ### `08-signal-stagnation.ts`
 
 **Tests**: No synthesis in 100+ observations triggers signal

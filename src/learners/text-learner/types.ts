@@ -109,7 +109,7 @@ export interface TextLearnerEventMap extends BaseLearnerEventMap {
 	}
 
 	// Query phase events
-	'learner:ask:thinking': {
+	'learner:query:thinking': {
 		learnerId: string
 		thoughts: string[]
 		usage: TokenUsage
@@ -209,6 +209,8 @@ export interface TextLearnerConfig extends CascadableConfig {
 	synthesize?: Partial<SynthesizeConfig>
 	/** Query phase configuration */
 	query?: QueryConfig
+	/** Governance configuration (Living Brain) */
+	governance?: Partial<import('../types').LearnerGovernance>
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

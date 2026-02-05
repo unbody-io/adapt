@@ -33,19 +33,23 @@ async function main() {
 	await brain.initialize()
 
 	const learner = await brain.createLearnerFromConfig({
+		id: 'stagnant-learner',
 		name: 'Stagnant Learner',
 		description: 'A learner that will stagnate',
 		instructions: 'You track software patterns.',
+		type: 'text' as const,
+		maintenance: {
+			strategy: 'continuous' as const,
+		},
 		thresholds: {
 			minImportance: 0.95, // Very high to prevent synthesis
 			maxObservations: 100, // High to prevent synthesis via buffer
 		},
 		governance: {
 			signalThresholds: {
-				dismissalRate: 0.8,
-				lowConfidence: 0.3,
-				bufferOverflow: 2.0,
-				stagnationWindow: 5, // Low threshold to trigger quickly
+				maxDismissalRate: 0.8,
+				minConfidence: 0.3,
+				maxObservationsWithoutSynthesis: 5, // Low threshold to trigger quickly
 			},
 		},
 	})
@@ -60,7 +64,7 @@ async function main() {
 
 	logger.logState('Learner State', {
 		name: learner.name,
-		stagnationWindow: learner.getGovernance().signalThresholds.stagnationWindow,
+		stagnationWindow: learner.getGovernance().signalThresholds.maxObservationsWithoutSynthesis,
 		minImportance: learner.getSynthesizeThresholds().minImportance,
 	})
 
@@ -76,7 +80,7 @@ async function main() {
 	]
 
 	for (const text of observations) {
-		await learner.ingest({ text })
+		await learner.learn([text])
 		logger.logState('Ingested', {
 			text: text.substring(0, 50) + '...',
 		})

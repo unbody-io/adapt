@@ -29,12 +29,10 @@ async function main() {
 	const brain = new Brain({
 		prompt: 'Test brain for signal buffering',
 		model: openrouter(MODEL),
-		config: {
-			evolution: {
-				enabled: true,
-				evaluatorSignalThreshold: 5,
-				autoEvaluate: true,
-			},
+		evolution: {
+			enabled: true,
+			evaluatorSignalThreshold: 5,
+			autoEvaluate: true,
 		},
 	})
 

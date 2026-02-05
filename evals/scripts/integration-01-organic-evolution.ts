@@ -28,12 +28,10 @@ async function main() {
 	const brain = new Brain({
 		prompt: 'You track software development best practices.',
 		model: openrouter(MODEL),
-		config: {
-			evolution: {
-				enabled: true,
-				evaluatorSignalThreshold: 3, // Low threshold for easier triggering
-				autoEvaluate: true,
-			},
+		evolution: {
+			enabled: true,
+			evaluatorSignalThreshold: 3, // Low threshold for easier triggering
+			autoEvaluate: true,
 		},
 	})
 

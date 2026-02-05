@@ -41,9 +41,14 @@ async function main() {
 
 	// Create a learner
 	const learner = await brain.createLearnerFromConfig({
+		id: 'obsolete-learner',
 		name: 'Obsolete Learner',
 		description: 'A learner that is no longer needed',
 		instructions: 'You track information that is now irrelevant.',
+		type: 'text' as const,
+		maintenance: {
+			strategy: 'continuous' as const,
+		},
 		thresholds: {
 			minImportance: 0.6,
 			maxObservations: 10,
@@ -68,9 +73,7 @@ async function main() {
 
 	logger.logSection('Action: Delete Learner')
 
-	const guidance = 'Remove this learner as it is no longer relevant to the Brain\'s purpose.'
-
-	await brain.deleteLearner(learner.id, guidance)
+	await brain.deleteLearner(learner.id)
 
 	logger.logSection('After State')
 

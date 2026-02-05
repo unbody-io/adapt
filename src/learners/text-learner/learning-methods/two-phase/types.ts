@@ -100,6 +100,33 @@ export interface TwoPhaseConfig {
 }
 
 /**
+ * Config accepted by TwoPhaseMethod.update()
+ *
+ * Same shape as constructor params but all optional.
+ * `instructions` and `model` are top-level since they come from the learner.
+ */
+export interface TwoPhaseUpdateConfig {
+	/** Default model override */
+	model?: LanguageModel
+	/** Learner instructions (triggers prompt regen) */
+	instructions?: string
+	/** Observe phase config updates */
+	observe?: Partial<ObserveConfig>
+	/** Synthesize phase config updates */
+	synthesize?: Partial<SynthesizeConfig>
+	/** Strategy update (triggers synthesize prompt regen) */
+	strategy?: Strategy
+}
+
+/**
+ * Result from TwoPhaseMethod.update()
+ */
+export interface TwoPhaseUpdateResult {
+	changedFields: string[]
+	promptsRegenerated: boolean
+}
+
+/**
  * Context for initializing the two-phase learning method
  */
 export interface InitContext {

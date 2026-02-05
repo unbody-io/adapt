@@ -131,7 +131,8 @@ export interface TextLearnerEventMap extends BaseLearnerEventMap {
 	// Config update events (Living Brain)
 	'learner:config:updated': {
 		learnerId: string
-		updates: Partial<any> // Will be Partial<GeneratedLearnerConfig>
+		changedFields: string[]
+		config: ResolvedTextLearnerConfig
 	}
 
 	'learner:prompts:regenerated': {
@@ -197,6 +198,8 @@ export interface TextLearnerConfig extends CascadableConfig {
 	instructions: string
 	/** Optional unique identifier */
 	id?: string
+	/** Optional display name */
+	name?: string
 	/** Optional description of learner purpose */
 	description?: string
 	/** How the learner was created */
@@ -255,6 +258,14 @@ export interface ResolvedTextLearnerConfig extends ResolvedCascadableConfig {
 	observe: ResolvedObserveConfig
 	synthesize: ResolvedSynthesizeConfig
 	query: ResolvedQueryConfig
+}
+
+/**
+ * Result from TextLearner.update()
+ */
+export interface TextLearnerUpdateResult {
+	changedFields: string[]
+	config: ResolvedTextLearnerConfig
 }
 
 /**

@@ -49,7 +49,14 @@ export class UpdateHandler extends EvolutionActionHandler<UpdateActionResult> {
 
 				const { updates } = result.output
 
-				await (learner as TextLearner).update(updates)
+				// Adapt flat thresholds to nested synthesize.thresholds shape
+				const { thresholds, ...rest } = updates
+				const adapted = {
+					...rest,
+					...(thresholds ? { synthesize: { thresholds } } : {}),
+				}
+
+				await (learner as TextLearner).update(adapted)
 
 				if (updates.name) {
 					this.brain.__updateLearnerName(learnerId, updates.name)

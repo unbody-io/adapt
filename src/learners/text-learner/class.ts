@@ -21,7 +21,9 @@ import type {
 	ResolvedTextLearnerConfig,
 	TextLearnerConfig,
 	TextLearnerEventMap,
+	TextLearnerUpdateResult,
 } from './types'
+import type { TwoPhaseUpdateConfig } from './learning-methods'
 
 /**
  * TextLearner - A learning agent that maintains understanding as narrative text
@@ -57,7 +59,7 @@ export class TextLearner
 		super()
 		this.config = resolveTextLearnerConfig(rawConfig, parentModels)
 		this.id = this.config.id
-		this.name = (rawConfig as any).name || this.config.id // Use name from config if available
+		this.name = rawConfig.name || this.config.id
 		this.instructions = this.config.instructions
 		this.description = rawConfig.description
 
@@ -109,12 +111,16 @@ export class TextLearner
 	 * Initialize the learner
 	 *
 	 * Generates system prompts for both observe and synthesize phases.
+	 * Delegates to update() internally — prompts are generated because
+	 * they are null on first call.
+	 *
 	 * This must be called before learn() or query().
 	 */
 	async init(): Promise<{
 		observeSystemPrompt: string
 		synthesizeSystemPrompt: string
 	}> {
+		// Already initialized — return existing prompts
 		if (
 			this._learningMethod.observePrompt &&
 			this._learningMethod.synthesizePrompt
@@ -128,15 +134,20 @@ export class TextLearner
 		this.emit('learner:init:started', { learnerId: this.id })
 
 		try {
-			const result = await this._learningMethod.init(this.instructions)
+			// Delegate to update — prompts are null so TwoPhaseMethod
+			// will force regeneration even though instructions haven't "changed"
+			await this.update({ instructions: this.instructions })
 
 			this.emit('learner:init:completed', {
 				learnerId: this.id,
-				systemPrompt: result.observeSystemPrompt, // For backwards compat
+				systemPrompt: this._learningMethod.observePrompt!, // For backwards compat
 				usage: { inputTokens: 0, outputTokens: 0, totalTokens: 0 },
 			})
 
-			return result
+			return {
+				observeSystemPrompt: this._learningMethod.observePrompt!,
+				synthesizeSystemPrompt: this._learningMethod.synthesizePrompt!,
+			}
 		} catch (err) {
 			const error = err instanceof Error ? err : new Error(String(err))
 			this.emit('learner:init:failed', {
@@ -261,114 +272,223 @@ export class TextLearner
 	}
 
 	/**
-	 * Update learner configuration (used by evolution system)
+	 * Update learner configuration
 	 *
-	 * Accepts partial config updates and applies them with validation:
-	 * - Immutable fields (id, origin, type, model, blueprintModel) cannot be changed
-	 * - Instructions changes trigger prompt regeneration
-	 * - Emits events for updates and prompt regeneration
+	 * Accepts the same shape as the constructor config (but partial).
+	 * Any config field can be updated. Only `id` is truly immutable.
 	 *
-	 * @param updates - Partial config updates
-	 * @throws Error if attempting to modify immutable fields
+	 * Raw constants (models, thresholds) are stored immediately.
+	 * Derived values (prompts/identity) are re-generated when their
+	 * inputs change (instructions, blueprintModel, strategy).
+	 *
+	 * @param updates - Partial config updates (same shape as TextLearnerConfig)
+	 * @returns Changed fields and full resolved config
+	 * @throws Error if attempting to modify `id`
 	 */
-	async update(updates: {
-		name?: string
-		description?: string
-		instructions?: string
-		thresholds?: {
-			minImportance?: number
-			maxObservations?: number
+	async update(updates: Partial<TextLearnerConfig>): Promise<TextLearnerUpdateResult> {
+		// Only id is truly immutable
+		if (updates.id !== undefined && updates.id !== this.id) {
+			throw new Error(
+				'Cannot update immutable field "id". Learner identity cannot be changed.',
+			)
 		}
-	}): Promise<void> {
-		// Validate that no immutable fields are being changed
-		this.validateImmutability(updates)
 
-		// Track what changed for event emission
-		const appliedUpdates: typeof updates = {}
+		const changedFields: string[] = []
+		const twoPhaseUpdate: TwoPhaseUpdateConfig = {}
+		let queryModelChanged = false
+		let queryMethodChanged = false
 
-		// Apply mutable field updates
+		// ── Metadata fields (no downstream effects) ──
+
 		if (updates.name !== undefined && updates.name !== this.name) {
 			this.name = updates.name
-			appliedUpdates.name = updates.name
+			changedFields.push('name')
 		}
 
-		if (
-			updates.description !== undefined &&
-			updates.description !== this.description
-		) {
+		if (updates.description !== undefined && updates.description !== this.description) {
 			this.description = updates.description
-			appliedUpdates.description = updates.description
+			changedFields.push('description')
 		}
 
-		// Instructions update requires prompt regeneration
-		if (
-			updates.instructions !== undefined &&
-			updates.instructions !== this.instructions
-		) {
+		if (updates.origin !== undefined && updates.origin !== this.config.origin) {
+			this.config.origin = updates.origin
+			changedFields.push('origin')
+		}
+
+		// ── Model changes ──
+
+		if (updates.model !== undefined) {
+			this.config.model = updates.model
+			changedFields.push('model')
+			twoPhaseUpdate.model = updates.model
+		}
+
+		if (updates.blueprintModel !== undefined) {
+			this.config.blueprintModel = updates.blueprintModel
+			changedFields.push('blueprintModel')
+			// Cascade to observe/synthesize blueprintModel unless explicitly overridden
+			if (!updates.observe?.blueprintModel) {
+				twoPhaseUpdate.observe = twoPhaseUpdate.observe || {}
+				twoPhaseUpdate.observe.blueprintModel = updates.blueprintModel
+			}
+			if (!updates.synthesize?.blueprintModel) {
+				twoPhaseUpdate.synthesize = twoPhaseUpdate.synthesize || {}
+				twoPhaseUpdate.synthesize.blueprintModel = updates.blueprintModel
+			}
+		}
+
+		// ── Instructions ──
+
+		if (updates.instructions !== undefined) {
 			this.instructions = updates.instructions
-			appliedUpdates.instructions = updates.instructions
+			this.config.instructions = updates.instructions
+			changedFields.push('instructions')
+			twoPhaseUpdate.instructions = updates.instructions
+		}
 
-			// Regenerate prompts with new instructions
-			const result = await this._learningMethod.init(updates.instructions)
+		// ── Observe config ──
 
-			this.emit('learner:prompts:regenerated', {
-				learnerId: this.id,
-				observePrompt: result.observeSystemPrompt,
-				synthesizePrompt: result.synthesizeSystemPrompt,
+		if (updates.observe) {
+			if (updates.observe.model !== undefined) {
+				this.config.observe.model = updates.observe.model
+				changedFields.push('observe.model')
+				twoPhaseUpdate.observe = twoPhaseUpdate.observe || {}
+				twoPhaseUpdate.observe.model = updates.observe.model
+			}
+			if (updates.observe.blueprintModel !== undefined) {
+				this.config.observe.blueprintModel = updates.observe.blueprintModel
+				changedFields.push('observe.blueprintModel')
+				twoPhaseUpdate.observe = twoPhaseUpdate.observe || {}
+				twoPhaseUpdate.observe.blueprintModel = updates.observe.blueprintModel
+			}
+		}
+
+		// ── Synthesize config ──
+
+		if (updates.synthesize) {
+			if (updates.synthesize.model !== undefined) {
+				this.config.synthesize.model = updates.synthesize.model
+				changedFields.push('synthesize.model')
+				twoPhaseUpdate.synthesize = twoPhaseUpdate.synthesize || {}
+				twoPhaseUpdate.synthesize.model = updates.synthesize.model
+			}
+			if (updates.synthesize.blueprintModel !== undefined) {
+				this.config.synthesize.blueprintModel = updates.synthesize.blueprintModel
+				changedFields.push('synthesize.blueprintModel')
+				twoPhaseUpdate.synthesize = twoPhaseUpdate.synthesize || {}
+				twoPhaseUpdate.synthesize.blueprintModel = updates.synthesize.blueprintModel
+			}
+			if (updates.synthesize.thresholds) {
+				const t = updates.synthesize.thresholds
+				if (t.minImportance !== undefined) {
+					this.config.synthesize.thresholds.minImportance = t.minImportance
+					changedFields.push('synthesize.thresholds.minImportance')
+				}
+				if (t.maxObservations !== undefined) {
+					this.config.synthesize.thresholds.maxObservations = t.maxObservations
+					changedFields.push('synthesize.thresholds.maxObservations')
+				}
+				if (t.maxTokens !== undefined) {
+					this.config.synthesize.thresholds.maxTokens = t.maxTokens
+					changedFields.push('synthesize.thresholds.maxTokens')
+				}
+				twoPhaseUpdate.synthesize = twoPhaseUpdate.synthesize || {}
+				twoPhaseUpdate.synthesize.thresholds = updates.synthesize.thresholds
+			}
+		}
+
+		// ── Maintenance / strategy ──
+
+		if (updates.maintenance?.strategy !== undefined && updates.maintenance.strategy !== this.config.maintenance.strategy) {
+			this.config.maintenance.strategy = updates.maintenance.strategy
+			changedFields.push('maintenance.strategy')
+			twoPhaseUpdate.strategy = updates.maintenance.strategy
+		}
+		if (updates.maintenance?.maxTokens !== undefined && updates.maintenance.maxTokens !== this.config.maintenance.maxTokens) {
+			this.config.maintenance.maxTokens = updates.maintenance.maxTokens
+			changedFields.push('maintenance.maxTokens')
+		}
+
+		// ── Query config ──
+
+		if (updates.query) {
+			if (updates.query.model !== undefined) {
+				this.config.query.model = updates.query.model
+				changedFields.push('query.model')
+				queryModelChanged = true
+			}
+			if (updates.query.method !== undefined && updates.query.method !== this.config.query.method) {
+				this.config.query.method = updates.query.method
+				changedFields.push('query.method')
+				queryMethodChanged = true
+			}
+		}
+
+		// ── Governance config (signal thresholds only — metrics are state) ──
+
+		if (updates.governance) {
+			if (updates.governance.threshold !== undefined) {
+				this.governance.threshold = updates.governance.threshold
+				changedFields.push('governance.threshold')
+			}
+			if (updates.governance.signalThresholds) {
+				const st = updates.governance.signalThresholds
+				if (st.maxDismissalRate !== undefined) {
+					this.governance.signalThresholds.maxDismissalRate = st.maxDismissalRate
+					changedFields.push('governance.signalThresholds.maxDismissalRate')
+				}
+				if (st.minConfidence !== undefined) {
+					this.governance.signalThresholds.minConfidence = st.minConfidence
+					changedFields.push('governance.signalThresholds.minConfidence')
+				}
+				if (st.maxObservationsWithoutSynthesis !== undefined) {
+					this.governance.signalThresholds.maxObservationsWithoutSynthesis = st.maxObservationsWithoutSynthesis
+					changedFields.push('governance.signalThresholds.maxObservationsWithoutSynthesis')
+				}
+			}
+		}
+
+		// ── Delegate to sub-components ──
+
+		let promptsRegenerated = false
+
+		if (Object.keys(twoPhaseUpdate).length > 0) {
+			const result = await this._learningMethod.update(twoPhaseUpdate)
+			promptsRegenerated = result.promptsRegenerated
+
+			if (promptsRegenerated) {
+				this.emit('learner:prompts:regenerated', {
+					learnerId: this.id,
+					observePrompt: this._learningMethod.observePrompt!,
+					synthesizePrompt: this._learningMethod.synthesizePrompt!,
+				})
+			}
+		}
+
+		if (queryMethodChanged) {
+			this._queryMethod = createQueryMethod(
+				this.config.query.method,
+				this.config.query.model,
+			)
+		} else if (queryModelChanged) {
+			this._queryMethod.update({ 
+				model: this.config.query.model 
 			})
 		}
 
-		// Threshold updates
-		if (updates.thresholds) {
-			const currentThresholds = this.config.synthesize.thresholds
+		// ── Emit event ──
 
-			// Only update if something actually changed
-			if (
-				updates.thresholds.minImportance !== undefined &&
-				updates.thresholds.minImportance !== currentThresholds.minImportance
-			) {
-				this.config.synthesize.thresholds.minImportance =
-					updates.thresholds.minImportance
-				appliedUpdates.thresholds = appliedUpdates.thresholds || {}
-				appliedUpdates.thresholds.minImportance =
-					updates.thresholds.minImportance
-			}
-
-			if (
-				updates.thresholds.maxObservations !== undefined &&
-				updates.thresholds.maxObservations !== currentThresholds.maxObservations
-			) {
-				this.config.synthesize.thresholds.maxObservations =
-					updates.thresholds.maxObservations
-				appliedUpdates.thresholds = appliedUpdates.thresholds || {}
-				appliedUpdates.thresholds.maxObservations =
-					updates.thresholds.maxObservations
-			}
-		}
-
-		// Emit config updated event if any changes were made
-		if (Object.keys(appliedUpdates).length > 0) {
+		if (changedFields.length > 0) {
 			this.emit('learner:config:updated', {
 				learnerId: this.id,
-				updates: appliedUpdates,
+				changedFields,
+				config: { ...this.config },
 			})
 		}
-	}
 
-	/**
-	 * Validate that no immutable fields are being changed
-	 *
-	 * @throws Error if attempting to modify immutable fields
-	 */
-	private validateImmutability(updates: any): void {
-		const IMMUTABLE_FIELDS = ['id', 'origin', 'type', 'model', 'blueprintModel']
-
-		for (const field of IMMUTABLE_FIELDS) {
-			if (updates[field] !== undefined) {
-				throw new Error(
-					`Cannot update immutable field "${field}". Learner identity and core configuration cannot be changed.`,
-				)
-			}
+		return {
+			changedFields,
+			config: { ...this.config },
 		}
 	}
 

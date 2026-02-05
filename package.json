@@ -27,6 +27,7 @@
     "eval:living:learner-06": "bun evals/scripts/learner-06-signal-confidence.ts",
     "eval:living:learner-07": "bun evals/scripts/learner-07-signal-buffer.ts",
     "eval:living:learner-08": "bun evals/scripts/learner-08-signal-stagnation.ts",
+    "eval:living:learner-09": "bun evals/scripts/learner-09-comprehensive-update.ts",
     "eval:living:brain-01": "bun evals/scripts/brain-01-initialization.ts",
     "eval:living:brain-02": "bun evals/scripts/brain-02-signal-buffering.ts",
     "eval:living:brain-03": "bun evals/scripts/brain-03-manual-create.ts",

@@ -114,9 +114,11 @@ async function main() {
 	logger.logSection('Action 3: Update thresholds')
 
 	await learner.update({
-		thresholds: {
-			minImportance: 0.7,
-			maxObservations: 20,
+		synthesize: {
+			thresholds: {
+				minImportance: 0.7,
+				maxObservations: 20,
+			},
 		},
 	})
 
@@ -175,18 +177,28 @@ async function main() {
 	assertEventEmitted(
 		events,
 		'learner:config:updated',
-		(payload) => payload.updates.name === 'Updated Name',
+		(payload) => payload.changedFields?.includes('name'),
 	)
 	assertEventEmitted(
 		events,
 		'learner:config:updated',
-		(payload) => payload.updates.instructions !== undefined,
+		(payload) => payload.changedFields?.includes('instructions'),
 	)
 	assertEventEmitted(events, 'learner:prompts:regenerated')
 
-	// Immutability assertion
-	assertTrue(!!immutabilityError, 'Immutability violation threw error')
+	// Immutability assertion (only id is immutable now)
+	assertTrue(!!immutabilityError, 'Immutability violation threw error for id')
 	assertContains(immutabilityError!.message, 'immutable', 'Error message mentions immutability')
+
+	logger.logSection('Action 5: Model swap (should succeed — no longer immutable)')
+
+	const modelUpdateResult = await learner.update({
+		model: openrouter(MODEL), // same model instance, but verifies no error
+	})
+	assertTrue(
+		modelUpdateResult.changedFields.includes('model'),
+		'Model change recorded in changedFields',
+	)
 
 	logger.logSuccess('All assertions passed!')
 	process.exit(0)

@@ -15,5 +15,7 @@ export type {
 	SynthesizeOutput,
 	SynthesizeThresholds,
 	TwoPhaseConfig,
+	TwoPhaseUpdateConfig,
+	TwoPhaseUpdateResult,
 } from './two-phase'
 export { TwoPhaseMethod } from './two-phase'

@@ -1,5 +1,5 @@
 /**
- * Create action handler - generates new learner from guidance
+ * Create action handler - generates new learners from guidance
  */
 
 import { Output } from 'ai'
@@ -7,47 +7,48 @@ import { EvolutionActionHandler } from '../base-handler'
 import type { EvolutionDecision } from '../../evaluator/types'
 import type { CreateActionResult } from '../types'
 import { generate } from '../../../llm'
-import { learnerConfigSchema } from '../../../learners/schema.config'
-import { createSystemPrompt } from '../prompt.system.create'
+import { learnerConfigsSchema } from '../../schemas/schema.learner-configs'
 import { createPromptTemplate } from '../prompt.template.create'
 
 /**
  * Handler for 'create' evolution action
  *
- * Creates a new learner based on natural language guidance from the Evaluator.
- * Reuses Brain's existing learner generation system.
+ * Joins guidance from all create decisions into a single LLM call,
+ * then creates learners from the generated configs.
  */
 export class CreateHandler extends EvolutionActionHandler<CreateActionResult> {
-	async execute(decision: EvolutionDecision): Promise<CreateActionResult> {
-		this.emitActionStarted(decision)
+	async execute(decisions: EvolutionDecision[]): Promise<CreateActionResult> {
+		for (const decision of decisions) {
+			this.emitActionStarted(decision)
+		}
 
 		try {
-			// Generate learner config using guidance
+			const guidance = decisions.map((d) => d.guidance).join('\n')
+
 			const result = await generate({
 				model: this.brain.config.model,
-				system: createSystemPrompt,
-				prompt: createPromptTemplate(
-					decision.guidance,
-					this.brain.prompt,
-					this.brain.learners.size,
-				),
-				output: Output.object({ schema: learnerConfigSchema }),
+				prompt: createPromptTemplate(guidance, this.brain.prompt),
+				output: Output.object({ schema: learnerConfigsSchema }),
 			})
 
-			// Create learner from generated config
-			const config = result.output.learners[0]
-			const learner = await this.brain.createLearnerFromConfig(config)
-
-			const actionResult: CreateActionResult = {
-				newLearnerIds: [learner.id],
+			const newLearnerIds: string[] = []
+			for (const config of result.output.learners) {
+				const learner = await this.brain.createLearnerFromConfig(config)
+				newLearnerIds.push(learner.id)
 			}
 
-			this.emitActionExecuted(decision, actionResult)
+			const actionResult: CreateActionResult = { newLearnerIds }
+
+			for (const decision of decisions) {
+				this.emitActionExecuted(decision, actionResult)
+			}
 
 			return actionResult
 		} catch (error) {
 			const err = error instanceof Error ? error : new Error(String(error))
-			this.emitActionFailed(decision, err)
+			for (const decision of decisions) {
+				this.emitActionFailed(decision, err)
+			}
 			throw new Error(`Create action failed: ${err.message}`)
 		}
 	}

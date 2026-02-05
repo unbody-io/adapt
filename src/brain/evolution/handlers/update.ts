@@ -15,61 +15,60 @@ import { updatePromptTemplate } from '../prompt.template.update'
 /**
  * Handler for 'update' evolution action
  *
- * Updates a learner's configuration based on guidance by:
- * 1. Analyzing the learner's current state and metrics
- * 2. Generating appropriate config updates via LLM
- * 3. Applying updates (with prompt regeneration if instructions change)
+ * Processes each update decision sequentially.
  */
 export class UpdateHandler extends EvolutionActionHandler<UpdateActionResult> {
-	async execute(decision: EvolutionDecision): Promise<UpdateActionResult> {
-		this.emitActionStarted(decision)
+	async execute(decisions: EvolutionDecision[]): Promise<UpdateActionResult> {
+		const allUpdatedLearnerIds: string[] = []
 
-		try {
-			// Validate targets
-			if (decision.targets.length !== 1) {
-				throw new Error('Update requires exactly 1 learner')
+		for (const decision of decisions) {
+			this.emitActionStarted(decision)
+
+			try {
+				if (decision.targets.length !== 1) {
+					throw new Error('Update requires exactly 1 learner')
+				}
+
+				const learnerId = decision.targets[0]
+				const learner = this.brain.learners.get(learnerId)
+
+				if (!learner) {
+					throw new Error(`Learner ${learnerId} not found`)
+				}
+
+				const result = await generate({
+					model: this.brain.config.model,
+					system: updateSystemPrompt,
+					prompt: updatePromptTemplate(
+						decision.guidance,
+						learner as TextLearner,
+						this.brain.prompt,
+					),
+					output: Output.object({ schema: updateOutputSchema }),
+				})
+
+				const { updates } = result.output
+
+				await (learner as TextLearner).update(updates)
+
+				if (updates.name) {
+					this.brain.__updateLearnerName(learnerId, updates.name)
+				}
+
+				allUpdatedLearnerIds.push(learnerId)
+
+				const actionResult: UpdateActionResult = {
+					updatedLearnerIds: [learnerId],
+				}
+
+				this.emitActionExecuted(decision, actionResult)
+			} catch (error) {
+				const err = error instanceof Error ? error : new Error(String(error))
+				this.emitActionFailed(decision, err)
+				throw new Error(`Update action failed: ${err.message}`)
 			}
-
-			const learnerId = decision.targets[0]
-			const learner = this.brain.learners.get(learnerId)
-
-			if (!learner) {
-				throw new Error(`Learner ${learnerId} not found`)
-			}
-
-			// Generate config updates via LLM
-			const result = await generate({
-				model: this.brain.config.model,
-				system: updateSystemPrompt,
-				prompt: updatePromptTemplate(
-					decision.guidance,
-					learner as TextLearner,
-					this.brain.prompt,
-				),
-				output: Output.object({ schema: updateOutputSchema }),
-			})
-
-			const { updates } = result.output
-
-			// Apply updates using TextLearner.update() method
-			await (learner as TextLearner).update(updates)
-
-			// Update Brain's learnerNames map if name changed
-			if (updates.name) {
-				this.brain.__updateLearnerName(learnerId, updates.name)
-			}
-
-			const actionResult: UpdateActionResult = {
-				updatedLearnerIds: [learnerId],
-			}
-
-			this.emitActionExecuted(decision, actionResult)
-
-			return actionResult
-		} catch (error) {
-			const err = error instanceof Error ? error : new Error(String(error))
-			this.emitActionFailed(decision, err)
-			throw new Error(`Update action failed: ${err.message}`)
 		}
+
+		return { updatedLearnerIds: allUpdatedLearnerIds }
 	}
 }

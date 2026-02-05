@@ -1,5 +1,5 @@
 /**
- * Evolution Orchestrator - Sequential execution of evolution actions
+ * Evolution Orchestrator - Groups decisions by action and dispatches to handlers
  */
 
 import type { Brain } from '../class'
@@ -13,10 +13,9 @@ import { DeleteHandler } from './handlers/delete'
 import type { EvolutionActionHandler } from './base-handler'
 
 /**
- * Orchestrates sequential execution of evolution actions
+ * Orchestrates evolution action execution
  *
- * Decisions are executed one at a time to avoid conflicts
- * (e.g., updating then deleting the same learner)
+ * Groups decisions by action type and dispatches each group to its handler.
  */
 export class EvolutionOrchestrator {
 	private handlers: Map<string, EvolutionActionHandler>
@@ -32,21 +31,28 @@ export class EvolutionOrchestrator {
 	}
 
 	/**
-	 * Execute evolution decisions sequentially
+	 * Execute evolution decisions grouped by action type
 	 *
 	 * @param decisions - Array of evolution decisions from Evaluator
-	 * @throws If any decision fails to execute
+	 * @throws If any group fails to execute
 	 */
 	async executeDecisions(decisions: EvolutionDecision[]): Promise<void> {
-		// Execute sequentially to avoid conflicts
+		const grouped = new Map<string, EvolutionDecision[]>()
+
 		for (const decision of decisions) {
-			const handler = this.handlers.get(decision.action)
+			const group = grouped.get(decision.action) ?? []
+			group.push(decision)
+			grouped.set(decision.action, group)
+		}
+
+		for (const [action, group] of grouped) {
+			const handler = this.handlers.get(action)
 
 			if (!handler) {
-				throw new Error(`No handler found for action: ${decision.action}`)
+				throw new Error(`No handler found for action: ${action}`)
 			}
 
-			await handler.execute(decision)
+			await handler.execute(group)
 		}
 	}
 
@@ -63,6 +69,6 @@ export class EvolutionOrchestrator {
 			throw new Error(`No handler found for action: ${decision.action}`)
 		}
 
-		return handler.execute(decision)
+		return handler.execute([decision])
 	}
 }

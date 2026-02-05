@@ -1,22 +1,31 @@
 /**
  * Template for create action prompt
  *
- * Formats guidance with Brain context for LLM to generate learner config
+ * Embeds the learner generation fragment with evolution-specific guidance.
  */
 
+import { learnerGenerationFragment } from '../prompts/prompt.fragment.learner-generation'
+
 /**
- * Format create prompt with guidance and Brain context
+ * Format create prompt with joined guidance and Brain context
  */
 export function createPromptTemplate(
 	guidance: string,
 	brainPrompt: string,
-	learnerCount: number,
 ): string {
-	return `Brain Purpose: ${brainPrompt}
+	return `You are creating new learners for an existing learning system.
 
-Current Learners: ${learnerCount}
+# Brain Purpose
 
-Task: ${guidance}
+${brainPrompt}
 
-Generate a learner configuration that fulfills this need.`
+# Creation Guidance
+
+${guidance}
+
+# Learner Generation Principles
+
+${learnerGenerationFragment}
+
+Generate the learner configurations based on the guidance above.`
 }

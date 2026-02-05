@@ -13,8 +13,8 @@ import { resolveBrainConfig } from './config.resolver'
 import { Evaluator } from './evaluator/class'
 import { EVOLUTION_ACTIONS, type EvolutionDecision } from './evaluator/types'
 import { EvolutionOrchestrator } from './evolution/orchestrator'
-import { learnerConfigsPromptTemplate } from './prompts/prompt.template.learner-configs'
-import { learnerConfigsSchema } from './schemas/schema.learner-configs'
+import { rootDecompositionPrompt } from './prompts/prompt.template.root-decomposition'
+import { brainDecompositionSchema } from './schemas/schema.brain-decomposition'
 import type {
 	BrainAskResult,
 	BrainConfig,
@@ -117,8 +117,8 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 	private async generateLearnerConfigs() {
 		return generate({
 			model: this.config.init.model,
-			prompt: learnerConfigsPromptTemplate(this.prompt),
-			output: Output.object({ schema: learnerConfigsSchema }),
+			prompt: rootDecompositionPrompt(this.prompt),
+			output: Output.object({ schema: brainDecompositionSchema }),
 		})
 	}
 
@@ -446,6 +446,7 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 	__removeLearner(learnerId: string): void {
 		this.learners.delete(learnerId)
 		this.learnerNames.delete(learnerId)
+		this.emit('brain:learner:removed', { learnerId })
 	}
 
 	/**

@@ -1,22 +1,11 @@
 /**
- * Prompt template for decomposing a user prompt into learner configurations
+ * Reusable prompt fragment for learner configuration generation
  *
- * Includes the Learner Creation Playbook (7 principles) to guide the LLM.
+ * Contains the 7 principles playbook and output format guidance.
+ * Embedded by both the root decomposition prompt and evolution create prompt.
  */
-export const learnerConfigsPromptTemplate = (
-	userPrompt: string,
-) => `You are a learning system architect. Your task is to decompose a user's prompt into a set of specialized learners.
 
-══════════════════════════════════════════════════════════════════════════════
-USER PROMPT
-══════════════════════════════════════════════════════════════════════════════
-${userPrompt}
-
-══════════════════════════════════════════════════════════════════════════════
-LEARNER CREATION PLAYBOOK
-══════════════════════════════════════════════════════════════════════════════
-
-Follow these principles when decomposing the prompt into learners:
+export const learnerGenerationFragment = `Follow these principles when generating learner configurations:
 
 PRINCIPLE 1: UNDERSTAND BEFORE DECOMPOSING
 
@@ -92,7 +81,7 @@ Questions to track: Concrete questions the learner should be able to answer.
 
 PRINCIPLE 7: VALIDATE BEFORE FINALIZING
 
-Coverage check: Do the learners together cover the full intent of the user's prompt?
+Coverage check: Do the learners together cover the full intent of the prompt?
 
 Overlap check: Is there significant redundancy where the same insight would appear in multiple learners?
 
@@ -100,29 +89,7 @@ Routing clarity: For each type of question the user might ask, is there a clear 
 
 Proportionality: Is the number of learners proportional to the complexity of the domain? Over-decomposition wastes tokens; under-decomposition loses nuance.
 
-══════════════════════════════════════════════════════════════════════════════
-OUTPUT FORMAT (JSON)
-══════════════════════════════════════════════════════════════════════════════
-
-CRITICAL: Output ONLY valid JSON. No markdown, no explanation, no code blocks.
-- Use \\n for newlines inside string values (do NOT use actual line breaks in strings)
-- Escape all special characters properly
-
-Return a JSON object with this exact structure:
-{
-  "learners": [
-    {
-      "id": "kebab-case-identifier",
-      "name": "Human-readable display name",
-      "description": "Brief description for query routing",
-      "instructions": "Full structured instructions...",
-      "type": "text",
-      "maintenance": { "strategy": "continuous" }
-    }
-  ]
-}
-
-For each learner:
+For each learner, provide:
 - id: kebab-case identifier (e.g., "coding-style", "learning-interests")
 - name: Human-readable display name
 - description: Brief description for query routing (what questions this learner answers)
@@ -138,10 +105,8 @@ For each learner:
   - [Concrete question 1]
   - [Concrete question 2]
 
-- type: "text" (only supported type in MVP)
-- maintenance: { strategy: "continuous" | "cumulative" | "decay" } (optional)
+- type: "text" (only supported type)
+- maintenance: { strategy: "continuous" | "cumulative" | "decay" }
   - continuous: Single growing understanding (default, good for most cases)
   - cumulative: Summarize when understanding gets large (good for high-volume data)
-  - decay: Weight recent observations higher (good for tracking evolving preferences)
-
-Output the JSON now:`
+  - decay: Weight recent observations higher (good for tracking evolving preferences)`

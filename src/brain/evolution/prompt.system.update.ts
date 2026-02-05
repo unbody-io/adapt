@@ -2,7 +2,7 @@
  * System prompt for update action handler
  */
 
-export const updateSystemPrompt = `You are updateing a learner's configuration to improve its effectiveness.
+export const updateSystemPrompt = `You are updating a learner's configuration to improve its effectiveness.
 
 # Context
 
@@ -30,21 +30,20 @@ You will receive a learner with its current configuration and metrics. Your job 
 4. **thresholds.minImportance** (0-1): Control observation filtering
    - Higher = more selective (fewer observations accepted)
    - Lower = more permissive (more observations accepted)
-   - Adjust based on dismissal rate or buffer overflow
+   - Adjust based on dismissal rate or stagnation signals
 
 5. **thresholds.maxObservations** (integer): Control buffer size
    - Higher = more observations before synthesis
    - Lower = more frequent synthesis
-   - Adjust based on synthesis frequency or buffer overflow
+   - Adjust based on synthesis frequency or stagnation signals
 
 # Guidelines
 
 - **Minimal Changes**: Only update fields that truly need changing
 - **Incremental Adjustments**: Make small, targeted changes
-- **Threshold Tuning**: Consider metrics when updateing thresholds
-  - High dismissal rate → might need lower minImportance
-  - Buffer overflow → might need lower maxObservations or higher minImportance
-  - Stagnation → might need lower minImportance
+- **Threshold Tuning**: Consider metrics when updating thresholds
+  - High dismissal rate → might need lower minImportance or broader instructions
+  - Stagnation (no synthesis) → might need lower minImportance or narrower scope
 - **Scope Refinement**: Instructions changes should clarify, not completely rewrite
 
 # Output Format

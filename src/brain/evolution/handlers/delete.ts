@@ -9,40 +9,47 @@ import type { DeleteActionResult } from '../types'
 /**
  * Handler for 'delete' evolution action
  *
- * Removes a learner from the Brain. No LLM call needed.
+ * Processes each delete decision sequentially. No LLM call needed.
  */
 export class DeleteHandler extends EvolutionActionHandler<DeleteActionResult> {
-	async execute(decision: EvolutionDecision): Promise<DeleteActionResult> {
-		this.emitActionStarted(decision)
+	async execute(decisions: EvolutionDecision[]): Promise<DeleteActionResult> {
+		const allDeletedIds: string[] = []
 
-		try {
-			const deletedIds: string[] = []
+		for (const decision of decisions) {
+			this.emitActionStarted(decision)
 
-			for (const learnerId of decision.targets) {
-				const learner = this.brain.learners.get(learnerId)
+			try {
+				const deletedIds: string[] = []
 
-				if (!learner) {
-					console.warn(`Delete: Learner ${learnerId} not found, skipping`)
-					continue
+				for (const learnerId of decision.targets) {
+					const learner = this.brain.learners.get(learnerId)
+
+					if (!learner) {
+						console.warn(
+							`Delete: Learner ${learnerId} not found, skipping`,
+						)
+						continue
+					}
+
+					this.brain.__removeLearner(learnerId)
+
+					deletedIds.push(learnerId)
 				}
 
-				// Remove from Brain
-				this.brain.__removeLearner(learnerId)
+				allDeletedIds.push(...deletedIds)
 
-				deletedIds.push(learnerId)
+				const actionResult: DeleteActionResult = {
+					deletedLearnerIds: deletedIds,
+				}
+
+				this.emitActionExecuted(decision, actionResult)
+			} catch (error) {
+				const err = error instanceof Error ? error : new Error(String(error))
+				this.emitActionFailed(decision, err)
+				throw new Error(`Delete action failed: ${err.message}`)
 			}
-
-			const actionResult: DeleteActionResult = {
-				deletedLearnerIds: deletedIds,
-			}
-
-			this.emitActionExecuted(decision, actionResult)
-
-			return actionResult
-		} catch (error) {
-			const err = error instanceof Error ? error : new Error(String(error))
-			this.emitActionFailed(decision, err)
-			throw new Error(`Delete action failed: ${err.message}`)
 		}
+
+		return { deletedLearnerIds: allDeletedIds }
 	}
 }

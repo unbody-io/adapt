@@ -24,12 +24,12 @@ export abstract class EvolutionActionHandler<
 	}
 
 	/**
-	 * Execute the evolution action
+	 * Execute the evolution action for a group of decisions
 	 *
-	 * @param decision - The evolution decision with guidance and targets
+	 * @param decisions - Array of evolution decisions with guidance and targets
 	 * @returns Result of the action execution
 	 */
-	abstract execute(decision: EvolutionDecision): Promise<TResult>
+	abstract execute(decisions: EvolutionDecision[]): Promise<TResult>
 
 	/**
 	 * Emit action started event

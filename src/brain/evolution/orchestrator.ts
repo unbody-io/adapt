@@ -11,6 +11,7 @@ import { SplitHandler } from './handlers/split'
 import { UpdateHandler } from './handlers/update'
 import { DeleteHandler } from './handlers/delete'
 import type { EvolutionActionHandler } from './base-handler'
+import type { AggregatedEvolutionResult, EvolutionActionResult } from './types'
 
 /**
  * Orchestrates evolution action execution
@@ -34,9 +35,18 @@ export class EvolutionOrchestrator {
 	 * Execute evolution decisions grouped by action type
 	 *
 	 * @param decisions - Array of evolution decisions from Evaluator
+	 * @returns Aggregated results from all handlers
 	 * @throws If any group fails to execute
 	 */
-	async executeDecisions(decisions: EvolutionDecision[]): Promise<void> {
+	async executeDecisions(decisions: EvolutionDecision[]): Promise<AggregatedEvolutionResult> {
+		const aggregated: AggregatedEvolutionResult = {
+			created: [],
+			updated: [],
+			deleted: [],
+			merged: [],
+			split: [],
+		}
+
 		const grouped = new Map<string, EvolutionDecision[]>()
 
 		for (const decision of decisions) {
@@ -52,8 +62,11 @@ export class EvolutionOrchestrator {
 				throw new Error(`No handler found for action: ${action}`)
 			}
 
-			await handler.execute(group)
+			const result: EvolutionActionResult = await handler.execute(group)
+			this.aggregateResult(aggregated, action, result)
 		}
+
+		return aggregated
 	}
 
 	/**
@@ -70,5 +83,27 @@ export class EvolutionOrchestrator {
 		}
 
 		return handler.execute([decision])
+	}
+
+	private aggregateResult(
+		aggregated: AggregatedEvolutionResult,
+		action: string,
+		result: EvolutionActionResult,
+	): void {
+		if ('newLearnerIds' in result) {
+			if (action === EVOLUTION_ACTIONS.create) {
+				aggregated.created.push(...result.newLearnerIds)
+			} else if (action === EVOLUTION_ACTIONS.merge) {
+				aggregated.merged.push(...result.newLearnerIds)
+			} else if (action === EVOLUTION_ACTIONS.split) {
+				aggregated.split.push(...result.newLearnerIds)
+			}
+		}
+		if ('updatedLearnerIds' in result) {
+			aggregated.updated.push(...result.updatedLearnerIds)
+		}
+		if ('deletedLearnerIds' in result) {
+			aggregated.deleted.push(...result.deletedLearnerIds)
+		}
 	}
 }

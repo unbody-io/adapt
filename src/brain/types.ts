@@ -9,6 +9,7 @@ import type {
 	ResolvedCascadableConfig,
 } from '../types/config'
 import type { EventsFromMap } from '../types/events'
+import type { EvolutionDecision } from './evaluator/types'
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Learning Config (passed to learners)
@@ -48,8 +49,17 @@ export interface MaintenanceConfig {
 
 /**
  * Learning config - applied to all auto-generated learners
+ *
+ * Semantic fields (instructions, name, description) go through the evaluator
+ * when used in brain.update(). Mechanical fields cascade directly to learners.
  */
 export interface LearningConfig extends CascadableConfig {
+	/** Learner instructions (semantic — goes through evaluator) */
+	instructions?: string
+	/** Learner name (semantic — goes through evaluator) */
+	name?: string
+	/** Learner description (semantic — goes through evaluator) */
+	description?: string
 	observe?: ObservePhaseConfig
 	synthesize?: SynthesizePhaseConfig
 	query?: QueryPhaseConfig
@@ -192,13 +202,15 @@ export interface ResolvedEvolutionConfig {
 
 /**
  * Fully resolved Brain config - all values defined
+ *
+ * Note: `learning` is intentionally absent. Each learner owns its own config.
+ * Use `brain.learners` to read learner configs.
  */
 export interface ResolvedBrainConfig extends ResolvedCascadableConfig {
 	prompt: string
 	init: ResolvedInitPhaseConfig
 	query: ResolvedBrainQueryConfig
 	ingest: ResolvedIngestConfig
-	learning: ResolvedLearningConfig
 	evolution: ResolvedEvolutionConfig
 }
 
@@ -254,6 +266,30 @@ export interface BrainAskResult {
 	}>
 	/** Aggregated gaps from all learners */
 	gaps: string[]
+}
+
+/**
+ * Result from brain.update()
+ */
+export interface BrainUpdateResult {
+	/** Brain-level fields that changed */
+	changedFields: string[]
+	/** Current resolved brain config after update */
+	config: ResolvedBrainConfig
+	/** Per-learner summary of what changed (from learner.update() calls) */
+	learnerResults: Array<{
+		learnerId: string
+		changedFields: string[]
+	}>
+	/** Present only when signal-driven evaluation was triggered */
+	evolutionResults?: {
+		decisions: EvolutionDecision[]
+		created: string[]
+		updated: string[]
+		deleted: string[]
+		merged: string[]
+		split: string[]
+	}
 }
 
 /**
@@ -379,16 +415,8 @@ export interface BrainOwnEventMap {
 
 	// Brain config update events
 	'brain:config:updated': {
-		updates: {
-			prompt?: string
-			model?: import('ai').LanguageModel
-			blueprintModel?: import('ai').LanguageModel
-			evolution?: {
-				enabled?: boolean
-				evaluatorSignalThreshold?: number
-				autoEvaluate?: boolean
-			}
-		}
+		updates: Partial<BrainConfig>
+		changedFields: string[]
 	}
 }
 

@@ -598,6 +598,8 @@ export class TextLearner
 				break
 
 			case 'synthesized': {
+				// The observation was made (it triggered synthesis), so count it
+				this.observationCount++
 				this.lastSynthesisObservationCount = this.observationCount
 				const previousUnderstanding = this.understanding
 
@@ -629,22 +631,30 @@ export class TextLearner
 
 				// Update governance (use 1.0 as relevance since it was synthesized)
 				this.updateGovernance(1.0)
+				// Check signals after observation+synthesis
+				this.checkAndEmitSignals()
 				break
 			}
 
 			case 'synthesize:dismissed':
+				// The observation was made (it triggered synthesis attempt), so count it
+				this.observationCount++
 				this.emit('learner:synthesize:dismissed', {
 					learnerId: this.id,
 					output: result.output,
 					usage: result.usage,
 				})
+				this.checkAndEmitSignals()
 				break
 
 			case 'synthesize:error':
+				// The observation was made but synthesis failed — still count it
+				this.observationCount++
 				this.emit('learner:synthesize:error', {
 					learnerId: this.id,
 					error: result.error,
 				})
+				this.checkAndEmitSignals()
 				break
 		}
 	}

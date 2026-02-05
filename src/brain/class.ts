@@ -6,13 +6,16 @@ import {
 	TextLearner,
 	type TokenUsage,
 } from '../learners'
+import type { TextLearnerConfig } from '../learners/text-learner/types'
 import { generate, Output } from '../llm'
 import { TypedEmitter } from '../types/events'
 import { synthesize } from './agent'
+import { BRAIN_DEFAULTS } from './config.defaults'
 import { resolveBrainConfig } from './config.resolver'
 import { Evaluator } from './evaluator/class'
 import { EVOLUTION_ACTIONS, type EvolutionDecision } from './evaluator/types'
 import { EvolutionOrchestrator } from './evolution/orchestrator'
+import type { AggregatedEvolutionResult } from './evolution/types'
 import { rootDecompositionPrompt } from './prompts/prompt.template.root-decomposition'
 import { brainDecompositionSchema } from './schemas/schema.brain-decomposition'
 import type {
@@ -21,6 +24,7 @@ import type {
 	BrainEventMap,
 	BrainInjectOptions,
 	BrainInjectResult,
+	BrainUpdateResult,
 	ResolvedBrainConfig,
 } from './types'
 
@@ -131,31 +135,27 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 			governance?: Partial<LearnerGovernance>
 		},
 	): Promise<TextLearner> {
-		const { learning } = this.config
-
 		const learner = new TextLearner(
 			{
 				id: config.id,
-				model: learning.model,
-				blueprintModel: learning.blueprintModel,
+				model: this.config.model,
+				blueprintModel: this.config.blueprintModel,
 				instructions: config.instructions,
 				origin: 'prompt',
-				maintenance: config.maintenance,
-				observe: {
-					model: learning.observe.model,
-					blueprintModel: learning.observe.blueprintModel,
+				maintenance: config.maintenance ?? {
+					strategy: BRAIN_DEFAULTS.learning.maintenance.strategy,
+					maxTokens: BRAIN_DEFAULTS.learning.maintenance.maxTokens,
 				},
 				synthesize: {
-					model: learning.synthesize.model,
-					blueprintModel: learning.synthesize.blueprintModel,
 					thresholds: {
-						...learning.synthesize.thresholds,
+						maxObservations: BRAIN_DEFAULTS.learning.synthesize.thresholds.maxObservations,
+						maxTokens: BRAIN_DEFAULTS.learning.synthesize.thresholds.maxTokens,
+						minImportance: BRAIN_DEFAULTS.learning.synthesize.thresholds.minImportance,
 						...config.thresholds,
 					},
 				},
 				query: {
-					model: learning.query.model,
-					method: learning.query.method,
+					method: BRAIN_DEFAULTS.learning.query.method,
 				},
 				name: config.name,
 				description: config.description,
@@ -383,11 +383,12 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 	 *
 	 * @param signal - Signal with source and description
 	 */
-	signal(signal: { source: string; description: string }): void {
+	signal(signal: { source: string; description: string; bypass?: boolean }): void {
 		const signalEvent = {
 			source: signal.source,
 			description: signal.description,
 			timestamp: new Date(),
+			bypass: signal.bypass,
 		}
 
 		this.emit('brain:signal:received', signalEvent)
@@ -407,7 +408,10 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 	 * @returns Array of evolution decisions (empty if no changes needed)
 	 * @throws Error if evolution is not enabled
 	 */
-	async evaluateEvolution(): Promise<EvolutionDecision[]> {
+	async evaluateEvolution(options?: { dryRun?: boolean }): Promise<{
+		decisions: EvolutionDecision[]
+		results: AggregatedEvolutionResult
+	}> {
 		if (!this.evaluator) {
 			throw new Error(
 				'Evolution is not enabled. Set config.evolution.enabled = true',
@@ -416,10 +420,18 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 
 		const decisions = await this.evaluator.evaluate()
 
-		// Execute decisions automatically
-		await this.executeEvolutionDecisions(decisions)
+		// In dryRun mode, return decisions without executing them
+		if (options?.dryRun) {
+			return {
+				decisions,
+				results: { created: [], updated: [], deleted: [], merged: [], split: [] },
+			}
+		}
 
-		return decisions
+		// Execute decisions automatically
+		const results = await this.executeEvolutionDecisions(decisions)
+
+		return { decisions, results }
 	}
 
 	/**
@@ -427,12 +439,12 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 	 */
 	private async executeEvolutionDecisions(
 		decisions: EvolutionDecision[],
-	): Promise<void> {
+	): Promise<AggregatedEvolutionResult> {
 		if (!this.evolutionOrchestrator) {
 			throw new Error('Evolution orchestrator not initialized')
 		}
 
-		await this.evolutionOrchestrator.executeDecisions(decisions)
+		return this.evolutionOrchestrator.executeDecisions(decisions)
 	}
 
 	// ─────────────────────────────────────────────────────────────────────────
@@ -656,99 +668,45 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 	/**
 	 * Update Brain configuration
 	 *
-	 * Supports updating:
-	 * - prompt: Brain's purpose (triggers authoritative signal for evolution)
-	 * - model: Default LLM for all operations
-	 * - blueprintModel: Blueprint LLM for all operations
-	 * - evolution: Evolution system configuration (enabled, thresholds, autoEvaluate)
+	 * Accepts a partial of the constructor config. Each field is categorized by
+	 * its downstream effect:
 	 *
-	 * @param updates - Partial configuration updates
+	 * 1. **Brain-only** — stored on this.config, no downstream propagation
+	 * 2. **Mechanical cascade** — forwarded to all learners via learner.update()
+	 * 3. **Signal-driven** — semantic changes routed through the evaluator
 	 *
-	 * @example
-	 * ```ts
-	 * // Update prompt (triggers evolution to adapt learners)
-	 * await brain.update({
-	 *   prompt: 'Track software architecture patterns AND deployment strategies'
-	 * })
-	 *
-	 * // Update models
-	 * await brain.update({
-	 *   model: newModel,
-	 *   blueprintModel: newBlueprintModel
-	 * })
-	 *
-	 * // Toggle evolution features
-	 * await brain.update({
-	 *   evolution: {
-	 *     enabled: false,
-	 *     autoEvaluate: false
-	 *   }
-	 * })
-	 * ```
+	 * @param updates - Partial configuration updates (same shape as BrainConfig)
+	 * @returns Result with changed fields, learner results, and evolution results
 	 */
-	async update(updates: {
-		prompt?: string
-		model?: import('ai').LanguageModel
-		blueprintModel?: import('ai').LanguageModel
-		evolution?: {
-			enabled?: boolean
-			evaluatorSignalThreshold?: number
-			autoEvaluate?: boolean
+	async update(updates: Partial<BrainConfig>): Promise<BrainUpdateResult> {
+		const changedFields: string[] = []
+		const learnerResults: BrainUpdateResult['learnerResults'] = []
+		let evolutionResults: BrainUpdateResult['evolutionResults'] | undefined
+
+		// ── 1. Brain-only fields ──
+
+		if (updates.init?.model !== undefined) {
+			this.config.init.model = updates.init.model
+			changedFields.push('init.model')
 		}
-	}): Promise<void> {
-		const appliedUpdates: typeof updates = {}
-
-		// Handle prompt update with authoritative signal
-		if (updates.prompt !== undefined && updates.prompt !== this.prompt) {
-			const oldPrompt = this.prompt
-			this.prompt = updates.prompt
-			this.config.prompt = updates.prompt
-			appliedUpdates.prompt = updates.prompt
-
-			// Emit authoritative signal to trigger learner adaptation
-			this.signal({
-				source: 'brain',
-				description: `SYSTEM DIRECTIVE: Brain purpose has been updated.
-
-Old purpose: ${oldPrompt}
-
-New purpose: ${updates.prompt}
-
-Required action: Analyze current learner coverage against the new purpose. Generate decisions to align all learners with the updated requirements. This may require creating new learners, updating existing ones, merging overlapping responsibilities, or splitting overly broad learners to match the new structure.
-
-This is a system-level directive and should be prioritized over organic signals.`,
-			})
+		if (updates.query?.model !== undefined) {
+			this.config.query.model = updates.query.model
+			changedFields.push('query.model')
+		}
+		if (updates.ingest?.batchSize !== undefined) {
+			this.config.ingest.batchSize = updates.ingest.batchSize
+			changedFields.push('ingest.batchSize')
 		}
 
-		// Update model (default LLM)
-		if (updates.model !== undefined && updates.model !== this.config.model) {
-			this.config.model = updates.model
-			this.config.learning.model = updates.model
-			appliedUpdates.model = updates.model
-		}
-
-		// Update blueprintModel
-		if (
-			updates.blueprintModel !== undefined &&
-			updates.blueprintModel !== this.config.blueprintModel
-		) {
-			this.config.blueprintModel = updates.blueprintModel
-			this.config.learning.blueprintModel = updates.blueprintModel
-			appliedUpdates.blueprintModel = updates.blueprintModel
-		}
-
-		// Update evolution config
+		// Evolution config
 		if (updates.evolution) {
-			const evolutionUpdates: typeof updates.evolution = {}
-
 			if (
 				updates.evolution.enabled !== undefined &&
 				updates.evolution.enabled !== this.config.evolution.enabled
 			) {
 				this.config.evolution.enabled = updates.evolution.enabled
-				evolutionUpdates.enabled = updates.evolution.enabled
+				changedFields.push('evolution.enabled')
 
-				// If enabling evolution and not initialized, initialize evaluator
 				if (updates.evolution.enabled && !this.evaluator && this.initialized) {
 					this.evaluator = new Evaluator(
 						this,
@@ -768,13 +726,9 @@ This is a system-level directive and should be prioritized over organic signals.
 			) {
 				this.config.evolution.evaluatorSignalThreshold =
 					updates.evolution.evaluatorSignalThreshold
-				evolutionUpdates.evaluatorSignalThreshold =
-					updates.evolution.evaluatorSignalThreshold
+				changedFields.push('evolution.evaluatorSignalThreshold')
 
-				// Update existing evaluator threshold if it exists
 				if (this.evaluator) {
-					// Evaluator stores threshold internally - would need to expose setter
-					// For now, recreate evaluator with new threshold
 					this.evaluator = new Evaluator(
 						this,
 						updates.evolution.evaluatorSignalThreshold,
@@ -790,19 +744,118 @@ This is a system-level directive and should be prioritized over organic signals.
 				updates.evolution.autoEvaluate !== this.config.evolution.autoEvaluate
 			) {
 				this.config.evolution.autoEvaluate = updates.evolution.autoEvaluate
-				evolutionUpdates.autoEvaluate = updates.evolution.autoEvaluate
-			}
-
-			if (Object.keys(evolutionUpdates).length > 0) {
-				appliedUpdates.evolution = evolutionUpdates
+				changedFields.push('evolution.autoEvaluate')
 			}
 		}
 
-		// Emit brain:config:updated event if any changes were made
-		if (Object.keys(appliedUpdates).length > 0) {
-			this.emit('brain:config:updated', {
-				updates: appliedUpdates,
+		// ── 2. Mechanical cascade to learners ──
+
+		const learnerUpdate: Partial<TextLearnerConfig> = {}
+
+		if (updates.model !== undefined) {
+			this.config.model = updates.model
+			changedFields.push('model')
+			learnerUpdate.model = updates.model
+		}
+		if (updates.blueprintModel !== undefined) {
+			this.config.blueprintModel = updates.blueprintModel
+			changedFields.push('blueprintModel')
+			learnerUpdate.blueprintModel = updates.blueprintModel
+		}
+
+		// Map learning.* mechanical fields to learnerUpdate shape
+		if (updates.learning?.model) learnerUpdate.model ??= updates.learning.model
+		if (updates.learning?.blueprintModel) learnerUpdate.blueprintModel ??= updates.learning.blueprintModel
+		if (updates.learning?.observe) {
+			learnerUpdate.observe = updates.learning.observe
+		}
+		if (updates.learning?.synthesize) {
+			const s = updates.learning.synthesize
+			learnerUpdate.synthesize = {
+				...(s.model ? { model: s.model } : {}),
+				...(s.blueprintModel ? { blueprintModel: s.blueprintModel } : {}),
+				...(s.thresholds ? { thresholds: s.thresholds } : {}),
+			}
+		}
+		if (updates.learning?.query) {
+			learnerUpdate.query = updates.learning.query
+		}
+		if (updates.learning?.maintenance) {
+			const m = updates.learning.maintenance
+			learnerUpdate.maintenance = {
+				...(m.strategy ? { strategy: m.strategy } : {}),
+				...(m.maxTokens !== undefined ? { maxTokens: m.maxTokens } : {}),
+			} as TextLearnerConfig['maintenance']
+		}
+
+		// Forward to all learners
+		if (Object.keys(learnerUpdate).length > 0) {
+			for (const learner of this.learners.values()) {
+				const result = await learner.update(learnerUpdate)
+				learnerResults.push({ learnerId: learner.id, changedFields: result.changedFields })
+			}
+		}
+
+		// ── 3. Signal-driven (semantic changes) ──
+
+		const semanticChanges: string[] = []
+
+		if (updates.prompt !== undefined && updates.prompt !== this.prompt) {
+			const oldPrompt = this.prompt
+			this.prompt = updates.prompt
+			this.config.prompt = updates.prompt
+			changedFields.push('prompt')
+			semanticChanges.push(
+				`Brain purpose has been updated by the user.\n` +
+				`Previous purpose: ${oldPrompt}\n` +
+				`New purpose: ${updates.prompt}\n\n` +
+				`IMPORTANT: This update does NOT necessarily mean all existing learners should be deleted and recreated. ` +
+				`Consider the relationship between the old and new purpose:\n` +
+				`- If the new purpose is a REFINEMENT or NARROWING of the old one, ADJUST existing learners to match.\n` +
+				`- If the new purpose OVERLAPS with the old one, keep learners whose knowledge is still relevant (check "What it has learned so far"), adjust their instructions, and only create new ones for gaps.\n` +
+				`- If the new purpose ADDS a new dimension, create new learners for the new area while keeping existing ones.\n` +
+				`- Only DELETE a learner if its accumulated knowledge is genuinely irrelevant to the new purpose.\n` +
+				`- Prefer ADJUST over DELETE+CREATE — adjusting preserves accumulated understanding, deleting destroys it.`
+			)
+		}
+		if (updates.learning?.instructions) {
+			semanticChanges.push(`Learner instructions update requested: ${updates.learning.instructions}`)
+		}
+		if (updates.learning?.name) {
+			semanticChanges.push(`Learner name update requested: ${updates.learning.name}`)
+		}
+		if (updates.learning?.description) {
+			semanticChanges.push(`Learner description update requested: ${updates.learning.description}`)
+		}
+
+		if (semanticChanges.length > 0) {
+			this.signal({
+				source: 'brain',
+				description: `SYSTEM DIRECTIVE: ${semanticChanges.join('\n\n')}`,
+				bypass: true,
 			})
+
+			// Await full evaluation + execution
+			if (this.evaluator) {
+				const { decisions, results } = await this.evaluateEvolution()
+				evolutionResults = {
+					decisions,
+					...results,
+				}
+			}
+		}
+
+		// ── 4. Emit event ──
+
+		if (changedFields.length > 0) {
+			this.emit('brain:config:updated', { updates, changedFields })
+		}
+
+		return {
+			changedFields,
+			config: { ...this.config },
+			learnerResults,
+			evolutionResults,
 		}
 	}
 }

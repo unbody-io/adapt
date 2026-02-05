@@ -16,7 +16,7 @@ export const TEXT_LEARNER_DEFAULTS = {
 		thresholds: {
 			maxObservations: 10,
 			maxTokens: 8000,
-			minImportance: 0.9,
+			minImportance: 0.5,
 		} satisfies Required<SynthesizeThresholds>,
 	},
 	query: {

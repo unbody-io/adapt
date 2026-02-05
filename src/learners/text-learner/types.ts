@@ -274,5 +274,5 @@ export interface TextLearnerUpdateResult {
 export const DEFAULT_THRESHOLDS: SynthesizeThresholds = {
 	maxObservations: 10,
 	maxTokens: 8000,
-	minImportance: 0.9,
+	minImportance: 0.5,
 }

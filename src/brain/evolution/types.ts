@@ -50,6 +50,17 @@ export type EvolutionActionResult =
 	| DeleteActionResult
 
 /**
+ * Aggregated result from executing multiple evolution decisions
+ */
+export interface AggregatedEvolutionResult {
+	created: string[]
+	updated: string[]
+	deleted: string[]
+	merged: string[]
+	split: string[]
+}
+
+/**
  * Event map for Evolution actions
  */
 export interface EvolutionEventMap {

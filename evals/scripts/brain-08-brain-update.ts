@@ -1,6 +1,9 @@
 /**
  * Eval: Brain Update
- * Tests brain.update() for modifying brain configuration and prompt
+ * Tests brain.update() with the 3-category field system:
+ * 1. Brain-only fields (evolution config)
+ * 2. Mechanical cascade (model changes → learner.update())
+ * 3. Signal-driven (prompt change → evaluator)
  */
 
 import { Brain } from '../../src/brain/class'
@@ -57,69 +60,105 @@ async function main() {
 
 	logger.logState('Brain Before Update', beforeState)
 
-	logger.logSection('Action 1: Update Brain Prompt')
+	// ── Category 1: Brain-only fields ──
 
-	const newPrompt = 'You help developers learn TypeScript, React, and Node.js best practices.'
+	logger.logSection('Action 1: Update Evolution Config (Brain-only)')
 
-	await brain.update({
-		prompt: newPrompt,
-	})
-
-	// Wait for signal to potentially trigger evaluation
-	await new Promise((resolve) => setTimeout(resolve, 1000))
-
-	logger.logSection('After Prompt Update')
-
-	const afterPromptState = {
-		prompt: brain.prompt,
-		promptChanged: brain.prompt !== initialPrompt,
-	}
-
-	logger.logState('Brain After Prompt Update', afterPromptState)
-
-	logger.logSection('Action 2: Update Evolution Config')
-
-	await brain.update({
+	const configResult = await brain.update({
 		evolution: {
-			enabled: true,
-			evaluatorSignalThreshold: 10, // Changed from 5 to 10
-			autoEvaluate: false, // Changed from true to false
+			evaluatorSignalThreshold: 10,
+			autoEvaluate: false,
 		},
 	})
 
-	logger.logSection('After Config Update')
+	logger.logState('Config Update Result', {
+		changedFields: configResult.changedFields,
+		learnerResults: configResult.learnerResults,
+	})
 
-	const afterConfigState = {
-		prompt: brain.prompt,
-		evolutionEnabled: brain.config.evolution?.enabled,
-		evaluatorSignalThreshold: brain.config.evolution?.evaluatorSignalThreshold,
-		autoEvaluate: brain.config.evolution?.autoEvaluate,
-	}
-
-	logger.logState('Brain After Config Update', afterConfigState)
-
-	logger.logSection('Assertions')
-
-	// Prompt update assertions
-	assertEqual(brain.prompt, newPrompt, 'Prompt was updated')
-	assertEqual(brain.config.prompt, newPrompt, 'Config prompt was updated')
-
-	// Config update assertions
 	assertEqual(
 		brain.config.evolution?.evaluatorSignalThreshold,
 		10,
 		'Evaluator signal threshold was updated',
 	)
 	assertEqual(brain.config.evolution?.autoEvaluate, false, 'Auto-evaluate was disabled')
+	assertTrue(
+		configResult.changedFields.includes('evolution.evaluatorSignalThreshold'),
+		'changedFields includes evolution.evaluatorSignalThreshold',
+	)
+	assertTrue(
+		configResult.changedFields.includes('evolution.autoEvaluate'),
+		'changedFields includes evolution.autoEvaluate',
+	)
+	assertEqual(configResult.learnerResults.length, 0, 'No learner results for brain-only update')
 
-	// Event assertions for prompt update
 	assertEventEmitted(
 		events,
 		'brain:config:updated',
-		(payload) => payload.updates.prompt === newPrompt,
+		(payload) => payload.changedFields.includes('evolution.evaluatorSignalThreshold'),
 	)
 
-	// Authoritative signal should have been emitted for prompt change
+	// ── Category 2: Mechanical cascade ──
+
+	logger.logSection('Action 2: Update Model (Mechanical Cascade)')
+
+	const newModel = openrouter(MODEL) // Same provider, tests the cascade path
+	const modelResult = await brain.update({
+		model: newModel,
+	})
+
+	logger.logState('Model Update Result', {
+		changedFields: modelResult.changedFields,
+		learnerResultCount: modelResult.learnerResults.length,
+		learnerResults: modelResult.learnerResults.map(r => ({
+			learnerId: r.learnerId,
+			changedFields: r.changedFields,
+		})),
+	})
+
+	assertTrue(
+		modelResult.changedFields.includes('model'),
+		'changedFields includes model',
+	)
+	assertEqual(
+		modelResult.learnerResults.length,
+		brain.learners.size,
+		'All learners received update',
+	)
+	// Each learner should report model as changed
+	for (const lr of modelResult.learnerResults) {
+		assertTrue(
+			lr.changedFields.includes('model'),
+			`Learner ${lr.learnerId} reports model changed`,
+		)
+	}
+
+	// ── Category 3: Signal-driven ──
+
+	logger.logSection('Action 3: Update Prompt (Signal-driven)')
+
+	// Re-enable autoEvaluate for this test
+	await brain.update({ evolution: { autoEvaluate: true } })
+
+	const newPrompt = 'You help developers learn TypeScript, React, and Node.js best practices.'
+	const promptResult = await brain.update({
+		prompt: newPrompt,
+	})
+
+	logger.logState('Prompt Update Result', {
+		changedFields: promptResult.changedFields,
+		hasEvolutionResults: !!promptResult.evolutionResults,
+		evolutionResults: promptResult.evolutionResults,
+	})
+
+	assertEqual(brain.prompt, newPrompt, 'Prompt was updated')
+	assertEqual(brain.config.prompt, newPrompt, 'Config prompt was updated')
+	assertTrue(
+		promptResult.changedFields.includes('prompt'),
+		'changedFields includes prompt',
+	)
+
+	// Signal should have been emitted
 	assertEventEmitted(
 		events,
 		'brain:signal:received',
@@ -127,12 +166,23 @@ async function main() {
 			payload.source === 'brain' && payload.description.includes('SYSTEM DIRECTIVE'),
 	)
 
-	// Event assertions for config update
-	assertEventEmitted(
-		events,
-		'brain:config:updated',
-		(payload) => payload.updates.evolution?.evaluatorSignalThreshold === 10,
-	)
+	// Evolution should have been triggered (bypass signal)
+	if (promptResult.evolutionResults) {
+		logger.logState('Evolution Results', promptResult.evolutionResults)
+		assertTrue(
+			Array.isArray(promptResult.evolutionResults.decisions),
+			'evolutionResults has decisions array',
+		)
+	}
+
+	// ── Return type validation ──
+
+	logger.logSection('Return Type Validation')
+
+	assertTrue(Array.isArray(promptResult.changedFields), 'changedFields is array')
+	assertTrue(promptResult.config !== undefined, 'config is present')
+	assertTrue(Array.isArray(promptResult.learnerResults), 'learnerResults is array')
+	assertEqual(promptResult.config.prompt, newPrompt, 'Returned config has updated prompt')
 
 	logger.logSuccess('All assertions passed!')
 	process.exit(0)

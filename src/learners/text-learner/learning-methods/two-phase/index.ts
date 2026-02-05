@@ -279,6 +279,16 @@ export class TwoPhaseMethod {
 			}
 		}
 
+		// Filter by importance threshold — low-importance observations don't get buffered
+		const minImportance = this.config.synthesize.thresholds.minImportance
+		if (minImportance !== undefined && observeResult.importance < minImportance) {
+			return {
+				status: 'observe:dismissed',
+				output: observeResult.output,
+				usage: observeResult.usage,
+			}
+		}
+
 		// Buffer the observation
 		this.buffer.add({
 			text: observeResult.output,

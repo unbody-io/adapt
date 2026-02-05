@@ -26,6 +26,7 @@ export interface Signal {
 	source: string
 	description: string
 	timestamp: Date
+	bypass?: boolean
 	metrics?: {
 		dismissalRate?: number
 		avgConfidence?: number
@@ -51,6 +52,7 @@ export interface LearnerContext {
 	id: string
 	name: string
 	purpose: string
+	understandingPreview: string
 	governance: {
 		activation: number
 		status: string

@@ -85,17 +85,13 @@ export class ObservationBuffer {
 	 * Check if any synthesis threshold is met
 	 */
 	shouldSynthesize(thresholds: SynthesizeThresholds): boolean {
-		const { maxObservations, maxTokens, minImportance } = thresholds
+		const { maxObservations, maxTokens } = thresholds
 
 		if (maxObservations !== undefined && this.count >= maxObservations) {
 			return true
 		}
 
 		if (maxTokens !== undefined && this.totalTokens >= maxTokens) {
-			return true
-		}
-
-		if (minImportance !== undefined && this.avgImportance >= minImportance) {
 			return true
 		}
 

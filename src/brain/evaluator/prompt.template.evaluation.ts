@@ -24,6 +24,7 @@ ${context.learners
 	.map(
 		(l) => `## ${l.name} (${l.id})
 **Purpose**: ${l.purpose}
+**What it has learned so far**: ${l.understandingPreview}
 **Status**: ${l.governance.status}
 **Activation**: ${l.governance.activation.toFixed(2)}
 **Last Accessed**: ${l.governance.lastAccessed.toISOString()}

@@ -36,10 +36,11 @@ export class Evaluator extends TypedEmitter<EvaluatorEventMap> {
 	signal(signal: Signal): void {
 		this.signals.push(signal)
 
-		// Auto-evaluate when threshold reached (if enabled)
+		// Auto-evaluate: bypass signals trigger immediately, otherwise wait for threshold
 		if (
-			this.signals.length >= this.threshold &&
-			this.brain.config.evolution.autoEvaluate
+			signal.bypass ||
+			(this.signals.length >= this.threshold &&
+			this.brain.config.evolution.autoEvaluate)
 		) {
 			// Fire and forget - don't block signal emission
 			this.evaluate().catch((error) => {
@@ -70,7 +71,7 @@ export class Evaluator extends TypedEmitter<EvaluatorEventMap> {
 
 			// Call LLM to generate decisions
 			const result = await generate({
-				model: this.brain.config.model,
+				model: this.brain.config.blueprintModel,
 				system: evaluatorSystemPrompt,
 				prompt: this.formatEvaluationPrompt(context),
 				output: Output.object({ schema: evolutionDecisionsSchema }),
@@ -124,10 +125,14 @@ export class Evaluator extends TypedEmitter<EvaluatorEventMap> {
 			},
 			learners: Array.from(this.brain.learners.values()).map((learner) => {
 				const governance = learner.getGovernance()
+				const understanding = learner.getUnderstanding()
 				return {
 					id: learner.id,
 					name: learner.id, // Use ID as name for now
 					purpose: this.extractPurpose(learner.instructions),
+					understandingPreview: understanding.length > 0
+						? understanding.substring(0, 300) + (understanding.length > 300 ? '...' : '')
+						: '(no understanding yet)',
 					governance: {
 						activation: governance.activation,
 						status: governance.status,

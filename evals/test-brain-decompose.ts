@@ -9,8 +9,8 @@
 
 import { createOpenRouter } from '@openrouter/ai-sdk-provider'
 import { generateText, Output } from 'ai'
-import { learnerConfigsPromptTemplate } from '../src/brain/prompts/prompt.template.learner-configs'
-import { learnerConfigsSchema } from '../src/brain/schemas/schema.learner-configs'
+import { rootDecompositionPrompt } from '../src/brain/prompts/prompt.template.root-decomposition'
+import { brainDecompositionSchema } from '../src/brain/schemas/schema.brain-decomposition'
 
 const openrouter = createOpenRouter({
 	apiKey: process.env.OPENROUTER_API_KEY,
@@ -35,13 +35,13 @@ Data: menus, reviews, chef interviews, social media posts.`,
 
 async function testPrompt(brainPrompt: string) {
 	const model = openrouter(MODEL)
-	const prompt = learnerConfigsPromptTemplate(brainPrompt)
+	const prompt = rootDecompositionPrompt(brainPrompt)
 
 	try {
 		const result = await generateText({
 			model,
 			prompt,
-			output: Output.object({ schema: learnerConfigsSchema }),
+			output: Output.object({ schema: brainDecompositionSchema }),
 		})
 
 		if (!result.output) {

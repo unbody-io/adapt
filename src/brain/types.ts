@@ -9,6 +9,7 @@ import type {
 	ResolvedCascadableConfig,
 } from '../types/config'
 import type { EventsFromMap } from '../types/events'
+import type { EvolutionDecision } from './evaluator/types'
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Learning Config (passed to learners)
@@ -48,8 +49,17 @@ export interface MaintenanceConfig {
 
 /**
  * Learning config - applied to all auto-generated learners
+ *
+ * Semantic fields (instructions, name, description) go through the evaluator
+ * when used in brain.update(). Mechanical fields cascade directly to learners.
  */
 export interface LearningConfig extends CascadableConfig {
+	/** Learner instructions (semantic — goes through evaluator) */
+	instructions?: string
+	/** Learner name (semantic — goes through evaluator) */
+	name?: string
+	/** Learner description (semantic — goes through evaluator) */
+	description?: string
 	observe?: ObservePhaseConfig
 	synthesize?: SynthesizePhaseConfig
 	query?: QueryPhaseConfig
@@ -82,6 +92,18 @@ export interface IngestConfig {
 }
 
 /**
+ * Evolution configuration (Living Brain)
+ */
+export interface EvolutionConfig {
+	/** Whether evolution is enabled */
+	enabled?: boolean
+	/** Number of signals before auto-evaluation */
+	evaluatorSignalThreshold?: number
+	/** Whether to auto-evaluate when threshold reached */
+	autoEvaluate?: boolean
+}
+
+/**
  * Configuration for creating a Brain
  */
 export interface BrainConfig extends CascadableConfig {
@@ -97,6 +119,8 @@ export interface BrainConfig extends CascadableConfig {
 	ingest?: IngestConfig
 	/** Learning config (applied to all learners) */
 	learning?: LearningConfig
+	/** Evolution config (Living Brain) */
+	evolution?: EvolutionConfig
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -168,14 +192,26 @@ export interface ResolvedIngestConfig {
 }
 
 /**
+ * Resolved evolution config
+ */
+export interface ResolvedEvolutionConfig {
+	enabled: boolean
+	evaluatorSignalThreshold: number
+	autoEvaluate: boolean
+}
+
+/**
  * Fully resolved Brain config - all values defined
+ *
+ * Note: `learning` is intentionally absent. Each learner owns its own config.
+ * Use `brain.learners` to read learner configs.
  */
 export interface ResolvedBrainConfig extends ResolvedCascadableConfig {
 	prompt: string
 	init: ResolvedInitPhaseConfig
 	query: ResolvedBrainQueryConfig
 	ingest: ResolvedIngestConfig
-	learning: ResolvedLearningConfig
+	evolution: ResolvedEvolutionConfig
 }
 
 /**
@@ -230,6 +266,30 @@ export interface BrainAskResult {
 	}>
 	/** Aggregated gaps from all learners */
 	gaps: string[]
+}
+
+/**
+ * Result from brain.update()
+ */
+export interface BrainUpdateResult {
+	/** Brain-level fields that changed */
+	changedFields: string[]
+	/** Current resolved brain config after update */
+	config: ResolvedBrainConfig
+	/** Per-learner summary of what changed (from learner.update() calls) */
+	learnerResults: Array<{
+		learnerId: string
+		changedFields: string[]
+	}>
+	/** Present only when signal-driven evaluation was triggered */
+	evolutionResults?: {
+		decisions: EvolutionDecision[]
+		created: string[]
+		updated: string[]
+		deleted: string[]
+		merged: string[]
+		split: string[]
+	}
 }
 
 /**
@@ -299,6 +359,64 @@ export interface BrainOwnEventMap {
 		learnerId: string
 		name: string
 		instructions: string
+	}
+	'brain:learner:removed': {
+		learnerId: string
+	}
+
+	// Signal events (Living Brain)
+	'brain:signal:received': {
+		source: string
+		description: string
+		timestamp: Date
+	}
+
+	// Evaluator events (Living Brain)
+	'evaluator:evaluation:started': {
+		signalCount: number
+	}
+	'evaluator:evaluation:completed': {
+		decisionCount: number
+		decisions: Array<{
+			action: 'create' | 'merge' | 'split' | 'adjust' | 'delete'
+			reasoning: string
+			guidance: string
+			targets: string[]
+		}>
+	}
+	'evaluator:evaluation:failed': {
+		error: string
+	}
+
+	// Evolution action events (Living Brain)
+	'evolution:action:started': {
+		action: string
+		targets: string[]
+		timestamp: Date
+	}
+	'evolution:action:executed': {
+		action: 'create' | 'merge' | 'split' | 'adjust' | 'delete'
+		reasoning: string
+		guidance: string
+		targets: string[]
+		timestamp: Date
+		result: {
+			newLearnerIds?: string[]
+			deletedLearnerIds?: string[]
+			updatedLearnerIds?: string[]
+		}
+	}
+	'evolution:action:failed': {
+		action: string
+		targets: string[]
+		error: string
+		timestamp: Date
+	}
+
+	// Brain config update events
+	'brain:config:updated': {
+		updates: Partial<BrainConfig>
+		changedFields: string[]
 	}
 }
 

@@ -109,10 +109,41 @@ export interface TextLearnerEventMap extends BaseLearnerEventMap {
 	}
 
 	// Query phase events
-	'learner:ask:thinking': {
+	'learner:query:thinking': {
 		learnerId: string
 		thoughts: string[]
 		usage: TokenUsage
+	}
+
+	// Signal events (Living Brain)
+	'learner:signal': {
+		learnerId: string
+		description: string
+		timestamp: Date
+		metrics?: {
+			dismissalRate?: number
+			avgConfidence?: number
+			bufferCount?: number
+			activation?: number
+		}
+	}
+
+	// Config update events (Living Brain)
+	'learner:config:updated': {
+		learnerId: string
+		changedFields: string[]
+		config: ResolvedTextLearnerConfig
+	}
+
+	'learner:prompts:regenerated': {
+		learnerId: string
+		observePrompt: string
+		synthesizePrompt: string
+	}
+
+	'learner:understanding:set': {
+		learnerId: string
+		understanding: string
 	}
 }
 
@@ -167,6 +198,10 @@ export interface TextLearnerConfig extends CascadableConfig {
 	instructions: string
 	/** Optional unique identifier */
 	id?: string
+	/** Optional display name */
+	name?: string
+	/** Optional description of learner purpose */
+	description?: string
 	/** How the learner was created */
 	origin?: LearnerOrigin
 	/** Maintenance settings for understanding compression */
@@ -177,6 +212,8 @@ export interface TextLearnerConfig extends CascadableConfig {
 	synthesize?: Partial<SynthesizeConfig>
 	/** Query phase configuration */
 	query?: QueryConfig
+	/** Governance configuration (Living Brain) */
+	governance?: Partial<import('../types').LearnerGovernance>
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -224,10 +261,18 @@ export interface ResolvedTextLearnerConfig extends ResolvedCascadableConfig {
 }
 
 /**
+ * Result from TextLearner.update()
+ */
+export interface TextLearnerUpdateResult {
+	changedFields: string[]
+	config: ResolvedTextLearnerConfig
+}
+
+/**
  * Default thresholds for synthesis triggers
  */
 export const DEFAULT_THRESHOLDS: SynthesizeThresholds = {
 	maxObservations: 10,
 	maxTokens: 8000,
-	minImportance: 0.9,
+	minImportance: 0.5,
 }

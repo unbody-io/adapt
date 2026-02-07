@@ -15,6 +15,7 @@ Brain is an experimental framework for creating AI systems that learn continuous
 - 💬 **Confident Responses** - Answers queries with calibrated confidence and explicit gap awareness
 - 🎯 **Auto-specialization** - Generates specialized learners from natural language prompts
 - 📊 **Self-governance** - Manages learner lifecycle based on relevance and activation signals
+- 🔧 **Self-evolution** - Autonomously adapts learner structure (create, merge, split, update, delete) based on performance signals
 
 Think of it as giving an LLM persistent, evolving memory that improves over time.
 
@@ -132,6 +133,29 @@ Brain uses a two-phase approach:
    - Merges new insights with existing knowledge
    - Produces evolved understanding
    - Strategies: cumulative (merge), replace (rewrite), hybrid
+
+### Self-Evolution (Living Brain)
+
+Brain autonomously adapts its learner structure based on performance signals:
+
+- **Signal System**: Learners emit signals when thresholds are crossed (high dismissal, low confidence, stagnation)
+- **Tool-Based Evaluator**: LLM investigates signals and decides what actions to take
+- **Evolution Actions**: Create, merge, split, update, or delete learners
+- **Purpose Changes**: When brain prompt changes, evaluator restructures learners automatically
+
+```typescript
+// Learners self-report when struggling
+brain.on('learner:signal', (signal) => {
+  // e.g., "I'm dismissing 85% of observations"
+})
+
+// Evaluator decides and executes evolution
+await brain.evaluateEvolution()
+// → Merge overlapping learners, split broad ones, etc.
+
+// Or change purpose - evaluator handles restructuring
+await brain.update({ prompt: 'New focus on ADHD therapists' })
+```
 
 ### Cascading Configuration
 
@@ -425,11 +449,12 @@ const brain = new Brain({
 - **Evaluation**: Limited eval datasets and metrics
 
 ### Roadmap
+
+- [x] Advanced governance (auto-merging, splitting learners)
 - [ ] Persistent storage (vector DB integration)
 - [ ] Learner state serialization/deserialization
 - [ ] More learner types (StructuredLearner, VisionLearner, etc.)
 - [ ] Streaming injection (real-time data sources)
-- [ ] Advanced governance (auto-merging, splitting learners)
 - [ ] Benchmark suite (accuracy, calibration, cost)
 - [ ] Multi-Brain federation (Brain networks)
 

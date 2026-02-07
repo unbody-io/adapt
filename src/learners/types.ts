@@ -27,6 +27,11 @@ export interface LearnerGovernance {
 	lastAccessed: Date
 	retrievalCount: number
 	successRate: number // responses that were useful
+	signalThresholds: {
+		maxDismissalRate: number // Default: 0.8 - alert when dismissal rate exceeds this
+		minConfidence: number // Default: 0.3 - alert when confidence falls below this
+		maxObservationsWithoutSynthesis: number // Default: 100 - alert after this many observations without synthesis
+	}
 }
 
 export interface LearnerMetadata {
@@ -101,16 +106,16 @@ export interface BaseLearnerEventMap {
 	}
 	'learner:init:failed': { learnerId: string; error: string }
 
-	// Ask
-	'learner:ask:started': { learnerId: string; query: string }
-	'learner:ask:completed': {
+	// Query
+	'learner:query:started': { learnerId: string; query: string }
+	'learner:query:completed': {
 		learnerId: string
 		insight: string
 		confidence: number
 		gaps: string[]
 		usage: TokenUsage
 	}
-	'learner:ask:failed': { learnerId: string; error: string }
+	'learner:query:failed': { learnerId: string; error: string }
 
 	// State changes
 	'learner:governance:updated': {

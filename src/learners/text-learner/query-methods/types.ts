@@ -59,6 +59,13 @@ export interface QueryCallbacks {
  * - tool-based: More control, works with all models, higher token usage
  * - direct: Single call, faster, requires structured output support
  */
+/**
+ * Config accepted by QueryMethod.update()
+ */
+export interface QueryMethodUpdateConfig {
+	model?: LanguageModel
+}
+
 export interface QueryMethod {
 	/** Unique identifier for this method */
 	readonly name: string
@@ -69,6 +76,9 @@ export interface QueryMethod {
 		options?: QueryOptions,
 		callbacks?: QueryCallbacks,
 	): Promise<QueryResult>
+
+	/** Update the method's config (e.g. swap model) */
+	update(config: QueryMethodUpdateConfig): void
 }
 
 /**

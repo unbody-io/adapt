@@ -6,6 +6,7 @@ import type {
 	QueryCallbacks,
 	QueryContext,
 	QueryMethod,
+	QueryMethodUpdateConfig,
 	QueryOptions,
 	QueryResult,
 } from '../types'
@@ -36,6 +37,12 @@ export class DirectMethod implements QueryMethod {
 
 	constructor(model: LanguageModel) {
 		this.model = model
+	}
+
+	update(config: QueryMethodUpdateConfig): void {
+		if (config.model !== undefined) {
+			this.model = config.model
+		}
 	}
 
 	async query(

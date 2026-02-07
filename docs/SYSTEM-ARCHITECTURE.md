@@ -309,6 +309,212 @@ DORMANT (low activation)
 
 ---
 
+## Self-Evolution & Signal System (Living Brain)
+
+The Brain can autonomously evolve its learner set through a **signal-driven evolution system**:
+
+### Signal System
+
+Learners continuously monitor their own effectiveness and emit **signals** when they detect issues:
+
+**Signal Types**:
+
+1. **High Dismissal Rate**: `dismissalRate > maxDismissalRate (0.8)`
+   - Learner is rejecting most observations
+   - Suggests scope mismatch or redundancy
+
+2. **Low Confidence**: `avgConfidence < minConfidence (0.3)`
+   - Query responses consistently have low confidence
+   - Suggests inadequate understanding or scope issues
+
+3. **Stagnation**: `observationsSinceLastSynthesis > maxObservationsWithoutSynthesis (100)`
+   - No synthesis happening despite many observations
+   - Suggests all observations deemed irrelevant
+
+**Signal Flow**:
+
+```
+Learner crosses threshold
+    ↓
+Emit 'learner:signal' event
+    ↓
+Brain receives and forwards to Evaluator
+    ↓
+Evaluator buffers signal
+    ↓
+When buffer reaches threshold → Evaluation
+```
+
+
+### Evaluator Component
+
+The **Evaluator** is the decision-making component that:
+
+1. **Buffers Signals**: Accumulates signals until threshold reached (default: 5)
+2. **Uses Tools to Investigate**: LLM can selectively fetch learner understandings as needed
+3. **Generates Decisions**: Returns structured evolution decisions via tool call
+4. **Outputs Guidance**: Provides natural language guidance for action handlers
+
+**Tool-Based Architecture**:
+
+The evaluator uses a **two-tool approach** for intelligent decision-making:
+
+```
+Signals arrive → evaluate() called
+       ↓
+LLM sees: signals + brain purpose + all learner metadata (lightweight)
+       ↓
+LLM reasons: "High dismissal on A and B, let me check overlap"
+       ↓
+LLM calls: getUnderstandings(["A", "B"])  ← investigation tool
+       ↓
+Tool returns understanding texts
+       ↓
+LLM continues reasoning, makes decision
+       ↓
+LLM calls: finalizeDecisions([...])  ← done tool
+       ↓
+Extract decisions from tool call
+```
+
+**Available Tools**:
+
+| Tool                                 | Purpose                                                   |
+|--------------------------------------|-----------------------------------------------------------|
+| `getUnderstandings({ learnerIds })`  | Fetch accumulated knowledge for specified learners        |
+| `finalizeDecisions({ decisions })`   | Return final evolution decisions (terminates evaluation)  |
+
+**Why Tools?**: Unlike structured output that requires all context upfront, tools let the LLM investigate selectively. A learner with 10KB of understanding only gets fetched if the LLM needs to diagnose it.
+
+**Evaluation Process**:
+
+```typescript
+// Evaluator receives 5+ signals
+const decisions = await evaluator.evaluate()
+
+// LLM investigates via tools and returns decisions
+[
+  {
+    action: 'split',
+    reasoning: 'Learner1 has high dismissal rate on backend topics',
+    guidance: 'Split into frontend-focused and backend-focused learners',
+    targets: ['learner1']
+  },
+  {
+    action: 'merge',
+    reasoning: 'Learner2 and Learner3 have 80% overlap in responses',
+    guidance: 'Combine into single unified testing practices learner',
+    targets: ['learner2', 'learner3']
+  }
+]
+```
+
+**Decision Frameworks**:
+
+The evaluator uses two specialized frameworks depending on signal types:
+
+1. **System Directive Framework** (source: "brain"): Applied when the brain's purpose changes. Classifies intent (related pivot, unrelated pivot, expansion, narrowing, refinement, reset) and applies matching rules.
+
+2. **Governance Framework** (source: learner ID): Applied for learner performance signals. Guides investigation through diagnostic questions:
+   - Is the topic exhausted? (stagnation often means success)
+   - Is the scope too narrow?
+   - Is there overlap with another learner?
+   - Is this a systemic issue?
+
+
+### Evolution Actions
+
+Five evolution actions can modify the learner set:
+
+
+1. **create**: Generate new learner from guidance
+   - Use case: Coverage gap identified
+   - Process: LLM generates config → Brain creates learner
+
+2. **merge**: Combine multiple learners into one
+   - Use case: Redundant or overlapping learners
+   - Process: LLM synthesizes configs + understandings → Create unified learner → Delete originals
+
+3. **split**: Divide one learner into multiple focused learners
+   - Use case: Learner too broad or unfocused
+   - Process: LLM generates focused configs → Create new learners → Delete original
+
+4. **update**: Update existing learner configuration
+   - Use case: Scope refinement, threshold tuning
+   - Process: LLM generates config updates → Apply to learner → Regenerate prompts if needed
+
+5. **delete**: Remove ineffective or dormant learner
+   - Use case: Permanently irrelevant learner
+   - Process: Remove from Brain → Clean up references
+
+**Action Handler Pattern**:
+```
+Decision (guidance)
+    ↓
+LLM generates config/understanding
+    ↓
+Execute structural change
+    ↓
+Emit 'evolution:action:executed' event
+```
+
+### Evolution Configuration
+
+```typescript
+{
+  evolution: {
+    enabled: true,                    // Enable autonomous evolution
+    evaluatorSignalThreshold: 5,      // Signals before evaluation
+    autoEvaluate: true                // Auto-evaluate when threshold reached
+  }
+}
+```
+
+**Manual Evolution API**:
+```typescript
+// Trigger evaluation manually
+await brain.evaluateEvolution()
+
+// Direct evolution actions
+await brain.createLearner('Track API design patterns')
+await brain.mergeLearners(['learner1', 'learner2'], 'Unified testing learner')
+await brain.splitLearner('learner3', 'Split into unit and integration learners')
+await brain.updateLearner('learner4', 'Narrow scope to React hooks only, increase importance threshold')
+await brain.deleteLearner('learner5')
+```
+
+### Signal Thresholds Configuration
+
+Signal thresholds are configurable at the learner level:
+
+```typescript
+{
+  governance: {
+    signalThresholds: {
+      maxDismissalRate: 0.8,                    // Ceiling threshold
+      minConfidence: 0.3,                        // Floor threshold
+      maxObservationsWithoutSynthesis: 100       // Stagnation detection
+    }
+  }
+}
+```
+
+**Naming Pattern**: `min`/`max` prefixes follow standard monitoring conventions:
+- `maxDismissalRate`: Alert when dismissal rate **exceeds** this ceiling
+- `minConfidence`: Alert when confidence **falls below** this floor
+
+### Why Living Brain?
+
+**Organic Evolution**: System adapts its structure based on actual usage patterns, not predetermined rules.
+
+**Self-Correcting**: Detects and resolves issues like redundancy, gaps, and overload automatically.
+
+**Transparent**: All evolution actions are event-driven and auditable.
+
+**Conservative**: Evaluator can output zero decisions if signals don't warrant changes.
+
+---
+
 ## Cascading Configuration
 
 Model selection flows from **specific → general**:
@@ -333,6 +539,67 @@ Query model: sonnet-4.5          (balanced - user-facing)
 ```
 
 **Why?**: Optimize cost vs quality - use fast models for high-volume operations, smart models for critical reasoning.
+
+---
+
+## Runtime Configuration: brain.update()
+
+Brain configuration can be updated at runtime. Changes are categorized by their downstream effect:
+
+### Category 1: Brain-Only (No Downstream Effect)
+
+These update brain config without affecting learners:
+
+| Field                              | Notes                                    |
+|------------------------------------|------------------------------------------|
+| `init.model`                       | Decomposition model (init-time only)     |
+| `query.model`                      | Brain-level query synthesis model        |
+| `ingest.batchSize`                 | Batch size for inject operations         |
+| `evolution.enabled`                | Enable/disable evolution system          |
+| `evolution.evaluatorSignalThreshold` | Signal count before auto-evaluation    |
+| `evolution.autoEvaluate`           | Whether to auto-evaluate on threshold    |
+
+### Category 2: Mechanical Cascade (Direct to Learners)
+
+These are forwarded to all learners via `learner.update()`:
+
+| Field                                | Forwarded as                             |
+|--------------------------------------|------------------------------------------|
+| `model`                              | `learner.update({ model })`              |
+| `blueprintModel`                     | `learner.update({ blueprintModel })`     |
+| `learning.observe.model`             | `learner.update({ observe: { model } })` |
+| `learning.synthesize.thresholds.*`   | `learner.update({ synthesize: {...} })`  |
+| `learning.maintenance.strategy`      | `learner.update({ maintenance: {...} })` |
+
+Learners handle their own internal cascade and decide what to do with each field.
+
+### Category 3: Signal-Driven (Evaluator Decides)
+
+These are semantic changes that affect learner purpose/identity. Brain generates a **bypass signal** to the evaluator:
+
+| Field                  | Notes                              |
+|------------------------|------------------------------------|
+| `prompt`               | Brain's purpose changed            |
+| `learning.instructions`| Learner instructions change request|
+| `learning.name`        | Learner name change request        |
+| `learning.description` | Learner description change request |
+
+**Bypass signals** trigger immediate evaluation regardless of threshold. The evaluator decides how to restructure learners based on the purpose change (update existing, delete irrelevant, create new).
+
+**Flow**:
+```
+brain.update({ prompt: "new purpose" })
+       ↓
+Signal with bypass: true
+       ↓
+Immediate evaluation
+       ↓
+Evaluator returns decisions
+       ↓
+Execute: update/delete/create learners
+       ↓
+Return result with evolutionResults
+```
 
 ---
 
@@ -569,10 +836,10 @@ System Prompt Template + Identity → Reusable System Prompt
 - Resume from snapshots across sessions
 - Export/import learner configurations
 
-### 2. Advanced Governance
-- Auto-merge similar learners (reduce redundancy)
-- Auto-split overloaded learners (increase specialization)
-- Dynamic learner generation from queries (emergent specialization)
+### 2. Advanced Learner Types
+- ListLearners: structured tracking (commitments, tasks, entities)
+- GraphLearners: relationship understanding
+- VisionLearners: image/video pattern recognition
 
 ### 3. Multi-Modal Learning
 - Vision learners (process images, diagrams, screenshots)
@@ -732,33 +999,38 @@ The augmentation pipeline and storage layers are **important but orthogonal** - 
 
 ### Evolution Path
 
-**Phase 1 (Current)**: Core learning system
+**Phase 1**: Core learning system
 - ✅ Brain orchestration
 - ✅ Learner decomposition
 - ✅ Two-phase learning
 - ✅ Understanding synthesis
 - ✅ Query synthesis
 
-**Phase 2**: Persistence & Recovery
+**Phase 2 (Complete)**: Self-Evolution
+- ✅ Signal system with threshold monitoring
+- ✅ Evaluator component with tool-based investigation
+- ✅ Evolution action handlers (create, merge, split, update, delete)
+- ✅ Full autonomous evolution flow
+
+**Phase 3**: Persistence & Recovery
 - ⚪ Save/load learner state
 - ⚪ Serialize understanding
 - ⚪ Resume from snapshots
 
-**Phase 3**: Storage Integration
+**Phase 4**: Storage Integration
 - ⚪ Raw data preservation
 - ⚪ Vector search (records + chunks)
 - ⚪ Hybrid queries (storage + learners)
 
-**Phase 4**: Augmentation Pipeline
+**Phase 5**: Augmentation Pipeline
 - ⚪ Perceiver agents (extraction, enrichment)
 - ⚪ Multi-modal input processing
 - ⚪ Entity normalization
 
-**Phase 5**: Advanced Features
+**Phase 6**: Advanced Features
 - ⚪ Subjects (multi-tenant scoping)
 - ⚪ Graph relationships
-- ⚪ Advanced governance (auto-merge, auto-split)
-- ⚪ Multi-modal learners
+- ⚪ Advanced learner types (List, Graph, Vision)
 
 ---
 
@@ -774,6 +1046,6 @@ The augmentation pipeline and storage layers are **important but orthogonal** - 
 
 **Core Innovation**: Persistent, multi-perspective understanding that evolves continuously while avoiding catastrophic forgetting and context limitations through two-phase learning and compressed representations.
 
-**Current Status**: Phase 1 complete (core learning system)
+**Current Status**: Phase 2 complete (self-evolution)
 **Organization**: [Unbody](https://unbody.io)
 **License**: MIT

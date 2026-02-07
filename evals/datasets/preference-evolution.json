@@ -1,0 +1,206 @@
+{
+  "metadata": {
+    "name": "Preference Evolution & Fact Contradiction",
+    "description": "Tests ability to extract personal facts from messages, then correctly update/invalidate those facts when new contradictory information arrives. Covers brand loyalty shifts, lifestyle changes, opinion reversals, and emotional context extraction.",
+    "source": "Unbody Brain Spec - Fact extraction with contradiction handling",
+    "eventCount": 24,
+    "timespan": "2024-09-01 to 2024-12-15 (3.5 months)",
+    "learners": [
+      {
+        "id": "facts",
+        "name": "Personal Fact Tracker",
+        "purpose": "Extract and maintain accurate personal facts about the user. When new information contradicts existing facts, update understanding accordingly. Track preferences, habits, opinions, and life circumstances."
+      },
+      {
+        "id": "preferences",
+        "name": "Preference Specialist",
+        "purpose": "Track the user's preferences, brand loyalties, and product opinions. Detect when preferences shift and understand the reasons behind changes."
+      },
+      {
+        "id": "sentiment",
+        "name": "Sentiment & Emotion Tracker",
+        "purpose": "Track the user's emotional states, satisfaction levels, and sentiment toward brands, products, and experiences. Note emotional shifts and their triggers."
+      }
+    ],
+    "queries": [
+      "What shoes does Robbie wear?",
+      "How does Robbie feel about Adidas?",
+      "What is Robbie's current diet?",
+      "Where does Robbie work?",
+      "What phone does Robbie use?",
+      "What has changed in Robbie's preferences over time?",
+      "What events caused Robbie to change their mind about things?",
+      "Is Robbie generally satisfied with the brands they use?"
+    ]
+  },
+  "events": [
+    {
+      "id": "evt_001",
+      "timestamp": "2024-09-07T14:27:00Z",
+      "type": "user_message",
+      "author": "Robbie",
+      "content": "I only wear Adidas shoes. I love them!"
+    },
+    {
+      "id": "evt_002",
+      "timestamp": "2024-09-08T10:15:00Z",
+      "type": "user_message",
+      "author": "Robbie",
+      "content": "Just got the new Adidas Ultraboost. Best running shoes I've ever owned."
+    },
+    {
+      "id": "evt_003",
+      "timestamp": "2024-09-12T08:30:00Z",
+      "type": "user_message",
+      "author": "Robbie",
+      "content": "I'm a strict vegan. Have been for 3 years now. It's the best decision I ever made for my health."
+    },
+    {
+      "id": "evt_004",
+      "timestamp": "2024-09-15T16:00:00Z",
+      "type": "user_message",
+      "author": "Robbie",
+      "content": "I work at Google as a senior software engineer. Love the culture there."
+    },
+    {
+      "id": "evt_005",
+      "timestamp": "2024-09-20T11:45:00Z",
+      "type": "user_message",
+      "author": "Robbie",
+      "content": "iPhone all the way. I've been an Apple user for over a decade. Android feels clunky to me."
+    },
+    {
+      "id": "evt_006",
+      "timestamp": "2024-09-25T09:00:00Z",
+      "type": "user_message",
+      "author": "Robbie",
+      "content": "Morning run in my Adidas gear. Nothing beats the comfort. 5K every day rain or shine."
+    },
+    {
+      "id": "evt_007",
+      "timestamp": "2024-10-02T13:20:00Z",
+      "type": "user_message",
+      "author": "Robbie",
+      "content": "Made an amazing vegan lasagna last night. My whole family loved it, even the meat eaters."
+    },
+    {
+      "id": "evt_008",
+      "timestamp": "2024-10-10T17:30:00Z",
+      "type": "user_message",
+      "author": "Robbie",
+      "content": "Big project launch at Google today. Our team shipped a new feature to 100M users. Feeling proud!"
+    },
+    {
+      "id": "evt_009",
+      "timestamp": "2024-10-14T09:12:00Z",
+      "type": "user_message",
+      "author": "Robbie",
+      "content": "My shoes fell apart and I need to return them. I'm super angry! I'll be wearing Nike going forward!"
+    },
+    {
+      "id": "evt_010",
+      "timestamp": "2024-10-16T14:00:00Z",
+      "type": "user_message",
+      "author": "Robbie",
+      "content": "Just picked up Nike Pegasus 41. Already feel more supported than my old Adidas ever did."
+    },
+    {
+      "id": "evt_011",
+      "timestamp": "2024-10-22T08:45:00Z",
+      "type": "user_message",
+      "author": "Robbie",
+      "content": "Doctor says my B12 levels are dangerously low. She recommended I start incorporating some animal products back into my diet. Starting with eggs and fish."
+    },
+    {
+      "id": "evt_012",
+      "timestamp": "2024-10-25T12:30:00Z",
+      "type": "user_message",
+      "author": "Robbie",
+      "content": "Had salmon for the first time in years. I actually really enjoyed it. I think pescatarian is the way to go for me."
+    },
+    {
+      "id": "evt_013",
+      "timestamp": "2024-11-01T10:00:00Z",
+      "type": "user_message",
+      "author": "Robbie",
+      "content": "Got laid off from Google today. Whole team was cut. Devastating after 6 years there."
+    },
+    {
+      "id": "evt_014",
+      "timestamp": "2024-11-05T15:20:00Z",
+      "type": "user_message",
+      "author": "Robbie",
+      "content": "Been running every morning in my Nikes. They're holding up great. Definitely a Nike convert now."
+    },
+    {
+      "id": "evt_015",
+      "timestamp": "2024-11-10T09:30:00Z",
+      "type": "user_message",
+      "author": "Robbie",
+      "content": "Interview at Stripe went really well! The engineering culture seems incredible. Fingers crossed!"
+    },
+    {
+      "id": "evt_016",
+      "timestamp": "2024-11-15T11:00:00Z",
+      "type": "user_message",
+      "author": "Robbie",
+      "content": "My iPhone screen cracked for the third time this year. The repair costs are insane. Seriously considering switching to something more durable."
+    },
+    {
+      "id": "evt_017",
+      "timestamp": "2024-11-18T14:15:00Z",
+      "type": "user_message",
+      "author": "Robbie",
+      "content": "Accepted the offer at Stripe! Starting as a Staff Engineer next month. So excited for this new chapter!"
+    },
+    {
+      "id": "evt_018",
+      "timestamp": "2024-11-22T16:45:00Z",
+      "type": "user_message",
+      "author": "Robbie",
+      "content": "Bought a Samsung Galaxy S24 Ultra. The build quality is miles ahead of my iPhone. Should have switched years ago."
+    },
+    {
+      "id": "evt_019",
+      "timestamp": "2024-11-28T10:30:00Z",
+      "type": "user_message",
+      "author": "Robbie",
+      "content": "Thanksgiving dinner was amazing. Made a mix of vegan and pescatarian dishes. I feel so much better with a balanced diet now."
+    },
+    {
+      "id": "evt_020",
+      "timestamp": "2024-12-02T09:00:00Z",
+      "type": "user_message",
+      "author": "Robbie",
+      "content": "First day at Stripe! The onboarding is so well organized. Already feels like the right move."
+    },
+    {
+      "id": "evt_021",
+      "timestamp": "2024-12-05T13:00:00Z",
+      "type": "user_message",
+      "author": "Robbie",
+      "content": "Ran a 10K in my Nike Pegasus today. Personal best time! These shoes are amazing for long distance."
+    },
+    {
+      "id": "evt_022",
+      "timestamp": "2024-12-08T11:20:00Z",
+      "type": "user_message",
+      "author": "Robbie",
+      "content": "The Samsung camera is incredible. My food photos for the blog have never looked better. Android ecosystem is actually great."
+    },
+    {
+      "id": "evt_023",
+      "timestamp": "2024-12-12T08:00:00Z",
+      "type": "user_message",
+      "author": "Robbie",
+      "content": "Making fish tacos for the team lunch at Stripe tomorrow. Pescatarian life suits me perfectly."
+    },
+    {
+      "id": "evt_024",
+      "timestamp": "2024-12-15T17:00:00Z",
+      "type": "user_message",
+      "author": "Robbie",
+      "content": "Reflecting on the last few months. Lost my job, changed my diet, switched my phone, even changed shoe brands. Life comes at you fast. But honestly? Every change was for the better."
+    }
+  ]
+}

@@ -408,7 +408,7 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 	 * @returns Array of evolution decisions (empty if no changes needed)
 	 * @throws Error if evolution is not enabled
 	 */
-	async evaluateEvolution(options?: { dryRun?: boolean }): Promise<{
+	async evaluateEvolution(options?: { dryRun?: boolean; includeUnderstanding?: boolean }): Promise<{
 		decisions: EvolutionDecision[]
 		results: AggregatedEvolutionResult
 	}> {
@@ -416,6 +416,10 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 			throw new Error(
 				'Evolution is not enabled. Set config.evolution.enabled = true',
 			)
+		}
+
+		if (options?.includeUnderstanding !== undefined) {
+			this.evaluator.includeUnderstanding = options.includeUnderstanding
 		}
 
 		const decisions = await this.evaluator.evaluate()

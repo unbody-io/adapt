@@ -782,7 +782,7 @@ export class TextLearner
 			if (dismissalRate > this.governance.signalThresholds.maxDismissalRate) {
 				this.emit('learner:signal', {
 					learnerId: this.id,
-					description: `I'm dismissing ${(dismissalRate * 100).toFixed(1)}% of observations`,
+					description: `High dismissal rate: rejecting ${(dismissalRate * 100).toFixed(0)}% of observations`,
 					timestamp: new Date(),
 					metrics: { dismissalRate },
 				})
@@ -797,7 +797,7 @@ export class TextLearner
 			if (avg < this.governance.signalThresholds.minConfidence) {
 				this.emit('learner:signal', {
 					learnerId: this.id,
-					description: `My query confidence is consistently low (${avg.toFixed(2)})`,
+					description: `Low confidence: query confidence averaging ${avg.toFixed(2)}`,
 					timestamp: new Date(),
 					metrics: { avgConfidence: avg },
 				})
@@ -814,7 +814,7 @@ export class TextLearner
 		) {
 			this.emit('learner:signal', {
 				learnerId: this.id,
-				description: `No synthesis in ${observationsSinceLastSynthesis} observations`,
+				description: `Stagnation: no synthesis in ${observationsSinceLastSynthesis} observations`,
 				timestamp: new Date(),
 			})
 		}

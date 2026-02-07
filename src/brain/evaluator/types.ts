@@ -32,6 +32,8 @@ export interface Signal {
 		avgConfidence?: number
 		bufferCount?: number
 		activation?: number
+		observationsSinceLastSynthesis?: number
+		severity?: 'minor' | 'moderate' | 'severe'
 	}
 }
 
@@ -52,7 +54,7 @@ export interface LearnerContext {
 	id: string
 	name: string
 	purpose: string
-	understandingPreview: string
+	understandingSize: number
 	governance: {
 		activation: number
 		status: string
@@ -71,6 +73,7 @@ export interface EvaluationContext {
 		learnerCount: number
 	}
 	learners: LearnerContext[]
+	includeUnderstanding: boolean
 }
 
 /**

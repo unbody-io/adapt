@@ -2,27 +2,34 @@
  * Evaluator: Decision-making component for Living Brain evolution
  *
  * Buffers signals from learners and external sources, then uses LLM
- * to determine what evolution actions (create, merge, split, adjust, delete)
- * are needed to improve system effectiveness.
+ * with tools to investigate and determine what evolution actions
+ * (create, merge, split, update, delete) are needed.
+ *
+ * Tool-based approach:
+ * - LLM receives signals + learner metadata (lightweight context)
+ * - LLM can call getUnderstandings() to fetch learner knowledge as needed
+ * - LLM calls finalizeDecisions() when done investigating
  */
 
-import { Output } from 'ai'
 import { TypedEmitter } from '../../types/events'
-import { generate } from '../../llm'
+import { generate, stepCountIs } from '../../llm'
 import { evaluatorSystemPrompt } from './prompt.system'
 import { evaluationPromptTemplate } from './prompt.template.evaluation'
-import { evolutionDecisionsSchema } from './schema'
-import type {
-	Signal,
-	EvolutionDecision,
-	EvaluatorEventMap,
-} from './types'
+import {
+	createGetUnderstandingsTool,
+	finalizeDecisions,
+	type FinalizeDecisionsParams,
+} from './tools'
+import type { Signal, EvolutionDecision, EvaluatorEventMap } from './types'
 import type { Brain } from '../class'
+
+const MAX_EVALUATION_STEPS = 10
 
 export class Evaluator extends TypedEmitter<EvaluatorEventMap> {
 	private signals: Signal[] = []
 	private readonly threshold: number
 	private readonly brain: Brain
+	includeUnderstanding = true
 
 	constructor(brain: Brain, threshold: number = 5) {
 		super()
@@ -54,6 +61,11 @@ export class Evaluator extends TypedEmitter<EvaluatorEventMap> {
 	/**
 	 * Evaluate buffered signals and generate evolution decisions
 	 *
+	 * Uses tool-based approach:
+	 * 1. LLM sees signals + learner metadata
+	 * 2. LLM calls getUnderstandings() to investigate as needed
+	 * 3. LLM calls finalizeDecisions() to return decisions
+	 *
 	 * @returns Array of evolution decisions (can be empty)
 	 */
 	async evaluate(): Promise<EvolutionDecision[]> {
@@ -69,15 +81,43 @@ export class Evaluator extends TypedEmitter<EvaluatorEventMap> {
 			// Build context for LLM
 			const context = this.buildContext()
 
-			// Call LLM to generate decisions
+			// Create tools with brain context
+			const getUnderstandings = createGetUnderstandingsTool(this.brain)
+			const tools = { getUnderstandings, finalizeDecisions }
+
+			// Call LLM with tools
 			const result = await generate({
 				model: this.brain.config.blueprintModel,
 				system: evaluatorSystemPrompt,
 				prompt: this.formatEvaluationPrompt(context),
-				output: Output.object({ schema: evolutionDecisionsSchema }),
+				tools,
+				toolChoice: 'required',
+				stopWhen: stepCountIs(MAX_EVALUATION_STEPS),
 			})
 
-			const decisions = result.output.decisions
+			// Extract decisions from finalizeDecisions tool call
+			// Check both result.toolCalls and steps (multi-step scenarios)
+			let finalizeCall = result.toolCalls.find(
+				(c) => c.toolName === 'finalizeDecisions',
+			)
+
+			if (!finalizeCall) {
+				for (const step of result.steps) {
+					const call = step.toolCalls.find(
+						(c) => c.toolName === 'finalizeDecisions',
+					)
+					if (call) {
+						finalizeCall = call
+						break
+					}
+				}
+			}
+
+			let decisions: EvolutionDecision[] = []
+			if (finalizeCall && 'input' in finalizeCall) {
+				const params = finalizeCall.input as FinalizeDecisionsParams
+				decisions = params.decisions
+			}
 
 			this.emit('evaluator:evaluation:completed', {
 				decisionCount: decisions.length,
@@ -123,16 +163,14 @@ export class Evaluator extends TypedEmitter<EvaluatorEventMap> {
 				prompt: this.brain.prompt,
 				learnerCount: this.brain.learners.size,
 			},
+			includeUnderstanding: this.includeUnderstanding,
 			learners: Array.from(this.brain.learners.values()).map((learner) => {
 				const governance = learner.getGovernance()
-				const understanding = learner.getUnderstanding()
 				return {
 					id: learner.id,
-					name: learner.id, // Use ID as name for now
+					name: learner.id,
 					purpose: this.extractPurpose(learner.instructions),
-					understandingPreview: understanding.length > 0
-						? understanding.substring(0, 300) + (understanding.length > 300 ? '...' : '')
-						: '(no understanding yet)',
+					understandingSize: learner.getUnderstanding().length,
 					governance: {
 						activation: governance.activation,
 						status: governance.status,

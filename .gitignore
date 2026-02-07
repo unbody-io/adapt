@@ -4,3 +4,4 @@ dist/
 .env.*
 *.log
 .DS_Store
+server/logs/

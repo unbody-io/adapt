@@ -2361,7 +2361,7 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
         projectSelect.innerHTML = '<option value="">Select a project...</option>'
         projects.forEach(p => {
           const opt = document.createElement('option')
-          opt.value = p.path
+          opt.value = p.dirName
           opt.textContent = p.name || p.path.split('/').pop()
           projectSelect.appendChild(opt)
         })

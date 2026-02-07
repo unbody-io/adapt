@@ -3,7 +3,7 @@
  *
  * Reads and parses Claude Code conversation history from ~/.claude/
  */
-import { readdir, readFile } from 'node:fs/promises'
+import { access, readdir, readFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { homedir } from 'node:os'
 
@@ -15,6 +15,7 @@ const PROJECTS_DIR = join(CLAUDE_DIR, 'projects')
 export interface ClaudeProject {
 	name: string
 	path: string
+	dirName: string
 	fullPath: string
 }
 
@@ -68,6 +69,69 @@ interface RawMessage {
 // --- Functions ---
 
 /**
+ * Decode an encoded project directory name back to a filesystem path.
+ *
+ * Claude Code encodes paths by replacing `/` and `.` with `-`, making the
+ * encoding ambiguous (a `-` could be a former `/`, former `.`, or literal `-`).
+ * We resolve the ambiguity by walking the filesystem and greedily matching
+ * the longest existing directory name at each level.
+ *
+ * Examples:
+ *   -Users-gaborkerekes-projects-sibyl-memory-mvp
+ *   → /Users/gaborkerekes/projects/sibyl-memory-mvp
+ *
+ *   -Users-gaborkerekes--config-nvim
+ *   → /Users/gaborkerekes/.config/nvim   (`--` means `/.`)
+ */
+async function decodeProjectPath(encoded: string): Promise<string> {
+	const raw = encoded.replace(/^-/, '')
+	const rawParts = raw.split('-')
+
+	// `--` in the encoding represents `/.` in the original path
+	const segments: string[] = []
+	for (let i = 0; i < rawParts.length; i++) {
+		if (rawParts[i] === '' && i + 1 < rawParts.length) {
+			segments.push('.' + rawParts[i + 1])
+			i++
+		} else if (rawParts[i] !== '') {
+			segments.push(rawParts[i])
+		}
+	}
+
+	// Walk the filesystem trying longest match at each level
+	let currentPath = '/'
+	let i = 0
+
+	while (i < segments.length) {
+		let matched = false
+		for (let end = segments.length; end > i; end--) {
+			const candidate = segments.slice(i, end).join('-')
+			const candidatePath = join(currentPath, candidate)
+
+			try {
+				await access(candidatePath)
+				currentPath = candidatePath
+				i = end
+				matched = true
+				break
+			} catch {
+				continue
+			}
+		}
+
+		if (!matched) {
+			// Can't resolve — treat remaining segments as individual components
+			for (let j = i; j < segments.length; j++) {
+				currentPath = join(currentPath, segments[j])
+			}
+			break
+		}
+	}
+
+	return currentPath
+}
+
+/**
  * List all Claude Code projects
  */
 export async function listClaudeProjects(): Promise<ClaudeProject[]> {
@@ -78,12 +142,12 @@ export async function listClaudeProjects(): Promise<ClaudeProject[]> {
 
 		for (const entry of entries) {
 			if (entry.isDirectory() && entry.name.startsWith('-')) {
-				// Decode path: -Users-amir-projects-foo -> /Users/amir/projects/foo
-				const decodedPath = entry.name.replace(/^-/, '/').replace(/-/g, '/')
+				const decodedPath = await decodeProjectPath(entry.name)
 
 				projects.push({
 					name: decodedPath.split('/').pop() || entry.name,
 					path: decodedPath,
+					dirName: entry.name,
 					fullPath: join(PROJECTS_DIR, entry.name),
 				})
 			}
@@ -136,9 +200,7 @@ async function countUserMessages(sessionFile: string): Promise<number> {
  */
 export async function listClaudeSessions(projectPath: string): Promise<ClaudeSession[]> {
 	try {
-		// Encode path: /Users/amir/projects/foo -> -Users-amir-projects-foo
-		const encodedPath = projectPath.replace(/\//g, '-')
-		const projectDir = join(PROJECTS_DIR, encodedPath)
+		const projectDir = join(PROJECTS_DIR, projectPath)
 
 		const indexPath = join(projectDir, 'sessions-index.json')
 		const indexContent = await readFile(indexPath, 'utf-8')
@@ -186,8 +248,7 @@ export async function parseClaudeSessions(
 		throw new Error('projectPath is required')
 	}
 
-	const encodedPath = projectPath.replace(/\//g, '-')
-	const projectDir = join(PROJECTS_DIR, encodedPath)
+	const projectDir = join(PROJECTS_DIR, projectPath)
 
 	const messages: ParsedMessage[] = []
 
@@ -260,7 +321,7 @@ export async function getClaudeStats(): Promise<{
 	let totalMessages = 0
 
 	for (const project of projects) {
-		const sessions = await listClaudeSessions(project.path)
+		const sessions = await listClaudeSessions(project.dirName)
 		totalSessions += sessions.length
 		totalMessages += sessions.reduce((sum, s) => sum + s.messageCount, 0)
 	}

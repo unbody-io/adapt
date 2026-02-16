@@ -17,7 +17,7 @@
 
     .container {
       display: grid;
-      grid-template-columns: 320px 1fr 280px;
+      grid-template-columns: 320px 1fr 340px;
       grid-template-rows: auto 1fr;
       height: 100vh;
       gap: 1px;
@@ -26,7 +26,7 @@
     }
 
     .container.config-collapsed {
-      grid-template-columns: 40px 1fr 280px;
+      grid-template-columns: 40px 1fr 340px;
     }
 
     .panel {
@@ -348,6 +348,67 @@
     }
 
     /* Last synthesis indicator */
+    /* Synthesis Stats */
+    .synth-stats {
+      background: #111; border-radius: 4px; padding: 6px 8px;
+      margin-bottom: 8px; font-size: 10px;
+    }
+    .synth-stats-row { margin-bottom: 5px; }
+    .synth-status-label {
+      font-weight: 600; text-transform: uppercase; letter-spacing: 0.3px;
+    }
+    .synth-status-label.idle { color: #555; }
+    .synth-status-label.buffering { color: #3b82f6; }
+    .synth-status-label.ready { color: #4ade80; }
+    .synth-status-label.synthesizing {
+      color: #facc15;
+      animation: pulse 1.2s ease-in-out infinite;
+    }
+    .synth-bar-row {
+      display: flex; align-items: center; gap: 6px; margin-bottom: 3px;
+    }
+    .synth-progress-bar {
+      flex: 1; height: 3px; background: #222; border-radius: 2px; overflow: hidden;
+    }
+    .synth-progress-fill {
+      height: 100%; background: #3b82f6; border-radius: 2px;
+      transition: width 0.3s ease;
+    }
+    .synth-progress-fill.tok { background: #8b5cf6; }
+    .synth-bar-label {
+      color: #555; white-space: nowrap; min-width: 70px; text-align: right;
+    }
+    .synth-meta-row {
+      display: flex; gap: 10px; color: #444; margin-top: 4px; flex-wrap: wrap;
+    }
+    /* Signal Metrics */
+    .signal-metrics {
+      background: #111; border-radius: 4px; padding: 6px 8px;
+      margin-bottom: 8px; font-size: 10px;
+    }
+    .signal-metrics-title {
+      color: #555; font-weight: 600; text-transform: uppercase;
+      letter-spacing: 0.3px; margin-bottom: 4px;
+    }
+    .signal-row {
+      display: flex; align-items: center; gap: 6px; margin-bottom: 3px;
+    }
+    .signal-row .signal-label { color: #666; min-width: 72px; }
+    .signal-row .signal-bar {
+      flex: 1; height: 3px; background: #222; border-radius: 2px; overflow: hidden;
+    }
+    .signal-row .signal-fill {
+      height: 100%; border-radius: 2px; transition: width 0.3s ease;
+      background: #444;
+    }
+    .signal-row .signal-fill.warn { background: #f59e0b; }
+    .signal-row .signal-fill.danger { background: #ef4444; }
+    .signal-row .signal-value {
+      color: #555; white-space: nowrap; min-width: 60px; text-align: right; font-variant-numeric: tabular-nums;
+    }
+    .signal-row .signal-value.warn { color: #f59e0b; }
+    .signal-row .signal-value.danger { color: #ef4444; }
+
     .learner-last-synthesis {
       font-size: 11px;
       padding: 6px 8px;
@@ -564,115 +625,150 @@
       word-break: break-word;
     }
 
-    /* Chat Area */
+    /* Main Panel */
     .main-panel {
       display: flex;
       flex-direction: column;
     }
 
-    .chat-area {
-      flex: 1;
-      overflow-y: auto;
-      padding: 16px;
-      border-top: 1px solid #222;
-    }
-
-    .message {
-      margin-bottom: 16px;
-      max-width: 80%;
-    }
-
-    .message.user {
-      margin-left: auto;
-      text-align: right;
-    }
-
-    .message-content {
-      display: inline-block;
-      padding: 10px 14px;
-      border-radius: 12px;
-      font-size: 14px;
-      line-height: 1.5;
-      white-space: pre-wrap;
-      word-wrap: break-word;
-      text-align: left;
-    }
-
-    .message.user .message-content {
-      background: #2563eb;
-      color: white;
-    }
-
-    .message.assistant .message-content {
-      background: #222;
-    }
-
-    .message .sources {
-      font-size: 10px;
-      color: #666;
-      margin-top: 6px;
-    }
-
-    .chat-options {
-      padding: 8px 16px;
-      border-top: 1px solid #222;
+    /* Q&A Panel (right column) */
+    .qa-panel {
       display: flex;
-      gap: 16px;
-      align-items: center;
-      background: #0d0d0d;
+      flex-direction: column;
+      height: 100%;
     }
 
-    .chat-option {
+    .qa-input-area {
+      padding: 12px;
+      border-bottom: 1px solid #222;
+    }
+
+    .qa-input-row {
       display: flex;
-      align-items: center;
       gap: 8px;
+      margin-bottom: 8px;
     }
 
-    .chat-option label {
-      font-size: 11px;
-      color: #666;
+    .qa-input-row input { flex: 1; }
+    .qa-input-row button { width: auto; padding: 8px 16px; }
+
+    .qa-options {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .qa-option {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .qa-option label {
+      font-size: 10px;
+      color: #555;
       white-space: nowrap;
     }
 
-    .chat-option select {
-      font-size: 11px;
-      padding: 4px 8px;
+    .qa-option select {
+      font-size: 10px;
+      padding: 3px 6px;
       background: #1a1a1a;
       border: 1px solid #333;
       color: #ccc;
-      border-radius: 4px;
+      border-radius: 3px;
     }
 
-    .chat-option input[type="range"] {
-      width: 80px;
-      height: 4px;
+    .qa-option input[type="range"] {
+      width: 60px;
+      height: 3px;
     }
 
-    .chat-input {
-      padding: 12px 16px;
-      border-top: 1px solid #222;
-      display: flex;
-      gap: 8px;
+    .qa-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 12px;
     }
 
-    .chat-input input { flex: 1; }
-    .chat-input button { width: auto; padding: 8px 20px; }
+    .qa-card {
+      background: #1a1a1a;
+      border: 1px solid #222;
+      border-radius: 8px;
+      margin-bottom: 12px;
+      overflow: hidden;
+    }
 
-    /* Events Panel */
-    .event-log {
-      font-family: 'SF Mono', Monaco, monospace;
-      font-size: 12px;
+    .qa-question {
+      padding: 10px 12px;
+      background: #1e3a5f;
+      color: #93c5fd;
+      font-size: 13px;
+      font-weight: 500;
+    }
+
+    .qa-answer {
+      padding: 10px 12px;
+      font-size: 13px;
       line-height: 1.5;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      color: #ccc;
     }
 
-    .event {
-      padding: 4px 0;
-      border-bottom: 1px solid #1a1a1a;
+    .qa-answer.loading {
+      color: #666;
     }
 
-    .event-type { color: #4a9eff; }
+    .qa-sources {
+      padding: 6px 12px;
+      font-size: 10px;
+      color: #555;
+      border-top: 1px solid #222;
+    }
+
+    .qa-empty {
+      text-align: center;
+      padding: 40px 16px;
+      color: #444;
+      font-size: 13px;
+    }
+
+    /* Collapsible sidebar sections */
+    .section-title.collapsible-toggle {
+      cursor: pointer;
+      user-select: none;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .section-title.collapsible-toggle:hover {
+      color: #6ab8ff;
+    }
+
+    .section-chevron {
+      font-size: 9px;
+      transition: transform 0.2s;
+      color: #555;
+    }
+
+    .section-body.collapsed {
+      display: none;
+    }
+
     .event-time { color: #444; margin-right: 6px; }
     .event-data { color: #666; display: block; margin-left: 12px; word-break: break-all; font-size: 9px; }
+
+    /* History */
+    .history-entry {
+      display: flex; align-items: center; gap: 6px; padding: 4px 0;
+      border-bottom: 1px solid #1a1a1a; font-size: 11px;
+    }
+    .history-restore {
+      margin-left: auto; background: none; border: 1px solid #333;
+      color: #888; cursor: pointer; padding: 2px 6px; border-radius: 3px; font-size: 11px;
+    }
+    .history-restore:hover { color: #fff; border-color: #666; }
 
     /* Session List */
     .session-list {
@@ -1161,6 +1257,53 @@
       margin-bottom: 6px;
     }
 
+    /* Evolution Monitor */
+    .evo-monitor {
+      margin-top: 12px;
+      border-top: 1px solid #222;
+      padding-top: 10px;
+    }
+    .evo-monitor-header {
+      display: flex; align-items: center; justify-content: space-between;
+      cursor: pointer; user-select: none; margin-bottom: 8px;
+    }
+    .evo-signal-count {
+      font-size: 10px; background: #3b82f6; color: #fff;
+      padding: 2px 8px; border-radius: 10px;
+    }
+    .evo-section { margin-bottom: 8px; }
+    .evo-section-label {
+      font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px;
+      color: #555; margin-bottom: 4px;
+    }
+    .evo-log {
+      max-height: 120px; overflow-y: auto; font-size: 11px;
+    }
+    .evo-empty { color: #444; font-size: 11px; }
+    .evo-entry {
+      padding: 4px 6px; border-left: 2px solid #333; margin-bottom: 3px;
+      background: #111; border-radius: 0 3px 3px 0;
+    }
+    .evo-entry.signal { border-left-color: #3b82f6; }
+    .evo-entry.eval-start { border-left-color: #facc15; }
+    .evo-entry.eval-done { border-left-color: #4ade80; }
+    .evo-entry.eval-fail { border-left-color: #f87171; }
+    .evo-entry.action-start { border-left-color: #a78bfa; }
+    .evo-entry.action-done { border-left-color: #4ade80; }
+    .evo-entry.action-fail { border-left-color: #f87171; }
+    .evo-entry .evo-time { color: #444; margin-right: 6px; }
+    .evo-entry .evo-type { font-weight: 600; }
+    .evo-entry .evo-detail { color: #888; display: block; margin-top: 2px; word-break: break-word; }
+    .evo-entry .evo-action-badge {
+      display: inline-block; font-size: 9px; padding: 1px 5px;
+      border-radius: 3px; font-weight: 600; text-transform: uppercase;
+    }
+    .evo-action-badge.create { background: #1a2a1a; color: #4ade80; }
+    .evo-action-badge.merge { background: #1a1a2a; color: #818cf8; }
+    .evo-action-badge.split { background: #2a2a1a; color: #facc15; }
+    .evo-action-badge.update { background: #1a2a2a; color: #3b82f6; }
+    .evo-action-badge.delete { background: #2a1a1a; color: #f87171; }
+
     /* Inject Status */
     .inject-status {
       display: flex;
@@ -1274,15 +1417,18 @@
       </div>
       <div class="panel-content">
         <!-- Brain Prompt -->
-        <div class="section-title">Brain Prompt</div>
+        <div class="section-title collapsible-toggle" data-target="section-prompt">Brain Prompt <span class="section-chevron">&#9662;</span></div>
+        <div class="section-body" id="section-prompt">
         <div class="form-group">
           <textarea id="brainPrompt" placeholder="What should the brain learn about?">This will be a chat log of myself with Claude Code during development of different projects. Learn about my thinking patterns, interests, preferences, and how I approach problems.
 
 Also, separately make sure you track the behaviors where I get frustrated and curse at the model.</textarea>
         </div>
+        </div>
 
         <!-- Model Config -->
-        <div class="section-title">Models</div>
+        <div class="section-title collapsible-toggle" data-target="section-models">Models <span class="section-chevron">&#9662;</span></div>
+        <div class="section-body" id="section-models">
         <div class="form-group">
           <label>Primary Model (runtime)</label>
           <select id="model" class="model-select">
@@ -1479,8 +1625,11 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
           </div>
         </div>
 
+        </div><!-- /section-models -->
+
         <!-- Learning Config -->
-        <div class="section-title">Learning</div>
+        <div class="section-title collapsible-toggle" data-target="section-learning">Learning <span class="section-chevron">&#9662;</span></div>
+        <div class="section-body" id="section-learning">
         <div class="form-group">
           <label>Strategy</label>
           <select id="strategy">
@@ -1515,11 +1664,67 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
           </div>
         </div>
 
+        </div><!-- /section-learning -->
+
+        <!-- Evolution Config -->
+        <div class="section-title collapsible-toggle" data-target="section-evolution">Evolution <span class="section-chevron">&#9662;</span></div>
+        <div class="section-body" id="section-evolution">
+        <div class="form-row">
+          <div class="form-group">
+            <label style="display:flex;align-items:center;gap:6px;">
+              <input type="checkbox" id="evolutionEnabled" checked style="width:auto;">
+              Enabled
+            </label>
+          </div>
+          <div class="form-group">
+            <label style="display:flex;align-items:center;gap:6px;">
+              <input type="checkbox" id="autoEvaluate" checked style="width:auto;">
+              Auto-Evaluate
+            </label>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Signal Threshold</label>
+          <input type="number" id="signalThreshold" value="3" min="1" max="100">
+        </div>
+
+        </div><!-- /section-evolution -->
+
+        <!-- Maintenance Config -->
+        <div class="section-title collapsible-toggle" data-target="section-maintenance">Maintenance <span class="section-chevron">&#9662;</span></div>
+        <div class="section-body" id="section-maintenance">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Strategy</label>
+            <select id="maintenanceStrategy">
+              <option value="continuous">Continuous</option>
+              <option value="cumulative">Cumulative</option>
+              <option value="decay">Decay</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Max Tokens</label>
+            <input type="number" id="maintenanceMaxTokens" value="100000" min="1000" step="1000">
+          </div>
+        </div>
+
+        </div><!-- /section-maintenance -->
+
         <button id="initBtn">Initialize Brain</button>
+        <button id="updateBrainBtn" class="secondary" style="display:none; margin-top:6px;">Update Brain</button>
+
+        <!-- Update History -->
+        <div class="section-title collapsible-toggle" data-target="section-history">Update History <span class="section-chevron">&#9656;</span></div>
+        <div class="section-body collapsed" id="section-history">
+          <div id="updateHistoryList" style="max-height:200px; overflow-y:auto;">
+            <div class="empty-text" style="padding:8px;color:#666;">No updates yet</div>
+          </div>
+        </div>
 
         <!-- Data Injection -->
-        <div class="section-title">Data Injection</div>
+        <div class="section-title collapsible-toggle" data-target="section-injection">Data Injection <span class="section-chevron">&#9662;</span></div>
 
+        <div class="section-body" id="section-injection">
         <!-- Injection Method Tabs -->
         <div class="inject-tabs">
           <button class="inject-tab active" data-tab="sessions">Claude Sessions</button>
@@ -1576,10 +1781,11 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
         </div>
 
         <button id="injectBtn" disabled>Inject Data</button>
+        </div><!-- /section-injection -->
       </div>
     </div>
 
-    <!-- Main Panel: Learners + Chat -->
+    <!-- Main Panel: Learners -->
     <div class="panel main-panel">
       <!-- Brain Monitor -->
       <div class="brain-monitor" id="brainMonitor">
@@ -1622,10 +1828,39 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
             </div>
           </div>
         </div>
+
+        <!-- Evolution Monitor -->
+        <div class="evo-monitor" id="evoMonitor">
+          <div class="evo-monitor-header" id="evoMonitorToggle">
+            <span class="monitor-card-title">Evolution Monitor</span>
+            <span class="evo-signal-count" id="evoSignalBadge" style="display:none;">0 signals</span>
+          </div>
+          <div class="evo-monitor-body" id="evoMonitorBody">
+            <div class="evo-section">
+              <div class="evo-section-label">Signals</div>
+              <div class="evo-log" id="evoSignalLog">
+                <div class="evo-empty">No signals yet</div>
+              </div>
+            </div>
+            <div class="evo-section">
+              <div class="evo-section-label">Evaluations</div>
+              <div class="evo-log" id="evoEvalLog">
+                <div class="evo-empty">No evaluations yet</div>
+              </div>
+            </div>
+            <div class="evo-section">
+              <div class="evo-section-label">Actions</div>
+              <div class="evo-log" id="evoActionLog">
+                <div class="evo-empty">No actions yet</div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
       <div class="panel-header">
         Learners <span id="learnerCount" style="color:#4ade80;margin-left:8px;">0</span>
+        <button id="addLearnerBtn" class="secondary" style="font-size:11px;padding:3px 10px;display:none;">+ Add Learner</button>
       </div>
 
       <div class="learners-grid" id="learnersGrid">
@@ -1635,60 +1870,55 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
         </div>
       </div>
 
-      <div class="chat-area" id="chatArea">
-        <div class="empty-state">
-          <h3>Ask the Brain</h3>
-          <p>Initialize and inject data first</p>
-        </div>
-      </div>
-
-      <div class="chat-options">
-        <div class="chat-option">
-          <label>Model</label>
-          <select id="queryModel">
-            <option value="">(use default)</option>
-            <optgroup label="Fastest">
-              <option value="openai/gpt-4o-mini">openai/gpt-4o-mini</option>
-              <option value="google/gemini-2.5-flash-lite-preview-09-2025">google/gemini-2.5-flash-lite</option>
-              <option value="qwen/qwen3-32b">qwen/qwen3-32b</option>
-            </optgroup>
-            <optgroup label="Anthropic">
-              <option value="anthropic/claude-3.5-haiku">anthropic/claude-3.5-haiku</option>
-              <option value="anthropic/claude-sonnet-4">anthropic/claude-sonnet-4</option>
-              <option value="anthropic/claude-sonnet-4.5">anthropic/claude-sonnet-4.5</option>
-              <option value="anthropic/claude-opus-4.5">anthropic/claude-opus-4.5</option>
-            </optgroup>
-            <optgroup label="Google">
-              <option value="google/gemini-2.0-flash-001">google/gemini-2.0-flash-001</option>
-              <option value="google/gemini-3-flash-preview">google/gemini-3-flash-preview</option>
-              <option value="google/gemini-3-pro-preview">google/gemini-3-pro-preview</option>
-            </optgroup>
-            <optgroup label="OpenAI">
-              <option value="openai/gpt-5.2">openai/gpt-5.2</option>
-              <option value="openai/gpt-5.2-codex">openai/gpt-5.2-codex</option>
-            </optgroup>
-            <optgroup label="xAI">
-              <option value="x-ai/grok-4">x-ai/grok-4</option>
-              <option value="x-ai/grok-4.1-fast">x-ai/grok-4.1-fast</option>
-            </optgroup>
-          </select>
-        </div>
-        <div class="chat-option">
-          <label>Temp: <span id="tempValue">0.7</span></label>
-          <input type="range" id="queryTemp" min="0" max="1" step="0.1" value="0.7">
-        </div>
-      </div>
-      <div class="chat-input">
-        <input type="text" id="queryInput" placeholder="Ask a question..." disabled>
-        <button id="askBtn" disabled>Ask</button>
-      </div>
     </div>
 
-    <!-- Right Panel: Events -->
-    <div class="panel">
-      <div class="panel-header">Events</div>
-      <div class="panel-content">
-        <div class="event-log" id="eventLog"></div>
+    <!-- Right Panel: Query -->
+    <div class="panel qa-panel">
+      <div class="panel-header">Query</div>
+      <div class="qa-input-area">
+        <div class="qa-input-row">
+          <input type="text" id="queryInput" placeholder="Ask the brain..." disabled>
+          <button id="askBtn" disabled>Ask</button>
+        </div>
+        <div class="qa-options">
+          <div class="qa-option">
+            <label>Model</label>
+            <select id="queryModel">
+              <option value="">(default)</option>
+              <optgroup label="Fastest">
+                <option value="openai/gpt-4o-mini">gpt-4o-mini</option>
+                <option value="google/gemini-2.5-flash-lite-preview-09-2025">gemini-flash-lite</option>
+                <option value="qwen/qwen3-32b">qwen3-32b</option>
+              </optgroup>
+              <optgroup label="Anthropic">
+                <option value="anthropic/claude-3.5-haiku">haiku</option>
+                <option value="anthropic/claude-sonnet-4">sonnet-4</option>
+                <option value="anthropic/claude-sonnet-4.5">sonnet-4.5</option>
+                <option value="anthropic/claude-opus-4.5">opus-4.5</option>
+              </optgroup>
+              <optgroup label="Google">
+                <option value="google/gemini-2.0-flash-001">gemini-flash</option>
+                <option value="google/gemini-3-flash-preview">gemini-3-flash</option>
+                <option value="google/gemini-3-pro-preview">gemini-3-pro</option>
+              </optgroup>
+              <optgroup label="OpenAI">
+                <option value="openai/gpt-5.2">gpt-5.2</option>
+                <option value="openai/gpt-5.2-codex">gpt-5.2-codex</option>
+              </optgroup>
+              <optgroup label="xAI">
+                <option value="x-ai/grok-4">grok-4</option>
+                <option value="x-ai/grok-4.1-fast">grok-4.1-fast</option>
+              </optgroup>
+            </select>
+          </div>
+          <div class="qa-option">
+            <label>Temp: <span id="tempValue">0.7</span></label>
+            <input type="range" id="queryTemp" min="0" max="1" step="0.1" value="0.7">
+          </div>
+        </div>
+      </div>
+      <div class="qa-list" id="qaList">
+        <div class="qa-empty">Ask a question after initializing and injecting data</div>
       </div>
     </div>
   </div>
@@ -1703,6 +1933,7 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
       <div class="modal-body">
         <div class="modal-tabs">
           <button class="modal-tab active" data-tab="overview">Overview</button>
+          <button class="modal-tab" data-tab="settings">Settings</button>
           <button class="modal-tab" data-tab="observe">Observe Prompt</button>
           <button class="modal-tab" data-tab="synthesize">Synthesize Prompt</button>
           <button class="modal-tab" data-tab="understanding">Understanding</button>
@@ -1710,11 +1941,22 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
         </div>
 
         <div class="modal-tab-content active" id="modal-overview">
+          <div class="form-row">
+            <div class="form-group">
+              <label>Name</label>
+              <input type="text" id="modalName" placeholder="Learner name">
+            </div>
+            <div class="form-group">
+              <label>Description</label>
+              <input type="text" id="modalDescription" placeholder="Brief description">
+            </div>
+          </div>
           <div class="form-group">
             <label>Instructions</label>
-            <pre id="modalInstructions"></pre>
+            <textarea id="modalInstructions" rows="5" style="font-size:12px;"></textarea>
           </div>
-          <div class="form-row">
+          <button id="saveOverviewBtn" class="secondary" style="margin-top:8px;">Save Changes</button>
+          <div class="form-row" style="margin-top:12px;">
             <div class="form-group">
               <label>Status</label>
               <pre id="modalStatus"></pre>
@@ -1728,6 +1970,73 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
             <label>Evolution History</label>
             <pre id="modalEvolution"></pre>
           </div>
+        </div>
+
+        <div class="modal-tab-content" id="modal-settings">
+          <div class="form-row">
+            <div class="form-group">
+              <label>Observe Model</label>
+              <select id="modalObserveModel" class="model-select">
+                <option value="">(inherit from brain)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Synthesize Model</label>
+              <select id="modalSynthesizeModel" class="model-select">
+                <option value="">(inherit from brain)</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Max Observations</label>
+              <input type="number" id="modalMaxObservations" value="10" min="1" max="50">
+            </div>
+            <div class="form-group">
+              <label>Min Importance</label>
+              <input type="number" id="modalMinImportance" value="0.3" min="0" max="1" step="0.1">
+            </div>
+          </div>
+          <div class="form-row" style="margin-top:12px;">
+            <div style="grid-column:1/-1;font-size:11px;color:#666;text-transform:uppercase;letter-spacing:0.5px;">Signal Thresholds</div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Max Dismissal Rate</label>
+              <input type="number" id="modalMaxDismissalRate" value="0.8" min="0" max="1" step="0.05">
+            </div>
+            <div class="form-group">
+              <label>Min Confidence</label>
+              <input type="number" id="modalMinConfidence" value="0.3" min="0" max="1" step="0.05">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Max Obs Without Synthesis</label>
+              <input type="number" id="modalMaxObsWithoutSynth" value="100" min="1" max="1000">
+            </div>
+          </div>
+          <div class="form-row" style="margin-top:12px;">
+            <div style="grid-column:1/-1;font-size:11px;color:#666;text-transform:uppercase;letter-spacing:0.5px;">General</div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Maintenance Strategy</label>
+              <select id="modalMaintenanceStrategy">
+                <option value="continuous">Continuous</option>
+                <option value="cumulative">Cumulative</option>
+                <option value="decay">Decay</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Query Method</label>
+              <select id="modalQueryMethod">
+                <option value="direct">Direct</option>
+                <option value="tool-based">Tool-based</option>
+              </select>
+            </div>
+          </div>
+          <button id="saveSettingsBtn" class="secondary" style="margin-top:8px;">Save Settings</button>
         </div>
 
         <div class="modal-tab-content" id="modal-observe">
@@ -1764,6 +2073,12 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
     let usageByLearner = {} // { learnerId: { inputTokens, outputTokens, requestCount } }
     let totalUsage = { inputTokens: 0, outputTokens: 0, totalTokens: 0, requestCount: 0 }
     let configuredModels = {} // Store model config: { primary, blueprint, observe, synthesize }
+    let lastBrainConfig = null // Snapshot of config at last init/update for diffing
+    let currentModalLearnerId = null // Currently open learner in modal
+    let updateHistory = [] // Client-side update history
+    // Signal metrics — accumulated client-side from SSE events per learner
+    // Mirrors the private counters in TextLearner (observationCount, dismissalCount, etc.)
+    let learnerMetrics = {} // { [learnerId]: { observations, dismissals, syntheses, lastSynthesisObs, queryConfidences } }
 
     // --- Configuration Panel Toggle ---
     const container = document.querySelector('.container')
@@ -1781,6 +2096,13 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
     })
 
     // --- Utility Functions ---
+    function ensureLearnerMetrics(learnerId) {
+      if (!learnerMetrics[learnerId]) {
+        learnerMetrics[learnerId] = { observations: 0, dismissals: 0, syntheses: 0, lastSynthesisObs: 0, queryConfidences: [] }
+      }
+      return learnerMetrics[learnerId]
+    }
+
     function escapeHtml(text) {
       if (!text) return ''
       const div = document.createElement('div')
@@ -1972,14 +2294,21 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
     const injectBtn = document.getElementById('injectBtn')
     const learnersGrid = document.getElementById('learnersGrid')
     const learnerCount = document.getElementById('learnerCount')
-    const chatArea = document.getElementById('chatArea')
+    const qaList = document.getElementById('qaList')
     const queryInput = document.getElementById('queryInput')
     const queryModelSelect = document.getElementById('queryModel')
     const queryTempSlider = document.getElementById('queryTemp')
     const tempValueDisplay = document.getElementById('tempValue')
     const askBtn = document.getElementById('askBtn')
-    const eventLog = document.getElementById('eventLog')
     const learnerModal = document.getElementById('learnerModal')
+    const updateBrainBtn = document.getElementById('updateBrainBtn')
+    const evolutionEnabled = document.getElementById('evolutionEnabled')
+    const autoEvaluate = document.getElementById('autoEvaluate')
+    const signalThreshold = document.getElementById('signalThreshold')
+    const maintenanceStrategy = document.getElementById('maintenanceStrategy')
+    const maintenanceMaxTokens = document.getElementById('maintenanceMaxTokens')
+    const saveOverviewBtn = document.getElementById('saveOverviewBtn')
+    const saveSettingsBtn = document.getElementById('saveSettingsBtn')
 
     // --- Modal Tabs ---
     document.querySelectorAll('.modal-tab').forEach(tab => {
@@ -1993,11 +2322,495 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
 
     function closeModal() {
       learnerModal.classList.remove('open')
+      currentModalLearnerId = null
     }
 
     learnerModal.addEventListener('click', (e) => {
       if (e.target === learnerModal) closeModal()
     })
+
+    // --- Model Options Helper ---
+    function populateModalModelSelect(selectEl) {
+      const options = model.querySelectorAll('option, optgroup')
+      // Clone options from primary model select
+      selectEl.innerHTML = '<option value="">(inherit from brain)</option>'
+      model.querySelectorAll('optgroup').forEach(group => {
+        selectEl.appendChild(group.cloneNode(true))
+      })
+      // Deselect all
+      selectEl.querySelectorAll('option').forEach(o => o.selected = false)
+      selectEl.querySelector('option[value=""]').selected = true
+    }
+
+    // Populate modal model selects on load
+    populateModalModelSelect(document.getElementById('modalObserveModel'))
+    populateModalModelSelect(document.getElementById('modalSynthesizeModel'))
+
+    // --- Brain Config Snapshot ---
+    function snapshotBrainConfig() {
+      return {
+        prompt: brainPrompt.value,
+        model: model.value,
+        blueprintModel: blueprintModel.value,
+        observeModel: observeModel.value,
+        observeBlueprintModel: observeBlueprintModel.value,
+        synthesizeModel: synthesizeModel.value,
+        synthesizeBlueprintModel: synthesizeBlueprintModel.value,
+        strategy: strategy.value,
+        batchSize: batchSize.value,
+        maxObservations: maxObservations.value,
+        minImportance: minImportance.value,
+        queryMethod: queryMethod.value,
+        evolutionEnabled: evolutionEnabled.checked,
+        autoEvaluate: autoEvaluate.checked,
+        signalThreshold: signalThreshold.value,
+        maintenanceStrategy: maintenanceStrategy.value,
+        maintenanceMaxTokens: maintenanceMaxTokens.value,
+      }
+    }
+
+    // --- Update Brain ---
+    async function updateBrain() {
+      const current = snapshotBrainConfig()
+      const prev = lastBrainConfig || {}
+      const body = {}
+      let hasChanges = false
+
+      // Diff prompt
+      if (current.prompt !== prev.prompt) {
+        body.prompt = current.prompt
+        hasChanges = true
+      }
+      // Diff models
+      if (current.model !== prev.model) {
+        body.model = current.model
+        hasChanges = true
+      }
+      if (current.blueprintModel !== prev.blueprintModel) {
+        body.blueprintModel = current.blueprintModel || undefined
+        hasChanges = true
+      }
+      // Diff learning config
+      const learning = {}
+      if (current.observeModel !== prev.observeModel) {
+        learning.observe = { model: current.observeModel || undefined }
+        hasChanges = true
+      }
+      if (current.observeBlueprintModel !== prev.observeBlueprintModel) {
+        learning.observe = { ...(learning.observe || {}), blueprintModel: current.observeBlueprintModel || undefined }
+        hasChanges = true
+      }
+      if (current.synthesizeModel !== prev.synthesizeModel) {
+        learning.synthesize = { model: current.synthesizeModel || undefined }
+        hasChanges = true
+      }
+      if (current.synthesizeBlueprintModel !== prev.synthesizeBlueprintModel) {
+        learning.synthesize = { ...(learning.synthesize || {}), blueprintModel: current.synthesizeBlueprintModel || undefined }
+        hasChanges = true
+      }
+      // Thresholds
+      const thresholds = {}
+      if (current.maxObservations !== prev.maxObservations) {
+        thresholds.maxObservations = parseInt(current.maxObservations)
+        hasChanges = true
+      }
+      if (current.minImportance !== prev.minImportance) {
+        thresholds.minImportance = parseFloat(current.minImportance)
+        hasChanges = true
+      }
+      if (Object.keys(thresholds).length > 0) {
+        learning.synthesize = { ...(learning.synthesize || {}), thresholds }
+      }
+      if (current.queryMethod !== prev.queryMethod) {
+        learning.query = { method: current.queryMethod }
+        hasChanges = true
+      }
+      if (current.maintenanceStrategy !== prev.maintenanceStrategy || current.maintenanceMaxTokens !== prev.maintenanceMaxTokens) {
+        learning.maintenance = {
+          strategy: current.maintenanceStrategy,
+          maxTokens: parseInt(current.maintenanceMaxTokens),
+        }
+        hasChanges = true
+      }
+      if (Object.keys(learning).length > 0) body.learning = learning
+
+      // Evolution config
+      const evolution = {}
+      if (current.evolutionEnabled !== prev.evolutionEnabled) {
+        evolution.enabled = current.evolutionEnabled
+        hasChanges = true
+      }
+      if (current.autoEvaluate !== prev.autoEvaluate) {
+        evolution.autoEvaluate = current.autoEvaluate
+        hasChanges = true
+      }
+      if (current.signalThreshold !== prev.signalThreshold) {
+        evolution.evaluatorSignalThreshold = parseInt(current.signalThreshold)
+        hasChanges = true
+      }
+      if (Object.keys(evolution).length > 0) body.evolution = evolution
+
+      if (!hasChanges) {
+        showToast('observed', 'brain', 'No changes detected')
+        return
+      }
+
+      // Record history before update
+      updateHistory.unshift({
+        timestamp: new Date().toISOString(),
+        target: 'brain',
+        changedFields: Object.keys(body),
+        previousValues: { ...prev },
+      })
+      renderUpdateHistory()
+
+      updateBrainBtn.disabled = true
+      updateBrainBtn.innerHTML = '<span class="spinner"></span>Updating...'
+
+      try {
+        const res = await fetch('/brain/update', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body),
+        })
+        const data = await res.json()
+        if (res.ok) {
+          lastBrainConfig = snapshotBrainConfig()
+          showToast('synthesized', 'brain', `Updated: ${data.changedFields?.join(', ') || 'done'}`)
+          updateLearners()
+        } else {
+          showToast('critical', 'brain', 'Update failed: ' + data.error)
+        }
+      } catch (err) {
+        showToast('critical', 'brain', 'Update error: ' + err.message)
+      } finally {
+        updateBrainBtn.disabled = false
+        updateBrainBtn.textContent = 'Update Brain'
+      }
+    }
+
+    // --- Learner Update Functions ---
+    async function saveLearnerOverview() {
+      if (!currentModalLearnerId) return
+      const body = {}
+      const state = learnerStates[currentModalLearnerId]
+      const data = state?.data || {}
+
+      const newName = document.getElementById('modalName').value.trim()
+      const newDesc = document.getElementById('modalDescription').value.trim()
+      const newInstructions = document.getElementById('modalInstructions').value.trim()
+
+      if (newName && newName !== (data.name || '')) body.name = newName
+      if (newDesc !== (data.description || '')) body.description = newDesc
+      if (newInstructions && newInstructions !== (data.instructions || '')) body.instructions = newInstructions
+
+      if (Object.keys(body).length === 0) {
+        showToast('observed', currentModalLearnerId, 'No changes detected')
+        return
+      }
+
+      updateHistory.unshift({
+        timestamp: new Date().toISOString(),
+        target: currentModalLearnerId,
+        changedFields: Object.keys(body),
+        previousValues: { name: data.name, description: data.description, instructions: data.instructions },
+      })
+      renderUpdateHistory()
+
+      saveOverviewBtn.disabled = true
+      saveOverviewBtn.innerHTML = '<span class="spinner"></span>Saving...'
+
+      try {
+        const res = await fetch(`/brain/learners/${encodeURIComponent(currentModalLearnerId)}/update`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body),
+        })
+        const result = await res.json()
+        if (res.ok) {
+          showToast('synthesized', currentModalLearnerId, `Updated: ${result.changedFields?.join(', ') || 'done'}`)
+          updateLearners()
+        } else {
+          showToast('critical', currentModalLearnerId, 'Update failed: ' + result.error)
+        }
+      } catch (err) {
+        showToast('critical', currentModalLearnerId, 'Error: ' + err.message)
+      } finally {
+        saveOverviewBtn.disabled = false
+        saveOverviewBtn.textContent = 'Save Changes'
+      }
+    }
+
+    async function saveLearnerSettings() {
+      if (!currentModalLearnerId) return
+      const body = {}
+      const state = learnerStates[currentModalLearnerId]
+      const data = state?.data || {}
+
+      const obsModel = document.getElementById('modalObserveModel').value
+      const synModel = document.getElementById('modalSynthesizeModel').value
+      const maxObs = parseInt(document.getElementById('modalMaxObservations').value)
+      const minImp = parseFloat(document.getElementById('modalMinImportance').value)
+      const maintStrat = document.getElementById('modalMaintenanceStrategy').value
+      const qMethod = document.getElementById('modalQueryMethod').value
+
+      if (obsModel) body.observe = { model: obsModel }
+      if (synModel) body.synthesize = { ...(body.synthesize || {}), model: synModel }
+
+      const currentThresholds = data.synthesizeThresholds || {}
+      if (maxObs !== (currentThresholds.maxObservations || 10) || minImp !== (currentThresholds.minImportance || 0.3)) {
+        body.synthesize = { ...(body.synthesize || {}), thresholds: { maxObservations: maxObs, minImportance: minImp } }
+      }
+
+      const currentMaint = data.maintenance || {}
+      if (maintStrat !== (currentMaint.strategy || 'continuous')) {
+        body.maintenance = { ...(body.maintenance || {}), strategy: maintStrat }
+      }
+
+      if (qMethod !== (data.queryMethod || 'direct')) {
+        body.query = { method: qMethod }
+      }
+
+      // Signal thresholds (governance)
+      const maxDR = parseFloat(document.getElementById('modalMaxDismissalRate').value)
+      const minConf = parseFloat(document.getElementById('modalMinConfidence').value)
+      const maxObsNoSynth = parseInt(document.getElementById('modalMaxObsWithoutSynth').value)
+      const currentGov = data.governance?.signalThresholds || {}
+      if (maxDR !== (currentGov.maxDismissalRate ?? 0.8) ||
+          minConf !== (currentGov.minConfidence ?? 0.3) ||
+          maxObsNoSynth !== (currentGov.maxObservationsWithoutSynthesis ?? 100)) {
+        body.governance = {
+          signalThresholds: {
+            maxDismissalRate: maxDR,
+            minConfidence: minConf,
+            maxObservationsWithoutSynthesis: maxObsNoSynth,
+          }
+        }
+      }
+
+      if (Object.keys(body).length === 0) {
+        showToast('observed', currentModalLearnerId, 'No changes detected')
+        return
+      }
+
+      updateHistory.unshift({
+        timestamp: new Date().toISOString(),
+        target: currentModalLearnerId,
+        changedFields: Object.keys(body),
+        previousValues: { synthesizeThresholds: currentThresholds, maintenance: currentMaint, queryMethod: data.queryMethod },
+      })
+      renderUpdateHistory()
+
+      saveSettingsBtn.disabled = true
+      saveSettingsBtn.innerHTML = '<span class="spinner"></span>Saving...'
+
+      try {
+        const res = await fetch(`/brain/learners/${encodeURIComponent(currentModalLearnerId)}/update`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body),
+        })
+        const result = await res.json()
+        if (res.ok) {
+          showToast('synthesized', currentModalLearnerId, `Updated: ${result.changedFields?.join(', ') || 'done'}`)
+          updateLearners()
+        } else {
+          showToast('critical', currentModalLearnerId, 'Update failed: ' + result.error)
+        }
+      } catch (err) {
+        showToast('critical', currentModalLearnerId, 'Error: ' + err.message)
+      } finally {
+        saveSettingsBtn.disabled = false
+        saveSettingsBtn.textContent = 'Save Settings'
+      }
+    }
+
+    // --- Add Learner ---
+    const addLearnerBtn = document.getElementById('addLearnerBtn')
+    addLearnerBtn.addEventListener('click', async () => {
+      const name = prompt('Learner name:')
+      if (!name || !name.trim()) return
+      const instructions = prompt('Instructions (what should this learner observe and track?):')
+      if (!instructions || !instructions.trim()) return
+      addLearnerBtn.disabled = true
+      addLearnerBtn.textContent = 'Creating...'
+      try {
+        const res = await fetch('/brain/learners/create', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name: name.trim(), instructions: instructions.trim() }),
+        })
+        const result = await res.json()
+        if (res.ok) {
+          showToast('synthesized', result.learnerId, 'New learner created: ' + name.trim())
+          updateLearners()
+        } else {
+          showToast('critical', 'brain', 'Create failed: ' + result.error)
+        }
+      } catch (err) {
+        showToast('critical', 'brain', 'Error: ' + err.message)
+      } finally {
+        addLearnerBtn.disabled = false
+        addLearnerBtn.textContent = '+ Add Learner'
+      }
+    })
+
+    // --- Update History ---
+    function renderUpdateHistory() {
+      const container = document.getElementById('updateHistoryList')
+      if (!container) return
+      if (updateHistory.length === 0) {
+        container.innerHTML = '<div class="empty-text" style="padding:8px;color:#666;">No updates yet</div>'
+        return
+      }
+      container.innerHTML = updateHistory.slice(0, 20).map((entry, i) => {
+        const time = new Date(entry.timestamp).toLocaleTimeString('en-US', { hour12: false })
+        const fields = entry.changedFields.join(', ')
+        return `<div class="history-entry">
+          <span class="event-time">${time}</span>
+          <span class="toast-learner">${entry.target}</span>
+          <span class="event-data">${fields}</span>
+          <button class="history-restore" onclick="restoreSnapshot(${i})" title="Restore">&#x21A9;</button>
+        </div>`
+      }).join('')
+    }
+
+    function restoreSnapshot(index) {
+      const entry = updateHistory[index]
+      if (!entry) return
+      if (entry.target === 'brain') {
+        const prev = entry.previousValues
+        if (prev.prompt !== undefined) brainPrompt.value = prev.prompt
+        if (prev.model !== undefined) model.value = prev.model
+        if (prev.blueprintModel !== undefined) blueprintModel.value = prev.blueprintModel
+        if (prev.observeModel !== undefined) observeModel.value = prev.observeModel
+        if (prev.observeBlueprintModel !== undefined) observeBlueprintModel.value = prev.observeBlueprintModel
+        if (prev.synthesizeModel !== undefined) synthesizeModel.value = prev.synthesizeModel
+        if (prev.synthesizeBlueprintModel !== undefined) synthesizeBlueprintModel.value = prev.synthesizeBlueprintModel
+        if (prev.strategy !== undefined) strategy.value = prev.strategy
+        if (prev.batchSize !== undefined) batchSize.value = prev.batchSize
+        if (prev.maxObservations !== undefined) maxObservations.value = prev.maxObservations
+        if (prev.minImportance !== undefined) minImportance.value = prev.minImportance
+        if (prev.queryMethod !== undefined) queryMethod.value = prev.queryMethod
+        if (prev.evolutionEnabled !== undefined) evolutionEnabled.checked = prev.evolutionEnabled
+        if (prev.autoEvaluate !== undefined) autoEvaluate.checked = prev.autoEvaluate
+        if (prev.signalThreshold !== undefined) signalThreshold.value = prev.signalThreshold
+        if (prev.maintenanceStrategy !== undefined) maintenanceStrategy.value = prev.maintenanceStrategy
+        if (prev.maintenanceMaxTokens !== undefined) maintenanceMaxTokens.value = prev.maintenanceMaxTokens
+        showToast('observed', 'brain', 'Snapshot restored — click Update Brain to apply')
+      } else {
+        // Learner snapshot — open modal and fill fields
+        const learnerId = entry.target
+        openLearnerModal(learnerId)
+        const prev = entry.previousValues
+        if (prev.name !== undefined) document.getElementById('modalName').value = prev.name || ''
+        if (prev.description !== undefined) document.getElementById('modalDescription').value = prev.description || ''
+        if (prev.instructions !== undefined) document.getElementById('modalInstructions').value = prev.instructions || ''
+        showToast('observed', learnerId, 'Snapshot restored — click Save to apply')
+      }
+    }
+    window.restoreSnapshot = restoreSnapshot
+
+    // --- Evolution Monitor ---
+    let evoSignalCount = 0
+
+    function evoTime() {
+      return new Date().toLocaleTimeString('en-US', { hour12: false })
+    }
+
+    function addEvoEntry(logId, cssClass, content) {
+      const log = document.getElementById(logId)
+      if (!log) return
+      // Remove empty placeholder
+      const empty = log.querySelector('.evo-empty')
+      if (empty) empty.remove()
+      const el = document.createElement('div')
+      el.className = `evo-entry ${cssClass}`
+      el.innerHTML = content
+      log.insertBefore(el, log.firstChild)
+      // Keep max 20 entries
+      while (log.children.length > 20) log.removeChild(log.lastChild)
+    }
+
+    function updateEvoSignalBadge() {
+      const badge = document.getElementById('evoSignalBadge')
+      if (evoSignalCount > 0) {
+        badge.style.display = ''
+        badge.textContent = `${evoSignalCount} signal${evoSignalCount !== 1 ? 's' : ''}`
+      } else {
+        badge.style.display = 'none'
+      }
+    }
+
+    function handleEvoEvent(type, data) {
+      // Signals
+      if (type === 'brain:signal:received' || type === 'learner:signal') {
+        evoSignalCount++
+        updateEvoSignalBadge()
+        const source = data.source || data.learnerId || '?'
+        const desc = data.description || ''
+        addEvoEntry('evoSignalLog', 'signal',
+          `<span class="evo-time">${evoTime()}</span><span class="evo-type">${escapeHtml(source)}</span>` +
+          `<span class="evo-detail">${escapeHtml(desc.slice(0, 200))}</span>`)
+      }
+
+      // Evaluator
+      if (type === 'evaluator:evaluation:started') {
+        addEvoEntry('evoEvalLog', 'eval-start',
+          `<span class="evo-time">${evoTime()}</span><span class="evo-type">Started</span>` +
+          `<span class="evo-detail">${data.signalCount || '?'} signals queued</span>`)
+      }
+      if (type === 'evaluator:evaluation:completed') {
+        evoSignalCount = 0
+        updateEvoSignalBadge()
+        const decisions = data.decisions || []
+        const summary = decisions.length === 0
+          ? 'No action needed'
+          : decisions.map(d => `<span class="evo-action-badge ${d.action}">${d.action}</span> ${escapeHtml(d.reasoning?.slice(0, 80) || '')}`).join('<br>')
+        addEvoEntry('evoEvalLog', 'eval-done',
+          `<span class="evo-time">${evoTime()}</span><span class="evo-type">Completed</span> (${decisions.length} decisions)` +
+          `<span class="evo-detail">${summary}</span>`)
+      }
+      if (type === 'evaluator:evaluation:failed') {
+        addEvoEntry('evoEvalLog', 'eval-fail',
+          `<span class="evo-time">${evoTime()}</span><span class="evo-type">Failed</span>` +
+          `<span class="evo-detail">${escapeHtml(data.error || 'Unknown error')}</span>`)
+      }
+
+      // Actions
+      if (type === 'evolution:action:started') {
+        addEvoEntry('evoActionLog', 'action-start',
+          `<span class="evo-time">${evoTime()}</span><span class="evo-action-badge ${data.action}">${data.action}</span>` +
+          `<span class="evo-detail">Targets: ${(data.targets || []).join(', ')}</span>`)
+      }
+      if (type === 'evolution:action:executed') {
+        const result = data.result || {}
+        const parts = []
+        if (result.newLearnerIds?.length) parts.push(`created: ${result.newLearnerIds.join(', ')}`)
+        if (result.deletedLearnerIds?.length) parts.push(`deleted: ${result.deletedLearnerIds.join(', ')}`)
+        if (result.updatedLearnerIds?.length) parts.push(`updated: ${result.updatedLearnerIds.join(', ')}`)
+        addEvoEntry('evoActionLog', 'action-done',
+          `<span class="evo-time">${evoTime()}</span><span class="evo-action-badge ${data.action}">${data.action}</span> done` +
+          `<span class="evo-detail">${parts.join(' | ') || escapeHtml(data.reasoning?.slice(0, 100) || 'Executed')}</span>`)
+        updateLearners()
+      }
+      if (type === 'evolution:action:failed') {
+        addEvoEntry('evoActionLog', 'action-fail',
+          `<span class="evo-time">${evoTime()}</span><span class="evo-action-badge ${data.action}">${data.action}</span> failed` +
+          `<span class="evo-detail">${escapeHtml(data.error || 'Unknown error')}</span>`)
+      }
+
+      // Learner added/removed
+      if (type === 'brain:learner:added') {
+        addEvoEntry('evoActionLog', 'action-done',
+          `<span class="evo-time">${evoTime()}</span><span class="evo-action-badge create">added</span> ${escapeHtml(data.learnerId || '')}` +
+          `<span class="evo-detail">${escapeHtml(data.name || data.instructions?.slice(0, 80) || '')}</span>`)
+      }
+      if (type === 'brain:learner:removed') {
+        addEvoEntry('evoActionLog', 'action-fail',
+          `<span class="evo-time">${evoTime()}</span><span class="evo-action-badge delete">removed</span> ${escapeHtml(data.learnerId || '')}`)
+      }
+    }
 
     // --- SSE Connection ---
     function connectSSE() {
@@ -2036,7 +2849,13 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
         'learner:understanding:updated', 'learner:governance:updated',
         'learner:ingest:thinking', 'learner:ask:started', 'learner:ask:thinking',
         'learner:ask:completed', 'learner:ask:failed',
+        'learner:query:started', 'learner:query:completed', 'learner:query:failed',
+        'brain:config:updated', 'brain:signal:received', 'brain:learner:removed',
+        'learner:config:updated', 'learner:prompts:regenerated', 'learner:signal',
+        'evaluator:evaluation:started', 'evaluator:evaluation:completed', 'evaluator:evaluation:failed',
+        'evolution:action:started', 'evolution:action:executed', 'evolution:action:failed',
         'server:brain:creating', 'server:brain:ready', 'server:brain:error',
+        'server:brain:updated', 'server:learner:updated',
         'server:parsing:started', 'server:parsing:completed',
         'server:inject:started', 'server:inject:completed', 'server:inject:error',
         'server:ask:started', 'server:ask:completed', 'server:ask:error'
@@ -2052,6 +2871,9 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
     }
 
     function handleEvent(type, data) {
+      // Route evolution events to monitor
+      handleEvoEvent(type, data)
+
       // Update status bar
       const statusMap = {
         'server:brain:creating': 'Creating brain...',
@@ -2091,8 +2913,13 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
         queryInput.disabled = false
         askBtn.disabled = false
         initBtn.textContent = 'Initialized'
+        initBtn.disabled = true
         initBtn.classList.add('secondary')
+        updateBrainBtn.style.display = ''
         updateLearners()
+
+        // Snapshot config and store for diffing
+        lastBrainConfig = snapshotBrainConfig()
 
         // Store configured models for usage tracking
         configuredModels = {
@@ -2103,6 +2930,35 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
           synthesize: synthesizeModel.value || model.value,
           synthesizeBlueprint: synthesizeBlueprintModel.value || blueprintModel.value || model.value
         }
+      }
+
+      // Brain updated via server
+      if (type === 'server:brain:updated') {
+        const fields = data.changedFields || []
+        showToast('synthesized', 'brain', `Brain updated: ${fields.join(', ')}`)
+        lastBrainConfig = snapshotBrainConfig()
+        updateLearners()
+      }
+
+      // Learner updated via server
+      if (type === 'server:learner:updated') {
+        const fields = data.changedFields || []
+        showToast('synthesized', data.learnerId, `Learner updated: ${fields.join(', ')}`)
+        updateLearners()
+        // Refresh modal if it's open for this learner
+        if (currentModalLearnerId === data.learnerId) {
+          setTimeout(() => openLearnerModal(data.learnerId), 500)
+        }
+      }
+
+      // Evolution events
+      if (type === 'evaluator:evaluation:completed') {
+        const decisions = data.decisions || []
+        if (decisions.length > 0) {
+          const summary = decisions.map(d => `${d.action}: ${d.targetName || d.targetId || ''}`).join('; ')
+          showToast('critical', 'evolution', summary)
+        }
+        updateLearners()
       }
 
       // Injection progress tracking
@@ -2192,6 +3048,7 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
 
       // Learner observed (completed - data buffered)
       if (type === 'learner:observed') {
+        ensureLearnerMetrics(data.learnerId).observations++
         if (learnerStates[data.learnerId]) {
           learnerStates[data.learnerId].status = 'ready'
           learnerStates[data.learnerId].action = `Buffered (${data.bufferCount} obs)`
@@ -2212,6 +3069,12 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
             bufferCount: data.bufferCount,
             time: new Date()
           }
+          // Keep buffer stats in sync from SSE events so synth stats are live
+          if (learnerStates[data.learnerId].data) {
+            if (!learnerStates[data.learnerId].data.buffer) learnerStates[data.learnerId].data.buffer = {}
+            learnerStates[data.learnerId].data.buffer.count = data.bufferCount
+            learnerStates[data.learnerId].data.buffer.avgImportance = data.importance
+          }
         }
         // Show toast for observations
         const preview = data.output?.slice(0, 120) + (data.output?.length > 120 ? '...' : '')
@@ -2227,6 +3090,9 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
       }
 
       if (type === 'learner:observe:dismissed') {
+        const m = ensureLearnerMetrics(data.learnerId)
+        m.observations++
+        m.dismissals++
         if (learnerStates[data.learnerId]) {
           learnerStates[data.learnerId].status = 'ready'
           learnerStates[data.learnerId].action = 'Dismissed (irrelevant)'
@@ -2245,6 +3111,7 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
 
       // Learner synthesized (completed)
       if (type === 'learner:synthesized') {
+        { const m = ensureLearnerMetrics(data.learnerId); m.observations++; m.syntheses++; m.lastSynthesisObs = m.observations }
         if (learnerStates[data.learnerId]) {
           learnerStates[data.learnerId].status = 'ready'
           learnerStates[data.learnerId].action = 'Understanding updated'
@@ -2252,6 +3119,11 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
             evolution: data.evolution,
             significance: data.significance,
             time: new Date()
+          }
+          // Buffer clears after synthesis — update immediately
+          if (learnerStates[data.learnerId].data) {
+            learnerStates[data.learnerId].data.buffer = { count: 0, avgImportance: 0, totalTokens: 0 }
+            learnerStates[data.learnerId].data.understanding = data.newUnderstanding
           }
         }
         // Show toast for synthesis
@@ -2267,19 +3139,24 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
         updateLearners()
       }
 
-      // Injection complete - reset learner states
+      // Injection complete - reset learner states and fetch fresh status
       if (type === 'brain:inject:completed') {
         Object.keys(learnerStates).forEach(id => {
           learnerStates[id].status = 'ready'
           learnerStates[id].action = 'Idle'
         })
-        updateLearnersUI()
+        updateLearners() // Full status refresh to sync buffer/understanding
       }
 
       // Learner query completed - track usage
-      if (type === 'learner:ask:completed') {
+      if (type === 'learner:ask:completed' || type === 'learner:query:completed') {
         if (data.usage) {
           trackUsage(configuredModels.primary, 'query', data.usage, data.learnerId)
+        }
+        if (data.learnerId && data.confidence !== undefined) {
+          const m = ensureLearnerMetrics(data.learnerId)
+          m.queryConfidences.push(data.confidence)
+          if (m.queryConfidences.length > 10) m.queryConfidences.shift()
         }
       }
 
@@ -2292,26 +3169,7 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
     }
 
     function logEvent(type, data) {
-      const time = new Date().toLocaleTimeString('en-US', { hour12: false })
-      const el = document.createElement('div')
-      el.className = 'event'
-
-      let dataStr = ''
-      if (data && Object.keys(data).length > 0) {
-        dataStr = JSON.stringify(data).slice(0, 150)
-        if (JSON.stringify(data).length > 150) dataStr += '...'
-      }
-
-      el.innerHTML = `
-        <span class="event-time">${time}</span>
-        <span class="event-type">${type.split(':').pop()}</span>
-        ${dataStr ? `<span class="event-data">${dataStr}</span>` : ''}
-      `
-
-      eventLog.insertBefore(el, eventLog.firstChild)
-      while (eventLog.children.length > 50) {
-        eventLog.removeChild(eventLog.lastChild)
-      }
+      // Events are logged to server terminal; no UI panel needed
     }
 
     // --- API Calls ---
@@ -2319,6 +3177,7 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
       initBtn.disabled = true
       initBtn.innerHTML = '<span class="spinner"></span>Initializing...'
       learnerStates = {}
+      learnerMetrics = {}
 
       try {
         const res = await fetch('/brain/init', {
@@ -2336,7 +3195,13 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
             batchSize: parseInt(batchSize.value),
             maxObservations: parseInt(maxObservations.value),
             minImportance: parseFloat(minImportance.value),
-            queryMethod: queryMethod.value
+            queryMethod: queryMethod.value,
+            maintenanceMaxTokens: parseInt(maintenanceMaxTokens.value),
+            evolution: {
+              enabled: evolutionEnabled.checked,
+              autoEvaluate: autoEvaluate.checked,
+              evaluatorSignalThreshold: parseInt(signalThreshold.value),
+            }
           })
         })
 
@@ -2413,10 +3278,12 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
       const query = queryInput.value.trim()
       if (!query) return
 
-      addMessage('user', query)
       queryInput.value = ''
       askBtn.disabled = true
       askBtn.innerHTML = '<span class="spinner"></span>'
+
+      // Create Q&A card with loading state
+      const card = createQACard(query)
 
       // Build request with options
       const requestBody = { query }
@@ -2432,34 +3299,43 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
 
         const data = await res.json()
         if (res.ok) {
-          addMessage('assistant', data.insight, data.sources)
+          updateQACard(card, data.insight, data.sources)
         } else {
-          addMessage('assistant', 'Error: ' + data.error)
+          updateQACard(card, 'Error: ' + data.error, [])
         }
       } catch (err) {
-        addMessage('assistant', 'Error: ' + err.message)
+        updateQACard(card, 'Error: ' + err.message, [])
       } finally {
         askBtn.disabled = false
         askBtn.textContent = 'Ask'
       }
     }
 
-    function addMessage(type, content, sources = []) {
-      const empty = chatArea.querySelector('.empty-state')
+    function createQACard(question) {
+      const empty = qaList.querySelector('.qa-empty')
       if (empty) empty.remove()
 
-      const el = document.createElement('div')
-      el.className = 'message ' + type
+      const card = document.createElement('div')
+      card.className = 'qa-card'
+      card.innerHTML = `
+        <div class="qa-question">${escapeHtml(question)}</div>
+        <div class="qa-answer loading"><span class="spinner"></span> Thinking...</div>
+      `
+      qaList.insertBefore(card, qaList.firstChild)
+      return card
+    }
 
-      let sourcesHtml = ''
+    function updateQACard(card, answer, sources = []) {
+      const answerEl = card.querySelector('.qa-answer')
+      answerEl.classList.remove('loading')
+      answerEl.textContent = answer
+
       if (sources.length > 0) {
-        sourcesHtml = `<div class="sources">Sources: ${sources.map(s => s.learnerId).join(', ')}</div>`
+        const srcEl = document.createElement('div')
+        srcEl.className = 'qa-sources'
+        srcEl.textContent = 'Sources: ' + sources.map(s => s.learnerId).join(', ')
+        card.appendChild(srcEl)
       }
-
-      // Properly escape HTML and preserve whitespace/line breaks
-      el.innerHTML = `<div class="message-content">${escapeHtml(content)}</div>${sourcesHtml}`
-      chatArea.appendChild(el)
-      chatArea.scrollTop = chatArea.scrollHeight
     }
 
     // --- Learners UI ---
@@ -2475,8 +3351,29 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
         initBtn.disabled = true
         initBtn.textContent = 'Initialized'
         initBtn.classList.add('secondary')
+        updateBrainBtn.style.display = ''
+        addLearnerBtn.style.display = ''
+        queryInput.disabled = false
+        askBtn.disabled = false
+
+        // Populate brain-level config from status
+        if (data.prompt) brainPrompt.value = data.prompt
+        if (data.evolution) {
+          evolutionEnabled.checked = data.evolution.enabled !== false
+          autoEvaluate.checked = data.evolution.autoEvaluate !== false
+          if (data.evolution.evaluatorSignalThreshold) signalThreshold.value = data.evolution.evaluatorSignalThreshold
+        }
+
+        // Snapshot if not already done
+        if (!lastBrainConfig) lastBrainConfig = snapshotBrainConfig()
 
         learnerCount.textContent = data.learners.length
+
+        // Remove learners no longer present (after evolution deletes)
+        const currentIds = new Set(data.learners.map(l => l.id))
+        Object.keys(learnerStates).forEach(id => {
+          if (!currentIds.has(id)) delete learnerStates[id]
+        })
 
         data.learners.forEach(l => {
           if (!learnerStates[l.id]) {
@@ -2514,8 +3411,94 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
 
         const understanding = data.understanding || 'No understanding yet'
         const bufferCount = data.buffer?.count || 0
+        const bufferTokens = data.buffer?.totalTokens || 0
         const bufferObservations = data.bufferObservations || []
         const evolutionCount = data.evolution?.length || 0
+        const thresholds = data.synthesizeThresholds || {}
+        const maxObs = thresholds.maxObservations || 10
+        const maxTokens = thresholds.maxTokens || 8000
+
+        // Synthesis stats — always visible
+        const minImp = thresholds.minImportance ?? 0.5
+        const avgImp = data.buffer?.avgImportance ?? 0
+        const obsPct = Math.min(100, (bufferCount / maxObs) * 100)
+        const tokPct = Math.min(100, (bufferTokens / maxTokens) * 100)
+        const synthPct = Math.max(obsPct, tokPct)
+
+        let synthStatusText = ''
+        let synthStatusClass = ''
+        if (state.status === 'synthesizing') {
+          synthStatusText = 'Synthesizing...'
+          synthStatusClass = 'synthesizing'
+        } else if (synthPct >= 100) {
+          synthStatusText = 'Ready to synthesize'
+          synthStatusClass = 'ready'
+        } else if (bufferCount === 0) {
+          synthStatusText = 'Waiting for data'
+          synthStatusClass = 'idle'
+        } else {
+          synthStatusText = 'Buffering'
+          synthStatusClass = 'buffering'
+        }
+
+        const synthProgressHtml = `
+          <div class="synth-stats">
+            <div class="synth-stats-row">
+              <span class="synth-status-label ${synthStatusClass}">${synthStatusText}</span>
+            </div>
+            <div class="synth-bar-row">
+              <div class="synth-progress-bar">
+                <div class="synth-progress-fill" style="width:${obsPct}%"></div>
+              </div>
+              <span class="synth-bar-label">${bufferCount}/${maxObs} obs</span>
+            </div>
+            <div class="synth-bar-row">
+              <div class="synth-progress-bar">
+                <div class="synth-progress-fill tok" style="width:${tokPct}%"></div>
+              </div>
+              <span class="synth-bar-label">${bufferTokens}/${maxTokens} tok</span>
+            </div>
+            <div class="synth-meta-row">
+              <span>min importance: ${minImp}</span>
+              <span>avg: ${avgImp.toFixed(2)}</span>
+              <span>strategy: ${data.maintenance?.strategy || '—'}</span>
+            </div>
+          </div>`
+
+        // Signal metrics — computed client-side from SSE events
+        const metrics = learnerMetrics[id] || { observations: 0, dismissals: 0, syntheses: 0, lastSynthesisObs: 0, queryConfidences: [] }
+        const sigThresholds = data.governance?.signalThresholds || { maxDismissalRate: 0.8, minConfidence: 0.3, maxObservationsWithoutSynthesis: 100 }
+        const dismissalRate = metrics.observations > 0 ? metrics.dismissals / metrics.observations : 0
+        const obsSinceSynth = metrics.observations - metrics.lastSynthesisObs
+        const avgConf = metrics.queryConfidences.length > 0
+          ? metrics.queryConfidences.reduce((a, b) => a + b, 0) / metrics.queryConfidences.length : null
+
+        const drPct = Math.min(100, (dismissalRate / sigThresholds.maxDismissalRate) * 100)
+        const drClass = drPct >= 100 ? 'danger' : drPct >= 70 ? 'warn' : ''
+        const stPct = Math.min(100, (obsSinceSynth / sigThresholds.maxObservationsWithoutSynthesis) * 100)
+        const stClass = stPct >= 100 ? 'danger' : stPct >= 70 ? 'warn' : ''
+        const confPct = avgConf !== null ? Math.min(100, ((1 - avgConf) / (1 - sigThresholds.minConfidence)) * 100) : 0
+        const confClass = confPct >= 100 ? 'danger' : confPct >= 70 ? 'warn' : ''
+
+        const signalMetricsHtml = `
+          <div class="signal-metrics">
+            <div class="signal-metrics-title">Signals</div>
+            <div class="signal-row">
+              <span class="signal-label">dismissals</span>
+              <div class="signal-bar"><div class="signal-fill ${drClass}" style="width:${drPct}%"></div></div>
+              <span class="signal-value ${drClass}">${(dismissalRate * 100).toFixed(0)}%/${(sigThresholds.maxDismissalRate * 100).toFixed(0)}%</span>
+            </div>
+            <div class="signal-row">
+              <span class="signal-label">stagnation</span>
+              <div class="signal-bar"><div class="signal-fill ${stClass}" style="width:${stPct}%"></div></div>
+              <span class="signal-value ${stClass}">${obsSinceSynth}/${sigThresholds.maxObservationsWithoutSynthesis}</span>
+            </div>
+            <div class="signal-row">
+              <span class="signal-label">confidence</span>
+              <div class="signal-bar"><div class="signal-fill ${confClass}" style="width:${confPct}%"></div></div>
+              <span class="signal-value ${confClass}">${avgConf !== null ? avgConf.toFixed(2) : '—'}/${sigThresholds.minConfidence}</span>
+            </div>
+          </div>`
 
         // Build observations HTML (use recentObservations from UI state, fallback to buffer)
         const recentObs = state.recentObservations || []
@@ -2555,15 +3538,19 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
           `
         }
 
+        const displayName = data.name || id
+
         card.innerHTML = `
           <div class="learner-card-header">
-            <h3>${id}</h3>
+            <h3 title="${escapeHtml(id)}">${escapeHtml(displayName)}</h3>
             <div class="learner-header-right">
               <span class="learner-stat-badge">${evolutionCount} updates</span>
               <span class="learner-status ${state.status}">${state.status}</span>
             </div>
           </div>
           <div class="learner-card-body">
+            ${synthProgressHtml}
+            ${signalMetricsHtml}
             ${observationsHtml}
             ${synthesisHtml}
             <div class="learner-understanding-preview">
@@ -2579,11 +3566,17 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
     }
 
     async function openLearnerModal(learnerId) {
+      currentModalLearnerId = learnerId
       const state = learnerStates[learnerId]
       const data = state?.data || {}
 
-      document.getElementById('modalTitle').textContent = learnerId
-      document.getElementById('modalInstructions').textContent = data.instructions || 'N/A'
+      document.getElementById('modalTitle').textContent = data.name || learnerId
+
+      // Editable fields
+      document.getElementById('modalName').value = data.name || ''
+      document.getElementById('modalDescription').value = data.description || ''
+      document.getElementById('modalInstructions').value = data.instructions || ''
+
       document.getElementById('modalStatus').textContent = JSON.stringify(data.governance || {}, null, 2)
 
       // Format buffer observations nicely
@@ -2602,10 +3595,27 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
       document.getElementById('modalUnderstanding').textContent = data.understanding || 'No understanding yet'
       document.getElementById('modalObservePrompt').textContent = data.observePrompt || 'Not initialized yet'
       document.getElementById('modalSynthesizePrompt').textContent = data.synthesizePrompt || 'Not initialized yet'
+
+      // Settings tab
+      const thresholds = data.synthesizeThresholds || {}
+      document.getElementById('modalMaxObservations').value = thresholds.maxObservations || 10
+      document.getElementById('modalMinImportance').value = thresholds.minImportance || 0.3
+      document.getElementById('modalMaintenanceStrategy').value = data.maintenance?.strategy || 'continuous'
+      document.getElementById('modalQueryMethod').value = data.queryMethod || 'direct'
+      // Signal thresholds
+      const sigThresh = data.governance?.signalThresholds || {}
+      document.getElementById('modalMaxDismissalRate').value = sigThresh.maxDismissalRate ?? 0.8
+      document.getElementById('modalMinConfidence').value = sigThresh.minConfidence ?? 0.3
+      document.getElementById('modalMaxObsWithoutSynth').value = sigThresh.maxObservationsWithoutSynthesis ?? 100
+
+      // Config tab (read-only dump)
       document.getElementById('modalConfig').textContent = JSON.stringify({
         id: data.id,
+        name: data.name,
+        description: data.description,
         instructions: data.instructions,
         maintenance: data.maintenance,
+        synthesizeThresholds: data.synthesizeThresholds,
         queryMethod: data.queryMethod,
         governance: data.governance,
         buffer: data.buffer
@@ -2814,6 +3824,9 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
     textInput.addEventListener('input', updateInjectButtonState)
 
     initBtn.addEventListener('click', initBrain)
+    updateBrainBtn.addEventListener('click', updateBrain)
+    saveOverviewBtn.addEventListener('click', saveLearnerOverview)
+    saveSettingsBtn.addEventListener('click', saveLearnerSettings)
     projectSelect.addEventListener('change', (e) => {
       currentProject = e.target.value
       if (currentProject) loadSessions(currentProject)
@@ -2825,6 +3838,17 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
     })
     queryTempSlider.addEventListener('input', (e) => {
       tempValueDisplay.textContent = e.target.value
+    })
+
+    // --- Collapsible Sidebar Sections ---
+    document.querySelectorAll('.collapsible-toggle').forEach(el => {
+      el.addEventListener('click', () => {
+        const target = document.getElementById(el.dataset.target)
+        if (!target) return
+        const chevron = el.querySelector('.section-chevron')
+        const isCollapsed = target.classList.toggle('collapsed')
+        if (chevron) chevron.innerHTML = isCollapsed ? '&#9656;' : '&#9662;'
+      })
     })
 
     // --- Init ---

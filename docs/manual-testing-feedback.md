@@ -142,3 +142,160 @@ Observations from manual testing sessions of the Brain Monitor UI.
   - (a) Pass the user's query verbatim as a strong instruction, with explicit "match the requested format" guidance
   - (b) Add a "conciseness" parameter that constrains response length
   - (c) Let the ask agent see the raw query first and plan its response format before synthesizing
+
+---
+
+## Session 4 — 2026-02-16 (governance blind spot investigation)
+
+**Setup:** 4 learners (problem-solving-patterns, interaction-preferences, sentiment-and-frustration, project-interest-focus). All have 6-8 evolution updates. Repeated queries testing out-of-scope detection.
+
+### Observations
+
+#### 22. Signal system has a critical blind spot: confidence=1.0 on "I can't help" responses
+
+- **Severity:** Critical — governance gap
+- **Details:** Asked "tell me a joke about him" 6+ times. Every learner returns `confidence: 1.0` with `relevant: false`. The learners are 100% confident they *cannot* help — but the signal system interprets this as "everything is fine" because it checks `avg confidence < 0.3` to trigger a low-confidence signal.
+- **Verified via API:** Raw SSE `learner:query:completed` events show `"confidence":1` for all 4 learners on every joke query. The signal threshold (`minConfidence: 0.3`) will never fire because confidence never drops below 1.0.
+- **Root cause:** The LLM interprets the confidence field as "how sure am I about my response" rather than "how well could I answer the user's question." When a learner is certain it can't help, it reports maximum confidence in that assessment.
+- **Impact:** The brain cannot detect when users are repeatedly asking things no learner can handle. No signal fires, no evolution is triggered, no new learner is suggested.
+- **Possible fixes:**
+  - (a) Track `relevant: false` rate separately — if >N queries return `relevant: false` from all learners, emit a "coverage gap" signal
+  - (b) Redefine confidence in the query schema to mean "how well could you answer the user's actual question" (requires prompt change)
+  - (c) Add a brain-level signal that fires when `sources.length === 0` repeatedly (the synthesis agent already filters to relevant-only sources)
+
+#### 23. `successRate` governance field is dead code
+
+- **Severity:** Medium — misleading metric
+- **Details:** `successRate` is defined in `src/learners/types.ts` as "responses that were useful", initialized to 0 in the learner constructor, read by the evaluator/evolution prompts, but **never written to anywhere in the codebase**. All learners show `successRate: 0` permanently.
+- **Verified via API:** All 4 learners report `successRate: 0` despite 16 queries each (`retrievalCount: 16`).
+- **Impact:** The evaluator LLM sees "Success Rate: 0.0%" for every learner in its context, which could mislead evolution decisions. It's either noise or actively harmful.
+- **Fix:** Either implement `successRate` tracking (increment when `relevant: true` and confidence > threshold) or remove the field entirely.
+
+#### 24. Query gaps accumulate but are never tracked or surfaced
+
+- **Severity:** Medium — missed signal source
+- **Details:** Every `learner:query:completed` event includes a `gaps` array describing what the learner couldn't answer. The `brain.ask()` response includes aggregated `gaps` from all learners. But these gaps are:
+  - Not tracked over time
+  - Not fed into the signal/evolution system
+  - Not shown in the UI
+  - Not counted or categorized
+- **Example gaps from joke query:** "The query asks for a joke, which falls outside my defined purpose", "I lack any instruction or context to generate a joke", "The query demands novel content generation which is outside my defined purpose"
+- **Opportunity:** Gap accumulation is a natural signal for evolution. If the same category of gap appears across multiple queries, the brain should recognize a coverage hole and potentially create a new learner or broaden an existing one.
+
+#### 25. Learners explain why they can't help instead of just saying no
+
+- **Severity:** Low — but affects response quality
+- **Details:** When asked "tell me a joke", each learner writes a 50-100 word essay explaining its purpose and why jokes are outside its scope. The synthesis agent then summarizes all four essays into "No learner had relevant information." This burns ~25k tokens across 4 learners just to say "no."
+- **Root cause:** The query prompt doesn't instruct learners to be brief when irrelevant. The `insight` field gets filled with lengthy self-descriptions even when `relevant: false`.
+- **Possible fix:** Add to query prompt: "If the query is outside your scope, set relevant to false and keep insight brief (1 sentence max)."
+
+### Governance Metrics Summary (from live API)
+
+| Learner | retrievalCount | successRate | activation | dismissalRate | buffer |
+|---|---|---|---|---|---|
+| problem-solving-patterns | 16 | 0 (dead) | 0.83 | — | 1 |
+| interaction-preferences | 16 | 0 (dead) | 0.83 | — | 0 |
+| sentiment-and-frustration | 16 | 0 (dead) | 0.74 | — | 1 |
+| project-interest-focus | 16 | 0 (dead) | 0.79 | — | 7 |
+
+### Signal System Coverage Map
+
+| Condition | Tracked? | Fires signal? | Working? |
+|---|---|---|---|
+| High dismissal rate (>80% obs dismissed) | Yes | Yes | Untested (rate is ~8-27%) |
+| Low confidence (<0.3 avg over 5+ queries) | Yes | Yes | **Broken** — confidence is always 1.0 even on failures |
+| Stagnation (>100 obs without synthesis) | Yes | Yes | Untested (haven't hit 100 obs) |
+| Query relevance failures (all learners return relevant:false) | **No** | **No** | N/A — not implemented |
+| Repeated identical/similar queries | **No** | **No** | N/A — not implemented |
+| Gap accumulation (what can't be answered) | **No** | **No** | N/A — not implemented |
+| Success rate tracking | **Dead code** | No | Field exists but never updated |
+
+---
+
+## Session 5 — 2026-02-16 (signal path & evaluator verification)
+
+**Setup:** Same brain, 4 learners. All have 8+ evolutions, 60-80 total observations. Server running at localhost:3210. Ran targeted API tests.
+
+### Observations
+
+#### 26. In-scope queries produce LOWER confidence than out-of-scope
+
+- **Severity:** Critical — inverts the signal model
+- **Details:** Fired "What are my main problem-solving patterns?" and "What frustrates me the most during development?" — learner confidence values:
+
+| Learner | In-scope confidence | Out-of-scope confidence |
+|---|---|---|
+| interaction-preferences | 0.98 | 1.0 |
+| sentiment-and-frustration | 0.95 | 1.0 |
+| problem-solving-patterns | 0.85 | 1.0 |
+| project-interest-focus | 0.70 | 1.0 |
+
+- **Implication:** The LLM interprets confidence as "certainty about my response." When uncertain about nuanced topics it hedges (0.70-0.98), but when certain it can't help it reports 1.0. The confidence signal (<0.3 threshold) is theoretically designed to catch struggling learners, but the inversion means truly relevant queries are more likely to trigger it than irrelevant ones.
+- **Root cause:** Same as #22 — confidence semantics are inverted from the signal system's assumptions.
+
+#### 27. Dismissal tracking works but is invisible via API
+
+- **Severity:** Medium — observability gap
+- **Details:** Injected 3 completely irrelevant items (chocolate cake recipe, basketball scores, cat description). All 4 learners correctly dismissed all items (4x `learner:observe:dismissed` SSE events). However:
+  - `dismissalCount` and `observationCount` are private fields on the learner class
+  - `getGovernance()` returns the governance object but NOT these counters
+  - The `/brain/status` endpoint has no way to report current dismissal rate
+  - Signal only fires after >10 observations AND >80% dismissal rate
+- **Impact:** Can't monitor dismissal rate trending. The signal is opaque until it fires.
+- **Possible fix:** Expose `dismissalCount`, `observationCount`, and current `dismissalRate` in `getGovernance()` or a separate `getSignalMetrics()` method.
+
+#### 28. Activation only changes on synthesis, not queries or dismissals
+
+- **Severity:** Low — design question
+- **Details:** Fired 2 in-scope queries (retrievalCount went 17→19) and 1 batch injection (all dismissed). Activation values were unchanged for all 4 learners. Activation uses EMA: `activation = activation * 0.8 + relevance * 0.2`, but `updateGovernance()` is only called after synthesis (with `relevance = 1.0`).
+- **Implication:** Activation only goes up (on synthesis) and slowly decays to zero if no synthesis occurs. Queries and dismissals don't affect it. A learner that answers many queries successfully won't increase its activation — only data ingestion that triggers synthesis matters.
+
+#### 29. Auto-evaluate generates decisions but NEVER executes them
+
+- **Severity:** Critical — evolution pipeline is broken for auto-triggered signals
+- **Details:** Manually sent 3 signals via `POST /brain/signal`. At threshold (3), the evaluator auto-triggered:
+  - `evaluator:evaluation:started` fired ✓
+  - `evaluator:evaluation:completed` fired with 3 "update" decisions ✓
+  - Decisions targeted specific learners with detailed reasoning ✓
+  - **But NO evolution execution events fired** — decisions were generated then discarded
+- **Root cause:** The `evaluator.signal()` method (line 53 of evaluator/class.ts) calls `this.evaluate()` — the evaluator's own method that returns decisions. It does NOT call `brain.evaluateEvolution()` which is the brain-level method that runs evaluate + execute via `executeEvolutionDecisions()`. The auto-evaluate path and the manual `brain.evaluateEvolution()` path are disconnected.
+- **Code path comparison:**
+  - Manual: `brain.evaluateEvolution()` → `evaluator.evaluate()` → `brain.executeEvolutionDecisions(decisions)` ✓
+  - Auto: `evaluator.signal()` → `evaluator.evaluate()` → decisions emitted as event → discarded ✗
+- **Impact:** Even if signals did fire correctly, nothing would change. The evolution system can only act through explicit `brain.evaluateEvolution()` or `brain.update()` calls.
+- **Possible fix:** In `evaluator.signal()`, call `brain.evaluateEvolution()` instead of `this.evaluate()`, or have the auto-evaluate path forward decisions to the brain for execution.
+
+#### 30. Signal counters are in-memory and not persisted
+
+- **Severity:** Low — but affects testing
+- **Details:** `dismissalCount`, `observationCount`, `queryConfidences[]`, and `lastSynthesisObservationCount` are all private instance fields initialized to 0 on construction. They reset on server restart. There's no persistence layer for signal tracking state.
+- **Implication:** If the server restarts, all signal accumulation is lost. A learner that was 9/10 observations toward triggering a dismissal signal starts at 0/0 again.
+
+#### 31. Evaluator decisions are well-reasoned when they fire
+
+- **Status:** Working well
+- **Details:** The evaluator produced 3 update decisions from 3 signals. Each decision included:
+  - Specific `action: "update"` with `targets: [learnerId]`
+  - Multi-sentence `reasoning` explaining the diagnosis
+  - Detailed `guidance` for how to update the learner
+  - Cross-referencing between signals (noted correlation between frustration learner's understanding and interaction-preferences stagnation)
+- **Quality:** The evaluator correctly identified that the "coverage gap" for humor/entertainment was intentional given the brain's development-focused purpose, rather than treating it as a problem.
+
+#### 32. Stagnation threshold is too high for practical testing
+
+- **Severity:** Low — tuning issue
+- **Details:** Default `maxObservationsWithoutSynthesis: 100`. With `maxObservations: 10` (synthesis trigger), a learner would need to dismiss 100 consecutive items without any single item being accepted. Given that our learners accept at least some items per batch, this threshold is practically unreachable.
+- **Math:** If dismissal rate is 50%, you'd expect ~50 accepted observations in 100, triggering ~5 synthesis cycles. To actually hit stagnation, dismissal rate would need to be ~100% for 100+ observations.
+
+### Updated Signal System Coverage Map
+
+| Condition | Tracked? | Fires signal? | Working? | Auto-executes? |
+|---|---|---|---|---|
+| High dismissal rate (>80% obs dismissed, >10 obs) | Yes (in-memory) | Yes | Likely works but rate too low to test | **No** — decisions discarded |
+| Low confidence (<0.3 avg over 5+ queries) | Yes (in-memory) | Yes | **Broken** — confidence inverted (1.0 on failures) | **No** — decisions discarded |
+| Stagnation (>100 obs without synthesis) | Yes (in-memory) | Yes | Threshold too high to practically trigger | **No** — decisions discarded |
+| Auto-evaluate → execute pipeline | N/A | N/A | **Broken** — evaluate runs but decisions never executed | **No** |
+| Query relevance failures (all relevant:false) | **No** | **No** | N/A — not implemented | N/A |
+| Gap accumulation | **No** | **No** | N/A — not implemented | N/A |
+| Success rate | **Dead code** | No | Field never updated | N/A |
+| Signal counters (dismissal, observation, confidence) | In-memory only | N/A | Not exposed via API, not persisted | N/A |

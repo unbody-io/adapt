@@ -30,7 +30,6 @@ export interface LearnerGovernance {
 		minRelevance: number // Default: 0.3 - alert when query relevance falls below this
 		minConfidence: number // Default: 0.3 - alert when query confidence falls below this
 		maxObservationsWithoutSynthesis: number // Default: 3 * maxObservations
-		minGapCount: number // Default: 10 - alert when accumulated gaps exceed this
 	}
 }
 

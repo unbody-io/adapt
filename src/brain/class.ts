@@ -336,9 +336,14 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 		try {
 			const learnerArray = this.getLearners()
 
+			// Skip learners with no understanding and no buffered observations
+			const queryableLearners = learnerArray.filter((l) => {
+				return !!l.getUnderstanding() || l.getBufferState().count > 0
+			})
+
 			// Query all learners in parallel
 			const learnerResults = await Promise.all(
-				learnerArray.map(async (learner) => {
+				queryableLearners.map(async (learner) => {
 					const result = await learner.query(query, options)
 					return {
 						learnerId: learner.id,

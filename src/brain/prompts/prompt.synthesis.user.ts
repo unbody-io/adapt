@@ -3,34 +3,30 @@ import type { LearnerResponse } from '../types'
 /**
  * User prompt for brain synthesis
  *
- * Provides the query and learner responses.
+ * Presents learner responses as anonymous knowledge sections
+ * with relevance and confidence labels for weighting.
  */
 export function buildSynthesisUserPrompt(
 	query: string,
 	responses: LearnerResponse[],
 ): string {
 	const relevant = responses.filter((r) => r.relevant)
-	const irrelevant = responses.filter((r) => !r.relevant)
 
-	const responsesText =
-		relevant.length > 0
-			? relevant
-					.map(
-						(r) =>
-							`[${r.name}] (confidence: ${(r.confidence * 100).toFixed(0)}%)
+	let knowledgeText: string
+	if (relevant.length > 0) {
+		knowledgeText = relevant
+			.map(
+				(r) =>
+					`KNOWLEDGE (relevance: ${(r.relevance * 100).toFixed(0)}%, confidence: ${(r.confidence * 100).toFixed(0)}%):
 ${r.insight}${r.gaps.length > 0 ? `\nGaps: ${r.gaps.join(', ')}` : ''}`,
-					)
-					.join('\n\n')
-			: '(No learners had relevant insights)'
-
-	const irrelevantText =
-		irrelevant.length > 0
-			? `\nLearners without relevant info: ${irrelevant.map((r) => r.name).join(', ')}`
-			: ''
+			)
+			.join('\n\n')
+	} else {
+		knowledgeText = '(No relevant knowledge available)'
+	}
 
 	return `QUESTION:
 ${query}
 
-LEARNER RESPONSES:
-${responsesText}${irrelevantText}`
+${knowledgeText}`
 }

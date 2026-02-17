@@ -107,7 +107,6 @@ export class TextLearner
 				minConfidence: 0.3,
 				maxObservationsWithoutSynthesis:
 					3 * (this.config.synthesize.thresholds.maxObservations ?? 10),
-				minGapCount: 10,
 				...rawConfig.governance?.signalThresholds,
 			},
 		}
@@ -703,12 +702,43 @@ export class TextLearner
 			query: question,
 		})
 
+		// Short-circuit if learner has no knowledge at all
+		if (!this.understanding && this.getBufferState().count === 0) {
+			const emptyResult: QueryResult = {
+				relevant: false,
+				relevance: 0,
+				confidence: 0,
+				insight: '',
+				gaps: '',
+				usage: { inputTokens: 0, outputTokens: 0, totalTokens: 0 },
+			}
+			this.emit('learner:query:completed', {
+				learnerId: this.id,
+				insight: '',
+				relevant: false,
+				relevance: 0,
+				confidence: 0,
+				gaps: [],
+				usage: emptyResult.usage,
+			})
+			return emptyResult
+		}
+
+		// Use buffered observations as fallback when understanding is empty
+		let knowledge = this.understanding
+		if (!knowledge) {
+			const observations = this.getBufferedObservations()
+			knowledge =
+				'Note: This knowledge has not been synthesized yet. These are raw observations.\n\n---\n' +
+				observations.map((obs) => obs.text).join('\n---\n')
+		}
+
 		try {
 			const result = await this._queryMethod.query(
 				{
 					learnerId: this.id,
 					instructions: this.instructions,
-					understanding: this.understanding,
+					understanding: knowledge,
 					question,
 				},
 				options,
@@ -903,15 +933,5 @@ export class TextLearner
 			})
 		}
 
-		// Check gap accumulation
-		if (query.gaps.length >= signalThresholds.minGapCount) {
-			this.emit('learner:signal', {
-				learnerId: this.id,
-				description: `Knowledge gaps accumulating: ${query.gaps.length} gaps recorded. Recent: ${query.gaps.slice(-5).join('; ')}`,
-				timestamp: new Date(),
-				metrics: { gapCount: query.gaps.length },
-			})
-			this.metrics.query.gaps = []
-		}
 	}
 }

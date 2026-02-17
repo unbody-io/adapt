@@ -13,7 +13,7 @@
 4. [Fix: Metrics Restructure](#4-fix-metrics-restructure)
 5. [Fix: Stagnation Threshold](#5-fix-stagnation-threshold)
 6. [New: Brain-Level Coverage Gap Signal](#6-new-brain-level-coverage-gap-signal)
-7. [New: Learner-Level Gap Accumulation Signal](#7-new-learner-level-gap-accumulation-signal)
+7. [~~Learner-Level Gap Accumulation Signal~~ (Removed)](#7-learner-level-gap-accumulation-signal-removed)
 8. [Removal: Dead successRate Field](#8-removal-dead-successrate-field)
 9. [Updated Signal System Summary](#9-updated-signal-system-summary)
 10. [Implementation Order](#10-implementation-order)
@@ -410,55 +410,17 @@ interface EvolutionConfig {
 
 ---
 
-## 7. New: Learner-Level Gap Accumulation Signal
+## 7. ~~Learner-Level Gap Accumulation Signal~~ (Removed)
 
-### Problem
-
-Every query response includes a `gaps` array describing what the learner couldn't answer. These gaps are returned but never tracked over time or fed into evolution.
-
-### Solution
-
-Each learner accumulates gaps in `metrics.query.gaps`. When gaps accumulate past a threshold, emit a signal with the accumulated gaps for the evaluator to analyze.
-
-### Design
-
-**Tracking (in TextLearner, after each query):**
-
-```typescript
-if (result.gaps && result.gaps.length > 0) {
-  this.metrics.query.gaps.push(...result.gaps)
-
-  // Cap at reasonable size
-  if (this.metrics.query.gaps.length > 50) {
-    this.metrics.query.gaps = this.metrics.query.gaps.slice(-50)
-  }
-}
-```
-
-**Signal emission (in `checkAndEmitSignals()`):**
-
-```typescript
-// Check gap accumulation
-if (this.metrics.query.gaps.length >= this.governance.signalThresholds.minGapCount) {
-  this.emit('learner:signal', {
-    learnerId: this.id,
-    description: `Knowledge gaps accumulating: ${this.metrics.query.gaps.length} gaps recorded. Recent gaps: ${this.metrics.query.gaps.slice(-5).join('; ')}`,
-    timestamp: new Date(),
-    metrics: { gapCount: this.metrics.query.gaps.length },
-  })
-  // Reset after signaling
-  this.metrics.query.gaps = []
-}
-```
-
-**Threshold config:**
-
-```typescript
-signalThresholds: {
-  // ... existing
-  minGapCount: number    // Default: 10 — emit signal after this many gaps accumulated
-}
-```
+> **Status:** Removed after manual testing (session 5+). The learner-level gap signal fired based on query volume rather than learner health — every out-of-scope query adds gaps to every learner, so the count correlated with "how many queries happened" not "this learner needs evolution."
+>
+> **What was kept:**
+> - `metrics.query.gaps` tracking (capped at `MAX_GAPS`) — useful for observability
+> - Brain-level `checkCoverageGap()` (section 6) — correctly detects system-wide blind spots
+>
+> **What was removed:**
+> - Gap accumulation check in `checkAndEmitSignals()`
+> - `minGapCount` from `signalThresholds`
 
 ---
 
@@ -489,7 +451,6 @@ With the new `relevance` and `confidence` split, plus gap accumulation, success 
 | Low relevance | `metrics.query.relevanceScores` avg | `< minRelevance` over 5+ queries | 0.3 | Queries aren't in learner's domain |
 | Low confidence | `metrics.query.confidenceScores` avg | `< minConfidence` over 5+ queries | 0.3 | Learner has knowledge gaps in its domain |
 | Stagnation | `metrics.ingestion.observationsSinceLastSynthesis` | `> maxObservationsWithoutSynthesis` | `3 * maxObservations` | Understanding plateaued |
-| Gap accumulation | `metrics.query.gaps.length` | `>= minGapCount` | 10 | Learner can't answer specific topics |
 
 ### Brain-Level Signals
 
@@ -523,7 +484,7 @@ Suggested order based on dependencies:
 3. **Confidence split** (section 2) — requires metrics in place
 4. **Auto-evaluate fix** (section 3) — independent, can parallel with 2-3
 5. **Stagnation threshold** (section 5) — small, independent
-6. **Gap accumulation signal** (section 7) — requires metrics.query.gaps
+6. ~~**Gap accumulation signal** (section 7)~~ — removed, see section 7
 7. **Coverage gap signal** (section 6) — requires relevance field from step 3
 
 ---

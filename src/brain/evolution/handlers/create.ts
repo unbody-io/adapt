@@ -49,7 +49,7 @@ export class CreateHandler extends EvolutionActionHandler<CreateActionResult> {
 			for (const decision of decisions) {
 				this.emitActionFailed(decision, err)
 			}
-			throw new Error(`Create action failed: ${err.message}`)
+			return { newLearnerIds: [] }
 		}
 	}
 }

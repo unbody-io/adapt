@@ -27,6 +27,7 @@ const MAX_EVALUATION_STEPS = 10
 
 export class Evaluator extends TypedEmitter<EvaluatorEventMap> {
 	private signals: Signal[] = []
+	private isEvaluating = false
 	private readonly threshold: number
 	private readonly brain: Brain
 	includeUnderstanding = true
@@ -43,18 +44,24 @@ export class Evaluator extends TypedEmitter<EvaluatorEventMap> {
 	signal(signal: Signal): void {
 		this.signals.push(signal)
 
+		if (this.isEvaluating) return
+
 		// Auto-evaluate: bypass signals trigger immediately, otherwise wait for threshold
 		if (
 			signal.bypass ||
 			(this.signals.length >= this.threshold &&
 			this.brain.config.evolution.autoEvaluate)
 		) {
-			// Fire and forget - don't block signal emission
-			this.evaluate('auto').catch((error) => {
-				this.emit('evaluator:evaluation:failed', {
-					error: error instanceof Error ? error.message : String(error),
+			this.isEvaluating = true
+			this.evaluate('auto')
+				.catch((error) => {
+					this.emit('evaluator:evaluation:failed', {
+						error: error instanceof Error ? error.message : String(error),
+					})
 				})
-			})
+				.finally(() => {
+					this.isEvaluating = false
+				})
 		}
 	}
 

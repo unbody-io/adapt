@@ -46,7 +46,7 @@ export class DeleteHandler extends EvolutionActionHandler<DeleteActionResult> {
 			} catch (error) {
 				const err = error instanceof Error ? error : new Error(String(error))
 				this.emitActionFailed(decision, err)
-				throw new Error(`Delete action failed: ${err.message}`)
+				continue
 			}
 		}
 

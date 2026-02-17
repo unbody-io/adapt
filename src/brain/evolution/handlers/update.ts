@@ -72,7 +72,7 @@ export class UpdateHandler extends EvolutionActionHandler<UpdateActionResult> {
 			} catch (error) {
 				const err = error instanceof Error ? error : new Error(String(error))
 				this.emitActionFailed(decision, err)
-				throw new Error(`Update action failed: ${err.message}`)
+				continue
 			}
 		}
 

@@ -75,7 +75,7 @@ export class MergeHandler extends EvolutionActionHandler<MergeActionResult> {
 			} catch (error) {
 				const err = error instanceof Error ? error : new Error(String(error))
 				this.emitActionFailed(decision, err)
-				throw new Error(`Merge action failed: ${err.message}`)
+				continue
 			}
 		}
 

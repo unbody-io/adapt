@@ -33,11 +33,11 @@ ${learner.instructions}
 **Understanding**:
 ${learner.getUnderstanding() || '(No understanding yet)'}
 
-**Governance Metrics**:
+**Governance**:
 - Activation: ${learner.getGovernance().activation.toFixed(2)}
 - Status: ${learner.getGovernance().status}
-- Retrieval Count: ${learner.getGovernance().retrievalCount}
-- Success Rate: ${(learner.getGovernance().successRate * 100).toFixed(1)}%
+- Query Count: ${learner.getMetrics().query.count}
+- Dismissal Rate: ${(learner.getMetrics().ingestion.dismissalRate * 100).toFixed(1)}%
 
 ---
 

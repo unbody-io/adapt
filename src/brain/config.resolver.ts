@@ -40,6 +40,11 @@ export function resolveBrainConfig(config: BrainConfig): ResolvedBrainConfig {
 				BRAIN_DEFAULTS.evolution.evaluatorSignalThreshold,
 			autoEvaluate:
 				config.evolution?.autoEvaluate ?? BRAIN_DEFAULTS.evolution.autoEvaluate,
+			coverageGap: {
+				relevanceThreshold: config.evolution?.coverageGap?.relevanceThreshold ?? 0.3,
+				gapCountThreshold: config.evolution?.coverageGap?.gapCountThreshold ?? 5,
+				windowSize: config.evolution?.coverageGap?.windowSize ?? 20,
+			},
 		},
 	}
 }

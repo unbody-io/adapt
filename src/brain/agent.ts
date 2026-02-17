@@ -66,6 +66,7 @@ export async function synthesize(
 		.filter((r) => r.relevant)
 		.map((r) => ({
 			learnerId: r.learnerId,
+			relevance: r.relevance,
 			confidence: r.confidence,
 			insight: r.insight,
 		}))

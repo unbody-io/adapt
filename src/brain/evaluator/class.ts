@@ -50,7 +50,7 @@ export class Evaluator extends TypedEmitter<EvaluatorEventMap> {
 			this.brain.config.evolution.autoEvaluate)
 		) {
 			// Fire and forget - don't block signal emission
-			this.evaluate().catch((error) => {
+			this.evaluate('auto').catch((error) => {
 				this.emit('evaluator:evaluation:failed', {
 					error: error instanceof Error ? error.message : String(error),
 				})
@@ -68,7 +68,7 @@ export class Evaluator extends TypedEmitter<EvaluatorEventMap> {
 	 *
 	 * @returns Array of evolution decisions (can be empty)
 	 */
-	async evaluate(): Promise<EvolutionDecision[]> {
+	async evaluate(source: 'auto' | 'manual' = 'manual'): Promise<EvolutionDecision[]> {
 		if (this.signals.length === 0) {
 			return []
 		}
@@ -120,6 +120,7 @@ export class Evaluator extends TypedEmitter<EvaluatorEventMap> {
 			}
 
 			this.emit('evaluator:evaluation:completed', {
+				source,
 				decisionCount: decisions.length,
 				decisions,
 			})
@@ -166,6 +167,7 @@ export class Evaluator extends TypedEmitter<EvaluatorEventMap> {
 			includeUnderstanding: this.includeUnderstanding,
 			learners: Array.from(this.brain.learners.values()).map((learner) => {
 				const governance = learner.getGovernance()
+				const metrics = learner.getMetrics()
 				return {
 					id: learner.id,
 					name: learner.id,
@@ -175,8 +177,13 @@ export class Evaluator extends TypedEmitter<EvaluatorEventMap> {
 						activation: governance.activation,
 						status: governance.status,
 						lastAccessed: governance.lastAccessed,
-						retrievalCount: governance.retrievalCount,
-						successRate: governance.successRate,
+					},
+					metrics: {
+						queryCount: metrics.query.count,
+						dismissalRate: metrics.ingestion.dismissalRate,
+						synthesisCount: metrics.ingestion.synthesisCount,
+						observationsSinceLastSynthesis:
+							metrics.ingestion.observationsSinceLastSynthesis,
 					},
 				}
 			}),

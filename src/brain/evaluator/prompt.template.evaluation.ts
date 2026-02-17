@@ -40,8 +40,9 @@ function classifyKnowledgeSize(chars: number): string {
  */
 const THRESHOLDS = {
 	maxDismissalRate: 0.8,
+	minRelevance: 0.3,
 	minConfidence: 0.3,
-	maxObservationsWithoutSynthesis: 100,
+	maxObservationsWithoutSynthesis: 30,
 }
 
 /**
@@ -58,6 +59,10 @@ function classifySignalSeverity(
 		const val = signal.metrics.dismissalRate
 		const threshold = THRESHOLDS.maxDismissalRate
 		diff = (val - threshold) / threshold
+	} else if (signal.metrics.avgRelevance !== undefined) {
+		const val = signal.metrics.avgRelevance
+		const threshold = THRESHOLDS.minRelevance
+		diff = (threshold - val) / threshold
 	} else if (signal.metrics.avgConfidence !== undefined) {
 		const val = signal.metrics.avgConfidence
 		const threshold = THRESHOLDS.minConfidence
@@ -110,8 +115,9 @@ ${context.learners
 	.map(
 		(l) => `### ${l.id}
 - **Purpose**: ${l.purpose}
-- **Accumulated Knowledge**: ${classifyKnowledgeSize(l.understandingSize)}
-- **Status**: ${l.governance.status}`,
+- **Knowledge**: ${classifyKnowledgeSize(l.understandingSize)}
+- **Status**: ${l.governance.status} (activation: ${l.governance.activation.toFixed(2)})
+- **Queries**: ${l.metrics.queryCount}, **Dismissal Rate**: ${(l.metrics.dismissalRate * 100).toFixed(0)}%, **Syntheses**: ${l.metrics.synthesisCount}`,
 	)
 	.join('\n\n')}`)
 

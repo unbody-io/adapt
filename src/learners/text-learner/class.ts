@@ -5,6 +5,7 @@ import type {
 	Learner,
 	LearnerGovernance,
 	LearnerMetadata,
+	LearnerMetrics,
 } from '../types'
 import { resolveTextLearnerConfig } from './config.resolver'
 import { type LearnOptions, TwoPhaseMethod } from './learning-methods'
@@ -49,11 +50,22 @@ export class TextLearner
 	private _learningMethod: TwoPhaseMethod
 	private _queryMethod: QueryMethod
 
-	// Signal tracking state (Living Brain)
-	private dismissalCount = 0
-	private observationCount = 0
-	private queryConfidences: number[] = []
-	private lastSynthesisObservationCount = 0
+	// Runtime metrics (Living Brain)
+	private metrics: LearnerMetrics = {
+		ingestion: {
+			observationCount: 0,
+			dismissalCount: 0,
+			dismissalRate: 0,
+			synthesisCount: 0,
+			observationsSinceLastSynthesis: 0,
+		},
+		query: {
+			count: 0,
+			relevanceScores: [],
+			confidenceScores: [],
+			gaps: [],
+		},
+	}
 
 	constructor(rawConfig: TextLearnerConfig, parentModels?: ParentModels) {
 		super()
@@ -89,12 +101,13 @@ export class TextLearner
 			threshold: 0.3,
 			status: 'dormant',
 			lastAccessed: new Date(),
-			retrievalCount: 0,
-			successRate: 0,
 			signalThresholds: {
 				maxDismissalRate: 0.8,
+				minRelevance: 0.3,
 				minConfidence: 0.3,
-				maxObservationsWithoutSynthesis: 100,
+				maxObservationsWithoutSynthesis:
+					3 * (this.config.synthesize.thresholds.maxObservations ?? 10),
+				minGapCount: 10,
 				...rawConfig.governance?.signalThresholds,
 			},
 		}
@@ -237,6 +250,21 @@ export class TextLearner
 	 */
 	getGovernance(): LearnerGovernance {
 		return { ...this.governance }
+	}
+
+	/**
+	 * Get a copy of runtime metrics
+	 */
+	getMetrics(): LearnerMetrics {
+		return {
+			ingestion: { ...this.metrics.ingestion },
+			query: {
+				...this.metrics.query,
+				relevanceScores: [...this.metrics.query.relevanceScores],
+				confidenceScores: [...this.metrics.query.confidenceScores],
+				gaps: [...this.metrics.query.gaps],
+			},
+		}
 	}
 
 	/**
@@ -564,7 +592,7 @@ export class TextLearner
 	private async handleLearnResult(result: LearnOutput): Promise<void> {
 		switch (result.status) {
 			case 'observed': {
-				this.observationCount++
+				this.trackIngestion()
 				const bufferState = this._learningMethod.getBufferState()
 				this.emit('learner:observed', {
 					learnerId: this.id,
@@ -579,8 +607,7 @@ export class TextLearner
 			}
 
 			case 'observe:dismissed':
-				this.observationCount++
-				this.dismissalCount++
+				this.trackIngestion(true)
 				this.emit('learner:observe:dismissed', {
 					learnerId: this.id,
 					output: result.output,
@@ -599,8 +626,9 @@ export class TextLearner
 
 			case 'synthesized': {
 				// The observation was made (it triggered synthesis), so count it
-				this.observationCount++
-				this.lastSynthesisObservationCount = this.observationCount
+				this.trackIngestion()
+				this.metrics.ingestion.synthesisCount++
+				this.metrics.ingestion.observationsSinceLastSynthesis = 0
 				const previousUnderstanding = this.understanding
 
 				// Apply strategy-specific maintenance
@@ -638,7 +666,7 @@ export class TextLearner
 
 			case 'synthesize:dismissed':
 				// The observation was made (it triggered synthesis attempt), so count it
-				this.observationCount++
+				this.trackIngestion()
 				this.emit('learner:synthesize:dismissed', {
 					learnerId: this.id,
 					output: result.output,
@@ -649,7 +677,7 @@ export class TextLearner
 
 			case 'synthesize:error':
 				// The observation was made but synthesis failed — still count it
-				this.observationCount++
+				this.trackIngestion()
 				this.emit('learner:synthesize:error', {
 					learnerId: this.id,
 					error: result.error,
@@ -668,7 +696,7 @@ export class TextLearner
 	 */
 	async query(question: string, options?: QueryOptions): Promise<QueryResult> {
 		this.governance.lastAccessed = new Date()
-		this.governance.retrievalCount++
+		this.metrics.query.count++
 
 		this.emit('learner:query:started', {
 			learnerId: this.id,
@@ -695,16 +723,14 @@ export class TextLearner
 				},
 			)
 
-			// Track confidence for signal detection
-			this.queryConfidences.push(result.confidence)
-			// Keep only last 10 confidences
-			if (this.queryConfidences.length > 10) {
-				this.queryConfidences.shift()
-			}
+			// Track query metrics for signal detection
+			this.trackQueryMetrics(result)
 
 			this.emit('learner:query:completed', {
 				learnerId: this.id,
 				insight: result.insight,
+				relevant: result.relevant,
+				relevance: result.relevance,
 				confidence: result.confidence,
 				gaps: result.gaps ? result.gaps.split('\n').filter(Boolean) : [],
 				usage: result.usage,
@@ -744,6 +770,48 @@ export class TextLearner
 	}
 
 	/**
+	 * Track an ingestion event (observation received)
+	 */
+	private trackIngestion(dismissed = false): void {
+		this.metrics.ingestion.observationCount++
+		this.metrics.ingestion.observationsSinceLastSynthesis++
+		if (dismissed) {
+			this.metrics.ingestion.dismissalCount++
+		}
+		this.metrics.ingestion.dismissalRate =
+			this.metrics.ingestion.observationCount > 0
+				? this.metrics.ingestion.dismissalCount /
+					this.metrics.ingestion.observationCount
+				: 0
+	}
+
+	/**
+	 * Track query metrics (relevance, confidence, gaps)
+	 */
+	private trackQueryMetrics(result: QueryResult): void {
+		const WINDOW_SIZE = 10
+		const MAX_GAPS = 50
+
+		this.metrics.query.relevanceScores.push(result.relevance)
+		if (this.metrics.query.relevanceScores.length > WINDOW_SIZE) {
+			this.metrics.query.relevanceScores.shift()
+		}
+
+		this.metrics.query.confidenceScores.push(result.confidence)
+		if (this.metrics.query.confidenceScores.length > WINDOW_SIZE) {
+			this.metrics.query.confidenceScores.shift()
+		}
+
+		if (result.gaps) {
+			const gaps = result.gaps.split('\n').filter(Boolean)
+			this.metrics.query.gaps.push(...gaps)
+			if (this.metrics.query.gaps.length > MAX_GAPS) {
+				this.metrics.query.gaps = this.metrics.query.gaps.slice(-MAX_GAPS)
+			}
+		}
+	}
+
+	/**
 	 * Update governance based on relevance of processed data
 	 *
 	 * Uses exponential moving average to smooth activation changes
@@ -776,47 +844,74 @@ export class TextLearner
 	 * Check signal thresholds and emit signals if crossed (Living Brain)
 	 */
 	private checkAndEmitSignals(): void {
+		const { signalThresholds } = this.governance
+		const { ingestion, query } = this.metrics
+
 		// Check dismissal rate
-		if (this.observationCount > 10) {
-			const dismissalRate = this.dismissalCount / this.observationCount
-			if (dismissalRate > this.governance.signalThresholds.maxDismissalRate) {
+		if (ingestion.observationCount > 10) {
+			if (ingestion.dismissalRate > signalThresholds.maxDismissalRate) {
 				this.emit('learner:signal', {
 					learnerId: this.id,
-					description: `High dismissal rate: rejecting ${(dismissalRate * 100).toFixed(0)}% of observations`,
+					description: `High dismissal rate: rejecting ${(ingestion.dismissalRate * 100).toFixed(0)}% of observations`,
 					timestamp: new Date(),
-					metrics: { dismissalRate },
+					metrics: { dismissalRate: ingestion.dismissalRate },
 				})
+			}
+		}
+
+		// Check relevance floor
+		if (query.relevanceScores.length >= 5) {
+			const avgRelevance =
+				query.relevanceScores.reduce((a, b) => a + b, 0) /
+				query.relevanceScores.length
+			if (avgRelevance < signalThresholds.minRelevance) {
+				this.emit('learner:signal', {
+					learnerId: this.id,
+					description: `Low relevance: avg ${avgRelevance.toFixed(2)} over last ${query.relevanceScores.length} queries`,
+					timestamp: new Date(),
+					metrics: { avgRelevance },
+				})
+				this.metrics.query.relevanceScores = []
 			}
 		}
 
 		// Check confidence floor
-		if (this.queryConfidences.length >= 5) {
-			const avg =
-				this.queryConfidences.reduce((a, b) => a + b, 0) /
-				this.queryConfidences.length
-			if (avg < this.governance.signalThresholds.minConfidence) {
+		if (query.confidenceScores.length >= 5) {
+			const avgConfidence =
+				query.confidenceScores.reduce((a, b) => a + b, 0) /
+				query.confidenceScores.length
+			if (avgConfidence < signalThresholds.minConfidence) {
 				this.emit('learner:signal', {
 					learnerId: this.id,
-					description: `Low confidence: query confidence averaging ${avg.toFixed(2)}`,
+					description: `Low confidence: avg ${avgConfidence.toFixed(2)} over last ${query.confidenceScores.length} queries — has knowledge gaps in its domain`,
 					timestamp: new Date(),
-					metrics: { avgConfidence: avg },
+					metrics: { avgConfidence },
 				})
-				this.queryConfidences = [] // Reset after signaling
+				this.metrics.query.confidenceScores = []
 			}
 		}
 
 		// Check synthesis gap (stagnation)
-		const observationsSinceLastSynthesis =
-			this.observationCount - this.lastSynthesisObservationCount
 		if (
-			observationsSinceLastSynthesis >
-			this.governance.signalThresholds.maxObservationsWithoutSynthesis
+			ingestion.observationsSinceLastSynthesis >
+			signalThresholds.maxObservationsWithoutSynthesis
 		) {
 			this.emit('learner:signal', {
 				learnerId: this.id,
-				description: `Stagnation: no synthesis in ${observationsSinceLastSynthesis} observations`,
+				description: `Stagnation: no synthesis in ${ingestion.observationsSinceLastSynthesis} observations`,
 				timestamp: new Date(),
 			})
+		}
+
+		// Check gap accumulation
+		if (query.gaps.length >= signalThresholds.minGapCount) {
+			this.emit('learner:signal', {
+				learnerId: this.id,
+				description: `Knowledge gaps accumulating: ${query.gaps.length} gaps recorded. Recent: ${query.gaps.slice(-5).join('; ')}`,
+				timestamp: new Date(),
+				metrics: { gapCount: query.gaps.length },
+			})
+			this.metrics.query.gaps = []
 		}
 	}
 }

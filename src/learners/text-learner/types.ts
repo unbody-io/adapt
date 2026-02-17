@@ -122,7 +122,9 @@ export interface TextLearnerEventMap extends BaseLearnerEventMap {
 		timestamp: Date
 		metrics?: {
 			dismissalRate?: number
+			avgRelevance?: number
 			avgConfidence?: number
+			gapCount?: number
 			bufferCount?: number
 			activation?: number
 		}

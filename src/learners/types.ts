@@ -25,12 +25,31 @@ export interface LearnerGovernance {
 	threshold: number // gates participation
 	status: LearnerStatus
 	lastAccessed: Date
-	retrievalCount: number
-	successRate: number // responses that were useful
 	signalThresholds: {
 		maxDismissalRate: number // Default: 0.8 - alert when dismissal rate exceeds this
-		minConfidence: number // Default: 0.3 - alert when confidence falls below this
-		maxObservationsWithoutSynthesis: number // Default: 100 - alert after this many observations without synthesis
+		minRelevance: number // Default: 0.3 - alert when query relevance falls below this
+		minConfidence: number // Default: 0.3 - alert when query confidence falls below this
+		maxObservationsWithoutSynthesis: number // Default: 3 * maxObservations
+		minGapCount: number // Default: 10 - alert when accumulated gaps exceed this
+	}
+}
+
+/**
+ * Runtime metrics for learner operations, separated by phase
+ */
+export interface LearnerMetrics {
+	ingestion: {
+		observationCount: number
+		dismissalCount: number
+		dismissalRate: number
+		synthesisCount: number
+		observationsSinceLastSynthesis: number
+	}
+	query: {
+		count: number
+		relevanceScores: number[] // rolling window of last 10
+		confidenceScores: number[] // rolling window of last 10
+		gaps: string[] // accumulated gap descriptions
 	}
 }
 
@@ -46,7 +65,8 @@ export interface LearnerMetadata {
  */
 export interface AskResult {
 	relevant: boolean
-	confidence: number // 0.0 - 1.0
+	relevance: number // 0.0 - 1.0: how related is this query to my domain
+	confidence: number // 0.0 - 1.0: how well could I answer from my understanding
 	insight: string
 	gaps: string[]
 }
@@ -62,6 +82,7 @@ export interface Learner<TUnderstanding = unknown> {
 	// Current state
 	getUnderstanding(): TUnderstanding
 	getGovernance(): LearnerGovernance
+	getMetrics(): LearnerMetrics
 
 	// Core operations
 	learn(batch: unknown[]): Promise<unknown>
@@ -111,6 +132,8 @@ export interface BaseLearnerEventMap {
 	'learner:query:completed': {
 		learnerId: string
 		insight: string
+		relevant: boolean
+		relevance: number
 		confidence: number
 		gaps: string[]
 		usage: TokenUsage

@@ -29,7 +29,9 @@ export interface Signal {
 	bypass?: boolean
 	metrics?: {
 		dismissalRate?: number
+		avgRelevance?: number
 		avgConfidence?: number
+		gapCount?: number
 		bufferCount?: number
 		activation?: number
 		observationsSinceLastSynthesis?: number
@@ -59,8 +61,12 @@ export interface LearnerContext {
 		activation: number
 		status: string
 		lastAccessed: Date
-		retrievalCount: number
-		successRate: number
+	}
+	metrics: {
+		queryCount: number
+		dismissalRate: number
+		synthesisCount: number
+		observationsSinceLastSynthesis: number
 	}
 }
 
@@ -84,6 +90,7 @@ export interface EvaluatorEventMap {
 		signalCount: number
 	}
 	'evaluator:evaluation:completed': {
+		source: 'auto' | 'manual'
 		decisionCount: number
 		decisions: EvolutionDecision[]
 	}

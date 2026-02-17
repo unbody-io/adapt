@@ -299,3 +299,145 @@ Observations from manual testing sessions of the Brain Monitor UI.
 | Gap accumulation | **No** | **No** | N/A — not implemented | N/A |
 | Success rate | **Dead code** | No | Field never updated | N/A |
 | Signal counters (dismissal, observation, confidence) | In-memory only | N/A | Not exposed via API, not persisted | N/A |
+
+---
+
+## Session 6 — 2026-02-17 (query-time fixes + ingestion-time evolution)
+
+**Setup:** Same brain, 3 learners. Running commit `a910bc4` (signal detection overhaul) + `7c36f4b` (query pipeline fixes). Server at localhost:3210.
+
+### Part A: Query-Time Fix Verification
+
+Tested all 5 fixes from commit `7c36f4b`:
+
+#### 33. Fix 1 — Pre-synthesis buffer fallback: PASS
+
+- **Test:** Created a fresh learner, ingested data (observations buffered but no synthesis yet), then queried.
+- **Result:** Learner answered from buffered observations instead of saying "I know nothing." Pre-synthesis dead zone (#1, #6) is resolved.
+
+#### 34. Fix 2 — Empty learner short-circuit: PASS
+
+- **Test:** Created learner with 0 observations and 0 understanding. Queried the brain.
+- **Result:** Empty learner was not queried and did not appear in sources. Resolves issue #8.
+
+#### 35. Fix 3 — Verbose rejections replaced with brief dismissals: PASS
+
+- **Test:** Asked out-of-scope queries ("what is the weather today", "tell me a joke about the developer").
+- **Result:** Irrelevant learner insights are 14-27 words instead of 50-100 word essays. Resolves issue #25.
+
+#### 36. Fix 4 — Architecture no longer leaks into responses: PASS
+
+- **Test:** Asked domain questions and checked response text.
+- **Result:** No mentions of "learner", "synthesize", "confidence", or other internal terms in user-facing responses. Resolves issue #20.
+
+#### 37. Fix 5 — Format constraints respected: PASS
+
+- **Test:** Asked "describe me as a developer in 3 words."
+- **Result:** Got "Modular, Semantic, Decoupled." — concise and format-compliant. Resolves issue #21.
+
+### Part B: Signal & Evolution Verification (Query-Time)
+
+#### 38. Relevance/confidence split working correctly
+
+- **Details:** In-scope queries produce high relevance (0.7-0.9) with moderate confidence (0.6-0.9). Out-of-scope queries produce relevance=0 with confidence=0. The inverted confidence problem (#22, #26) is resolved — confidence no longer reads 1.0 on "I can't help" responses.
+
+#### 39. Auto-evaluate → execute pipeline now connected
+
+- **Details:** During query testing, gap accumulation signals (since removed) triggered the evaluator automatically. The evaluator produced 3 decisions (2 updates + 1 delete), and all 3 were executed (`evolution:action:executed` events fired). This confirms fix for issue #29 — auto-evaluate path now forwards decisions to brain for execution.
+
+### Part C: Ingestion-Time Evolution Testing
+
+#### 40. Test setup: real data + irrelevant data injection
+
+- **Method:**
+  1. User ingested real chat history data → 52 observations accepted, 6 syntheses triggered, 0 dismissals (all data relevant to learner domains)
+  2. Injected ~520 irrelevant items (recipes, sports scores, travel guides, fiction, weather reports, celebrity news) to push dismissal rates up
+
+#### 41. Stagnation signal fires correctly during ingestion: PASS
+
+- **Details:** After injecting irrelevant data, stagnation signals fired for all 3 learners: "no synthesis in 31 observations", "no synthesis in 32 observations", etc. The signal fires every batch once the threshold is crossed (3 × maxObservations = 30 default).
+- **Issue:** Signal fires on every subsequent batch (31, 32, 33, 34...) creating a signal storm. Should probably fire once and reset, or use a cooldown.
+
+#### 42. Auto-evaluate triggered and executed during ingestion: PASS
+
+- **Details:** Stagnation signals accumulated and triggered auto-evaluation. Evaluator produced decisions (update learner configs, regenerate prompts). Decisions were forwarded to brain and executed — `evolution:action:executed` events confirmed.
+- **Signal count escalation observed:** Signal counts climbed rapidly: 3, 4, 5, 6, 7, 8, 9, 10, 11, 12... as stagnation fired per-learner per-batch.
+
+#### 43. Dismissal rate signal NOT confirmed
+
+- **Details:** Despite injecting ~520 irrelevant items (100% dismissal rate on those batches), only stagnation signals appeared in the logs. The dismissal rate signal (>80% after 10+ obs) may not have fired because the learners already had accepted observations from the earlier real data injection, keeping the cumulative rate below 80%.
+- **Status:** Untested — needs isolated test with a fresh learner receiving only irrelevant data.
+
+#### 44. Server crash: concurrent evolution + throw-on-failure
+
+- **Severity:** Critical — server dies under load
+- **Details:** During bulk irrelevant injection, the following sequence crashed the server:
+  1. Stagnation signals fired for all 3 learners every batch
+  2. Multiple evaluator auto-triggers ran concurrently (no lock/guard)
+  3. Multiple evolution actions targeted the same learners simultaneously
+  4. One evolution action hit a JSON parse error (LLM returned malformed response)
+  5. `throw new Error('Update action failed:...')` in `update.ts:75` propagated up and crashed the process
+
+- **Two root causes:**
+  1. **No concurrency guard on evaluator:** Multiple evaluation + execution cycles run simultaneously when signals accumulate faster than evaluation completes. This causes race conditions (concurrent updates to same learner).
+  2. **Evolution handler crashes on failure:** `throw` in the evolution update handler propagates to the top level. Should catch, log, and continue — a single failed evolution action shouldn't kill the server.
+
+- **Crash stack:** `evolution:action:failed` → `Error: Update action failed: Failed to parse...` → unhandled throw → process exit
+
+### Updated Signal System Coverage Map (Post Session 6)
+
+| Condition | Tracked? | Fires signal? | Working? | Auto-executes? |
+|---|---|---|---|---|
+| High dismissal rate (>80%, >10 obs) | Yes | Yes | **Untested** (cumulative rate stayed below 80%) | Yes (pipeline connected) |
+| Low relevance (<0.3 avg over 5+ queries) | Yes | Yes | **Likely works** (not stress-tested) | Yes |
+| Low confidence (<0.3 avg over 5+ queries) | Yes | Yes | **Likely works** (confidence no longer inverted) | Yes |
+| Stagnation (>3×maxObs without synthesis) | Yes | Yes | **Working** — fires during ingestion | Yes |
+| Auto-evaluate → execute pipeline | N/A | N/A | **Working** — decisions now executed | Yes |
+| Brain-level coverage gap | Yes | Yes | **Untested** (sliding window, needs many queries) | Yes |
+| Concurrent evaluation guard | **No** | N/A | **Bug** — multiple evals run simultaneously | N/A |
+| Evolution error handling | **No** | N/A | **Bug** — throw crashes server | N/A |
+
+### Bugs to Fix
+
+1. **Concurrency guard needed on evaluator** — Add a lock so only one evaluation + execution cycle runs at a time. Subsequent signals should queue or be deferred until the current cycle completes.
+
+2. **Evolution handler must not crash on failure** — Wrap evolution action execution in try/catch. Log the failure and continue with remaining actions. A single LLM parse error shouldn't kill the server.
+
+3. **Stagnation signal storm** — Signal fires on every batch once threshold is crossed (31, 32, 33... observations without synthesis). Should fire once and either reset or use a cooldown to prevent signal flooding.
+
+---
+
+## Session 7 — 2026-02-17 (full evolution lifecycle test)
+
+**Setup:** Fresh brain, 5 learners (architecture-patterns, code-quality-practices, problem-solving-approach, decision-making-tradeoffs, collaboration-communication). Bugs #1-3 from Session 6 fixed. Injected 500 items across 5 phases, then 5 additional rounds of noise (~750 more items). Total: ~1,250 items.
+
+**Prompt:** "These are reflections and observations from a software engineer's daily work. Learn about their engineering practices, technical decision-making patterns, problem-solving approaches, and how they think about building software."
+
+### Test Phases
+
+| Phase | Items | Purpose | Result |
+|---|---|---|---|
+| 1 - Foundation | 104 | Core dev content | ~85% accepted, 1 synthesis |
+| 2 - Domain Stretch | 71 | Team/leadership/product | ~95% accepted, 3 syntheses |
+| 3 - Coverage Gaps | 81 | ML, UX, DevOps, productivity | ~85% accepted (expected dismissals) |
+| 4 - Noise (×6) | ~880 | Recipes, sports, nature, history | ~95% dismissed, but ~5% leaked through |
+| 5 - Recovery | 50 | Back to dev topics | ~97% accepted |
+
+### Findings
+
+#### 45. Resilience fixes confirmed — server survived ~1,250 items including ~880 noise
+
+- All three Session 6 bugs fixed: no crash on evolution failure, no concurrent evaluator runs, no signal storms.
+
+#### 46. Evolution pipeline never triggered during ingestion
+
+- Zero signals fired. Zero evaluator auto-triggers. Zero evolution decisions.
+- Dismissal rate never crossed 80% threshold because: (a) learners accepted too many items from early phases, diluting the rate; (b) learners kept accepting ~5% of noise items, preventing stagnation.
+
+#### 47. Observe phase is too permissive — absorbs irrelevant content via abstract pattern-matching
+
+- **The core finding.** Learners accepted ~5% of completely irrelevant noise (recipes, sports, nature facts) by finding abstract metaphorical connections to their domain.
+- Example: `problem-solving-approach` synthesized cooking data into its understanding: *"...mirroring the precision required in complex culinary arts (e.g., detailed, time-bound, temperature-dependent processes like croissants or espresso)"*
+- The observe prompt's dismissal criteria is one vague sentence: "Dismiss data that doesn't connect to what you're tracking." The LLM interprets "connect" broadly enough to find patterns in anything.
+- This leakage prevents the signal system from ever triggering because dismissal rates stay below threshold and synthesis keeps happening (resetting stagnation counters).
+- **Root cause:** `src/learners/text-learner/learning-methods/two-phase/observe/prompt.template.system.ts` — the relevance section needs stricter dismissal guidance.

@@ -12,11 +12,21 @@ import type { ObserveIdentity } from './schema.identity'
  * @param identity - Generated observe identity
  */
 export function observeSystemPromptTemplate(identity: ObserveIdentity): string {
+	const domainSection = identity.domain
+		? `Your domain: ${identity.domain}
+
+Data may be fully relevant, partly relevant, or entirely outside your domain.
+Evaluate whether the content literally relates to your domain.
+Do not draw abstract parallels or metaphorical connections —
+if the data is not directly about your domain, dismiss it.`
+		: `Evaluate whether the content directly relates to your purpose.
+Do not draw abstract parallels or metaphorical connections —
+if the data is not directly relevant, dismiss it.`
+
 	return `${identity.identity}
 
 ## Relevance
-
-Data is relevant when it directly relates to your focus areas. Dismiss data that doesn't connect to what you're tracking.
+${domainSection}
 
 ## Importance
 
@@ -27,21 +37,9 @@ Rate how significant each observation is for your purpose:
 
 ## Observation Guidelines
 
+**Be selective**: Only extract facts that directly relate to your ${identity.domain ? 'domain' : 'purpose'}.
 **Be literal**: Quote or closely paraphrase what the source actually says.
-- Source says "anxiety is not weakness" → write: States 'anxiety is not weakness'
-- Source mentions PhD from Berkeley → write: PhD in Clinical Psychology from UC Berkeley
-
-**Be exhaustive**: Extract every relevant fact from the data. If the source mentions 4 things, capture all 4.
-
 **Be direct**: One fact per line, no commentary.
-
-## Your Approach
-
-Scan the data systematically. For each piece of information, ask:
-1. Is this relevant to what I'm tracking?
-2. What exactly does the source say?
-
-Extract all relevant facts. Miss nothing.
 
 ## CRITICAL: Response Format
 

@@ -110,6 +110,8 @@ export interface TwoPhaseUpdateConfig {
 	model?: LanguageModel
 	/** Learner instructions (triggers prompt regen) */
 	instructions?: string
+	/** Focus areas (triggers observe prompt regen) */
+	focus?: string
 	/** Observe phase config updates */
 	observe?: Partial<ObserveConfig>
 	/** Synthesize phase config updates */

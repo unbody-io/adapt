@@ -33,6 +33,7 @@ export class TwoPhaseMethod {
 	private config: TwoPhaseConfig
 	private buffer: ObservationBuffer
 	private instructions: string = ''
+	private focus: string = ''
 
 	// Generated during init (identities stored for potential debugging/introspection)
 	private _observeIdentity: ObserveIdentity | null = null
@@ -118,6 +119,13 @@ export class TwoPhaseMethod {
 			needsSynthesizeRegen = true
 		}
 
+		// Focus change → observe prompt needs regen
+		if (config.focus !== undefined && config.focus !== this.focus) {
+			this.focus = config.focus
+			changedFields.push('focus')
+			needsObserveRegen = true
+		}
+
 		// Observe config updates
 		if (config.observe) {
 			if (config.observe.model !== undefined) {
@@ -169,7 +177,7 @@ export class TwoPhaseMethod {
 
 			if (needsObserveRegen) {
 				promises.push(
-					initObserve(observeBlueprintModel, this.instructions).then((result) => {
+					initObserve(observeBlueprintModel, this.instructions, this.focus || undefined).then((result) => {
 						this._observeIdentity = result.identity
 						this.observeSystemPrompt = result.systemPrompt
 					}),

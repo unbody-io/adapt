@@ -198,6 +198,8 @@ export interface TextLearnerConfig extends CascadableConfig {
 	model: LanguageModel
 	/** Natural language instructions for what this learner tracks and watches for */
 	instructions: string
+	/** Optional focus areas to narrow observation filtering */
+	focus?: string
 	/** Optional unique identifier */
 	id?: string
 	/** Optional display name */

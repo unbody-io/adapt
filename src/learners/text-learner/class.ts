@@ -41,6 +41,7 @@ export class TextLearner
 	readonly id: string
 	name!: string
 	instructions!: string
+	focus?: string
 	description?: string
 
 	private config: ResolvedTextLearnerConfig
@@ -49,6 +50,10 @@ export class TextLearner
 	private governance: LearnerGovernance
 	private _learningMethod: TwoPhaseMethod
 	private _queryMethod: QueryMethod
+
+	// Signal fire-once flags (reset when condition clears)
+	private stagnationSignalFired = false
+	private dismissalSignalFired = false
 
 	// Runtime metrics (Living Brain)
 	private metrics: LearnerMetrics = {
@@ -73,6 +78,7 @@ export class TextLearner
 		this.id = this.config.id
 		this.name = rawConfig.name || this.config.id
 		this.instructions = this.config.instructions
+		this.focus = rawConfig.focus
 		this.description = rawConfig.description
 
 		// Create two-phase learning method with resolved config
@@ -373,6 +379,14 @@ export class TextLearner
 			twoPhaseUpdate.instructions = updates.instructions
 		}
 
+		// ── Focus ──
+
+		if (updates.focus !== undefined && updates.focus !== this.focus) {
+			this.focus = updates.focus
+			changedFields.push('focus')
+			twoPhaseUpdate.focus = updates.focus
+		}
+
 		// ── Observe config ──
 
 		if (updates.observe) {
@@ -628,6 +642,7 @@ export class TextLearner
 				this.trackIngestion()
 				this.metrics.ingestion.synthesisCount++
 				this.metrics.ingestion.observationsSinceLastSynthesis = 0
+				this.stagnationSignalFired = false
 				const previousUnderstanding = this.understanding
 
 				// Apply strategy-specific maintenance
@@ -877,15 +892,20 @@ export class TextLearner
 		const { signalThresholds } = this.governance
 		const { ingestion, query } = this.metrics
 
-		// Check dismissal rate
+		// Check dismissal rate — fire once, reset when rate drops below threshold
 		if (ingestion.observationCount > 10) {
 			if (ingestion.dismissalRate > signalThresholds.maxDismissalRate) {
-				this.emit('learner:signal', {
-					learnerId: this.id,
-					description: `High dismissal rate: rejecting ${(ingestion.dismissalRate * 100).toFixed(0)}% of observations`,
-					timestamp: new Date(),
-					metrics: { dismissalRate: ingestion.dismissalRate },
-				})
+				if (!this.dismissalSignalFired) {
+					this.dismissalSignalFired = true
+					this.emit('learner:signal', {
+						learnerId: this.id,
+						description: `High dismissal rate: rejecting ${(ingestion.dismissalRate * 100).toFixed(0)}% of observations`,
+						timestamp: new Date(),
+						metrics: { dismissalRate: ingestion.dismissalRate },
+					})
+				}
+			} else {
+				this.dismissalSignalFired = false
 			}
 		}
 
@@ -921,11 +941,13 @@ export class TextLearner
 			}
 		}
 
-		// Check synthesis gap (stagnation)
+		// Check synthesis gap (stagnation) — fire once, reset on synthesis
 		if (
+			!this.stagnationSignalFired &&
 			ingestion.observationsSinceLastSynthesis >
 			signalThresholds.maxObservationsWithoutSynthesis
 		) {
+			this.stagnationSignalFired = true
 			this.emit('learner:signal', {
 				learnerId: this.id,
 				description: `Stagnation: no synthesis in ${ingestion.observationsSinceLastSynthesis} observations`,

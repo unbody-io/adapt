@@ -2,6 +2,8 @@
 export { BaseLearner } from './base'
 export type { BaseLearnerInit } from './base'
 export type { SharedLearnerEventMap, EventUsage } from './base'
+export type { QueryOptions, QueryResult } from './base/query-method'
+export { ToolBasedMethod } from './base/query-method'
 
 // Schemas
 export {

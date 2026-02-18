@@ -5,11 +5,4 @@
 export { TextLearner } from './class'
 // Learning methods
 export { TextDefaultMethod } from './learning-methods'
-// Query methods
-export {
-	createQueryMethod,
-	DirectMethod as DirectQueryMethod,
-	type QueryMethod,
-	ToolBasedMethod as ToolBasedQueryMethod,
-} from './query-methods'
 export * from './types'

@@ -26,6 +26,7 @@ import type {
 	LearnOutput,
 	LearningMethod,
 } from './learning-method'
+import type { QueryOptions, QueryResult } from './query-method'
 import type { SharedLearnerEventMap } from './types'
 
 /**
@@ -108,7 +109,7 @@ export abstract class BaseLearner<TUnderstanding>
 
 	// init() and query() stay abstract — they depend on subclass config
 	abstract init(): Promise<unknown>
-	abstract query(question: string, options?: unknown): Promise<unknown>
+	abstract query(question: string, options?: QueryOptions): Promise<QueryResult>
 
 	// ── Identity ────────────────────────────────────────────────────────────
 

@@ -36,7 +36,6 @@ export interface SynthesizePhaseConfig extends CascadableConfig {
  */
 export interface QueryPhaseConfig {
 	model?: LanguageModel
-	method?: 'tool-based' | 'direct'
 }
 
 /**
@@ -158,7 +157,6 @@ export interface ResolvedSynthesizePhaseConfig
  */
 export interface ResolvedQueryPhaseConfig {
 	model: LanguageModel
-	method: 'tool-based' | 'direct'
 }
 
 /**

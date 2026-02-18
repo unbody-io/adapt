@@ -1,16 +1,12 @@
 import type { ParentModels } from '../../types/config'
 import { BaseLearner } from '../base'
+import type { QueryOptions, QueryResult } from '../base/query-method'
+import { ToolBasedMethod } from '../base/query-method'
 import { resolveTextLearnerConfig } from './config.resolver'
 import { TextDefaultMethod } from './learning-methods'
 import type { TextDefaultUpdateConfig } from './learning-methods'
-import {
-	createQueryMethod,
-	type QueryMethod,
-	type QueryOptions,
-	type QueryResult,
-} from './query-methods'
+import { buildTextQueryPrompt, createReadUnderstandingTool } from './query-tools'
 import type {
-	QueryMethodName,
 	ResolvedTextLearnerConfig,
 	TextLearnerConfig,
 	TextLearnerUpdateResult,
@@ -27,7 +23,7 @@ import type {
 export class TextLearner extends BaseLearner<string> {
 	private config: ResolvedTextLearnerConfig
 	private understanding = ''
-	private _queryMethod: QueryMethod
+	private _queryMethod: ToolBasedMethod
 
 	constructor(rawConfig: TextLearnerConfig, parentModels?: ParentModels) {
 		const config = resolveTextLearnerConfig(rawConfig, parentModels)
@@ -59,10 +55,15 @@ export class TextLearner extends BaseLearner<string> {
 			maintenance: this.config.maintenance,
 		})
 
-		this._queryMethod = createQueryMethod(
-			this.config.query.method,
-			this.config.query.model,
-		)
+		this._queryMethod = new ToolBasedMethod(this.config.query.model, {
+			tools: {
+				readUnderstanding: createReadUnderstandingTool(
+					() => this.getUnderstanding(),
+					() => this.getBufferedObservations(),
+				),
+			},
+			buildPrompt: buildTextQueryPrompt,
+		})
 	}
 
 	// ── Abstract implementations ───────────────────────────────────────────────
@@ -162,21 +163,11 @@ export class TextLearner extends BaseLearner<string> {
 			return emptyResult
 		}
 
-		// Use buffered observations as fallback when understanding is empty
-		let knowledge = this.understanding
-		if (!knowledge) {
-			const observations = this.getBufferedObservations()
-			knowledge =
-				'Note: This knowledge has not been synthesized yet. These are raw observations.\n\n---\n' +
-				observations.map((obs) => obs.text).join('\n---\n')
-		}
-
 		try {
 			const result = await this._queryMethod.query(
 				{
 					learnerId: this.id,
 					instructions: this.instructions,
-					understanding: knowledge,
 					question,
 				},
 				options,
@@ -230,8 +221,8 @@ export class TextLearner extends BaseLearner<string> {
 		return { ...this.config.maintenance }
 	}
 
-	getQueryMethodName(): QueryMethodName {
-		return this.config.query.method
+	getQueryMethodName(): string {
+		return 'tool-based'
 	}
 
 	getSynthesizeThresholds() {
@@ -255,8 +246,6 @@ export class TextLearner extends BaseLearner<string> {
 
 		const changedFields: string[] = []
 		const methodUpdate: TextDefaultUpdateConfig = {}
-		let queryModelChanged = false
-		let queryMethodChanged = false
 
 		// ── Metadata fields ──
 
@@ -382,17 +371,10 @@ export class TextLearner extends BaseLearner<string> {
 
 		// ── Query config ──
 
-		if (updates.query) {
-			if (updates.query.model !== undefined) {
-				this.config.query.model = updates.query.model
-				changedFields.push('query.model')
-				queryModelChanged = true
-			}
-			if (updates.query.method !== undefined && updates.query.method !== this.config.query.method) {
-				this.config.query.method = updates.query.method
-				changedFields.push('query.method')
-				queryMethodChanged = true
-			}
+		if (updates.query?.model !== undefined) {
+			this.config.query.model = updates.query.model
+			changedFields.push('query.model')
+			this._queryMethod.update({ model: updates.query.model })
 		}
 
 		// ── Governance config ──
@@ -434,17 +416,6 @@ export class TextLearner extends BaseLearner<string> {
 					synthesizePrompt: this._learningMethod.synthesizePrompt!,
 				})
 			}
-		}
-
-		if (queryMethodChanged) {
-			this._queryMethod = createQueryMethod(
-				this.config.query.method,
-				this.config.query.model,
-			)
-		} else if (queryModelChanged) {
-			this._queryMethod.update({
-				model: this.config.query.model
-			})
 		}
 
 		if (changedFields.length > 0) {

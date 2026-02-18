@@ -166,9 +166,6 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 						...config.thresholds,
 					},
 				},
-				query: {
-					method: BRAIN_DEFAULTS.learning.query.method,
-				},
 				name: config.name,
 				description: config.description,
 				governance: config.governance,

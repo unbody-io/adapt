@@ -68,7 +68,6 @@ export function resolveTextLearnerConfig(
 		},
 		query: {
 			model: cascade(config.query?.model, model),
-			method: config.query?.method ?? TEXT_LEARNER_DEFAULTS.query.method,
 		},
 		maintenance: {
 			strategy:

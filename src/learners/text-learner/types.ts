@@ -14,7 +14,6 @@ import type {
 	SynthesizeConfig,
 	SynthesizeThresholds,
 } from './learning-methods/types'
-import type { QueryMethodName } from './query-methods/types'
 import type { Strategy } from './strategies'
 
 // Re-export TokenUsage for backwards compatibility
@@ -28,8 +27,8 @@ export type {
 	SynthesizeThresholds,
 } from './learning-methods/types'
 
-// Re-export query method types
-export type { QueryMethodName, QueryResult } from './query-methods/types'
+// Re-export query types from base
+export type { QueryResult } from '../base/query-method'
 
 // Re-export EventUsage from base
 export type { EventUsage } from '../base/types'
@@ -87,8 +86,6 @@ export interface TextLearnerMaintenance {
 export interface QueryConfig {
 	/** Optional model override for query phase */
 	model?: LanguageModel
-	/** Query method to use */
-	method?: QueryMethodName
 }
 
 /**
@@ -96,7 +93,6 @@ export interface QueryConfig {
  */
 export interface ResolvedQueryConfig {
 	model: LanguageModel
-	method: QueryMethodName
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

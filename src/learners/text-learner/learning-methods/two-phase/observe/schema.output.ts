@@ -23,9 +23,9 @@ export const observeOutputSchema = z.object({
 		"'observed' if relevant content was found, 'dismissed' if nothing relevant",
 	),
 	output: z
-		.string()
+		.array(z.string())
 		.describe(
-			'Plain text observations, one per line. Just state what you see — no markers, no importance ratings, no interpretation. Empty string if dismissed.',
+			'Array of discrete observations. Each string is one standalone fact or insight. Just state what you see — no markers, no importance ratings, no interpretation. Empty array if dismissed.',
 		),
 	importance: z
 		.number()

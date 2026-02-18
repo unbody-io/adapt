@@ -59,14 +59,14 @@ export interface TextLearnerEventMap extends BaseLearnerEventMap {
 	}
 	'learner:observed': {
 		learnerId: string
-		output: string
+		output: string[]
 		importance: number
 		bufferCount: number
 		usage?: EventUsage
 	}
 	'learner:observe:dismissed': {
 		learnerId: string
-		output: string
+		output: string[]
 		usage?: EventUsage
 	}
 	'learner:observe:error': {

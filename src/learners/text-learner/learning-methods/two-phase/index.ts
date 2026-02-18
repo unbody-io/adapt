@@ -297,11 +297,10 @@ export class TwoPhaseMethod {
 			}
 		}
 
-		// Buffer the observation
-		this.buffer.add({
-			text: observeResult.output,
-			importance: observeResult.importance,
-		})
+		// Buffer each observation individually
+		for (const text of observeResult.output) {
+			this.buffer.add({ text, importance: observeResult.importance })
+		}
 
 		// Check if synthesis should happen
 		const shouldSynthesize =

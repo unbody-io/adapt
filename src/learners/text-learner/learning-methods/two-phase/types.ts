@@ -32,8 +32,8 @@ import type { Usage } from './observe/types'
  */
 export type LearnOutput =
 	// Observe outcomes
-	| { status: 'observed'; output: string; usage?: Usage }
-	| { status: 'observe:dismissed'; output: string; usage?: Usage }
+	| { status: 'observed'; output: string[]; usage?: Usage }
+	| { status: 'observe:dismissed'; output: string[]; usage?: Usage }
 	| { status: 'observe:error'; error: unknown }
 	// Synthesize outcomes
 	| {

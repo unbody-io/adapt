@@ -83,6 +83,32 @@ export interface EvaluationContext {
 }
 
 /**
+ * Learner activity data for evaluation investigation
+ */
+export interface LearnerActivity {
+	ingestion: {
+		observationCount: number
+		dismissalCount: number
+		dismissalRate: number
+		synthesisCount: number
+		observationsSinceLastSynthesis: number
+	}
+	recentObservations: Array<{ text: string; importance: number }>
+}
+
+/**
+ * Record of past evaluation decisions (in-memory, capped)
+ */
+export interface EvolutionHistoryEntry {
+	timestamp: Date
+	decisions: Array<{
+		action: string
+		targets: string[]
+		reasoning: string
+	}>
+}
+
+/**
  * Event map for Evaluator
  */
 export interface EvaluatorEventMap {

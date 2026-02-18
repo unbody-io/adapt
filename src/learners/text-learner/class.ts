@@ -1,5 +1,6 @@
 import type { ParentModels } from '../../types/config'
 import { TypedEmitter } from '../../types/events'
+import type { LearnerActivity } from '../../brain/evaluator/types'
 import type {
 	EvolutionEntry,
 	Learner,
@@ -295,6 +296,16 @@ export class TextLearner
 	 */
 	getBufferedObservations(): Array<{ text: string; importance: number }> {
 		return this._learningMethod.getBufferedObservations()
+	}
+
+	/**
+	 * Get activity data for evaluator investigation
+	 */
+	getActivity(): LearnerActivity {
+		return {
+			ingestion: { ...this.metrics.ingestion },
+			recentObservations: this.getBufferedObservations(),
+		}
 	}
 
 	/**

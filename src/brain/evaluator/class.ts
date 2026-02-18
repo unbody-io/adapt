@@ -17,16 +17,24 @@ import { evaluatorSystemPrompt } from './prompt.system'
 import { evaluationPromptTemplate } from './prompt.template.evaluation'
 import {
 	createGetUnderstandingsTool,
+	createGetLearnerActivityTool,
+	createGetRecentHistoryTool,
 	finalizeDecisions,
 	type FinalizeDecisionsParams,
 } from './tools'
-import type { Signal, EvolutionDecision, EvaluatorEventMap } from './types'
+import type {
+	Signal,
+	EvolutionDecision,
+	EvolutionHistoryEntry,
+	EvaluatorEventMap,
+} from './types'
 import type { Brain } from '../class'
 
 const MAX_EVALUATION_STEPS = 10
 
 export class Evaluator extends TypedEmitter<EvaluatorEventMap> {
 	private signals: Signal[] = []
+	private history: EvolutionHistoryEntry[] = []
 	private isEvaluating = false
 	private readonly threshold: number
 	private readonly brain: Brain
@@ -90,7 +98,14 @@ export class Evaluator extends TypedEmitter<EvaluatorEventMap> {
 
 			// Create tools with brain context
 			const getUnderstandings = createGetUnderstandingsTool(this.brain)
-			const tools = { getUnderstandings, finalizeDecisions }
+			const getLearnerActivity = createGetLearnerActivityTool(this.brain)
+			const getRecentHistory = createGetRecentHistoryTool(this.history)
+			const tools = {
+				getUnderstandings,
+				getLearnerActivity,
+				getRecentHistory,
+				finalizeDecisions,
+			}
 
 			// Call LLM with tools
 			const result = await generate({
@@ -131,6 +146,17 @@ export class Evaluator extends TypedEmitter<EvaluatorEventMap> {
 				decisionCount: decisions.length,
 				decisions,
 			})
+
+			// Record history (capped at 10)
+			this.history.push({
+				timestamp: new Date(),
+				decisions: decisions.map((d) => ({
+					action: d.action,
+					targets: d.targets,
+					reasoning: d.reasoning,
+				})),
+			})
+			if (this.history.length > 10) this.history.shift()
 
 			// Clear signal buffer after successful evaluation
 			this.signals = []

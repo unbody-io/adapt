@@ -49,14 +49,14 @@ ALL fields are required.
 If relevant content found:
 {
   "status": "observed",
-  "output": "Your observations as plain text, one per line, separated by newlines",
+  "output": ["first discrete observation", "second discrete observation", "...one fact per string"],
   "importance": 0.0 to 1.0
 }
 
 If nothing relevant:
 {
   "status": "dismissed",
-  "output": "",
+  "output": [],
   "importance": 0.5
 }`
 }

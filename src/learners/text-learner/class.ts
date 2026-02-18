@@ -1,13 +1,7 @@
 import type { ParentModels } from '../../types/config'
-import { TypedEmitter } from '../../types/events'
 import type { LearnerActivity } from '../../brain/evaluator/types'
-import type {
-	EvolutionEntry,
-	Learner,
-	LearnerGovernance,
-	LearnerMetadata,
-	LearnerMetrics,
-} from '../types'
+import type { EvolutionEntry } from '../types'
+import { BaseLearner } from '../base'
 import { resolveTextLearnerConfig } from './config.resolver'
 import { type LearnOptions, TwoPhaseMethod } from './learning-methods'
 import {
@@ -22,7 +16,6 @@ import type {
 	QueryMethodName,
 	ResolvedTextLearnerConfig,
 	TextLearnerConfig,
-	TextLearnerEventMap,
 	TextLearnerUpdateResult,
 } from './types'
 import type { TwoPhaseUpdateConfig } from './learning-methods'
@@ -33,54 +26,28 @@ import type { TwoPhaseUpdateConfig } from './learning-methods'
  * Uses two-phase learning: Observe → Buffer → Synthesize
  * This reduces understanding degradation by only rewriting during synthesis.
  *
- * Extends TypedEmitter to provide event-based observability.
+ * Extends BaseLearner for shared governance, metrics, evolution, events.
  */
-export class TextLearner
-	extends TypedEmitter<TextLearnerEventMap>
-	implements Learner<string>
-{
-	readonly id: string
-	name!: string
-	instructions!: string
-	focus?: string
-	description?: string
-
+export class TextLearner extends BaseLearner<string> {
 	private config: ResolvedTextLearnerConfig
 	private understanding = ''
-	private evolution: EvolutionEntry[] = []
-	private governance: LearnerGovernance
 	private _learningMethod: TwoPhaseMethod
 	private _queryMethod: QueryMethod
 
-	// Signal fire-once flags (reset when condition clears)
-	private stagnationSignalFired = false
-	private dismissalSignalFired = false
-
-	// Runtime metrics (Living Brain)
-	private metrics: LearnerMetrics = {
-		ingestion: {
-			observationCount: 0,
-			dismissalCount: 0,
-			dismissalRate: 0,
-			synthesisCount: 0,
-			observationsSinceLastSynthesis: 0,
-		},
-		query: {
-			count: 0,
-			relevanceScores: [],
-			confidenceScores: [],
-			gaps: [],
-		},
-	}
-
 	constructor(rawConfig: TextLearnerConfig, parentModels?: ParentModels) {
-		super()
-		this.config = resolveTextLearnerConfig(rawConfig, parentModels)
-		this.id = this.config.id
-		this.name = rawConfig.name || this.config.id
-		this.instructions = this.config.instructions
-		this.focus = rawConfig.focus
-		this.description = rawConfig.description
+		const config = resolveTextLearnerConfig(rawConfig, parentModels)
+		super({
+			id: config.id,
+			name: rawConfig.name || config.id,
+			instructions: config.instructions,
+			origin: config.origin,
+			focus: rawConfig.focus,
+			description: rawConfig.description,
+			governance: rawConfig.governance,
+			maxObservationsForStagnation:
+				3 * (config.synthesize.thresholds.maxObservations ?? 10),
+		})
+		this.config = config
 
 		// Create two-phase learning method with resolved config
 		this._learningMethod = new TwoPhaseMethod(this.config.model, {
@@ -102,29 +69,28 @@ export class TextLearner
 			this.config.query.method,
 			this.config.query.model,
 		)
-
-		this.governance = {
-			activation: 0,
-			threshold: 0.3,
-			status: 'dormant',
-			lastAccessed: new Date(),
-			signalThresholds: {
-				maxDismissalRate: 0.8,
-				minRelevance: 0.3,
-				minConfidence: 0.3,
-				maxObservationsWithoutSynthesis:
-					3 * (this.config.synthesize.thresholds.maxObservations ?? 10),
-				...rawConfig.governance?.signalThresholds,
-			},
-		}
 	}
 
-	/**
-	 * Get the learner's origin
-	 */
-	get origin() {
-		return this.config.origin
+	// ── Abstract implementations ───────────────────────────────────────────────
+
+	getUnderstanding(): string {
+		return this.understanding
 	}
+
+	setUnderstanding(understanding: string): void {
+		this.understanding = understanding
+
+		this.emit('learner:understanding:set', {
+			learnerId: this.id,
+			understanding,
+		})
+	}
+
+	getSummary(): string {
+		return this.understanding || '(no understanding yet)'
+	}
+
+	// ── Lifecycle ──────────────────────────────────────────────────────────────
 
 	/**
 	 * Initialize the learner
@@ -178,6 +144,160 @@ export class TextLearner
 	}
 
 	/**
+	 * Learn from a batch of data using two-phase learning
+	 *
+	 * Phase 1 (Observe): Extract relevant observations from data
+	 * Phase 2 (Synthesize): Update understanding when thresholds met
+	 */
+	async learn(batch: unknown[], options?: LearnOptions): Promise<LearnOutput> {
+		if (!this.isInitialized()) {
+			throw new Error('Learner not initialized. Call init() first.')
+		}
+
+		try {
+			const result = await this._learningMethod.learn(
+				this.id,
+				this.instructions,
+				this.understanding,
+				batch,
+				options,
+				{
+					onObserveStarted: (itemCount) => {
+						this.emit('learner:observe:started', {
+							learnerId: this.id,
+							itemCount,
+						})
+					},
+					onObserveThinking: (thoughts) => {
+						this.emit('learner:observe:thinking', {
+							learnerId: this.id,
+							thoughts,
+							usage: { inputTokens: 0, outputTokens: 0, totalTokens: 0 },
+						})
+					},
+					onSynthesizeStarted: (observationCount) => {
+						this.emit('learner:synthesize:started', {
+							learnerId: this.id,
+							observationCount,
+						})
+					},
+					onSynthesizeThinking: (thoughts) => {
+						this.emit('learner:synthesize:thinking', {
+							learnerId: this.id,
+							thoughts,
+							usage: { inputTokens: 0, outputTokens: 0, totalTokens: 0 },
+						})
+					},
+				},
+			)
+
+			// Emit events and update state based on result status
+			await this.handleLearnResult(result)
+
+			return result
+		} catch (err) {
+			const error = err instanceof Error ? err : new Error(String(err))
+			this.emit('learner:learn:failed', {
+				learnerId: this.id,
+				error: error.message,
+			})
+			throw error
+		}
+	}
+
+	/**
+	 * Query against understanding using the configured query method
+	 */
+	async query(question: string, options?: QueryOptions): Promise<QueryResult> {
+		this.governance.lastAccessed = new Date()
+		this.metrics.query.count++
+
+		this.emit('learner:query:started', {
+			learnerId: this.id,
+			query: question,
+		})
+
+		// Short-circuit if learner has no knowledge at all
+		if (!this.understanding && this.getBufferState().count === 0) {
+			const emptyResult: QueryResult = {
+				relevant: false,
+				relevance: 0,
+				confidence: 0,
+				insight: '',
+				gaps: '',
+				usage: { inputTokens: 0, outputTokens: 0, totalTokens: 0 },
+			}
+			this.emit('learner:query:completed', {
+				learnerId: this.id,
+				insight: '',
+				relevant: false,
+				relevance: 0,
+				confidence: 0,
+				gaps: [],
+				usage: emptyResult.usage,
+			})
+			return emptyResult
+		}
+
+		// Use buffered observations as fallback when understanding is empty
+		let knowledge = this.understanding
+		if (!knowledge) {
+			const observations = this.getBufferedObservations()
+			knowledge =
+				'Note: This knowledge has not been synthesized yet. These are raw observations.\n\n---\n' +
+				observations.map((obs) => obs.text).join('\n---\n')
+		}
+
+		try {
+			const result = await this._queryMethod.query(
+				{
+					learnerId: this.id,
+					instructions: this.instructions,
+					understanding: knowledge,
+					question,
+				},
+				options,
+				{
+					onThinking: (thoughts, usage) => {
+						this.emit('learner:query:thinking', {
+							learnerId: this.id,
+							thoughts,
+							usage,
+						})
+					},
+				},
+			)
+
+			// Track query metrics for signal detection
+			this.trackQueryMetrics(result)
+
+			this.emit('learner:query:completed', {
+				learnerId: this.id,
+				insight: result.insight,
+				relevant: result.relevant,
+				relevance: result.relevance,
+				confidence: result.confidence,
+				gaps: result.gaps ? result.gaps.split('\n').filter(Boolean) : [],
+				usage: result.usage,
+			})
+
+			// Check signals after query
+			this.checkAndEmitSignals()
+
+			return result
+		} catch (err) {
+			const error = err instanceof Error ? err : new Error(String(err))
+			this.emit('learner:query:failed', {
+				learnerId: this.id,
+				error: error.message,
+			})
+			throw error
+		}
+	}
+
+	// ── Text-specific accessors ────────────────────────────────────────────────
+
+	/**
 	 * Check if the learner has been initialized
 	 */
 	isInitialized(): boolean {
@@ -216,61 +336,10 @@ export class TextLearner
 	}
 
 	/**
-	 * Get the current understanding (narrative text)
-	 */
-	getUnderstanding(): string {
-		return this.understanding
-	}
-
-	/**
-	 * Set understanding directly (used by evolution system)
-	 *
-	 * This bypasses normal learning flow and directly sets the understanding text.
-	 * Primarily used by merge/split handlers to transfer understanding between learners.
-	 */
-	setUnderstanding(understanding: string): void {
-		this.understanding = understanding
-
-		this.emit('learner:understanding:set', {
-			learnerId: this.id,
-			understanding,
-		})
-	}
-
-	/**
-	 * Get a copy of the evolution history (newest first)
-	 */
-	getEvolution(): EvolutionEntry[] {
-		return [...this.evolution]
-	}
-
-	/**
 	 * Get the maintenance configuration
 	 */
 	getMaintenance() {
 		return { ...this.config.maintenance }
-	}
-
-	/**
-	 * Get a copy of the governance state
-	 */
-	getGovernance(): LearnerGovernance {
-		return { ...this.governance }
-	}
-
-	/**
-	 * Get a copy of runtime metrics
-	 */
-	getMetrics(): LearnerMetrics {
-		return {
-			ingestion: { ...this.metrics.ingestion },
-			query: {
-				...this.metrics.query,
-				relevanceScores: [...this.metrics.query.relevanceScores],
-				confidenceScores: [...this.metrics.query.confidenceScores],
-				gaps: [...this.metrics.query.gaps],
-			},
-		}
 	}
 
 	/**
@@ -301,7 +370,7 @@ export class TextLearner
 	/**
 	 * Get activity data for evaluator investigation
 	 */
-	getActivity(): LearnerActivity {
+	override getActivity(): LearnerActivity {
 		return {
 			ingestion: { ...this.metrics.ingestion },
 			recentObservations: this.getBufferedObservations(),
@@ -315,6 +384,8 @@ export class TextLearner
 		return { ...this.config.synthesize.thresholds }
 	}
 
+	// ── Update ─────────────────────────────────────────────────────────────────
+
 	/**
 	 * Update learner configuration
 	 *
@@ -324,10 +395,6 @@ export class TextLearner
 	 * Raw constants (models, thresholds) are stored immediately.
 	 * Derived values (prompts/identity) are re-generated when their
 	 * inputs change (instructions, blueprintModel, strategy).
-	 *
-	 * @param updates - Partial config updates (same shape as TextLearnerConfig)
-	 * @returns Changed fields and full resolved config
-	 * @throws Error if attempting to modify `id`
 	 */
 	async update(updates: Partial<TextLearnerConfig>): Promise<TextLearnerUpdateResult> {
 		// Only id is truly immutable
@@ -356,6 +423,7 @@ export class TextLearner
 
 		if (updates.origin !== undefined && updates.origin !== this.config.origin) {
 			this.config.origin = updates.origin
+			this._origin = updates.origin
 			changedFields.push('origin')
 		}
 
@@ -523,8 +591,8 @@ export class TextLearner
 				this.config.query.model,
 			)
 		} else if (queryModelChanged) {
-			this._queryMethod.update({ 
-				model: this.config.query.model 
+			this._queryMethod.update({
+				model: this.config.query.model
 			})
 		}
 
@@ -544,71 +612,7 @@ export class TextLearner
 		}
 	}
 
-	/**
-	 * Learn from a batch of data using two-phase learning
-	 *
-	 * Phase 1 (Observe): Extract relevant observations from data
-	 * Phase 2 (Synthesize): Update understanding when thresholds met
-	 *
-	 * @param batch - Array of data items to learn from
-	 * @param options - Learn options (forceSynthesize, etc.)
-	 * @returns LearnOutput discriminated union
-	 */
-	async learn(batch: unknown[], options?: LearnOptions): Promise<LearnOutput> {
-		if (!this.isInitialized()) {
-			throw new Error('Learner not initialized. Call init() first.')
-		}
-
-		try {
-			const result = await this._learningMethod.learn(
-				this.id,
-				this.instructions,
-				this.understanding,
-				batch,
-				options,
-				{
-					onObserveStarted: (itemCount) => {
-						this.emit('learner:observe:started', {
-							learnerId: this.id,
-							itemCount,
-						})
-					},
-					onObserveThinking: (thoughts) => {
-						this.emit('learner:observe:thinking', {
-							learnerId: this.id,
-							thoughts,
-							usage: { inputTokens: 0, outputTokens: 0, totalTokens: 0 },
-						})
-					},
-					onSynthesizeStarted: (observationCount) => {
-						this.emit('learner:synthesize:started', {
-							learnerId: this.id,
-							observationCount,
-						})
-					},
-					onSynthesizeThinking: (thoughts) => {
-						this.emit('learner:synthesize:thinking', {
-							learnerId: this.id,
-							thoughts,
-							usage: { inputTokens: 0, outputTokens: 0, totalTokens: 0 },
-						})
-					},
-				},
-			)
-
-			// Emit events and update state based on result status
-			await this.handleLearnResult(result)
-
-			return result
-		} catch (err) {
-			const error = err instanceof Error ? err : new Error(String(err))
-			this.emit('learner:learn:failed', {
-				learnerId: this.id,
-				error: error.message,
-			})
-			throw error
-		}
-	}
+	// ── Internal ───────────────────────────────────────────────────────────────
 
 	/**
 	 * Handle learn result - emit events and update state
@@ -710,261 +714,5 @@ export class TextLearner
 				this.checkAndEmitSignals()
 				break
 		}
-	}
-
-	/**
-	 * Query against understanding using the configured query method
-	 *
-	 * @param question - The question or query to answer
-	 * @param options - Optional generation options (temperature, etc.)
-	 * @returns QueryResult with insight, confidence, and gaps
-	 */
-	async query(question: string, options?: QueryOptions): Promise<QueryResult> {
-		this.governance.lastAccessed = new Date()
-		this.metrics.query.count++
-
-		this.emit('learner:query:started', {
-			learnerId: this.id,
-			query: question,
-		})
-
-		// Short-circuit if learner has no knowledge at all
-		if (!this.understanding && this.getBufferState().count === 0) {
-			const emptyResult: QueryResult = {
-				relevant: false,
-				relevance: 0,
-				confidence: 0,
-				insight: '',
-				gaps: '',
-				usage: { inputTokens: 0, outputTokens: 0, totalTokens: 0 },
-			}
-			this.emit('learner:query:completed', {
-				learnerId: this.id,
-				insight: '',
-				relevant: false,
-				relevance: 0,
-				confidence: 0,
-				gaps: [],
-				usage: emptyResult.usage,
-			})
-			return emptyResult
-		}
-
-		// Use buffered observations as fallback when understanding is empty
-		let knowledge = this.understanding
-		if (!knowledge) {
-			const observations = this.getBufferedObservations()
-			knowledge =
-				'Note: This knowledge has not been synthesized yet. These are raw observations.\n\n---\n' +
-				observations.map((obs) => obs.text).join('\n---\n')
-		}
-
-		try {
-			const result = await this._queryMethod.query(
-				{
-					learnerId: this.id,
-					instructions: this.instructions,
-					understanding: knowledge,
-					question,
-				},
-				options,
-				{
-					onThinking: (thoughts, usage) => {
-						this.emit('learner:query:thinking', {
-							learnerId: this.id,
-							thoughts,
-							usage,
-						})
-					},
-				},
-			)
-
-			// Track query metrics for signal detection
-			this.trackQueryMetrics(result)
-
-			this.emit('learner:query:completed', {
-				learnerId: this.id,
-				insight: result.insight,
-				relevant: result.relevant,
-				relevance: result.relevance,
-				confidence: result.confidence,
-				gaps: result.gaps ? result.gaps.split('\n').filter(Boolean) : [],
-				usage: result.usage,
-			})
-
-			// Check signals after query
-			this.checkAndEmitSignals()
-
-			return result
-		} catch (err) {
-			const error = err instanceof Error ? err : new Error(String(err))
-			this.emit('learner:query:failed', {
-				learnerId: this.id,
-				error: error.message,
-			})
-			throw error
-		}
-	}
-
-	/**
-	 * Get a human-readable summary of current understanding
-	 */
-	getSummary(): string {
-		return this.understanding || '(no understanding yet)'
-	}
-
-	/**
-	 * Get learner metadata including governance state
-	 */
-	getMetadata(): LearnerMetadata {
-		return {
-			id: this.id,
-			instructions: this.instructions,
-			origin: this.origin,
-			governance: this.getGovernance(),
-		}
-	}
-
-	/**
-	 * Track an ingestion event (observation received)
-	 */
-	private trackIngestion(dismissed = false): void {
-		this.metrics.ingestion.observationCount++
-		this.metrics.ingestion.observationsSinceLastSynthesis++
-		if (dismissed) {
-			this.metrics.ingestion.dismissalCount++
-		}
-		this.metrics.ingestion.dismissalRate =
-			this.metrics.ingestion.observationCount > 0
-				? this.metrics.ingestion.dismissalCount /
-					this.metrics.ingestion.observationCount
-				: 0
-	}
-
-	/**
-	 * Track query metrics (relevance, confidence, gaps)
-	 */
-	private trackQueryMetrics(result: QueryResult): void {
-		const WINDOW_SIZE = 10
-		const MAX_GAPS = 50
-
-		this.metrics.query.relevanceScores.push(result.relevance)
-		if (this.metrics.query.relevanceScores.length > WINDOW_SIZE) {
-			this.metrics.query.relevanceScores.shift()
-		}
-
-		this.metrics.query.confidenceScores.push(result.confidence)
-		if (this.metrics.query.confidenceScores.length > WINDOW_SIZE) {
-			this.metrics.query.confidenceScores.shift()
-		}
-
-		if (result.gaps) {
-			const gaps = result.gaps.split('\n').filter(Boolean)
-			this.metrics.query.gaps.push(...gaps)
-			if (this.metrics.query.gaps.length > MAX_GAPS) {
-				this.metrics.query.gaps = this.metrics.query.gaps.slice(-MAX_GAPS)
-			}
-		}
-	}
-
-	/**
-	 * Update governance based on relevance of processed data
-	 *
-	 * Uses exponential moving average to smooth activation changes
-	 */
-	private updateGovernance(relevance: number): void {
-		const previousStatus = this.governance.status
-
-		// EMA: weight recent relevance at 20%
-		this.governance.activation =
-			this.governance.activation * 0.8 + relevance * 0.2
-
-		// Update status based on threshold
-		if (this.governance.activation >= this.governance.threshold) {
-			this.governance.status = 'active'
-		}
-
-		this.governance.lastAccessed = new Date()
-
-		// Emit governance updated event
-		this.emit('learner:governance:updated', {
-			learnerId: this.id,
-			activation: this.governance.activation,
-			status: this.governance.status,
-			previousStatus:
-				previousStatus !== this.governance.status ? previousStatus : undefined,
-		})
-	}
-
-	/**
-	 * Check signal thresholds and emit signals if crossed (Living Brain)
-	 */
-	private checkAndEmitSignals(): void {
-		const { signalThresholds } = this.governance
-		const { ingestion, query } = this.metrics
-
-		// Check dismissal rate — fire once, reset when rate drops below threshold
-		if (ingestion.observationCount > 10) {
-			if (ingestion.dismissalRate > signalThresholds.maxDismissalRate) {
-				if (!this.dismissalSignalFired) {
-					this.dismissalSignalFired = true
-					this.emit('learner:signal', {
-						learnerId: this.id,
-						description: `High dismissal rate: rejecting ${(ingestion.dismissalRate * 100).toFixed(0)}% of observations`,
-						timestamp: new Date(),
-						metrics: { dismissalRate: ingestion.dismissalRate },
-					})
-				}
-			} else {
-				this.dismissalSignalFired = false
-			}
-		}
-
-		// Check relevance floor
-		if (query.relevanceScores.length >= 5) {
-			const avgRelevance =
-				query.relevanceScores.reduce((a, b) => a + b, 0) /
-				query.relevanceScores.length
-			if (avgRelevance < signalThresholds.minRelevance) {
-				this.emit('learner:signal', {
-					learnerId: this.id,
-					description: `Low relevance: avg ${avgRelevance.toFixed(2)} over last ${query.relevanceScores.length} queries`,
-					timestamp: new Date(),
-					metrics: { avgRelevance },
-				})
-				this.metrics.query.relevanceScores = []
-			}
-		}
-
-		// Check confidence floor
-		if (query.confidenceScores.length >= 5) {
-			const avgConfidence =
-				query.confidenceScores.reduce((a, b) => a + b, 0) /
-				query.confidenceScores.length
-			if (avgConfidence < signalThresholds.minConfidence) {
-				this.emit('learner:signal', {
-					learnerId: this.id,
-					description: `Low confidence: avg ${avgConfidence.toFixed(2)} over last ${query.confidenceScores.length} queries — has knowledge gaps in its domain`,
-					timestamp: new Date(),
-					metrics: { avgConfidence },
-				})
-				this.metrics.query.confidenceScores = []
-			}
-		}
-
-		// Check synthesis gap (stagnation) — fire once, reset on synthesis
-		if (
-			!this.stagnationSignalFired &&
-			ingestion.observationsSinceLastSynthesis >
-			signalThresholds.maxObservationsWithoutSynthesis
-		) {
-			this.stagnationSignalFired = true
-			this.emit('learner:signal', {
-				learnerId: this.id,
-				description: `Stagnation: no synthesis in ${ingestion.observationsSinceLastSynthesis} observations`,
-				timestamp: new Date(),
-			})
-		}
-
 	}
 }

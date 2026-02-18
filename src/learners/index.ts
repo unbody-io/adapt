@@ -1,4 +1,7 @@
-// Core types
+// Base
+export { BaseLearner } from './base'
+export type { BaseLearnerInit } from './base'
+export type { SharedLearnerEventMap, EventUsage } from './base'
 
 // Schemas
 export {

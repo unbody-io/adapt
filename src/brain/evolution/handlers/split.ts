@@ -47,6 +47,7 @@ export class SplitHandler extends EvolutionActionHandler<SplitActionResult> {
 						this.brain.prompt,
 					),
 					output: Output.object({ schema: splitOutputSchema }),
+					repairSchema: splitOutputSchema,
 				})
 
 				const { learners: splitConfigs } = result.output

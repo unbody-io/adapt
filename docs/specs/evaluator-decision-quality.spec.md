@@ -1,7 +1,8 @@
 # Evaluator Decision Quality
 
-> **Status:** Design Specification
+> **Status:** Implemented
 > **Date:** 2026-02-17
+> **Implemented:** 2026-02-18
 
 ## Problem
 
@@ -98,98 +99,47 @@ interface EvolutionHistoryEntry {
 | `getRecentHistory()` | **New** | Fetch last 10 evaluation decision sets |
 | `finalizeDecisions({ decisions })` | Existing | Terminate evaluation with decisions |
 
-### C. Governance Framework Refactor
+### C. Reasoning-Based Evaluator (replaces fragment-based approach)
 
-Replace single `FRAGMENT_GOVERNANCE` with composable fragments:
+The original spec proposed composable governance fragments (`FRAGMENT_GOVERNANCE_PREAMBLE`, `FRAGMENT_DISMISSAL`, etc.). During implementation, this was replaced with a simpler reasoning-based approach:
 
-#### Shared Governance Preamble
+- **Deleted `prompt.fragments.ts` entirely** — no more prescriptive diagnostic recipes
+- **Rewrote system prompt** with principles instead of procedures:
+  1. Investigate before deciding (use tools to gather evidence)
+  2. Knowledge has value (irreversible to destroy)
+  3. Proportionality (systemic patterns ≠ individual problems)
+  4. Healthy dormancy is success (significant knowledge + high dismissal = correct filtering)
+  5. No action is valid (empty decisions array is legitimate)
+- **Simplified evaluation template** — presents context (learners with raw metrics), signals (with raw metric values), tools, and a generic 4-step task. No fragment injection, no signal type detection, no triage function.
 
-Always injected when governance signals are present. Contains:
+**Why the shift:** The fragment approach was over-prescriptive — it told the LLM *what to check in what order*. The reasoning approach gives the LLM good tools, good principles, and raw data, then lets it reason from evidence. The structural fixes (better tools from sections A and B) were the real solution; the diagnostic recipes were constraining the LLM's reasoning rather than helping it.
 
-1. **Systemic check** (first diagnostic — before any per-signal reasoning):
-   - Are multiple learners showing the same signal type?
-   - If majority show same symptom → likely data stream shift, not individual learner issues
-   - Default bias: no action for systemic patterns
+### D. Additional Fixes (discovered during testing)
 
-2. **Healthy dormancy check**:
-   - Does the learner have significant accumulated knowledge AND high dismissal?
-   - Significant knowledge + high dismissal = learner built its understanding and is correctly filtering irrelevant data
-   - This is healthy behavior — no action needed
+Two related issues found during stress testing:
 
-3. **Cost principle** (moved from current governance fragment):
-   - Accumulated knowledge is irreversible to destroy
-   - The more knowledge, the higher the cost of destructive action
+1. **Observe output: string → string[]** — one LLM call per batch now produces multiple discrete observations, each becoming its own buffer entry. Fixes learners not reaching synthesis threshold (`maxObservations: 10`).
 
-4. **Available actions** reference (update, merge, split, delete, no action)
-
-#### Per-Signal-Type Fragments
-
-Only the relevant fragments are injected based on which signal types are present in the buffer. Each fragment contains:
-- Metric definition (what the number means)
-- Diagnostic steps specific to that signal type
-- Recommended actions for each diagnosis
-
-**`FRAGMENT_DISMISSAL`** — injected when buffer contains high-dismissal signals:
-- `dismissalRate`: ratio of dismissed observations to total observations (0.0-1.0)
-- Diagnostics: scope too narrow? scope mismatched with brain purpose? overlap with other learner?
-- If systemic pattern already identified in preamble → likely no action
-
-**`FRAGMENT_STAGNATION`** — injected when buffer contains stagnation signals:
-- `observationsSinceLastSynthesis`: count of observations processed since last synthesis
-- Diagnostics: topic exhausted (finite topic fully captured)? scope too narrow (nothing passes filter)? data stream dried up?
-- Topic exhaustion = success, not failure
-
-**`FRAGMENT_LOW_CONFIDENCE`** — injected when buffer contains low-confidence signals:
-- `avgConfidence`: rolling average of query confidence scores (0.0-1.0)
-- Diagnostics: understanding too thin? scope too broad (trying to answer everything)? consistently out-of-domain queries?
-
-#### Fragment Composition
-
-For a mixed batch (dismissal + stagnation signals):
-```
-[Shared Governance Preamble]
-[FRAGMENT_DISMISSAL]
-[FRAGMENT_STAGNATION]
-```
-
-For a pure dismissal batch:
-```
-[Shared Governance Preamble]
-[FRAGMENT_DISMISSAL]
-```
-
-This follows the existing pattern where `FRAGMENT_SYSTEM_DIRECTIVE` and `FRAGMENT_GOVERNANCE` are composed based on signal types — just more granular within governance.
-
-### D. Evaluation Prompt Template Updates
-
-**File:** `src/brain/evaluator/prompt.template.evaluation.ts`
-
-Changes to `evaluationPromptTemplate()`:
-
-1. **Add triage summary section** — injected after context, before individual signals
-2. **Replace single governance fragment** — use `detectGovernanceSignalTypes()` to determine which per-type fragments to inject
-3. **Update tool descriptions** — add `getLearnerActivity` and `getRecentHistory` to the available tools section
-4. **Update task instructions** — reference systemic check as first step for governance signals
-
-## System Prompt
-
-No changes to `src/brain/evaluator/prompt.system.ts`. The system prompt (role, actions, cost principle) remains stable.
+2. **Update handler** — removed `targets.length === 1` guard, now loops over all targets in a decision. Fixes crash when evaluator batches multiple learners in one update decision.
 
 ## Files Changed
 
 | File | Change |
 |------|--------|
-| `src/brain/evaluator/prompt.fragments.ts` | Replace `FRAGMENT_GOVERNANCE` with preamble + per-type fragments |
-| `src/brain/evaluator/prompt.template.evaluation.ts` | Add triage summary, compose per-type fragments, update tool descriptions |
+| `src/brain/evaluator/prompt.system.ts` | Rewritten — principles-based system prompt |
+| `src/brain/evaluator/prompt.template.evaluation.ts` | Simplified — presents data + tools, no fragments |
+| `src/brain/evaluator/prompt.fragments.ts` | **Deleted** — prescriptive fragments removed |
 | `src/brain/evaluator/tools/getLearnerActivity.ts` | **New** — tool implementation |
 | `src/brain/evaluator/tools/getRecentHistory.ts` | **New** — tool implementation |
-| `src/brain/evaluator/class.ts` | Add evolution history log, wire new tools, add triage step |
-| `src/brain/evaluator/types.ts` | Add LearnerActivity, EvolutionHistoryEntry types |
-| `src/learners/text-learner/class.ts` | Expose `getActivity()` method (returns metrics + buffered observations) |
+| `src/brain/evaluator/tools/index.ts` | Export new tools |
+| `src/brain/evaluator/class.ts` | Add evolution history log, wire 4 tools |
+| `src/brain/evaluator/types.ts` | Add `LearnerActivity`, `EvolutionHistoryEntry` types |
+| `src/learners/text-learner/class.ts` | Expose `getActivity()` method |
+| `src/brain/evolution/handlers/update.ts` | Fix multi-target update loop |
+| `src/learners/text-learner/learning-methods/two-phase/observe/*` | Observe output string → string[] |
 
 ## Verification
 
-1. **Type check**: `bun run build`
-2. **Re-run evolution lifecycle test** — inject noise after building understanding
-3. **Expected**: evaluator sees systemic pattern, identifies healthy dormancy, takes no destructive action on learners with significant knowledge
-4. **Regression**: purpose change (FRAGMENT_SYSTEM_DIRECTIVE) decisions should be unaffected
+1. **Type check**: `bun run build` — passes
+2. **Stress test**: `tests/evaluator-stress.ts` — all 5 evolution actions verified passing
+3. **Expected**: evaluator sees systemic pattern, identifies healthy dormancy, no destructive actions on learners with significant knowledge

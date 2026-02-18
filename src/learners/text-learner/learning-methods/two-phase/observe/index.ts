@@ -42,6 +42,7 @@ export async function initObserve(
 		model,
 		prompt,
 		output: Output.object({ schema: observeIdentitySchema }),
+		repairSchema: observeIdentitySchema,
 	})
 
 	const systemPrompt = observeSystemPromptTemplate(identity)
@@ -72,6 +73,7 @@ export async function observe(
 			system: systemPrompt,
 			prompt,
 			output: Output.object({ schema: observeOutputSchema }),
+			repairSchema: observeOutputSchema,
 			temperature: 0.2,
 		})
 

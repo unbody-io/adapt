@@ -808,6 +808,55 @@ app.post('/brain/evolve/delete', async (c) => {
 	}
 })
 
+// --- Learner Action Endpoints ---
+
+app.post('/brain/learners/:id/synthesize', async (c) => {
+	if (!brain) {
+		return c.json({ error: 'Brain not initialized. Call /brain/init first.' }, 400)
+	}
+
+	const learnerId = c.req.param('id')
+	const learner = brain.getLearner(learnerId)
+	if (!learner) {
+		return c.json({ error: `Learner ${learnerId} not found` }, 404)
+	}
+
+	try {
+		const result = await learner.learn([], { forceSynthesize: true })
+		return c.json({ ok: true, result })
+	} catch (error) {
+		const message = extractErrorMessage(error)
+		console.error('[Force Synthesis Error]', error)
+		return c.json({ error: message }, 500)
+	}
+})
+
+app.post('/brain/learners/:id/query', async (c) => {
+	if (!brain) {
+		return c.json({ error: 'Brain not initialized. Call /brain/init first.' }, 400)
+	}
+
+	const learnerId = c.req.param('id')
+	const learner = brain.getLearner(learnerId)
+	if (!learner) {
+		return c.json({ error: `Learner ${learnerId} not found` }, 404)
+	}
+
+	const body = await c.req.json<{ query: string }>()
+	if (!body.query) {
+		return c.json({ error: 'query is required' }, 400)
+	}
+
+	try {
+		const result = await learner.query(body.query)
+		return c.json(result)
+	} catch (error) {
+		const message = extractErrorMessage(error)
+		console.error('[Learner Query Error]', error)
+		return c.json({ error: message }, 500)
+	}
+})
+
 // --- Claude Session Endpoints ---
 
 app.get('/claude/projects', async (c) => {

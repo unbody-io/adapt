@@ -49,6 +49,7 @@ export class MergeHandler extends EvolutionActionHandler<MergeActionResult> {
 						this.brain.prompt,
 					),
 					output: Output.object({ schema: mergeOutputSchema }),
+					repairSchema: mergeOutputSchema,
 				})
 
 				const { config, understanding } = result.output

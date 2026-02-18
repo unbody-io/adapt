@@ -134,6 +134,7 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 			model: this.config.init.model,
 			prompt: rootDecompositionPrompt(this.prompt),
 			output: Output.object({ schema: brainDecompositionSchema }),
+			repairSchema: brainDecompositionSchema,
 		})
 	}
 

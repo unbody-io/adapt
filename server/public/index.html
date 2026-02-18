@@ -200,8 +200,8 @@
     /* Learner Cards */
     .learners-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: 12px;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 14px;
       padding: 16px;
     }
 
@@ -347,6 +347,220 @@
       color: #888;
     }
 
+    .learner-card-actions {
+      display: flex;
+      gap: 6px;
+      padding-top: 8px;
+      border-top: 1px solid #222;
+    }
+
+    .learner-card-actions button {
+      font-size: 10px;
+      padding: 3px 8px;
+      background: #1a1a1a;
+      border: 1px solid #333;
+      color: #888;
+      border-radius: 4px;
+      cursor: pointer;
+      width: auto;
+    }
+
+    .learner-card-actions button:hover { color: #fff; border-color: #555; }
+    .learner-card-actions button.danger { color: #f87171; }
+    .learner-card-actions button.danger:hover { border-color: #f87171; }
+
+    /* Aggregate dashboard bar */
+    .brain-dashboard {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+      gap: 8px;
+      margin-bottom: 12px;
+      padding: 0 2px;
+    }
+
+    .dash-stat {
+      background: #111;
+      border-radius: 6px;
+      padding: 14px 12px;
+      text-align: center;
+    }
+
+    .dash-stat .dash-value {
+      font-size: 28px;
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+      color: #e0e0e0;
+      line-height: 1.2;
+    }
+
+    .dash-stat .dash-label {
+      font-size: 10px;
+      color: #555;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-top: 4px;
+    }
+
+    .dash-stat.accent-green .dash-value { color: #4ade80; }
+    .dash-stat.accent-amber .dash-value { color: #f59e0b; }
+    .dash-stat.accent-red .dash-value { color: #f87171; }
+    .dash-stat.accent-blue .dash-value { color: #60a5fa; }
+
+    /* Visual gauges row on cards */
+    .card-gauges {
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
+      padding: 12px 0;
+      gap: 8px;
+      border-bottom: 1px solid #1a1a1a;
+      margin-bottom: 10px;
+    }
+
+    .gauge-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .gauge-item canvas {
+      display: block;
+    }
+
+    .gauge-label {
+      font-size: 10px;
+      color: #555;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+
+    /* Activity sparkline */
+    .card-activity {
+      padding: 6px 0;
+      border-bottom: 1px solid #1a1a1a;
+      margin-bottom: 10px;
+    }
+
+    .activity-legend {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      margin-top: 5px;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 10px;
+      color: #555;
+    }
+    .legend-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+    .card-compact-stats {
+      display: flex;
+      justify-content: space-around;
+      padding: 10px 0;
+      border-bottom: 1px solid #1a1a1a;
+      margin-bottom: 10px;
+    }
+    .compact-stat {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+    }
+    .compact-value {
+      font-size: 20px;
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+      color: #ccc;
+    }
+    .compact-label {
+      font-size: 10px;
+      color: #555;
+      text-transform: uppercase;
+    }
+    .card-understanding-growth {
+      padding: 6px 0;
+      margin-bottom: 8px;
+    }
+    .understanding-growth-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 4px;
+    }
+    .understanding-growth-label {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 10px;
+      color: #666;
+    }
+    .understanding-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #333;
+      display: inline-block;
+    }
+    .understanding-dot.has {
+      background: #4ade80;
+      box-shadow: 0 0 4px #4ade8066;
+    }
+    .understanding-strategy {
+      font-size: 10px;
+      color: #555;
+      background: #1a1a1a;
+      padding: 1px 6px;
+      border-radius: 3px;
+    }
+    .understanding-growth-canvas {
+      display: block;
+      border-radius: 4px;
+    }
+
+    .modal-header-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .modal-delete-btn {
+      font-size: 11px;
+      padding: 4px 10px;
+      background: #2a1a1a;
+      border: 1px solid #7f1d1d;
+      color: #f87171;
+      border-radius: 4px;
+      cursor: pointer;
+      width: auto;
+    }
+
+    .modal-delete-btn:hover { background: #3a1a1a; border-color: #f87171; }
+
+    .modal-force-synth {
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid #222;
+    }
+
+    #modalQueryResult {
+      margin-top: 12px;
+      font-size: 12px;
+      white-space: pre-wrap;
+      color: #ccc;
+      background: #111;
+      border-radius: 4px;
+      padding: 10px;
+      line-height: 1.5;
+    }
+
     /* Last synthesis indicator */
     /* Synthesis Stats */
     .synth-stats {
@@ -386,9 +600,13 @@
       background: #111; border-radius: 4px; padding: 6px 8px;
       margin-bottom: 8px; font-size: 10px;
     }
-    .signal-metrics-title {
-      color: #555; font-weight: 600; text-transform: uppercase;
-      letter-spacing: 0.3px; margin-bottom: 4px;
+    .signal-metrics-group {
+      margin-bottom: 6px;
+    }
+    .signal-metrics-group:last-child { margin-bottom: 0; }
+    .signal-group-label {
+      color: #444; font-size: 9px; font-weight: 600; text-transform: uppercase;
+      letter-spacing: 0.5px; margin-bottom: 3px;
     }
     .signal-row {
       display: flex; align-items: center; gap: 6px; margin-bottom: 3px;
@@ -408,6 +626,10 @@
     }
     .signal-row .signal-value.warn { color: #f59e0b; }
     .signal-row .signal-value.danger { color: #ef4444; }
+    .signal-counts {
+      display: flex; gap: 8px; color: #444; font-size: 9px; margin-top: 2px;
+    }
+    .signal-counts span { font-variant-numeric: tabular-nums; }
 
     .learner-last-synthesis {
       font-size: 11px;
@@ -725,6 +947,60 @@
       color: #555;
       border-top: 1px solid #222;
     }
+    .qa-sources-summary {
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .qa-sources-summary:hover { color: #888; }
+    .qa-sources-summary .chevron {
+      font-size: 8px;
+      transition: transform 0.15s;
+    }
+    .qa-sources-summary .chevron.open { transform: rotate(90deg); }
+    .qa-sources-detail {
+      display: none;
+      padding: 6px 0 2px 8px;
+      border-left: 2px solid #333;
+      margin-top: 4px;
+    }
+    .qa-sources-detail.open { display: block; }
+    .qa-source-item {
+      margin-bottom: 4px;
+      color: #666;
+    }
+    .qa-source-item .source-id { color: #4ade80; }
+    .qa-source-item .source-scores { color: #888; }
+    .qa-source-item .source-insight {
+      display: block;
+      color: #555;
+      font-style: italic;
+      margin-left: 8px;
+      margin-top: 1px;
+    }
+    .qa-gaps {
+      padding: 4px 12px 6px;
+      font-size: 10px;
+      color: #555;
+    }
+    .qa-gaps-summary {
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      color: #d97706;
+    }
+    .qa-gaps-summary:hover { color: #f59e0b; }
+    .qa-gaps-detail {
+      display: none;
+      padding: 4px 0 2px 8px;
+      border-left: 2px solid #92400e;
+      margin-top: 4px;
+      color: #b45309;
+    }
+    .qa-gaps-detail.open { display: block; }
+    .qa-gap-item { margin-bottom: 2px; }
 
     .qa-empty {
       text-align: center;
@@ -1690,6 +1966,38 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
 
         </div><!-- /section-evolution -->
 
+        <!-- Evolution Actions -->
+        <div class="section-title collapsible-toggle" data-target="section-evo-actions">Evolution Actions <span class="section-chevron">&#9656;</span></div>
+        <div class="section-body collapsed" id="section-evo-actions">
+          <button id="evaluateNowBtn" class="secondary" style="width:100%;margin-bottom:8px;" disabled>Evaluate Now</button>
+
+          <div style="font-size:11px;color:#666;text-transform:uppercase;letter-spacing:0.5px;margin:8px 0 4px;">Send Signal</div>
+          <div class="form-group">
+            <input type="text" id="signalSource" placeholder="Source (e.g. manual)" style="font-size:12px;">
+          </div>
+          <div class="form-group">
+            <textarea id="signalDescription" rows="2" placeholder="Signal description..." style="font-size:12px;"></textarea>
+          </div>
+          <button id="sendSignalBtn" class="secondary" style="width:100%;margin-bottom:8px;" disabled>Send Signal</button>
+
+          <hr style="border:none;border-top:1px solid #333;margin:10px 0;">
+
+          <div style="font-size:11px;color:#666;text-transform:uppercase;letter-spacing:0.5px;margin:8px 0 4px;">Create Learner (Guidance)</div>
+          <div class="form-group">
+            <textarea id="createGuidance" rows="2" placeholder="Describe what this learner should track..." style="font-size:12px;"></textarea>
+          </div>
+          <button id="createViaGuidanceBtn" class="secondary" style="width:100%;margin-bottom:8px;" disabled>Create via Guidance</button>
+
+          <div style="font-size:11px;color:#666;text-transform:uppercase;letter-spacing:0.5px;margin:8px 0 4px;">Merge Learners</div>
+          <div id="mergeLearnerList" style="max-height:120px;overflow-y:auto;margin-bottom:4px;font-size:12px;">
+            <span style="color:#666;">Initialize brain first</span>
+          </div>
+          <div class="form-group">
+            <textarea id="mergeGuidance" rows="2" placeholder="Guidance for merging..." style="font-size:12px;"></textarea>
+          </div>
+          <button id="mergeLearnersBtn" class="secondary" style="width:100%;" disabled>Merge Selected</button>
+        </div><!-- /section-evo-actions -->
+
         <!-- Maintenance Config -->
         <div class="section-title collapsible-toggle" data-target="section-maintenance">Maintenance <span class="section-chevron">&#9662;</span></div>
         <div class="section-body" id="section-maintenance">
@@ -1863,6 +2171,33 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
         <button id="addLearnerBtn" class="secondary" style="font-size:11px;padding:3px 10px;display:none;">+ Add Learner</button>
       </div>
 
+      <div class="brain-dashboard" id="brainDashboard" style="display:none;">
+        <div class="dash-stat accent-green">
+          <div class="dash-value" id="dashObserved">0</div>
+          <div class="dash-label">Observed</div>
+        </div>
+        <div class="dash-stat accent-amber">
+          <div class="dash-value" id="dashDismissed">0</div>
+          <div class="dash-label">Dismissed</div>
+        </div>
+        <div class="dash-stat accent-blue">
+          <div class="dash-value" id="dashSyntheses">0</div>
+          <div class="dash-label">Syntheses</div>
+        </div>
+        <div class="dash-stat">
+          <div class="dash-value" id="dashQueries">0</div>
+          <div class="dash-label">Queries</div>
+        </div>
+        <div class="dash-stat">
+          <div class="dash-value" id="dashDismissalRate">0%</div>
+          <div class="dash-label">Dismissal Rate</div>
+        </div>
+        <div class="dash-stat accent-green">
+          <div class="dash-value" id="dashActiveLearners">0</div>
+          <div class="dash-label">Active</div>
+        </div>
+      </div>
+
       <div class="learners-grid" id="learnersGrid">
         <div class="empty-state">
           <h3>No learners yet</h3>
@@ -1928,7 +2263,10 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
     <div class="modal">
       <div class="modal-header">
         <h2 id="modalTitle">Learner Details</h2>
-        <button class="modal-close" onclick="closeModal()">&times;</button>
+        <div class="modal-header-actions">
+          <button class="modal-delete-btn" id="modalDeleteBtn" onclick="deleteFromModal()">Delete</button>
+          <button class="modal-close" onclick="closeModal()">&times;</button>
+        </div>
       </div>
       <div class="modal-body">
         <div class="modal-tabs">
@@ -1938,6 +2276,7 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
           <button class="modal-tab" data-tab="synthesize">Synthesize Prompt</button>
           <button class="modal-tab" data-tab="understanding">Understanding</button>
           <button class="modal-tab" data-tab="config">Config</button>
+          <button class="modal-tab" data-tab="query">Query</button>
         </div>
 
         <div class="modal-tab-content active" id="modal-overview">
@@ -1955,7 +2294,10 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
             <label>Instructions</label>
             <textarea id="modalInstructions" rows="5" style="font-size:12px;"></textarea>
           </div>
-          <button id="saveOverviewBtn" class="secondary" style="margin-top:8px;">Save Changes</button>
+          <div style="display:flex;gap:8px;margin-top:8px;">
+            <button id="saveOverviewBtn" class="secondary">Save Changes</button>
+            <button id="forceSynthBtn" class="secondary" style="background:#1a2f1a;border-color:#166534;color:#4ade80;">Force Synthesis</button>
+          </div>
           <div class="form-row" style="margin-top:12px;">
             <div class="form-group">
               <label>Status</label>
@@ -2054,6 +2396,17 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
         <div class="modal-tab-content" id="modal-config">
           <pre id="modalConfig"></pre>
         </div>
+
+        <div class="modal-tab-content" id="modal-query">
+          <div class="form-group">
+            <label>Ask this learner a question</label>
+            <div style="display:flex;gap:8px;">
+              <input type="text" id="modalQueryInput" placeholder="e.g. What do you know about...">
+              <button id="modalQueryBtn" class="secondary" style="white-space:nowrap;">Ask</button>
+            </div>
+          </div>
+          <div id="modalQueryResult" style="display:none;"></div>
+        </div>
       </div>
     </div>
   </div>
@@ -2098,9 +2451,310 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
     // --- Utility Functions ---
     function ensureLearnerMetrics(learnerId) {
       if (!learnerMetrics[learnerId]) {
-        learnerMetrics[learnerId] = { observations: 0, dismissals: 0, syntheses: 0, lastSynthesisObs: 0, queryConfidences: [] }
+        learnerMetrics[learnerId] = { observations: 0, dismissals: 0, syntheses: 0, lastSynthesisObs: 0, queryConfidences: [], events: [], understandingSizes: [] }
       }
       return learnerMetrics[learnerId]
+    }
+
+    // Track a timestamped event for sparklines (keep last 60)
+    function trackEvent(learnerId, type) {
+      const m = ensureLearnerMetrics(learnerId)
+      m.events.push({ t: Date.now(), type })
+      if (m.events.length > 60) m.events.shift()
+    }
+
+    // --- Canvas Gauge Drawing ---
+
+    function drawRingGauge(canvas, pct, label, color) {
+      const ctx = canvas.getContext('2d')
+      const dpr = window.devicePixelRatio || 1
+      const size = 72
+      canvas.width = size * dpr
+      canvas.height = size * dpr
+      canvas.style.width = size + 'px'
+      canvas.style.height = size + 'px'
+      ctx.scale(dpr, dpr)
+
+      const cx = size / 2, cy = size / 2, r = 28, lw = 6
+      const startAngle = -Math.PI / 2
+      const endAngle = startAngle + (2 * Math.PI * Math.min(1, pct))
+
+      // Background ring
+      ctx.beginPath()
+      ctx.arc(cx, cy, r, 0, 2 * Math.PI)
+      ctx.strokeStyle = '#222'
+      ctx.lineWidth = lw
+      ctx.stroke()
+
+      // Fill ring
+      if (pct > 0) {
+        ctx.beginPath()
+        ctx.arc(cx, cy, r, startAngle, endAngle)
+        ctx.strokeStyle = color
+        ctx.lineWidth = lw
+        ctx.lineCap = 'round'
+        ctx.stroke()
+      }
+
+      // Center text
+      ctx.fillStyle = color
+      ctx.font = 'bold 13px system-ui'
+      ctx.textAlign = 'center'
+      ctx.textBaseline = 'middle'
+      ctx.fillText(label, cx, cy)
+    }
+
+    function drawArcGauge(canvas, value, max, threshWarn, threshDanger, invert) {
+      const ctx = canvas.getContext('2d')
+      const dpr = window.devicePixelRatio || 1
+      const w = 72, h = 44
+      canvas.width = w * dpr
+      canvas.height = h * dpr
+      canvas.style.width = w + 'px'
+      canvas.style.height = h + 'px'
+      ctx.scale(dpr, dpr)
+
+      const cx = w / 2, cy = h - 6, r = 26, lw = 6
+      const startAngle = Math.PI
+      const pct = max > 0 ? Math.min(1, value / max) : 0
+      const sweepAngle = Math.PI * pct
+
+      // Determine color (invert: high = green, low = red)
+      let color
+      if (invert) {
+        color = '#ef4444'
+        if (pct >= threshWarn) color = '#f59e0b'
+        if (pct >= threshDanger) color = '#4ade80'
+      } else {
+        color = '#4ade80'
+        if (pct >= threshWarn) color = '#f59e0b'
+        if (pct >= 1) color = '#ef4444'
+      }
+
+      // Background arc
+      ctx.beginPath()
+      ctx.arc(cx, cy, r, startAngle, 0)
+      ctx.strokeStyle = '#222'
+      ctx.lineWidth = lw
+      ctx.lineCap = 'round'
+      ctx.stroke()
+
+      // Fill arc
+      if (pct > 0) {
+        ctx.beginPath()
+        ctx.arc(cx, cy, r, startAngle, startAngle + sweepAngle)
+        ctx.strokeStyle = color
+        ctx.lineWidth = lw
+        ctx.lineCap = 'round'
+        ctx.stroke()
+      }
+
+      // Value text
+      ctx.fillStyle = color
+      ctx.font = 'bold 12px system-ui'
+      ctx.textAlign = 'center'
+      ctx.textBaseline = 'bottom'
+      ctx.fillText(typeof value === 'number' ? (value * 100).toFixed(0) + '%' : '—', cx, cy - 2)
+    }
+
+    function drawActivityChart(canvas, events, windowMs) {
+      const ctx = canvas.getContext('2d')
+      const dpr = window.devicePixelRatio || 1
+      const w = canvas.parentElement?.clientWidth || 200
+      const h = 64
+      canvas.width = w * dpr
+      canvas.height = h * dpr
+      canvas.style.width = w + 'px'
+      canvas.style.height = h + 'px'
+      ctx.scale(dpr, dpr)
+
+      const now = Date.now()
+      const start = now - windowMs
+      const bucketCount = Math.min(40, Math.floor(w / 4))
+      const bucketMs = windowMs / bucketCount
+      const midY = h / 2
+
+      // Background
+      ctx.fillStyle = '#0a0a0a'
+      ctx.fillRect(0, 0, w, h)
+
+      // Divider line between ingest (top) and query (bottom)
+      ctx.strokeStyle = '#1a1a1a'
+      ctx.lineWidth = 1
+      ctx.beginPath()
+      ctx.moveTo(0, midY)
+      ctx.lineTo(w, midY)
+      ctx.stroke()
+
+      // Lane labels
+      ctx.font = '9px system-ui'
+      ctx.fillStyle = '#444'
+      ctx.textAlign = 'left'
+      ctx.fillText('ingest', 2, 8)
+      ctx.fillText('query', 2, h - 2)
+
+      // Bucket events
+      const ingestBuckets = new Array(bucketCount).fill(null).map(() => ({ observed: 0, dismissed: 0, synthesized: 0 }))
+      const queryBuckets = new Array(bucketCount).fill(0)
+
+      events.forEach(ev => {
+        if (ev.t < start) return
+        const bi = Math.min(bucketCount - 1, Math.floor((ev.t - start) / bucketMs))
+        if (ev.type === 'query') queryBuckets[bi]++
+        else if (ev.type === 'observed') ingestBuckets[bi].observed++
+        else if (ev.type === 'dismissed') ingestBuckets[bi].dismissed++
+        else if (ev.type === 'synthesized') ingestBuckets[bi].synthesized++
+      })
+
+      // Find max for scaling
+      const maxIngest = Math.max(1, ...ingestBuckets.map(b => b.observed + b.dismissed + b.synthesized))
+      const maxQuery = Math.max(1, ...queryBuckets)
+      const barW = Math.max(2, (w / bucketCount) - 1)
+      const laneH = midY - 2
+
+      // Draw ingest bars (stacked, growing upward from midline)
+      for (let i = 0; i < bucketCount; i++) {
+        const b = ingestBuckets[i]
+        const total = b.observed + b.dismissed + b.synthesized
+        if (total === 0) continue
+        const x = (i / bucketCount) * w
+        const fullH = (total / maxIngest) * laneH
+        let y = midY - 1
+
+        // Observed (green)
+        if (b.observed > 0) {
+          const bh = (b.observed / total) * fullH
+          ctx.fillStyle = '#4ade80'
+          ctx.fillRect(x, y - bh, barW, bh)
+          y -= bh
+        }
+        // Dismissed (amber)
+        if (b.dismissed > 0) {
+          const bh = (b.dismissed / total) * fullH
+          ctx.fillStyle = '#f59e0b'
+          ctx.fillRect(x, y - bh, barW, bh)
+          y -= bh
+        }
+        // Synthesized (blue)
+        if (b.synthesized > 0) {
+          const bh = (b.synthesized / total) * fullH
+          ctx.fillStyle = '#60a5fa'
+          ctx.fillRect(x, y - bh, barW, bh)
+        }
+      }
+
+      // Draw query bars (growing downward from midline)
+      for (let i = 0; i < bucketCount; i++) {
+        if (queryBuckets[i] === 0) continue
+        const x = (i / bucketCount) * w
+        const bh = (queryBuckets[i] / maxQuery) * laneH
+        ctx.fillStyle = '#a78bfa'
+        ctx.fillRect(x, midY + 1, barW, bh)
+      }
+    }
+
+    function drawUnderstandingGrowth(canvas, sizes, currentSize) {
+      const ctx = canvas.getContext('2d')
+      const dpr = window.devicePixelRatio || 1
+      const w = canvas.parentElement?.clientWidth || 200
+      const h = 40
+      canvas.width = w * dpr
+      canvas.height = h * dpr
+      canvas.style.width = w + 'px'
+      canvas.style.height = h + 'px'
+      ctx.scale(dpr, dpr)
+
+      // Background
+      ctx.fillStyle = '#0a0a0a'
+      ctx.fillRect(0, 0, w, h)
+
+      // Build data points: include initial 0 + each synthesis snapshot + current
+      const points = [{ size: 0 }]
+      sizes.forEach(s => points.push(s))
+      if (currentSize > 0 && (points.length === 1 || points[points.length - 1].size !== currentSize)) {
+        points.push({ size: currentSize })
+      }
+
+      if (points.length < 2) {
+        ctx.fillStyle = '#333'
+        ctx.font = '10px system-ui'
+        ctx.textAlign = 'center'
+        ctx.fillText('No synthesis yet', w / 2, h / 2 + 3)
+        return
+      }
+
+      const maxSize = Math.max(...points.map(p => p.size), 1)
+      const pad = 2
+
+      // Draw filled area
+      ctx.beginPath()
+      ctx.moveTo(pad, h - pad)
+      points.forEach((p, i) => {
+        const x = pad + (i / (points.length - 1)) * (w - pad * 2)
+        const y = (h - pad) - (p.size / maxSize) * (h - pad * 2)
+        ctx.lineTo(x, y)
+      })
+      ctx.lineTo(w - pad, h - pad)
+      ctx.closePath()
+      ctx.fillStyle = 'rgba(74, 222, 128, 0.15)'
+      ctx.fill()
+
+      // Draw line
+      ctx.beginPath()
+      points.forEach((p, i) => {
+        const x = pad + (i / (points.length - 1)) * (w - pad * 2)
+        const y = (h - pad) - (p.size / maxSize) * (h - pad * 2)
+        if (i === 0) ctx.moveTo(x, y)
+        else ctx.lineTo(x, y)
+      })
+      ctx.strokeStyle = '#4ade80'
+      ctx.lineWidth = 1.5
+      ctx.stroke()
+
+      // Draw dots at each synthesis point
+      points.forEach((p, i) => {
+        if (i === 0) return
+        const x = pad + (i / (points.length - 1)) * (w - pad * 2)
+        const y = (h - pad) - (p.size / maxSize) * (h - pad * 2)
+        ctx.beginPath()
+        ctx.arc(x, y, 2.5, 0, 2 * Math.PI)
+        ctx.fillStyle = '#4ade80'
+        ctx.fill()
+      })
+
+      // Current size label at top-right
+      ctx.fillStyle = '#4ade80'
+      ctx.font = 'bold 10px system-ui'
+      ctx.textAlign = 'right'
+      ctx.fillText(currentSize >= 1000 ? (currentSize / 1000).toFixed(1) + 'K' : currentSize + '', w - 4, 11)
+    }
+
+    // --- Dashboard Update ---
+    function updateDashboard() {
+      let totalObs = 0, totalDis = 0, totalSynth = 0, totalQueries = 0, activeLearners = 0
+      Object.keys(learnerMetrics).forEach(id => {
+        const m = learnerMetrics[id]
+        totalObs += m.observations
+        totalDis += m.dismissals
+        totalSynth += m.syntheses
+        totalQueries += m.queryConfidences.length
+      })
+      Object.keys(learnerStates).forEach(id => {
+        const gov = learnerStates[id]?.data?.governance
+        if (gov && gov.status === 'active') activeLearners++
+      })
+      const rate = totalObs > 0 ? ((totalDis / totalObs) * 100).toFixed(0) : '0'
+      document.getElementById('dashObserved').textContent = totalObs
+      document.getElementById('dashDismissed').textContent = totalDis
+      document.getElementById('dashSyntheses').textContent = totalSynth
+      document.getElementById('dashQueries').textContent = totalQueries
+      document.getElementById('dashDismissalRate').textContent = rate + '%'
+      document.getElementById('dashActiveLearners').textContent = activeLearners
+    }
+
+    function formatSize(chars) {
+      if (chars >= 1000) return (chars / 1000).toFixed(1) + 'K chars'
+      return chars + ' chars'
     }
 
     function escapeHtml(text) {
@@ -2327,6 +2981,120 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
 
     learnerModal.addEventListener('click', (e) => {
       if (e.target === learnerModal) closeModal()
+    })
+
+    // --- Learner Lifecycle Actions ---
+
+    async function deleteLearnerFromCard(learnerId) {
+      if (!confirm(`Delete learner "${learnerId}"? This will destroy all accumulated knowledge.`)) return
+      try {
+        const res = await fetch('/brain/evolve/delete', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ learnerId })
+        })
+        if (!res.ok) throw new Error((await res.json()).error)
+        showToast(`Deleted learner: ${learnerId}`, 'success')
+        await updateLearners()
+      } catch (err) {
+        showToast(`Delete failed: ${err.message}`, 'error')
+      }
+    }
+
+    async function splitLearnerFromCard(learnerId) {
+      const guidance = prompt('Describe how to split this learner (guidance):')
+      if (!guidance) return
+      try {
+        const res = await fetch('/brain/evolve/split', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ learnerId, guidance })
+        })
+        if (!res.ok) throw new Error((await res.json()).error)
+        showToast(`Split initiated for: ${learnerId}`, 'success')
+        await updateLearners()
+      } catch (err) {
+        showToast(`Split failed: ${err.message}`, 'error')
+      }
+    }
+
+    async function deleteFromModal() {
+      if (!currentModalLearnerId) return
+      if (!confirm(`Delete learner "${currentModalLearnerId}"? This will destroy all accumulated knowledge.`)) return
+      try {
+        const res = await fetch('/brain/evolve/delete', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ learnerId: currentModalLearnerId })
+        })
+        if (!res.ok) throw new Error((await res.json()).error)
+        showToast(`Deleted learner: ${currentModalLearnerId}`, 'success')
+        closeModal()
+        await updateLearners()
+      } catch (err) {
+        showToast(`Delete failed: ${err.message}`, 'error')
+      }
+    }
+
+    document.getElementById('forceSynthBtn').addEventListener('click', async () => {
+      if (!currentModalLearnerId) return
+      const btn = document.getElementById('forceSynthBtn')
+      btn.disabled = true
+      btn.textContent = 'Synthesizing...'
+      try {
+        const res = await fetch(`/brain/learners/${currentModalLearnerId}/synthesize`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' }
+        })
+        if (!res.ok) throw new Error((await res.json()).error)
+        showToast(`Force synthesis completed for: ${currentModalLearnerId}`, 'success')
+        await updateLearners()
+        openLearnerModal(currentModalLearnerId) // Refresh modal
+      } catch (err) {
+        showToast(`Synthesis failed: ${err.message}`, 'error')
+      } finally {
+        btn.disabled = false
+        btn.textContent = 'Force Synthesis'
+      }
+    })
+
+    document.getElementById('modalQueryBtn').addEventListener('click', async () => {
+      const input = document.getElementById('modalQueryInput')
+      const resultEl = document.getElementById('modalQueryResult')
+      const query = input.value.trim()
+      if (!query || !currentModalLearnerId) return
+
+      const btn = document.getElementById('modalQueryBtn')
+      btn.disabled = true
+      btn.textContent = 'Asking...'
+      resultEl.style.display = 'block'
+      resultEl.textContent = 'Loading...'
+
+      try {
+        const res = await fetch(`/brain/learners/${currentModalLearnerId}/query`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ query })
+        })
+        if (!res.ok) throw new Error((await res.json()).error)
+        const data = await res.json()
+        resultEl.textContent = [
+          `Relevant: ${data.relevant ? 'Yes' : 'No'}`,
+          `Relevance: ${(data.relevance ?? 0).toFixed(2)}  |  Confidence: ${(data.confidence ?? 0).toFixed(2)}`,
+          '',
+          data.insight || '(no insight)',
+          data.gaps ? `\nGaps: ${data.gaps}` : ''
+        ].join('\n')
+      } catch (err) {
+        resultEl.textContent = `Error: ${err.message}`
+      } finally {
+        btn.disabled = false
+        btn.textContent = 'Ask'
+      }
+    })
+
+    document.getElementById('modalQueryInput').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') document.getElementById('modalQueryBtn').click()
     })
 
     // --- Model Options Helper ---
@@ -2655,6 +3423,140 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
       }
     })
 
+    // --- Evolution Actions ---
+    const evaluateNowBtn = document.getElementById('evaluateNowBtn')
+    const sendSignalBtn = document.getElementById('sendSignalBtn')
+    const createViaGuidanceBtn = document.getElementById('createViaGuidanceBtn')
+    const mergeLearnersBtn = document.getElementById('mergeLearnersBtn')
+
+    evaluateNowBtn.addEventListener('click', async () => {
+      evaluateNowBtn.disabled = true
+      evaluateNowBtn.innerHTML = '<span class="spinner"></span> Evaluating...'
+      try {
+        const res = await fetch('/brain/evaluate', { method: 'POST' })
+        const data = await res.json()
+        if (res.ok) {
+          showToast('synthesized', 'evaluator', `${data.decisions?.length || 0} decisions`)
+        } else {
+          showToast('critical', 'evaluator', 'Evaluate failed: ' + data.error)
+        }
+      } catch (err) {
+        showToast('critical', 'evaluator', 'Error: ' + err.message)
+      } finally {
+        evaluateNowBtn.disabled = false
+        evaluateNowBtn.textContent = 'Evaluate Now'
+      }
+    })
+
+    sendSignalBtn.addEventListener('click', async () => {
+      const source = document.getElementById('signalSource').value.trim()
+      const description = document.getElementById('signalDescription').value.trim()
+      if (!description) { showToast('critical', 'signal', 'Description is required'); return }
+      sendSignalBtn.disabled = true
+      sendSignalBtn.innerHTML = '<span class="spinner"></span> Sending...'
+      try {
+        const res = await fetch('/brain/signal', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ source: source || 'manual', description }),
+        })
+        if (res.ok) {
+          showToast('observed', 'signal', 'Signal sent')
+          document.getElementById('signalSource').value = ''
+          document.getElementById('signalDescription').value = ''
+        } else {
+          const data = await res.json()
+          showToast('critical', 'signal', 'Failed: ' + data.error)
+        }
+      } catch (err) {
+        showToast('critical', 'signal', 'Error: ' + err.message)
+      } finally {
+        sendSignalBtn.disabled = false
+        sendSignalBtn.textContent = 'Send Signal'
+      }
+    })
+
+    createViaGuidanceBtn.addEventListener('click', async () => {
+      const guidance = document.getElementById('createGuidance').value.trim()
+      if (!guidance) { showToast('critical', 'evolve', 'Guidance is required'); return }
+      createViaGuidanceBtn.disabled = true
+      createViaGuidanceBtn.innerHTML = '<span class="spinner"></span> Creating...'
+      try {
+        const res = await fetch('/brain/evolve/create', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ guidance }),
+        })
+        const data = await res.json()
+        if (res.ok) {
+          showToast('synthesized', data.learnerId || 'evolve', 'Learner created via guidance')
+          document.getElementById('createGuidance').value = ''
+          updateLearners()
+        } else {
+          showToast('critical', 'evolve', 'Failed: ' + data.error)
+        }
+      } catch (err) {
+        showToast('critical', 'evolve', 'Error: ' + err.message)
+      } finally {
+        createViaGuidanceBtn.disabled = false
+        createViaGuidanceBtn.textContent = 'Create via Guidance'
+      }
+    })
+
+    mergeLearnersBtn.addEventListener('click', async () => {
+      const checked = document.querySelectorAll('#mergeLearnerList input[type="checkbox"]:checked')
+      const learnerIds = Array.from(checked).map(cb => cb.value)
+      const guidance = document.getElementById('mergeGuidance').value.trim()
+      if (learnerIds.length < 2) { showToast('critical', 'evolve', 'Select at least 2 learners'); return }
+      if (!guidance) { showToast('critical', 'evolve', 'Guidance is required'); return }
+      mergeLearnersBtn.disabled = true
+      mergeLearnersBtn.innerHTML = '<span class="spinner"></span> Merging...'
+      try {
+        const res = await fetch('/brain/evolve/merge', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ learnerIds, guidance }),
+        })
+        const data = await res.json()
+        if (res.ok) {
+          showToast('synthesized', 'evolve', 'Learners merged')
+          document.getElementById('mergeGuidance').value = ''
+          updateLearners()
+        } else {
+          showToast('critical', 'evolve', 'Failed: ' + data.error)
+        }
+      } catch (err) {
+        showToast('critical', 'evolve', 'Error: ' + err.message)
+      } finally {
+        mergeLearnersBtn.disabled = false
+        mergeLearnersBtn.textContent = 'Merge Selected'
+      }
+    })
+
+    function updateMergeLearnerList() {
+      const container = document.getElementById('mergeLearnerList')
+      if (!container) return
+      const learners = Object.keys(learnerStates).filter(id => learnerStates[id].data)
+      if (learners.length === 0) {
+        container.innerHTML = '<span style="color:#666;">No learners available</span>'
+        return
+      }
+      container.innerHTML = learners.map(id => {
+        const name = learnerStates[id].data?.name || id
+        return `<label style="display:flex;align-items:center;gap:4px;padding:2px 0;cursor:pointer;">
+          <input type="checkbox" value="${escapeHtml(id)}" style="width:auto;">
+          <span style="color:#ccc;">${escapeHtml(name)}</span>
+        </label>`
+      }).join('')
+    }
+
+    function enableEvoActions() {
+      evaluateNowBtn.disabled = false
+      sendSignalBtn.disabled = false
+      createViaGuidanceBtn.disabled = false
+      mergeLearnersBtn.disabled = false
+    }
+
     // --- Update History ---
     function renderUpdateHistory() {
       const container = document.getElementById('updateHistoryList')
@@ -2916,6 +3818,8 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
         initBtn.disabled = true
         initBtn.classList.add('secondary')
         updateBrainBtn.style.display = ''
+        enableEvoActions()
+        document.getElementById('brainDashboard').style.display = ''
         updateLearners()
 
         // Snapshot config and store for diffing
@@ -3049,6 +3953,7 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
       // Learner observed (completed - data buffered)
       if (type === 'learner:observed') {
         ensureLearnerMetrics(data.learnerId).observations++
+        trackEvent(data.learnerId, 'observed')
         if (learnerStates[data.learnerId]) {
           learnerStates[data.learnerId].status = 'ready'
           learnerStates[data.learnerId].action = `Buffered (${data.bufferCount} obs)`
@@ -3093,6 +3998,7 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
         const m = ensureLearnerMetrics(data.learnerId)
         m.observations++
         m.dismissals++
+        trackEvent(data.learnerId, 'dismissed')
         if (learnerStates[data.learnerId]) {
           learnerStates[data.learnerId].status = 'ready'
           learnerStates[data.learnerId].action = 'Dismissed (irrelevant)'
@@ -3111,7 +4017,7 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
 
       // Learner synthesized (completed)
       if (type === 'learner:synthesized') {
-        { const m = ensureLearnerMetrics(data.learnerId); m.observations++; m.syntheses++; m.lastSynthesisObs = m.observations }
+        { const m = ensureLearnerMetrics(data.learnerId); m.observations++; m.syntheses++; m.lastSynthesisObs = m.observations; trackEvent(data.learnerId, 'synthesized'); if (data.newUnderstanding) { m.understandingSizes.push({ t: Date.now(), size: data.newUnderstanding.length }) } }
         if (learnerStates[data.learnerId]) {
           learnerStates[data.learnerId].status = 'ready'
           learnerStates[data.learnerId].action = 'Understanding updated'
@@ -3157,7 +4063,9 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
           const m = ensureLearnerMetrics(data.learnerId)
           m.queryConfidences.push(data.confidence)
           if (m.queryConfidences.length > 10) m.queryConfidences.shift()
+          trackEvent(data.learnerId, 'query')
         }
+        updateDashboard()
       }
 
       // Brain ask completed - track usage
@@ -3299,7 +4207,7 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
 
         const data = await res.json()
         if (res.ok) {
-          updateQACard(card, data.insight, data.sources)
+          updateQACard(card, data.insight, data.sources, data.gaps)
         } else {
           updateQACard(card, 'Error: ' + data.error, [])
         }
@@ -3325,7 +4233,7 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
       return card
     }
 
-    function updateQACard(card, answer, sources = []) {
+    function updateQACard(card, answer, sources = [], gaps = []) {
       const answerEl = card.querySelector('.qa-answer')
       answerEl.classList.remove('loading')
       answerEl.textContent = answer
@@ -3333,8 +4241,39 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
       if (sources.length > 0) {
         const srcEl = document.createElement('div')
         srcEl.className = 'qa-sources'
-        srcEl.textContent = 'Sources: ' + sources.map(s => s.learnerId).join(', ')
+
+        const summaryText = sources.map(s =>
+          `${s.learnerId} (${(s.relevance ?? 0).toFixed(2)})`
+        ).join(', ')
+
+        const detailItems = sources.map(s => `
+          <div class="qa-source-item">
+            <span class="source-id">${escapeHtml(s.learnerId)}</span>
+            <span class="source-scores">— relevance: ${(s.relevance ?? 0).toFixed(2)}, confidence: ${(s.confidence ?? 0).toFixed(2)}</span>
+            ${s.insight ? `<span class="source-insight">${escapeHtml(s.insight.slice(0, 120))}${s.insight.length > 120 ? '...' : ''}</span>` : ''}
+          </div>
+        `).join('')
+
+        srcEl.innerHTML = `
+          <div class="qa-sources-summary" onclick="this.querySelector('.chevron').classList.toggle('open');this.nextElementSibling.classList.toggle('open')">
+            <span class="chevron">&#9656;</span> Sources: ${escapeHtml(summaryText)}
+          </div>
+          <div class="qa-sources-detail">${detailItems}</div>
+        `
         card.appendChild(srcEl)
+      }
+
+      if (gaps && gaps.length > 0) {
+        const gapEl = document.createElement('div')
+        gapEl.className = 'qa-gaps'
+        const gapItems = gaps.map(g => `<div class="qa-gap-item">- ${escapeHtml(g)}</div>`).join('')
+        gapEl.innerHTML = `
+          <div class="qa-gaps-summary" onclick="this.querySelector('.chevron').classList.toggle('open');this.nextElementSibling.classList.toggle('open')">
+            <span class="chevron">&#9656;</span> Gaps: ${gaps.length} identified
+          </div>
+          <div class="qa-gaps-detail">${gapItems}</div>
+        `
+        card.appendChild(gapEl)
       }
     }
 
@@ -3380,6 +4319,11 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
             learnerStates[l.id] = { status: 'ready', action: 'Idle' }
           }
           learnerStates[l.id].data = l
+          // Seed initial understanding size for growth chart (once)
+          const m = ensureLearnerMetrics(l.id)
+          if (m.understandingSizes.length === 0 && l.understanding && l.understanding.length > 0) {
+            m.understandingSizes.push({ t: Date.now(), size: l.understanding.length })
+          }
         })
 
         updateLearnersUI()
@@ -3479,52 +4423,44 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
         const stClass = stPct >= 100 ? 'danger' : stPct >= 70 ? 'warn' : ''
         const confPct = avgConf !== null ? Math.min(100, ((1 - avgConf) / (1 - sigThresholds.minConfidence)) * 100) : 0
         const confClass = confPct >= 100 ? 'danger' : confPct >= 70 ? 'warn' : ''
+        const queryCount = metrics.queryConfidences.length
 
         const signalMetricsHtml = `
           <div class="signal-metrics">
-            <div class="signal-metrics-title">Signals</div>
-            <div class="signal-row">
-              <span class="signal-label">dismissals</span>
-              <div class="signal-bar"><div class="signal-fill ${drClass}" style="width:${drPct}%"></div></div>
-              <span class="signal-value ${drClass}">${(dismissalRate * 100).toFixed(0)}%/${(sigThresholds.maxDismissalRate * 100).toFixed(0)}%</span>
+            <div class="signal-metrics-group">
+              <div class="signal-group-label">Ingest</div>
+              <div class="signal-row">
+                <span class="signal-label">dismissal rate</span>
+                <div class="signal-bar"><div class="signal-fill ${drClass}" style="width:${drPct}%"></div></div>
+                <span class="signal-value ${drClass}">${(dismissalRate * 100).toFixed(0)}%/${(sigThresholds.maxDismissalRate * 100).toFixed(0)}%</span>
+              </div>
+              <div class="signal-row">
+                <span class="signal-label">obs w/o synth</span>
+                <div class="signal-bar"><div class="signal-fill ${stClass}" style="width:${stPct}%"></div></div>
+                <span class="signal-value ${stClass}">${obsSinceSynth}/${sigThresholds.maxObservationsWithoutSynthesis}</span>
+              </div>
+              <div class="signal-counts">
+                <span>${metrics.observations} observed</span>
+                <span>${metrics.dismissals} dismissed</span>
+                <span>${metrics.syntheses} syntheses</span>
+              </div>
             </div>
-            <div class="signal-row">
-              <span class="signal-label">stagnation</span>
-              <div class="signal-bar"><div class="signal-fill ${stClass}" style="width:${stPct}%"></div></div>
-              <span class="signal-value ${stClass}">${obsSinceSynth}/${sigThresholds.maxObservationsWithoutSynthesis}</span>
-            </div>
-            <div class="signal-row">
-              <span class="signal-label">confidence</span>
-              <div class="signal-bar"><div class="signal-fill ${confClass}" style="width:${confPct}%"></div></div>
-              <span class="signal-value ${confClass}">${avgConf !== null ? avgConf.toFixed(2) : '—'}/${sigThresholds.minConfidence}</span>
+            <div class="signal-metrics-group">
+              <div class="signal-group-label">Query</div>
+              <div class="signal-row">
+                <span class="signal-label">avg confidence</span>
+                <div class="signal-bar"><div class="signal-fill ${confClass}" style="width:${confPct}%"></div></div>
+                <span class="signal-value ${confClass}">${avgConf !== null ? avgConf.toFixed(2) : '—'}/${sigThresholds.minConfidence}</span>
+              </div>
+              <div class="signal-counts">
+                <span>${queryCount} quer${queryCount === 1 ? 'y' : 'ies'}</span>
+              </div>
             </div>
           </div>`
 
         // Build observations HTML (use recentObservations from UI state, fallback to buffer)
         const recentObs = state.recentObservations || []
-        const displayObs = recentObs.length > 0 ? recentObs : bufferObservations
-        let observationsHtml = ''
-        if (displayObs.length > 0) {
-          const obsHtml = displayObs.slice(0, 5).map(obs =>
-            `<div class="observation"><span class="importance">[${(obs.importance * 100).toFixed(0)}%]</span> ${escapeHtml(obs.text.slice(0, 120))}${obs.text.length > 120 ? '...' : ''}</div>`
-          ).join('')
-          observationsHtml = `
-            <div class="learner-observations">
-              <span class="label">Recent Observations (${displayObs.length})${bufferCount > 0 ? ` · ${bufferCount} buffered` : ''}</span>
-              <div class="content">${obsHtml}</div>
-            </div>
-          `
-        } else {
-          observationsHtml = `
-            <div class="learner-observations empty">
-              <span class="label">Observations</span>
-              <div class="content empty-text">No observations yet</div>
-            </div>
-          `
-        }
-
-        // Build compact understanding preview
-        const understandingPreview = understanding.slice(0, 100) + (understanding.length > 100 ? '...' : '')
+        // recentObs and bufferObservations still tracked for modal use
 
         // Build last synthesis info if available
         let synthesisHtml = ''
@@ -3549,13 +4485,63 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
             </div>
           </div>
           <div class="learner-card-body">
+            <div class="card-gauges">
+              <div class="gauge-item">
+                <canvas class="gauge-ring" data-learner="${id}"></canvas>
+                <span class="gauge-label">Obs til Synth</span>
+              </div>
+              <div class="gauge-item">
+                <canvas class="gauge-arc-dismiss" data-learner="${id}"></canvas>
+                <span class="gauge-label">Ingest Reject %</span>
+              </div>
+              <div class="gauge-item">
+                <canvas class="gauge-arc-conf" data-learner="${id}"></canvas>
+                <span class="gauge-label">Query Confidence</span>
+              </div>
+            </div>
+            <div class="card-activity">
+              <canvas class="activity-chart" data-learner="${id}" style="width:100%;"></canvas>
+              <div class="activity-legend">
+                <span class="legend-item"><span class="legend-dot" style="background:#4ade80;"></span>obs</span>
+                <span class="legend-item"><span class="legend-dot" style="background:#f59e0b;"></span>dismiss</span>
+                <span class="legend-item"><span class="legend-dot" style="background:#60a5fa;"></span>synth</span>
+                <span class="legend-item"><span class="legend-dot" style="background:#a78bfa;"></span>query</span>
+              </div>
+            </div>
             ${synthProgressHtml}
             ${signalMetricsHtml}
-            ${observationsHtml}
+            <div class="card-compact-stats">
+              <div class="compact-stat">
+                <span class="compact-value">${metrics.observations}</span>
+                <span class="compact-label">observed</span>
+              </div>
+              <div class="compact-stat">
+                <span class="compact-value">${metrics.dismissals}</span>
+                <span class="compact-label">dismissed</span>
+              </div>
+              <div class="compact-stat">
+                <span class="compact-value">${metrics.syntheses}</span>
+                <span class="compact-label">syntheses</span>
+              </div>
+              <div class="compact-stat">
+                <span class="compact-value">${metrics.queryConfidences.length}</span>
+                <span class="compact-label">queries</span>
+              </div>
+            </div>
             ${synthesisHtml}
-            <div class="learner-understanding-preview">
-              <span class="label">Understanding:</span>
-              <span class="preview-text">${escapeHtml(understandingPreview)}</span>
+            <div class="card-understanding-growth">
+              <div class="understanding-growth-header">
+                <span class="understanding-growth-label">
+                  <span class="understanding-dot ${understanding !== 'No understanding yet' ? 'has' : ''}"></span>
+                  Understanding ${understanding !== 'No understanding yet' ? formatSize(understanding.length) : '—'}
+                </span>
+                <span class="understanding-strategy">${data.maintenance?.strategy || '—'}</span>
+              </div>
+              <canvas class="understanding-growth-canvas" data-learner="${id}" style="width:100%;"></canvas>
+            </div>
+            <div class="learner-card-actions">
+              <button onclick="event.stopPropagation(); splitLearnerFromCard('${id}')">Split</button>
+              <button class="danger" onclick="event.stopPropagation(); deleteLearnerFromCard('${id}')">Delete</button>
             </div>
           </div>
         `
@@ -3563,6 +4549,52 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
         card.addEventListener('click', () => openLearnerModal(id))
         learnersGrid.appendChild(card)
       })
+
+      updateMergeLearnerList()
+
+      // Draw canvas gauges after cards are in the DOM
+      document.querySelectorAll('.gauge-ring').forEach(canvas => {
+        const id = canvas.dataset.learner
+        const data = learnerStates[id]?.data || {}
+        const bufferCount = data.buffer?.count || 0
+        const maxObs = (data.synthesizeThresholds || {}).maxObservations || 10
+        const pct = maxObs > 0 ? bufferCount / maxObs : 0
+        const color = pct >= 1 ? '#4ade80' : pct >= 0.7 ? '#f59e0b' : '#555'
+        drawRingGauge(canvas, pct, bufferCount + '/' + maxObs, color)
+      })
+
+      document.querySelectorAll('.gauge-arc-dismiss').forEach(canvas => {
+        const id = canvas.dataset.learner
+        const metrics = learnerMetrics[id] || { observations: 0, dismissals: 0 }
+        const data = learnerStates[id]?.data || {}
+        const maxDR = data.governance?.signalThresholds?.maxDismissalRate || 0.8
+        const dr = metrics.observations > 0 ? metrics.dismissals / metrics.observations : 0
+        drawArcGauge(canvas, dr, maxDR, 0.5, 0.8)
+      })
+
+      document.querySelectorAll('.gauge-arc-conf').forEach(canvas => {
+        const id = canvas.dataset.learner
+        const metrics = learnerMetrics[id] || { queryConfidences: [] }
+        const avgConf = metrics.queryConfidences.length > 0
+          ? metrics.queryConfidences.reduce((a, b) => a + b, 0) / metrics.queryConfidences.length : 0
+        drawArcGauge(canvas, avgConf, 1, 0.3, 0.7, true)
+      })
+
+      document.querySelectorAll('.activity-chart').forEach(canvas => {
+        const id = canvas.dataset.learner
+        const metrics = learnerMetrics[id] || { events: [] }
+        drawActivityChart(canvas, metrics.events, 5 * 60 * 1000)
+      })
+
+      document.querySelectorAll('.understanding-growth-canvas').forEach(canvas => {
+        const id = canvas.dataset.learner
+        const metrics = learnerMetrics[id] || { understandingSizes: [] }
+        const understanding = learnerStates[id]?.data?.understanding || ''
+        const currentSize = understanding.length || 0
+        drawUnderstandingGrowth(canvas, metrics.understandingSizes, currentSize)
+      })
+
+      updateDashboard()
     }
 
     async function openLearnerModal(learnerId) {

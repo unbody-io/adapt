@@ -52,6 +52,7 @@ export async function synthesize(
 		system,
 		prompt,
 		output: Output.object({ schema: synthesisOutputSchema }),
+		repairSchema: synthesisOutputSchema,
 		...generateOptions,
 	})
 

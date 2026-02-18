@@ -357,7 +357,7 @@ The **Evaluator** is the decision-making component that:
 
 **Tool-Based Architecture**:
 
-The evaluator uses a **two-tool approach** for intelligent decision-making:
+The evaluator uses a **reasoning-based approach** with investigation tools:
 
 ```
 Signals arrive → evaluate() called
@@ -367,10 +367,10 @@ LLM sees: signals + brain purpose + all learner metadata (lightweight)
 LLM reasons: "High dismissal on A and B, let me check overlap"
        ↓
 LLM calls: getUnderstandings(["A", "B"])  ← investigation tool
+LLM calls: getLearnerActivity(["A", "B"]) ← ingestion data
+LLM calls: getRecentHistory()             ← past decisions
        ↓
-Tool returns understanding texts
-       ↓
-LLM continues reasoning, makes decision
+LLM continues reasoning from evidence, makes decision
        ↓
 LLM calls: finalizeDecisions([...])  ← done tool
        ↓
@@ -379,10 +379,12 @@ Extract decisions from tool call
 
 **Available Tools**:
 
-| Tool                                 | Purpose                                                   |
-|--------------------------------------|-----------------------------------------------------------|
-| `getUnderstandings({ learnerIds })`  | Fetch accumulated knowledge for specified learners        |
-| `finalizeDecisions({ decisions })`   | Return final evolution decisions (terminates evaluation)  |
+| Tool                                  | Purpose                                                   |
+|---------------------------------------|-----------------------------------------------------------|
+| `getUnderstandings({ learnerIds })`   | Fetch accumulated knowledge for specified learners        |
+| `getLearnerActivity({ learnerIds })`  | Fetch ingestion metrics + buffered observations           |
+| `getRecentHistory()`                  | Fetch last 10 evaluation decision sets                    |
+| `finalizeDecisions({ decisions })`    | Return final evolution decisions (terminates evaluation)  |
 
 **Why Tools?**: Unlike structured output that requires all context upfront, tools let the LLM investigate selectively. A learner with 10KB of understanding only gets fetched if the LLM needs to diagnose it.
 
@@ -409,17 +411,17 @@ const decisions = await evaluator.evaluate()
 ]
 ```
 
-**Decision Frameworks**:
+**Reasoning Approach**:
 
-The evaluator uses two specialized frameworks depending on signal types:
+The evaluator's system prompt establishes principles (not prescriptive recipes) that guide the LLM's reasoning:
 
-1. **System Directive Framework** (source: "brain"): Applied when the brain's purpose changes. Classifies intent (related pivot, unrelated pivot, expansion, narrowing, refinement, reset) and applies matching rules.
+1. **Investigate before deciding** — use tools to gather evidence, don't decide from metadata alone
+2. **Knowledge has value** — accumulated knowledge is irreversible to destroy; prefer update over delete
+3. **Proportionality** — match action severity to problem severity; systemic patterns across many learners likely indicate a data stream shift, not individual problems
+4. **Healthy dormancy is success** — significant knowledge + high dismissal = learner correctly filtering irrelevant data
+5. **No action is valid** — empty decisions array is a legitimate outcome
 
-2. **Governance Framework** (source: learner ID): Applied for learner performance signals. Guides investigation through diagnostic questions:
-   - Is the topic exhausted? (stagnation often means success)
-   - Is the scope too narrow?
-   - Is there overlap with another learner?
-   - Is this a systemic issue?
+The evaluation template presents context (learners, signals with raw metrics) and tools — the LLM reasons from evidence without prescriptive diagnostic checklists.
 
 
 ### Evolution Actions

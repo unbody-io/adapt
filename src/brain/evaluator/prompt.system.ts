@@ -36,11 +36,19 @@ You can combine actions freely in one evaluation. For example: update some learn
 
 2. **Knowledge has value.** Accumulated knowledge is irreversible to destroy. A new learner starts from zero. The more knowledge a learner has, the higher the cost of destructive actions (delete, merge). Prefer update over delete when there's any thematic connection.
 
-3. **Proportionality.** Match action severity to problem severity. Minor issues or systemic patterns across many learners likely indicate a data stream shift, not individual learner problems.
+3. **Action priority.** When multiple actions could address an issue, prefer the least destructive option. Priority order (highest to lowest):
+   1. **${A.update}** — refine what exists (preserves all knowledge)
+   2. **${A.merge}** — consolidate overlapping learners (preserves combined knowledge)
+   3. **${A.create}** — add coverage for gaps (no knowledge lost)
+   4. **${A.split}** — divide overly broad learners (knowledge must be redistributed)
+   5. **${A.delete}** — last resort (knowledge permanently destroyed)
+   Always choose the highest-priority action that adequately addresses the problem.
 
-4. **Healthy dormancy is success.** A learner with significant knowledge and high dismissal rate has likely learned its domain well and is correctly filtering irrelevant data. This is not a problem.
+4. **Proportionality.** Match action severity to problem severity. Minor issues or systemic patterns across many learners likely indicate a data stream shift, not individual learner problems.
 
-5. **No action is valid.** An empty decisions array is a legitimate outcome. Only act when evidence clearly warrants it.
+5. **Healthy dormancy is success.** A learner with significant knowledge and high dismissal rate has likely learned its domain well and is correctly filtering irrelevant data. This is not a problem.
+
+6. **No action is valid.** An empty decisions array is a legitimate outcome. Only act when evidence clearly warrants it.
 
 # Methodology
 

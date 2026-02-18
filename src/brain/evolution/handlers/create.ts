@@ -29,6 +29,7 @@ export class CreateHandler extends EvolutionActionHandler<CreateActionResult> {
 				model: this.brain.config.model,
 				prompt: createPromptTemplate(guidance, this.brain.prompt),
 				output: Output.object({ schema: learnerConfigsSchema }),
+				repairSchema: learnerConfigsSchema,
 			})
 
 			const newLearnerIds: string[] = []

@@ -42,6 +42,7 @@ export class UpdateHandler extends EvolutionActionHandler<UpdateActionResult> {
 							this.brain.prompt,
 						),
 						output: Output.object({ schema: updateOutputSchema }),
+						repairSchema: updateOutputSchema,
 					})
 
 					const { updates } = result.output

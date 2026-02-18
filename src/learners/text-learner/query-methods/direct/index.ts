@@ -72,6 +72,7 @@ export class DirectMethod implements QueryMethod {
 			system,
 			prompt,
 			output: Output.object({ schema: queryResponseSchema }),
+			repairSchema: queryResponseSchema,
 			...generateOptions,
 		})
 

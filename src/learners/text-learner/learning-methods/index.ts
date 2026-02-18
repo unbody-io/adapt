@@ -1,9 +1,8 @@
 /**
  * Learning methods for TextLearner
- *
- * Currently only two-phase method is supported.
  */
 
+export { TextDefaultMethod } from './two-phase'
 export type {
 	InitOutput,
 	LearnCallbacks,
@@ -14,8 +13,7 @@ export type {
 	SynthesizeConfig,
 	SynthesizeOutput,
 	SynthesizeThresholds,
-	TwoPhaseConfig,
-	TwoPhaseUpdateConfig,
-	TwoPhaseUpdateResult,
+	TextDefaultConfig,
+	TextDefaultUpdateConfig,
+	TextDefaultUpdateResult,
 } from './two-phase'
-export { TwoPhaseMethod } from './two-phase'

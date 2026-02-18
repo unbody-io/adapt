@@ -3,7 +3,7 @@ import type { GeneratedLearnerConfig } from '../learners/schema.config'
 import type { Strategy } from '../learners/text-learner/strategies'
 import type { SharedLearnerEventMap } from '../learners/base/types'
 import type { TokenUsage } from '../learners/types'
-import type { LearnOutput } from '../learners/text-learner/learning-methods/two-phase/types'
+import type { LearnOutput } from '../learners/base/learning-method'
 import type {
 	CascadableConfig,
 	ResolvedCascadableConfig,

@@ -4,7 +4,7 @@
 
 export { TextLearner } from './class'
 // Learning methods
-export { TwoPhaseMethod } from './learning-methods'
+export { TextDefaultMethod } from './learning-methods'
 // Query methods
 export {
 	createQueryMethod,

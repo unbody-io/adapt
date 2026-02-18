@@ -24,7 +24,7 @@ export type {
 	SynthesizeThresholds,
 } from './text-learner/learning-methods'
 // Learning methods
-export { TwoPhaseMethod } from './text-learner/learning-methods'
+export { TextDefaultMethod } from './text-learner/learning-methods'
 
 export type {
 	MaintenanceConfig,

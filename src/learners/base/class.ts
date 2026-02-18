@@ -1,9 +1,13 @@
 /**
  * BaseLearner — abstract base class for all learner types
  *
- * Owns: identity, governance, metrics, evolution, events, signal detection.
- * Lifecycle orchestration (init/learn/query) moves here in Phase 2-3
- * once LearningMethod and QueryMethod are properly abstracted.
+ * Owns: identity, governance, metrics, evolution, events, signal detection,
+ * learn() orchestration (delegates to LearningMethod + handleLearnResult bookkeeping).
+ *
+ * Subclasses must:
+ * - Set `_learningMethod` in their constructor
+ * - Implement `getUnderstanding()`, `setUnderstanding()`, `getSummary()`
+ * - Implement `init()` and `query()` (lifecycle methods that depend on subclass config)
  */
 
 import { TypedEmitter } from '../../types/events'
@@ -16,6 +20,12 @@ import type {
 	LearnerMetrics,
 	LearnerOrigin,
 } from '../types'
+import type {
+	LearnCallbacks,
+	LearnOptions,
+	LearnOutput,
+	LearningMethod,
+} from './learning-method'
 import type { SharedLearnerEventMap } from './types'
 
 /**
@@ -32,14 +42,6 @@ export interface BaseLearnerInit {
 	maxObservationsForStagnation?: number
 }
 
-/**
- * BaseLearner — shared logic across all learner types
- *
- * Subclasses must:
- * - Set `_learningMethod` and `_queryMethod` in their constructor
- * - Implement `getUnderstanding()`, `setUnderstanding()`, `getSummary()`
- * - Implement lifecycle methods (init, learn, query) using protected helpers
- */
 export abstract class BaseLearner<TUnderstanding>
 	extends TypedEmitter<SharedLearnerEventMap>
 	implements Learner<TUnderstanding>
@@ -51,6 +53,7 @@ export abstract class BaseLearner<TUnderstanding>
 	description?: string
 
 	protected _origin: LearnerOrigin
+	protected _learningMethod!: LearningMethod
 	protected evolution: EvolutionEntry[] = []
 	protected governance: LearnerGovernance
 	protected metrics: LearnerMetrics = {
@@ -103,15 +106,106 @@ export abstract class BaseLearner<TUnderstanding>
 	abstract setUnderstanding(value: TUnderstanding): void
 	abstract getSummary(): string
 
-	// Lifecycle — subclass implements using protected helpers
+	// init() and query() stay abstract — they depend on subclass config
 	abstract init(): Promise<unknown>
-	abstract learn(batch: unknown[], options?: unknown): Promise<unknown>
 	abstract query(question: string, options?: unknown): Promise<unknown>
 
 	// ── Identity ────────────────────────────────────────────────────────────
 
 	get origin(): LearnerOrigin {
 		return this._origin
+	}
+
+	// ── Learn (concrete — delegates to _learningMethod) ─────────────────────
+
+	/**
+	 * Learn from a batch of data
+	 *
+	 * Delegates to the pluggable LearningMethod, then does shared bookkeeping
+	 * (metrics, evolution, events, governance, signals) via handleLearnResult.
+	 */
+	async learn(batch: unknown[], options?: LearnOptions): Promise<LearnOutput> {
+		if (!this.isInitialized()) {
+			throw new Error('Learner not initialized. Call init() first.')
+		}
+
+		try {
+			const result = await this._learningMethod.learn(
+				this.id,
+				this.instructions,
+				this.getUnderstanding(),
+				batch,
+				options,
+				{
+					onObserveStarted: (itemCount) => {
+						this.emit('learner:observe:started', {
+							learnerId: this.id,
+							itemCount,
+						})
+					},
+					onObserveThinking: (thoughts) => {
+						this.emit('learner:observe:thinking', {
+							learnerId: this.id,
+							thoughts,
+							usage: { inputTokens: 0, outputTokens: 0, totalTokens: 0 },
+						})
+					},
+					onSynthesizeStarted: (observationCount) => {
+						this.emit('learner:synthesize:started', {
+							learnerId: this.id,
+							observationCount,
+						})
+					},
+					onSynthesizeThinking: (thoughts) => {
+						this.emit('learner:synthesize:thinking', {
+							learnerId: this.id,
+							thoughts,
+							usage: { inputTokens: 0, outputTokens: 0, totalTokens: 0 },
+						})
+					},
+				} satisfies LearnCallbacks,
+			)
+
+			this.handleLearnResult(result)
+
+			return result
+		} catch (err) {
+			const error = err instanceof Error ? err : new Error(String(err))
+			this.emit('learner:learn:failed', {
+				learnerId: this.id,
+				error: error.message,
+			})
+			throw error
+		}
+	}
+
+	// ── Delegates to _learningMethod ────────────────────────────────────────
+
+	isInitialized(): boolean {
+		return (
+			this._learningMethod.observePrompt !== null &&
+			this._learningMethod.synthesizePrompt !== null
+		)
+	}
+
+	getObserveSystemPrompt(): string | null {
+		return this._learningMethod.observePrompt
+	}
+
+	getSynthesizeSystemPrompt(): string | null {
+		return this._learningMethod.synthesizePrompt
+	}
+
+	getBufferState(): {
+		count: number
+		avgImportance: number
+		totalTokens: number
+	} {
+		return this._learningMethod.getBufferState()
+	}
+
+	getBufferedObservations(): Array<{ text: string; importance: number }> {
+		return this._learningMethod.getBufferedObservations()
 	}
 
 	// ── Accessors ───────────────────────────────────────────────────────────
@@ -148,11 +242,102 @@ export abstract class BaseLearner<TUnderstanding>
 	getActivity(): LearnerActivity {
 		return {
 			ingestion: { ...this.metrics.ingestion },
-			recentObservations: [],
+			recentObservations: this._learningMethod.getBufferedObservations(),
 		}
 	}
 
-	// ── Metrics tracking (protected helpers for subclasses) ─────────────────
+	// ── Shared bookkeeping ──────────────────────────────────────────────────
+
+	/**
+	 * Handle learn result — shared bookkeeping for all learner types.
+	 *
+	 * The LearningMethod returns a fully processed result (understanding is
+	 * already post-strategy/post-governance). BaseLearner just does metrics,
+	 * evolution, events, and signal detection.
+	 */
+	protected handleLearnResult(result: LearnOutput): void {
+		switch (result.status) {
+			case 'observed': {
+				this.trackIngestion()
+				const bufferState = this._learningMethod.getBufferState()
+				this.emit('learner:observed', {
+					learnerId: this.id,
+					output: result.output,
+					importance: bufferState.avgImportance,
+					bufferCount: bufferState.count,
+					usage: result.usage,
+				})
+				this.checkAndEmitSignals()
+				break
+			}
+
+			case 'observe:dismissed':
+				this.trackIngestion(true)
+				this.emit('learner:observe:dismissed', {
+					learnerId: this.id,
+					output: result.output,
+					usage: result.usage,
+				})
+				this.checkAndEmitSignals()
+				break
+
+			case 'observe:error':
+				this.emit('learner:observe:error', {
+					learnerId: this.id,
+					error: result.error,
+				})
+				break
+
+			case 'synthesized': {
+				this.trackIngestion()
+				this.metrics.ingestion.synthesisCount++
+				this.metrics.ingestion.observationsSinceLastSynthesis = 0
+				this.stagnationSignalFired = false
+
+				const previousUnderstanding = this.getUnderstanding()
+				this.setUnderstanding(result.newUnderstanding as TUnderstanding)
+
+				const evolutionEntry: EvolutionEntry = {
+					summary: result.evolution,
+					significance: result.significance,
+					timestamp: new Date().toISOString(),
+				}
+				this.evolution.unshift(evolutionEntry)
+
+				this.emit('learner:synthesized', {
+					learnerId: this.id,
+					newUnderstanding: result.newUnderstanding,
+					previousUnderstanding,
+					significance: result.significance,
+					evolution: result.evolution,
+					usage: result.usage,
+				})
+
+				this.updateGovernance(1.0)
+				this.checkAndEmitSignals()
+				break
+			}
+
+			case 'synthesize:dismissed':
+				this.trackIngestion()
+				this.emit('learner:synthesize:dismissed', {
+					learnerId: this.id,
+					output: result.output,
+					usage: result.usage,
+				})
+				this.checkAndEmitSignals()
+				break
+
+			case 'synthesize:error':
+				this.trackIngestion()
+				this.emit('learner:synthesize:error', {
+					learnerId: this.id,
+					error: result.error,
+				})
+				this.checkAndEmitSignals()
+				break
+		}
+	}
 
 	protected trackIngestion(dismissed = false): void {
 		this.metrics.ingestion.observationCount++

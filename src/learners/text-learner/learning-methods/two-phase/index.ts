@@ -1,91 +1,69 @@
 /**
- * Two-phase learning method
+ * TextDefaultMethod — text-specific two-phase learning
  *
- * Separates observation (capture) from synthesis (understanding update).
- * This reduces understanding degradation by only rewriting during synthesis.
+ * Orchestrates observe → buffer → synthesize flow.
+ * Strategy application is internal — returns post-strategy understanding.
+ * Implements the shared LearningMethod interface.
  */
 
 import type { LanguageModel } from 'ai'
-import { ObservationBuffer } from './buffer'
+import { ObservationBuffer } from '../../../base/learning-method'
+import type {
+	LearnCallbacks,
+	LearnOptions,
+	LearnOutput,
+	LearningMethod,
+} from '../../../base/learning-method'
+import { applyStrategy } from '../../strategies'
 import { initObserve, observe } from './observe'
 import type { ObserveIdentity } from './observe/schema.identity'
 import { initSynthesize, synthesize } from './synthesize'
 import type { SynthesizeIdentity } from './synthesize/schema.identity'
 import type {
-	InitOutput,
-	LearnCallbacks,
-	LearnOptions,
-	LearnOutput,
-	TwoPhaseConfig,
-	TwoPhaseUpdateConfig,
-	TwoPhaseUpdateResult,
+	TextDefaultConfig,
+	TextDefaultUpdateConfig,
+	TextDefaultUpdateResult,
 } from './types'
 
-/**
- * Two-phase learning method
- *
- * Orchestrates observe → buffer → synthesize flow.
- */
-export class TwoPhaseMethod {
-	readonly name = 'two-phase'
+export class TextDefaultMethod implements LearningMethod {
+	readonly name = 'text-default'
 
 	private model: LanguageModel
-	private config: TwoPhaseConfig
+	private config: TextDefaultConfig
 	private buffer: ObservationBuffer
 	private instructions: string = ''
 	private focus: string = ''
 
-	// Generated during init (identities stored for potential debugging/introspection)
+	// Generated during init
 	private _observeIdentity: ObserveIdentity | null = null
 	private _synthesizeIdentity: SynthesizeIdentity | null = null
 	private observeSystemPrompt: string | null = null
 	private synthesizeSystemPrompt: string | null = null
 
-	constructor(model: LanguageModel, config: TwoPhaseConfig) {
+	constructor(model: LanguageModel, config: TextDefaultConfig) {
 		this.model = model
 		this.config = config
 		this.buffer = new ObservationBuffer()
 	}
 
-	/**
-	 * Get observe system prompt (null if not initialized)
-	 */
 	get observePrompt(): string | null {
 		return this.observeSystemPrompt
 	}
 
-	/**
-	 * Get synthesize system prompt (null if not initialized)
-	 */
 	get synthesizePrompt(): string | null {
 		return this.synthesizeSystemPrompt
 	}
 
-	/**
-	 * Get observe identity (for debugging/introspection)
-	 */
 	get observeIdentity(): ObserveIdentity | null {
 		return this._observeIdentity
 	}
 
-	/**
-	 * Get synthesize identity (for debugging/introspection)
-	 */
 	get synthesizeIdentity(): SynthesizeIdentity | null {
 		return this._synthesizeIdentity
 	}
 
-	/**
-	 * Initialize the two-phase method
-	 *
-	 * Generates identities and system prompts for both phases.
-	 * Delegates to update() internally.
-	 *
-	 * @param instructions - Learner's purpose/instructions
-	 */
-	async init(instructions: string): Promise<InitOutput> {
-		await this.update({ instructions })
-
+	async init(instructions: string, focus?: string) {
+		await this.update({ instructions, focus })
 		return {
 			observeSystemPrompt: this.observeSystemPrompt!,
 			synthesizeSystemPrompt: this.synthesizeSystemPrompt!,
@@ -100,7 +78,7 @@ export class TwoPhaseMethod {
 	 * inputs change (instructions, blueprintModel, strategy).
 	 * If prompts are null (first init), regeneration is forced.
 	 */
-	async update(config: TwoPhaseUpdateConfig): Promise<TwoPhaseUpdateResult> {
+	async update(config: TextDefaultUpdateConfig): Promise<TextDefaultUpdateResult> {
 		const changedFields: string[] = []
 		let needsObserveRegen = false
 		let needsSynthesizeRegen = false
@@ -156,11 +134,17 @@ export class TwoPhaseMethod {
 			}
 		}
 
-		// Strategy change → synthesize prompt needs regen
-		if (config.strategy !== undefined && config.strategy !== this.config.strategy) {
-			this.config.strategy = config.strategy
-			changedFields.push('strategy')
-			needsSynthesizeRegen = true
+		// Maintenance updates
+		if (config.maintenance) {
+			if (config.maintenance.strategy !== undefined && config.maintenance.strategy !== this.config.maintenance.strategy) {
+				this.config.maintenance.strategy = config.maintenance.strategy
+				changedFields.push('maintenance.strategy')
+				needsSynthesizeRegen = true
+			}
+			if (config.maintenance.maxTokens !== undefined) {
+				this.config.maintenance.maxTokens = config.maintenance.maxTokens
+				changedFields.push('maintenance.maxTokens')
+			}
 		}
 
 		// Force regen if prompts don't exist yet (first init)
@@ -186,7 +170,7 @@ export class TwoPhaseMethod {
 
 			if (needsSynthesizeRegen) {
 				promises.push(
-					initSynthesize(synthesizeBlueprintModel, this.instructions, this.config.strategy).then((result) => {
+					initSynthesize(synthesizeBlueprintModel, this.instructions, this.config.maintenance.strategy).then((result) => {
 						this._synthesizeIdentity = result.identity
 						this.synthesizeSystemPrompt = result.systemPrompt
 					}),
@@ -202,27 +186,22 @@ export class TwoPhaseMethod {
 	/**
 	 * Learn from data
 	 *
-	 * Observes data, buffers observations, and synthesizes when thresholds met.
-	 *
-	 * @param learnerId - Learner's unique identifier
-	 * @param instructions - Learner's purpose/instructions
-	 * @param currentUnderstanding - Current understanding
-	 * @param data - Data to learn from
-	 * @param options - Learn options (forceSynthesize, etc.)
-	 * @param callbacks - Callbacks for observability
+	 * Observes data, buffers observations, synthesizes when thresholds met,
+	 * and applies strategy maintenance to the resulting understanding.
 	 */
 	async learn(
 		learnerId: string,
 		instructions: string,
-		currentUnderstanding: string,
+		currentUnderstanding: unknown,
 		data: unknown[],
 		options?: LearnOptions,
 		callbacks?: LearnCallbacks,
 	): Promise<LearnOutput> {
 		if (!this.observeSystemPrompt || !this.synthesizeSystemPrompt) {
-			throw new Error('TwoPhaseMethod not initialized. Call init() first.')
+			throw new Error('TextDefaultMethod not initialized. Call init() first.')
 		}
 
+		const understanding = currentUnderstanding as string
 		const observeModel = this.config.observe.model ?? this.model
 		const synthesizeModel = this.config.synthesize.model ?? this.model
 
@@ -236,7 +215,7 @@ export class TwoPhaseMethod {
 			const synthesizeResult = await synthesize(
 				synthesizeModel,
 				this.synthesizeSystemPrompt,
-				{ learnerId, instructions, currentUnderstanding, observations },
+				{ learnerId, instructions, currentUnderstanding: understanding, observations },
 				{ onThinking: callbacks?.onSynthesizeThinking },
 			)
 
@@ -254,7 +233,7 @@ export class TwoPhaseMethod {
 			}
 			return {
 				status: 'synthesized',
-				newUnderstanding: synthesizeResult.newUnderstanding,
+				newUnderstanding: await this.applyMaintenanceStrategy(synthesizeResult.newUnderstanding),
 				significance: synthesizeResult.significance,
 				evolution: synthesizeResult.evolution,
 				reasoning: synthesizeResult.reasoning,
@@ -273,10 +252,7 @@ export class TwoPhaseMethod {
 
 		// Handle observe outcomes
 		if (observeResult.status === 'error') {
-			return {
-				status: 'observe:error',
-				error: observeResult.error,
-			}
+			return { status: 'observe:error', error: observeResult.error }
 		}
 
 		if (observeResult.status === 'dismissed') {
@@ -287,7 +263,7 @@ export class TwoPhaseMethod {
 			}
 		}
 
-		// Filter by importance threshold — low-importance observations don't get buffered
+		// Filter by importance threshold
 		const minImportance = this.config.synthesize.thresholds.minImportance
 		if (minImportance !== undefined && observeResult.importance < minImportance) {
 			return {
@@ -297,7 +273,7 @@ export class TwoPhaseMethod {
 			}
 		}
 
-		// Buffer each observation individually
+		// Buffer each observation
 		for (const text of observeResult.output) {
 			this.buffer.add({ text, importance: observeResult.importance })
 		}
@@ -321,19 +297,14 @@ export class TwoPhaseMethod {
 		const synthesizeResult = await synthesize(
 			synthesizeModel,
 			this.synthesizeSystemPrompt,
-			{ learnerId, instructions, currentUnderstanding, observations },
+			{ learnerId, instructions, currentUnderstanding: understanding, observations },
 			{ onThinking: callbacks?.onSynthesizeThinking },
 		)
 
-		// Clear buffer after synthesis
 		this.buffer.clear()
 
-		// Handle synthesize outcomes
 		if (synthesizeResult.status === 'error') {
-			return {
-				status: 'synthesize:error',
-				error: synthesizeResult.error,
-			}
+			return { status: 'synthesize:error', error: synthesizeResult.error }
 		}
 
 		if (synthesizeResult.status === 'dismissed') {
@@ -346,7 +317,7 @@ export class TwoPhaseMethod {
 
 		return {
 			status: 'synthesized',
-			newUnderstanding: synthesizeResult.newUnderstanding,
+			newUnderstanding: await this.applyMaintenanceStrategy(synthesizeResult.newUnderstanding),
 			significance: synthesizeResult.significance,
 			evolution: synthesizeResult.evolution,
 			reasoning: synthesizeResult.reasoning,
@@ -354,9 +325,6 @@ export class TwoPhaseMethod {
 		}
 	}
 
-	/**
-	 * Get current buffer state (for debugging/observability)
-	 */
 	getBufferState(): {
 		count: number
 		avgImportance: number
@@ -369,29 +337,39 @@ export class TwoPhaseMethod {
 		}
 	}
 
-	/**
-	 * Get all buffered observations (for debugging/observability)
-	 */
 	getBufferedObservations(): Array<{ text: string; importance: number }> {
 		return this.buffer.getAll()
+	}
+
+	/**
+	 * Apply strategy-specific maintenance to post-synthesis understanding
+	 */
+	private async applyMaintenanceStrategy(understanding: string): Promise<string> {
+		const result = await applyStrategy({
+			understanding,
+			model: this.model,
+			config: this.config.maintenance,
+		})
+		return result.understanding
 	}
 }
 
 export type { ObserveIdentity } from './observe/schema.identity'
-
 export type { ObserveContext, ObserveOutput } from './observe/types'
 export type { SynthesizeIdentity } from './synthesize/schema.identity'
 export type { SynthesizeContext, SynthesizeOutput } from './synthesize/types'
-// Re-export types
+export type {
+	ObserveConfig,
+	SynthesizeConfig,
+	TextDefaultConfig,
+	TextDefaultUpdateConfig,
+	TextDefaultUpdateResult,
+} from './types'
+// Re-export shared types
 export type {
 	InitOutput,
 	LearnCallbacks,
 	LearnOptions,
 	LearnOutput,
-	ObserveConfig,
-	SynthesizeConfig,
 	SynthesizeThresholds,
-	TwoPhaseConfig,
-	TwoPhaseUpdateConfig,
-	TwoPhaseUpdateResult,
 } from './types'

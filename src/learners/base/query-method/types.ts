@@ -1,3 +1,10 @@
+/**
+ * Shared QueryMethod interface and types
+ *
+ * QueryContext does NOT include understanding — each learner provides
+ * understanding-access tools to the QueryMethod instead.
+ */
+
 import type { LanguageModel } from 'ai'
 import type { TokenUsage } from '../../types'
 
@@ -35,14 +42,14 @@ export interface QueryResult {
 
 /**
  * Context provided to query methods
+ *
+ * Understanding is NOT included — it's accessed via learner-provided tools.
  */
 export interface QueryContext {
 	/** The learner's unique identifier */
 	learnerId: string
 	/** The learner's purpose/instructions */
 	instructions: string
-	/** Current understanding to query against */
-	understanding: string
 	/** The question or query to answer */
 	question: string
 }
@@ -55,19 +62,15 @@ export interface QueryCallbacks {
 }
 
 /**
- * A query method defines how understanding is queried
- *
- * Different methods have different tradeoffs:
- * - tool-based: More control, works with all models, higher token usage
- * - direct: Single call, faster, requires structured output support
- */
-/**
  * Config accepted by QueryMethod.update()
  */
 export interface QueryMethodUpdateConfig {
 	model?: LanguageModel
 }
 
+/**
+ * A query method defines how understanding is queried
+ */
 export interface QueryMethod {
 	/** Unique identifier for this method */
 	readonly name: string
@@ -82,8 +85,3 @@ export interface QueryMethod {
 	/** Update the method's config (e.g. swap model) */
 	update(config: QueryMethodUpdateConfig): void
 }
-
-/**
- * Available query method names
- */
-export type QueryMethodName = 'tool-based' | 'direct'

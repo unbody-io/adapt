@@ -3,7 +3,6 @@
  */
 
 import type { SynthesizeThresholds } from './learning-methods/types'
-import type { QueryMethodName } from './query-methods/types'
 import type { Strategy } from './strategies'
 
 export const TEXT_LEARNER_DEFAULTS = {
@@ -18,9 +17,6 @@ export const TEXT_LEARNER_DEFAULTS = {
 			maxTokens: 8000,
 			minImportance: 0.5,
 		} satisfies Required<SynthesizeThresholds>,
-	},
-	query: {
-		method: 'tool-based' as QueryMethodName,
 	},
 	maintenance: {
 		strategy: 'cumulative' as Strategy,

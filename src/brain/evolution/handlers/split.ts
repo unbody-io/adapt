@@ -6,7 +6,6 @@ import { Output } from 'ai'
 import { EvolutionActionHandler } from '../base-handler'
 import type { EvolutionDecision } from '../../evaluator/types'
 import type { SplitActionResult } from '../types'
-import type { TextLearner } from '../../../learners/text-learner/class'
 import { generate } from '../../../llm'
 import { splitOutputSchema } from '../schemas/split'
 import { splitSystemPrompt } from '../prompt.system.split'
@@ -43,7 +42,7 @@ export class SplitHandler extends EvolutionActionHandler<SplitActionResult> {
 					system: splitSystemPrompt,
 					prompt: splitPromptTemplate(
 						decision.guidance,
-						learner as TextLearner,
+						learner,
 						this.brain.prompt,
 					),
 					output: Output.object({ schema: splitOutputSchema }),

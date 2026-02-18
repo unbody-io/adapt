@@ -12,8 +12,5 @@ export type {
 	ObserveConfig,
 	SynthesizeConfig,
 	SynthesizeThresholds,
-	TwoPhaseConfig,
+	TextDefaultConfig,
 } from './two-phase'
-
-// Learning method name is now just 'two-phase'
-export type LearningMethodName = 'two-phase'

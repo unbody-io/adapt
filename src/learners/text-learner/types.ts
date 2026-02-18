@@ -5,17 +5,15 @@ import type {
 } from '../../types/config'
 import type { EventsFromMap } from '../../types/events'
 import type {
-	BaseLearnerEventMap,
 	LearnerOrigin,
 	Significance,
-	TokenUsage,
 } from '../types'
+import type { SharedLearnerEventMap } from '../base/types'
 import type {
 	ObserveConfig,
 	SynthesizeConfig,
 	SynthesizeThresholds,
 } from './learning-methods/types'
-import type { QueryMethodName } from './query-methods/types'
 import type { Strategy } from './strategies'
 
 // Re-export TokenUsage for backwards compatibility
@@ -29,120 +27,34 @@ export type {
 	SynthesizeThresholds,
 } from './learning-methods/types'
 
-// Re-export query method types
-export type { QueryMethodName, QueryResult } from './query-methods/types'
+// Re-export query types from base
+export type { QueryResult } from '../base/query-method'
 
-/**
- * Usage data for events
- */
-export interface EventUsage {
-	inputTokens?: number
-	outputTokens?: number
-	totalTokens?: number
-}
+// Re-export EventUsage from base
+export type { EventUsage } from '../base/types'
 
 /**
  * TextLearner event map
  *
- * Extends base events with two-phase learning events.
+ * Extends SharedLearnerEventMap with narrowed types for text-specific fields.
+ * At runtime, BaseLearner emits using SharedLearnerEventMap (understanding = unknown).
+ * This type narrows understanding fields to string for consumers that know
+ * they're working with a TextLearner.
  */
-export interface TextLearnerEventMap extends BaseLearnerEventMap {
-	// Observe phase events
-	'learner:observe:started': {
-		learnerId: string
-		itemCount: number
-	}
-	'learner:observe:thinking': {
-		learnerId: string
-		thoughts: string[]
-		usage: TokenUsage
-	}
-	'learner:observed': {
-		learnerId: string
-		output: string[]
-		importance: number
-		bufferCount: number
-		usage?: EventUsage
-	}
-	'learner:observe:dismissed': {
-		learnerId: string
-		output: string[]
-		usage?: EventUsage
-	}
-	'learner:observe:error': {
-		learnerId: string
-		error: unknown
-	}
-
-	// Synthesize phase events
-	'learner:synthesize:started': {
-		learnerId: string
-		observationCount: number
-	}
-	'learner:synthesize:thinking': {
-		learnerId: string
-		thoughts: string[]
-		usage: TokenUsage
-	}
+export interface TextLearnerEventMap extends SharedLearnerEventMap {
 	'learner:synthesized': {
 		learnerId: string
 		newUnderstanding: string
 		previousUnderstanding: string
 		significance: Significance
 		evolution: string
-		usage?: EventUsage
+		usage?: { inputTokens?: number; outputTokens?: number; totalTokens?: number }
 	}
-	'learner:synthesize:dismissed': {
-		learnerId: string
-		output: string
-		usage?: EventUsage
-	}
-	'learner:synthesize:error': {
-		learnerId: string
-		error: unknown
-	}
-
-	// Learn phase errors
-	'learner:learn:failed': {
-		learnerId: string
-		error: string
-	}
-
-	// Query phase events
-	'learner:query:thinking': {
-		learnerId: string
-		thoughts: string[]
-		usage: TokenUsage
-	}
-
-	// Signal events (Living Brain)
-	'learner:signal': {
-		learnerId: string
-		description: string
-		timestamp: Date
-		metrics?: {
-			dismissalRate?: number
-			avgRelevance?: number
-			avgConfidence?: number
-			gapCount?: number
-			bufferCount?: number
-			activation?: number
-		}
-	}
-
-	// Config update events (Living Brain)
 	'learner:config:updated': {
 		learnerId: string
 		changedFields: string[]
 		config: ResolvedTextLearnerConfig
 	}
-
-	'learner:prompts:regenerated': {
-		learnerId: string
-		observePrompt: string
-		synthesizePrompt: string
-	}
-
 	'learner:understanding:set': {
 		learnerId: string
 		understanding: string
@@ -174,8 +86,6 @@ export interface TextLearnerMaintenance {
 export interface QueryConfig {
 	/** Optional model override for query phase */
 	model?: LanguageModel
-	/** Query method to use */
-	method?: QueryMethodName
 }
 
 /**
@@ -183,7 +93,6 @@ export interface QueryConfig {
  */
 export interface ResolvedQueryConfig {
 	model: LanguageModel
-	method: QueryMethodName
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

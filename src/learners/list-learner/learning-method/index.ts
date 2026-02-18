@@ -1,35 +1,50 @@
 /**
- * TextDefaultMethod — text-specific two-phase learning
+ * ListDefaultMethod — list-specific learning method
  *
- * Orchestrates observe → buffer → synthesize flow.
- * Strategy application is internal — returns post-strategy understanding.
+ * Orchestrates observe → buffer → synthesize → governance flow.
+ * Observe extracts discrete items/entities as text observations.
+ * Synthesize produces structured operations (add/update/remove).
+ * Governance applies mechanical dedup/pruning post-synthesis.
  * Implements the shared LearningMethod interface.
  */
 
 import type { LanguageModel } from 'ai'
-import { ObservationBuffer } from '../../../base/learning-method'
+import type { SynthesizeThresholds } from '../../base/learning-method'
+import { ObservationBuffer } from '../../base/learning-method'
 import type {
 	LearnCallbacks,
 	LearnOptions,
 	LearnOutput,
 	LearningMethod,
-} from '../../../base/learning-method'
-import { applyStrategy } from '../../strategies'
+} from '../../base/learning-method'
+import type { ListItem, ResolvedListGovernanceConfig } from '../types'
+import { applyListGovernance } from '../governance'
 import { initObserve, observe } from './observe'
-import type { ObserveIdentity } from './observe/schema.identity'
-import { initSynthesize, synthesize } from './synthesize'
-import type { SynthesizeIdentity } from './synthesize/schema.identity'
-import type {
-	TextDefaultConfig,
-	TextDefaultUpdateConfig,
-	TextDefaultUpdateResult,
-} from './types'
+import type { ObserveIdentity } from './observe'
+import {
+	initSynthesize,
+	synthesize,
+} from './synthesize'
+import type { SynthesizeIdentity } from './synthesize'
 
-export class TextDefaultMethod implements LearningMethod {
-	readonly name = 'text-default'
+export interface ListDefaultConfig {
+	observe: {
+		model?: LanguageModel
+		blueprintModel?: LanguageModel
+	}
+	synthesize: {
+		model?: LanguageModel
+		blueprintModel?: LanguageModel
+		thresholds: SynthesizeThresholds
+	}
+	listGovernance: ResolvedListGovernanceConfig
+}
+
+export class ListDefaultMethod implements LearningMethod {
+	readonly name = 'list-default'
 
 	private model: LanguageModel
-	private config: TextDefaultConfig
+	private config: ListDefaultConfig
 	private buffer: ObservationBuffer
 	private instructions: string = ''
 	private focus: string = ''
@@ -38,9 +53,10 @@ export class TextDefaultMethod implements LearningMethod {
 	private _observeIdentity: ObserveIdentity | null = null
 	private _synthesizeIdentity: SynthesizeIdentity | null = null
 	private observeSystemPrompt: string | null = null
+	// synthesizeSystemPrompt is dynamically generated (includes current items)
 	private synthesizeSystemPrompt: string | null = null
 
-	constructor(model: LanguageModel, config: TextDefaultConfig) {
+	constructor(model: LanguageModel, config: ListDefaultConfig) {
 		this.model = model
 		this.config = config
 		this.buffer = new ObservationBuffer()
@@ -51,6 +67,7 @@ export class TextDefaultMethod implements LearningMethod {
 	}
 
 	get synthesizePrompt(): string | null {
+		// Return a marker — actual prompt is generated per-call with current items
 		return this.synthesizeSystemPrompt
 	}
 
@@ -70,81 +87,70 @@ export class TextDefaultMethod implements LearningMethod {
 		}
 	}
 
-	/**
-	 * Update config with dependency-driven re-derivation
-	 *
-	 * Raw constants (models, thresholds) are stored immediately.
-	 * Derived values (prompts/identity) are re-generated when their
-	 * inputs change (instructions, blueprintModel, strategy).
-	 * If prompts are null (first init), regeneration is forced.
-	 */
-	async update(config: TextDefaultUpdateConfig): Promise<TextDefaultUpdateResult> {
+	async update(
+		config: Record<string, unknown>,
+	): Promise<{ changedFields: string[]; promptsRegenerated: boolean }> {
 		const changedFields: string[] = []
 		let needsObserveRegen = false
 		let needsSynthesizeRegen = false
 
-		// Default model swap
 		if (config.model !== undefined) {
-			this.model = config.model
+			this.model = config.model as LanguageModel
 			changedFields.push('model')
 		}
 
-		// Instructions change → both prompts need regen
-		if (config.instructions !== undefined && config.instructions !== this.instructions) {
-			this.instructions = config.instructions
+		if (
+			config.instructions !== undefined &&
+			config.instructions !== this.instructions
+		) {
+			this.instructions = config.instructions as string
 			changedFields.push('instructions')
 			needsObserveRegen = true
 			needsSynthesizeRegen = true
 		}
 
-		// Focus change → observe prompt needs regen
 		if (config.focus !== undefined && config.focus !== this.focus) {
-			this.focus = config.focus
+			this.focus = config.focus as string
 			changedFields.push('focus')
 			needsObserveRegen = true
 		}
 
-		// Observe config updates
 		if (config.observe) {
-			if (config.observe.model !== undefined) {
-				this.config.observe.model = config.observe.model
+			const obs = config.observe as Partial<ListDefaultConfig['observe']>
+			if (obs.model !== undefined) {
+				this.config.observe.model = obs.model
 				changedFields.push('observe.model')
 			}
-			if (config.observe.blueprintModel !== undefined) {
-				this.config.observe.blueprintModel = config.observe.blueprintModel
+			if (obs.blueprintModel !== undefined) {
+				this.config.observe.blueprintModel = obs.blueprintModel
 				changedFields.push('observe.blueprintModel')
 				needsObserveRegen = true
 			}
 		}
 
-		// Synthesize config updates
 		if (config.synthesize) {
-			if (config.synthesize.model !== undefined) {
-				this.config.synthesize.model = config.synthesize.model
+			const syn = config.synthesize as Partial<ListDefaultConfig['synthesize']>
+			if (syn.model !== undefined) {
+				this.config.synthesize.model = syn.model
 				changedFields.push('synthesize.model')
 			}
-			if (config.synthesize.blueprintModel !== undefined) {
-				this.config.synthesize.blueprintModel = config.synthesize.blueprintModel
+			if (syn.blueprintModel !== undefined) {
+				this.config.synthesize.blueprintModel = syn.blueprintModel
 				changedFields.push('synthesize.blueprintModel')
 				needsSynthesizeRegen = true
 			}
-			if (config.synthesize.thresholds !== undefined) {
-				Object.assign(this.config.synthesize.thresholds, config.synthesize.thresholds)
+			if (syn.thresholds !== undefined) {
+				Object.assign(this.config.synthesize.thresholds, syn.thresholds)
 				changedFields.push('synthesize.thresholds')
 			}
 		}
 
-		// Maintenance updates
-		if (config.maintenance) {
-			if (config.maintenance.strategy !== undefined && config.maintenance.strategy !== this.config.maintenance.strategy) {
-				this.config.maintenance.strategy = config.maintenance.strategy
-				changedFields.push('maintenance.strategy')
-				needsSynthesizeRegen = true
-			}
-			if (config.maintenance.maxTokens !== undefined) {
-				this.config.maintenance.maxTokens = config.maintenance.maxTokens
-				changedFields.push('maintenance.maxTokens')
-			}
+		if (config.listGovernance) {
+			Object.assign(
+				this.config.listGovernance,
+				config.listGovernance,
+			)
+			changedFields.push('listGovernance')
 		}
 
 		// Force regen if prompts don't exist yet (first init)
@@ -154,14 +160,20 @@ export class TextDefaultMethod implements LearningMethod {
 		const promptsRegenerated = needsObserveRegen || needsSynthesizeRegen
 
 		if (promptsRegenerated) {
-			const observeBlueprintModel = this.config.observe.blueprintModel ?? this.model
-			const synthesizeBlueprintModel = this.config.synthesize.blueprintModel ?? this.model
+			const observeBlueprintModel =
+				this.config.observe.blueprintModel ?? this.model
+			const synthesizeBlueprintModel =
+				this.config.synthesize.blueprintModel ?? this.model
 
 			const promises: Promise<void>[] = []
 
 			if (needsObserveRegen) {
 				promises.push(
-					initObserve(observeBlueprintModel, this.instructions, this.focus || undefined).then((result) => {
+					initObserve(
+						observeBlueprintModel,
+						this.instructions,
+						this.focus || undefined,
+					).then((result) => {
 						this._observeIdentity = result.identity
 						this.observeSystemPrompt = result.systemPrompt
 					}),
@@ -170,9 +182,13 @@ export class TextDefaultMethod implements LearningMethod {
 
 			if (needsSynthesizeRegen) {
 				promises.push(
-					initSynthesize(synthesizeBlueprintModel, this.instructions, this.config.maintenance.strategy).then((result) => {
+					initSynthesize(
+						synthesizeBlueprintModel,
+						this.instructions,
+					).then((result) => {
 						this._synthesizeIdentity = result.identity
-						this.synthesizeSystemPrompt = result.systemPrompt
+						// Mark as initialized — actual prompt is generated per synthesize call
+						this.synthesizeSystemPrompt = '(list-synthesize: identity initialized)'
 					}),
 				)
 			}
@@ -183,12 +199,6 @@ export class TextDefaultMethod implements LearningMethod {
 		return { changedFields, promptsRegenerated }
 	}
 
-	/**
-	 * Learn from data
-	 *
-	 * Observes data, buffers observations, synthesizes when thresholds met,
-	 * and applies strategy maintenance to the resulting understanding.
-	 */
 	async learn(
 		learnerId: string,
 		instructions: string,
@@ -197,25 +207,28 @@ export class TextDefaultMethod implements LearningMethod {
 		options?: LearnOptions,
 		callbacks?: LearnCallbacks,
 	): Promise<LearnOutput> {
-		if (!this.observeSystemPrompt || !this.synthesizeSystemPrompt) {
-			throw new Error('TextDefaultMethod not initialized. Call init() first.')
+		if (!this.observeSystemPrompt || !this._synthesizeIdentity) {
+			throw new Error(
+				'ListDefaultMethod not initialized. Call init() first.',
+			)
 		}
 
-		const understanding = currentUnderstanding as string
+		const currentItems = currentUnderstanding as ListItem[]
 		const observeModel = this.config.observe.model ?? this.model
 		const synthesizeModel = this.config.synthesize.model ?? this.model
 
-		// Handle forceSynthesize with empty data — skip observe, go straight to synthesis
-		if (
-			options?.forceSynthesize &&
-			data.length === 0 &&
-			this.buffer.count > 0
-		) {
+		// Handle forceSynthesize with empty data
+		if (options?.forceSynthesize && data.length === 0 && this.buffer.count > 0) {
 			const observations = this.buffer.getTexts()
 			const synthesizeResult = await synthesize(
 				synthesizeModel,
-				this.synthesizeSystemPrompt,
-				{ learnerId, instructions, currentUnderstanding: understanding, observations },
+				this._synthesizeIdentity,
+				{
+					learnerId,
+					instructions,
+					currentItems,
+					observations,
+				},
 				{ onThinking: callbacks?.onSynthesizeThinking },
 			)
 
@@ -233,7 +246,10 @@ export class TextDefaultMethod implements LearningMethod {
 			}
 			return {
 				status: 'synthesized',
-				newUnderstanding: await this.applyMaintenanceStrategy(synthesizeResult.newUnderstanding),
+				newUnderstanding: applyListGovernance(
+					synthesizeResult.newItems,
+					this.config.listGovernance,
+				),
 				significance: synthesizeResult.significance,
 				evolution: synthesizeResult.evolution,
 				reasoning: synthesizeResult.reasoning,
@@ -250,7 +266,6 @@ export class TextDefaultMethod implements LearningMethod {
 			{ onThinking: callbacks?.onObserveThinking },
 		)
 
-		// Handle observe outcomes
 		if (observeResult.status === 'error') {
 			return { status: 'observe:error', error: observeResult.error }
 		}
@@ -265,7 +280,10 @@ export class TextDefaultMethod implements LearningMethod {
 
 		// Filter by importance threshold
 		const minImportance = this.config.synthesize.thresholds.minImportance
-		if (minImportance !== undefined && observeResult.importance < minImportance) {
+		if (
+			minImportance !== undefined &&
+			observeResult.importance < minImportance
+		) {
 			return {
 				status: 'observe:dismissed',
 				output: observeResult.output,
@@ -273,7 +291,7 @@ export class TextDefaultMethod implements LearningMethod {
 			}
 		}
 
-		// Buffer each observation
+		// Buffer observations
 		for (const text of observeResult.output) {
 			this.buffer.add({ text, importance: observeResult.importance })
 		}
@@ -296,8 +314,8 @@ export class TextDefaultMethod implements LearningMethod {
 		callbacks?.onSynthesizeStarted?.(observations.length)
 		const synthesizeResult = await synthesize(
 			synthesizeModel,
-			this.synthesizeSystemPrompt,
-			{ learnerId, instructions, currentUnderstanding: understanding, observations },
+			this._synthesizeIdentity,
+			{ learnerId, instructions, currentItems, observations },
 			{ onThinking: callbacks?.onSynthesizeThinking },
 		)
 
@@ -317,7 +335,10 @@ export class TextDefaultMethod implements LearningMethod {
 
 		return {
 			status: 'synthesized',
-			newUnderstanding: await this.applyMaintenanceStrategy(synthesizeResult.newUnderstanding),
+			newUnderstanding: applyListGovernance(
+				synthesizeResult.newItems,
+				this.config.listGovernance,
+			),
 			significance: synthesizeResult.significance,
 			evolution: synthesizeResult.evolution,
 			reasoning: synthesizeResult.reasoning,
@@ -340,36 +361,4 @@ export class TextDefaultMethod implements LearningMethod {
 	getBufferedObservations(): Array<{ text: string; importance: number }> {
 		return this.buffer.getAll()
 	}
-
-	/**
-	 * Apply strategy-specific maintenance to post-synthesis understanding
-	 */
-	private async applyMaintenanceStrategy(understanding: string): Promise<string> {
-		const result = await applyStrategy({
-			understanding,
-			model: this.model,
-			config: this.config.maintenance,
-		})
-		return result.understanding
-	}
 }
-
-export type { ObserveIdentity } from './observe/schema.identity'
-export type { ObserveContext, ObserveOutput } from './observe/types'
-export type { SynthesizeIdentity } from './synthesize/schema.identity'
-export type { SynthesizeContext, SynthesizeOutput } from './synthesize/types'
-export type {
-	ObserveConfig,
-	SynthesizeConfig,
-	TextDefaultConfig,
-	TextDefaultUpdateConfig,
-	TextDefaultUpdateResult,
-} from './types'
-// Re-export shared types
-export type {
-	InitOutput,
-	LearnCallbacks,
-	LearnOptions,
-	LearnOutput,
-	SynthesizeThresholds,
-} from './types'

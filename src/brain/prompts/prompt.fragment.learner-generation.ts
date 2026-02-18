@@ -105,8 +105,21 @@ For each learner, provide:
   - [Concrete question 1]
   - [Concrete question 2]
 
-- type: "text" (only supported type)
-- maintenance: { strategy: "continuous" | "cumulative" | "decay" }
-  - continuous: Single growing understanding (default, good for most cases)
-  - cumulative: Summarize when understanding gets large (good for high-volume data)
-  - decay: Weight recent observations higher (good for tracking evolving preferences)`
+- type: "text" or "list"
+
+  TEXT learners (type: "text") — build narrative prose understanding.
+  Best for: qualitative patterns, preferences, philosophies, interconnected concepts, nuanced reasoning.
+  - maintenance: { strategy: "continuous" | "cumulative" | "decay" }
+    - continuous: Single growing understanding (default, good for most cases)
+    - cumulative: Summarize when understanding gets large (good for high-volume data)
+    - decay: Weight recent observations higher (good for tracking evolving preferences)
+
+  LIST learners (type: "list") — track structured collections of discrete items.
+  Best for: entities, catalogs, inventories, tools/technologies used, specific preferences as countable items.
+  - listGovernance: { deduplication?: "strict" | "none", maxItems?: number, pruning?: "oldest" | "least-confident" | "none" }
+    - Defaults are sensible (strict dedup, 200 maxItems, oldest pruning) — omit unless specific needs.
+
+  How to choose:
+  - If the learner builds understanding by synthesizing patterns across observations → text
+  - If the learner tracks a growing/changing set of distinct things → list
+  - When in doubt, prefer text — it's more flexible`

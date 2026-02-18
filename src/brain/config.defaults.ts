@@ -14,9 +14,6 @@ export const BRAIN_DEFAULTS = {
 				minImportance: 0.5,
 			},
 		},
-		query: {
-			method: 'tool-based' as const,
-		},
 		maintenance: {
 			strategy: 'cumulative' as const,
 			maxTokens: 16000,

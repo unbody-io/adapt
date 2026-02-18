@@ -2,31 +2,31 @@ import type { ParentModels } from '../../types/config'
 import { BaseLearner } from '../base'
 import type { QueryOptions, QueryResult } from '../base/query-method'
 import { ToolBasedMethod } from '../base/query-method'
-import { resolveTextLearnerConfig } from './config.resolver'
-import { TextDefaultMethod } from './learning-methods'
-import type { TextDefaultUpdateConfig } from './learning-methods'
-import { buildTextQueryPrompt, createReadUnderstandingTool } from './query-tools'
+import { resolveListLearnerConfig } from './config.resolver'
+import { ListDefaultMethod } from './learning-method'
+import { buildListQueryPrompt, createListQueryTools } from './query-tools'
 import type {
-	ResolvedTextLearnerConfig,
-	TextLearnerConfig,
-	TextLearnerUpdateResult,
+	ListItem,
+	ListLearnerConfig,
+	ListLearnerUpdateResult,
+	ResolvedListLearnerConfig,
 } from './types'
 
 /**
- * TextLearner - A learning agent that maintains understanding as narrative text
+ * ListLearner - A learning agent that maintains understanding as a collection of items
  *
- * Uses two-phase learning: Observe → Buffer → Synthesize
- * Strategy application is internal to TextDefaultMethod.
+ * Uses two-phase learning: Observe → Buffer → Synthesize (operations) → Governance
+ * Post-synthesis governance (dedup, maxItems, pruning) is internal to ListDefaultMethod.
  *
  * Extends BaseLearner for shared governance, metrics, evolution, events, learn().
  */
-export class TextLearner extends BaseLearner<string> {
-	private config: ResolvedTextLearnerConfig
-	private understanding = ''
+export class ListLearner extends BaseLearner<ListItem[]> {
+	private config: ResolvedListLearnerConfig
+	private items: ListItem[] = []
 	private _queryMethod: ToolBasedMethod
 
-	constructor(rawConfig: TextLearnerConfig, parentModels?: ParentModels) {
-		const config = resolveTextLearnerConfig(rawConfig, parentModels)
+	constructor(rawConfig: ListLearnerConfig, parentModels?: ParentModels) {
+		const config = resolveListLearnerConfig(rawConfig, parentModels)
 		super({
 			id: config.id,
 			name: rawConfig.name || config.id,
@@ -40,60 +40,47 @@ export class TextLearner extends BaseLearner<string> {
 		})
 		this.config = config
 
-		this._learningMethod = new TextDefaultMethod(this.config.model, {
+		this._learningMethod = new ListDefaultMethod(this.config.model, {
 			observe: {
-				method: this.config.observe.method,
 				model: this.config.observe.model,
 				blueprintModel: this.config.observe.blueprintModel,
 			},
 			synthesize: {
-				method: this.config.synthesize.method,
 				model: this.config.synthesize.model,
 				blueprintModel: this.config.synthesize.blueprintModel,
 				thresholds: this.config.synthesize.thresholds,
 			},
-			maintenance: this.config.maintenance,
+			listGovernance: this.config.listGovernance,
 		})
 
 		this._queryMethod = new ToolBasedMethod(this.config.query.model, {
-			tools: {
-				readUnderstanding: createReadUnderstandingTool(
-					() => this.getUnderstanding(),
-					() => this.getBufferedObservations(),
-				),
-			},
-			buildPrompt: buildTextQueryPrompt,
+			tools: createListQueryTools(() => this.getUnderstanding()),
+			buildPrompt: buildListQueryPrompt,
 		})
 	}
 
 	// ── Abstract implementations ───────────────────────────────────────────────
 
-	getUnderstanding(): string {
-		return this.understanding
+	getUnderstanding(): ListItem[] {
+		return this.items
 	}
 
-	setUnderstanding(understanding: string): void {
-		this.understanding = understanding
+	setUnderstanding(items: ListItem[]): void {
+		this.items = items
 
 		this.emit('learner:understanding:set', {
 			learnerId: this.id,
-			understanding,
+			understanding: items,
 		})
 	}
 
 	getSummary(): string {
-		return this.understanding || '(no understanding yet)'
+		if (this.items.length === 0) return '(no items yet)'
+		return `${this.items.length} items tracked`
 	}
 
 	// ── Init ───────────────────────────────────────────────────────────────────
 
-	/**
-	 * Initialize the learner
-	 *
-	 * Generates system prompts for both observe and synthesize phases.
-	 * Delegates to update() internally — prompts are generated because
-	 * they are null on first call.
-	 */
 	async init(): Promise<{
 		observeSystemPrompt: string
 		synthesizeSystemPrompt: string
@@ -142,7 +129,7 @@ export class TextLearner extends BaseLearner<string> {
 		})
 
 		// Short-circuit if learner has no knowledge at all
-		if (!this.understanding && this.getBufferState().count === 0) {
+		if (this.items.length === 0 && this.getBufferState().count === 0) {
 			const emptyResult: QueryResult = {
 				relevant: false,
 				relevance: 0,
@@ -207,18 +194,10 @@ export class TextLearner extends BaseLearner<string> {
 		}
 	}
 
-	// ── Text-specific accessors ────────────────────────────────────────────────
+	// ── List-specific accessors ────────────────────────────────────────────────
 
-	getObserveIdentity() {
-		return (this._learningMethod as TextDefaultMethod).observeIdentity
-	}
-
-	getSynthesizeIdentity() {
-		return (this._learningMethod as TextDefaultMethod).synthesizeIdentity
-	}
-
-	getMaintenance() {
-		return { ...this.config.maintenance }
+	getItemCount(): number {
+		return this.items.length
 	}
 
 	getQueryMethodName(): string {
@@ -229,15 +208,15 @@ export class TextLearner extends BaseLearner<string> {
 		return { ...this.config.synthesize.thresholds }
 	}
 
+	getListGovernance() {
+		return { ...this.config.listGovernance }
+	}
+
 	// ── Update ─────────────────────────────────────────────────────────────────
 
-	/**
-	 * Update learner configuration
-	 *
-	 * Accepts the same shape as the constructor config (but partial).
-	 * Any config field can be updated. Only `id` is truly immutable.
-	 */
-	async update(updates: Partial<TextLearnerConfig>): Promise<TextLearnerUpdateResult> {
+	async update(
+		updates: Partial<ListLearnerConfig>,
+	): Promise<ListLearnerUpdateResult> {
 		if (updates.id !== undefined && updates.id !== this.id) {
 			throw new Error(
 				'Cannot update immutable field "id". Learner identity cannot be changed.',
@@ -245,27 +224,33 @@ export class TextLearner extends BaseLearner<string> {
 		}
 
 		const changedFields: string[] = []
-		const methodUpdate: TextDefaultUpdateConfig = {}
+		const methodUpdate: Record<string, unknown> = {}
 
-		// ── Metadata fields ──
+		// ── Metadata ──
 
 		if (updates.name !== undefined && updates.name !== this.name) {
 			this.name = updates.name
 			changedFields.push('name')
 		}
 
-		if (updates.description !== undefined && updates.description !== this.description) {
+		if (
+			updates.description !== undefined &&
+			updates.description !== this.description
+		) {
 			this.description = updates.description
 			changedFields.push('description')
 		}
 
-		if (updates.origin !== undefined && updates.origin !== this.config.origin) {
+		if (
+			updates.origin !== undefined &&
+			updates.origin !== this.config.origin
+		) {
 			this.config.origin = updates.origin
 			this._origin = updates.origin
 			changedFields.push('origin')
 		}
 
-		// ── Model changes ──
+		// ── Model ──
 
 		if (updates.model !== undefined) {
 			this.config.model = updates.model
@@ -276,14 +261,6 @@ export class TextLearner extends BaseLearner<string> {
 		if (updates.blueprintModel !== undefined) {
 			this.config.blueprintModel = updates.blueprintModel
 			changedFields.push('blueprintModel')
-			if (!updates.observe?.blueprintModel) {
-				methodUpdate.observe = methodUpdate.observe || {}
-				methodUpdate.observe.blueprintModel = updates.blueprintModel
-			}
-			if (!updates.synthesize?.blueprintModel) {
-				methodUpdate.synthesize = methodUpdate.synthesize || {}
-				methodUpdate.synthesize.blueprintModel = updates.blueprintModel
-			}
 		}
 
 		// ── Instructions ──
@@ -309,14 +286,19 @@ export class TextLearner extends BaseLearner<string> {
 			if (updates.observe.model !== undefined) {
 				this.config.observe.model = updates.observe.model
 				changedFields.push('observe.model')
-				methodUpdate.observe = methodUpdate.observe || {}
-				methodUpdate.observe.model = updates.observe.model
+				methodUpdate.observe = {
+					...(methodUpdate.observe as object),
+					model: updates.observe.model,
+				}
 			}
 			if (updates.observe.blueprintModel !== undefined) {
-				this.config.observe.blueprintModel = updates.observe.blueprintModel
+				this.config.observe.blueprintModel =
+					updates.observe.blueprintModel
 				changedFields.push('observe.blueprintModel')
-				methodUpdate.observe = methodUpdate.observe || {}
-				methodUpdate.observe.blueprintModel = updates.observe.blueprintModel
+				methodUpdate.observe = {
+					...(methodUpdate.observe as object),
+					blueprintModel: updates.observe.blueprintModel,
+				}
 			}
 		}
 
@@ -326,47 +308,39 @@ export class TextLearner extends BaseLearner<string> {
 			if (updates.synthesize.model !== undefined) {
 				this.config.synthesize.model = updates.synthesize.model
 				changedFields.push('synthesize.model')
-				methodUpdate.synthesize = methodUpdate.synthesize || {}
-				methodUpdate.synthesize.model = updates.synthesize.model
+				methodUpdate.synthesize = {
+					...(methodUpdate.synthesize as object),
+					model: updates.synthesize.model,
+				}
 			}
 			if (updates.synthesize.blueprintModel !== undefined) {
-				this.config.synthesize.blueprintModel = updates.synthesize.blueprintModel
+				this.config.synthesize.blueprintModel =
+					updates.synthesize.blueprintModel
 				changedFields.push('synthesize.blueprintModel')
-				methodUpdate.synthesize = methodUpdate.synthesize || {}
-				methodUpdate.synthesize.blueprintModel = updates.synthesize.blueprintModel
+				methodUpdate.synthesize = {
+					...(methodUpdate.synthesize as object),
+					blueprintModel: updates.synthesize.blueprintModel,
+				}
 			}
 			if (updates.synthesize.thresholds) {
-				const t = updates.synthesize.thresholds
-				if (t.minImportance !== undefined) {
-					this.config.synthesize.thresholds.minImportance = t.minImportance
-					changedFields.push('synthesize.thresholds.minImportance')
+				Object.assign(
+					this.config.synthesize.thresholds,
+					updates.synthesize.thresholds,
+				)
+				changedFields.push('synthesize.thresholds')
+				methodUpdate.synthesize = {
+					...(methodUpdate.synthesize as object),
+					thresholds: updates.synthesize.thresholds,
 				}
-				if (t.maxObservations !== undefined) {
-					this.config.synthesize.thresholds.maxObservations = t.maxObservations
-					changedFields.push('synthesize.thresholds.maxObservations')
-				}
-				if (t.maxTokens !== undefined) {
-					this.config.synthesize.thresholds.maxTokens = t.maxTokens
-					changedFields.push('synthesize.thresholds.maxTokens')
-				}
-				methodUpdate.synthesize = methodUpdate.synthesize || {}
-				methodUpdate.synthesize.thresholds = updates.synthesize.thresholds
 			}
 		}
 
-		// ── Maintenance ──
+		// ── List governance ──
 
-		if (updates.maintenance?.strategy !== undefined && updates.maintenance.strategy !== this.config.maintenance.strategy) {
-			this.config.maintenance.strategy = updates.maintenance.strategy
-			changedFields.push('maintenance.strategy')
-			methodUpdate.maintenance = methodUpdate.maintenance || {}
-			methodUpdate.maintenance.strategy = updates.maintenance.strategy
-		}
-		if (updates.maintenance?.maxTokens !== undefined && updates.maintenance.maxTokens !== this.config.maintenance.maxTokens) {
-			this.config.maintenance.maxTokens = updates.maintenance.maxTokens
-			changedFields.push('maintenance.maxTokens')
-			methodUpdate.maintenance = methodUpdate.maintenance || {}
-			methodUpdate.maintenance.maxTokens = updates.maintenance.maxTokens
+		if (updates.listGovernance) {
+			Object.assign(this.config.listGovernance, updates.listGovernance)
+			changedFields.push('listGovernance')
+			methodUpdate.listGovernance = updates.listGovernance
 		}
 
 		// ── Query config ──
@@ -387,16 +361,25 @@ export class TextLearner extends BaseLearner<string> {
 			if (updates.governance.signalThresholds) {
 				const st = updates.governance.signalThresholds
 				if (st.maxDismissalRate !== undefined) {
-					this.governance.signalThresholds.maxDismissalRate = st.maxDismissalRate
-					changedFields.push('governance.signalThresholds.maxDismissalRate')
+					this.governance.signalThresholds.maxDismissalRate =
+						st.maxDismissalRate
+					changedFields.push(
+						'governance.signalThresholds.maxDismissalRate',
+					)
 				}
 				if (st.minConfidence !== undefined) {
-					this.governance.signalThresholds.minConfidence = st.minConfidence
-					changedFields.push('governance.signalThresholds.minConfidence')
+					this.governance.signalThresholds.minConfidence =
+						st.minConfidence
+					changedFields.push(
+						'governance.signalThresholds.minConfidence',
+					)
 				}
 				if (st.maxObservationsWithoutSynthesis !== undefined) {
-					this.governance.signalThresholds.maxObservationsWithoutSynthesis = st.maxObservationsWithoutSynthesis
-					changedFields.push('governance.signalThresholds.maxObservationsWithoutSynthesis')
+					this.governance.signalThresholds.maxObservationsWithoutSynthesis =
+						st.maxObservationsWithoutSynthesis
+					changedFields.push(
+						'governance.signalThresholds.maxObservationsWithoutSynthesis',
+					)
 				}
 			}
 		}
@@ -406,7 +389,7 @@ export class TextLearner extends BaseLearner<string> {
 		let promptsRegenerated = false
 
 		if (Object.keys(methodUpdate).length > 0) {
-			const result = await this._learningMethod.update(methodUpdate as Record<string, unknown>)
+			const result = await this._learningMethod.update(methodUpdate)
 			promptsRegenerated = result.promptsRegenerated
 
 			if (promptsRegenerated) {

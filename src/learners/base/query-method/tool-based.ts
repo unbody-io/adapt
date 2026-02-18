@@ -1,0 +1,211 @@
+/**
+ * ToolBasedMethod — generic tool-based query method
+ *
+ * Accepts learner-provided understanding-access tools + a prompt builder.
+ * Cognitive tools (generateResponse, identifyGaps, complete) are built-in.
+ */
+
+import type { LanguageModel, Tool } from 'ai'
+import { tool } from 'ai'
+import { z } from 'zod'
+import { generate, stepCountIs } from '../../../llm'
+import type { TokenUsage } from '../../types'
+import type {
+	QueryCallbacks,
+	QueryContext,
+	QueryMethod,
+	QueryMethodUpdateConfig,
+	QueryOptions,
+	QueryResult,
+} from './types'
+
+const MAX_STEPS = 10
+
+// ── Cognitive tools (built-in) ─────────────────────────────────────────────
+
+const completeSchema = z.object({
+	relevant: z
+		.boolean()
+		.describe('Is this query within your area of expertise/purpose?'),
+	relevance: z
+		.number()
+		.min(0)
+		.max(1)
+		.describe(
+			'How related is this query to your domain/purpose? 0.0 = completely outside your scope, 1.0 = core to what you do',
+		),
+	confidence: z
+		.number()
+		.min(0)
+		.max(1)
+		.describe(
+			'How well could you answer from your understanding? 0.0 = you have nothing on this topic, 1.0 = you fully answered. If outside your scope, this should be 0.0',
+		),
+	insight: z.string().describe('The insight or response to the query'),
+	gaps: z.array(z.string()).describe('What could not be answered'),
+})
+
+type CompleteParams = z.infer<typeof completeSchema>
+
+const cognitiveTools = {
+	generateResponse: tool({
+		description:
+			'Formulate an answer based on your understanding. Be specific, cite what you know, express appropriate confidence, acknowledge uncertainty.',
+		inputSchema: z.object({
+			response: z
+				.string()
+				.describe('The generated response to the query'),
+			relevance: z
+				.number()
+				.min(0)
+				.max(1)
+				.describe(
+					'How related is this query to your domain/purpose?',
+				),
+			confidence: z
+				.number()
+				.min(0)
+				.max(1)
+				.describe(
+					'How well could you answer from your understanding?',
+				),
+		}),
+		execute: async (params) => params,
+	}),
+	identifyGaps: tool({
+		description:
+			'Note what you could not answer — missing data, conflicting signals, or queries outside your purpose. Gaps guide future learning.',
+		inputSchema: z.object({
+			gaps: z
+				.array(z.string())
+				.describe('List of things that could not be answered'),
+		}),
+		execute: async (params) => params,
+	}),
+	complete: tool({
+		description:
+			'Finalize query response with relevance assessment, confidence score, insight, and identified gaps.',
+		inputSchema: completeSchema,
+		// No execute — done tool
+	}),
+} as const
+
+// ── ToolBasedMethod ────────────────────────────────────────────────────────
+
+export interface ToolBasedConfig {
+	/** Learner-specific understanding-access tools */
+	tools: Record<string, Tool<any, any>>
+	/** Builds the system prompt for the query (learner-specific) */
+	buildPrompt: (context: QueryContext) => string
+}
+
+export class ToolBasedMethod implements QueryMethod {
+	readonly name = 'tool-based'
+	private model: LanguageModel
+	private config: ToolBasedConfig
+
+	constructor(model: LanguageModel, config: ToolBasedConfig) {
+		this.model = model
+		this.config = config
+	}
+
+	update(config: QueryMethodUpdateConfig): void {
+		if (config.model !== undefined) {
+			this.model = config.model
+		}
+	}
+
+	async query(
+		context: QueryContext,
+		options?: QueryOptions,
+		callbacks?: QueryCallbacks,
+	): Promise<QueryResult> {
+		const totalUsage: TokenUsage = {
+			inputTokens: 0,
+			outputTokens: 0,
+			totalTokens: 0,
+		}
+
+		let completeResult: CompleteParams | null = null
+
+		const handleStep = ({
+			usage,
+			text,
+			toolCalls,
+		}: {
+			usage?: {
+				inputTokens?: number
+				outputTokens?: number
+				totalTokens?: number
+			}
+			text?: string
+			toolCalls?: Array<{ toolName: string; input?: unknown }>
+		}) => {
+			if (usage?.inputTokens != null && usage?.outputTokens != null) {
+				totalUsage.inputTokens += usage.inputTokens
+				totalUsage.outputTokens += usage.outputTokens
+				totalUsage.totalTokens += usage.totalTokens ?? 0
+			}
+
+			if (text && callbacks?.onThinking) {
+				callbacks.onThinking([text], {
+					inputTokens: usage?.inputTokens ?? 0,
+					outputTokens: usage?.outputTokens ?? 0,
+					totalTokens: usage?.totalTokens ?? 0,
+				})
+			}
+
+			if (toolCalls) {
+				for (const tc of toolCalls) {
+					if (tc.toolName === 'complete') {
+						completeResult = tc.input as CompleteParams
+					}
+				}
+			}
+		}
+
+		const system = this.config.buildPrompt(context)
+		const allTools = { ...this.config.tools, ...cognitiveTools }
+		const { model: modelOverride, ...generateOptions } = options ?? {}
+
+		const result = await generate({
+			model: modelOverride ?? this.model,
+			system,
+			prompt: 'Answer the query based on your understanding.',
+			tools: allTools,
+			toolChoice: 'required',
+			stopWhen: stepCountIs(MAX_STEPS),
+			onStepFinish: handleStep,
+			...generateOptions,
+		})
+
+		// Check final step for complete tool call
+		const completeCall = result.toolCalls.find(
+			(c) => c.toolName === 'complete',
+		)
+		if (completeCall && 'input' in completeCall) {
+			completeResult = completeCall.input as CompleteParams
+		}
+
+		if (completeResult) {
+			return {
+				relevant: completeResult.relevant,
+				relevance: completeResult.relevance,
+				confidence: completeResult.confidence,
+				insight: completeResult.insight,
+				gaps: (completeResult.gaps || []).join('\n'),
+				usage: totalUsage,
+			}
+		}
+
+		// Fallback if no complete tool was called
+		return {
+			relevant: false,
+			relevance: 0,
+			confidence: 0,
+			insight: 'Unable to generate response',
+			gaps: 'Query processing did not complete',
+			usage: totalUsage,
+		}
+	}
+}

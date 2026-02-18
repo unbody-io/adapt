@@ -4,14 +4,15 @@
  * Formats learner data for LLM to synthesize into a unified learner
  */
 
-import type { TextLearner } from '../../learners/text-learner/class'
+import type { BaseLearner } from '../../learners/base/class'
+import { stringifyUnderstanding } from './utils'
 
 /**
  * Format merge prompt with learner data and guidance
  */
 export function mergePromptTemplate(
 	guidance: string,
-	learners: TextLearner[],
+	learners: BaseLearner<any>[],
 	brainPrompt: string,
 ): string {
 	return `# Brain Context
@@ -34,7 +35,7 @@ ${learners
 ${learner.instructions}
 
 **Understanding**:
-${learner.getUnderstanding() || '(No understanding yet)'}
+${stringifyUnderstanding(learner.getUnderstanding())}
 
 ---`,
 	)

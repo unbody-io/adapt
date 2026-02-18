@@ -1,9 +1,9 @@
 import type { LanguageModel } from 'ai'
 import type { GeneratedLearnerConfig } from '../learners/schema.config'
 import type { Strategy } from '../learners/text-learner/strategies'
-import type { TextLearnerEventMap } from '../learners/text-learner/types'
+import type { SharedLearnerEventMap } from '../learners/base/types'
 import type { TokenUsage } from '../learners/types'
-import type { LearnOutput } from '../learners/text-learner/learning-methods/two-phase/types'
+import type { LearnOutput } from '../learners/base/learning-method'
 import type {
 	CascadableConfig,
 	ResolvedCascadableConfig,
@@ -36,7 +36,6 @@ export interface SynthesizePhaseConfig extends CascadableConfig {
  */
 export interface QueryPhaseConfig {
 	model?: LanguageModel
-	method?: 'tool-based' | 'direct'
 }
 
 /**
@@ -158,7 +157,6 @@ export interface ResolvedSynthesizePhaseConfig
  */
 export interface ResolvedQueryPhaseConfig {
 	model: LanguageModel
-	method: 'tool-based' | 'direct'
 }
 
 /**
@@ -440,7 +438,7 @@ export interface BrainOwnEventMap {
 /**
  * Combined Brain event map (Brain's own events + forwarded learner events)
  */
-export type BrainEventMap = BrainOwnEventMap & TextLearnerEventMap
+export type BrainEventMap = BrainOwnEventMap & SharedLearnerEventMap
 
 /**
  * Union type of all Brain events

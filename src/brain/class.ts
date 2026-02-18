@@ -45,6 +45,10 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 	private evaluator?: Evaluator
 	private evolutionOrchestrator?: EvolutionOrchestrator
 
+	// Coverage gap tracking
+	private coverageGapCount = 0
+	private recentQueryCount = 0
+
 	constructor(rawConfig: BrainConfig) {
 		super()
 		this.config = resolveBrainConfig(rawConfig)
@@ -99,6 +103,13 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 					this.emit(event.type as keyof BrainEventMap, event.payload as never)
 				})
 
+				// Auto-execute decisions from signal-triggered evaluations
+				this.evaluator.on('evaluator:evaluation:completed', async (event) => {
+					if (event.source === 'auto' && event.decisions.length > 0) {
+						await this.executeEvolutionDecisions(event.decisions)
+					}
+				})
+
 				// Initialize evolution orchestrator
 				this.evolutionOrchestrator = new EvolutionOrchestrator(this)
 			}
@@ -123,6 +134,7 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 			model: this.config.init.model,
 			prompt: rootDecompositionPrompt(this.prompt),
 			output: Output.object({ schema: brainDecompositionSchema }),
+			repairSchema: brainDecompositionSchema,
 		})
 	}
 
@@ -325,20 +337,29 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 		try {
 			const learnerArray = this.getLearners()
 
+			// Skip learners with no understanding and no buffered observations
+			const queryableLearners = learnerArray.filter((l) => {
+				return !!l.getUnderstanding() || l.getBufferState().count > 0
+			})
+
 			// Query all learners in parallel
 			const learnerResults = await Promise.all(
-				learnerArray.map(async (learner) => {
+				queryableLearners.map(async (learner) => {
 					const result = await learner.query(query, options)
 					return {
 						learnerId: learner.id,
 						name: this.learnerNames.get(learner.id) ?? learner.id,
 						relevant: result.relevant,
+						relevance: result.relevance,
 						confidence: result.confidence,
 						insight: result.insight,
 						gaps: result.gaps ? result.gaps.split('\n').filter(Boolean) : [],
 					}
 				}),
 			)
+
+			// Check for coverage gaps
+			this.checkCoverageGap(learnerResults)
 
 			this.emit('brain:ask:synthesis:started', {
 				queryId,
@@ -400,6 +421,38 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 	}
 
 	/**
+	 * Check for coverage gaps after ask() collects learner responses
+	 */
+	private checkCoverageGap(
+		responses: Array<{ relevance: number }>,
+	): void {
+		if (!this.config.evolution.enabled) return
+
+		const { relevanceThreshold, gapCountThreshold, windowSize } =
+			this.config.evolution.coverageGap
+
+		this.recentQueryCount++
+
+		const allLowRelevance = responses.every(
+			(r) => r.relevance < relevanceThreshold,
+		)
+		if (allLowRelevance) {
+			this.coverageGapCount++
+		}
+
+		if (this.recentQueryCount >= windowSize) {
+			if (this.coverageGapCount >= gapCountThreshold) {
+				this.signal({
+					source: 'brain',
+					description: `Coverage gap: ${this.coverageGapCount} of last ${this.recentQueryCount} queries had no relevant learner`,
+				})
+			}
+			this.coverageGapCount = 0
+			this.recentQueryCount = 0
+		}
+	}
+
+	/**
 	 * Manually trigger evolution evaluation (Living Brain)
 	 *
 	 * Evaluates buffered signals and returns evolution decisions.
@@ -422,7 +475,7 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 			this.evaluator.includeUnderstanding = options.includeUnderstanding
 		}
 
-		const decisions = await this.evaluator.evaluate()
+		const decisions = await this.evaluator.evaluate('manual')
 
 		// In dryRun mode, return decisions without executing them
 		if (options?.dryRun) {

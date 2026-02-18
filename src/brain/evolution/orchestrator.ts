@@ -36,7 +36,6 @@ export class EvolutionOrchestrator {
 	 *
 	 * @param decisions - Array of evolution decisions from Evaluator
 	 * @returns Aggregated results from all handlers
-	 * @throws If any group fails to execute
 	 */
 	async executeDecisions(decisions: EvolutionDecision[]): Promise<AggregatedEvolutionResult> {
 		const aggregated: AggregatedEvolutionResult = {
@@ -57,13 +56,14 @@ export class EvolutionOrchestrator {
 
 		for (const [action, group] of grouped) {
 			const handler = this.handlers.get(action)
+			if (!handler) continue
 
-			if (!handler) {
-				throw new Error(`No handler found for action: ${action}`)
+			try {
+				const result: EvolutionActionResult = await handler.execute(group)
+				this.aggregateResult(aggregated, action, result)
+			} catch {
+				// Individual handler failures are already emitted via emitActionFailed
 			}
-
-			const result: EvolutionActionResult = await handler.execute(group)
-			this.aggregateResult(aggregated, action, result)
 		}
 
 		return aggregated

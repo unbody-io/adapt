@@ -38,12 +38,15 @@ ${learner.instructions}
 - Min Importance: ${thresholds.minImportance}
 - Max Observations: ${thresholds.maxObservations}
 
-**Governance Metrics**:
+**Governance**:
 - Activation: ${governance.activation.toFixed(2)}
 - Status: ${governance.status}
-- Retrieval Count: ${governance.retrievalCount}
-- Success Rate: ${(governance.successRate * 100).toFixed(1)}%
 - Last Accessed: ${governance.lastAccessed.toISOString()}
+
+**Metrics**:
+- Query Count: ${learner.getMetrics().query.count}
+- Dismissal Rate: ${(learner.getMetrics().ingestion.dismissalRate * 100).toFixed(1)}%
+- Syntheses: ${learner.getMetrics().ingestion.synthesisCount}
 
 **Current Understanding** (first 500 chars):
 ${learner.getUnderstanding().slice(0, 500)}${learner.getUnderstanding().length > 500 ? '...' : ''}

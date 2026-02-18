@@ -17,16 +17,25 @@ import { evaluatorSystemPrompt } from './prompt.system'
 import { evaluationPromptTemplate } from './prompt.template.evaluation'
 import {
 	createGetUnderstandingsTool,
+	createGetLearnerActivityTool,
+	createGetRecentHistoryTool,
 	finalizeDecisions,
 	type FinalizeDecisionsParams,
 } from './tools'
-import type { Signal, EvolutionDecision, EvaluatorEventMap } from './types'
+import type {
+	Signal,
+	EvolutionDecision,
+	EvolutionHistoryEntry,
+	EvaluatorEventMap,
+} from './types'
 import type { Brain } from '../class'
 
 const MAX_EVALUATION_STEPS = 10
 
 export class Evaluator extends TypedEmitter<EvaluatorEventMap> {
 	private signals: Signal[] = []
+	private history: EvolutionHistoryEntry[] = []
+	private isEvaluating = false
 	private readonly threshold: number
 	private readonly brain: Brain
 	includeUnderstanding = true
@@ -43,18 +52,24 @@ export class Evaluator extends TypedEmitter<EvaluatorEventMap> {
 	signal(signal: Signal): void {
 		this.signals.push(signal)
 
+		if (this.isEvaluating) return
+
 		// Auto-evaluate: bypass signals trigger immediately, otherwise wait for threshold
 		if (
 			signal.bypass ||
 			(this.signals.length >= this.threshold &&
 			this.brain.config.evolution.autoEvaluate)
 		) {
-			// Fire and forget - don't block signal emission
-			this.evaluate().catch((error) => {
-				this.emit('evaluator:evaluation:failed', {
-					error: error instanceof Error ? error.message : String(error),
+			this.isEvaluating = true
+			this.evaluate('auto')
+				.catch((error) => {
+					this.emit('evaluator:evaluation:failed', {
+						error: error instanceof Error ? error.message : String(error),
+					})
 				})
-			})
+				.finally(() => {
+					this.isEvaluating = false
+				})
 		}
 	}
 
@@ -68,7 +83,7 @@ export class Evaluator extends TypedEmitter<EvaluatorEventMap> {
 	 *
 	 * @returns Array of evolution decisions (can be empty)
 	 */
-	async evaluate(): Promise<EvolutionDecision[]> {
+	async evaluate(source: 'auto' | 'manual' = 'manual'): Promise<EvolutionDecision[]> {
 		if (this.signals.length === 0) {
 			return []
 		}
@@ -83,7 +98,14 @@ export class Evaluator extends TypedEmitter<EvaluatorEventMap> {
 
 			// Create tools with brain context
 			const getUnderstandings = createGetUnderstandingsTool(this.brain)
-			const tools = { getUnderstandings, finalizeDecisions }
+			const getLearnerActivity = createGetLearnerActivityTool(this.brain)
+			const getRecentHistory = createGetRecentHistoryTool(this.history)
+			const tools = {
+				getUnderstandings,
+				getLearnerActivity,
+				getRecentHistory,
+				finalizeDecisions,
+			}
 
 			// Call LLM with tools
 			const result = await generate({
@@ -120,9 +142,21 @@ export class Evaluator extends TypedEmitter<EvaluatorEventMap> {
 			}
 
 			this.emit('evaluator:evaluation:completed', {
+				source,
 				decisionCount: decisions.length,
 				decisions,
 			})
+
+			// Record history (capped at 10)
+			this.history.push({
+				timestamp: new Date(),
+				decisions: decisions.map((d) => ({
+					action: d.action,
+					targets: d.targets,
+					reasoning: d.reasoning,
+				})),
+			})
+			if (this.history.length > 10) this.history.shift()
 
 			// Clear signal buffer after successful evaluation
 			this.signals = []
@@ -166,6 +200,7 @@ export class Evaluator extends TypedEmitter<EvaluatorEventMap> {
 			includeUnderstanding: this.includeUnderstanding,
 			learners: Array.from(this.brain.learners.values()).map((learner) => {
 				const governance = learner.getGovernance()
+				const metrics = learner.getMetrics()
 				return {
 					id: learner.id,
 					name: learner.id,
@@ -175,8 +210,13 @@ export class Evaluator extends TypedEmitter<EvaluatorEventMap> {
 						activation: governance.activation,
 						status: governance.status,
 						lastAccessed: governance.lastAccessed,
-						retrievalCount: governance.retrievalCount,
-						successRate: governance.successRate,
+					},
+					metrics: {
+						queryCount: metrics.query.count,
+						dismissalRate: metrics.ingestion.dismissalRate,
+						synthesisCount: metrics.ingestion.synthesisCount,
+						observationsSinceLastSynthesis:
+							metrics.ingestion.observationsSinceLastSynthesis,
 					},
 				}
 			}),

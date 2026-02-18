@@ -136,9 +136,10 @@ export class ToolBasedMethod implements QueryMethod {
 		if (completeResult) {
 			return {
 				relevant: completeResult.relevant,
+				relevance: completeResult.relevance,
 				confidence: completeResult.confidence,
 				insight: completeResult.insight,
-				gaps: completeResult.gaps.join('\n'),
+				gaps: (completeResult.gaps || []).join('\n'),
 				usage: totalUsage,
 			}
 		}
@@ -146,6 +147,7 @@ export class ToolBasedMethod implements QueryMethod {
 		// Fallback if no complete tool was called
 		return {
 			relevant: false,
+			relevance: 0,
 			confidence: 0,
 			insight: 'Unable to generate response',
 			gaps: 'Query processing did not complete',

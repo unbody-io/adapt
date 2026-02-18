@@ -47,6 +47,7 @@ export class SplitHandler extends EvolutionActionHandler<SplitActionResult> {
 						this.brain.prompt,
 					),
 					output: Output.object({ schema: splitOutputSchema }),
+					repairSchema: splitOutputSchema,
 				})
 
 				const { learners: splitConfigs } = result.output
@@ -81,7 +82,7 @@ export class SplitHandler extends EvolutionActionHandler<SplitActionResult> {
 			} catch (error) {
 				const err = error instanceof Error ? error : new Error(String(error))
 				this.emitActionFailed(decision, err)
-				throw new Error(`Split action failed: ${err.message}`)
+				continue
 			}
 		}
 

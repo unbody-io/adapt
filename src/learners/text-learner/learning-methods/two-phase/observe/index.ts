@@ -28,18 +28,21 @@ export interface ObserveInitResult {
  *
  * @param model - Language model to use
  * @param instructions - Learner's purpose/instructions
+ * @param focus - Optional focus areas to narrow observation filtering
  * @returns Generated identity and system prompt
  */
 export async function initObserve(
 	model: LanguageModel,
 	instructions: string,
+	focus?: string,
 ): Promise<ObserveInitResult> {
-	const prompt = observeIdentityPromptTemplate(instructions)
+	const prompt = observeIdentityPromptTemplate(instructions, focus)
 
 	const { output: identity } = await generate({
 		model,
 		prompt,
 		output: Output.object({ schema: observeIdentitySchema }),
+		repairSchema: observeIdentitySchema,
 	})
 
 	const systemPrompt = observeSystemPromptTemplate(identity)
@@ -70,6 +73,7 @@ export async function observe(
 			system: systemPrompt,
 			prompt,
 			output: Output.object({ schema: observeOutputSchema }),
+			repairSchema: observeOutputSchema,
 			temperature: 0.2,
 		})
 

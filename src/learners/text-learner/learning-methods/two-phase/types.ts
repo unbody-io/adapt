@@ -32,8 +32,8 @@ import type { Usage } from './observe/types'
  */
 export type LearnOutput =
 	// Observe outcomes
-	| { status: 'observed'; output: string; usage?: Usage }
-	| { status: 'observe:dismissed'; output: string; usage?: Usage }
+	| { status: 'observed'; output: string[]; usage?: Usage }
+	| { status: 'observe:dismissed'; output: string[]; usage?: Usage }
 	| { status: 'observe:error'; error: unknown }
 	// Synthesize outcomes
 	| {
@@ -110,6 +110,8 @@ export interface TwoPhaseUpdateConfig {
 	model?: LanguageModel
 	/** Learner instructions (triggers prompt regen) */
 	instructions?: string
+	/** Focus areas (triggers observe prompt regen) */
+	focus?: string
 	/** Observe phase config updates */
 	observe?: Partial<ObserveConfig>
 	/** Synthesize phase config updates */

@@ -52,6 +52,7 @@ export async function synthesize(
 		system,
 		prompt,
 		output: Output.object({ schema: synthesisOutputSchema }),
+		repairSchema: synthesisOutputSchema,
 		...generateOptions,
 	})
 
@@ -66,6 +67,7 @@ export async function synthesize(
 		.filter((r) => r.relevant)
 		.map((r) => ({
 			learnerId: r.learnerId,
+			relevance: r.relevance,
 			confidence: r.confidence,
 			insight: r.insight,
 		}))

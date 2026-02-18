@@ -49,6 +49,7 @@ export class MergeHandler extends EvolutionActionHandler<MergeActionResult> {
 						this.brain.prompt,
 					),
 					output: Output.object({ schema: mergeOutputSchema }),
+					repairSchema: mergeOutputSchema,
 				})
 
 				const { config, understanding } = result.output
@@ -75,7 +76,7 @@ export class MergeHandler extends EvolutionActionHandler<MergeActionResult> {
 			} catch (error) {
 				const err = error instanceof Error ? error : new Error(String(error))
 				this.emitActionFailed(decision, err)
-				throw new Error(`Merge action failed: ${err.message}`)
+				continue
 			}
 		}
 

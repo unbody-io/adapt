@@ -29,6 +29,7 @@ export class CreateHandler extends EvolutionActionHandler<CreateActionResult> {
 				model: this.brain.config.model,
 				prompt: createPromptTemplate(guidance, this.brain.prompt),
 				output: Output.object({ schema: learnerConfigsSchema }),
+				repairSchema: learnerConfigsSchema,
 			})
 
 			const newLearnerIds: string[] = []
@@ -49,7 +50,7 @@ export class CreateHandler extends EvolutionActionHandler<CreateActionResult> {
 			for (const decision of decisions) {
 				this.emitActionFailed(decision, err)
 			}
-			throw new Error(`Create action failed: ${err.message}`)
+			return { newLearnerIds: [] }
 		}
 	}
 }

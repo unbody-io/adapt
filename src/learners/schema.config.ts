@@ -26,6 +26,10 @@ Watch for:
 Track answers to:
 - [Question 1]
 - [Question 2]`),
+	focus: z
+		.string()
+		.optional()
+		.describe('Optional focus areas to narrow observation filtering'),
 	type: z
 		.literal('text')
 		.describe('Learner type - must be "text"'),

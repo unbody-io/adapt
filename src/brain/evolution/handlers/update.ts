@@ -15,7 +15,8 @@ import { updatePromptTemplate } from '../prompt.template.update'
 /**
  * Handler for 'update' evolution action
  *
- * Processes each update decision sequentially.
+ * Processes each target in each decision sequentially.
+ * A single decision can target multiple learners (same guidance applied per-learner).
  */
 export class UpdateHandler extends EvolutionActionHandler<UpdateActionResult> {
 	async execute(decisions: EvolutionDecision[]): Promise<UpdateActionResult> {
@@ -25,54 +26,52 @@ export class UpdateHandler extends EvolutionActionHandler<UpdateActionResult> {
 			this.emitActionStarted(decision)
 
 			try {
-				if (decision.targets.length !== 1) {
-					throw new Error('Update requires exactly 1 learner')
+				for (const learnerId of decision.targets) {
+					const learner = this.brain.learners.get(learnerId)
+
+					if (!learner) {
+						throw new Error(`Learner ${learnerId} not found`)
+					}
+
+					const result = await generate({
+						model: this.brain.config.model,
+						system: updateSystemPrompt,
+						prompt: updatePromptTemplate(
+							decision.guidance,
+							learner as TextLearner,
+							this.brain.prompt,
+						),
+						output: Output.object({ schema: updateOutputSchema }),
+						repairSchema: updateOutputSchema,
+					})
+
+					const { updates } = result.output
+
+					// Adapt flat thresholds to nested synthesize.thresholds shape
+					const { thresholds, ...rest } = updates
+					const adapted = {
+						...rest,
+						...(thresholds ? { synthesize: { thresholds } } : {}),
+					}
+
+					await (learner as TextLearner).update(adapted)
+
+					if (updates.name) {
+						this.brain.__updateLearnerName(learnerId, updates.name)
+					}
+
+					allUpdatedLearnerIds.push(learnerId)
 				}
-
-				const learnerId = decision.targets[0]
-				const learner = this.brain.learners.get(learnerId)
-
-				if (!learner) {
-					throw new Error(`Learner ${learnerId} not found`)
-				}
-
-				const result = await generate({
-					model: this.brain.config.model,
-					system: updateSystemPrompt,
-					prompt: updatePromptTemplate(
-						decision.guidance,
-						learner as TextLearner,
-						this.brain.prompt,
-					),
-					output: Output.object({ schema: updateOutputSchema }),
-				})
-
-				const { updates } = result.output
-
-				// Adapt flat thresholds to nested synthesize.thresholds shape
-				const { thresholds, ...rest } = updates
-				const adapted = {
-					...rest,
-					...(thresholds ? { synthesize: { thresholds } } : {}),
-				}
-
-				await (learner as TextLearner).update(adapted)
-
-				if (updates.name) {
-					this.brain.__updateLearnerName(learnerId, updates.name)
-				}
-
-				allUpdatedLearnerIds.push(learnerId)
 
 				const actionResult: UpdateActionResult = {
-					updatedLearnerIds: [learnerId],
+					updatedLearnerIds: [...decision.targets],
 				}
 
 				this.emitActionExecuted(decision, actionResult)
 			} catch (error) {
 				const err = error instanceof Error ? error : new Error(String(error))
 				this.emitActionFailed(decision, err)
-				throw new Error(`Update action failed: ${err.message}`)
+				continue
 			}
 		}
 

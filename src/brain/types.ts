@@ -101,6 +101,15 @@ export interface EvolutionConfig {
 	evaluatorSignalThreshold?: number
 	/** Whether to auto-evaluate when threshold reached */
 	autoEvaluate?: boolean
+	/** Coverage gap detection config */
+	coverageGap?: {
+		/** Relevance below this counts as "not relevant" (default: 0.3) */
+		relevanceThreshold?: number
+		/** Number of gap queries before signaling (default: 5) */
+		gapCountThreshold?: number
+		/** Window size for counting (default: 20) */
+		windowSize?: number
+	}
 }
 
 /**
@@ -198,6 +207,11 @@ export interface ResolvedEvolutionConfig {
 	enabled: boolean
 	evaluatorSignalThreshold: number
 	autoEvaluate: boolean
+	coverageGap: {
+		relevanceThreshold: number
+		gapCountThreshold: number
+		windowSize: number
+	}
 }
 
 /**
@@ -261,6 +275,7 @@ export interface BrainAskResult {
 	/** Individual learner responses */
 	sources: Array<{
 		learnerId: string
+		relevance: number
 		confidence: number
 		insight: string
 	}>
@@ -299,6 +314,7 @@ export interface LearnerResponse {
 	learnerId: string
 	name: string
 	relevant: boolean
+	relevance: number
 	confidence: number
 	insight: string
 	gaps: string[]
@@ -376,6 +392,7 @@ export interface BrainOwnEventMap {
 		signalCount: number
 	}
 	'evaluator:evaluation:completed': {
+		source: 'auto' | 'manual'
 		decisionCount: number
 		decisions: Array<{
 			action: 'create' | 'merge' | 'split' | 'adjust' | 'delete'

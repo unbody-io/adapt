@@ -21,7 +21,9 @@ export interface QueryOptions {
 export interface QueryResult {
 	/** Whether this learner can help with the query */
 	relevant: boolean
-	/** Confidence in the response (0.0 - 1.0) */
+	/** How related is this query to the learner's domain (0.0 - 1.0) */
+	relevance: number
+	/** How well the learner could answer from its understanding (0.0 - 1.0) */
 	confidence: number
 	/** The insight or response to the query */
 	insight: string

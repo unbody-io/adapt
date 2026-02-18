@@ -29,7 +29,9 @@ export interface Signal {
 	bypass?: boolean
 	metrics?: {
 		dismissalRate?: number
+		avgRelevance?: number
 		avgConfidence?: number
+		gapCount?: number
 		bufferCount?: number
 		activation?: number
 		observationsSinceLastSynthesis?: number
@@ -59,8 +61,12 @@ export interface LearnerContext {
 		activation: number
 		status: string
 		lastAccessed: Date
-		retrievalCount: number
-		successRate: number
+	}
+	metrics: {
+		queryCount: number
+		dismissalRate: number
+		synthesisCount: number
+		observationsSinceLastSynthesis: number
 	}
 }
 
@@ -77,6 +83,32 @@ export interface EvaluationContext {
 }
 
 /**
+ * Learner activity data for evaluation investigation
+ */
+export interface LearnerActivity {
+	ingestion: {
+		observationCount: number
+		dismissalCount: number
+		dismissalRate: number
+		synthesisCount: number
+		observationsSinceLastSynthesis: number
+	}
+	recentObservations: Array<{ text: string; importance: number }>
+}
+
+/**
+ * Record of past evaluation decisions (in-memory, capped)
+ */
+export interface EvolutionHistoryEntry {
+	timestamp: Date
+	decisions: Array<{
+		action: string
+		targets: string[]
+		reasoning: string
+	}>
+}
+
+/**
  * Event map for Evaluator
  */
 export interface EvaluatorEventMap {
@@ -84,6 +116,7 @@ export interface EvaluatorEventMap {
 		signalCount: number
 	}
 	'evaluator:evaluation:completed': {
+		source: 'auto' | 'manual'
 		decisionCount: number
 		decisions: EvolutionDecision[]
 	}

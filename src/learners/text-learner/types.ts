@@ -59,14 +59,14 @@ export interface TextLearnerEventMap extends BaseLearnerEventMap {
 	}
 	'learner:observed': {
 		learnerId: string
-		output: string
+		output: string[]
 		importance: number
 		bufferCount: number
 		usage?: EventUsage
 	}
 	'learner:observe:dismissed': {
 		learnerId: string
-		output: string
+		output: string[]
 		usage?: EventUsage
 	}
 	'learner:observe:error': {
@@ -122,7 +122,9 @@ export interface TextLearnerEventMap extends BaseLearnerEventMap {
 		timestamp: Date
 		metrics?: {
 			dismissalRate?: number
+			avgRelevance?: number
 			avgConfidence?: number
+			gapCount?: number
 			bufferCount?: number
 			activation?: number
 		}
@@ -196,6 +198,8 @@ export interface TextLearnerConfig extends CascadableConfig {
 	model: LanguageModel
 	/** Natural language instructions for what this learner tracks and watches for */
 	instructions: string
+	/** Optional focus areas to narrow observation filtering */
+	focus?: string
 	/** Optional unique identifier */
 	id?: string
 	/** Optional display name */

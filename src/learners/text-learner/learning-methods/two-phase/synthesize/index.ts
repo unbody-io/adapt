@@ -47,6 +47,7 @@ export async function initSynthesize(
 		model,
 		prompt,
 		output: Output.object({ schema: synthesizeIdentitySchema }),
+		repairSchema: synthesizeIdentitySchema,
 	})
 
 	const systemPrompt = synthesizeSystemPromptTemplate(identity, strategy)
@@ -80,6 +81,7 @@ export async function synthesize(
 			system: systemPrompt,
 			prompt,
 			output: Output.object({ schema: synthesizeOutputSchema }),
+			repairSchema: synthesizeOutputSchema,
 		})
 
 		// Emit thinking if available

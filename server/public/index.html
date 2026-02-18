@@ -1541,36 +1541,167 @@
     }
     .evo-monitor-header {
       display: flex; align-items: center; justify-content: space-between;
-      cursor: pointer; user-select: none; margin-bottom: 8px;
+      cursor: pointer; user-select: none; margin-bottom: 10px;
     }
-    .evo-signal-count {
-      font-size: 10px; background: #3b82f6; color: #fff;
-      padding: 2px 8px; border-radius: 10px;
+
+    /* Two-column layout */
+    .evo-columns {
+      display: flex; gap: 8px;
     }
-    .evo-section { margin-bottom: 8px; }
-    .evo-section-label {
-      font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px;
-      color: #555; margin-bottom: 4px;
+    .evo-col-viz {
+      flex: 0 0 36%; display: flex; flex-direction: column; gap: 6px;
     }
-    .evo-log {
-      max-height: 120px; overflow-y: auto; font-size: 11px;
+    .evo-col-data {
+      flex: 1; min-width: 0;
     }
-    .evo-empty { color: #444; font-size: 11px; }
-    .evo-entry {
-      padding: 4px 6px; border-left: 2px solid #333; margin-bottom: 3px;
-      background: #111; border-radius: 0 3px 3px 0;
+
+    /* Activity pulse canvas */
+    .evo-pulse-canvas {
+      width: 100%; height: 36px; display: block;
+      border-radius: 4px; background: #0a0a0a;
     }
-    .evo-entry.signal { border-left-color: #3b82f6; }
-    .evo-entry.eval-start { border-left-color: #facc15; }
-    .evo-entry.eval-done { border-left-color: #4ade80; }
-    .evo-entry.eval-fail { border-left-color: #f87171; }
-    .evo-entry.action-start { border-left-color: #a78bfa; }
-    .evo-entry.action-done { border-left-color: #4ade80; }
-    .evo-entry.action-fail { border-left-color: #f87171; }
-    .evo-entry .evo-time { color: #444; margin-right: 6px; }
-    .evo-entry .evo-type { font-weight: 600; }
-    .evo-entry .evo-detail { color: #888; display: block; margin-top: 2px; word-break: break-word; }
-    .evo-entry .evo-action-badge {
+
+    /* Learner topology canvas */
+    .evo-topo-canvas {
+      width: 100%; flex: 1; min-height: 100px; display: block;
+      border-radius: 4px; background: #0a0a0a;
+    }
+
+    /* Status beacon */
+    .evo-status {
+      display: flex; align-items: center; gap: 8px; margin-bottom: 10px;
+    }
+    .evo-beacon {
+      width: 8px; height: 8px; border-radius: 50%; background: #333;
+      flex-shrink: 0;
+    }
+    .evo-beacon.idle { background: #555; }
+    .evo-beacon.evaluating { background: #facc15; animation: evo-pulse 1s ease-in-out infinite; }
+    .evo-beacon.executing { background: #a78bfa; animation: evo-pulse 0.6s ease-in-out infinite; }
+    @keyframes evo-pulse {
+      0%, 100% { opacity: 1; box-shadow: 0 0 0 0 currentColor; }
+      50% { opacity: 0.6; box-shadow: 0 0 6px 2px currentColor; }
+    }
+    .evo-status-label {
+      font-size: 10px; color: #666; text-transform: uppercase; letter-spacing: 0.5px;
+    }
+
+    /* Signal gauge */
+    .evo-signal-gauge {
+      margin-bottom: 10px;
+    }
+    .evo-gauge-header {
+      display: flex; justify-content: space-between; align-items: center;
+      font-size: 10px; color: #555; margin-bottom: 3px;
+    }
+    .evo-gauge-header .evo-gauge-count { color: #8bb4e0; font-weight: 600; }
+    .evo-gauge-track {
+      height: 4px; background: #1a1a1a; border-radius: 2px; overflow: hidden;
+    }
+    .evo-gauge-fill {
+      height: 100%; background: #3b82f6; border-radius: 2px;
+      transition: width 0.4s ease; width: 0%;
+    }
+    .evo-gauge-fill.near-threshold { background: #facc15; }
+    .evo-gauge-fill.at-threshold { background: #f87171; animation: evo-gauge-pulse 1s ease-in-out infinite; }
+    @keyframes evo-gauge-pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.6; }
+    }
+
+    /* Action counters */
+    .evo-action-counters {
+      display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 10px;
+    }
+    .evo-counter {
+      display: flex; align-items: center; gap: 3px;
+      font-size: 10px; padding: 2px 6px; border-radius: 3px;
+      background: #111; border: 1px solid #222;
+      cursor: pointer; color: #888; transition: all 0.15s;
+      font-family: inherit;
+    }
+    .evo-counter:hover { border-color: #444; background: #1a1a1a; }
+    .evo-counter.active { border-color: #555; background: #1a1a1a; }
+    .evo-counter .evo-counter-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+    }
+    .evo-counter .evo-counter-val { font-weight: 600; }
+    .evo-counter.create .evo-counter-dot { background: #4ade80; }
+    .evo-counter.update .evo-counter-dot { background: #3b82f6; }
+    .evo-counter.merge .evo-counter-dot { background: #818cf8; }
+    .evo-counter.split .evo-counter-dot { background: #facc15; }
+    .evo-counter.delete .evo-counter-dot { background: #f87171; }
+    .evo-counter.create .evo-counter-val { color: #4ade80; }
+    .evo-counter.update .evo-counter-val { color: #3b82f6; }
+    .evo-counter.merge .evo-counter-val { color: #818cf8; }
+    .evo-counter.split .evo-counter-val { color: #facc15; }
+    .evo-counter.delete .evo-counter-val { color: #f87171; }
+    .evo-counter.zero { opacity: 0.3; }
+    .evo-counter.zero:hover { opacity: 0.5; }
+
+    /* Unified timeline */
+    .evo-timeline {
+      max-height: 240px; overflow-y: auto; font-size: 11px;
+      position: relative; padding-left: 14px;
+    }
+    .evo-timeline::-webkit-scrollbar { width: 3px; }
+    .evo-timeline::-webkit-scrollbar-thumb { background: #333; border-radius: 2px; }
+    /* Vertical line */
+    .evo-timeline::before {
+      content: ''; position: absolute; left: 4px; top: 0; bottom: 0;
+      width: 1px; background: #222;
+    }
+    .evo-tl-entry {
+      position: relative; padding: 4px 8px; margin-bottom: 2px;
+      border-radius: 3px; cursor: default;
+    }
+    .evo-tl-entry:hover { background: #111; }
+    /* Timeline dot */
+    .evo-tl-entry::before {
+      content: ''; position: absolute; left: -12px; top: 9px;
+      width: 7px; height: 7px; border-radius: 50%;
+      background: #333; border: 1px solid #0a0a0a;
+    }
+    .evo-tl-entry.signal::before { background: #3b82f6; }
+    .evo-tl-entry.eval-start::before { background: #facc15; }
+    .evo-tl-entry.eval-done::before { background: #4ade80; }
+    .evo-tl-entry.eval-fail::before { background: #f87171; }
+    .evo-tl-entry.action-start::before { background: #a78bfa; }
+    .evo-tl-entry.action-done::before { background: #4ade80; }
+    .evo-tl-entry.action-fail::before { background: #f87171; }
+    .evo-tl-entry.learner-add::before { background: #4ade80; }
+    .evo-tl-entry.learner-remove::before { background: #f87171; }
+
+    .evo-tl-row {
+      display: flex; align-items: center; gap: 6px;
+    }
+    .evo-tl-time { color: #444; font-size: 10px; flex-shrink: 0; }
+    .evo-tl-label { color: #999; }
+    .evo-tl-detail {
+      color: #666; font-size: 10px; margin-top: 2px; padding-left: 2px;
+      display: none; word-break: break-word; line-height: 1.4;
+    }
+    .evo-tl-entry.expanded .evo-tl-detail { display: block; }
+
+    /* Decision chips in evaluation entries */
+    .evo-decision-chips {
+      display: flex; gap: 3px; flex-wrap: wrap; margin-top: 4px;
+    }
+    .evo-decision-chip {
+      display: flex; align-items: center; gap: 3px;
+      font-size: 9px; padding: 2px 6px; border-radius: 10px;
+      font-weight: 600; text-transform: uppercase;
+    }
+    .evo-decision-chip.create { background: #1a2a1a; color: #4ade80; }
+    .evo-decision-chip.merge { background: #1a1a2a; color: #818cf8; }
+    .evo-decision-chip.split { background: #2a2a1a; color: #facc15; }
+    .evo-decision-chip.update { background: #1a2a2a; color: #3b82f6; }
+    .evo-decision-chip.delete { background: #2a1a1a; color: #f87171; }
+
+    .evo-tl-empty { color: #333; font-size: 11px; padding: 8px 0; text-align: center; }
+
+    /* Keep action badges for inline use */
+    .evo-action-badge {
       display: inline-block; font-size: 9px; padding: 1px 5px;
       border-radius: 3px; font-weight: 600; text-transform: uppercase;
     }
@@ -2141,25 +2272,39 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
         <div class="evo-monitor" id="evoMonitor">
           <div class="evo-monitor-header" id="evoMonitorToggle">
             <span class="monitor-card-title">Evolution Monitor</span>
-            <span class="evo-signal-count" id="evoSignalBadge" style="display:none;">0 signals</span>
           </div>
           <div class="evo-monitor-body" id="evoMonitorBody">
-            <div class="evo-section">
-              <div class="evo-section-label">Signals</div>
-              <div class="evo-log" id="evoSignalLog">
-                <div class="evo-empty">No signals yet</div>
+            <div class="evo-columns">
+              <!-- Left: visualizations (1/3) -->
+              <div class="evo-col-viz">
+                <canvas class="evo-pulse-canvas" id="evoPulseCanvas"></canvas>
+                <canvas class="evo-topo-canvas" id="evoTopoCanvas"></canvas>
               </div>
-            </div>
-            <div class="evo-section">
-              <div class="evo-section-label">Evaluations</div>
-              <div class="evo-log" id="evoEvalLog">
-                <div class="evo-empty">No evaluations yet</div>
-              </div>
-            </div>
-            <div class="evo-section">
-              <div class="evo-section-label">Actions</div>
-              <div class="evo-log" id="evoActionLog">
-                <div class="evo-empty">No actions yet</div>
+              <!-- Right: data (2/3) -->
+              <div class="evo-col-data">
+                <div class="evo-status">
+                  <div class="evo-beacon idle" id="evoBeacon"></div>
+                  <span class="evo-status-label" id="evoStatusLabel">Idle</span>
+                </div>
+                <div class="evo-signal-gauge">
+                  <div class="evo-gauge-header">
+                    <span>Signals</span>
+                    <span><span class="evo-gauge-count" id="evoGaugeCount">0</span> / <span id="evoGaugeMax">3</span></span>
+                  </div>
+                  <div class="evo-gauge-track">
+                    <div class="evo-gauge-fill" id="evoGaugeFill"></div>
+                  </div>
+                </div>
+                <div class="evo-action-counters" id="evoActionCounters">
+                  <button class="evo-counter update zero" data-filter="update"><span class="evo-counter-dot"></span><span class="evo-counter-val">0</span> update</button>
+                  <button class="evo-counter merge zero" data-filter="merge"><span class="evo-counter-dot"></span><span class="evo-counter-val">0</span> merge</button>
+                  <button class="evo-counter create zero" data-filter="create"><span class="evo-counter-dot"></span><span class="evo-counter-val">0</span> create</button>
+                  <button class="evo-counter split zero" data-filter="split"><span class="evo-counter-dot"></span><span class="evo-counter-val">0</span> split</button>
+                  <button class="evo-counter delete zero" data-filter="delete"><span class="evo-counter-dot"></span><span class="evo-counter-val">0</span> delete</button>
+                </div>
+                <div class="evo-timeline" id="evoTimeline">
+                  <div class="evo-tl-empty">No activity yet</div>
+                </div>
               </div>
             </div>
           </div>
@@ -3615,102 +3760,528 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
 
     // --- Evolution Monitor ---
     let evoSignalCount = 0
+    const evoActionCounts = { update: 0, merge: 0, create: 0, split: 0, delete: 0 }
 
     function evoTime() {
       return new Date().toLocaleTimeString('en-US', { hour12: false })
     }
 
-    function addEvoEntry(logId, cssClass, content) {
-      const log = document.getElementById(logId)
-      if (!log) return
-      // Remove empty placeholder
-      const empty = log.querySelector('.evo-empty')
-      if (empty) empty.remove()
-      const el = document.createElement('div')
-      el.className = `evo-entry ${cssClass}`
-      el.innerHTML = content
-      log.insertBefore(el, log.firstChild)
-      // Keep max 20 entries
-      while (log.children.length > 20) log.removeChild(log.lastChild)
+    function setEvoStatus(state, label) {
+      const beacon = document.getElementById('evoBeacon')
+      const lbl = document.getElementById('evoStatusLabel')
+      beacon.className = `evo-beacon ${state}`
+      lbl.textContent = label || state.charAt(0).toUpperCase() + state.slice(1)
     }
 
-    function updateEvoSignalBadge() {
-      const badge = document.getElementById('evoSignalBadge')
-      if (evoSignalCount > 0) {
-        badge.style.display = ''
-        badge.textContent = `${evoSignalCount} signal${evoSignalCount !== 1 ? 's' : ''}`
-      } else {
-        badge.style.display = 'none'
+    function updateEvoGauge() {
+      const threshold = parseInt(document.getElementById('signalThreshold')?.value) || 3
+      const count = document.getElementById('evoGaugeCount')
+      const max = document.getElementById('evoGaugeMax')
+      const fill = document.getElementById('evoGaugeFill')
+      count.textContent = evoSignalCount
+      max.textContent = threshold
+      const pct = Math.min(100, (evoSignalCount / threshold) * 100)
+      fill.style.width = pct + '%'
+      fill.className = 'evo-gauge-fill' +
+        (pct >= 100 ? ' at-threshold' : pct >= 70 ? ' near-threshold' : '')
+    }
+
+    function updateEvoCounters() {
+      const container = document.getElementById('evoActionCounters')
+      for (const action of ['update', 'merge', 'create', 'split', 'delete']) {
+        const el = container.querySelector(`.evo-counter.${action}`)
+        if (!el) continue
+        const val = el.querySelector('.evo-counter-val')
+        val.textContent = evoActionCounts[action]
+        el.classList.toggle('zero', evoActionCounts[action] === 0)
       }
     }
 
-    function handleEvoEvent(type, data) {
+    let evoActiveFilter = null // null = show all, 'update'/'merge'/etc = filter
+
+    function addTlEntry(cssClass, label, detail, actionTag) {
+      const tl = document.getElementById('evoTimeline')
+      if (!tl) return
+      const empty = tl.querySelector('.evo-tl-empty')
+      if (empty) empty.remove()
+      const el = document.createElement('div')
+      el.className = `evo-tl-entry ${cssClass}`
+      if (actionTag) el.dataset.action = actionTag
+      el.innerHTML =
+        `<div class="evo-tl-row"><span class="evo-tl-time">${evoTime()}</span><span class="evo-tl-label">${label}</span></div>` +
+        (detail ? `<div class="evo-tl-detail">${detail}</div>` : '')
+      if (detail) {
+        el.style.cursor = 'pointer'
+        el.addEventListener('click', () => el.classList.toggle('expanded'))
+      }
+      // Respect active filter
+      if (evoActiveFilter && actionTag !== evoActiveFilter) {
+        el.style.display = 'none'
+      }
+      tl.insertBefore(el, tl.firstChild)
+      while (tl.children.length > 50) tl.removeChild(tl.lastChild)
+    }
+
+    function applyEvoFilter(action) {
+      if (evoActiveFilter === action) {
+        evoActiveFilter = null // toggle off
+      } else {
+        evoActiveFilter = action
+      }
+      // Update counter button states
+      document.querySelectorAll('.evo-counter').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.filter === evoActiveFilter)
+      })
+      // Show/hide timeline entries
+      document.querySelectorAll('.evo-tl-entry').forEach(entry => {
+        if (!evoActiveFilter) {
+          entry.style.display = ''
+        } else {
+          entry.style.display = entry.dataset.action === evoActiveFilter ? '' : 'none'
+        }
+      })
+    }
+
+    // Wire up counter filter clicks
+    document.querySelectorAll('.evo-counter[data-filter]').forEach(btn => {
+      btn.addEventListener('click', () => applyEvoFilter(btn.dataset.filter))
+    })
+
+    let handleEvoEvent = function(type, data) {
       // Signals
       if (type === 'brain:signal:received' || type === 'learner:signal') {
         evoSignalCount++
-        updateEvoSignalBadge()
+        updateEvoGauge()
         const source = data.source || data.learnerId || '?'
         const desc = data.description || ''
-        addEvoEntry('evoSignalLog', 'signal',
-          `<span class="evo-time">${evoTime()}</span><span class="evo-type">${escapeHtml(source)}</span>` +
-          `<span class="evo-detail">${escapeHtml(desc.slice(0, 200))}</span>`)
+        addTlEntry('signal',
+          `<strong>${escapeHtml(source)}</strong> signal`,
+          desc ? escapeHtml(desc.slice(0, 200)) : null)
       }
 
       // Evaluator
       if (type === 'evaluator:evaluation:started') {
-        addEvoEntry('evoEvalLog', 'eval-start',
-          `<span class="evo-time">${evoTime()}</span><span class="evo-type">Started</span>` +
-          `<span class="evo-detail">${data.signalCount || '?'} signals queued</span>`)
+        setEvoStatus('evaluating', 'Evaluating...')
+        addTlEntry('eval-start',
+          `Evaluation started — ${data.signalCount || '?'} signals`)
       }
       if (type === 'evaluator:evaluation:completed') {
         evoSignalCount = 0
-        updateEvoSignalBadge()
+        updateEvoGauge()
+        setEvoStatus('idle', 'Idle')
         const decisions = data.decisions || []
-        const summary = decisions.length === 0
-          ? 'No action needed'
-          : decisions.map(d => `<span class="evo-action-badge ${d.action}">${d.action}</span> ${escapeHtml(d.reasoning?.slice(0, 80) || '')}`).join('<br>')
-        addEvoEntry('evoEvalLog', 'eval-done',
-          `<span class="evo-time">${evoTime()}</span><span class="evo-type">Completed</span> (${decisions.length} decisions)` +
-          `<span class="evo-detail">${summary}</span>`)
+        if (decisions.length === 0) {
+          addTlEntry('eval-done', 'Evaluation complete — no action needed')
+        } else {
+          const chips = decisions.map(d =>
+            `<span class="evo-decision-chip ${d.action}">${d.action}</span>`
+          ).join('')
+          const details = decisions.map(d =>
+            `<span class="evo-decision-chip ${d.action}">${d.action}</span> ${escapeHtml(d.reasoning?.slice(0, 120) || '')}`
+          ).join('<br>')
+          addTlEntry('eval-done',
+            `Evaluation complete — ${decisions.length} decision${decisions.length !== 1 ? 's' : ''} <div class="evo-decision-chips">${chips}</div>`,
+            details)
+        }
       }
       if (type === 'evaluator:evaluation:failed') {
-        addEvoEntry('evoEvalLog', 'eval-fail',
-          `<span class="evo-time">${evoTime()}</span><span class="evo-type">Failed</span>` +
-          `<span class="evo-detail">${escapeHtml(data.error || 'Unknown error')}</span>`)
+        setEvoStatus('idle', 'Idle')
+        addTlEntry('eval-fail',
+          '<strong style="color:#f87171">Evaluation failed</strong>',
+          escapeHtml(data.error || 'Unknown error'))
       }
 
       // Actions
       if (type === 'evolution:action:started') {
-        addEvoEntry('evoActionLog', 'action-start',
-          `<span class="evo-time">${evoTime()}</span><span class="evo-action-badge ${data.action}">${data.action}</span>` +
-          `<span class="evo-detail">Targets: ${(data.targets || []).join(', ')}</span>`)
+        setEvoStatus('executing', `Executing ${data.action}...`)
+        addTlEntry('action-start',
+          `<span class="evo-action-badge ${data.action}">${data.action}</span> started`,
+          `Targets: ${(data.targets || []).join(', ')}`,
+          data.action)
       }
       if (type === 'evolution:action:executed') {
+        setEvoStatus('idle', 'Idle')
+        if (evoActionCounts[data.action] !== undefined) {
+          evoActionCounts[data.action]++
+          updateEvoCounters()
+        }
         const result = data.result || {}
         const parts = []
         if (result.newLearnerIds?.length) parts.push(`created: ${result.newLearnerIds.join(', ')}`)
         if (result.deletedLearnerIds?.length) parts.push(`deleted: ${result.deletedLearnerIds.join(', ')}`)
         if (result.updatedLearnerIds?.length) parts.push(`updated: ${result.updatedLearnerIds.join(', ')}`)
-        addEvoEntry('evoActionLog', 'action-done',
-          `<span class="evo-time">${evoTime()}</span><span class="evo-action-badge ${data.action}">${data.action}</span> done` +
-          `<span class="evo-detail">${parts.join(' | ') || escapeHtml(data.reasoning?.slice(0, 100) || 'Executed')}</span>`)
+        addTlEntry('action-done',
+          `<span class="evo-action-badge ${data.action}">${data.action}</span> done`,
+          parts.join(' | ') || escapeHtml(data.reasoning?.slice(0, 120) || 'Executed'),
+          data.action)
         updateLearners()
       }
       if (type === 'evolution:action:failed') {
-        addEvoEntry('evoActionLog', 'action-fail',
-          `<span class="evo-time">${evoTime()}</span><span class="evo-action-badge ${data.action}">${data.action}</span> failed` +
-          `<span class="evo-detail">${escapeHtml(data.error || 'Unknown error')}</span>`)
+        setEvoStatus('idle', 'Idle')
+        addTlEntry('action-fail',
+          `<span class="evo-action-badge ${data.action}">${data.action}</span> <strong style="color:#f87171">failed</strong>`,
+          escapeHtml(data.error || 'Unknown error'),
+          data.action)
       }
 
       // Learner added/removed
       if (type === 'brain:learner:added') {
-        addEvoEntry('evoActionLog', 'action-done',
-          `<span class="evo-time">${evoTime()}</span><span class="evo-action-badge create">added</span> ${escapeHtml(data.learnerId || '')}` +
-          `<span class="evo-detail">${escapeHtml(data.name || data.instructions?.slice(0, 80) || '')}</span>`)
+        addTlEntry('learner-add',
+          `<span class="evo-action-badge create">added</span> ${escapeHtml(data.learnerId || '')}`,
+          escapeHtml(data.name || data.instructions?.slice(0, 80) || ''),
+          'create')
       }
       if (type === 'brain:learner:removed') {
-        addEvoEntry('evoActionLog', 'action-fail',
-          `<span class="evo-time">${evoTime()}</span><span class="evo-action-badge delete">removed</span> ${escapeHtml(data.learnerId || '')}`)
+        addTlEntry('learner-remove',
+          `<span class="evo-action-badge delete">removed</span> ${escapeHtml(data.learnerId || '')}`,
+          null,
+          'delete')
+      }
+    }
+
+    // --- Activity Pulse Canvas ---
+    const pulseCanvas = document.getElementById('evoPulseCanvas')
+    const pulseCtx = pulseCanvas ? pulseCanvas.getContext('2d') : null
+    const PULSE_POINTS = 200
+    const pulseData = new Array(PULSE_POINTS).fill(0) // 0 = baseline
+    const pulseColors = new Array(PULSE_POINTS).fill(null)
+    let pulseAnimId = null
+
+    const PULSE_COLOR_MAP = {
+      signal: '#3b82f6',
+      'eval-start': '#facc15',
+      'eval-done': '#4ade80',
+      'eval-fail': '#f87171',
+      'action-start': '#a78bfa',
+      'action-done': '#4ade80',
+      'action-fail': '#f87171',
+      'learner-add': '#4ade80',
+      'learner-remove': '#f87171',
+      'observe': '#06b6d4',
+      'observe-dismiss': '#334155',
+      'synthesize': '#f59e0b',
+      'synthesized': '#4ade80',
+      'query': '#ec4899',
+    }
+
+    function injectPulse(eventType) {
+      const height = eventType.includes('fail') ? 0.9
+        : eventType.includes('done') || eventType.includes('add') || eventType === 'synthesized' ? 0.7
+        : eventType.includes('start') || eventType === 'signal' ? 0.5
+        : 0.3
+      // Inject a spike shape: rise + peak + fall
+      const color = PULSE_COLOR_MAP[eventType] || '#555'
+      const idx = PULSE_POINTS - 1
+      pulseData[idx] = Math.max(pulseData[idx], height)
+      pulseColors[idx] = color
+    }
+
+    function drawPulse() {
+      if (!pulseCtx || !pulseCanvas) return
+      const dpr = window.devicePixelRatio || 1
+      const rect = pulseCanvas.getBoundingClientRect()
+      const w = rect.width * dpr
+      const h = rect.height * dpr
+      if (pulseCanvas.width !== w || pulseCanvas.height !== h) {
+        pulseCanvas.width = w
+        pulseCanvas.height = h
+      }
+      const ctx = pulseCtx
+      ctx.clearRect(0, 0, w, h)
+
+      // Shift data left
+      pulseData.shift()
+      pulseData.push(0)
+      pulseColors.shift()
+      pulseColors.push(null)
+
+      const stepX = w / PULSE_POINTS
+      const baseY = h * 0.75
+      const maxAmp = h * 0.6
+
+      // Draw baseline
+      ctx.strokeStyle = '#1a1a1a'
+      ctx.lineWidth = 1
+      ctx.beginPath()
+      ctx.moveTo(0, baseY)
+      ctx.lineTo(w, baseY)
+      ctx.stroke()
+
+      // Draw waveform segments with individual colors
+      for (let i = 1; i < PULSE_POINTS; i++) {
+        const val = pulseData[i]
+        const prevVal = pulseData[i - 1]
+        if (val === 0 && prevVal === 0) continue
+        const color = pulseColors[i] || pulseColors[i - 1] || '#555'
+        ctx.strokeStyle = color
+        ctx.lineWidth = 1.5 * dpr
+        ctx.beginPath()
+        ctx.moveTo((i - 1) * stepX, baseY - prevVal * maxAmp)
+        ctx.lineTo(i * stepX, baseY - val * maxAmp)
+        ctx.stroke()
+
+        // Glow on spikes
+        if (val > 0.3) {
+          ctx.strokeStyle = color + '40'
+          ctx.lineWidth = 4 * dpr
+          ctx.beginPath()
+          ctx.moveTo((i - 1) * stepX, baseY - prevVal * maxAmp)
+          ctx.lineTo(i * stepX, baseY - val * maxAmp)
+          ctx.stroke()
+        }
+      }
+
+      // Decay existing values slightly for smooth tails
+      for (let i = 0; i < PULSE_POINTS; i++) {
+        if (pulseData[i] > 0) {
+          pulseData[i] *= 0.92
+          if (pulseData[i] < 0.01) {
+            pulseData[i] = 0
+            pulseColors[i] = null
+          }
+        }
+      }
+
+      pulseAnimId = requestAnimationFrame(drawPulse)
+    }
+
+    // Start pulse animation
+    if (pulseCanvas) {
+      pulseAnimId = requestAnimationFrame(drawPulse)
+    }
+
+    // --- Learner Topology Canvas ---
+    const topoCanvas = document.getElementById('evoTopoCanvas')
+    const topoCtx = topoCanvas ? topoCanvas.getContext('2d') : null
+    let topoNodes = [] // { id, label, x, y, r, color, alpha, glow, glowColor, glowDecay }
+    let topoAnimId = null
+    let topoNeedsRedraw = true
+
+    const TOPO_COLORS = [
+      '#3b82f6', '#818cf8', '#4ade80', '#facc15', '#f97316',
+      '#ec4899', '#06b6d4', '#a78bfa', '#34d399', '#fb923c',
+    ]
+
+    function buildTopoNodes() {
+      if (!topoCanvas) return
+      const dpr = window.devicePixelRatio || 1
+      const rect = topoCanvas.getBoundingClientRect()
+      const w = rect.width
+      const h = rect.height
+
+      const ids = Object.keys(learnerStates).filter(id => learnerStates[id].data)
+      const count = ids.length
+      if (count === 0) {
+        topoNodes = []
+        topoNeedsRedraw = true
+        return
+      }
+
+      const cx = w / 2
+      const cy = h / 2
+      const radiusOrbit = Math.min(w, h) * 0.28
+      const nodeR = Math.max(6, Math.min(12, 36 / Math.sqrt(count)))
+
+      const newNodes = ids.map((id, i) => {
+        const angle = (i / count) * Math.PI * 2 - Math.PI / 2
+        const x = cx + Math.cos(angle) * radiusOrbit
+        const y = cy + Math.sin(angle) * radiusOrbit
+        const data = learnerStates[id].data
+        const label = (data?.name || id).slice(0, 8)
+        // Existing node? Preserve animation state
+        const existing = topoNodes.find(n => n.id === id)
+        return {
+          id,
+          label,
+          x, y,
+          r: nodeR,
+          color: TOPO_COLORS[i % TOPO_COLORS.length],
+          alpha: existing ? existing.alpha : 1,
+          glow: existing ? existing.glow : 0,
+          glowColor: existing ? existing.glowColor : null,
+        }
+      })
+      topoNodes = newNodes
+      topoNeedsRedraw = true
+    }
+
+    function triggerTopoGlow(learnerId, color) {
+      const node = topoNodes.find(n => n.id === learnerId)
+      if (node) {
+        node.glow = 1.0
+        node.glowColor = color
+        topoNeedsRedraw = true
+      }
+    }
+
+    function triggerTopoFlash(color) {
+      // Flash all nodes (e.g., for evaluation)
+      for (const node of topoNodes) {
+        node.glow = 0.6
+        node.glowColor = color
+      }
+      topoNeedsRedraw = true
+    }
+
+    function drawTopo() {
+      if (!topoCtx || !topoCanvas) return
+      const dpr = window.devicePixelRatio || 1
+      const rect = topoCanvas.getBoundingClientRect()
+      const w = rect.width * dpr
+      const h = rect.height * dpr
+      if (topoCanvas.width !== w || topoCanvas.height !== h) {
+        topoCanvas.width = w
+        topoCanvas.height = h
+      }
+      const ctx = topoCtx
+      ctx.clearRect(0, 0, w, h)
+
+      if (topoNodes.length === 0) {
+        ctx.fillStyle = '#333'
+        ctx.font = `${11 * dpr}px monospace`
+        ctx.textAlign = 'center'
+        ctx.fillText('No learners', w / 2, h / 2)
+        return
+      }
+
+      const cx = w / 2
+      const cy = h / 2
+
+      // Draw faint connections from center to each node
+      ctx.strokeStyle = '#1a1a1a'
+      ctx.lineWidth = 1
+      for (const node of topoNodes) {
+        ctx.beginPath()
+        ctx.moveTo(cx, cy)
+        ctx.lineTo(node.x * dpr, node.y * dpr)
+        ctx.stroke()
+      }
+
+      // Draw center brain dot
+      ctx.fillStyle = '#222'
+      ctx.beginPath()
+      ctx.arc(cx, cy, 4 * dpr, 0, Math.PI * 2)
+      ctx.fill()
+
+      // Draw nodes
+      let hasGlow = false
+      for (const node of topoNodes) {
+        const nx = node.x * dpr
+        const ny = node.y * dpr
+        const nr = node.r * dpr
+
+        // Glow ring
+        if (node.glow > 0.05) {
+          hasGlow = true
+          const glowAlpha = Math.floor(node.glow * 180).toString(16).padStart(2, '0')
+          ctx.strokeStyle = (node.glowColor || node.color) + glowAlpha
+          ctx.lineWidth = (3 + node.glow * 4) * dpr
+          ctx.beginPath()
+          ctx.arc(nx, ny, nr + 3 * dpr, 0, Math.PI * 2)
+          ctx.stroke()
+          node.glow *= 0.94
+        }
+
+        // Node circle
+        ctx.globalAlpha = node.alpha
+        ctx.fillStyle = node.color + '30'
+        ctx.strokeStyle = node.color
+        ctx.lineWidth = 1.5 * dpr
+        ctx.beginPath()
+        ctx.arc(nx, ny, nr, 0, Math.PI * 2)
+        ctx.fill()
+        ctx.stroke()
+
+        // Label below circle
+        ctx.fillStyle = '#777'
+        ctx.font = `${8 * dpr}px monospace`
+        ctx.textAlign = 'center'
+        ctx.textBaseline = 'top'
+        ctx.fillText(node.label, nx, ny + nr + 3 * dpr)
+        ctx.globalAlpha = 1
+      }
+
+      if (hasGlow) {
+        topoNeedsRedraw = true
+      }
+
+      if (topoNeedsRedraw) {
+        topoNeedsRedraw = false
+        requestAnimationFrame(drawTopo)
+      }
+    }
+
+    // Hook topology into evolution events
+    const origHandleEvoEvent = handleEvoEvent
+    handleEvoEvent = function(type, data) {
+      origHandleEvoEvent(type, data)
+
+      // Inject pulse
+      if (type === 'brain:signal:received' || type === 'learner:signal') injectPulse('signal')
+      if (type === 'evaluator:evaluation:started') injectPulse('eval-start')
+      if (type === 'evaluator:evaluation:completed') injectPulse('eval-done')
+      if (type === 'evaluator:evaluation:failed') injectPulse('eval-fail')
+      if (type === 'evolution:action:started') injectPulse('action-start')
+      if (type === 'evolution:action:executed') injectPulse('action-done')
+      if (type === 'evolution:action:failed') injectPulse('action-fail')
+      if (type === 'brain:learner:added') injectPulse('learner-add')
+      if (type === 'brain:learner:removed') injectPulse('learner-remove')
+
+      // Topology effects
+      if (type === 'evaluator:evaluation:started') {
+        triggerTopoFlash('#facc15')
+      }
+      if (type === 'evaluator:evaluation:completed') {
+        const decisions = data.decisions || []
+        for (const d of decisions) {
+          const color = d.action === 'delete' ? '#f87171'
+            : d.action === 'update' ? '#3b82f6'
+            : d.action === 'merge' ? '#818cf8'
+            : d.action === 'split' ? '#facc15'
+            : d.action === 'create' ? '#4ade80' : '#888'
+          for (const t of (d.targets || [])) {
+            triggerTopoGlow(t, color)
+          }
+        }
+      }
+      if (type === 'evolution:action:started') {
+        for (const t of (data.targets || [])) {
+          triggerTopoGlow(t, '#a78bfa')
+        }
+      }
+      if (type === 'evolution:action:executed' || type === 'evolution:action:failed') {
+        // Rebuild topology after structural changes
+        setTimeout(() => { buildTopoNodes(); drawTopo() }, 500)
+      }
+      if (type === 'brain:learner:added' || type === 'brain:learner:removed') {
+        setTimeout(() => { buildTopoNodes(); drawTopo() }, 300)
+      }
+      if (type === 'learner:signal') {
+        triggerTopoGlow(data.learnerId, '#3b82f6')
+      }
+
+      // Ingestion events — pulse + topology
+      if (type === 'learner:observed') {
+        injectPulse('observe')
+        triggerTopoGlow(data.learnerId, '#06b6d4')
+      }
+      if (type === 'learner:observe:dismissed') {
+        injectPulse('observe-dismiss')
+      }
+      if (type === 'learner:synthesize:started') {
+        injectPulse('synthesize')
+        triggerTopoGlow(data.learnerId, '#f59e0b')
+      }
+      if (type === 'learner:synthesized') {
+        injectPulse('synthesized')
+        triggerTopoGlow(data.learnerId, '#4ade80')
+      }
+      if (type === 'learner:query:started' || type === 'learner:ask:started') {
+        injectPulse('query')
+      }
+      if (type === 'learner:query:completed' || type === 'learner:ask:completed') {
+        injectPulse('query')
+        if (data.learnerId) triggerTopoGlow(data.learnerId, '#ec4899')
       }
     }
 
@@ -4301,6 +4872,7 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
           evolutionEnabled.checked = data.evolution.enabled !== false
           autoEvaluate.checked = data.evolution.autoEvaluate !== false
           if (data.evolution.evaluatorSignalThreshold) signalThreshold.value = data.evolution.evaluatorSignalThreshold
+          updateEvoGauge()
         }
 
         // Snapshot if not already done
@@ -4595,6 +5167,12 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
       })
 
       updateDashboard()
+
+      // Rebuild topology after learner UI update
+      if (typeof buildTopoNodes === 'function') {
+        buildTopoNodes()
+        drawTopo()
+      }
     }
 
     async function openLearnerModal(learnerId) {

@@ -139,7 +139,7 @@ export class ToolBasedMethod implements QueryMethod {
 				relevance: completeResult.relevance,
 				confidence: completeResult.confidence,
 				insight: completeResult.insight,
-				gaps: completeResult.gaps.join('\n'),
+				gaps: (completeResult.gaps || []).join('\n'),
 				usage: totalUsage,
 			}
 		}

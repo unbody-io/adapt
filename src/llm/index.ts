@@ -123,6 +123,7 @@ function repairJson(text: string): string {
 	repaired = stripMarkdownCodeBlock(repaired)
 	repaired = stripGarbagePrefix(repaired)
 	repaired = fixDoubleBrace(repaired)
+	repaired = fixQuotedObjectPrefix(repaired)
 	repaired = repairJsonNewlines(repaired)
 	return repaired
 }
@@ -142,11 +143,19 @@ function stripMarkdownCodeBlock(text: string): string {
  * Handles cases like: `.{`, `craft.{`, `).{`, `{\n{`
  */
 function stripGarbagePrefix(text: string): string {
-	const jsonStartPattern = /\{\s*"/
+	// Look for { followed by a real JSON key (starts with a letter/underscore)
+	const jsonStartPattern = /\{\s*"[a-zA-Z_]/
 	const match = text.match(jsonStartPattern)
 
 	if (match && match.index !== undefined) {
 		return text.slice(match.index)
+	}
+
+	// Fallback: any { followed by "
+	const loosePattern = /\{\s*"/
+	const looseMatch = text.match(loosePattern)
+	if (looseMatch && looseMatch.index !== undefined) {
+		return text.slice(looseMatch.index)
 	}
 
 	const firstBrace = text.indexOf('{')
@@ -167,6 +176,19 @@ function fixDoubleBrace(text: string): string {
 		if (secondBrace !== -1) {
 			return text.slice(secondBrace)
 		}
+	}
+	return text
+}
+
+/**
+ * Fix pattern like: { "{ "key": value -> {"key": value
+ * The model sometimes outputs the JSON object wrapped in an extra brace+quote
+ */
+function fixQuotedObjectPrefix(text: string): string {
+	// Pattern: { "{ "realKey" -> {"realKey"
+	const brokenPrefix = /^\{\s*"\{\s*"/
+	if (brokenPrefix.test(text)) {
+		return text.replace(brokenPrefix, '{"')
 	}
 	return text
 }

@@ -42,6 +42,20 @@ export {
 	strategyFunctions,
 	strategyPrompts,
 } from './text-learner/strategies'
+// ListLearner
+export { ListLearner, ListDefaultMethod } from './list-learner'
+export type {
+	ListItem,
+	ListLearnerConfig,
+	ListLearnerEvent,
+	ListLearnerEventMap,
+	ListLearnerUpdateResult,
+	ListGovernanceConfig,
+	ListOperation,
+	ResolvedListLearnerConfig,
+	ResolvedListGovernanceConfig,
+} from './list-learner'
+
 export type {
 	AskResult,
 	BaseLearnerEvent,

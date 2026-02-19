@@ -1,7 +1,5 @@
 /**
  * Types for learning methods
- *
- * Re-exports from two-phase for backwards compatibility.
  */
 
 export type {
@@ -16,4 +14,4 @@ export type {
 	SynthesizeConfig,
 	SynthesizeThresholds,
 	TextDefaultConfig,
-} from './two-phase'
+} from './default-method'

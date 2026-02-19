@@ -2,7 +2,7 @@ import type { ParentModels } from '../../types/config'
 import { BaseLearner } from '../base'
 import { ToolBasedMethod } from '../base/query-method'
 import { resolveListLearnerConfig } from './config.resolver'
-import { ListDefaultMethod } from './learning-method'
+import { ListDefaultMethod } from './learning-methods'
 import { buildListQueryPrompt, createListQueryTools } from './query-tools'
 import type {
 	ListItem,
@@ -14,7 +14,6 @@ import type {
 /**
  * ListLearner - A learning agent that maintains understanding as a collection of items
  *
- * Uses two-phase learning: Observe → Buffer → Synthesize (operations) → Governance
  * Post-synthesis governance (dedup, maxItems, pruning) is internal to ListDefaultMethod.
  *
  * Extends BaseLearner for shared health, metrics, evolution, events, learn(), update().

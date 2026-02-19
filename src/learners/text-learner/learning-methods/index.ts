@@ -2,7 +2,7 @@
  * Learning methods for TextLearner
  */
 
-export { TextDefaultMethod } from './two-phase'
+export { TextDefaultMethod } from './default-method'
 export type {
 	InitOutput,
 	LearnCallbacks,
@@ -19,4 +19,4 @@ export type {
 	TextDefaultConfig,
 	TextDefaultUpdateConfig,
 	TextDefaultUpdateResult,
-} from './two-phase'
+} from './default-method'

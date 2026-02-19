@@ -13,7 +13,6 @@ import type {
 /**
  * TextLearner - A learning agent that maintains understanding as narrative text
  *
- * Uses two-phase learning: Observe → Buffer → Synthesize
  * Strategy application is internal to TextDefaultMethod.
  *
  * Extends BaseLearner for shared health, metrics, evolution, events, learn(), update().

@@ -9,8 +9,8 @@
 
 import type { LanguageModel } from 'ai'
 import { z } from 'zod'
-import { generate, Output } from '../../../llm'
-import type { Usage } from '../../base/learning-method'
+import { generate, Output } from '../../../../llm'
+import type { Usage } from '../../../base/learning-method'
 
 // ── Identity schema ────────────────────────────────────────────────────────
 

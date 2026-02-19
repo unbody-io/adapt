@@ -1,5 +1,5 @@
 export { ListLearner } from './class'
-export { ListDefaultMethod } from './learning-method'
+export { ListDefaultMethod } from './learning-methods'
 export type {
 	ListItem,
 	ListLearnerConfig,

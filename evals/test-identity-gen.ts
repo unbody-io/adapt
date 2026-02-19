@@ -7,10 +7,10 @@
 
 import { createOpenRouter } from '@openrouter/ai-sdk-provider'
 import { generateText, Output } from 'ai'
-import { observeIdentityPromptTemplate } from '../src/learners/text-learner/learning-methods/two-phase/observe/prompt.template.identity'
-import { observeIdentitySchema } from '../src/learners/text-learner/learning-methods/two-phase/observe/schema.identity'
-import { synthesizeIdentityPromptTemplate } from '../src/learners/text-learner/learning-methods/two-phase/synthesize/prompt.template.identity'
-import { synthesizeIdentitySchema } from '../src/learners/text-learner/learning-methods/two-phase/synthesize/schema.identity'
+import { observeIdentityPromptTemplate } from '../src/learners/text-learner/learning-methods/default-method/observe/prompt.template.identity'
+import { observeIdentitySchema } from '../src/learners/text-learner/learning-methods/default-method/observe/schema.identity'
+import { synthesizeIdentityPromptTemplate } from '../src/learners/text-learner/learning-methods/default-method/synthesize/prompt.template.identity'
+import { synthesizeIdentitySchema } from '../src/learners/text-learner/learning-methods/default-method/synthesize/schema.identity'
 
 const openrouter = createOpenRouter({
 	apiKey: process.env.OPENROUTER_API_KEY,

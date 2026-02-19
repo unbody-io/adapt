@@ -1,5 +1,5 @@
 /**
- * Types for the TextDefaultMethod (text-specific two-phase learning)
+ * Types for the TextDefaultMethod
  *
  * Shared types (LearnOutput, LearnOptions, LearnCallbacks, SynthesizeThresholds)
  * live in base/learning-method. This file defines text-specific config.

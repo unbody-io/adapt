@@ -6,13 +6,13 @@
  */
 
 import type { LanguageModel } from 'ai'
-import { BaseLearningMethod } from '../../base/learning-method'
+import { BaseLearningMethod } from '../../../base/learning-method'
 import type {
 	ObserveCallResult,
 	SynthesizeCallResult,
-} from '../../base/learning-method'
-import type { ListItem, ResolvedListGovernanceConfig } from '../types'
-import { applyListGovernance } from '../governance'
+} from '../../../base/learning-method'
+import type { ListItem, ResolvedListGovernanceConfig } from '../../types'
+import { applyListGovernance } from '../../governance'
 import { initObserve, observe } from './observe'
 import { initSynthesize, synthesize } from './synthesize'
 import type { SynthesizeIdentity } from './synthesize'
@@ -25,7 +25,7 @@ export interface ListDefaultConfig {
 	synthesize: {
 		model: LanguageModel
 		blueprintModel: LanguageModel
-		thresholds: Required<import('../../base/learning-method').SynthesizeThresholds>
+		thresholds: Required<import('../../../base/learning-method').SynthesizeThresholds>
 	}
 	governance: ResolvedListGovernanceConfig
 }

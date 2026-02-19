@@ -1,5 +1,5 @@
 /**
- * TextDefaultMethod — text-specific two-phase learning
+ * TextDefaultMethod — text-specific default learning method
  *
  * Extends BaseLearningMethod with text-specific observe/synthesize
  * implementations and strategy-based post-synthesis governance.

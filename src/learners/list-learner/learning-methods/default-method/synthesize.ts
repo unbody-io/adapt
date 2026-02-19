@@ -9,10 +9,10 @@
 import type { LanguageModel } from 'ai'
 import { z } from 'zod'
 import { nanoid } from 'nanoid'
-import { generate, Output } from '../../../llm'
-import type { Usage } from '../../base/learning-method'
-import type { Significance } from '../../types'
-import type { ListItem } from '../types'
+import { generate, Output } from '../../../../llm'
+import type { Usage } from '../../../base/learning-method'
+import type { Significance } from '../../../types'
+import type { ListItem } from '../../types'
 
 // ── Identity schema ────────────────────────────────────────────────────────
 

@@ -374,7 +374,7 @@ async function main() {
 	// Verify threshold actually changed on learners
 	for (const learner of brain.learners.values()) {
 		assertEqual(
-			learner.getSynthesizeThresholds().minImportance,
+			learner.getUnderstandThresholds().minImportance,
 			0.95,
 			`Learner ${learner.id} minImportance is 0.95`,
 		)
@@ -421,7 +421,7 @@ async function main() {
 
 	for (const learner of brain.learners.values()) {
 		assertEqual(
-			learner.getSynthesizeThresholds().minImportance,
+			learner.getUnderstandThresholds().minImportance,
 			0.3,
 			`Learner ${learner.id} minImportance restored to 0.3`,
 		)

@@ -45,7 +45,7 @@ async function main() {
 		description: 'Tracks TypeScript basics',
 		instructions: 'You track basic TypeScript syntax and type system features.',
 		type: 'text' as const,
-		maintenance: {
+		governance: {
 			strategy: 'continuous' as const,
 		},
 		thresholds: {
@@ -61,7 +61,7 @@ async function main() {
 		name: learner.name,
 		description: learner.description,
 		instructions: learner.instructions,
-		thresholds: learner.getSynthesizeThresholds(),
+		thresholds: learner.getUnderstandThresholds(),
 	}
 
 	logger.logState('Learner Before Update', beforeState)
@@ -79,7 +79,7 @@ async function main() {
 		name: updatedLearner.name,
 		description: updatedLearner.description,
 		instructions: updatedLearner.instructions,
-		thresholds: updatedLearner.getSynthesizeThresholds(),
+		thresholds: updatedLearner.getUnderstandThresholds(),
 	}
 
 	logger.logState('Learner After Update', afterState)

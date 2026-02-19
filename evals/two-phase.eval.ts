@@ -388,7 +388,7 @@ async function runEval(options: EvalOptions) {
 		id: `eval-${options.dataset}-${options.instructions ? 'custom' : learnerConfig.id}`,
 		model: openrouter(MODEL),
 		instructions,
-		maintenance: { strategy: 'continuous' },
+		governance: { strategy: 'continuous' },
 	})
 
 	// Initialize
@@ -396,7 +396,7 @@ async function runEval(options: EvalOptions) {
 	await learner.init()
 
 	const observeIdentity = learner.getObserveIdentity()?.identity ?? '(none)'
-	const synthesizeIdentity = learner.getSynthesizeIdentity()?.identity ?? '(none)'
+	const synthesizeIdentity = learner.getUnderstandIdentity()?.identity ?? '(none)'
 
 	// Track records
 	const learnRecords: LearnRecord[] = []

@@ -69,8 +69,8 @@ async function main() {
 			name: newLearner.name,
 			description: newLearner.description,
 			instructions: newLearner.instructions,
-			activation: newLearner.getGovernance().activation,
-			status: newLearner.getGovernance().status,
+			activation: newLearner.getHealth().activation,
+			status: newLearner.getHealth().status,
 		},
 	}
 
@@ -101,8 +101,8 @@ async function main() {
 	)
 
 	// Governance assertions (new learners start dormant, earn activation through learning)
-	assertEqual(newLearner.getGovernance().status, 'dormant', 'New learner starts dormant')
-	assertEqual(newLearner.getGovernance().activation, 0, 'New learner activation starts at 0')
+	assertEqual(newLearner.getHealth().status, 'dormant', 'New learner starts dormant')
+	assertEqual(newLearner.getHealth().activation, 0, 'New learner activation starts at 0')
 
 	// Verify learner is registered in brain
 	const retrieved = brain.learners.get(newLearner.id)

@@ -1,16 +1,16 @@
 /**
  * Test identity generation across models
  *
- * Tests both observe and synthesize identity generation.
+ * Tests both observe and understand identity generation.
  * Run with: MODEL=<model> bun evals/test-identity-gen.ts
  */
 
 import { createOpenRouter } from '@openrouter/ai-sdk-provider'
 import { generateText, Output } from 'ai'
-import { observeIdentityPromptTemplate } from '../src/learners/text-learner/learning-methods/two-phase/observe/prompt.template.identity'
-import { observeIdentitySchema } from '../src/learners/text-learner/learning-methods/two-phase/observe/schema.identity'
-import { synthesizeIdentityPromptTemplate } from '../src/learners/text-learner/learning-methods/two-phase/synthesize/prompt.template.identity'
-import { synthesizeIdentitySchema } from '../src/learners/text-learner/learning-methods/two-phase/synthesize/schema.identity'
+import { observeIdentityPromptTemplate } from '../src/learners/observer/prompts/identity'
+import { observeIdentitySchema } from '../src/learners/observer/schema.identity'
+import { understandIdentityPromptTemplate } from '../src/learners/text-learner/understand/prompts/identity'
+import { understandIdentitySchema } from '../src/learners/text-learner/understand/schema.identity'
 
 const openrouter = createOpenRouter({
 	apiKey: process.env.OPENROUTER_API_KEY,
@@ -27,18 +27,18 @@ const TEST_INSTRUCTIONS = [
 	'Understand this therapist\'s philosophy and approach',
 ]
 
-type IdentityType = 'observe' | 'synthesize'
+type IdentityType = 'observe' | 'understand'
 
 async function testIdentity(modelId: string, instructions: string, type: IdentityType) {
 	const model = openrouter(modelId)
 
 	const prompt = type === 'observe'
 		? observeIdentityPromptTemplate(instructions)
-		: synthesizeIdentityPromptTemplate(instructions)
+		: understandIdentityPromptTemplate(instructions)
 
 	const schema = type === 'observe'
 		? observeIdentitySchema
-		: synthesizeIdentitySchema
+		: understandIdentitySchema
 
 	try {
 		const result = await generateText({
@@ -76,13 +76,13 @@ async function main() {
 			const shortInstr = instructions.substring(0, 35) + '...'
 
 			// Test observe
-			process.stdout.write(`  [observe]     "${shortInstr}" `)
+			process.stdout.write(`  [observe]      "${shortInstr}" `)
 			const observeResult = await testIdentity(modelId, instructions, 'observe')
 			console.log(observeResult.success ? '✅' : `❌ ${observeResult.error}`)
 
-			// Test synthesize
-			process.stdout.write(`  [synthesize]  "${shortInstr}" `)
-			const synthResult = await testIdentity(modelId, instructions, 'synthesize')
+			// Test understand
+			process.stdout.write(`  [understand]   "${shortInstr}" `)
+			const synthResult = await testIdentity(modelId, instructions, 'understand')
 			console.log(synthResult.success ? '✅' : `❌ ${synthResult.error}`)
 		}
 	}

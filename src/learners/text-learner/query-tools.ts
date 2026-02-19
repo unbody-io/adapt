@@ -7,7 +7,7 @@
 
 import { tool } from 'ai'
 import { z } from 'zod'
-import type { QueryContext } from '../base/query-method'
+import type { QueryContext } from '../base/query'
 
 /**
  * Create a readUnderstanding tool that closes over learner state
@@ -17,7 +17,7 @@ import type { QueryContext } from '../base/query-method'
  */
 export function createReadUnderstandingTool(
 	getUnderstanding: () => string,
-	getBufferedObservations: () => Array<{ text: string; importance: number }>,
+	getBufferedObservations: () => Promise<Array<{ text: string; importance: number }>>,
 ) {
 	return tool({
 		description:
@@ -27,7 +27,7 @@ export function createReadUnderstandingTool(
 			const understanding = getUnderstanding()
 			if (understanding) return understanding
 
-			const observations = getBufferedObservations()
+			const observations = await getBufferedObservations()
 			if (observations.length === 0) {
 				return '(No understanding yet. You have not processed any data.)'
 			}

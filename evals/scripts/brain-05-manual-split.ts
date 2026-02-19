@@ -48,7 +48,7 @@ async function main() {
 		description: 'Tracks everything about web development',
 		instructions: 'You track all aspects of web development including frontend, backend, databases, and deployment.',
 		type: 'text' as const,
-		maintenance: {
+		governance: {
 			strategy: 'continuous' as const,
 		},
 		thresholds: {

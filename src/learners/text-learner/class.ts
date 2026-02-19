@@ -1,10 +1,14 @@
+import type { LanguageModel } from 'ai'
 import type { ParentModels } from '../../types/config'
-import { BaseLearner } from '../base'
-import type { QueryOptions, QueryResult } from '../base/query-method'
-import { ToolBasedMethod } from '../base/query-method'
+import { BaseLearner } from '../base/class'
+import type { UnderstandCallResult } from '../base/class'
+import { ToolBasedMethod } from '../base/query'
+import type { QueryMethod } from '../base/query'
+import { MemoryStore } from '../stores'
 import { resolveTextLearnerConfig } from './config.resolver'
-import { TextDefaultMethod } from './learning-methods'
-import type { TextDefaultUpdateConfig } from './learning-methods'
+import { applyStrategy } from './strategies'
+import { initUnderstand, understand } from './understand'
+import type { UnderstandIdentity } from './understand'
 import { buildTextQueryPrompt, createReadUnderstandingTool } from './query-tools'
 import type {
 	ResolvedTextLearnerConfig,
@@ -15,15 +19,12 @@ import type {
 /**
  * TextLearner - A learning agent that maintains understanding as narrative text
  *
- * Uses two-phase learning: Observe → Buffer → Synthesize
- * Strategy application is internal to TextDefaultMethod.
- *
- * Extends BaseLearner for shared governance, metrics, evolution, events, learn().
+ * Strategy application is handled in postProcessUnderstanding.
+ * Store is injected (defaults to MemoryStore).
  */
-export class TextLearner extends BaseLearner<string> {
-	private config: ResolvedTextLearnerConfig
+export class TextLearner extends BaseLearner<string, ResolvedTextLearnerConfig> {
 	private understanding = ''
-	private _queryMethod: ToolBasedMethod
+	private _understandIdentity: UnderstandIdentity | null = null
 
 	constructor(rawConfig: TextLearnerConfig, parentModels?: ParentModels) {
 		const config = resolveTextLearnerConfig(rawConfig, parentModels)
@@ -32,30 +33,125 @@ export class TextLearner extends BaseLearner<string> {
 			name: rawConfig.name || config.id,
 			instructions: config.instructions,
 			origin: config.origin,
+			store: rawConfig.store ?? new MemoryStore(),
 			focus: rawConfig.focus,
 			description: rawConfig.description,
-			governance: rawConfig.governance,
+			health: rawConfig.health,
 			maxObservationsForStagnation:
-				3 * (config.synthesize.thresholds.maxObservations ?? 10),
+				3 * (config.understand.thresholds.maxObservations ?? 10),
 		})
 		this.config = config
+	}
 
-		this._learningMethod = new TextDefaultMethod(this.config.model, {
-			observe: {
-				method: this.config.observe.method,
-				model: this.config.observe.model,
-				blueprintModel: this.config.observe.blueprintModel,
-			},
-			synthesize: {
-				method: this.config.synthesize.method,
-				model: this.config.synthesize.model,
-				blueprintModel: this.config.synthesize.blueprintModel,
-				thresholds: this.config.synthesize.thresholds,
-			},
-			maintenance: this.config.maintenance,
+	// ── Abstract implementations ───────────────────────────────────────────────
+
+	getUnderstanding(): string {
+		return this.understanding
+	}
+
+	async setUnderstanding(understanding: string): Promise<void> {
+		this.understanding = understanding
+
+		// Write-through to store
+		const existing = await this.store.understanding.get('current')
+		if (existing) {
+			await this.store.understanding.update('current', {
+				data: understanding,
+				metadata_updated_at: new Date().toISOString(),
+			})
+		} else {
+			await this.store.understanding.add({
+				id: 'current',
+				data: understanding,
+				metadata_confidence: 1.0,
+				metadata_created_at: new Date().toISOString(),
+				metadata_updated_at: new Date().toISOString(),
+			})
+		}
+
+		this.emit('learner:understanding:set', {
+			learnerId: this.id,
+			understanding,
 		})
+	}
 
-		this._queryMethod = new ToolBasedMethod(this.config.query.model, {
+	protected async restoreUnderstanding(): Promise<void> {
+		const record = await this.store.understanding.get('current')
+		if (record) {
+			this.understanding = record.data as string
+		}
+	}
+
+	getSummary(): string {
+		return this.understanding || '(no understanding yet)'
+	}
+
+	hasKnowledge(): boolean {
+		return !!this.understanding
+	}
+
+	protected async regenUnderstandPrompt(
+		model: LanguageModel,
+		instructions: string,
+	): Promise<void> {
+		const result = await initUnderstand(
+			model,
+			instructions,
+			this.config.governance.strategy,
+		)
+		this._understandIdentity = result.identity
+		this.understandSystemPrompt = result.systemPrompt
+	}
+
+	protected async callUnderstand(
+		model: LanguageModel,
+		understanding: string,
+		observations: string[],
+		callbacks?: { onThinking?: (thoughts: string[]) => void },
+	): Promise<UnderstandCallResult> {
+		const result = await understand(
+			model,
+			this.understandSystemPrompt!,
+			{
+				learnerId: this.id,
+				instructions: this.instructions,
+				currentUnderstanding: understanding,
+				observations,
+			},
+			callbacks,
+		)
+
+		if (result.status === 'error') {
+			return { status: 'error', error: result.error }
+		}
+		if (result.status === 'dismissed') {
+			return {
+				status: 'dismissed',
+				output: result.output,
+				usage: result.usage,
+			}
+		}
+		return {
+			status: 'synthesized',
+			newUnderstanding: result.newUnderstanding,
+			significance: result.significance,
+			evolution: result.evolution,
+			reasoning: result.reasoning,
+			usage: result.usage,
+		}
+	}
+
+	protected async postProcessUnderstanding(raw: string): Promise<string> {
+		const result = await applyStrategy({
+			understanding: raw,
+			model: this.config.model,
+			config: this.config.governance,
+		})
+		return result.understanding
+	}
+
+	protected createQueryMethod(): QueryMethod {
+		return new ToolBasedMethod(this.config.query.model, {
 			tools: {
 				readUnderstanding: createReadUnderstandingTool(
 					() => this.getUnderstanding(),
@@ -66,369 +162,96 @@ export class TextLearner extends BaseLearner<string> {
 		})
 	}
 
-	// ── Abstract implementations ───────────────────────────────────────────────
+	// ── Schema generation (hardcoded for text) ──────────────────────────────────
 
-	getUnderstanding(): string {
-		return this.understanding
-	}
-
-	setUnderstanding(understanding: string): void {
-		this.understanding = understanding
-
-		this.emit('learner:understanding:set', {
-			learnerId: this.id,
-			understanding,
-		})
-	}
-
-	getSummary(): string {
-		return this.understanding || '(no understanding yet)'
-	}
-
-	// ── Init ───────────────────────────────────────────────────────────────────
-
-	/**
-	 * Initialize the learner
-	 *
-	 * Generates system prompts for both observe and synthesize phases.
-	 * Delegates to update() internally — prompts are generated because
-	 * they are null on first call.
-	 */
-	async init(): Promise<{
-		observeSystemPrompt: string
-		synthesizeSystemPrompt: string
-	}> {
-		if (this.isInitialized()) {
-			return {
-				observeSystemPrompt: this._learningMethod.observePrompt!,
-				synthesizeSystemPrompt: this._learningMethod.synthesizePrompt!,
-			}
-		}
-
-		this.emit('learner:init:started', { learnerId: this.id })
-
-		try {
-			await this.update({ instructions: this.instructions })
-
-			this.emit('learner:init:completed', {
-				learnerId: this.id,
-				systemPrompt: this._learningMethod.observePrompt!,
-				usage: { inputTokens: 0, outputTokens: 0, totalTokens: 0 },
-			})
-
-			return {
-				observeSystemPrompt: this._learningMethod.observePrompt!,
-				synthesizeSystemPrompt: this._learningMethod.synthesizePrompt!,
-			}
-		} catch (err) {
-			const error = err instanceof Error ? err : new Error(String(err))
-			this.emit('learner:init:failed', {
-				learnerId: this.id,
-				error: error.message,
-			})
-			throw error
+	protected async generateSchemas() {
+		return {
+			observationSchema: {
+				type: 'string',
+				description: 'Single observation. Concise and factual.',
+				minLength: 10,
+				maxLength: 500,
+			},
+			understandingSchema: {
+				type: 'string',
+				description: 'Comprehensive prose synthesis. Well-structured narrative.',
+				minLength: 100,
+				maxLength: 5000,
+			},
 		}
 	}
 
-	// ── Query ──────────────────────────────────────────────────────────────────
+	// ── State persistence (adds understand identity) ──────────────────────────
 
-	async query(question: string, options?: QueryOptions): Promise<QueryResult> {
-		this.governance.lastAccessed = new Date()
-		this.metrics.query.count++
-
-		this.emit('learner:query:started', {
-			learnerId: this.id,
-			query: question,
-		})
-
-		// Short-circuit if learner has no knowledge at all
-		if (!this.understanding && this.getBufferState().count === 0) {
-			const emptyResult: QueryResult = {
-				relevant: false,
-				relevance: 0,
-				confidence: 0,
-				insight: '',
-				gaps: '',
-				usage: { inputTokens: 0, outputTokens: 0, totalTokens: 0 },
-			}
-			this.emit('learner:query:completed', {
-				learnerId: this.id,
-				insight: '',
-				relevant: false,
-				relevance: 0,
-				confidence: 0,
-				gaps: [],
-				usage: emptyResult.usage,
-			})
-			return emptyResult
+	protected async persistState(): Promise<void> {
+		await super.persistState()
+		const now = new Date().toISOString()
+		const existing = await this.store.state.get('understand_identity')
+		if (existing) {
+			await this.store.state.update('understand_identity', { value: this._understandIdentity, updated_at: now })
+		} else {
+			await this.store.state.add({ id: 'understand_identity', value: this._understandIdentity, updated_at: now })
 		}
+	}
 
-		try {
-			const result = await this._queryMethod.query(
-				{
-					learnerId: this.id,
-					instructions: this.instructions,
-					question,
-				},
-				options,
-				{
-					onThinking: (thoughts, usage) => {
-						this.emit('learner:query:thinking', {
-							learnerId: this.id,
-							thoughts,
-							usage,
-						})
-					},
-				},
-			)
+	protected async restoreState(): Promise<boolean> {
+		const baseRestored = await super.restoreState()
+		if (!baseRestored) return false
 
-			this.trackQueryMetrics(result)
+		const understandIdentity = await this.store.state.get('understand_identity')
+		if (!understandIdentity) return false
 
-			this.emit('learner:query:completed', {
-				learnerId: this.id,
-				insight: result.insight,
-				relevant: result.relevant,
-				relevance: result.relevance,
-				confidence: result.confidence,
-				gaps: result.gaps ? result.gaps.split('\n').filter(Boolean) : [],
-				usage: result.usage,
-			})
-
-			this.checkAndEmitSignals()
-
-			return result
-		} catch (err) {
-			const error = err instanceof Error ? err : new Error(String(err))
-			this.emit('learner:query:failed', {
-				learnerId: this.id,
-				error: error.message,
-			})
-			throw error
-		}
+		this._understandIdentity = understandIdentity.value as UnderstandIdentity
+		return true
 	}
 
 	// ── Text-specific accessors ────────────────────────────────────────────────
 
 	getObserveIdentity() {
-		return (this._learningMethod as TextDefaultMethod).observeIdentity
+		return this._observeIdentity
 	}
 
-	getSynthesizeIdentity() {
-		return (this._learningMethod as TextDefaultMethod).synthesizeIdentity
+	getUnderstandIdentity() {
+		return this._understandIdentity
 	}
 
-	getMaintenance() {
-		return { ...this.config.maintenance }
+	getGovernance() {
+		return { ...this.config.governance }
 	}
 
 	getQueryMethodName(): string {
 		return 'tool-based'
 	}
 
-	getSynthesizeThresholds() {
-		return { ...this.config.synthesize.thresholds }
+	// ── Type-specific update (only governance) ─────────────────────────────────
+
+	protected applyTypeSpecificUpdates(
+		updates: Record<string, unknown>,
+		changedFields: string[],
+	): void {
+		const u = updates as Partial<TextLearnerConfig>
+
+		if (
+			u.governance?.strategy !== undefined &&
+			u.governance.strategy !== this.config.governance.strategy
+		) {
+			this.config.governance.strategy = u.governance.strategy
+			changedFields.push('governance.strategy')
+		}
+		if (
+			u.governance?.maxTokens !== undefined &&
+			u.governance.maxTokens !== this.config.governance.maxTokens
+		) {
+			this.config.governance.maxTokens = u.governance.maxTokens
+			changedFields.push('governance.maxTokens')
+		}
 	}
 
-	// ── Update ─────────────────────────────────────────────────────────────────
+	// ── Typed update wrapper ───────────────────────────────────────────────────
 
-	/**
-	 * Update learner configuration
-	 *
-	 * Accepts the same shape as the constructor config (but partial).
-	 * Any config field can be updated. Only `id` is truly immutable.
-	 */
-	async update(updates: Partial<TextLearnerConfig>): Promise<TextLearnerUpdateResult> {
-		if (updates.id !== undefined && updates.id !== this.id) {
-			throw new Error(
-				'Cannot update immutable field "id". Learner identity cannot be changed.',
-			)
-		}
-
-		const changedFields: string[] = []
-		const methodUpdate: TextDefaultUpdateConfig = {}
-
-		// ── Metadata fields ──
-
-		if (updates.name !== undefined && updates.name !== this.name) {
-			this.name = updates.name
-			changedFields.push('name')
-		}
-
-		if (updates.description !== undefined && updates.description !== this.description) {
-			this.description = updates.description
-			changedFields.push('description')
-		}
-
-		if (updates.origin !== undefined && updates.origin !== this.config.origin) {
-			this.config.origin = updates.origin
-			this._origin = updates.origin
-			changedFields.push('origin')
-		}
-
-		// ── Model changes ──
-
-		if (updates.model !== undefined) {
-			this.config.model = updates.model
-			changedFields.push('model')
-			methodUpdate.model = updates.model
-		}
-
-		if (updates.blueprintModel !== undefined) {
-			this.config.blueprintModel = updates.blueprintModel
-			changedFields.push('blueprintModel')
-			if (!updates.observe?.blueprintModel) {
-				methodUpdate.observe = methodUpdate.observe || {}
-				methodUpdate.observe.blueprintModel = updates.blueprintModel
-			}
-			if (!updates.synthesize?.blueprintModel) {
-				methodUpdate.synthesize = methodUpdate.synthesize || {}
-				methodUpdate.synthesize.blueprintModel = updates.blueprintModel
-			}
-		}
-
-		// ── Instructions ──
-
-		if (updates.instructions !== undefined) {
-			this.instructions = updates.instructions
-			this.config.instructions = updates.instructions
-			changedFields.push('instructions')
-			methodUpdate.instructions = updates.instructions
-		}
-
-		// ── Focus ──
-
-		if (updates.focus !== undefined && updates.focus !== this.focus) {
-			this.focus = updates.focus
-			changedFields.push('focus')
-			methodUpdate.focus = updates.focus
-		}
-
-		// ── Observe config ──
-
-		if (updates.observe) {
-			if (updates.observe.model !== undefined) {
-				this.config.observe.model = updates.observe.model
-				changedFields.push('observe.model')
-				methodUpdate.observe = methodUpdate.observe || {}
-				methodUpdate.observe.model = updates.observe.model
-			}
-			if (updates.observe.blueprintModel !== undefined) {
-				this.config.observe.blueprintModel = updates.observe.blueprintModel
-				changedFields.push('observe.blueprintModel')
-				methodUpdate.observe = methodUpdate.observe || {}
-				methodUpdate.observe.blueprintModel = updates.observe.blueprintModel
-			}
-		}
-
-		// ── Synthesize config ──
-
-		if (updates.synthesize) {
-			if (updates.synthesize.model !== undefined) {
-				this.config.synthesize.model = updates.synthesize.model
-				changedFields.push('synthesize.model')
-				methodUpdate.synthesize = methodUpdate.synthesize || {}
-				methodUpdate.synthesize.model = updates.synthesize.model
-			}
-			if (updates.synthesize.blueprintModel !== undefined) {
-				this.config.synthesize.blueprintModel = updates.synthesize.blueprintModel
-				changedFields.push('synthesize.blueprintModel')
-				methodUpdate.synthesize = methodUpdate.synthesize || {}
-				methodUpdate.synthesize.blueprintModel = updates.synthesize.blueprintModel
-			}
-			if (updates.synthesize.thresholds) {
-				const t = updates.synthesize.thresholds
-				if (t.minImportance !== undefined) {
-					this.config.synthesize.thresholds.minImportance = t.minImportance
-					changedFields.push('synthesize.thresholds.minImportance')
-				}
-				if (t.maxObservations !== undefined) {
-					this.config.synthesize.thresholds.maxObservations = t.maxObservations
-					changedFields.push('synthesize.thresholds.maxObservations')
-				}
-				if (t.maxTokens !== undefined) {
-					this.config.synthesize.thresholds.maxTokens = t.maxTokens
-					changedFields.push('synthesize.thresholds.maxTokens')
-				}
-				methodUpdate.synthesize = methodUpdate.synthesize || {}
-				methodUpdate.synthesize.thresholds = updates.synthesize.thresholds
-			}
-		}
-
-		// ── Maintenance ──
-
-		if (updates.maintenance?.strategy !== undefined && updates.maintenance.strategy !== this.config.maintenance.strategy) {
-			this.config.maintenance.strategy = updates.maintenance.strategy
-			changedFields.push('maintenance.strategy')
-			methodUpdate.maintenance = methodUpdate.maintenance || {}
-			methodUpdate.maintenance.strategy = updates.maintenance.strategy
-		}
-		if (updates.maintenance?.maxTokens !== undefined && updates.maintenance.maxTokens !== this.config.maintenance.maxTokens) {
-			this.config.maintenance.maxTokens = updates.maintenance.maxTokens
-			changedFields.push('maintenance.maxTokens')
-			methodUpdate.maintenance = methodUpdate.maintenance || {}
-			methodUpdate.maintenance.maxTokens = updates.maintenance.maxTokens
-		}
-
-		// ── Query config ──
-
-		if (updates.query?.model !== undefined) {
-			this.config.query.model = updates.query.model
-			changedFields.push('query.model')
-			this._queryMethod.update({ model: updates.query.model })
-		}
-
-		// ── Governance config ──
-
-		if (updates.governance) {
-			if (updates.governance.threshold !== undefined) {
-				this.governance.threshold = updates.governance.threshold
-				changedFields.push('governance.threshold')
-			}
-			if (updates.governance.signalThresholds) {
-				const st = updates.governance.signalThresholds
-				if (st.maxDismissalRate !== undefined) {
-					this.governance.signalThresholds.maxDismissalRate = st.maxDismissalRate
-					changedFields.push('governance.signalThresholds.maxDismissalRate')
-				}
-				if (st.minConfidence !== undefined) {
-					this.governance.signalThresholds.minConfidence = st.minConfidence
-					changedFields.push('governance.signalThresholds.minConfidence')
-				}
-				if (st.maxObservationsWithoutSynthesis !== undefined) {
-					this.governance.signalThresholds.maxObservationsWithoutSynthesis = st.maxObservationsWithoutSynthesis
-					changedFields.push('governance.signalThresholds.maxObservationsWithoutSynthesis')
-				}
-			}
-		}
-
-		// ── Delegate to sub-components ──
-
-		let promptsRegenerated = false
-
-		if (Object.keys(methodUpdate).length > 0) {
-			const result = await this._learningMethod.update(methodUpdate as Record<string, unknown>)
-			promptsRegenerated = result.promptsRegenerated
-
-			if (promptsRegenerated) {
-				this.emit('learner:prompts:regenerated', {
-					learnerId: this.id,
-					observePrompt: this._learningMethod.observePrompt!,
-					synthesizePrompt: this._learningMethod.synthesizePrompt!,
-				})
-			}
-		}
-
-		if (changedFields.length > 0) {
-			this.emit('learner:config:updated', {
-				learnerId: this.id,
-				changedFields,
-				config: { ...this.config },
-			})
-		}
-
-		return {
-			changedFields,
-			config: { ...this.config },
-		}
+	async update(
+		updates: Partial<TextLearnerConfig>,
+	): Promise<TextLearnerUpdateResult> {
+		return super.update(updates as Record<string, unknown>)
 	}
 }

@@ -7,14 +7,14 @@ export const BRAIN_DEFAULTS = {
 		batchSize: 20,
 	},
 	learning: {
-		synthesize: {
+		understand: {
 			thresholds: {
 				maxObservations: 10,
 				maxTokens: 8000,
 				minImportance: 0.5,
 			},
 		},
-		maintenance: {
+		governance: {
 			strategy: 'cumulative' as const,
 			maxTokens: 16000,
 		},

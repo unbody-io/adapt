@@ -9,7 +9,7 @@
 
 import { tool } from 'ai'
 import { z } from 'zod'
-import type { QueryContext } from '../base/query-method'
+import type { QueryContext } from '../base/query'
 import type { ListItem } from './types'
 
 /**

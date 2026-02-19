@@ -41,7 +41,7 @@ const textLearnerConfigSchema = z.object({
 		.describe(
 			'Text learner — builds narrative prose understanding. Best for qualitative patterns, preferences, philosophies, and interconnected concepts.',
 		),
-	maintenance: z
+	governance: z
 		.object({
 			strategy: z
 				.enum(['continuous', 'cumulative', 'decay'])
@@ -50,7 +50,7 @@ const textLearnerConfigSchema = z.object({
 				),
 		})
 		.describe(
-			'Maintenance configuration. Use { strategy: "continuous" } as default.',
+			'Governance configuration. Use { strategy: "continuous" } as default.',
 		),
 })
 
@@ -61,7 +61,7 @@ const listLearnerConfigSchema = z.object({
 		.describe(
 			'List learner — tracks a structured collection of items. Best for entities, catalogs, inventories, preferences as discrete items, and anything countable.',
 		),
-	listGovernance: z
+	governance: z
 		.object({
 			deduplication: z
 				.enum(['strict', 'none'])

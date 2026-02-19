@@ -3,7 +3,7 @@ import { nanoid } from 'nanoid'
 import {
 	BaseLearner,
 	type GeneratedLearnerConfig,
-	type LearnerGovernance,
+	type LearnerHealth,
 	ListLearner,
 	TextLearner,
 	type TokenUsage,
@@ -40,7 +40,7 @@ import type {
 export class Brain extends TypedEmitter<BrainEventMap> {
 	prompt: string
 	readonly config: ResolvedBrainConfig
-	readonly learners: Map<string, BaseLearner<any>> = new Map()
+	readonly learners: Map<string, BaseLearner<unknown>> = new Map()
 	private learnerNames: Map<string, string> = new Map()
 	private initialized = false
 	private evaluator?: Evaluator
@@ -145,9 +145,9 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 	async createLearnerFromConfig(
 		config: GeneratedLearnerConfig & {
 			thresholds?: { minImportance?: number; maxObservations?: number }
-			governance?: Partial<LearnerGovernance>
+			health?: Partial<LearnerHealth>
 		},
-	): Promise<BaseLearner<any>> {
+	): Promise<BaseLearner<unknown>> {
 		const shared = {
 			id: config.id,
 			model: this.config.model,
@@ -156,30 +156,30 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 			origin: 'prompt' as const,
 			name: config.name,
 			description: config.description,
-			governance: config.governance,
-			synthesize: {
+			health: config.health,
+			understand: {
 				thresholds: {
-					maxObservations: BRAIN_DEFAULTS.learning.synthesize.thresholds.maxObservations,
-					maxTokens: BRAIN_DEFAULTS.learning.synthesize.thresholds.maxTokens,
-					minImportance: BRAIN_DEFAULTS.learning.synthesize.thresholds.minImportance,
+					maxObservations: BRAIN_DEFAULTS.learning.understand.thresholds.maxObservations,
+					maxTokens: BRAIN_DEFAULTS.learning.understand.thresholds.maxTokens,
+					minImportance: BRAIN_DEFAULTS.learning.understand.thresholds.minImportance,
 					...config.thresholds,
 				},
 			},
 		}
 
-		let learner: BaseLearner<any>
+		let learner: BaseLearner<unknown>
 
 		if (config.type === 'list') {
 			learner = new ListLearner({
 				...shared,
-				listGovernance: config.listGovernance,
+				governance: config.governance,
 			})
 		} else {
 			learner = new TextLearner({
 				...shared,
-				maintenance: config.maintenance ?? {
-					strategy: BRAIN_DEFAULTS.learning.maintenance.strategy,
-					maxTokens: BRAIN_DEFAULTS.learning.maintenance.maxTokens,
+				governance: config.governance ?? {
+					strategy: BRAIN_DEFAULTS.learning.governance.strategy,
+					maxTokens: BRAIN_DEFAULTS.learning.governance.maxTokens,
 				},
 			} as any)
 		}
@@ -226,21 +226,21 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 	/**
 	 * Add a learner manually
 	 */
-	async addLearner(config: GeneratedLearnerConfig): Promise<BaseLearner<any>> {
+	async addLearner(config: GeneratedLearnerConfig): Promise<BaseLearner<unknown>> {
 		return this.createLearnerFromConfig(config)
 	}
 
 	/**
 	 * Get all learners
 	 */
-	getLearners(): BaseLearner<any>[] {
+	getLearners(): BaseLearner<unknown>[] {
 		return Array.from(this.learners.values())
 	}
 
 	/**
 	 * Get a specific learner by ID
 	 */
-	getLearner(id: string): BaseLearner<any> | undefined {
+	getLearner(id: string): BaseLearner<unknown> | undefined {
 		return this.learners.get(id)
 	}
 
@@ -347,9 +347,17 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 			const learnerArray = this.getLearners()
 
 			// Skip learners with no understanding and no buffered observations
-			const queryableLearners = learnerArray.filter((l) => {
-				return !!l.getUnderstanding() || l.getBufferState().count > 0
-			})
+			const bufferStates = await Promise.all(
+				learnerArray.map(async (l) => ({
+					learner: l,
+					buffer: await l.getBufferState(),
+				})),
+			)
+			const queryableLearners = bufferStates
+				.filter(({ learner, buffer }) => {
+					return !!learner.getUnderstanding() || buffer.count > 0
+				})
+				.map(({ learner }) => learner)
 
 			// Query all learners in parallel
 			const learnerResults = await Promise.all(
@@ -562,7 +570,7 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 	 * const learner = await brain.createLearner('Track API design patterns and best practices')
 	 * ```
 	 */
-	async createLearner(guidance: string): Promise<BaseLearner<any>> {
+	async createLearner(guidance: string): Promise<BaseLearner<unknown>> {
 		if (!this.evolutionOrchestrator) {
 			throw new Error(
 				'Evolution is not enabled. Set config.evolution.enabled = true',
@@ -602,7 +610,7 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 	async mergeLearners(
 		learnerIds: string[],
 		guidance: string,
-	): Promise<BaseLearner<any>> {
+	): Promise<BaseLearner<unknown>> {
 		if (!this.evolutionOrchestrator) {
 			throw new Error(
 				'Evolution is not enabled. Set config.evolution.enabled = true',
@@ -642,7 +650,7 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 	async splitLearner(
 		learnerId: string,
 		guidance: string,
-	): Promise<BaseLearner<any>[]> {
+	): Promise<BaseLearner<unknown>[]> {
 		if (!this.evolutionOrchestrator) {
 			throw new Error(
 				'Evolution is not enabled. Set config.evolution.enabled = true',
@@ -681,7 +689,7 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 	async updateLearner(
 		learnerId: string,
 		guidance: string,
-	): Promise<BaseLearner<any>> {
+	): Promise<BaseLearner<unknown>> {
 		if (!this.evolutionOrchestrator) {
 			throw new Error(
 				'Evolution is not enabled. Set config.evolution.enabled = true',
@@ -833,12 +841,12 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 		// Map learning.* mechanical fields to learnerUpdate shape
 		if (updates.learning?.model) learnerUpdate.model ??= updates.learning.model
 		if (updates.learning?.blueprintModel) learnerUpdate.blueprintModel ??= updates.learning.blueprintModel
-		if (updates.learning?.observe) {
-			learnerUpdate.observe = updates.learning.observe
+		if (updates.learning?.observer) {
+			learnerUpdate.observer = updates.learning.observer
 		}
-		if (updates.learning?.synthesize) {
-			const s = updates.learning.synthesize
-			learnerUpdate.synthesize = {
+		if (updates.learning?.understand) {
+			const s = updates.learning.understand
+			learnerUpdate.understand = {
 				...(s.model ? { model: s.model } : {}),
 				...(s.blueprintModel ? { blueprintModel: s.blueprintModel } : {}),
 				...(s.thresholds ? { thresholds: s.thresholds } : {}),
@@ -847,9 +855,9 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 		if (updates.learning?.query) {
 			learnerUpdate.query = updates.learning.query
 		}
-		if (updates.learning?.maintenance) {
-			const m = updates.learning.maintenance
-			learnerUpdate.maintenance = {
+		if (updates.learning?.governance) {
+			const m = updates.learning.governance
+			learnerUpdate.governance = {
 				...(m.strategy ? { strategy: m.strategy } : {}),
 				...(m.maxTokens !== undefined ? { maxTokens: m.maxTokens } : {}),
 			}

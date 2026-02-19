@@ -31,7 +31,7 @@ export class MergeHandler extends EvolutionActionHandler<MergeActionResult> {
 					throw new Error('Merge requires at least 2 learners')
 				}
 
-				const learners: BaseLearner<any>[] = []
+				const learners: BaseLearner<unknown>[] = []
 				for (const learnerId of decision.targets) {
 					const learner = this.brain.learners.get(learnerId)
 					if (!learner) {
@@ -58,7 +58,7 @@ export class MergeHandler extends EvolutionActionHandler<MergeActionResult> {
 				const newLearner =
 					await this.brain.createLearnerFromConfig(completeConfig)
 
-				newLearner.setUnderstanding(understanding)
+				await newLearner.setUnderstanding(understanding)
 
 				for (const learnerId of decision.targets) {
 					this.brain.__removeLearner(learnerId)

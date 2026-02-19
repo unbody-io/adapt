@@ -38,7 +38,7 @@ async function main() {
 		description: 'A learner that will stagnate',
 		instructions: 'You track software patterns.',
 		type: 'text' as const,
-		maintenance: {
+		governance: {
 			strategy: 'continuous' as const,
 		},
 		thresholds: {
@@ -64,8 +64,8 @@ async function main() {
 
 	logger.logState('Learner State', {
 		name: learner.name,
-		stagnationWindow: learner.getGovernance().signalThresholds.maxObservationsWithoutSynthesis,
-		minImportance: learner.getSynthesizeThresholds().minImportance,
+		stagnationWindow: learner.getHealth().signalThresholds.maxObservationsWithoutSynthesis,
+		minImportance: learner.getUnderstandThresholds().minImportance,
 	})
 
 	logger.logSection('Action: Ingest low-importance observations to trigger stagnation')

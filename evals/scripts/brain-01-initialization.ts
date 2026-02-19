@@ -73,8 +73,8 @@ You should track:
 			name: l.name,
 			description: l.description,
 			instructionsPreview: l.instructions.substring(0, 100) + '...',
-			activation: l.getGovernance().activation,
-			status: l.getGovernance().status,
+			activation: l.getHealth().activation,
+			status: l.getHealth().status,
 		})),
 	}
 
@@ -106,8 +106,8 @@ You should track:
 			`Learner ${learner.name} has meaningful instructions`,
 		)
 		// Newly created learners start dormant with activation 0 (earn activation through learning)
-		assertEqual(learner.getGovernance().status, 'dormant', `Learner ${learner.name} starts dormant`)
-		assertEqual(learner.getGovernance().activation, 0, `Learner ${learner.name} activation starts at 0`)
+		assertEqual(learner.getHealth().status, 'dormant', `Learner ${learner.name} starts dormant`)
+		assertEqual(learner.getHealth().activation, 0, `Learner ${learner.name} activation starts at 0`)
 	}
 
 	// Verify learners cover different aspects of the brain prompt

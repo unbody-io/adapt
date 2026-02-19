@@ -57,7 +57,7 @@ export interface LearnerContext {
 	name: string
 	purpose: string
 	understandingSize: number
-	governance: {
+	health: {
 		activation: number
 		status: string
 		lastAccessed: Date

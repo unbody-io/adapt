@@ -5,24 +5,22 @@
  */
 
 import type { LanguageModel } from 'ai'
-import type {
-	CascadableConfig,
-	ResolvedCascadableConfig,
-} from '../../types/config'
+import type { CascadableConfig } from '../../types/config'
+import type { BaseResolvedConfig, UnderstandThresholds } from '../base/types'
 import type { EventsFromMap } from '../../types/events'
 import type {
-	LearnerGovernance,
+	LearnerHealth,
 	LearnerOrigin,
 	Significance,
 } from '../types'
-import type { SynthesizeThresholds } from '../base/learning-method'
 import type { SharedLearnerEventMap } from '../base/types'
+import type { Store } from '../stores'
 
 // ── Core types ─────────────────────────────────────────────────────────────
 
 export interface ListItem {
 	id: string
-	data: Record<string, any>
+	data: Record<string, unknown>
 	metadata: {
 		confidence: number
 		firstSeen: string
@@ -35,7 +33,7 @@ export type ListOperation =
 	| {
 			type: 'add'
 			item: {
-				data: Record<string, any>
+				data: Record<string, unknown>
 				metadata?: Partial<ListItem['metadata']>
 			}
 	  }
@@ -43,7 +41,7 @@ export type ListOperation =
 			type: 'update'
 			id: string
 			changes: {
-				data?: Record<string, any>
+				data?: Record<string, unknown>
 				metadata?: Partial<ListItem['metadata']>
 			}
 	  }
@@ -115,36 +113,28 @@ export interface ListLearnerConfig extends CascadableConfig {
 	description?: string
 	/** How the learner was created */
 	origin?: LearnerOrigin
+	/** Injected store (defaults to MemoryStore if not provided) */
+	store?: Store
 	/** List-specific governance (dedup, maxItems, pruning) */
-	listGovernance?: ListGovernanceConfig
-	/** Observe phase configuration */
-	observe?: { model?: LanguageModel; blueprintModel?: LanguageModel }
-	/** Synthesize phase configuration */
-	synthesize?: {
+	governance?: ListGovernanceConfig
+	/** Observer phase configuration */
+	observer?: { model?: LanguageModel; blueprintModel?: LanguageModel }
+	/** Understand phase configuration */
+	understand?: {
 		model?: LanguageModel
 		blueprintModel?: LanguageModel
-		thresholds?: SynthesizeThresholds
+		thresholds?: UnderstandThresholds
 	}
 	/** Query phase configuration */
 	query?: { model?: LanguageModel }
-	/** Governance configuration (Living Brain) */
-	governance?: Partial<LearnerGovernance>
+	/** Health configuration (Living Brain) */
+	health?: Partial<LearnerHealth>
 }
 
 // ── Resolved config ────────────────────────────────────────────────────────
 
-export interface ResolvedListLearnerConfig extends ResolvedCascadableConfig {
-	instructions: string
-	id: string
-	origin: LearnerOrigin
-	observe: { model: LanguageModel; blueprintModel: LanguageModel }
-	synthesize: {
-		model: LanguageModel
-		blueprintModel: LanguageModel
-		thresholds: Required<SynthesizeThresholds>
-	}
-	query: { model: LanguageModel }
-	listGovernance: ResolvedListGovernanceConfig
+export interface ResolvedListLearnerConfig extends BaseResolvedConfig {
+	governance: ResolvedListGovernanceConfig
 }
 
 export interface ListLearnerUpdateResult {

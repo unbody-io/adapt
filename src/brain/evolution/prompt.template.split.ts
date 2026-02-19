@@ -12,7 +12,7 @@ import { stringifyUnderstanding } from './utils'
  */
 export function splitPromptTemplate(
 	guidance: string,
-	learner: BaseLearner<any>,
+	learner: BaseLearner<unknown>,
 	brainPrompt: string,
 ): string {
 	return `# Brain Context
@@ -34,9 +34,9 @@ ${learner.instructions}
 **Understanding**:
 ${stringifyUnderstanding(learner.getUnderstanding())}
 
-**Governance**:
-- Activation: ${learner.getGovernance().activation.toFixed(2)}
-- Status: ${learner.getGovernance().status}
+**Health**:
+- Activation: ${learner.getHealth().activation.toFixed(2)}
+- Status: ${learner.getHealth().status}
 - Query Count: ${learner.getMetrics().query.count}
 - Dismissal Rate: ${(learner.getMetrics().ingestion.dismissalRate * 100).toFixed(1)}%
 

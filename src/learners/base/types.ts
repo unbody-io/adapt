@@ -6,7 +6,67 @@
  * has a different understanding shape (string, ListItem[], etc.).
  */
 
-import type { LearnerStatus, Significance, TokenUsage } from '../types'
+import type { LanguageModel } from 'ai'
+import type { ResolvedCascadableConfig } from '../../types/config'
+import type {
+	LearnerHealth,
+	LearnerOrigin,
+	LearnerStatus,
+	Significance,
+	TokenUsage,
+} from '../types'
+
+/**
+ * Thresholds that trigger the understand phase
+ */
+export interface UnderstandThresholds {
+	maxObservations?: number
+	maxTokens?: number
+	minImportance?: number
+}
+
+/**
+ * Base resolved config — common fields shared across all learner types.
+ *
+ * Each subclass config extends this and adds type-specific fields (e.g. governance).
+ */
+export interface BaseResolvedConfig extends ResolvedCascadableConfig {
+	instructions: string
+	id: string
+	origin: LearnerOrigin
+	observer: { model: LanguageModel; blueprintModel: LanguageModel }
+	understand: {
+		model: LanguageModel
+		blueprintModel: LanguageModel
+		thresholds: Required<UnderstandThresholds>
+	}
+	query: { model: LanguageModel }
+}
+
+/**
+ * Input shape for BaseLearner.update() — all fields optional.
+ *
+ * Type-specific fields (like governance) pass through via the index signature
+ * and are handled by each subclass's applyTypeSpecificUpdates().
+ */
+export interface BaseLearnerUpdateInput {
+	id?: string
+	name?: string
+	description?: string
+	origin?: LearnerOrigin
+	model?: LanguageModel
+	blueprintModel?: LanguageModel
+	instructions?: string
+	focus?: string
+	observer?: { model?: LanguageModel; blueprintModel?: LanguageModel }
+	understand?: {
+		model?: LanguageModel
+		blueprintModel?: LanguageModel
+		thresholds?: UnderstandThresholds
+	}
+	query?: { model?: LanguageModel }
+	health?: Partial<LearnerHealth>
+}
 
 /**
  * Usage data for events (partial — LLM calls may not report all fields)
@@ -43,19 +103,19 @@ export interface SharedLearnerEventMap {
 	}
 	'learner:observed': {
 		learnerId: string
-		output: string[]
+		output: unknown[]
 		importance: number
 		bufferCount: number
 		usage?: EventUsage
 	}
 	'learner:observe:dismissed': {
 		learnerId: string
-		output: string[]
+		output: unknown[]
 		usage?: EventUsage
 	}
 	'learner:observe:error': { learnerId: string; error: unknown }
 
-	// Synthesize phase
+	// Synthesize phase (event names preserved for backward compat)
 	'learner:synthesize:started': {
 		learnerId: string
 		observationCount: number
@@ -101,8 +161,8 @@ export interface SharedLearnerEventMap {
 		usage: TokenUsage
 	}
 
-	// Governance
-	'learner:governance:updated': {
+	// Health
+	'learner:health:updated': {
 		learnerId: string
 		activation: number
 		status: LearnerStatus
@@ -133,7 +193,7 @@ export interface SharedLearnerEventMap {
 	'learner:prompts:regenerated': {
 		learnerId: string
 		observePrompt: string
-		synthesizePrompt: string
+		understandPrompt: string
 	}
 	'learner:understanding:set': {
 		learnerId: string

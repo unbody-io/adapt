@@ -98,9 +98,9 @@ function getBrainConfigSnapshot(b: Brain) {
 	// Read learner-level config from first learner (representative sample)
 	const firstLearner = b.getLearners()[0]
 	const learnerConfig = firstLearner ? {
-		thresholds: firstLearner.getSynthesizeThresholds(),
+		thresholds: firstLearner.getUnderstandThresholds(),
 		queryMethod: firstLearner.getQueryMethodName(),
-		maintenanceStrategy: firstLearner.getMaintenance().strategy,
+		governance: firstLearner.getGovernance(),
 	} : null
 	return {
 		prompt: b.prompt.slice(0, 120) + (b.prompt.length > 120 ? '...' : ''),
@@ -194,7 +194,7 @@ interface InitRequest {
 	maxObservations?: number
 	minImportance?: number
 	queryMethod?: 'direct' | 'tool-based'
-	maintenanceMaxTokens?: number
+	governanceMaxTokens?: number
 	evolution?: {
 		enabled?: boolean
 		autoEvaluate?: boolean
@@ -345,9 +345,9 @@ app.post('/brain/init', async (c) => {
 					minImportance: body.minImportance,
 				},
 			},
-			maintenance: {
+			governance: {
 				strategy: body.strategy,
-				...(body.maintenanceMaxTokens ? { maxTokens: body.maintenanceMaxTokens } : {}),
+				...(body.governanceMaxTokens ? { maxTokens: body.governanceMaxTokens } : {}),
 			},
 			query: {
 				method: body.queryMethod,
@@ -467,27 +467,27 @@ app.post('/brain/ask', async (c) => {
 	}
 })
 
-app.get('/brain/status', (c) => {
+app.get('/brain/status', async (c) => {
 	if (!brain) {
 		return c.json({ status: 'not_initialized' })
 	}
 
-	const learners = brain.getLearners().map((l) => ({
+	const learners = await Promise.all(brain.getLearners().map(async (l) => ({
 		id: l.id,
 		name: l.name,
 		description: l.description,
 		instructions: l.instructions,
 		understanding: l.getUnderstanding(),
-		evolution: l.getEvolution(),
-		buffer: l.getBufferState(),
-		bufferObservations: l.getBufferedObservations(),
+		evolution: await l.getEvolution(),
+		buffer: await l.getBufferState(),
+		bufferObservations: await l.getBufferedObservations(),
+		health: l.getHealth(),
 		governance: l.getGovernance(),
-		maintenance: l.getMaintenance(),
-		synthesizeThresholds: l.getSynthesizeThresholds(),
+		understandThresholds: l.getUnderstandThresholds(),
 		observePrompt: l.getObserveSystemPrompt(),
-		synthesizePrompt: l.getSynthesizeSystemPrompt(),
+		understandPrompt: l.getUnderstandSystemPrompt(),
 		queryMethod: l.getQueryMethodName(),
-	}))
+	})))
 
 	return c.json({
 		status: 'initialized',
@@ -524,7 +524,7 @@ app.post('/brain/update', async (c) => {
 				thresholds?: { maxObservations?: number; maxTokens?: number; minImportance?: number }
 			}
 			query?: { model?: string; method?: 'tool-based' | 'direct' }
-			maintenance?: { strategy?: 'continuous' | 'cumulative' | 'decay'; maxTokens?: number }
+			governance?: { strategy?: 'continuous' | 'cumulative' | 'decay'; maxTokens?: number }
 		}
 		evolution?: {
 			enabled?: boolean
@@ -569,7 +569,7 @@ app.post('/brain/update', async (c) => {
 					...(body.learning.query.method ? { method: body.learning.query.method } : {}),
 				},
 			} : {}),
-			...(body.learning.maintenance ? { maintenance: body.learning.maintenance } : {}),
+			...(body.learning.governance ? { governance: body.learning.governance } : {}),
 		}
 	}
 	if (body.evolution) updates.evolution = body.evolution
@@ -608,13 +608,13 @@ app.post('/brain/learners/:id/update', async (c) => {
 		observe?: { model?: string }
 		synthesize?: { model?: string; thresholds?: { maxObservations?: number; minImportance?: number } }
 		query?: { method?: 'tool-based' | 'direct' }
-		maintenance?: { strategy?: 'continuous' | 'cumulative' | 'decay'; maxTokens?: number }
-		governance?: { signalThresholds?: { maxDismissalRate?: number; minConfidence?: number; maxObservationsWithoutSynthesis?: number } }
+		governance?: Record<string, unknown>
+		health?: { signalThresholds?: { maxDismissalRate?: number; minConfidence?: number; maxObservationsWithoutSynthesis?: number } }
 	}>()
 
 	const openrouter = createOpenRouter({ apiKey: process.env.OPENROUTER_API_KEY })
 
-	const updates: Record<string, any> = {}
+	const updates: Record<string, unknown> = {}
 	if (body.name !== undefined) updates.name = body.name
 	if (body.description !== undefined) updates.description = body.description
 	if (body.instructions !== undefined) updates.instructions = body.instructions
@@ -627,8 +627,8 @@ app.post('/brain/learners/:id/update', async (c) => {
 		}
 	}
 	if (body.query) updates.query = body.query
-	if (body.maintenance) updates.maintenance = body.maintenance
 	if (body.governance) updates.governance = body.governance
+	if (body.health) updates.health = body.health
 
 	try {
 		const result = await learner.update(updates)

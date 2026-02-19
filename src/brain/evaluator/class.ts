@@ -199,17 +199,17 @@ export class Evaluator extends TypedEmitter<EvaluatorEventMap> {
 			},
 			includeUnderstanding: this.includeUnderstanding,
 			learners: Array.from(this.brain.learners.values()).map((learner) => {
-				const governance = learner.getGovernance()
+				const health = learner.getHealth()
 				const metrics = learner.getMetrics()
 				return {
 					id: learner.id,
 					name: learner.id,
 					purpose: this.extractPurpose(learner.instructions),
-					understandingSize: learner.getUnderstanding().length,
-					governance: {
-						activation: governance.activation,
-						status: governance.status,
-						lastAccessed: governance.lastAccessed,
+					understandingSize: String(learner.getUnderstanding()).length,
+					health: {
+						activation: health.activation,
+						status: health.status,
+						lastAccessed: health.lastAccessed,
 					},
 					metrics: {
 						queryCount: metrics.query.count,

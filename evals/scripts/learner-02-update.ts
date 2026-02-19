@@ -39,7 +39,7 @@ async function main() {
 		description: 'Original description',
 		instructions: 'Original instructions about tracking TypeScript patterns.',
 		type: 'text' as const,
-		maintenance: {
+		governance: {
 			strategy: 'continuous' as const,
 		},
 		thresholds: {
@@ -60,9 +60,9 @@ async function main() {
 		name: learner.name,
 		description: learner.description,
 		instructions: learner.instructions,
-		thresholds: learner.getSynthesizeThresholds(),
+		thresholds: learner.getUnderstandThresholds(),
 		hasObservePrompt: !!learner.getObserveSystemPrompt(),
-		hasSynthesizePrompt: !!learner.getSynthesizeSystemPrompt(),
+		hasUnderstandPrompt: !!learner.getUnderstandSystemPrompt(),
 	}
 
 	logger.logState('Learner Before Update', beforeState)
@@ -80,7 +80,7 @@ async function main() {
 		name: learner.name,
 		description: learner.description,
 		instructions: learner.instructions,
-		thresholds: learner.getSynthesizeThresholds(),
+		thresholds: learner.getUnderstandThresholds(),
 	}
 
 	logger.logState('Learner After Name/Description Update', afterState1)
@@ -90,7 +90,7 @@ async function main() {
 	logger.logSection('Action 2: Update instructions (triggers prompt regeneration)')
 
 	const oldObservePrompt = learner.getObserveSystemPrompt()
-	const oldSynthesizePrompt = learner.getSynthesizeSystemPrompt()
+	const oldUnderstandPrompt = learner.getUnderstandSystemPrompt()
 
 	await learner.update({
 		instructions:
@@ -103,10 +103,10 @@ async function main() {
 		name: learner.name,
 		description: learner.description,
 		instructions: learner.instructions,
-		thresholds: learner.getSynthesizeThresholds(),
+		thresholds: learner.getUnderstandThresholds(),
 		observePromptChanged: oldObservePrompt !== learner.getObserveSystemPrompt(),
 		synthesizePromptChanged:
-			oldSynthesizePrompt !== learner.getSynthesizeSystemPrompt(),
+			oldUnderstandPrompt !== learner.getUnderstandSystemPrompt(),
 	}
 
 	logger.logState('Learner After Instructions Update', afterState2)
@@ -125,7 +125,7 @@ async function main() {
 	logger.logSection('After State 3')
 
 	const afterState3 = {
-		thresholds: learner.getSynthesizeThresholds(),
+		thresholds: learner.getUnderstandThresholds(),
 	}
 
 	logger.logState('Learner After Threshold Update', afterState3)
@@ -166,9 +166,9 @@ async function main() {
 	assertTrue(afterState2.synthesizePromptChanged, 'Synthesize prompt was regenerated')
 
 	// Threshold update assertions
-	assertEqual(learner.getSynthesizeThresholds().minImportance, 0.7, 'minImportance was updated')
+	assertEqual(learner.getUnderstandThresholds().minImportance, 0.7, 'minImportance was updated')
 	assertEqual(
-		learner.getSynthesizeThresholds().maxObservations,
+		learner.getUnderstandThresholds().maxObservations,
 		20,
 		'maxObservations was updated',
 	)

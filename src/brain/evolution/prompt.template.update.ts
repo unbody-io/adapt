@@ -12,17 +12,14 @@ import { stringifyUnderstanding } from './utils'
  */
 export function updatePromptTemplate(
 	guidance: string,
-	learner: BaseLearner<any>,
+	learner: BaseLearner<unknown>,
 	brainPrompt: string,
 ): string {
-	const governance = learner.getGovernance()
+	const health = learner.getHealth()
 	const metrics = learner.getMetrics()
 	const understanding = stringifyUnderstanding(learner.getUnderstanding())
 
-	// getSynthesizeThresholds exists on both TextLearner and ListLearner
-	const thresholds = 'getSynthesizeThresholds' in learner
-		? (learner as any).getSynthesizeThresholds()
-		: null
+	const thresholds = learner.getUnderstandThresholds()
 
 	return `# Brain Context
 
@@ -40,15 +37,15 @@ ${guidance}
 
 **Current Instructions**:
 ${learner.instructions}
-${thresholds ? `
+
 **Current Thresholds**:
 - Min Importance: ${thresholds.minImportance}
-- Max Observations: ${thresholds.maxObservations}` : ''}
+- Max Observations: ${thresholds.maxObservations}
 
-**Governance**:
-- Activation: ${governance.activation.toFixed(2)}
-- Status: ${governance.status}
-- Last Accessed: ${governance.lastAccessed.toISOString()}
+**Health**:
+- Activation: ${health.activation.toFixed(2)}
+- Status: ${health.status}
+- Last Accessed: ${health.lastAccessed.toISOString()}
 
 **Metrics**:
 - Query Count: ${metrics.query.count}

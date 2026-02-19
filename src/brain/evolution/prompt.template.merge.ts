@@ -12,7 +12,7 @@ import { stringifyUnderstanding } from './utils'
  */
 export function mergePromptTemplate(
 	guidance: string,
-	learners: BaseLearner<any>[],
+	learners: BaseLearner<unknown>[],
 	brainPrompt: string,
 ): string {
 	return `# Brain Context

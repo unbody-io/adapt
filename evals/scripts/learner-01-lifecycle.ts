@@ -33,7 +33,7 @@ async function main() {
 		instructions:
 			'You are responsible for tracking information about TypeScript best practices and design patterns.',
 		type: 'text' as const,
-		maintenance: { strategy: 'continuous' as const },
+		governance: { strategy: 'continuous' as const },
 		thresholds: {
 			minImportance: 0.6,
 			maxObservations: 10,
@@ -78,10 +78,10 @@ async function main() {
 			name: learner.name,
 			description: learner.description,
 			instructions: learner.instructions,
-			thresholds: learner.getSynthesizeThresholds(),
+			thresholds: learner.getUnderstandThresholds(),
 			governance: {
-				activation: learner.getGovernance().activation,
-				status: learner.getGovernance().status,
+				activation: learner.getHealth().activation,
+				status: learner.getHealth().status,
 			},
 		},
 	}
@@ -104,19 +104,19 @@ async function main() {
 		'Learner instructions match config',
 	)
 	assertEqual(
-		learner.getSynthesizeThresholds().minImportance,
+		learner.getUnderstandThresholds().minImportance,
 		learnerConfig.thresholds.minImportance,
 		'minImportance threshold matches',
 	)
 	assertEqual(
-		learner.getSynthesizeThresholds().maxObservations,
+		learner.getUnderstandThresholds().maxObservations,
 		learnerConfig.thresholds.maxObservations,
 		'maxObservations threshold matches',
 	)
 
 	// Governance assertions (defaults for new learners)
-	assertEqual(learner.getGovernance().activation, 0, 'Activation starts at 0 (dormant)')
-	assertEqual(learner.getGovernance().status, 'dormant', 'Status is dormant')
+	assertEqual(learner.getHealth().activation, 0, 'Activation starts at 0 (dormant)')
+	assertEqual(learner.getHealth().status, 'dormant', 'Status is dormant')
 
 	// Event assertions
 	assertEventEmitted(events, 'learner:init:started', (payload) => payload.learnerId === learner.id)

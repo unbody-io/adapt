@@ -100,7 +100,7 @@ async function main() {
 		targetName: target.name,
 		targetInstructions: target.instructions,
 		targetObservePrompt: target.getObserveSystemPrompt(),
-		targetSynthesizePrompt: target.getSynthesizeSystemPrompt(),
+		targetUnderstandPrompt: target.getUnderstandSystemPrompt(),
 		targetUnderstanding: target.getUnderstanding(),
 	}
 
@@ -145,7 +145,7 @@ async function main() {
 		'Direct: observe prompt changed',
 	)
 	assertTrue(
-		target.getSynthesizeSystemPrompt() !== baselineState.targetSynthesizePrompt,
+		target.getUnderstandSystemPrompt() !== baselineState.targetUnderstandPrompt,
 		'Direct: synthesize prompt changed',
 	)
 
@@ -220,7 +220,7 @@ async function main() {
 	const target2 = brain.getLearner(target2Id)!
 	assertDefined(target2, 'Target2 learner exists')
 
-	const preThreshold = target2.getSynthesizeThresholds().minImportance
+	const preThreshold = target2.getUnderstandThresholds().minImportance
 
 	await target2.update({
 		synthesize: {
@@ -232,7 +232,7 @@ async function main() {
 
 	// Hard: threshold stored
 	assertEqual(
-		target2.getSynthesizeThresholds().minImportance,
+		target2.getUnderstandThresholds().minImportance,
 		0.95,
 		'Direct threshold: stored correctly',
 	)
@@ -262,7 +262,7 @@ async function main() {
 		synthesize: { thresholds: { minImportance: preThreshold } },
 	})
 	assertEqual(
-		target2.getSynthesizeThresholds().minImportance,
+		target2.getUnderstandThresholds().minImportance,
 		preThreshold,
 		'Direct threshold: restored',
 	)

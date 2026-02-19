@@ -1,45 +1,19 @@
 import type { LanguageModel } from 'ai'
-import type {
-	CascadableConfig,
-	ResolvedCascadableConfig,
-} from '../../types/config'
+import type { CascadableConfig } from '../../types/config'
+import type { BaseResolvedConfig, UnderstandThresholds } from '../base/types'
 import type { EventsFromMap } from '../../types/events'
 import type {
 	LearnerOrigin,
 	Significance,
 } from '../types'
 import type { SharedLearnerEventMap } from '../base/types'
-import type {
-	ObserveConfig,
-	SynthesizeConfig,
-	SynthesizeThresholds,
-} from './learning-methods/types'
+import type { Store } from '../stores'
 import type { Strategy } from './strategies'
-
-// Re-export TokenUsage for backwards compatibility
-export type { TokenUsage } from '../types'
-
-// Re-export learning method types
-export type {
-	LearnOutput,
-	ObserveConfig,
-	SynthesizeConfig,
-	SynthesizeThresholds,
-} from './learning-methods/types'
-
-// Re-export query types from base
-export type { QueryResult } from '../base/query-method'
-
-// Re-export EventUsage from base
-export type { EventUsage } from '../base/types'
 
 /**
  * TextLearner event map
  *
  * Extends SharedLearnerEventMap with narrowed types for text-specific fields.
- * At runtime, BaseLearner emits using SharedLearnerEventMap (understanding = unknown).
- * This type narrows understanding fields to string for consumers that know
- * they're working with a TextLearner.
  */
 export interface TextLearnerEventMap extends SharedLearnerEventMap {
 	'learner:synthesized': {
@@ -61,47 +35,31 @@ export interface TextLearnerEventMap extends SharedLearnerEventMap {
 	}
 }
 
-/**
- * Union type of all TextLearner events
- */
 export type TextLearnerEvent = EventsFromMap<TextLearnerEventMap>
 
-/**
- * Maintenance configuration for TextLearner
- */
-export interface TextLearnerMaintenance {
+// ── Governance ──────────────────────────────────────────────────────────────
+
+export interface TextGovernanceConfig {
 	/** How understanding evolves over time */
 	strategy: Strategy
-	/** Max tokens before maintenance kicks in (for cumulative/decay) */
+	/** Max tokens before governance kicks in (for cumulative/decay) */
 	maxTokens?: number
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Query Config
-// ─────────────────────────────────────────────────────────────────────────────
+export interface ResolvedGovernanceConfig {
+	strategy: Strategy
+	maxTokens: number
+}
 
-/**
- * Query phase configuration
- */
+// ── Query ───────────────────────────────────────────────────────────────────
+
 export interface QueryConfig {
 	/** Optional model override for query phase */
 	model?: LanguageModel
 }
 
-/**
- * Resolved query config
- */
-export interface ResolvedQueryConfig {
-	model: LanguageModel
-}
+// ── TextLearner Config (input) ──────────────────────────────────────────────
 
-// ─────────────────────────────────────────────────────────────────────────────
-// TextLearner Config (input)
-// ─────────────────────────────────────────────────────────────────────────────
-
-/**
- * Configuration for creating a TextLearner
- */
 export interface TextLearnerConfig extends CascadableConfig {
 	/** Default model for all operations */
 	model: LanguageModel
@@ -117,75 +75,31 @@ export interface TextLearnerConfig extends CascadableConfig {
 	description?: string
 	/** How the learner was created */
 	origin?: LearnerOrigin
-	/** Maintenance settings for understanding compression */
-	maintenance?: TextLearnerMaintenance
-	/** Observe phase configuration */
-	observe?: Partial<ObserveConfig>
-	/** Synthesize phase configuration */
-	synthesize?: Partial<SynthesizeConfig>
+	/** Injected store (defaults to MemoryStore if not provided) */
+	store?: Store
+	/** Governance settings for understanding management */
+	governance?: TextGovernanceConfig
+	/** Observer phase configuration */
+	observer?: { model?: LanguageModel; blueprintModel?: LanguageModel }
+	/** Understand phase configuration */
+	understand?: {
+		model?: LanguageModel
+		blueprintModel?: LanguageModel
+		thresholds?: UnderstandThresholds
+	}
 	/** Query phase configuration */
 	query?: QueryConfig
-	/** Governance configuration (Living Brain) */
-	governance?: Partial<import('../types').LearnerGovernance>
+	/** Health configuration (Living Brain) */
+	health?: Partial<import('../types').LearnerHealth>
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Resolved TextLearner Config
-// ─────────────────────────────────────────────────────────────────────────────
+// ── Resolved Config ─────────────────────────────────────────────────────────
 
-/**
- * Resolved observe config
- */
-export interface ResolvedObserveConfig {
-	method: 'direct'
-	model: LanguageModel
-	blueprintModel: LanguageModel
+export interface ResolvedTextLearnerConfig extends BaseResolvedConfig {
+	governance: ResolvedGovernanceConfig
 }
 
-/**
- * Resolved synthesize config
- */
-export interface ResolvedSynthesizeConfig {
-	method: 'direct'
-	model: LanguageModel
-	blueprintModel: LanguageModel
-	thresholds: Required<SynthesizeThresholds>
-}
-
-/**
- * Resolved maintenance config
- */
-export interface ResolvedMaintenanceConfig {
-	strategy: Strategy
-	maxTokens: number
-}
-
-/**
- * Fully resolved TextLearner config
- */
-export interface ResolvedTextLearnerConfig extends ResolvedCascadableConfig {
-	instructions: string
-	id: string
-	origin: LearnerOrigin
-	maintenance: ResolvedMaintenanceConfig
-	observe: ResolvedObserveConfig
-	synthesize: ResolvedSynthesizeConfig
-	query: ResolvedQueryConfig
-}
-
-/**
- * Result from TextLearner.update()
- */
 export interface TextLearnerUpdateResult {
 	changedFields: string[]
 	config: ResolvedTextLearnerConfig
-}
-
-/**
- * Default thresholds for synthesis triggers
- */
-export const DEFAULT_THRESHOLDS: SynthesizeThresholds = {
-	maxObservations: 10,
-	maxTokens: 8000,
-	minImportance: 0.5,
 }

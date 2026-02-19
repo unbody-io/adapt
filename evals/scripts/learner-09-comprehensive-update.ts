@@ -71,7 +71,7 @@ async function main() {
 		instructions:
 			'You track TypeScript patterns, idioms, design patterns, and best practices used in codebases.',
 		type: 'text' as const,
-		maintenance: {
+		governance: {
 			strategy: 'continuous' as const,
 		},
 		thresholds: {
@@ -90,7 +90,7 @@ async function main() {
 
 	assertTrue(learner.isInitialized(), 'Learner initialized')
 	assertDefined(learner.getObserveSystemPrompt(), 'Observe prompt exists')
-	assertDefined(learner.getSynthesizeSystemPrompt(), 'Synthesize prompt exists')
+	assertDefined(learner.getUnderstandSystemPrompt(), 'Synthesize prompt exists')
 
 	const initObservePrompt = learner.getObserveSystemPrompt()!
 
@@ -183,7 +183,7 @@ async function main() {
 	resetSection()
 
 	const preUpdateObserve = learner.getObserveSystemPrompt()!
-	const preUpdateSynthesize = learner.getSynthesizeSystemPrompt()!
+	const preUpdateUnderstand = learner.getUnderstandSystemPrompt()!
 
 	const instrResult = await learner.update({
 		instructions:
@@ -195,14 +195,14 @@ async function main() {
 	// ── Prompts actually regenerated ──
 
 	const postUpdateObserve = learner.getObserveSystemPrompt()!
-	const postUpdateSynthesize = learner.getSynthesizeSystemPrompt()!
+	const postUpdateUnderstand = learner.getUnderstandSystemPrompt()!
 
 	assertTrue(
 		postUpdateObserve !== preUpdateObserve,
 		'Observe prompt string changed after instructions update',
 	)
 	assertTrue(
-		postUpdateSynthesize !== preUpdateSynthesize,
+		postUpdateUnderstand !== preUpdateUnderstand,
 		'Synthesize prompt string changed after instructions update',
 	)
 
@@ -210,14 +210,14 @@ async function main() {
 
 	const cookingKeywords = ['cook', 'recipe', 'italian', 'cuisine', 'ingredient', 'food', 'dish']
 	const newObserveLower = postUpdateObserve.toLowerCase()
-	const newSynthesizeLower = postUpdateSynthesize.toLowerCase()
+	const newUnderstandLower = postUpdateUnderstand.toLowerCase()
 
 	assertTrue(
 		cookingKeywords.some((kw) => newObserveLower.includes(kw)),
 		'Observe prompt contains cooking keyword',
 	)
 	assertTrue(
-		cookingKeywords.some((kw) => newSynthesizeLower.includes(kw)),
+		cookingKeywords.some((kw) => newUnderstandLower.includes(kw)),
 		'Synthesize prompt contains cooking keyword',
 	)
 	assertFalse(
@@ -225,7 +225,7 @@ async function main() {
 		'Observe prompt no longer mentions TypeScript',
 	)
 	assertFalse(
-		newSynthesizeLower.includes('typescript'),
+		newUnderstandLower.includes('typescript'),
 		'Synthesize prompt no longer mentions TypeScript',
 	)
 
@@ -366,7 +366,7 @@ async function main() {
 	})
 
 	assertEqual(
-		learner.getSynthesizeThresholds().minImportance,
+		learner.getUnderstandThresholds().minImportance,
 		0.99,
 		'minImportance stored as 0.99',
 	)
@@ -403,7 +403,7 @@ async function main() {
 	})
 
 	assertEqual(
-		learner.getSynthesizeThresholds().minImportance,
+		learner.getUnderstandThresholds().minImportance,
 		0.3,
 		'minImportance restored to 0.3',
 	)
@@ -444,7 +444,7 @@ async function main() {
 
 	const preMidPrompts = {
 		observe: learner.getObserveSystemPrompt()!,
-		synthesize: learner.getSynthesizeSystemPrompt()!,
+		synthesize: learner.getUnderstandSystemPrompt()!,
 	}
 
 	await learner.update({
@@ -551,7 +551,7 @@ async function main() {
 
 	resetSection()
 	const preMetaObserve = learner.getObserveSystemPrompt()
-	const preMetaSynthesize = learner.getSynthesizeSystemPrompt()
+	const preMetaUnderstand = learner.getUnderstandSystemPrompt()
 
 	const metaResult = await learner.update({
 		name: 'Renamed Learner',
@@ -566,8 +566,8 @@ async function main() {
 		'Metadata: observe prompt unchanged',
 	)
 	assertEqual(
-		learner.getSynthesizeSystemPrompt(),
-		preMetaSynthesize,
+		learner.getUnderstandSystemPrompt(),
+		preMetaUnderstand,
 		'Metadata: synthesize prompt unchanged',
 	)
 	assertFalse(
@@ -579,7 +579,7 @@ async function main() {
 	// ── 5d: Governance signal thresholds ──
 
 	resetSection()
-	const preGov = learner.getGovernance()
+	const preGov = learner.getHealth()
 
 	await learner.update({
 		governance: {
@@ -593,12 +593,12 @@ async function main() {
 	})
 
 	assertEqual(
-		learner.getGovernance().signalThresholds.maxDismissalRate,
+		learner.getHealth().signalThresholds.maxDismissalRate,
 		0.5,
 		'maxDismissalRate → 0.5',
 	)
 	assertEqual(
-		learner.getGovernance().signalThresholds.minConfidence,
+		learner.getHealth().signalThresholds.minConfidence,
 		0.6,
 		'minConfidence → 0.6',
 	)
@@ -677,11 +677,11 @@ async function main() {
 		name: learner.name,
 		instructions: learner.instructions.substring(0, 60) + '...',
 		understanding: learner.getUnderstanding().substring(0, 200) + '...',
-		thresholds: learner.getSynthesizeThresholds(),
+		thresholds: learner.getUnderstandThresholds(),
 		governance: {
-			activation: learner.getGovernance().activation,
-			status: learner.getGovernance().status,
-			signalThresholds: learner.getGovernance().signalThresholds,
+			activation: learner.getHealth().activation,
+			status: learner.getHealth().status,
+			signalThresholds: learner.getHealth().signalThresholds,
 		},
 		totalEvents: events.length,
 	})

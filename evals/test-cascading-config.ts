@@ -330,15 +330,15 @@ function testNonModelConfigsUsesDefaults() {
 	const config: TextLearnerConfig = {
 		model: MODEL_A,
 		instructions: 'Test learner',
-		// No maintenance, observe, synthesize, or query configs
+		// No governance, observe, synthesize, or query configs
 	}
 
 	const resolved = resolveTextLearnerConfig(config)
 
 	// Verify defaults are applied (not cascaded from parent)
 	test('origin defaults to developer', 'developer', resolved.origin)
-	test('maintenance.strategy defaults to cumulative', 'cumulative', resolved.maintenance.strategy)
-	test('maintenance.maxTokens defaults to 16000', '16000', String(resolved.maintenance.maxTokens))
+	test('governance.strategy defaults to cumulative', 'cumulative', resolved.governance.strategy)
+	test('governance.maxTokens defaults to 16000', '16000', String(resolved.governance.maxTokens))
 	test('observe.method defaults to direct', 'direct', resolved.observe.method)
 	test('synthesize.method defaults to direct', 'direct', resolved.synthesize.method)
 	test('query.method defaults to tool-based', 'tool-based', resolved.query.method)

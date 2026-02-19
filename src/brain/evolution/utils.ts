@@ -9,7 +9,7 @@ import type { GeneratedLearnerConfig } from '../../learners'
  * Create a complete GeneratedLearnerConfig from partial config
  *
  * Handlers only generate name, description, and instructions.
- * This fills in the required fields (id, type, maintenance/listGovernance).
+ * This fills in the required fields (id, type, governance).
  */
 export function createCompleteConfig(partial: {
 	name: string
@@ -32,7 +32,7 @@ export function createCompleteConfig(partial: {
 		description: partial.description,
 		instructions: partial.instructions,
 		type: 'text',
-		maintenance: {
+		governance: {
 			strategy: 'continuous',
 		},
 	}

@@ -5,6 +5,7 @@
  * (TextDefaultMethod, ListDefaultMethod, etc.)
  */
 
+import type { LanguageModel } from 'ai'
 import type { Significance } from '../../types'
 
 /**
@@ -72,6 +73,42 @@ export interface InitOutput {
 	observeSystemPrompt: string
 	synthesizeSystemPrompt: string
 }
+
+/**
+ * Base config shape that all learning method configs must satisfy.
+ * Type-specific fields (e.g. governance) live in each subclass config.
+ */
+export interface BaseLearningMethodConfig {
+	observe: { model: LanguageModel; blueprintModel: LanguageModel }
+	synthesize: {
+		model: LanguageModel
+		blueprintModel: LanguageModel
+		thresholds: Required<SynthesizeThresholds>
+	}
+}
+
+/**
+ * Result from callObserve() — discriminated union of observe outcomes
+ */
+export type ObserveCallResult =
+	| { status: 'observed'; output: string[]; importance: number; usage?: Usage }
+	| { status: 'dismissed'; output: string[]; usage?: Usage }
+	| { status: 'error'; output: null; error: unknown }
+
+/**
+ * Result from callSynthesize() — discriminated union of synthesize outcomes
+ */
+export type SynthesizeCallResult =
+	| {
+			status: 'synthesized'
+			newUnderstanding: unknown
+			significance: Significance
+			evolution: string
+			reasoning?: string
+			usage?: Usage
+	  }
+	| { status: 'dismissed'; output: string; usage?: Usage }
+	| { status: 'error'; error: unknown }
 
 /**
  * LearningMethod interface — pluggable learning strategy

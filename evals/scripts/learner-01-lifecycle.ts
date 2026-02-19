@@ -80,8 +80,8 @@ async function main() {
 			instructions: learner.instructions,
 			thresholds: learner.getSynthesizeThresholds(),
 			governance: {
-				activation: learner.getGovernance().activation,
-				status: learner.getGovernance().status,
+				activation: learner.getHealth().activation,
+				status: learner.getHealth().status,
 			},
 		},
 	}
@@ -115,8 +115,8 @@ async function main() {
 	)
 
 	// Governance assertions (defaults for new learners)
-	assertEqual(learner.getGovernance().activation, 0, 'Activation starts at 0 (dormant)')
-	assertEqual(learner.getGovernance().status, 'dormant', 'Status is dormant')
+	assertEqual(learner.getHealth().activation, 0, 'Activation starts at 0 (dormant)')
+	assertEqual(learner.getHealth().status, 'dormant', 'Status is dormant')
 
 	// Event assertions
 	assertEventEmitted(events, 'learner:init:started', (payload) => payload.learnerId === learner.id)

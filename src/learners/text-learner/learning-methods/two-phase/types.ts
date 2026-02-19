@@ -6,7 +6,8 @@
  */
 
 import type { LanguageModel } from 'ai'
-import type { MaintenanceConfig } from '../../strategies'
+import type { SynthesizeThresholds } from '../../../base/learning-method'
+import type { GovernanceConfig, Strategy } from '../../strategies'
 
 // Re-export shared types from base for backwards compat
 export type {
@@ -31,7 +32,7 @@ export type {
 } from './synthesize/types'
 
 /**
- * Configuration for observe phase
+ * Configuration for observe phase (input — optional models)
  */
 export interface ObserveConfig {
 	method: 'direct'
@@ -40,22 +41,49 @@ export interface ObserveConfig {
 }
 
 /**
- * Configuration for synthesize phase
+ * Resolved observe config (all fields required)
+ */
+export interface ResolvedObserveConfig {
+	method: 'direct'
+	model: LanguageModel
+	blueprintModel: LanguageModel
+}
+
+/**
+ * Configuration for synthesize phase (input — optional models)
  */
 export interface SynthesizeConfig {
 	method: 'direct'
 	model?: LanguageModel
 	blueprintModel?: LanguageModel
-	thresholds: import('../../../base/learning-method').SynthesizeThresholds
+	thresholds: SynthesizeThresholds
 }
 
 /**
- * Configuration for TextDefaultMethod
+ * Resolved synthesize config (all fields required)
+ */
+export interface ResolvedSynthesizeConfig {
+	method: 'direct'
+	model: LanguageModel
+	blueprintModel: LanguageModel
+	thresholds: Required<SynthesizeThresholds>
+}
+
+/**
+ * Resolved governance config (all fields required)
+ */
+export interface ResolvedGovernanceConfig {
+	strategy: Strategy
+	maxTokens: number
+}
+
+/**
+ * Configuration for TextDefaultMethod (resolved — ready to use)
  */
 export interface TextDefaultConfig {
-	observe: ObserveConfig
-	synthesize: SynthesizeConfig
-	maintenance: MaintenanceConfig
+	observe: ResolvedObserveConfig
+	synthesize: ResolvedSynthesizeConfig
+	governance: ResolvedGovernanceConfig
 }
 
 /**
@@ -67,7 +95,7 @@ export interface TextDefaultUpdateConfig {
 	focus?: string
 	observe?: Partial<ObserveConfig>
 	synthesize?: Partial<SynthesizeConfig>
-	maintenance?: Partial<MaintenanceConfig>
+	governance?: Partial<GovernanceConfig>
 }
 
 /**

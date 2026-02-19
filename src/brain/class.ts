@@ -3,7 +3,7 @@ import { nanoid } from 'nanoid'
 import {
 	BaseLearner,
 	type GeneratedLearnerConfig,
-	type LearnerGovernance,
+	type LearnerHealth,
 	ListLearner,
 	TextLearner,
 	type TokenUsage,
@@ -145,7 +145,7 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 	async createLearnerFromConfig(
 		config: GeneratedLearnerConfig & {
 			thresholds?: { minImportance?: number; maxObservations?: number }
-			governance?: Partial<LearnerGovernance>
+			health?: Partial<LearnerHealth>
 		},
 	): Promise<BaseLearner<any>> {
 		const shared = {
@@ -156,7 +156,7 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 			origin: 'prompt' as const,
 			name: config.name,
 			description: config.description,
-			governance: config.governance,
+			health: config.health,
 			synthesize: {
 				thresholds: {
 					maxObservations: BRAIN_DEFAULTS.learning.synthesize.thresholds.maxObservations,
@@ -172,14 +172,14 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 		if (config.type === 'list') {
 			learner = new ListLearner({
 				...shared,
-				listGovernance: config.listGovernance,
+				governance: config.governance,
 			})
 		} else {
 			learner = new TextLearner({
 				...shared,
-				maintenance: config.maintenance ?? {
-					strategy: BRAIN_DEFAULTS.learning.maintenance.strategy,
-					maxTokens: BRAIN_DEFAULTS.learning.maintenance.maxTokens,
+				governance: config.governance ?? {
+					strategy: BRAIN_DEFAULTS.learning.governance.strategy,
+					maxTokens: BRAIN_DEFAULTS.learning.governance.maxTokens,
 				},
 			} as any)
 		}
@@ -847,9 +847,9 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 		if (updates.learning?.query) {
 			learnerUpdate.query = updates.learning.query
 		}
-		if (updates.learning?.maintenance) {
-			const m = updates.learning.maintenance
-			learnerUpdate.maintenance = {
+		if (updates.learning?.governance) {
+			const m = updates.learning.governance
+			learnerUpdate.governance = {
 				...(m.strategy ? { strategy: m.strategy } : {}),
 				...(m.maxTokens !== undefined ? { maxTokens: m.maxTokens } : {}),
 			}

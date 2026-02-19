@@ -64,7 +64,7 @@ async function main() {
 
 	logger.logState('Learner State', {
 		name: learner.name,
-		stagnationWindow: learner.getGovernance().signalThresholds.maxObservationsWithoutSynthesis,
+		stagnationWindow: learner.getHealth().signalThresholds.maxObservationsWithoutSynthesis,
 		minImportance: learner.getSynthesizeThresholds().minImportance,
 	})
 

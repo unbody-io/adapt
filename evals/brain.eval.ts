@@ -315,9 +315,9 @@ async function runEval() {
 	console.log(`Events processed: ${developerActivity.length}`)
 	console.log(`Queries answered: ${queries.length}`)
 
-	console.log('\nLearner Governance:')
+	console.log('\nLearner Health:')
 	for (const learner of learners) {
-		const gov = learner.getGovernance()
+		const gov = learner.getHealth()
 		console.log(`  [${learner.id}] status=${gov.status}, activation=${gov.activation.toFixed(3)}`)
 	}
 

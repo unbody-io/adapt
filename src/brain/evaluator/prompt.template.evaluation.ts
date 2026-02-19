@@ -66,7 +66,7 @@ ${context.learners
 		(l) => `### ${l.id}
 - **Purpose**: ${l.purpose}
 - **Knowledge**: ${classifyKnowledgeSize(l.understandingSize)} (${l.understandingSize} chars)
-- **Status**: ${l.governance.status} (activation: ${l.governance.activation.toFixed(2)})
+- **Status**: ${l.health.status} (activation: ${l.health.activation.toFixed(2)})
 - **Queries**: ${l.metrics.queryCount}, **Dismissal Rate**: ${(l.metrics.dismissalRate * 100).toFixed(0)}%, **Syntheses**: ${l.metrics.synthesisCount}`,
 	)
 	.join('\n\n')}`)

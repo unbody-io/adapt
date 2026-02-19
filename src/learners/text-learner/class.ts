@@ -1,6 +1,5 @@
 import type { ParentModels } from '../../types/config'
 import { BaseLearner } from '../base'
-import type { QueryOptions, QueryResult } from '../base/query-method'
 import { ToolBasedMethod } from '../base/query-method'
 import { resolveTextLearnerConfig } from './config.resolver'
 import { TextDefaultMethod } from './learning-methods'
@@ -23,7 +22,6 @@ import type {
 export class TextLearner extends BaseLearner<string> {
 	private config: ResolvedTextLearnerConfig
 	private understanding = ''
-	private _queryMethod: ToolBasedMethod
 
 	constructor(rawConfig: TextLearnerConfig, parentModels?: ParentModels) {
 		const config = resolveTextLearnerConfig(rawConfig, parentModels)
@@ -34,25 +32,16 @@ export class TextLearner extends BaseLearner<string> {
 			origin: config.origin,
 			focus: rawConfig.focus,
 			description: rawConfig.description,
-			governance: rawConfig.governance,
+			health: rawConfig.health,
 			maxObservationsForStagnation:
 				3 * (config.synthesize.thresholds.maxObservations ?? 10),
 		})
 		this.config = config
 
 		this._learningMethod = new TextDefaultMethod(this.config.model, {
-			observe: {
-				method: this.config.observe.method,
-				model: this.config.observe.model,
-				blueprintModel: this.config.observe.blueprintModel,
-			},
-			synthesize: {
-				method: this.config.synthesize.method,
-				model: this.config.synthesize.model,
-				blueprintModel: this.config.synthesize.blueprintModel,
-				thresholds: this.config.synthesize.thresholds,
-			},
-			maintenance: this.config.maintenance,
+			observe: this.config.observe,
+			synthesize: this.config.synthesize,
+			governance: this.config.governance,
 		})
 
 		this._queryMethod = new ToolBasedMethod(this.config.query.model, {
@@ -85,126 +74,8 @@ export class TextLearner extends BaseLearner<string> {
 		return this.understanding || '(no understanding yet)'
 	}
 
-	// ── Init ───────────────────────────────────────────────────────────────────
-
-	/**
-	 * Initialize the learner
-	 *
-	 * Generates system prompts for both observe and synthesize phases.
-	 * Delegates to update() internally — prompts are generated because
-	 * they are null on first call.
-	 */
-	async init(): Promise<{
-		observeSystemPrompt: string
-		synthesizeSystemPrompt: string
-	}> {
-		if (this.isInitialized()) {
-			return {
-				observeSystemPrompt: this._learningMethod.observePrompt!,
-				synthesizeSystemPrompt: this._learningMethod.synthesizePrompt!,
-			}
-		}
-
-		this.emit('learner:init:started', { learnerId: this.id })
-
-		try {
-			await this.update({ instructions: this.instructions })
-
-			this.emit('learner:init:completed', {
-				learnerId: this.id,
-				systemPrompt: this._learningMethod.observePrompt!,
-				usage: { inputTokens: 0, outputTokens: 0, totalTokens: 0 },
-			})
-
-			return {
-				observeSystemPrompt: this._learningMethod.observePrompt!,
-				synthesizeSystemPrompt: this._learningMethod.synthesizePrompt!,
-			}
-		} catch (err) {
-			const error = err instanceof Error ? err : new Error(String(err))
-			this.emit('learner:init:failed', {
-				learnerId: this.id,
-				error: error.message,
-			})
-			throw error
-		}
-	}
-
-	// ── Query ──────────────────────────────────────────────────────────────────
-
-	async query(question: string, options?: QueryOptions): Promise<QueryResult> {
-		this.governance.lastAccessed = new Date()
-		this.metrics.query.count++
-
-		this.emit('learner:query:started', {
-			learnerId: this.id,
-			query: question,
-		})
-
-		// Short-circuit if learner has no knowledge at all
-		if (!this.understanding && this.getBufferState().count === 0) {
-			const emptyResult: QueryResult = {
-				relevant: false,
-				relevance: 0,
-				confidence: 0,
-				insight: '',
-				gaps: '',
-				usage: { inputTokens: 0, outputTokens: 0, totalTokens: 0 },
-			}
-			this.emit('learner:query:completed', {
-				learnerId: this.id,
-				insight: '',
-				relevant: false,
-				relevance: 0,
-				confidence: 0,
-				gaps: [],
-				usage: emptyResult.usage,
-			})
-			return emptyResult
-		}
-
-		try {
-			const result = await this._queryMethod.query(
-				{
-					learnerId: this.id,
-					instructions: this.instructions,
-					question,
-				},
-				options,
-				{
-					onThinking: (thoughts, usage) => {
-						this.emit('learner:query:thinking', {
-							learnerId: this.id,
-							thoughts,
-							usage,
-						})
-					},
-				},
-			)
-
-			this.trackQueryMetrics(result)
-
-			this.emit('learner:query:completed', {
-				learnerId: this.id,
-				insight: result.insight,
-				relevant: result.relevant,
-				relevance: result.relevance,
-				confidence: result.confidence,
-				gaps: result.gaps ? result.gaps.split('\n').filter(Boolean) : [],
-				usage: result.usage,
-			})
-
-			this.checkAndEmitSignals()
-
-			return result
-		} catch (err) {
-			const error = err instanceof Error ? err : new Error(String(err))
-			this.emit('learner:query:failed', {
-				learnerId: this.id,
-				error: error.message,
-			})
-			throw error
-		}
+	hasKnowledge(): boolean {
+		return !!this.understanding
 	}
 
 	// ── Text-specific accessors ────────────────────────────────────────────────
@@ -217,8 +88,8 @@ export class TextLearner extends BaseLearner<string> {
 		return (this._learningMethod as TextDefaultMethod).synthesizeIdentity
 	}
 
-	getMaintenance() {
-		return { ...this.config.maintenance }
+	getGovernance() {
+		return { ...this.config.governance }
 	}
 
 	getQueryMethodName(): string {
@@ -354,19 +225,19 @@ export class TextLearner extends BaseLearner<string> {
 			}
 		}
 
-		// ── Maintenance ──
+		// ── Governance ──
 
-		if (updates.maintenance?.strategy !== undefined && updates.maintenance.strategy !== this.config.maintenance.strategy) {
-			this.config.maintenance.strategy = updates.maintenance.strategy
-			changedFields.push('maintenance.strategy')
-			methodUpdate.maintenance = methodUpdate.maintenance || {}
-			methodUpdate.maintenance.strategy = updates.maintenance.strategy
+		if (updates.governance?.strategy !== undefined && updates.governance.strategy !== this.config.governance.strategy) {
+			this.config.governance.strategy = updates.governance.strategy
+			changedFields.push('governance.strategy')
+			methodUpdate.governance = methodUpdate.governance || {}
+			methodUpdate.governance.strategy = updates.governance.strategy
 		}
-		if (updates.maintenance?.maxTokens !== undefined && updates.maintenance.maxTokens !== this.config.maintenance.maxTokens) {
-			this.config.maintenance.maxTokens = updates.maintenance.maxTokens
-			changedFields.push('maintenance.maxTokens')
-			methodUpdate.maintenance = methodUpdate.maintenance || {}
-			methodUpdate.maintenance.maxTokens = updates.maintenance.maxTokens
+		if (updates.governance?.maxTokens !== undefined && updates.governance.maxTokens !== this.config.governance.maxTokens) {
+			this.config.governance.maxTokens = updates.governance.maxTokens
+			changedFields.push('governance.maxTokens')
+			methodUpdate.governance = methodUpdate.governance || {}
+			methodUpdate.governance.maxTokens = updates.governance.maxTokens
 		}
 
 		// ── Query config ──
@@ -377,26 +248,26 @@ export class TextLearner extends BaseLearner<string> {
 			this._queryMethod.update({ model: updates.query.model })
 		}
 
-		// ── Governance config ──
+		// ── Health config ──
 
-		if (updates.governance) {
-			if (updates.governance.threshold !== undefined) {
-				this.governance.threshold = updates.governance.threshold
-				changedFields.push('governance.threshold')
+		if (updates.health) {
+			if (updates.health.threshold !== undefined) {
+				this.health.threshold = updates.health.threshold
+				changedFields.push('health.threshold')
 			}
-			if (updates.governance.signalThresholds) {
-				const st = updates.governance.signalThresholds
+			if (updates.health.signalThresholds) {
+				const st = updates.health.signalThresholds
 				if (st.maxDismissalRate !== undefined) {
-					this.governance.signalThresholds.maxDismissalRate = st.maxDismissalRate
-					changedFields.push('governance.signalThresholds.maxDismissalRate')
+					this.health.signalThresholds.maxDismissalRate = st.maxDismissalRate
+					changedFields.push('health.signalThresholds.maxDismissalRate')
 				}
 				if (st.minConfidence !== undefined) {
-					this.governance.signalThresholds.minConfidence = st.minConfidence
-					changedFields.push('governance.signalThresholds.minConfidence')
+					this.health.signalThresholds.minConfidence = st.minConfidence
+					changedFields.push('health.signalThresholds.minConfidence')
 				}
 				if (st.maxObservationsWithoutSynthesis !== undefined) {
-					this.governance.signalThresholds.maxObservationsWithoutSynthesis = st.maxObservationsWithoutSynthesis
-					changedFields.push('governance.signalThresholds.maxObservationsWithoutSynthesis')
+					this.health.signalThresholds.maxObservationsWithoutSynthesis = st.maxObservationsWithoutSynthesis
+					changedFields.push('health.signalThresholds.maxObservationsWithoutSynthesis')
 				}
 			}
 		}

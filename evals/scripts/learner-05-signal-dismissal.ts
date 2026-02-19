@@ -64,7 +64,7 @@ async function main() {
 	logger.logState('Learner State', {
 		name: learner.name,
 		instructions: learner.instructions.substring(0, 100) + '...',
-		dismissalThreshold: learner.getGovernance().signalThresholds.maxDismissalRate,
+		dismissalThreshold: learner.getHealth().signalThresholds.maxDismissalRate,
 	})
 
 	logger.logSection('Action: Ingest irrelevant observations to trigger dismissals')

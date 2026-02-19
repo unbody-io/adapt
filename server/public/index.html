@@ -2129,13 +2129,13 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
           <button id="mergeLearnersBtn" class="secondary" style="width:100%;" disabled>Merge Selected</button>
         </div><!-- /section-evo-actions -->
 
-        <!-- Maintenance Config -->
-        <div class="section-title collapsible-toggle" data-target="section-maintenance">Maintenance <span class="section-chevron">&#9662;</span></div>
-        <div class="section-body" id="section-maintenance">
+        <!-- Governance Config -->
+        <div class="section-title collapsible-toggle" data-target="section-governance">Governance <span class="section-chevron">&#9662;</span></div>
+        <div class="section-body" id="section-governance">
         <div class="form-row">
           <div class="form-group">
             <label>Strategy</label>
-            <select id="maintenanceStrategy">
+            <select id="governanceStrategy">
               <option value="continuous">Continuous</option>
               <option value="cumulative">Cumulative</option>
               <option value="decay">Decay</option>
@@ -2143,11 +2143,11 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
           </div>
           <div class="form-group">
             <label>Max Tokens</label>
-            <input type="number" id="maintenanceMaxTokens" value="100000" min="1000" step="1000">
+            <input type="number" id="governanceMaxTokens" value="100000" min="1000" step="1000">
           </div>
         </div>
 
-        </div><!-- /section-maintenance -->
+        </div><!-- /section-governance -->
 
         <button id="initBtn">Initialize Brain</button>
         <button id="updateBrainBtn" class="secondary" style="display:none; margin-top:6px;">Update Brain</button>
@@ -2508,8 +2508,8 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
           </div>
           <div class="form-row">
             <div class="form-group">
-              <label>Maintenance Strategy</label>
-              <select id="modalMaintenanceStrategy">
+              <label>Governance Strategy</label>
+              <select id="modalGovernanceStrategy">
                 <option value="continuous">Continuous</option>
                 <option value="cumulative">Cumulative</option>
                 <option value="decay">Decay</option>
@@ -2885,7 +2885,7 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
         totalQueries += m.queryConfidences.length
       })
       Object.keys(learnerStates).forEach(id => {
-        const gov = learnerStates[id]?.data?.governance
+        const gov = learnerStates[id]?.data?.health
         if (gov && gov.status === 'active') activeLearners++
       })
       const rate = totalObs > 0 ? ((totalDis / totalObs) * 100).toFixed(0) : '0'
@@ -3104,8 +3104,8 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
     const evolutionEnabled = document.getElementById('evolutionEnabled')
     const autoEvaluate = document.getElementById('autoEvaluate')
     const signalThreshold = document.getElementById('signalThreshold')
-    const maintenanceStrategy = document.getElementById('maintenanceStrategy')
-    const maintenanceMaxTokens = document.getElementById('maintenanceMaxTokens')
+    const governanceStrategy = document.getElementById('governanceStrategy')
+    const governanceMaxTokens = document.getElementById('governanceMaxTokens')
     const saveOverviewBtn = document.getElementById('saveOverviewBtn')
     const saveSettingsBtn = document.getElementById('saveSettingsBtn')
 
@@ -3277,8 +3277,8 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
         evolutionEnabled: evolutionEnabled.checked,
         autoEvaluate: autoEvaluate.checked,
         signalThreshold: signalThreshold.value,
-        maintenanceStrategy: maintenanceStrategy.value,
-        maintenanceMaxTokens: maintenanceMaxTokens.value,
+        governanceStrategy: governanceStrategy.value,
+        governanceMaxTokens: governanceMaxTokens.value,
       }
     }
 
@@ -3338,10 +3338,10 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
         learning.query = { method: current.queryMethod }
         hasChanges = true
       }
-      if (current.maintenanceStrategy !== prev.maintenanceStrategy || current.maintenanceMaxTokens !== prev.maintenanceMaxTokens) {
-        learning.maintenance = {
-          strategy: current.maintenanceStrategy,
-          maxTokens: parseInt(current.maintenanceMaxTokens),
+      if (current.governanceStrategy !== prev.governanceStrategy || current.governanceMaxTokens !== prev.governanceMaxTokens) {
+        learning.governance = {
+          strategy: current.governanceStrategy,
+          maxTokens: parseInt(current.governanceMaxTokens),
         }
         hasChanges = true
       }
@@ -3464,7 +3464,7 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
       const synModel = document.getElementById('modalSynthesizeModel').value
       const maxObs = parseInt(document.getElementById('modalMaxObservations').value)
       const minImp = parseFloat(document.getElementById('modalMinImportance').value)
-      const maintStrat = document.getElementById('modalMaintenanceStrategy').value
+      const maintStrat = document.getElementById('modalGovernanceStrategy').value
       const qMethod = document.getElementById('modalQueryMethod').value
 
       if (obsModel) body.observe = { model: obsModel }
@@ -3475,24 +3475,24 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
         body.synthesize = { ...(body.synthesize || {}), thresholds: { maxObservations: maxObs, minImportance: minImp } }
       }
 
-      const currentMaint = data.maintenance || {}
-      if (maintStrat !== (currentMaint.strategy || 'continuous')) {
-        body.maintenance = { ...(body.maintenance || {}), strategy: maintStrat }
+      const currentGovr = data.governance || {}
+      if (maintStrat !== (currentGovr.strategy || 'continuous')) {
+        body.governance = { ...(body.governance || {}), strategy: maintStrat }
       }
 
       if (qMethod !== (data.queryMethod || 'direct')) {
         body.query = { method: qMethod }
       }
 
-      // Signal thresholds (governance)
+      // Signal thresholds (health)
       const maxDR = parseFloat(document.getElementById('modalMaxDismissalRate').value)
       const minConf = parseFloat(document.getElementById('modalMinConfidence').value)
       const maxObsNoSynth = parseInt(document.getElementById('modalMaxObsWithoutSynth').value)
-      const currentGov = data.governance?.signalThresholds || {}
+      const currentGov = data.health?.signalThresholds || {}
       if (maxDR !== (currentGov.maxDismissalRate ?? 0.8) ||
           minConf !== (currentGov.minConfidence ?? 0.3) ||
           maxObsNoSynth !== (currentGov.maxObservationsWithoutSynthesis ?? 100)) {
-        body.governance = {
+        body.health = {
           signalThresholds: {
             maxDismissalRate: maxDR,
             minConfidence: minConf,
@@ -3510,7 +3510,7 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
         timestamp: new Date().toISOString(),
         target: currentModalLearnerId,
         changedFields: Object.keys(body),
-        previousValues: { synthesizeThresholds: currentThresholds, maintenance: currentMaint, queryMethod: data.queryMethod },
+        previousValues: { synthesizeThresholds: currentThresholds, governance: currentGovr, queryMethod: data.queryMethod },
       })
       renderUpdateHistory()
 
@@ -3742,8 +3742,8 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
         if (prev.evolutionEnabled !== undefined) evolutionEnabled.checked = prev.evolutionEnabled
         if (prev.autoEvaluate !== undefined) autoEvaluate.checked = prev.autoEvaluate
         if (prev.signalThreshold !== undefined) signalThreshold.value = prev.signalThreshold
-        if (prev.maintenanceStrategy !== undefined) maintenanceStrategy.value = prev.maintenanceStrategy
-        if (prev.maintenanceMaxTokens !== undefined) maintenanceMaxTokens.value = prev.maintenanceMaxTokens
+        if (prev.governanceStrategy !== undefined) governanceStrategy.value = prev.governanceStrategy
+        if (prev.governanceMaxTokens !== undefined) governanceMaxTokens.value = prev.governanceMaxTokens
         showToast('observed', 'brain', 'Snapshot restored — click Update Brain to apply')
       } else {
         // Learner snapshot — open modal and fill fields
@@ -4319,7 +4319,7 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
         'learner:init:started', 'learner:init:completed', 'learner:init:failed',
         'learner:observe:started', 'learner:observed', 'learner:observe:dismissed', 'learner:observe:error',
         'learner:synthesize:started', 'learner:synthesized', 'learner:synthesize:dismissed', 'learner:synthesize:error',
-        'learner:understanding:updated', 'learner:governance:updated',
+        'learner:understanding:updated', 'learner:health:updated',
         'learner:ingest:thinking', 'learner:ask:started', 'learner:ask:thinking',
         'learner:ask:completed', 'learner:ask:failed',
         'learner:query:started', 'learner:query:completed', 'learner:query:failed',
@@ -4675,7 +4675,7 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
             maxObservations: parseInt(maxObservations.value),
             minImportance: parseFloat(minImportance.value),
             queryMethod: queryMethod.value,
-            maintenanceMaxTokens: parseInt(maintenanceMaxTokens.value),
+            governanceMaxTokens: parseInt(governanceMaxTokens.value),
             evolution: {
               enabled: evolutionEnabled.checked,
               autoEvaluate: autoEvaluate.checked,
@@ -4977,13 +4977,13 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
             <div class="synth-meta-row">
               <span>min importance: ${minImp}</span>
               <span>avg: ${avgImp.toFixed(2)}</span>
-              <span>strategy: ${data.maintenance?.strategy || '—'}</span>
+              <span>strategy: ${data.governance?.strategy || '—'}</span>
             </div>
           </div>`
 
         // Signal metrics — computed client-side from SSE events
         const metrics = learnerMetrics[id] || { observations: 0, dismissals: 0, syntheses: 0, lastSynthesisObs: 0, queryConfidences: [] }
-        const sigThresholds = data.governance?.signalThresholds || { maxDismissalRate: 0.8, minConfidence: 0.3, maxObservationsWithoutSynthesis: 100 }
+        const sigThresholds = data.health?.signalThresholds || { maxDismissalRate: 0.8, minConfidence: 0.3, maxObservationsWithoutSynthesis: 100 }
         const dismissalRate = metrics.observations > 0 ? metrics.dismissals / metrics.observations : 0
         const obsSinceSynth = metrics.observations - metrics.lastSynthesisObs
         const avgConf = metrics.queryConfidences.length > 0
@@ -5107,7 +5107,7 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
                   <span class="understanding-dot ${understanding !== 'No understanding yet' ? 'has' : ''}"></span>
                   Understanding ${understanding !== 'No understanding yet' ? formatSize(understanding.length) : '—'}
                 </span>
-                <span class="understanding-strategy">${data.maintenance?.strategy || '—'}</span>
+                <span class="understanding-strategy">${data.governance?.strategy || '—'}</span>
               </div>
               <canvas class="understanding-growth-canvas" data-learner="${id}" style="width:100%;"></canvas>
             </div>
@@ -5139,7 +5139,7 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
         const id = canvas.dataset.learner
         const metrics = learnerMetrics[id] || { observations: 0, dismissals: 0 }
         const data = learnerStates[id]?.data || {}
-        const maxDR = data.governance?.signalThresholds?.maxDismissalRate || 0.8
+        const maxDR = data.health?.signalThresholds?.maxDismissalRate || 0.8
         const dr = metrics.observations > 0 ? metrics.dismissals / metrics.observations : 0
         drawArcGauge(canvas, dr, maxDR, 0.5, 0.8)
       })
@@ -5187,7 +5187,7 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
       document.getElementById('modalDescription').value = data.description || ''
       document.getElementById('modalInstructions').value = data.instructions || ''
 
-      document.getElementById('modalStatus').textContent = JSON.stringify(data.governance || {}, null, 2)
+      document.getElementById('modalStatus').textContent = JSON.stringify(data.health || {}, null, 2)
 
       // Format buffer observations nicely
       const bufferObs = data.bufferObservations || []
@@ -5210,10 +5210,10 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
       const thresholds = data.synthesizeThresholds || {}
       document.getElementById('modalMaxObservations').value = thresholds.maxObservations || 10
       document.getElementById('modalMinImportance').value = thresholds.minImportance || 0.3
-      document.getElementById('modalMaintenanceStrategy').value = data.maintenance?.strategy || 'continuous'
+      document.getElementById('modalGovernanceStrategy').value = data.governance?.strategy || 'continuous'
       document.getElementById('modalQueryMethod').value = data.queryMethod || 'direct'
       // Signal thresholds
-      const sigThresh = data.governance?.signalThresholds || {}
+      const sigThresh = data.health?.signalThresholds || {}
       document.getElementById('modalMaxDismissalRate').value = sigThresh.maxDismissalRate ?? 0.8
       document.getElementById('modalMinConfidence').value = sigThresh.minConfidence ?? 0.3
       document.getElementById('modalMaxObsWithoutSynth').value = sigThresh.maxObservationsWithoutSynthesis ?? 100
@@ -5224,10 +5224,10 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
         name: data.name,
         description: data.description,
         instructions: data.instructions,
-        maintenance: data.maintenance,
+        governance: data.governance,
         synthesizeThresholds: data.synthesizeThresholds,
         queryMethod: data.queryMethod,
-        governance: data.governance,
+        health: data.health,
         buffer: data.buffer
       }, null, 2)
 

@@ -14,7 +14,7 @@ export const BRAIN_DEFAULTS = {
 				minImportance: 0.5,
 			},
 		},
-		maintenance: {
+		governance: {
 			strategy: 'cumulative' as const,
 			maxTokens: 16000,
 		},

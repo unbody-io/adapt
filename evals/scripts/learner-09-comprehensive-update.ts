@@ -579,7 +579,7 @@ async function main() {
 	// ── 5d: Governance signal thresholds ──
 
 	resetSection()
-	const preGov = learner.getGovernance()
+	const preGov = learner.getHealth()
 
 	await learner.update({
 		governance: {
@@ -593,12 +593,12 @@ async function main() {
 	})
 
 	assertEqual(
-		learner.getGovernance().signalThresholds.maxDismissalRate,
+		learner.getHealth().signalThresholds.maxDismissalRate,
 		0.5,
 		'maxDismissalRate → 0.5',
 	)
 	assertEqual(
-		learner.getGovernance().signalThresholds.minConfidence,
+		learner.getHealth().signalThresholds.minConfidence,
 		0.6,
 		'minConfidence → 0.6',
 	)
@@ -679,9 +679,9 @@ async function main() {
 		understanding: learner.getUnderstanding().substring(0, 200) + '...',
 		thresholds: learner.getSynthesizeThresholds(),
 		governance: {
-			activation: learner.getGovernance().activation,
-			status: learner.getGovernance().status,
-			signalThresholds: learner.getGovernance().signalThresholds,
+			activation: learner.getHealth().activation,
+			status: learner.getHealth().status,
+			signalThresholds: learner.getHealth().signalThresholds,
 		},
 		totalEvents: events.length,
 	})

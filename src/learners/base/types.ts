@@ -101,8 +101,8 @@ export interface SharedLearnerEventMap {
 		usage: TokenUsage
 	}
 
-	// Governance
-	'learner:governance:updated': {
+	// Health
+	'learner:health:updated': {
 		learnerId: string
 		activation: number
 		status: LearnerStatus

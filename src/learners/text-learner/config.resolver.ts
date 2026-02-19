@@ -69,13 +69,13 @@ export function resolveTextLearnerConfig(
 		query: {
 			model: cascade(config.query?.model, model),
 		},
-		maintenance: {
+		governance: {
 			strategy:
-				config.maintenance?.strategy ??
-				TEXT_LEARNER_DEFAULTS.maintenance.strategy,
+				config.governance?.strategy ??
+				TEXT_LEARNER_DEFAULTS.governance.strategy,
 			maxTokens:
-				config.maintenance?.maxTokens ??
-				TEXT_LEARNER_DEFAULTS.maintenance.maxTokens,
+				config.governance?.maxTokens ??
+				TEXT_LEARNER_DEFAULTS.governance.maxTokens,
 		},
 	}
 }

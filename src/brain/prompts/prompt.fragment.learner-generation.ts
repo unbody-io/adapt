@@ -109,14 +109,14 @@ For each learner, provide:
 
   TEXT learners (type: "text") — build narrative prose understanding.
   Best for: qualitative patterns, preferences, philosophies, interconnected concepts, nuanced reasoning.
-  - maintenance: { strategy: "continuous" | "cumulative" | "decay" }
+  - governance: { strategy: "continuous" | "cumulative" | "decay" }
     - continuous: Single growing understanding (default, good for most cases)
     - cumulative: Summarize when understanding gets large (good for high-volume data)
     - decay: Weight recent observations higher (good for tracking evolving preferences)
 
   LIST learners (type: "list") — track structured collections of discrete items.
   Best for: entities, catalogs, inventories, tools/technologies used, specific preferences as countable items.
-  - listGovernance: { deduplication?: "strict" | "none", maxItems?: number, pruning?: "oldest" | "least-confident" | "none" }
+  - governance: { deduplication?: "strict" | "none", maxItems?: number, pruning?: "oldest" | "least-confident" | "none" }
     - Defaults are sensible (strict dedup, 200 maxItems, oldest pruning) — omit unless specific needs.
 
   How to choose:

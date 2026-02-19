@@ -20,7 +20,7 @@ export interface EvolutionEntry {
 	timestamp: string // ISO 8601
 }
 
-export interface LearnerGovernance {
+export interface LearnerHealth {
 	activation: number // 0.0 - 1.0
 	threshold: number // gates participation
 	status: LearnerStatus
@@ -56,7 +56,7 @@ export interface LearnerMetadata {
 	id: string
 	instructions: string
 	origin: LearnerOrigin
-	governance: LearnerGovernance
+	health: LearnerHealth
 }
 
 /**
@@ -80,7 +80,7 @@ export interface Learner<TUnderstanding = unknown> {
 
 	// Current state
 	getUnderstanding(): TUnderstanding
-	getGovernance(): LearnerGovernance
+	getHealth(): LearnerHealth
 	getMetrics(): LearnerMetrics
 
 	// Core operations
@@ -140,7 +140,7 @@ export interface BaseLearnerEventMap {
 	'learner:query:failed': { learnerId: string; error: string }
 
 	// State changes
-	'learner:governance:updated': {
+	'learner:health:updated': {
 		learnerId: string
 		activation: number
 		status: LearnerStatus

@@ -100,7 +100,7 @@ function getBrainConfigSnapshot(b: Brain) {
 	const learnerConfig = firstLearner ? {
 		thresholds: firstLearner.getSynthesizeThresholds(),
 		queryMethod: firstLearner.getQueryMethodName(),
-		maintenanceStrategy: firstLearner.getMaintenance().strategy,
+		governanceStrategy: firstLearner.getGovernance().strategy,
 	} : null
 	return {
 		prompt: b.prompt.slice(0, 120) + (b.prompt.length > 120 ? '...' : ''),
@@ -194,7 +194,7 @@ interface InitRequest {
 	maxObservations?: number
 	minImportance?: number
 	queryMethod?: 'direct' | 'tool-based'
-	maintenanceMaxTokens?: number
+	governanceMaxTokens?: number
 	evolution?: {
 		enabled?: boolean
 		autoEvaluate?: boolean
@@ -345,9 +345,9 @@ app.post('/brain/init', async (c) => {
 					minImportance: body.minImportance,
 				},
 			},
-			maintenance: {
+			governance: {
 				strategy: body.strategy,
-				...(body.maintenanceMaxTokens ? { maxTokens: body.maintenanceMaxTokens } : {}),
+				...(body.governanceMaxTokens ? { maxTokens: body.governanceMaxTokens } : {}),
 			},
 			query: {
 				method: body.queryMethod,
@@ -481,8 +481,8 @@ app.get('/brain/status', (c) => {
 		evolution: l.getEvolution(),
 		buffer: l.getBufferState(),
 		bufferObservations: l.getBufferedObservations(),
+		health: l.getHealth(),
 		governance: l.getGovernance(),
-		maintenance: l.getMaintenance(),
 		synthesizeThresholds: l.getSynthesizeThresholds(),
 		observePrompt: l.getObserveSystemPrompt(),
 		synthesizePrompt: l.getSynthesizeSystemPrompt(),
@@ -524,7 +524,7 @@ app.post('/brain/update', async (c) => {
 				thresholds?: { maxObservations?: number; maxTokens?: number; minImportance?: number }
 			}
 			query?: { model?: string; method?: 'tool-based' | 'direct' }
-			maintenance?: { strategy?: 'continuous' | 'cumulative' | 'decay'; maxTokens?: number }
+			governance?: { strategy?: 'continuous' | 'cumulative' | 'decay'; maxTokens?: number }
 		}
 		evolution?: {
 			enabled?: boolean
@@ -569,7 +569,7 @@ app.post('/brain/update', async (c) => {
 					...(body.learning.query.method ? { method: body.learning.query.method } : {}),
 				},
 			} : {}),
-			...(body.learning.maintenance ? { maintenance: body.learning.maintenance } : {}),
+			...(body.learning.governance ? { governance: body.learning.governance } : {}),
 		}
 	}
 	if (body.evolution) updates.evolution = body.evolution
@@ -608,8 +608,8 @@ app.post('/brain/learners/:id/update', async (c) => {
 		observe?: { model?: string }
 		synthesize?: { model?: string; thresholds?: { maxObservations?: number; minImportance?: number } }
 		query?: { method?: 'tool-based' | 'direct' }
-		maintenance?: { strategy?: 'continuous' | 'cumulative' | 'decay'; maxTokens?: number }
-		governance?: { signalThresholds?: { maxDismissalRate?: number; minConfidence?: number; maxObservationsWithoutSynthesis?: number } }
+		governance?: { strategy?: 'continuous' | 'cumulative' | 'decay'; maxTokens?: number }
+		health?: { signalThresholds?: { maxDismissalRate?: number; minConfidence?: number; maxObservationsWithoutSynthesis?: number } }
 	}>()
 
 	const openrouter = createOpenRouter({ apiKey: process.env.OPENROUTER_API_KEY })
@@ -627,8 +627,8 @@ app.post('/brain/learners/:id/update', async (c) => {
 		}
 	}
 	if (body.query) updates.query = body.query
-	if (body.maintenance) updates.maintenance = body.maintenance
 	if (body.governance) updates.governance = body.governance
+	if (body.health) updates.health = body.health
 
 	try {
 		const result = await learner.update(updates)

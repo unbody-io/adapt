@@ -29,15 +29,15 @@ import type { SynthesizeIdentity } from './synthesize'
 
 export interface ListDefaultConfig {
 	observe: {
-		model?: LanguageModel
-		blueprintModel?: LanguageModel
+		model: LanguageModel
+		blueprintModel: LanguageModel
 	}
 	synthesize: {
-		model?: LanguageModel
-		blueprintModel?: LanguageModel
-		thresholds: SynthesizeThresholds
+		model: LanguageModel
+		blueprintModel: LanguageModel
+		thresholds: Required<SynthesizeThresholds>
 	}
-	listGovernance: ResolvedListGovernanceConfig
+	governance: ResolvedListGovernanceConfig
 }
 
 export class ListDefaultMethod implements LearningMethod {
@@ -145,12 +145,12 @@ export class ListDefaultMethod implements LearningMethod {
 			}
 		}
 
-		if (config.listGovernance) {
+		if (config.governance) {
 			Object.assign(
-				this.config.listGovernance,
-				config.listGovernance,
+				this.config.governance,
+				config.governance,
 			)
-			changedFields.push('listGovernance')
+			changedFields.push('governance')
 		}
 
 		// Force regen if prompts don't exist yet (first init)
@@ -248,7 +248,7 @@ export class ListDefaultMethod implements LearningMethod {
 				status: 'synthesized',
 				newUnderstanding: applyListGovernance(
 					synthesizeResult.newItems,
-					this.config.listGovernance,
+					this.config.governance,
 				),
 				significance: synthesizeResult.significance,
 				evolution: synthesizeResult.evolution,
@@ -337,7 +337,7 @@ export class ListDefaultMethod implements LearningMethod {
 			status: 'synthesized',
 			newUnderstanding: applyListGovernance(
 				synthesizeResult.newItems,
-				this.config.listGovernance,
+				this.config.governance,
 			),
 			significance: synthesizeResult.significance,
 			evolution: synthesizeResult.evolution,

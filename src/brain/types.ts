@@ -39,9 +39,9 @@ export interface QueryPhaseConfig {
 }
 
 /**
- * Maintenance configuration
+ * Governance configuration (text learner understanding management)
  */
-export interface MaintenanceConfig {
+export interface GovernanceConfig {
 	strategy?: Strategy
 	maxTokens?: number
 }
@@ -62,7 +62,7 @@ export interface LearningConfig extends CascadableConfig {
 	observe?: ObservePhaseConfig
 	synthesize?: SynthesizePhaseConfig
 	query?: QueryPhaseConfig
-	maintenance?: MaintenanceConfig
+	governance?: GovernanceConfig
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -160,9 +160,9 @@ export interface ResolvedQueryPhaseConfig {
 }
 
 /**
- * Resolved maintenance config
+ * Resolved governance config
  */
-export interface ResolvedMaintenanceConfig {
+export interface ResolvedGovernanceConfig {
 	strategy: Strategy
 	maxTokens: number
 }
@@ -174,7 +174,7 @@ export interface ResolvedLearningConfig extends ResolvedCascadableConfig {
 	observe: ResolvedObservePhaseConfig
 	synthesize: ResolvedSynthesizePhaseConfig
 	query: ResolvedQueryPhaseConfig
-	maintenance: ResolvedMaintenanceConfig
+	governance: ResolvedGovernanceConfig
 }
 
 /**

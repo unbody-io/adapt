@@ -179,12 +179,12 @@ function snapshotLearner(learner: ReturnType<Brain['getLearners']>[0]) {
 		understandingPreview: truncate(learner.getUnderstanding(), 300),
 		bufferState: learner.getBufferState(),
 		thresholds: learner.getSynthesizeThresholds(),
-		maintenance: learner.getMaintenance(),
+		governance: learner.getGovernance(),
 		queryMethod: learner.getQueryMethodName(),
 		governance: {
-			activation: learner.getGovernance().activation,
-			status: learner.getGovernance().status,
-			signalThresholds: learner.getGovernance().signalThresholds,
+			activation: learner.getHealth().activation,
+			status: learner.getHealth().status,
+			signalThresholds: learner.getHealth().signalThresholds,
 		},
 		observePromptPreview: truncate(learner.getObserveSystemPrompt() ?? '(null)', 300),
 		synthesizePromptPreview: truncate(learner.getSynthesizeSystemPrompt() ?? '(null)', 300),
@@ -361,7 +361,7 @@ async function main() {
 			report.kv('Understanding Length', snap.understandingLength)
 			report.kv('Buffer', `${snap.bufferState.count} items, avg importance ${snap.bufferState.avgImportance.toFixed(2)}`)
 			report.kv('Thresholds', JSON.stringify(snap.thresholds))
-			report.kv('Governance', `activation=${snap.governance.activation.toFixed(2)}, status=${snap.governance.status}`)
+			report.kv('Governance', `activation=${snap.health.activation.toFixed(2)}, status=${snap.health.status}`)
 			report.p(`**Understanding Preview:**`)
 			report.code(snap.understandingPreview)
 			report.p(`**Observe Prompt Preview:**`)
@@ -536,7 +536,7 @@ async function main() {
 		// Governance state per learner
 		report.h3('Learner Governance States')
 		for (const learner of brain.getLearners()) {
-			const gov = learner.getGovernance()
+			const gov = learner.getHealth()
 			const stats = observeStats[learner.id] ?? { observed: 0, dismissed: 0, errors: 0, synthesized: 0 }
 			// Total observations = observed + dismissed + errors + synthesized
 			// (synthesized means an observation was made AND triggered synthesis)
@@ -572,7 +572,7 @@ async function main() {
 			// Explain why based on computed stats
 			report.h4('Why No Signals?')
 			for (const learner of brain.getLearners()) {
-				const gov = learner.getGovernance()
+				const gov = learner.getHealth()
 				const stats = observeStats[learner.id] ?? { observed: 0, dismissed: 0, errors: 0, synthesized: 0 }
 				const totalObs = stats.observed + stats.dismissed + stats.errors + stats.synthesized
 				const dismissalRate = totalObs > 0 ? stats.dismissed / totalObs : 0

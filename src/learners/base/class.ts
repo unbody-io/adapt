@@ -1,13 +1,13 @@
 /**
  * BaseLearner — abstract base class for all learner types
  *
- * Owns: identity, governance, metrics, evolution, events, signal detection,
+ * Owns: identity, health, metrics, evolution, events, signal detection,
  * learn() orchestration (delegates to LearningMethod + handleLearnResult bookkeeping).
  *
  * Subclasses must:
- * - Set `_learningMethod` in their constructor
- * - Implement `getUnderstanding()`, `setUnderstanding()`, `getSummary()`
- * - Implement `init()` and `query()` (lifecycle methods that depend on subclass config)
+ * - Set `_learningMethod` and `_queryMethod` in their constructor
+ * - Implement `getUnderstanding()`, `setUnderstanding()`, `getSummary()`, `hasKnowledge()`
+ * - Implement `init()` and `update()` (lifecycle methods that depend on subclass config)
  */
 
 import { TypedEmitter } from '../../types/events'
@@ -15,7 +15,7 @@ import type { LearnerActivity } from '../../brain/evaluator/types'
 import type {
 	EvolutionEntry,
 	Learner,
-	LearnerGovernance,
+	LearnerHealth,
 	LearnerMetadata,
 	LearnerMetrics,
 	LearnerOrigin,
@@ -26,7 +26,7 @@ import type {
 	LearnOutput,
 	LearningMethod,
 } from './learning-method'
-import type { QueryOptions, QueryResult } from './query-method'
+import type { QueryCallbacks, QueryMethod, QueryOptions, QueryResult } from './query-method'
 import type { SharedLearnerEventMap } from './types'
 
 /**
@@ -39,7 +39,7 @@ export interface BaseLearnerInit {
 	origin: LearnerOrigin
 	focus?: string
 	description?: string
-	governance?: Partial<LearnerGovernance>
+	health?: Partial<LearnerHealth>
 	maxObservationsForStagnation?: number
 }
 
@@ -55,8 +55,9 @@ export abstract class BaseLearner<TUnderstanding>
 
 	protected _origin: LearnerOrigin
 	protected _learningMethod!: LearningMethod
+	protected _queryMethod!: QueryMethod
 	protected evolution: EvolutionEntry[] = []
-	protected governance: LearnerGovernance
+	protected health: LearnerHealth
 	protected metrics: LearnerMetrics = {
 		ingestion: {
 			observationCount: 0,
@@ -86,7 +87,7 @@ export abstract class BaseLearner<TUnderstanding>
 		this.focus = init.focus
 		this.description = init.description
 
-		this.governance = {
+		this.health = {
 			activation: 0,
 			threshold: 0.3,
 			status: 'dormant',
@@ -96,7 +97,7 @@ export abstract class BaseLearner<TUnderstanding>
 				minRelevance: 0.3,
 				minConfidence: 0.3,
 				maxObservationsWithoutSynthesis: init.maxObservationsForStagnation ?? 30,
-				...init.governance?.signalThresholds,
+				...init.health?.signalThresholds,
 			},
 		}
 	}
@@ -106,11 +107,48 @@ export abstract class BaseLearner<TUnderstanding>
 	abstract getUnderstanding(): TUnderstanding
 	abstract setUnderstanding(value: TUnderstanding): void
 	abstract getSummary(): string
+	abstract hasKnowledge(): boolean
 
-	// init(), query(), update() stay abstract — they depend on subclass config
-	abstract init(): Promise<unknown>
-	abstract query(question: string, options?: QueryOptions): Promise<QueryResult>
+	// update() stays abstract — depends on subclass config
 	abstract update(updates: Record<string, unknown>): Promise<{ changedFields: string[] }>
+
+	// ── Init (concrete — shared by all learner types) ─────────────────────
+
+	async init(): Promise<{
+		observeSystemPrompt: string
+		synthesizeSystemPrompt: string
+	}> {
+		if (this.isInitialized()) {
+			return {
+				observeSystemPrompt: this._learningMethod.observePrompt!,
+				synthesizeSystemPrompt: this._learningMethod.synthesizePrompt!,
+			}
+		}
+
+		this.emit('learner:init:started', { learnerId: this.id })
+
+		try {
+			await this.update({ instructions: this.instructions })
+
+			this.emit('learner:init:completed', {
+				learnerId: this.id,
+				systemPrompt: this._learningMethod.observePrompt!,
+				usage: { inputTokens: 0, outputTokens: 0, totalTokens: 0 },
+			})
+
+			return {
+				observeSystemPrompt: this._learningMethod.observePrompt!,
+				synthesizeSystemPrompt: this._learningMethod.synthesizePrompt!,
+			}
+		} catch (err) {
+			const error = err instanceof Error ? err : new Error(String(err))
+			this.emit('learner:init:failed', {
+				learnerId: this.id,
+				error: error.message,
+			})
+			throw error
+		}
+	}
 
 	// ── Identity ────────────────────────────────────────────────────────────
 
@@ -181,6 +219,90 @@ export abstract class BaseLearner<TUnderstanding>
 		}
 	}
 
+	// ── Query (concrete — delegates to _queryMethod) ────────────────────────
+
+	/**
+	 * Query the learner's understanding
+	 *
+	 * Short-circuits with an empty result if the learner has no knowledge
+	 * and no buffered observations. Otherwise delegates to the pluggable
+	 * QueryMethod and does shared bookkeeping (metrics, events, signals).
+	 */
+	async query(question: string, options?: QueryOptions): Promise<QueryResult> {
+		this.health.lastAccessed = new Date()
+		this.metrics.query.count++
+
+		this.emit('learner:query:started', {
+			learnerId: this.id,
+			query: question,
+		})
+
+		// Short-circuit if learner has no knowledge at all
+		if (!this.hasKnowledge() && this.getBufferState().count === 0) {
+			const emptyResult: QueryResult = {
+				relevant: false,
+				relevance: 0,
+				confidence: 0,
+				insight: '',
+				gaps: '',
+				usage: { inputTokens: 0, outputTokens: 0, totalTokens: 0 },
+			}
+			this.emit('learner:query:completed', {
+				learnerId: this.id,
+				insight: '',
+				relevant: false,
+				relevance: 0,
+				confidence: 0,
+				gaps: [],
+				usage: emptyResult.usage,
+			})
+			return emptyResult
+		}
+
+		try {
+			const result = await this._queryMethod.query(
+				{
+					learnerId: this.id,
+					instructions: this.instructions,
+					question,
+				},
+				options,
+				{
+					onThinking: (thoughts, usage) => {
+						this.emit('learner:query:thinking', {
+							learnerId: this.id,
+							thoughts,
+							usage,
+						})
+					},
+				} satisfies QueryCallbacks,
+			)
+
+			this.trackQueryMetrics(result)
+
+			this.emit('learner:query:completed', {
+				learnerId: this.id,
+				insight: result.insight,
+				relevant: result.relevant,
+				relevance: result.relevance,
+				confidence: result.confidence,
+				gaps: result.gaps ? result.gaps.split('\n').filter(Boolean) : [],
+				usage: result.usage,
+			})
+
+			this.checkAndEmitSignals()
+
+			return result
+		} catch (err) {
+			const error = err instanceof Error ? err : new Error(String(err))
+			this.emit('learner:query:failed', {
+				learnerId: this.id,
+				error: error.message,
+			})
+			throw error
+		}
+	}
+
 	// ── Delegates to _learningMethod ────────────────────────────────────────
 
 	isInitialized(): boolean {
@@ -216,8 +338,8 @@ export abstract class BaseLearner<TUnderstanding>
 		return [...this.evolution]
 	}
 
-	getGovernance(): LearnerGovernance {
-		return { ...this.governance }
+	getHealth(): LearnerHealth {
+		return { ...this.health }
 	}
 
 	getMetrics(): LearnerMetrics {
@@ -237,7 +359,7 @@ export abstract class BaseLearner<TUnderstanding>
 			id: this.id,
 			instructions: this.instructions,
 			origin: this.origin,
-			governance: this.getGovernance(),
+			health: this.getHealth(),
 		}
 	}
 
@@ -378,29 +500,29 @@ export abstract class BaseLearner<TUnderstanding>
 	}
 
 	protected updateGovernance(relevance: number): void {
-		const previousStatus = this.governance.status
+		const previousStatus = this.health.status
 
 		// EMA: weight recent relevance at 20%
-		this.governance.activation =
-			this.governance.activation * 0.8 + relevance * 0.2
+		this.health.activation =
+			this.health.activation * 0.8 + relevance * 0.2
 
-		if (this.governance.activation >= this.governance.threshold) {
-			this.governance.status = 'active'
+		if (this.health.activation >= this.health.threshold) {
+			this.health.status = 'active'
 		}
 
-		this.governance.lastAccessed = new Date()
+		this.health.lastAccessed = new Date()
 
-		this.emit('learner:governance:updated', {
+		this.emit('learner:health:updated', {
 			learnerId: this.id,
-			activation: this.governance.activation,
-			status: this.governance.status,
+			activation: this.health.activation,
+			status: this.health.status,
 			previousStatus:
-				previousStatus !== this.governance.status ? previousStatus : undefined,
+				previousStatus !== this.health.status ? previousStatus : undefined,
 		})
 	}
 
 	protected checkAndEmitSignals(): void {
-		const { signalThresholds } = this.governance
+		const { signalThresholds } = this.health
 		const { ingestion, query } = this.metrics
 
 		// Check dismissal rate — fire once, reset when rate drops below threshold

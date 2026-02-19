@@ -11,7 +11,7 @@ import type {
 } from '../../types/config'
 import type { EventsFromMap } from '../../types/events'
 import type {
-	LearnerGovernance,
+	LearnerHealth,
 	LearnerOrigin,
 	Significance,
 } from '../types'
@@ -116,7 +116,7 @@ export interface ListLearnerConfig extends CascadableConfig {
 	/** How the learner was created */
 	origin?: LearnerOrigin
 	/** List-specific governance (dedup, maxItems, pruning) */
-	listGovernance?: ListGovernanceConfig
+	governance?: ListGovernanceConfig
 	/** Observe phase configuration */
 	observe?: { model?: LanguageModel; blueprintModel?: LanguageModel }
 	/** Synthesize phase configuration */
@@ -127,8 +127,8 @@ export interface ListLearnerConfig extends CascadableConfig {
 	}
 	/** Query phase configuration */
 	query?: { model?: LanguageModel }
-	/** Governance configuration (Living Brain) */
-	governance?: Partial<LearnerGovernance>
+	/** Health configuration (Living Brain) */
+	health?: Partial<LearnerHealth>
 }
 
 // ── Resolved config ────────────────────────────────────────────────────────
@@ -144,7 +144,7 @@ export interface ResolvedListLearnerConfig extends ResolvedCascadableConfig {
 		thresholds: Required<SynthesizeThresholds>
 	}
 	query: { model: LanguageModel }
-	listGovernance: ResolvedListGovernanceConfig
+	governance: ResolvedListGovernanceConfig
 }
 
 export interface ListLearnerUpdateResult {

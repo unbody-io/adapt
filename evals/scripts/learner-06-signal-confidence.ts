@@ -70,7 +70,7 @@ async function main() {
 	logger.logState('Learner State', {
 		name: learner.name,
 		understanding: learner.getUnderstanding()?.substring(0, 100) + '...',
-		confidenceThreshold: learner.getGovernance().signalThresholds.minConfidence,
+		confidenceThreshold: learner.getHealth().signalThresholds.minConfidence,
 	})
 
 	logger.logSection('Action: Ask complex questions to trigger low confidence')

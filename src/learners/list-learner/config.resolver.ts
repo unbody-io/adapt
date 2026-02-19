@@ -52,16 +52,16 @@ export function resolveListLearnerConfig(
 		query: {
 			model: cascade(config.query?.model, model),
 		},
-		listGovernance: {
+		governance: {
 			deduplication:
-				config.listGovernance?.deduplication ??
-				LIST_LEARNER_DEFAULTS.listGovernance.deduplication,
+				config.governance?.deduplication ??
+				LIST_LEARNER_DEFAULTS.governance.deduplication,
 			maxItems:
-				config.listGovernance?.maxItems ??
-				LIST_LEARNER_DEFAULTS.listGovernance.maxItems,
+				config.governance?.maxItems ??
+				LIST_LEARNER_DEFAULTS.governance.maxItems,
 			pruning:
-				config.listGovernance?.pruning ??
-				LIST_LEARNER_DEFAULTS.listGovernance.pruning,
+				config.governance?.pruning ??
+				LIST_LEARNER_DEFAULTS.governance.pruning,
 		},
 	}
 }

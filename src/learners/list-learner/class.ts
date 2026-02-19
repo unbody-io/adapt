@@ -1,6 +1,5 @@
 import type { ParentModels } from '../../types/config'
 import { BaseLearner } from '../base'
-import type { QueryOptions, QueryResult } from '../base/query-method'
 import { ToolBasedMethod } from '../base/query-method'
 import { resolveListLearnerConfig } from './config.resolver'
 import { ListDefaultMethod } from './learning-method'
@@ -23,7 +22,6 @@ import type {
 export class ListLearner extends BaseLearner<ListItem[]> {
 	private config: ResolvedListLearnerConfig
 	private items: ListItem[] = []
-	private _queryMethod: ToolBasedMethod
 
 	constructor(rawConfig: ListLearnerConfig, parentModels?: ParentModels) {
 		const config = resolveListLearnerConfig(rawConfig, parentModels)
@@ -34,23 +32,16 @@ export class ListLearner extends BaseLearner<ListItem[]> {
 			origin: config.origin,
 			focus: rawConfig.focus,
 			description: rawConfig.description,
-			governance: rawConfig.governance,
+			health: rawConfig.health,
 			maxObservationsForStagnation:
 				3 * (config.synthesize.thresholds.maxObservations ?? 10),
 		})
 		this.config = config
 
 		this._learningMethod = new ListDefaultMethod(this.config.model, {
-			observe: {
-				model: this.config.observe.model,
-				blueprintModel: this.config.observe.blueprintModel,
-			},
-			synthesize: {
-				model: this.config.synthesize.model,
-				blueprintModel: this.config.synthesize.blueprintModel,
-				thresholds: this.config.synthesize.thresholds,
-			},
-			listGovernance: this.config.listGovernance,
+			observe: this.config.observe,
+			synthesize: this.config.synthesize,
+			governance: this.config.governance,
 		})
 
 		this._queryMethod = new ToolBasedMethod(this.config.query.model, {
@@ -79,119 +70,8 @@ export class ListLearner extends BaseLearner<ListItem[]> {
 		return `${this.items.length} items tracked`
 	}
 
-	// ── Init ───────────────────────────────────────────────────────────────────
-
-	async init(): Promise<{
-		observeSystemPrompt: string
-		synthesizeSystemPrompt: string
-	}> {
-		if (this.isInitialized()) {
-			return {
-				observeSystemPrompt: this._learningMethod.observePrompt!,
-				synthesizeSystemPrompt: this._learningMethod.synthesizePrompt!,
-			}
-		}
-
-		this.emit('learner:init:started', { learnerId: this.id })
-
-		try {
-			await this.update({ instructions: this.instructions })
-
-			this.emit('learner:init:completed', {
-				learnerId: this.id,
-				systemPrompt: this._learningMethod.observePrompt!,
-				usage: { inputTokens: 0, outputTokens: 0, totalTokens: 0 },
-			})
-
-			return {
-				observeSystemPrompt: this._learningMethod.observePrompt!,
-				synthesizeSystemPrompt: this._learningMethod.synthesizePrompt!,
-			}
-		} catch (err) {
-			const error = err instanceof Error ? err : new Error(String(err))
-			this.emit('learner:init:failed', {
-				learnerId: this.id,
-				error: error.message,
-			})
-			throw error
-		}
-	}
-
-	// ── Query ──────────────────────────────────────────────────────────────────
-
-	async query(question: string, options?: QueryOptions): Promise<QueryResult> {
-		this.governance.lastAccessed = new Date()
-		this.metrics.query.count++
-
-		this.emit('learner:query:started', {
-			learnerId: this.id,
-			query: question,
-		})
-
-		// Short-circuit if learner has no knowledge at all
-		if (this.items.length === 0 && this.getBufferState().count === 0) {
-			const emptyResult: QueryResult = {
-				relevant: false,
-				relevance: 0,
-				confidence: 0,
-				insight: '',
-				gaps: '',
-				usage: { inputTokens: 0, outputTokens: 0, totalTokens: 0 },
-			}
-			this.emit('learner:query:completed', {
-				learnerId: this.id,
-				insight: '',
-				relevant: false,
-				relevance: 0,
-				confidence: 0,
-				gaps: [],
-				usage: emptyResult.usage,
-			})
-			return emptyResult
-		}
-
-		try {
-			const result = await this._queryMethod.query(
-				{
-					learnerId: this.id,
-					instructions: this.instructions,
-					question,
-				},
-				options,
-				{
-					onThinking: (thoughts, usage) => {
-						this.emit('learner:query:thinking', {
-							learnerId: this.id,
-							thoughts,
-							usage,
-						})
-					},
-				},
-			)
-
-			this.trackQueryMetrics(result)
-
-			this.emit('learner:query:completed', {
-				learnerId: this.id,
-				insight: result.insight,
-				relevant: result.relevant,
-				relevance: result.relevance,
-				confidence: result.confidence,
-				gaps: result.gaps ? result.gaps.split('\n').filter(Boolean) : [],
-				usage: result.usage,
-			})
-
-			this.checkAndEmitSignals()
-
-			return result
-		} catch (err) {
-			const error = err instanceof Error ? err : new Error(String(err))
-			this.emit('learner:query:failed', {
-				learnerId: this.id,
-				error: error.message,
-			})
-			throw error
-		}
+	hasKnowledge(): boolean {
+		return this.items.length > 0
 	}
 
 	// ── List-specific accessors ────────────────────────────────────────────────
@@ -208,8 +88,8 @@ export class ListLearner extends BaseLearner<ListItem[]> {
 		return { ...this.config.synthesize.thresholds }
 	}
 
-	getListGovernance() {
-		return { ...this.config.listGovernance }
+	getGovernance() {
+		return { ...this.config.governance }
 	}
 
 	// ── Update ─────────────────────────────────────────────────────────────────
@@ -337,10 +217,10 @@ export class ListLearner extends BaseLearner<ListItem[]> {
 
 		// ── List governance ──
 
-		if (updates.listGovernance) {
-			Object.assign(this.config.listGovernance, updates.listGovernance)
-			changedFields.push('listGovernance')
-			methodUpdate.listGovernance = updates.listGovernance
+		if (updates.governance) {
+			Object.assign(this.config.governance, updates.governance)
+			changedFields.push('governance')
+			methodUpdate.governance = updates.governance
 		}
 
 		// ── Query config ──
@@ -351,34 +231,34 @@ export class ListLearner extends BaseLearner<ListItem[]> {
 			this._queryMethod.update({ model: updates.query.model })
 		}
 
-		// ── Governance config ──
+		// ── Health config ──
 
-		if (updates.governance) {
-			if (updates.governance.threshold !== undefined) {
-				this.governance.threshold = updates.governance.threshold
-				changedFields.push('governance.threshold')
+		if (updates.health) {
+			if (updates.health.threshold !== undefined) {
+				this.health.threshold = updates.health.threshold
+				changedFields.push('health.threshold')
 			}
-			if (updates.governance.signalThresholds) {
-				const st = updates.governance.signalThresholds
+			if (updates.health.signalThresholds) {
+				const st = updates.health.signalThresholds
 				if (st.maxDismissalRate !== undefined) {
-					this.governance.signalThresholds.maxDismissalRate =
+					this.health.signalThresholds.maxDismissalRate =
 						st.maxDismissalRate
 					changedFields.push(
-						'governance.signalThresholds.maxDismissalRate',
+						'health.signalThresholds.maxDismissalRate',
 					)
 				}
 				if (st.minConfidence !== undefined) {
-					this.governance.signalThresholds.minConfidence =
+					this.health.signalThresholds.minConfidence =
 						st.minConfidence
 					changedFields.push(
-						'governance.signalThresholds.minConfidence',
+						'health.signalThresholds.minConfidence',
 					)
 				}
 				if (st.maxObservationsWithoutSynthesis !== undefined) {
-					this.governance.signalThresholds.maxObservationsWithoutSynthesis =
+					this.health.signalThresholds.maxObservationsWithoutSynthesis =
 						st.maxObservationsWithoutSynthesis
 					changedFields.push(
-						'governance.signalThresholds.maxObservationsWithoutSynthesis',
+						'health.signalThresholds.maxObservationsWithoutSynthesis',
 					)
 				}
 			}

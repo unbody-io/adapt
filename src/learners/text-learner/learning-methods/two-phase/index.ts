@@ -134,16 +134,16 @@ export class TextDefaultMethod implements LearningMethod {
 			}
 		}
 
-		// Maintenance updates
-		if (config.maintenance) {
-			if (config.maintenance.strategy !== undefined && config.maintenance.strategy !== this.config.maintenance.strategy) {
-				this.config.maintenance.strategy = config.maintenance.strategy
-				changedFields.push('maintenance.strategy')
+		// Governance updates
+		if (config.governance) {
+			if (config.governance.strategy !== undefined && config.governance.strategy !== this.config.governance.strategy) {
+				this.config.governance.strategy = config.governance.strategy
+				changedFields.push('governance.strategy')
 				needsSynthesizeRegen = true
 			}
-			if (config.maintenance.maxTokens !== undefined) {
-				this.config.maintenance.maxTokens = config.maintenance.maxTokens
-				changedFields.push('maintenance.maxTokens')
+			if (config.governance.maxTokens !== undefined) {
+				this.config.governance.maxTokens = config.governance.maxTokens
+				changedFields.push('governance.maxTokens')
 			}
 		}
 
@@ -170,7 +170,7 @@ export class TextDefaultMethod implements LearningMethod {
 
 			if (needsSynthesizeRegen) {
 				promises.push(
-					initSynthesize(synthesizeBlueprintModel, this.instructions, this.config.maintenance.strategy).then((result) => {
+					initSynthesize(synthesizeBlueprintModel, this.instructions, this.config.governance.strategy).then((result) => {
 						this._synthesizeIdentity = result.identity
 						this.synthesizeSystemPrompt = result.systemPrompt
 					}),
@@ -233,7 +233,7 @@ export class TextDefaultMethod implements LearningMethod {
 			}
 			return {
 				status: 'synthesized',
-				newUnderstanding: await this.applyMaintenanceStrategy(synthesizeResult.newUnderstanding),
+				newUnderstanding: await this.applyGovernanceStrategy(synthesizeResult.newUnderstanding),
 				significance: synthesizeResult.significance,
 				evolution: synthesizeResult.evolution,
 				reasoning: synthesizeResult.reasoning,
@@ -317,7 +317,7 @@ export class TextDefaultMethod implements LearningMethod {
 
 		return {
 			status: 'synthesized',
-			newUnderstanding: await this.applyMaintenanceStrategy(synthesizeResult.newUnderstanding),
+			newUnderstanding: await this.applyGovernanceStrategy(synthesizeResult.newUnderstanding),
 			significance: synthesizeResult.significance,
 			evolution: synthesizeResult.evolution,
 			reasoning: synthesizeResult.reasoning,
@@ -342,13 +342,13 @@ export class TextDefaultMethod implements LearningMethod {
 	}
 
 	/**
-	 * Apply strategy-specific maintenance to post-synthesis understanding
+	 * Apply strategy-specific governance to post-synthesis understanding
 	 */
-	private async applyMaintenanceStrategy(understanding: string): Promise<string> {
+	private async applyGovernanceStrategy(understanding: string): Promise<string> {
 		const result = await applyStrategy({
 			understanding,
 			model: this.model,
-			config: this.config.maintenance,
+			config: this.config.governance,
 		})
 		return result.understanding
 	}
@@ -360,6 +360,9 @@ export type { SynthesizeIdentity } from './synthesize/schema.identity'
 export type { SynthesizeContext, SynthesizeOutput } from './synthesize/types'
 export type {
 	ObserveConfig,
+	ResolvedGovernanceConfig,
+	ResolvedObserveConfig,
+	ResolvedSynthesizeConfig,
 	SynthesizeConfig,
 	TextDefaultConfig,
 	TextDefaultUpdateConfig,

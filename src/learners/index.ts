@@ -14,7 +14,7 @@ export type {
 	TextLearnerConfig,
 	TextLearnerEvent,
 	TextLearnerEventMap,
-	TextLearnerMaintenance,
+	TextGovernanceConfig,
 } from './text-learner'
 
 // TextLearner
@@ -29,7 +29,7 @@ export type {
 export { TextDefaultMethod } from './text-learner/learning-methods'
 
 export type {
-	MaintenanceConfig,
+	GovernanceConfig,
 	Strategy,
 	StrategyContext,
 	StrategyFn,
@@ -63,7 +63,7 @@ export type {
 	EvolutionEntry,
 	Learner,
 	LearnerConfig,
-	LearnerGovernance,
+	LearnerHealth,
 	LearnerMetadata,
 	LearnerOrigin,
 	LearnerStatus,

@@ -13,12 +13,12 @@ export const LIST_LEARNER_DEFAULTS = {
 			minImportance: 0.5,
 		} satisfies Required<SynthesizeThresholds>,
 	},
-	listGovernance: {
+	governance: {
 		deduplication: 'strict' as const,
 		maxItems: 200,
 		pruning: 'oldest' as const,
 	},
-	governance: {
+	health: {
 		signalThresholds: {
 			maxDismissalRate: 0.8,
 			minConfidence: 0.3,

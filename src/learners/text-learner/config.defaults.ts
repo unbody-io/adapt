@@ -18,11 +18,11 @@ export const TEXT_LEARNER_DEFAULTS = {
 			minImportance: 0.5,
 		} satisfies Required<SynthesizeThresholds>,
 	},
-	maintenance: {
+	governance: {
 		strategy: 'cumulative' as Strategy,
 		maxTokens: 16000,
 	},
-	governance: {
+	health: {
 		signalThresholds: {
 			maxDismissalRate: 0.8,
 			minConfidence: 0.3,

@@ -11,6 +11,9 @@ import type {
 import type { SharedLearnerEventMap } from '../base/types'
 import type {
 	ObserveConfig,
+	ResolvedGovernanceConfig,
+	ResolvedObserveConfig,
+	ResolvedSynthesizeConfig,
 	SynthesizeConfig,
 	SynthesizeThresholds,
 } from './learning-methods/types'
@@ -23,6 +26,9 @@ export type { TokenUsage } from '../types'
 export type {
 	LearnOutput,
 	ObserveConfig,
+	ResolvedGovernanceConfig,
+	ResolvedObserveConfig,
+	ResolvedSynthesizeConfig,
 	SynthesizeConfig,
 	SynthesizeThresholds,
 } from './learning-methods/types'
@@ -67,12 +73,12 @@ export interface TextLearnerEventMap extends SharedLearnerEventMap {
 export type TextLearnerEvent = EventsFromMap<TextLearnerEventMap>
 
 /**
- * Maintenance configuration for TextLearner
+ * Governance configuration for TextLearner
  */
-export interface TextLearnerMaintenance {
+export interface TextGovernanceConfig {
 	/** How understanding evolves over time */
 	strategy: Strategy
-	/** Max tokens before maintenance kicks in (for cumulative/decay) */
+	/** Max tokens before governance kicks in (for cumulative/decay) */
 	maxTokens?: number
 }
 
@@ -117,48 +123,21 @@ export interface TextLearnerConfig extends CascadableConfig {
 	description?: string
 	/** How the learner was created */
 	origin?: LearnerOrigin
-	/** Maintenance settings for understanding compression */
-	maintenance?: TextLearnerMaintenance
+	/** Governance settings for understanding management */
+	governance?: TextGovernanceConfig
 	/** Observe phase configuration */
 	observe?: Partial<ObserveConfig>
 	/** Synthesize phase configuration */
 	synthesize?: Partial<SynthesizeConfig>
 	/** Query phase configuration */
 	query?: QueryConfig
-	/** Governance configuration (Living Brain) */
-	governance?: Partial<import('../types').LearnerGovernance>
+	/** Health configuration (Living Brain) */
+	health?: Partial<import('../types').LearnerHealth>
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Resolved TextLearner Config
 // ─────────────────────────────────────────────────────────────────────────────
-
-/**
- * Resolved observe config
- */
-export interface ResolvedObserveConfig {
-	method: 'direct'
-	model: LanguageModel
-	blueprintModel: LanguageModel
-}
-
-/**
- * Resolved synthesize config
- */
-export interface ResolvedSynthesizeConfig {
-	method: 'direct'
-	model: LanguageModel
-	blueprintModel: LanguageModel
-	thresholds: Required<SynthesizeThresholds>
-}
-
-/**
- * Resolved maintenance config
- */
-export interface ResolvedMaintenanceConfig {
-	strategy: Strategy
-	maxTokens: number
-}
 
 /**
  * Fully resolved TextLearner config
@@ -167,7 +146,7 @@ export interface ResolvedTextLearnerConfig extends ResolvedCascadableConfig {
 	instructions: string
 	id: string
 	origin: LearnerOrigin
-	maintenance: ResolvedMaintenanceConfig
+	governance: ResolvedGovernanceConfig
 	observe: ResolvedObserveConfig
 	synthesize: ResolvedSynthesizeConfig
 	query: ResolvedQueryConfig

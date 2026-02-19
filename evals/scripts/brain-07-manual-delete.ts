@@ -46,7 +46,7 @@ async function main() {
 		description: 'A learner that is no longer needed',
 		instructions: 'You track information that is now irrelevant.',
 		type: 'text' as const,
-		maintenance: {
+		governance: {
 			strategy: 'continuous' as const,
 		},
 		thresholds: {

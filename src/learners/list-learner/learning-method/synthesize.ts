@@ -10,6 +10,7 @@ import type { LanguageModel } from 'ai'
 import { z } from 'zod'
 import { nanoid } from 'nanoid'
 import { generate, Output } from '../../../llm'
+import type { Usage } from '../../base/learning-method'
 import type { Significance } from '../../types'
 import type { ListItem } from '../types'
 
@@ -201,9 +202,9 @@ export type SynthesizeOutput =
 			significance: Significance
 			evolution: string
 			reasoning?: string
-			usage?: any
+			usage?: Usage
 	  }
-	| { status: 'dismissed'; output: string; usage?: any }
+	| { status: 'dismissed'; output: string; usage?: Usage }
 	| { status: 'error'; error: unknown }
 
 export async function synthesize(

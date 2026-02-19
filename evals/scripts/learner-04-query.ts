@@ -39,7 +39,7 @@ async function main() {
 		description: 'Tracks TypeScript best practices',
 		instructions: 'You track TypeScript patterns, idioms, and best practices.',
 		type: 'text' as const,
-		maintenance: {
+		governance: {
 			strategy: 'continuous' as const,
 		},
 		thresholds: {

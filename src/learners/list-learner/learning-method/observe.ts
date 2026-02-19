@@ -10,6 +10,7 @@
 import type { LanguageModel } from 'ai'
 import { z } from 'zod'
 import { generate, Output } from '../../../llm'
+import type { Usage } from '../../base/learning-method'
 
 // ── Identity schema ────────────────────────────────────────────────────────
 
@@ -138,8 +139,8 @@ export interface ObserveCallbacks {
 }
 
 export type ObserveOutput =
-	| { status: 'observed'; output: string[]; importance: number; usage?: any }
-	| { status: 'dismissed'; output: string[]; usage?: any }
+	| { status: 'observed'; output: string[]; importance: number; usage?: Usage }
+	| { status: 'dismissed'; output: string[]; usage?: Usage }
 	| { status: 'error'; output: null; error: unknown }
 
 export async function observe(

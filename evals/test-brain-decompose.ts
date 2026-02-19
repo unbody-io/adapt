@@ -81,7 +81,7 @@ async function main() {
 		for (const learner of result.learners) {
 			console.log(`  ┌─ ${learner.name} (${learner.id})`)
 			console.log(`  │  Type: ${learner.type}`)
-			console.log(`  │  Strategy: ${learner.maintenance?.strategy ?? 'continuous (default)'}`)
+			console.log(`  │  Strategy: ${learner.governance?.strategy ?? 'continuous (default)'}`)
 			console.log(`  │  Description: ${learner.description}`)
 			console.log(`  │`)
 			console.log(`  │  Instructions:`)

@@ -39,7 +39,7 @@ async function main() {
 		instructions:
 			'You ONLY track TypeScript syntax, type system features, and compiler behavior. Dismiss anything about React, APIs, databases, or other topics.',
 		type: 'text',
-		maintenance: { strategy: 'continuous' },
+		governance: { strategy: 'continuous' },
 		thresholds: {
 			minImportance: 0.6,
 			maxObservations: 10,

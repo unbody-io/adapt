@@ -48,7 +48,7 @@ async function main() {
 		description: 'Tracks React hooks patterns',
 		instructions: 'You track React hooks usage patterns and best practices.',
 		type: 'text' as const,
-		maintenance: {
+		governance: {
 			strategy: 'continuous' as const,
 		},
 		thresholds: {
@@ -63,7 +63,7 @@ async function main() {
 		description: 'Tracks React state management',
 		instructions: 'You track React state management approaches and patterns.',
 		type: 'text' as const,
-		maintenance: {
+		governance: {
 			strategy: 'continuous' as const,
 		},
 		thresholds: {

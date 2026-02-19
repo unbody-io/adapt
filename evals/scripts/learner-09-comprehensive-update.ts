@@ -71,7 +71,7 @@ async function main() {
 		instructions:
 			'You track TypeScript patterns, idioms, design patterns, and best practices used in codebases.',
 		type: 'text' as const,
-		maintenance: {
+		governance: {
 			strategy: 'continuous' as const,
 		},
 		thresholds: {

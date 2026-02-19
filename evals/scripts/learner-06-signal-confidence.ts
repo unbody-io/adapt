@@ -38,7 +38,7 @@ async function main() {
 		description: 'Tracks Python best practices',
 		instructions: 'You track Python programming patterns and idioms.',
 		type: 'text' as const,
-		maintenance: {
+		governance: {
 			strategy: 'continuous' as const,
 		},
 		thresholds: {

@@ -33,7 +33,7 @@ async function main() {
 		instructions:
 			'You are responsible for tracking information about TypeScript best practices and design patterns.',
 		type: 'text' as const,
-		maintenance: { strategy: 'continuous' as const },
+		governance: { strategy: 'continuous' as const },
 		thresholds: {
 			minImportance: 0.6,
 			maxObservations: 10,

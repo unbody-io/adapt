@@ -39,7 +39,7 @@ async function main() {
 		description: 'Original description',
 		instructions: 'Original instructions about tracking TypeScript patterns.',
 		type: 'text' as const,
-		maintenance: {
+		governance: {
 			strategy: 'continuous' as const,
 		},
 		thresholds: {

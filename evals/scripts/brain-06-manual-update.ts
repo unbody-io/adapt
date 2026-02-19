@@ -45,7 +45,7 @@ async function main() {
 		description: 'Tracks TypeScript basics',
 		instructions: 'You track basic TypeScript syntax and type system features.',
 		type: 'text' as const,
-		maintenance: {
+		governance: {
 			strategy: 'continuous' as const,
 		},
 		thresholds: {

@@ -57,12 +57,8 @@ export type {
 } from './list-learner'
 
 export type {
-	AskResult,
-	BaseLearnerEvent,
-	BaseLearnerEventMap,
 	EvolutionEntry,
 	Learner,
-	LearnerConfig,
 	LearnerHealth,
 	LearnerMetadata,
 	LearnerOrigin,

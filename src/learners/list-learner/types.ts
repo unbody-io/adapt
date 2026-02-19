@@ -20,7 +20,7 @@ import type { SharedLearnerEventMap } from '../base/types'
 
 export interface ListItem {
 	id: string
-	data: Record<string, any>
+	data: Record<string, unknown>
 	metadata: {
 		confidence: number
 		firstSeen: string
@@ -33,7 +33,7 @@ export type ListOperation =
 	| {
 			type: 'add'
 			item: {
-				data: Record<string, any>
+				data: Record<string, unknown>
 				metadata?: Partial<ListItem['metadata']>
 			}
 	  }
@@ -41,7 +41,7 @@ export type ListOperation =
 			type: 'update'
 			id: string
 			changes: {
-				data?: Record<string, any>
+				data?: Record<string, unknown>
 				metadata?: Partial<ListItem['metadata']>
 			}
 	  }

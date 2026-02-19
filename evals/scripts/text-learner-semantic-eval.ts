@@ -37,7 +37,7 @@ async function main() {
 			'You are a coffee knowledge tracker. Watch for information about coffee ' +
 			'brewing methods, bean origins, roasting profiles, flavor notes, and ' +
 			'preparation techniques. Focus on practical, actionable knowledge.',
-		maintenance: { strategy: 'continuous' },
+		governance: { strategy: 'continuous' },
 		synthesize: {
 			thresholds: {
 				minImportance: 0.3,
@@ -157,7 +157,7 @@ async function main() {
 	console.log(`  Changed fields: [${update2.changedFields.join(', ')}]`)
 	console.log(`  New thresholds: minImportance=${learner.getSynthesizeThresholds().minImportance}`)
 
-	// Update 3: Change maintenance strategy
+	// Update 3: Change governance strategy
 	logger.logSection('5c. Update — switch to cumulative strategy')
 	const update3 = await learner.update({
 		governance: { strategy: 'cumulative' },

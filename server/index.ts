@@ -100,7 +100,7 @@ function getBrainConfigSnapshot(b: Brain) {
 	const learnerConfig = firstLearner ? {
 		thresholds: firstLearner.getSynthesizeThresholds(),
 		queryMethod: firstLearner.getQueryMethodName(),
-		governanceStrategy: firstLearner.getGovernance().strategy,
+		governance: firstLearner.getGovernance(),
 	} : null
 	return {
 		prompt: b.prompt.slice(0, 120) + (b.prompt.length > 120 ? '...' : ''),
@@ -608,13 +608,13 @@ app.post('/brain/learners/:id/update', async (c) => {
 		observe?: { model?: string }
 		synthesize?: { model?: string; thresholds?: { maxObservations?: number; minImportance?: number } }
 		query?: { method?: 'tool-based' | 'direct' }
-		governance?: { strategy?: 'continuous' | 'cumulative' | 'decay'; maxTokens?: number }
+		governance?: Record<string, unknown>
 		health?: { signalThresholds?: { maxDismissalRate?: number; minConfidence?: number; maxObservationsWithoutSynthesis?: number } }
 	}>()
 
 	const openrouter = createOpenRouter({ apiKey: process.env.OPENROUTER_API_KEY })
 
-	const updates: Record<string, any> = {}
+	const updates: Record<string, unknown> = {}
 	if (body.name !== undefined) updates.name = body.name
 	if (body.description !== undefined) updates.description = body.description
 	if (body.instructions !== undefined) updates.instructions = body.instructions

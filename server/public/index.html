@@ -2506,7 +2506,8 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
           <div class="form-row" style="margin-top:12px;">
             <div style="grid-column:1/-1;font-size:11px;color:#666;text-transform:uppercase;letter-spacing:0.5px;">General</div>
           </div>
-          <div class="form-row">
+          <!-- Text learner governance -->
+          <div class="form-row" id="modalGovText">
             <div class="form-group">
               <label>Governance Strategy</label>
               <select id="modalGovernanceStrategy">
@@ -2518,6 +2519,35 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
             <div class="form-group">
               <label>Query Method</label>
               <select id="modalQueryMethod">
+                <option value="direct">Direct</option>
+                <option value="tool-based">Tool-based</option>
+              </select>
+            </div>
+          </div>
+          <!-- List learner governance -->
+          <div class="form-row" id="modalGovList" style="display:none;">
+            <div class="form-group">
+              <label>Deduplication</label>
+              <select id="modalDeduplication">
+                <option value="strict">Strict</option>
+                <option value="none">None</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Max Items</label>
+              <input type="number" id="modalMaxItems" value="100" min="1" max="10000">
+            </div>
+            <div class="form-group">
+              <label>Pruning</label>
+              <select id="modalPruning">
+                <option value="least-confident">Least Confident</option>
+                <option value="oldest">Oldest</option>
+                <option value="none">None</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Query Method</label>
+              <select id="modalQueryMethodList">
                 <option value="direct">Direct</option>
                 <option value="tool-based">Tool-based</option>
               </select>
@@ -3071,6 +3101,22 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
       return n.toString()
     }
 
+    /** Detect learner type from governance shape */
+    function getLearnerType(data) {
+      if (data.governance?.deduplication !== undefined) return 'list'
+      return 'text'
+    }
+
+    /** Short governance summary for cards */
+    function governanceSummary(data) {
+      const g = data.governance
+      if (!g) return '—'
+      if (getLearnerType(data) === 'list') {
+        return `dedup: ${g.deduplication || '—'}, max: ${g.maxItems ?? '—'}`
+      }
+      return g.strategy || '—'
+    }
+
     // --- DOM Elements ---
     const statusDot = document.getElementById('statusDot')
     const statusText = document.getElementById('statusText')
@@ -3464,8 +3510,7 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
       const synModel = document.getElementById('modalSynthesizeModel').value
       const maxObs = parseInt(document.getElementById('modalMaxObservations').value)
       const minImp = parseFloat(document.getElementById('modalMinImportance').value)
-      const maintStrat = document.getElementById('modalGovernanceStrategy').value
-      const qMethod = document.getElementById('modalQueryMethod').value
+      const lType = getLearnerType(data)
 
       if (obsModel) body.observe = { model: obsModel }
       if (synModel) body.synthesize = { ...(body.synthesize || {}), model: synModel }
@@ -3476,12 +3521,24 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
       }
 
       const currentGovr = data.governance || {}
-      if (maintStrat !== (currentGovr.strategy || 'continuous')) {
-        body.governance = { ...(body.governance || {}), strategy: maintStrat }
-      }
-
-      if (qMethod !== (data.queryMethod || 'direct')) {
-        body.query = { method: qMethod }
+      if (lType === 'list') {
+        const dedup = document.getElementById('modalDeduplication').value
+        const maxItems = parseInt(document.getElementById('modalMaxItems').value)
+        const pruning = document.getElementById('modalPruning').value
+        const qMethod = document.getElementById('modalQueryMethodList').value
+        const govChanges = {}
+        if (dedup !== (currentGovr.deduplication || 'strict')) govChanges.deduplication = dedup
+        if (maxItems !== (currentGovr.maxItems ?? 100)) govChanges.maxItems = maxItems
+        if (pruning !== (currentGovr.pruning || 'least-confident')) govChanges.pruning = pruning
+        if (Object.keys(govChanges).length > 0) body.governance = govChanges
+        if (qMethod !== (data.queryMethod || 'tool-based')) body.query = { method: qMethod }
+      } else {
+        const govStrategy = document.getElementById('modalGovernanceStrategy').value
+        const qMethod = document.getElementById('modalQueryMethod').value
+        if (govStrategy !== (currentGovr.strategy || 'continuous')) {
+          body.governance = { ...(body.governance || {}), strategy: govStrategy }
+        }
+        if (qMethod !== (data.queryMethod || 'direct')) body.query = { method: qMethod }
       }
 
       // Signal thresholds (health)
@@ -4588,7 +4645,7 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
 
       // Learner synthesized (completed)
       if (type === 'learner:synthesized') {
-        { const m = ensureLearnerMetrics(data.learnerId); m.observations++; m.syntheses++; m.lastSynthesisObs = m.observations; trackEvent(data.learnerId, 'synthesized'); if (data.newUnderstanding) { m.understandingSizes.push({ t: Date.now(), size: data.newUnderstanding.length }) } }
+        { const m = ensureLearnerMetrics(data.learnerId); m.observations++; m.syntheses++; m.lastSynthesisObs = m.observations; trackEvent(data.learnerId, 'synthesized'); if (data.newUnderstanding) { const u = data.newUnderstanding; m.understandingSizes.push({ t: Date.now(), size: typeof u === 'string' ? u.length : Array.isArray(u) ? u.length : 0 }) } }
         if (learnerStates[data.learnerId]) {
           learnerStates[data.learnerId].status = 'ready'
           learnerStates[data.learnerId].action = 'Understanding updated'
@@ -4925,7 +4982,11 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
           card.classList.add('active')
         }
 
-        const understanding = data.understanding || 'No understanding yet'
+        const rawUnderstanding = data.understanding
+        const hasUnderstanding = rawUnderstanding && (typeof rawUnderstanding === 'string' ? rawUnderstanding.length > 0 : Array.isArray(rawUnderstanding) && rawUnderstanding.length > 0)
+        const understandingSize = hasUnderstanding
+          ? (Array.isArray(rawUnderstanding) ? rawUnderstanding.length + ' items' : formatSize(rawUnderstanding.length))
+          : '—'
         const bufferCount = data.buffer?.count || 0
         const bufferTokens = data.buffer?.totalTokens || 0
         const bufferObservations = data.bufferObservations || []
@@ -4977,7 +5038,7 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
             <div class="synth-meta-row">
               <span>min importance: ${minImp}</span>
               <span>avg: ${avgImp.toFixed(2)}</span>
-              <span>strategy: ${data.governance?.strategy || '—'}</span>
+              <span>${getLearnerType(data) === 'list' ? 'governance' : 'strategy'}: ${governanceSummary(data)}</span>
             </div>
           </div>`
 
@@ -5104,10 +5165,10 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
             <div class="card-understanding-growth">
               <div class="understanding-growth-header">
                 <span class="understanding-growth-label">
-                  <span class="understanding-dot ${understanding !== 'No understanding yet' ? 'has' : ''}"></span>
-                  Understanding ${understanding !== 'No understanding yet' ? formatSize(understanding.length) : '—'}
+                  <span class="understanding-dot ${hasUnderstanding ? 'has' : ''}"></span>
+                  Understanding ${understandingSize}
                 </span>
-                <span class="understanding-strategy">${data.governance?.strategy || '—'}</span>
+                <span class="understanding-strategy">${governanceSummary(data)}</span>
               </div>
               <canvas class="understanding-growth-canvas" data-learner="${id}" style="width:100%;"></canvas>
             </div>
@@ -5202,7 +5263,9 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
       document.getElementById('modalBuffer').textContent = bufferText
 
       document.getElementById('modalEvolution').textContent = JSON.stringify(data.evolution || [], null, 2)
-      document.getElementById('modalUnderstanding').textContent = data.understanding || 'No understanding yet'
+      document.getElementById('modalUnderstanding').textContent = Array.isArray(data.understanding)
+        ? JSON.stringify(data.understanding, null, 2)
+        : (data.understanding || 'No understanding yet')
       document.getElementById('modalObservePrompt').textContent = data.observePrompt || 'Not initialized yet'
       document.getElementById('modalSynthesizePrompt').textContent = data.synthesizePrompt || 'Not initialized yet'
 
@@ -5210,8 +5273,18 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
       const thresholds = data.synthesizeThresholds || {}
       document.getElementById('modalMaxObservations').value = thresholds.maxObservations || 10
       document.getElementById('modalMinImportance').value = thresholds.minImportance || 0.3
-      document.getElementById('modalGovernanceStrategy').value = data.governance?.strategy || 'continuous'
-      document.getElementById('modalQueryMethod').value = data.queryMethod || 'direct'
+      const lType = getLearnerType(data)
+      document.getElementById('modalGovText').style.display = lType === 'text' ? '' : 'none'
+      document.getElementById('modalGovList').style.display = lType === 'list' ? '' : 'none'
+      if (lType === 'list') {
+        document.getElementById('modalDeduplication').value = data.governance?.deduplication || 'strict'
+        document.getElementById('modalMaxItems').value = data.governance?.maxItems ?? 100
+        document.getElementById('modalPruning').value = data.governance?.pruning || 'least-confident'
+        document.getElementById('modalQueryMethodList').value = data.queryMethod || 'tool-based'
+      } else {
+        document.getElementById('modalGovernanceStrategy').value = data.governance?.strategy || 'continuous'
+        document.getElementById('modalQueryMethod').value = data.queryMethod || 'direct'
+      }
       // Signal thresholds
       const sigThresh = data.health?.signalThresholds || {}
       document.getElementById('modalMaxDismissalRate').value = sigThresh.maxDismissalRate ?? 0.8

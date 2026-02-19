@@ -5,10 +5,8 @@
  */
 
 import type { LanguageModel } from 'ai'
-import type {
-	CascadableConfig,
-	ResolvedCascadableConfig,
-} from '../../types/config'
+import type { CascadableConfig } from '../../types/config'
+import type { BaseResolvedConfig } from '../base'
 import type { EventsFromMap } from '../../types/events'
 import type {
 	LearnerHealth,
@@ -133,17 +131,7 @@ export interface ListLearnerConfig extends CascadableConfig {
 
 // ── Resolved config ────────────────────────────────────────────────────────
 
-export interface ResolvedListLearnerConfig extends ResolvedCascadableConfig {
-	instructions: string
-	id: string
-	origin: LearnerOrigin
-	observe: { model: LanguageModel; blueprintModel: LanguageModel }
-	synthesize: {
-		model: LanguageModel
-		blueprintModel: LanguageModel
-		thresholds: Required<SynthesizeThresholds>
-	}
-	query: { model: LanguageModel }
+export interface ResolvedListLearnerConfig extends BaseResolvedConfig {
 	governance: ResolvedListGovernanceConfig
 }
 

@@ -1,8 +1,6 @@
 import type { LanguageModel } from 'ai'
-import type {
-	CascadableConfig,
-	ResolvedCascadableConfig,
-} from '../../types/config'
+import type { CascadableConfig } from '../../types/config'
+import type { BaseResolvedConfig } from '../base'
 import type { EventsFromMap } from '../../types/events'
 import type {
 	LearnerOrigin,
@@ -142,10 +140,7 @@ export interface TextLearnerConfig extends CascadableConfig {
 /**
  * Fully resolved TextLearner config
  */
-export interface ResolvedTextLearnerConfig extends ResolvedCascadableConfig {
-	instructions: string
-	id: string
-	origin: LearnerOrigin
+export interface ResolvedTextLearnerConfig extends BaseResolvedConfig {
 	governance: ResolvedGovernanceConfig
 	observe: ResolvedObserveConfig
 	synthesize: ResolvedSynthesizeConfig

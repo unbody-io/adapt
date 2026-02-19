@@ -6,7 +6,59 @@
  * has a different understanding shape (string, ListItem[], etc.).
  */
 
-import type { LearnerStatus, Significance, TokenUsage } from '../types'
+import type { LanguageModel } from 'ai'
+import type { ResolvedCascadableConfig } from '../../types/config'
+import type {
+	LearnerHealth,
+	LearnerOrigin,
+	LearnerStatus,
+	Significance,
+	TokenUsage,
+} from '../types'
+import type { SynthesizeThresholds } from './learning-method'
+
+/**
+ * Base resolved config — common fields shared across all learner types.
+ *
+ * Each subclass config extends this and adds type-specific fields (e.g. governance).
+ */
+export interface BaseResolvedConfig extends ResolvedCascadableConfig {
+	instructions: string
+	id: string
+	origin: LearnerOrigin
+	observe: { model: LanguageModel; blueprintModel: LanguageModel }
+	synthesize: {
+		model: LanguageModel
+		blueprintModel: LanguageModel
+		thresholds: Required<SynthesizeThresholds>
+	}
+	query: { model: LanguageModel }
+}
+
+/**
+ * Input shape for BaseLearner.update() — all fields optional.
+ *
+ * Type-specific fields (like governance) pass through via the index signature
+ * and are handled by each subclass's applyTypeSpecificUpdates().
+ */
+export interface BaseLearnerUpdateInput {
+	id?: string
+	name?: string
+	description?: string
+	origin?: LearnerOrigin
+	model?: LanguageModel
+	blueprintModel?: LanguageModel
+	instructions?: string
+	focus?: string
+	observe?: { model?: LanguageModel; blueprintModel?: LanguageModel }
+	synthesize?: {
+		model?: LanguageModel
+		blueprintModel?: LanguageModel
+		thresholds?: SynthesizeThresholds
+	}
+	query?: { model?: LanguageModel }
+	health?: Partial<LearnerHealth>
+}
 
 /**
  * Usage data for events (partial — LLM calls may not report all fields)

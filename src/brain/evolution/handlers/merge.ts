@@ -6,7 +6,7 @@ import { Output } from 'ai'
 import { EvolutionActionHandler } from '../base-handler'
 import type { EvolutionDecision } from '../../evaluator/types'
 import type { MergeActionResult } from '../types'
-import type { TextLearner } from '../../../learners/text-learner/class'
+import type { BaseLearner } from '../../../learners/base/class'
 import { generate } from '../../../llm'
 import { mergeOutputSchema } from '../schemas/merge'
 import { mergeSystemPrompt } from '../prompt.system.merge'
@@ -31,13 +31,13 @@ export class MergeHandler extends EvolutionActionHandler<MergeActionResult> {
 					throw new Error('Merge requires at least 2 learners')
 				}
 
-				const learners: TextLearner[] = []
+				const learners: BaseLearner<any>[] = []
 				for (const learnerId of decision.targets) {
 					const learner = this.brain.learners.get(learnerId)
 					if (!learner) {
 						throw new Error(`Learner ${learnerId} not found`)
 					}
-					learners.push(learner as TextLearner)
+					learners.push(learner)
 				}
 
 				const result = await generate({

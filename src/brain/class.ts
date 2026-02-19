@@ -1,12 +1,13 @@
 import type { CallSettings } from 'ai'
 import { nanoid } from 'nanoid'
 import {
+	BaseLearner,
 	type GeneratedLearnerConfig,
 	type LearnerGovernance,
+	ListLearner,
 	TextLearner,
 	type TokenUsage,
 } from '../learners'
-import type { TextLearnerConfig } from '../learners/text-learner/types'
 import { generate, Output } from '../llm'
 import { TypedEmitter } from '../types/events'
 import { synthesize } from './agent'
@@ -39,7 +40,7 @@ import type {
 export class Brain extends TypedEmitter<BrainEventMap> {
 	prompt: string
 	readonly config: ResolvedBrainConfig
-	readonly learners: Map<string, TextLearner> = new Map()
+	readonly learners: Map<string, BaseLearner<any>> = new Map()
 	private learnerNames: Map<string, string> = new Map()
 	private initialized = false
 	private evaluator?: Evaluator
@@ -139,38 +140,49 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 	}
 
 	/**
-	 * Create a TextLearner from a generated config
+	 * Create a learner from a generated config (factory — routes by config.type)
 	 */
 	async createLearnerFromConfig(
 		config: GeneratedLearnerConfig & {
 			thresholds?: { minImportance?: number; maxObservations?: number }
 			governance?: Partial<LearnerGovernance>
 		},
-	): Promise<TextLearner> {
-		const learner = new TextLearner(
-			{
-				id: config.id,
-				model: this.config.model,
-				blueprintModel: this.config.blueprintModel,
-				instructions: config.instructions,
-				origin: 'prompt',
+	): Promise<BaseLearner<any>> {
+		const shared = {
+			id: config.id,
+			model: this.config.model,
+			blueprintModel: this.config.blueprintModel,
+			instructions: config.instructions,
+			origin: 'prompt' as const,
+			name: config.name,
+			description: config.description,
+			governance: config.governance,
+			synthesize: {
+				thresholds: {
+					maxObservations: BRAIN_DEFAULTS.learning.synthesize.thresholds.maxObservations,
+					maxTokens: BRAIN_DEFAULTS.learning.synthesize.thresholds.maxTokens,
+					minImportance: BRAIN_DEFAULTS.learning.synthesize.thresholds.minImportance,
+					...config.thresholds,
+				},
+			},
+		}
+
+		let learner: BaseLearner<any>
+
+		if (config.type === 'list') {
+			learner = new ListLearner({
+				...shared,
+				listGovernance: config.listGovernance,
+			})
+		} else {
+			learner = new TextLearner({
+				...shared,
 				maintenance: config.maintenance ?? {
 					strategy: BRAIN_DEFAULTS.learning.maintenance.strategy,
 					maxTokens: BRAIN_DEFAULTS.learning.maintenance.maxTokens,
 				},
-				synthesize: {
-					thresholds: {
-						maxObservations: BRAIN_DEFAULTS.learning.synthesize.thresholds.maxObservations,
-						maxTokens: BRAIN_DEFAULTS.learning.synthesize.thresholds.maxTokens,
-						minImportance: BRAIN_DEFAULTS.learning.synthesize.thresholds.minImportance,
-						...config.thresholds,
-					},
-				},
-				name: config.name,
-				description: config.description,
-				governance: config.governance,
-			} as any,
-		)
+			} as any)
+		}
 
 		// Forward all learner events through Brain
 		learner.on((event) => {
@@ -214,21 +226,21 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 	/**
 	 * Add a learner manually
 	 */
-	async addLearner(config: GeneratedLearnerConfig): Promise<TextLearner> {
+	async addLearner(config: GeneratedLearnerConfig): Promise<BaseLearner<any>> {
 		return this.createLearnerFromConfig(config)
 	}
 
 	/**
 	 * Get all learners
 	 */
-	getLearners(): TextLearner[] {
+	getLearners(): BaseLearner<any>[] {
 		return Array.from(this.learners.values())
 	}
 
 	/**
 	 * Get a specific learner by ID
 	 */
-	getLearner(id: string): TextLearner | undefined {
+	getLearner(id: string): BaseLearner<any> | undefined {
 		return this.learners.get(id)
 	}
 
@@ -550,7 +562,7 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 	 * const learner = await brain.createLearner('Track API design patterns and best practices')
 	 * ```
 	 */
-	async createLearner(guidance: string): Promise<TextLearner> {
+	async createLearner(guidance: string): Promise<BaseLearner<any>> {
 		if (!this.evolutionOrchestrator) {
 			throw new Error(
 				'Evolution is not enabled. Set config.evolution.enabled = true',
@@ -590,7 +602,7 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 	async mergeLearners(
 		learnerIds: string[],
 		guidance: string,
-	): Promise<TextLearner> {
+	): Promise<BaseLearner<any>> {
 		if (!this.evolutionOrchestrator) {
 			throw new Error(
 				'Evolution is not enabled. Set config.evolution.enabled = true',
@@ -630,7 +642,7 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 	async splitLearner(
 		learnerId: string,
 		guidance: string,
-	): Promise<TextLearner[]> {
+	): Promise<BaseLearner<any>[]> {
 		if (!this.evolutionOrchestrator) {
 			throw new Error(
 				'Evolution is not enabled. Set config.evolution.enabled = true',
@@ -669,7 +681,7 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 	async updateLearner(
 		learnerId: string,
 		guidance: string,
-	): Promise<TextLearner> {
+	): Promise<BaseLearner<any>> {
 		if (!this.evolutionOrchestrator) {
 			throw new Error(
 				'Evolution is not enabled. Set config.evolution.enabled = true',
@@ -804,7 +816,8 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 
 		// ── 2. Mechanical cascade to learners ──
 
-		const learnerUpdate: Partial<TextLearnerConfig> = {}
+		// Shared learner update — each learner's update() picks up what it recognizes
+		const learnerUpdate: Record<string, unknown> = {}
 
 		if (updates.model !== undefined) {
 			this.config.model = updates.model
@@ -839,13 +852,13 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 			learnerUpdate.maintenance = {
 				...(m.strategy ? { strategy: m.strategy } : {}),
 				...(m.maxTokens !== undefined ? { maxTokens: m.maxTokens } : {}),
-			} as TextLearnerConfig['maintenance']
+			}
 		}
 
-		// Forward to all learners
+		// Forward to all learners (each ignores fields it doesn't recognize)
 		if (Object.keys(learnerUpdate).length > 0) {
 			for (const learner of this.learners.values()) {
-				const result = await learner.update(learnerUpdate)
+				const result = await learner.update(learnerUpdate as any)
 				learnerResults.push({ learnerId: learner.id, changedFields: result.changedFields })
 			}
 		}

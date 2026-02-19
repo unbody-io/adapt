@@ -6,7 +6,6 @@ import { Output } from 'ai'
 import { EvolutionActionHandler } from '../base-handler'
 import type { EvolutionDecision } from '../../evaluator/types'
 import type { UpdateActionResult } from '../types'
-import type { TextLearner } from '../../../learners/text-learner/class'
 import { generate } from '../../../llm'
 import { updateOutputSchema } from '../schemas/update'
 import { updateSystemPrompt } from '../prompt.system.update'
@@ -38,7 +37,7 @@ export class UpdateHandler extends EvolutionActionHandler<UpdateActionResult> {
 						system: updateSystemPrompt,
 						prompt: updatePromptTemplate(
 							decision.guidance,
-							learner as TextLearner,
+							learner as any,
 							this.brain.prompt,
 						),
 						output: Output.object({ schema: updateOutputSchema }),
@@ -54,7 +53,7 @@ export class UpdateHandler extends EvolutionActionHandler<UpdateActionResult> {
 						...(thresholds ? { synthesize: { thresholds } } : {}),
 					}
 
-					await (learner as TextLearner).update(adapted)
+					await (learner as any).update(adapted)
 
 					if (updates.name) {
 						this.brain.__updateLearnerName(learnerId, updates.name)

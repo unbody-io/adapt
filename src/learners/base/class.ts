@@ -107,9 +107,10 @@ export abstract class BaseLearner<TUnderstanding>
 	abstract setUnderstanding(value: TUnderstanding): void
 	abstract getSummary(): string
 
-	// init() and query() stay abstract — they depend on subclass config
+	// init(), query(), update() stay abstract — they depend on subclass config
 	abstract init(): Promise<unknown>
 	abstract query(question: string, options?: QueryOptions): Promise<QueryResult>
+	abstract update(updates: Record<string, unknown>): Promise<{ changedFields: string[] }>
 
 	// ── Identity ────────────────────────────────────────────────────────────
 

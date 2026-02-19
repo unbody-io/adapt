@@ -4,18 +4,25 @@
  * Formats learner data for LLM to generate config updates
  */
 
-import type { TextLearner } from '../../learners/text-learner/class'
+import type { BaseLearner } from '../../learners/base/class'
+import { stringifyUnderstanding } from './utils'
 
 /**
  * Format update prompt with learner data and guidance
  */
 export function updatePromptTemplate(
 	guidance: string,
-	learner: TextLearner,
+	learner: BaseLearner<any>,
 	brainPrompt: string,
 ): string {
 	const governance = learner.getGovernance()
-	const thresholds = learner.getSynthesizeThresholds()
+	const metrics = learner.getMetrics()
+	const understanding = stringifyUnderstanding(learner.getUnderstanding())
+
+	// getSynthesizeThresholds exists on both TextLearner and ListLearner
+	const thresholds = 'getSynthesizeThresholds' in learner
+		? (learner as any).getSynthesizeThresholds()
+		: null
 
 	return `# Brain Context
 
@@ -33,10 +40,10 @@ ${guidance}
 
 **Current Instructions**:
 ${learner.instructions}
-
+${thresholds ? `
 **Current Thresholds**:
 - Min Importance: ${thresholds.minImportance}
-- Max Observations: ${thresholds.maxObservations}
+- Max Observations: ${thresholds.maxObservations}` : ''}
 
 **Governance**:
 - Activation: ${governance.activation.toFixed(2)}
@@ -44,12 +51,12 @@ ${learner.instructions}
 - Last Accessed: ${governance.lastAccessed.toISOString()}
 
 **Metrics**:
-- Query Count: ${learner.getMetrics().query.count}
-- Dismissal Rate: ${(learner.getMetrics().ingestion.dismissalRate * 100).toFixed(1)}%
-- Syntheses: ${learner.getMetrics().ingestion.synthesisCount}
+- Query Count: ${metrics.query.count}
+- Dismissal Rate: ${(metrics.ingestion.dismissalRate * 100).toFixed(1)}%
+- Syntheses: ${metrics.ingestion.synthesisCount}
 
 **Current Understanding** (first 500 chars):
-${learner.getUnderstanding().slice(0, 500)}${learner.getUnderstanding().length > 500 ? '...' : ''}
+${understanding.slice(0, 500)}${understanding.length > 500 ? '...' : ''}
 
 ---
 

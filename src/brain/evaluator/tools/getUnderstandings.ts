@@ -34,7 +34,13 @@ export function createGetUnderstandingsTool(brain: Brain) {
 				const learner = brain.learners.get(id)
 				if (learner) {
 					const understanding = learner.getUnderstanding()
-					result[id] = understanding || '(no understanding accumulated yet)'
+					if (!understanding) {
+						result[id] = '(no understanding accumulated yet)'
+					} else if (typeof understanding === 'string') {
+						result[id] = understanding || '(no understanding accumulated yet)'
+					} else {
+						result[id] = JSON.stringify(understanding, null, 2)
+					}
 				} else {
 					result[id] = '(learner not found)'
 				}

@@ -50,6 +50,9 @@ export class TextLearner extends BaseLearner<string, ResolvedTextLearnerConfig> 
 	}
 
 	async setUnderstanding(understanding: string): Promise<void> {
+		if (!this.validateUnderstandingData(understanding)) {
+			console.error(`[${this.id}] Understanding failed schema validation, storing anyway`)
+		}
 		this.understanding = understanding
 
 		// Write-through to store
@@ -160,6 +163,25 @@ export class TextLearner extends BaseLearner<string, ResolvedTextLearnerConfig> 
 			},
 			buildPrompt: buildTextQueryPrompt,
 		})
+	}
+
+	// ── Schema generation (hardcoded for text) ──────────────────────────────────
+
+	protected async generateSchemas() {
+		return {
+			observationSchema: {
+				type: 'string',
+				description: 'Single observation. Concise and factual.',
+				minLength: 10,
+				maxLength: 500,
+			},
+			understandingSchema: {
+				type: 'string',
+				description: 'Comprehensive prose synthesis. Well-structured narrative.',
+				minLength: 100,
+				maxLength: 5000,
+			},
+		}
 	}
 
 	// ── State persistence (adds understand identity) ──────────────────────────

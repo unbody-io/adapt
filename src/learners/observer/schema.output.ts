@@ -37,3 +37,30 @@ export const observeOutputSchema = z.object({
 })
 
 export type ObserveSchemaOutput = z.infer<typeof observeOutputSchema>
+
+/**
+ * Build a dynamic observe output schema using a JSON Schema for items.
+ * When an observationSchema is provided, observation items match that schema
+ * instead of being plain strings.
+ */
+export function buildObserveOutputSchema(observationSchema: Record<string, unknown>) {
+	const itemSchema = z.fromJSONSchema(observationSchema)
+
+	return z.object({
+		status: observeStatusEnum.describe(
+			"'observed' if relevant content was found, 'dismissed' if nothing relevant",
+		),
+		output: z
+			.array(itemSchema)
+			.describe(
+				'Array of discrete observations. Each item follows the defined schema. Empty array if dismissed.',
+			),
+		importance: z
+			.number()
+			.min(0)
+			.max(1)
+			.describe(
+				'How important this observation is (0.0 to 1.0). Use 0.5 if dismissed.',
+			),
+	})
+}

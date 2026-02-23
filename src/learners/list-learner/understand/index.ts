@@ -32,53 +32,58 @@ export type UnderstandIdentity = z.infer<typeof understandIdentitySchema>
 
 // ── Operations output schema ───────────────────────────────────────────────
 
-const operationSchema = z.discriminatedUnion('type', [
-	z.object({
-		type: z.literal('add'),
-		item: z.object({
-			data: z.record(z.any()).describe('The item data as key-value pairs'),
-			confidence: z
-				.number()
-				.min(0)
-				.max(1)
-				.optional()
-				.describe('How confident you are about this item (0.0-1.0)'),
-			signals: z
-				.array(z.string())
-				.optional()
-				.describe('Notable signals or tags for this item'),
-		}),
-	}),
-	z.object({
-		type: z.literal('update'),
-		id: z.string().describe('ID of the item to update'),
-		changes: z.object({
-			data: z
-				.record(z.any())
-				.optional()
-				.describe('Fields to update/add in the item data'),
-			confidence: z.number().min(0).max(1).optional(),
-			signals: z.array(z.string()).optional(),
-		}),
-	}),
-	z.object({
-		type: z.literal('remove'),
-		id: z.string().describe('ID of the item to remove'),
-		reason: z.string().describe('Why this item should be removed'),
-	}),
-])
+function buildOperationSchema(understandingSchema?: Record<string, unknown>) {
+	const dataSchema = understandingSchema
+		? z.fromJSONSchema(understandingSchema)
+		: z.record(z.string(), z.unknown()).describe('The item data as key-value pairs')
 
-const understandOutputSchema = z.object({
-	changed: z
-		.boolean()
-		.describe('Whether the observations warrant any changes to the collection'),
-	operations: z.array(operationSchema),
-	evolution: z.string().describe('Brief description of what changed and why'),
-	significance: z
-		.enum(['routine', 'notable', 'critical'])
-		.describe('How significant are these changes?'),
-	reasoning: z.string().optional().describe('Key reasoning behind the decisions'),
-})
+	return z.discriminatedUnion('type', [
+		z.object({
+			type: z.literal('add'),
+			item: z.object({
+				data: dataSchema,
+				confidence: z
+					.number()
+					.min(0)
+					.max(1)
+					.optional()
+					.describe('How confident you are about this item (0.0-1.0)'),
+				signals: z
+					.array(z.string())
+					.optional()
+					.describe('Notable signals or tags for this item'),
+			}),
+		}),
+		z.object({
+			type: z.literal('update'),
+			id: z.string().describe('ID of the item to update'),
+			changes: z.object({
+				data: dataSchema.optional(),
+				confidence: z.number().min(0).max(1).optional(),
+				signals: z.array(z.string()).optional(),
+			}),
+		}),
+		z.object({
+			type: z.literal('remove'),
+			id: z.string().describe('ID of the item to remove'),
+			reason: z.string().describe('Why this item should be removed'),
+		}),
+	])
+}
+
+function buildUnderstandOutputSchema(understandingSchema?: Record<string, unknown>) {
+	return z.object({
+		changed: z
+			.boolean()
+			.describe('Whether the observations warrant any changes to the collection'),
+		operations: z.array(buildOperationSchema(understandingSchema)),
+		evolution: z.string().describe('Brief description of what changed and why'),
+		significance: z
+			.enum(['routine', 'notable', 'critical'])
+			.describe('How significant are these changes?'),
+		reasoning: z.string().optional().describe('Key reasoning behind the decisions'),
+	})
+}
 
 // ── Identity prompt ────────────────────────────────────────────────────────
 
@@ -192,18 +197,20 @@ export async function understand(
 	model: LanguageModel,
 	identity: UnderstandIdentity,
 	context: UnderstandContext,
+	understandingSchema?: Record<string, unknown>,
 	callbacks?: UnderstandCallbacks,
 ): Promise<UnderstandOutput> {
 	try {
 		const system = systemPrompt(identity, context.currentItems)
 		const prompt = `New observations to integrate:\n\n${context.observations.map((o, i) => `${i + 1}. ${o}`).join('\n')}\n\nDecide what operations to apply to the collection.`
+		const outputSchema = buildUnderstandOutputSchema(understandingSchema)
 
 		const result = await generate({
 			model,
 			system,
 			prompt,
-			output: Output.object({ schema: understandOutputSchema }),
-			repairSchema: understandOutputSchema,
+			output: Output.object({ schema: outputSchema }),
+			repairSchema: outputSchema,
 		})
 
 		if (callbacks?.onThinking && result.reasoning) {
@@ -240,7 +247,10 @@ export async function understand(
 
 // ── Operation application ──────────────────────────────────────────────────
 
-type RawOperation = z.infer<typeof operationSchema>
+type RawOperation =
+	| { type: 'add'; item: { data: Record<string, unknown>; confidence?: number; signals?: string[] } }
+	| { type: 'update'; id: string; changes: { data?: Record<string, unknown>; confidence?: number; signals?: string[] } }
+	| { type: 'remove'; id: string; reason: string }
 
 function applyOperations(
 	currentItems: ListItem[],

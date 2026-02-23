@@ -13,7 +13,7 @@ import { observeSystemPromptTemplate } from './prompts/system'
 import { observeUserPromptTemplate } from './prompts/user'
 import type { ObserveIdentity } from './schema.identity'
 import { observeIdentitySchema } from './schema.identity'
-import { observeOutputSchema } from './schema.output'
+import { observeOutputSchema, buildObserveOutputSchema } from './schema.output'
 import type { ObserveCallbacks, ObserveContext, ObserveOutput } from './types'
 
 /**
@@ -57,6 +57,7 @@ export async function initObserve(
  * @param model - Language model to use
  * @param systemPrompt - Pre-generated system prompt
  * @param context - Observe context (data, etc.)
+ * @param observationSchema - Optional JSON Schema for structured observation output
  * @param callbacks - Optional callbacks for observability
  * @returns Observe output
  */
@@ -64,17 +65,21 @@ export async function observe(
 	model: LanguageModel,
 	systemPrompt: string,
 	context: ObserveContext,
+	observationSchema?: Record<string, unknown>,
 	callbacks?: ObserveCallbacks,
 ): Promise<ObserveOutput> {
 	try {
 		const prompt = observeUserPromptTemplate(context.data)
+		const outputSchema = observationSchema
+			? buildObserveOutputSchema(observationSchema)
+			: observeOutputSchema
 
 		const result = await generate({
 			model,
 			system: systemPrompt,
 			prompt,
-			output: Output.object({ schema: observeOutputSchema }),
-			repairSchema: observeOutputSchema,
+			output: Output.object({ schema: outputSchema }),
+			repairSchema: outputSchema,
 			temperature: 0.2,
 		})
 

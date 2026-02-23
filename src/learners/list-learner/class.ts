@@ -10,6 +10,7 @@ import { applyListGovernance } from './governance'
 import { initUnderstand, understand } from './understand'
 import type { UnderstandIdentity } from './understand'
 import { buildListQueryPrompt, createListQueryTools } from './query-tools'
+import { generateObservationSchema, generateUnderstandingSchema } from './schema'
 import type {
 	ListItem,
 	ListLearnerConfig,
@@ -51,6 +52,12 @@ export class ListLearner extends BaseLearner<ListItem[], ResolvedListLearnerConf
 	}
 
 	async setUnderstanding(items: ListItem[]): Promise<void> {
+		// Layer 2 validation: validate each item's data against understanding schema
+		for (const item of items) {
+			if (!this.validateUnderstandingData(item.data)) {
+				console.error(`[${this.id}] Item ${item.id} data failed schema validation`)
+			}
+		}
 		this.items = items
 
 		// Write-through to store — replace all understanding records
@@ -114,6 +121,7 @@ export class ListLearner extends BaseLearner<ListItem[], ResolvedListLearnerConf
 				currentItems: understanding,
 				observations,
 			},
+			this.understandingSchema ?? undefined,
 			callbacks,
 		)
 
@@ -146,6 +154,18 @@ export class ListLearner extends BaseLearner<ListItem[], ResolvedListLearnerConf
 			tools: createListQueryTools(() => this.getUnderstanding()),
 			buildPrompt: buildListQueryPrompt,
 		})
+	}
+
+	// ── Schema generation (LLM-generated for list) ──────────────────────────────
+
+	protected async generateSchemas(model: LanguageModel, instructions: string) {
+		const observeIdentity = this._observeIdentity?.identity ?? instructions
+		const understandIdentity = this._understandIdentity?.identity ?? instructions
+		const [observationSchema, understandingSchema] = await Promise.all([
+			generateObservationSchema(model, instructions, observeIdentity),
+			generateUnderstandingSchema(model, instructions, understandIdentity),
+		])
+		return { observationSchema, understandingSchema }
 	}
 
 	// ── State persistence (adds understand identity) ──────────────────────────

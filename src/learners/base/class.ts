@@ -12,6 +12,7 @@
  */
 
 import type { LanguageModel } from 'ai'
+import { z } from 'zod'
 import { nanoid } from 'nanoid'
 import { TypedEmitter } from '../../types/events'
 import type { LearnerActivity } from '../../brain/evaluator/types'
@@ -38,8 +39,8 @@ import type {
  * Output from learn() - discriminated union of all possible outcomes
  */
 export type LearnOutput =
-	| { status: 'observed'; output: string[]; usage?: { inputTokens?: number; outputTokens?: number; totalTokens?: number } }
-	| { status: 'observe:dismissed'; output: string[]; usage?: { inputTokens?: number; outputTokens?: number; totalTokens?: number } }
+	| { status: 'observed'; output: unknown[]; usage?: { inputTokens?: number; outputTokens?: number; totalTokens?: number } }
+	| { status: 'observe:dismissed'; output: unknown[]; usage?: { inputTokens?: number; outputTokens?: number; totalTokens?: number } }
 	| { status: 'observe:error'; error: unknown }
 	| {
 			status: 'synthesized'
@@ -138,6 +139,10 @@ export abstract class BaseLearner<
 	protected observeSystemPrompt: string | null = null
 	protected understandSystemPrompt: string | null = null
 
+	// Schemas (JSON Schema objects — define observation/understanding shape)
+	protected observationSchema: Record<string, unknown> | null = null
+	protected understandingSchema: Record<string, unknown> | null = null
+
 	// Signal fire-once flags (reset when condition clears)
 	protected stagnationSignalFired = false
 	protected dismissalSignalFired = false
@@ -217,6 +222,18 @@ export abstract class BaseLearner<
 	 */
 	protected abstract createQueryMethod(): QueryMethod
 
+	/**
+	 * Generate observation and understanding JSON Schemas.
+	 * Text learner returns hardcoded schemas; list learner generates via LLM.
+	 */
+	protected abstract generateSchemas(
+		model: LanguageModel,
+		instructions: string,
+	): Promise<{
+		observationSchema: Record<string, unknown>
+		understandingSchema: Record<string, unknown>
+	}>
+
 	// ── Init ────────────────────────────────────────────────────────────────
 
 	async init(): Promise<{
@@ -255,6 +272,12 @@ export abstract class BaseLearner<
 					understandBlueprintModel,
 					this.instructions,
 				)
+
+				// Generate schemas (type-specific)
+				const schemaBlueprintModel = this.config.blueprintModel ?? this.config.model
+				const schemas = await this.generateSchemas(schemaBlueprintModel, this.instructions)
+				this.observationSchema = schemas.observationSchema
+				this.understandingSchema = schemas.understandingSchema
 
 				// Persist to store.state for future inits
 				await this.persistState()
@@ -298,6 +321,8 @@ export abstract class BaseLearner<
 			{ id: 'observe_identity', value: this._observeIdentity },
 			{ id: 'observe_prompt', value: this.observeSystemPrompt },
 			{ id: 'understand_prompt', value: this.understandSystemPrompt },
+			{ id: 'observation_schema', value: this.observationSchema },
+			{ id: 'understanding_schema', value: this.understandingSchema },
 		]
 
 		for (const entry of entries) {
@@ -316,20 +341,38 @@ export abstract class BaseLearner<
 	 * Subclasses override to restore type-specific state.
 	 */
 	protected async restoreState(): Promise<boolean> {
-		const [observeIdentity, observePrompt, understandPrompt] = await Promise.all([
+		const [observeIdentity, observePrompt, understandPrompt, obsSchema, undSchema] = await Promise.all([
 			this.store.state.get('observe_identity'),
 			this.store.state.get('observe_prompt'),
 			this.store.state.get('understand_prompt'),
+			this.store.state.get('observation_schema'),
+			this.store.state.get('understanding_schema'),
 		])
 
-		if (!observeIdentity || !observePrompt || !understandPrompt) {
+		if (!observeIdentity || !observePrompt || !understandPrompt || !obsSchema || !undSchema) {
 			return false
 		}
 
 		this._observeIdentity = observeIdentity.value as ObserveIdentity
 		this.observeSystemPrompt = observePrompt.value as string
 		this.understandSystemPrompt = understandPrompt.value as string
+		this.observationSchema = obsSchema.value as Record<string, unknown>
+		this.understandingSchema = undSchema.value as Record<string, unknown>
 		return true
+	}
+
+	/**
+	 * Validate data against a schema. Returns true if valid or no schema set.
+	 * Used for Layer 2 validation before store writes.
+	 */
+	protected validateObservationData(data: unknown): boolean {
+		if (!this.observationSchema) return true
+		return z.fromJSONSchema(this.observationSchema).safeParse(data).success
+	}
+
+	protected validateUnderstandingData(data: unknown): boolean {
+		if (!this.understandingSchema) return true
+		return z.fromJSONSchema(this.understandingSchema).safeParse(data).success
 	}
 
 	// ── Identity ────────────────────────────────────────────────────────────
@@ -352,6 +395,14 @@ export abstract class BaseLearner<
 
 	getUnderstandThresholds() {
 		return { ...this.config.understand.thresholds }
+	}
+
+	getObservationSchema(): Record<string, unknown> | null {
+		return this.observationSchema
+	}
+
+	getUnderstandingSchema(): Record<string, unknown> | null {
+		return this.understandingSchema
 	}
 
 	// ── Learn (pipeline: observe → store → understand) ────────────────────
@@ -383,6 +434,7 @@ export abstract class BaseLearner<
 				observeModel,
 				this.observeSystemPrompt!,
 				{ learnerId: this.id, instructions: this.instructions, data: batch },
+				this.observationSchema ?? undefined,
 				{
 					onThinking: (thoughts) => {
 						this.emit('learner:observe:thinking', {
@@ -422,13 +474,18 @@ export abstract class BaseLearner<
 				return result
 			}
 
-			// Store observations as pending
-			for (const text of observeResult.output) {
+			// Store observations as pending (with Layer 2 validation)
+			for (const item of observeResult.output) {
+				if (!this.validateObservationData(item)) {
+					console.error(`[${this.id}] Skipping invalid observation:`, item)
+					continue
+				}
+				const serialized = typeof item === 'string' ? item : JSON.stringify(item)
 				await this.store.observations.add({
 					id: `obs_${nanoid()}`,
-					data: text,
+					data: item,
 					metadata_importance: observeResult.importance,
-					metadata_tokens: Math.ceil(text.length / 4),
+					metadata_tokens: Math.ceil(serialized.length / 4),
 					metadata_status: 'pending',
 					metadata_created_at: new Date().toISOString(),
 				})
@@ -465,7 +522,9 @@ export abstract class BaseLearner<
 
 	private async understandFromStore(model: LanguageModel): Promise<LearnOutput> {
 		const pending = await this.store.observations.list({ metadata_status: 'pending' })
-		const observations = pending.map((o) => String(o.data))
+		const observations = pending.map((o) =>
+			typeof o.data === 'string' ? o.data : JSON.stringify(o.data),
+		)
 
 		this.emit('learner:synthesize:started', {
 			learnerId: this.id,
@@ -651,6 +710,7 @@ export abstract class BaseLearner<
 		const changedFields: string[] = []
 		let needsObserveRegen = false
 		let needsUnderstandRegen = false
+		let needsSchemaRegen = false
 
 		// ── Metadata (passive) ──
 
@@ -690,6 +750,7 @@ export abstract class BaseLearner<
 			changedFields.push('instructions')
 			needsObserveRegen = true
 			needsUnderstandRegen = true
+			needsSchemaRegen = true
 		}
 
 		// ── Focus (reactive) ──
@@ -773,10 +834,11 @@ export abstract class BaseLearner<
 
 		if (this.observeSystemPrompt === null) needsObserveRegen = true
 		if (this.understandSystemPrompt === null) needsUnderstandRegen = true
+		if (this.observationSchema === null) needsSchemaRegen = true
 
 		// ── Regenerate prompts ──
 
-		if (needsObserveRegen || needsUnderstandRegen) {
+		if (needsObserveRegen || needsUnderstandRegen || needsSchemaRegen) {
 			const promises: Promise<void>[] = []
 
 			if (needsObserveRegen) {
@@ -803,6 +865,14 @@ export abstract class BaseLearner<
 			}
 
 			await Promise.all(promises)
+
+			// Regenerate schemas if instructions changed
+			if (needsSchemaRegen) {
+				const schemaBlueprintModel = this.config.blueprintModel ?? this.config.model
+				const schemas = await this.generateSchemas(schemaBlueprintModel, this.instructions)
+				this.observationSchema = schemas.observationSchema
+				this.understandingSchema = schemas.understandingSchema
+			}
 
 			// Persist regenerated state to store
 			await this.persistState()

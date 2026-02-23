@@ -103,14 +103,14 @@ export interface SharedLearnerEventMap {
 	}
 	'learner:observed': {
 		learnerId: string
-		output: string[]
+		output: unknown[]
 		importance: number
 		bufferCount: number
 		usage?: EventUsage
 	}
 	'learner:observe:dismissed': {
 		learnerId: string
-		output: string[]
+		output: unknown[]
 		usage?: EventUsage
 	}
 	'learner:observe:error': { learnerId: string; error: unknown }

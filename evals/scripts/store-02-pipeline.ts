@@ -60,6 +60,26 @@ async function main() {
 		logger.logEvent({ type: event.type, payload: event.payload })
 	})
 
+	// ── Schema assertions — schemas persisted to store.state after init ──
+
+	logger.logSection('Text: Schema assertions')
+
+	const textObsSchema = await textStore.state.get('observation_schema')
+	const textUndSchema = await textStore.state.get('understanding_schema')
+
+	assertDefined(textObsSchema, 'Text: observation_schema in store.state')
+	assertDefined(textUndSchema, 'Text: understanding_schema in store.state')
+
+	const textObsSchemaValue = textObsSchema!.value as Record<string, unknown>
+	const textUndSchemaValue = textUndSchema!.value as Record<string, unknown>
+
+	assertEqual(textObsSchemaValue.type, 'string', 'Text: observation schema is string type')
+	assertEqual(textUndSchemaValue.type, 'string', 'Text: understanding schema is string type')
+
+	// Public accessors
+	assertDefined(textLearner.getObservationSchema(), 'Text: getObservationSchema returns value')
+	assertDefined(textLearner.getUnderstandingSchema(), 'Text: getUnderstandingSchema returns value')
+
 	// ── Phase 1: First observation — should stay pending ──────────────────
 
 	logger.logSection('Text: Phase 1 — First observation (below threshold)')
@@ -196,6 +216,31 @@ async function main() {
 		logger.logEvent({ type: event.type, payload: event.payload })
 	})
 
+	// ── Schema assertions — list schemas are LLM-generated objects ────────
+
+	logger.logSection('List: Schema assertions')
+
+	const listObsSchema = await listStore.state.get('observation_schema')
+	const listUndSchema = await listStore.state.get('understanding_schema')
+
+	assertDefined(listObsSchema, 'List: observation_schema in store.state')
+	assertDefined(listUndSchema, 'List: understanding_schema in store.state')
+
+	const listObsSchemaValue = listObsSchema!.value as Record<string, unknown>
+	const listUndSchemaValue = listUndSchema!.value as Record<string, unknown>
+
+	assertEqual(listObsSchemaValue.type, 'object', 'List: observation schema is object type')
+	assertEqual(listUndSchemaValue.type, 'object', 'List: understanding schema is object type')
+	assertDefined(
+		(listObsSchemaValue as { properties?: unknown }).properties,
+		'List: observation schema has properties',
+	)
+
+	logger.logState('List schemas', {
+		observationSchema: JSON.stringify(listObsSchemaValue, null, 2).slice(0, 200),
+		understandingSchema: JSON.stringify(listUndSchemaValue, null, 2).slice(0, 200),
+	})
+
 	// ── Phase 1: First observation ────────────────────────────────────────
 
 	logger.logSection('List: Phase 1 — First observation')
@@ -278,6 +323,15 @@ async function main() {
 	const restored = textLearner2.getUnderstanding()
 	assertTrue(restored.length > 0, 'Restored: has understanding from store')
 	assertEqual(restored, savedUnderstanding, 'Restored: matches original')
+
+	// Schemas restored from store
+	assertDefined(textLearner2.getObservationSchema(), 'Restored: observation schema restored')
+	assertDefined(textLearner2.getUnderstandingSchema(), 'Restored: understanding schema restored')
+	assertEqual(
+		(textLearner2.getObservationSchema() as Record<string, unknown>).type,
+		'string',
+		'Restored: observation schema type matches',
+	)
 
 	// ── DONE ─────────────────────────────────────────────────────────────────
 

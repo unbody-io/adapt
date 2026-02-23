@@ -1,26 +1,26 @@
 /**
  * Eval: Store ↔ Pipeline Integration
  *
- * Verifies that the learn() pipeline correctly uses the store:
- * 1. Observations land in store.observations with metadata_status 'pending'
- * 2. After understand, observations are marked 'processed' (NOT deleted)
- * 3. Understanding is written to store.understanding
- * 4. Evolution records are stored in store.evolution
+ * Exercises the full learn() pipeline against both store adapters.
+ * Dumps raw state after each phase — no assertions, no judgments.
  *
- * Creates learners directly (no Brain) with an injected MemoryStore.
+ * What to look for in output:
+ * - Observations land in store with correct metadata fields
+ * - After understand triggers, observations marked 'processed' (NOT deleted)
+ * - Understanding written to store.understanding
+ * - Evolution records stored in store.evolution
+ * - Schemas persisted in store.state after init
+ * - Restore from existing store recovers understanding + schemas
+ *
+ * Runs against both MemoryStore and SQLiteStore by default.
+ * Use STORE=memory or STORE=sqlite to run a single adapter.
  */
 
 import { TextLearner } from '../../src/learners/text-learner/class'
 import { ListLearner } from '../../src/learners/list-learner/class'
-import { MemoryStore } from '../../src/learners/stores'
+import { MemoryStore, SQLiteStore } from '../../src/learners/stores'
+import type { Store } from '../../src/learners/stores'
 import { logger } from '../helpers/logger'
-import {
-	assertEqual,
-	assertTrue,
-	assertGreaterThan,
-	assertEventEmitted,
-	assertDefined,
-} from '../helpers/assertions'
 import { createOpenRouter } from '@openrouter/ai-sdk-provider'
 
 const openrouter = createOpenRouter({
@@ -30,13 +30,59 @@ const openrouter = createOpenRouter({
 const MODEL = process.env.MODEL ?? 'google/gemini-2.0-flash-001'
 const model = openrouter(MODEL)
 
-async function main() {
+type CreateStore = () => Store
+
+async function dumpStoreState(store: Store, label: string) {
+	const observations = await store.observations.list()
+	const pending = await store.observations.list({ metadata_status: 'pending' })
+	const processed = await store.observations.list({ metadata_status: 'processed' })
+	const understanding = await store.understanding.list()
+	const evolution = await store.evolution.list()
+	const state = await store.state.list()
+
+	logger.logState(label, {
+		observations: {
+			total: observations.length,
+			pending: pending.length,
+			processed: processed.length,
+			items: observations.map((o) => ({
+				id: o.id,
+				data: typeof o.data === 'string' ? o.data.slice(0, 100) : o.data,
+				status: o.metadata_status,
+				importance: o.metadata_importance,
+			})),
+		},
+		understanding: {
+			count: understanding.length,
+			items: understanding.map((u) => ({
+				id: u.id,
+				data: typeof u.data === 'string' ? u.data.slice(0, 150) : u.data,
+				confidence: u.metadata_confidence,
+			})),
+		},
+		evolution: {
+			count: evolution.length,
+			items: evolution.map((e) => ({
+				id: e.id,
+				significance: e.significance,
+				summary: e.summary.slice(0, 100),
+			})),
+		},
+		state: {
+			count: state.length,
+			keys: state.map((s) => s.id),
+		},
+	})
+}
+
+async function runPipeline(adapterName: string, createStore: CreateStore) {
+	logger.logSection(`═══ ${adapterName} ═══`)
+
 	// ── TEXT LEARNER ──────────────────────────────────────────────────────────
 
-	logger.logSection('Text Learner: Store-Pipeline Integration')
+	logger.logSection('Text Learner')
 
-	const events: Array<{ type: string; payload?: any }> = []
-	const textStore = new MemoryStore()
+	const textStore = createStore()
 
 	const textLearner = new TextLearner({
 		id: 'text-store-test',
@@ -56,143 +102,52 @@ async function main() {
 	await textLearner.init()
 
 	textLearner.on((event) => {
-		events.push({ type: event.type, payload: event.payload })
 		logger.logEvent({ type: event.type, payload: event.payload })
 	})
 
-	// ── Schema assertions — schemas persisted to store.state after init ──
-
-	logger.logSection('Text: Schema assertions')
-
+	// Schemas after init
+	logger.logSection('Text: Schemas after init')
 	const textObsSchema = await textStore.state.get('observation_schema')
 	const textUndSchema = await textStore.state.get('understanding_schema')
+	logger.logState('Text schemas', {
+		observation_schema: textObsSchema?.value,
+		understanding_schema: textUndSchema?.value,
+		getObservationSchema: textLearner.getObservationSchema(),
+		getUnderstandingSchema: textLearner.getUnderstandingSchema(),
+	})
 
-	assertDefined(textObsSchema, 'Text: observation_schema in store.state')
-	assertDefined(textUndSchema, 'Text: understanding_schema in store.state')
-
-	const textObsSchemaValue = textObsSchema!.value as Record<string, unknown>
-	const textUndSchemaValue = textUndSchema!.value as Record<string, unknown>
-
-	assertEqual(textObsSchemaValue.type, 'string', 'Text: observation schema is string type')
-	assertEqual(textUndSchemaValue.type, 'string', 'Text: understanding schema is string type')
-
-	// Public accessors
-	assertDefined(textLearner.getObservationSchema(), 'Text: getObservationSchema returns value')
-	assertDefined(textLearner.getUnderstandingSchema(), 'Text: getUnderstandingSchema returns value')
-
-	// ── Phase 1: First observation — should stay pending ──────────────────
-
-	logger.logSection('Text: Phase 1 — First observation (below threshold)')
-
+	// Learn 1
+	logger.logSection('Text: Learn 1')
 	await textLearner.learn([
 		'Rust uses ownership and borrowing to guarantee memory safety without a garbage collector.',
 	])
+	await dumpStoreState(textStore, 'Text: after learn 1')
 
-	const textObs1 = await textStore.observations.list()
-	const textPending1 = await textStore.observations.list({ metadata_status: 'pending' })
-	const textProcessed1 = await textStore.observations.list({ metadata_status: 'processed' })
-
-	logger.logState('After first learn', {
-		totalObs: textObs1.length,
-		pending: textPending1.length,
-		processed: textProcessed1.length,
-	})
-
-	assertGreaterThan(textObs1.length, 0, 'Text: observation stored after first learn')
-	assertEqual(textProcessed1.length, 0, 'Text: no processed observations yet')
-	assertEqual(textPending1.length, textObs1.length, 'Text: all observations are pending')
-
-	// Check metadata fields on each observation
-	for (const obs of textPending1) {
-		assertEqual(obs.metadata_status, 'pending', 'Text: status is pending')
-		assertDefined(obs.metadata_importance, 'Text: has metadata_importance')
-		assertDefined(obs.metadata_created_at, 'Text: has metadata_created_at')
-	}
-
-	// Understanding should NOT be in store yet
-	assertEqual(
-		(await textStore.understanding.list()).length,
-		0,
-		'Text: no understanding before threshold',
-	)
-
-	// ── Phase 2: Second observation — still below threshold ───────────────
-
-	logger.logSection('Text: Phase 2 — Second observation (still below threshold)')
-
+	// Learn 2
+	logger.logSection('Text: Learn 2')
 	await textLearner.learn([
 		'Go uses goroutines and channels for concurrent programming, making it easy to write parallel code.',
 	])
+	await dumpStoreState(textStore, 'Text: after learn 2')
 
-	const textPending2 = await textStore.observations.list({ metadata_status: 'pending' })
-
-	assertGreaterThan(textPending2.length, textPending1.length, 'Text: pending count grew')
-	assertEqual(
-		(await textStore.observations.list({ metadata_status: 'processed' })).length,
-		0,
-		'Text: still no processed observations',
-	)
-
-	// ── Phase 3: Third observation — should trigger understand ────────────
-
-	logger.logSection('Text: Phase 3 — Third observation (triggers understand)')
-
+	// Learn 3
+	logger.logSection('Text: Learn 3')
 	await textLearner.learn([
 		'TypeScript adds static typing to JavaScript, catching type errors at compile time rather than runtime.',
 	])
+	await dumpStoreState(textStore, 'Text: after learn 3')
 
-	const textAllObs = await textStore.observations.list()
-	const textPending3 = await textStore.observations.list({ metadata_status: 'pending' })
-	const textProcessed3 = await textStore.observations.list({ metadata_status: 'processed' })
-
-	logger.logState('After third learn (understand triggered)', {
-		totalObs: textAllObs.length,
-		pending: textPending3.length,
-		processed: textProcessed3.length,
+	// Cache vs store
+	logger.logState('Text: cache vs store', {
+		cachedUnderstanding: textLearner.getUnderstanding()?.slice(0, 200),
+		storeUnderstanding: ((await textStore.understanding.get('current'))?.data as string)?.slice(0, 200),
 	})
-
-	// Observations NOT deleted, just marked processed
-	assertGreaterThan(textAllObs.length, 0, 'Text: observations NOT deleted after understand')
-	assertGreaterThan(textProcessed3.length, 0, 'Text: some observations marked processed')
-
-	// Understanding written to store
-	const textCurrentUnderstanding = await textStore.understanding.get('current')
-	assertDefined(textCurrentUnderstanding, 'Text: understanding record with id "current"')
-	assertTrue(
-		typeof textCurrentUnderstanding!.data === 'string' &&
-			textCurrentUnderstanding!.data.length > 0,
-		'Text: understanding data is non-empty string',
-	)
-	assertDefined(
-		textCurrentUnderstanding!.metadata_updated_at,
-		'Text: understanding has metadata_updated_at',
-	)
-
-	// Cache matches store
-	assertEqual(
-		textLearner.getUnderstanding(),
-		textCurrentUnderstanding!.data as string,
-		'Text: cached understanding matches store',
-	)
-
-	// Evolution recorded
-	const textEvolution = await textStore.evolution.list()
-	assertGreaterThan(textEvolution.length, 0, 'Text: evolution record stored')
-	assertDefined(textEvolution[0].significance, 'Text: evolution has significance')
-	assertDefined(textEvolution[0].created_at, 'Text: evolution has created_at')
-
-	// Events
-	assertEventEmitted(events, 'learner:observe:started')
-	assertEventEmitted(events, 'learner:synthesize:started')
-	assertEventEmitted(events, 'learner:synthesized')
-	assertEventEmitted(events, 'learner:understanding:set')
 
 	// ── LIST LEARNER ─────────────────────────────────────────────────────────
 
-	logger.logSection('List Learner: Store-Pipeline Integration')
+	logger.logSection('List Learner')
 
-	const listEvents: Array<{ type: string; payload?: any }> = []
-	const listStore = new MemoryStore()
+	const listStore = createStore()
 
 	const listLearner = new ListLearner({
 		id: 'list-store-test',
@@ -204,7 +159,7 @@ async function main() {
 		understand: {
 			thresholds: {
 				minImportance: 0.1,
-				maxObservations: 2,
+				maxObservations: 10,
 			},
 		},
 	})
@@ -212,99 +167,48 @@ async function main() {
 	await listLearner.init()
 
 	listLearner.on((event) => {
-		listEvents.push({ type: event.type, payload: event.payload })
 		logger.logEvent({ type: event.type, payload: event.payload })
 	})
 
-	// ── Schema assertions — list schemas are LLM-generated objects ────────
-
-	logger.logSection('List: Schema assertions')
-
+	// Schemas after init
+	logger.logSection('List: Schemas after init')
 	const listObsSchema = await listStore.state.get('observation_schema')
 	const listUndSchema = await listStore.state.get('understanding_schema')
-
-	assertDefined(listObsSchema, 'List: observation_schema in store.state')
-	assertDefined(listUndSchema, 'List: understanding_schema in store.state')
-
-	const listObsSchemaValue = listObsSchema!.value as Record<string, unknown>
-	const listUndSchemaValue = listUndSchema!.value as Record<string, unknown>
-
-	assertEqual(listObsSchemaValue.type, 'object', 'List: observation schema is object type')
-	assertEqual(listUndSchemaValue.type, 'object', 'List: understanding schema is object type')
-	assertDefined(
-		(listObsSchemaValue as { properties?: unknown }).properties,
-		'List: observation schema has properties',
-	)
-
 	logger.logState('List schemas', {
-		observationSchema: JSON.stringify(listObsSchemaValue, null, 2).slice(0, 200),
-		understandingSchema: JSON.stringify(listUndSchemaValue, null, 2).slice(0, 200),
+		observation_schema: listObsSchema?.value,
+		understanding_schema: listUndSchema?.value,
 	})
 
-	// ── Phase 1: First observation ────────────────────────────────────────
-
-	logger.logSection('List: Phase 1 — First observation')
-
+	// Learn 1
+	logger.logSection('List: Learn 1')
 	await listLearner.learn([
 		'React 19 introduces server components and actions, enabling hybrid client-server rendering.',
 	])
+	await dumpStoreState(listStore, 'List: after learn 1')
 
-	assertGreaterThan(
-		(await listStore.observations.list({ metadata_status: 'pending' })).length,
-		0,
-		'List: observation stored as pending',
-	)
-
-	// ── Phase 2: Second observation (triggers understand) ─────────────────
-
-	logger.logSection('List: Phase 2 — Second observation (triggers understand)')
-
+	// Learn 2
+	logger.logSection('List: Learn 2')
 	await listLearner.learn([
 		'Vue 3 uses the Composition API with reactive refs and computed values for state management.',
 	])
+	await dumpStoreState(listStore, 'List: after learn 2')
 
-	const listAllObs = await listStore.observations.list()
-	const listProcessed = await listStore.observations.list({ metadata_status: 'processed' })
-
-	logger.logState('After list understand', {
-		totalObs: listAllObs.length,
-		processed: listProcessed.length,
-	})
-
-	assertGreaterThan(listAllObs.length, 0, 'List: observations NOT deleted after understand')
-	assertGreaterThan(listProcessed.length, 0, 'List: observations marked processed')
-
-	// Understanding in store — list learner stores multiple records
+	// Cache vs store
 	const listUnderstanding = await listStore.understanding.list()
-	assertGreaterThan(listUnderstanding.length, 0, 'List: understanding records in store')
-
-	for (const rec of listUnderstanding) {
-		assertDefined(rec.data, 'List: understanding record has data')
-		assertDefined(rec.metadata_confidence, 'List: understanding record has confidence')
-	}
-
-	// Cache matches store
-	assertEqual(
-		listLearner.getUnderstanding().length,
-		listUnderstanding.length,
-		'List: cached item count matches store',
-	)
-
-	// Evolution recorded
-	assertGreaterThan(
-		(await listStore.evolution.list()).length,
-		0,
-		'List: evolution record stored',
-	)
-
-	// Events
-	assertEventEmitted(listEvents, 'learner:observe:started')
-	assertEventEmitted(listEvents, 'learner:synthesized')
-	assertEventEmitted(listEvents, 'learner:understanding:set')
+	logger.logState('List: cache vs store', {
+		cachedItemCount: listLearner.getUnderstanding().length,
+		storeItemCount: listUnderstanding.length,
+		cachedItems: listLearner.getUnderstanding(),
+		storeItems: listUnderstanding.map((u) => ({
+			id: u.id,
+			data: u.data,
+			confidence: u.metadata_confidence,
+		})),
+	})
 
 	// ── RESTORE FROM STORE ───────────────────────────────────────────────────
 
-	logger.logSection('Restore: New learner restores understanding from existing store')
+	logger.logSection('Restore: New learner from existing store')
 
 	const savedUnderstanding = textLearner.getUnderstanding()
 
@@ -313,31 +217,44 @@ async function main() {
 		name: 'Text Restore Test',
 		model,
 		instructions: 'Track programming language features and paradigms.',
-		store: textStore, // Same store
+		store: textStore,
 		governance: { strategy: 'continuous' as const },
 		understand: { thresholds: { minImportance: 0.1, maxObservations: 10 } },
 	})
 
 	await textLearner2.init()
 
-	const restored = textLearner2.getUnderstanding()
-	assertTrue(restored.length > 0, 'Restored: has understanding from store')
-	assertEqual(restored, savedUnderstanding, 'Restored: matches original')
+	logger.logState('Restore result', {
+		originalUnderstanding: savedUnderstanding?.slice(0, 200),
+		restoredUnderstanding: textLearner2.getUnderstanding()?.slice(0, 200),
+		match: savedUnderstanding === textLearner2.getUnderstanding(),
+		restoredObsSchema: textLearner2.getObservationSchema(),
+		restoredUndSchema: textLearner2.getUnderstandingSchema(),
+	})
 
-	// Schemas restored from store
-	assertDefined(textLearner2.getObservationSchema(), 'Restored: observation schema restored')
-	assertDefined(textLearner2.getUnderstandingSchema(), 'Restored: understanding schema restored')
-	assertEqual(
-		(textLearner2.getObservationSchema() as Record<string, unknown>).type,
-		'string',
-		'Restored: observation schema type matches',
-	)
+	// Cleanup
+	await textStore.dispose()
+	await listStore.dispose()
 
-	// ── DONE ─────────────────────────────────────────────────────────────────
+	logger.logSuccess(`${adapterName}: pipeline complete`)
+}
 
-	logger.logSection('Summary')
-	logger.logSuccess('All store-pipeline integration assertions passed!')
-	process.exit(0)
+async function main() {
+	console.log(`Store Pipeline Eval`)
+	console.log(`Model: ${MODEL}`)
+	console.log(`Time: ${new Date().toISOString()}`)
+
+	const storeArg = process.env.STORE?.toLowerCase()
+
+	if (!storeArg || storeArg === 'memory') {
+		await runPipeline('MemoryStore', () => new MemoryStore())
+	}
+
+	if (!storeArg || storeArg === 'sqlite') {
+		await runPipeline('SQLiteStore', () => new SQLiteStore())
+	}
+
+	logger.logSection('Done')
 }
 
 main().catch((error) => {

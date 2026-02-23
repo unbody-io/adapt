@@ -410,6 +410,20 @@ The current system prompt dumps all items into the prompt. The new prompt remove
 
 `initUnderstand()` and the identity generation stay the same. The identity already contains the matching criteria and decision logic the agent needs.
 
+### Blueprint self-questioning
+
+The blueprint LLM calls — `initObserve()`, `initUnderstand()`, `generateSchemas()` — should reason about what dimensions matter for this specific domain before producing their output. The prompts for these calls should instruct the LLM to ask itself questions like:
+
+- Does time/date of events matter? Should observations include timestamps?
+- Are there quantities, amounts, or measurements to track?
+- Are there categories or enums (e.g., meal types, status values)?
+- Do relationships between items matter (e.g., "related to item X")?
+- What makes two observations refer to the same thing? (matching criteria)
+- Is ordering/sequence important?
+- Are there confidence-affecting factors (source reliability, recency)?
+
+This self-questioning improves the quality of generated observer prompts (what to extract), observation schemas (what shape), understand identities (how to process), and understanding schemas (what to store). Getting these right is critical for the agentic understand — the agent makes per-item decisions based on what the observer extracted and what the schema expects.
+
 ### Implementation pattern
 
 Uses the same `generate()` + `tool()` from Vercel AI SDK, same agentic loop as query (`ToolBasedMethod`):

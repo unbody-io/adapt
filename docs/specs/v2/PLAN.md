@@ -4,6 +4,27 @@
 
 ---
 
+## Implementation Requirements
+
+Rules for anyone (human or agent) implementing these specs:
+
+1. **Write code only when needed.** Less code is better. Code is expensive — every line is a liability to maintain. Before adding, ask: "Can we solve this by removing something instead?"
+
+2. **TypeScript is the first-class citizen.** Strong types, no `any` escape hatches, no shortcuts. Type safety is velocity.
+
+3. **Follow existing patterns.** Match the codebase's file naming, code structure, and file organization conventions. Read what exists before writing anything new.
+
+4. **Make things modular and reusable.** Every component must work in isolation and standalone — learners, storage, observer, etc. No hidden coupling. If you can't test it independently, it's not modular.
+
+5. **Test at three levels for every phase/milestone:**
+   - **Build test** — `npx tsc --noEmit` passes, zero compilation errors
+   - **Programmatic test** — unit/integration tests that verify behavior automatically
+   - **Real-world evals** — scripts that exercise the system as a developer would use it. Run the scripts, read the logs, verify the output makes semantic sense. This is the most important layer — it catches what automated tests miss. Eval scripts should do semantic analysis and validation of actual LLM outputs, not just check that functions return without errors.
+
+6. **Don't over-engineer.** Solve the immediate problem with the simplest approach. Add complexity only when the current solution breaks down. No premature abstractions, no hypothetical future requirements.
+
+---
+
 ## Design Principles
 
 1. **"Understand actively curates"** — NOT a 1:1 copy from observations to understanding. It deduplicates, filters, merges, and updates.

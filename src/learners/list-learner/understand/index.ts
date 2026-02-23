@@ -70,7 +70,6 @@ You have tools to manage a collection of items. Process the given observations b
 3. Add new items, update existing ones with new info, or remove stale ones
 4. When updating, merge new data with existing data — don't replace
 
-If a tool returns a validation error, adjust the data and retry.
 When done processing all observations, call the complete tool with a summary.`
 }
 
@@ -87,12 +86,11 @@ function createUnderstandTools(
 	understandingSchema: Record<string, unknown> | undefined,
 	changes: ChangeRecord[],
 ) {
-	const validateData = (data: Record<string, unknown>): { valid: boolean; error?: string } => {
-		if (!understandingSchema) return { valid: true }
-		const result = z.fromJSONSchema(understandingSchema).safeParse(data)
-		if (result.success) return { valid: true }
-		return { valid: false, error: result.error.message }
-	}
+	// Build a Zod schema from the JSON Schema — used as the tool's inputSchema
+	// so the model sees exact field names/types in the tool definition itself.
+	const dataSchema = understandingSchema
+		? z.fromJSONSchema(understandingSchema)
+		: z.record(z.string(), z.unknown())
 
 	return {
 		listItems: tool({
@@ -150,11 +148,9 @@ function createUnderstandTools(
 
 		addItem: tool({
 			description:
-				'Add a new item to the collection. Data is validated against the schema. Returns the new item ID.',
+				'Add a new item to the collection. Returns the new item ID.',
 			inputSchema: z.object({
-				data: z
-					.record(z.string(), z.unknown())
-					.describe('The item data as key-value pairs'),
+				data: dataSchema.describe('The item data matching the collection schema'),
 				confidence: z
 					.number()
 					.min(0)
@@ -167,18 +163,12 @@ function createUnderstandTools(
 					.describe('Tags or signals for this item'),
 			}),
 			execute: async (params) => {
-				const validation = validateData(params.data)
-				if (!validation.valid) {
-					return {
-						success: false,
-						error: `Validation failed: ${validation.error}. Adjust data and retry.`,
-					}
-				}
+				const data = params.data as Record<string, unknown>
 				const id = `item_${nanoid()}`
 				const now = new Date().toISOString()
 				const listItem: ListItem = {
 					id,
-					data: params.data,
+					data,
 					metadata: {
 						confidence: params.confidence ?? 0.5,
 						firstSeen: now,
@@ -196,7 +186,7 @@ function createUnderstandTools(
 				changes.push({
 					type: 'add',
 					id,
-					detail: JSON.stringify(params.data).slice(0, 100),
+					detail: JSON.stringify(data).slice(0, 100),
 				})
 				return { success: true, id }
 			},
@@ -207,10 +197,7 @@ function createUnderstandTools(
 				'Update an existing item. Merges data fields with existing data (does not replace). Returns success.',
 			inputSchema: z.object({
 				id: z.string().describe('ID of the item to update'),
-				data: z
-					.record(z.string(), z.unknown())
-					.optional()
-					.describe('Fields to update/add in the item data'),
+				data: dataSchema.optional().describe('Fields to update/add in the item data'),
 				confidence: z.number().min(0).max(1).optional(),
 				signals: z
 					.array(z.string())
@@ -224,19 +211,10 @@ function createUnderstandTools(
 				}
 
 				const existingItem = existing.data as ListItem
-				const mergedData = params.data
-					? { ...existingItem.data, ...params.data }
+				const updateData = params.data as Record<string, unknown> | undefined
+				const mergedData = updateData
+					? { ...existingItem.data, ...updateData }
 					: existingItem.data
-
-				if (params.data) {
-					const validation = validateData(mergedData)
-					if (!validation.valid) {
-						return {
-							success: false,
-							error: `Validation failed: ${validation.error}. Adjust data and retry.`,
-						}
-					}
-				}
 
 				const now = new Date().toISOString()
 				const mergedSignals = params.signals
@@ -264,7 +242,7 @@ function createUnderstandTools(
 				changes.push({
 					type: 'update',
 					id: params.id,
-					detail: JSON.stringify(params.data || {}).slice(0, 100),
+					detail: JSON.stringify(updateData || {}).slice(0, 100),
 				})
 				return { success: true }
 			},

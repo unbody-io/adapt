@@ -26,7 +26,6 @@ export type UnderstandOutput =
 export interface UnderstandContext {
 	learnerId: string
 	instructions: string
-	currentItems: ListItem[]
 	observations: string[]
 }
 

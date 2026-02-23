@@ -52,12 +52,6 @@ export class ListLearner extends BaseLearner<ListItem[], ResolvedListLearnerConf
 	}
 
 	async setUnderstanding(items: ListItem[]): Promise<void> {
-		// Layer 2 validation: validate each item's data against understanding schema
-		for (const item of items) {
-			if (!this.validateUnderstandingData(item.data)) {
-				console.error(`[${this.id}] Item ${item.id} data failed schema validation`)
-			}
-		}
 		this.items = items
 
 		// Write-through to store — replace all understanding records
@@ -108,7 +102,7 @@ export class ListLearner extends BaseLearner<ListItem[], ResolvedListLearnerConf
 
 	protected async callUnderstand(
 		model: LanguageModel,
-		understanding: ListItem[],
+		_understanding: ListItem[],
 		observations: string[],
 		callbacks?: { onThinking?: (thoughts: string[]) => void },
 	): Promise<UnderstandCallResult> {
@@ -118,9 +112,9 @@ export class ListLearner extends BaseLearner<ListItem[], ResolvedListLearnerConf
 			{
 				learnerId: this.id,
 				instructions: this.instructions,
-				currentItems: understanding,
 				observations,
 			},
+			this.store.understanding,
 			this.understandingSchema ?? undefined,
 			callbacks,
 		)

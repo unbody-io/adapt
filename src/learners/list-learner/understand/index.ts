@@ -1,15 +1,18 @@
 /**
- * List understand phase
+ * List understand phase — agentic tool-based flow
  *
- * Takes current items + buffered observations → produces structured operations.
- * Operations (add/update/remove) are mechanically applied to the items list.
- * Identity generation follows same pattern as text understand.
+ * The LLM agent processes observations using CRUD tools backed by store.understanding.
+ * It searches for duplicates, adds new items, updates existing ones, removes stale ones.
+ * Schema validation happens in write tool handlers — agent can self-correct on errors.
+ * After the agent loop, final state is read from the store.
  */
 
 import type { LanguageModel } from 'ai'
+import { tool } from 'ai'
 import { z } from 'zod'
 import { nanoid } from 'nanoid'
-import { generate, Output } from '../../../llm'
+import { generate, Output, stepCountIs } from '../../../llm'
+import type { Collection, UnderstandingRecord } from '../../stores/types'
 import type { Significance } from '../../types'
 import type { ListItem } from '../types'
 import type {
@@ -17,6 +20,8 @@ import type {
 	UnderstandContext,
 	UnderstandOutput,
 } from './types'
+
+const MAX_STEPS = 30
 
 // ── Identity schema ────────────────────────────────────────────────────────
 
@@ -29,61 +34,6 @@ const understandIdentitySchema = z.object({
 })
 
 export type UnderstandIdentity = z.infer<typeof understandIdentitySchema>
-
-// ── Operations output schema ───────────────────────────────────────────────
-
-function buildOperationSchema(understandingSchema?: Record<string, unknown>) {
-	const dataSchema = understandingSchema
-		? z.fromJSONSchema(understandingSchema)
-		: z.record(z.string(), z.unknown()).describe('The item data as key-value pairs')
-
-	return z.discriminatedUnion('type', [
-		z.object({
-			type: z.literal('add'),
-			item: z.object({
-				data: dataSchema,
-				confidence: z
-					.number()
-					.min(0)
-					.max(1)
-					.optional()
-					.describe('How confident you are about this item (0.0-1.0)'),
-				signals: z
-					.array(z.string())
-					.optional()
-					.describe('Notable signals or tags for this item'),
-			}),
-		}),
-		z.object({
-			type: z.literal('update'),
-			id: z.string().describe('ID of the item to update'),
-			changes: z.object({
-				data: dataSchema.optional(),
-				confidence: z.number().min(0).max(1).optional(),
-				signals: z.array(z.string()).optional(),
-			}),
-		}),
-		z.object({
-			type: z.literal('remove'),
-			id: z.string().describe('ID of the item to remove'),
-			reason: z.string().describe('Why this item should be removed'),
-		}),
-	])
-}
-
-function buildUnderstandOutputSchema(understandingSchema?: Record<string, unknown>) {
-	return z.object({
-		changed: z
-			.boolean()
-			.describe('Whether the observations warrant any changes to the collection'),
-		operations: z.array(buildOperationSchema(understandingSchema)),
-		evolution: z.string().describe('Brief description of what changed and why'),
-		significance: z
-			.enum(['routine', 'notable', 'critical'])
-			.describe('How significant are these changes?'),
-		reasoning: z.string().optional().describe('Key reasoning behind the decisions'),
-	})
-}
 
 // ── Identity prompt ────────────────────────────────────────────────────────
 
@@ -109,64 +59,252 @@ Respond with JSON only:
 }`
 }
 
-// ── System prompt template ─────────────────────────────────────────────────
+// ── System prompt ──────────────────────────────────────────────────────────
 
-function systemPrompt(
-	identity: UnderstandIdentity,
-	currentItems: ListItem[],
-): string {
-	const itemsSummary =
-		currentItems.length === 0
-			? '(empty collection — no items yet)'
-			: JSON.stringify(
-					currentItems.map((item) => ({
-						id: item.id,
-						data: item.data,
-						confidence: item.metadata.confidence,
-						signals: item.metadata.signals,
-					})),
-					null,
-					2,
-				)
-
+function systemPrompt(identity: UnderstandIdentity): string {
 	return `${identity.identity}
 
-══════════════════════════════════════════════════════════════════════════════
-CURRENT COLLECTION (${currentItems.length} items)
-══════════════════════════════════════════════════════════════════════════════
-${itemsSummary}
+You have tools to manage a collection of items. Process the given observations by:
+1. Listing or searching existing items to understand what's already tracked
+2. For each observation: search for matches before adding — avoid duplicates
+3. Add new items, update existing ones with new info, or remove stale ones
+4. When updating, merge new data with existing data — don't replace
 
-══════════════════════════════════════════════════════════════════════════════
-YOUR APPROACH
-══════════════════════════════════════════════════════════════════════════════
-For each observation, decide:
-1. ADD — if it describes a new item not in the collection
-2. UPDATE — if it adds info or changes an existing item (reference by id)
-3. REMOVE — if it indicates an item is no longer relevant (reference by id)
-4. SKIP — if the observation doesn't warrant any change
+If a tool returns a validation error, adjust the data and retry.
+When done processing all observations, call the complete tool with a summary.`
+}
 
-Guidelines:
-- Be precise with item matching — use your matching criteria
-- Preserve existing data when updating (merge, don't replace)
-- Set confidence based on the quality/reliability of the observation
-- Add relevant signals/tags to items
-- Only remove items when there's clear evidence they should go
+// ── Tool creation ──────────────────────────────────────────────────────────
 
-══════════════════════════════════════════════════════════════════════════════
-RESPONSE FORMAT
-══════════════════════════════════════════════════════════════════════════════
-Respond with JSON only:
-{
-  "changed": true/false,
-  "operations": [
-    { "type": "add", "item": { "data": {...}, "confidence": 0.8, "signals": ["new"] } },
-    { "type": "update", "id": "item_xxx", "changes": { "data": {...} } },
-    { "type": "remove", "id": "item_xxx", "reason": "..." }
-  ],
-  "evolution": "Brief description of what changed",
-  "significance": "routine" | "notable" | "critical",
-  "reasoning": "Why you made these decisions"
-}`
+interface ChangeRecord {
+	type: 'add' | 'update' | 'remove'
+	id: string
+	detail: string
+}
+
+function createUnderstandTools(
+	collection: Collection<UnderstandingRecord>,
+	understandingSchema: Record<string, unknown> | undefined,
+	changes: ChangeRecord[],
+) {
+	const validateData = (data: Record<string, unknown>): { valid: boolean; error?: string } => {
+		if (!understandingSchema) return { valid: true }
+		const result = z.fromJSONSchema(understandingSchema).safeParse(data)
+		if (result.success) return { valid: true }
+		return { valid: false, error: result.error.message }
+	}
+
+	return {
+		listItems: tool({
+			description:
+				'List all items in the collection. Returns id, data, and confidence for each item.',
+			inputSchema: z.object({}),
+			execute: async () => {
+				const records = await collection.list()
+				return {
+					count: records.length,
+					items: records.map((r) => {
+						const item = r.data as ListItem
+						return { id: r.id, data: item.data, confidence: r.metadata_confidence }
+					}),
+				}
+			},
+		}),
+
+		searchItems: tool({
+			description:
+				'Search items by text query. Matches against all fields in item data.',
+			inputSchema: z.object({
+				query: z.string().describe('Search query text'),
+			}),
+			execute: async (params) => {
+				const matches = await collection.search(params.query)
+				return {
+					count: matches.length,
+					items: matches.map((r) => {
+						const item = r.data as ListItem
+						return { id: r.id, data: item.data, confidence: r.metadata_confidence }
+					}),
+				}
+			},
+		}),
+
+		getItem: tool({
+			description: 'Get a single item by its ID with full details.',
+			inputSchema: z.object({
+				id: z.string().describe('The item ID'),
+			}),
+			execute: async (params) => {
+				const record = await collection.get(params.id)
+				if (!record) return { found: false }
+				const item = record.data as ListItem
+				return {
+					found: true,
+					id: record.id,
+					data: item.data,
+					confidence: item.metadata.confidence,
+					signals: item.metadata.signals,
+				}
+			},
+		}),
+
+		addItem: tool({
+			description:
+				'Add a new item to the collection. Data is validated against the schema. Returns the new item ID.',
+			inputSchema: z.object({
+				data: z
+					.record(z.string(), z.unknown())
+					.describe('The item data as key-value pairs'),
+				confidence: z
+					.number()
+					.min(0)
+					.max(1)
+					.optional()
+					.describe('Confidence score (0-1), defaults to 0.5'),
+				signals: z
+					.array(z.string())
+					.optional()
+					.describe('Tags or signals for this item'),
+			}),
+			execute: async (params) => {
+				const validation = validateData(params.data)
+				if (!validation.valid) {
+					return {
+						success: false,
+						error: `Validation failed: ${validation.error}. Adjust data and retry.`,
+					}
+				}
+				const id = `item_${nanoid()}`
+				const now = new Date().toISOString()
+				const listItem: ListItem = {
+					id,
+					data: params.data,
+					metadata: {
+						confidence: params.confidence ?? 0.5,
+						firstSeen: now,
+						lastUpdated: now,
+						signals: params.signals ?? [],
+					},
+				}
+				await collection.add({
+					id,
+					data: listItem as unknown,
+					metadata_confidence: listItem.metadata.confidence,
+					metadata_created_at: now,
+					metadata_updated_at: now,
+				})
+				changes.push({
+					type: 'add',
+					id,
+					detail: JSON.stringify(params.data).slice(0, 100),
+				})
+				return { success: true, id }
+			},
+		}),
+
+		updateItem: tool({
+			description:
+				'Update an existing item. Merges data fields with existing data (does not replace). Returns success.',
+			inputSchema: z.object({
+				id: z.string().describe('ID of the item to update'),
+				data: z
+					.record(z.string(), z.unknown())
+					.optional()
+					.describe('Fields to update/add in the item data'),
+				confidence: z.number().min(0).max(1).optional(),
+				signals: z
+					.array(z.string())
+					.optional()
+					.describe('Signals to add (merged with existing)'),
+			}),
+			execute: async (params) => {
+				const existing = await collection.get(params.id)
+				if (!existing) {
+					return { success: false, error: `Item ${params.id} not found` }
+				}
+
+				const existingItem = existing.data as ListItem
+				const mergedData = params.data
+					? { ...existingItem.data, ...params.data }
+					: existingItem.data
+
+				if (params.data) {
+					const validation = validateData(mergedData)
+					if (!validation.valid) {
+						return {
+							success: false,
+							error: `Validation failed: ${validation.error}. Adjust data and retry.`,
+						}
+					}
+				}
+
+				const now = new Date().toISOString()
+				const mergedSignals = params.signals
+					? [...new Set([...existingItem.metadata.signals, ...params.signals])]
+					: existingItem.metadata.signals
+
+				const updatedItem: ListItem = {
+					...existingItem,
+					data: mergedData,
+					metadata: {
+						...existingItem.metadata,
+						...(params.confidence !== undefined && {
+							confidence: params.confidence,
+						}),
+						signals: mergedSignals,
+						lastUpdated: now,
+					},
+				}
+
+				await collection.update(params.id, {
+					data: updatedItem as unknown,
+					metadata_confidence: updatedItem.metadata.confidence,
+					metadata_updated_at: now,
+				})
+				changes.push({
+					type: 'update',
+					id: params.id,
+					detail: JSON.stringify(params.data || {}).slice(0, 100),
+				})
+				return { success: true }
+			},
+		}),
+
+		removeItem: tool({
+			description: 'Remove an item from the collection.',
+			inputSchema: z.object({
+				id: z.string().describe('ID of the item to remove'),
+				reason: z.string().describe('Why this item should be removed'),
+			}),
+			execute: async (params) => {
+				try {
+					await collection.delete(params.id)
+					changes.push({ type: 'remove', id: params.id, detail: params.reason })
+					return { success: true }
+				} catch {
+					return { success: false, error: `Item ${params.id} not found` }
+				}
+			},
+		}),
+
+		complete: tool({
+			description:
+				'Call this when you are done processing all observations. Summarize what changed.',
+			inputSchema: z.object({
+				evolution: z
+					.string()
+					.describe('Brief description of what changed and why'),
+				significance: z
+					.enum(['routine', 'notable', 'critical'])
+					.describe('How significant are these changes'),
+				reasoning: z
+					.string()
+					.optional()
+					.describe('Key reasoning behind the decisions'),
+			}),
+			// No execute — terminal tool
+		}),
+	}
 }
 
 // ── Public API ─────────────────────────────────────────────────────────────
@@ -189,7 +327,6 @@ export async function initUnderstand(
 		repairSchema: understandIdentitySchema,
 	})
 
-	// System prompt is partially generated now; currentItems injected at call time
 	return { identity, systemPrompt: '' }
 }
 
@@ -197,121 +334,75 @@ export async function understand(
 	model: LanguageModel,
 	identity: UnderstandIdentity,
 	context: UnderstandContext,
+	collection: Collection<UnderstandingRecord>,
 	understandingSchema?: Record<string, unknown>,
 	callbacks?: UnderstandCallbacks,
 ): Promise<UnderstandOutput> {
 	try {
-		const system = systemPrompt(identity, context.currentItems)
-		const prompt = `New observations to integrate:\n\n${context.observations.map((o, i) => `${i + 1}. ${o}`).join('\n')}\n\nDecide what operations to apply to the collection.`
-		const outputSchema = buildUnderstandOutputSchema(understandingSchema)
+		const changes: ChangeRecord[] = []
+		const tools = createUnderstandTools(collection, understandingSchema, changes)
+
+		const system = systemPrompt(identity)
+		const prompt = `New observations to integrate:\n\n${context.observations.map((o, i) => `${i + 1}. ${o}`).join('\n')}\n\nProcess these observations using your tools.`
+
+		interface CompleteResult {
+			evolution: string
+			significance: string
+			reasoning?: string
+		}
+		let completeResult: CompleteResult | null = null
 
 		const result = await generate({
 			model,
 			system,
 			prompt,
-			output: Output.object({ schema: outputSchema }),
-			repairSchema: outputSchema,
+			tools,
+			toolChoice: 'required' as const,
+			stopWhen: stepCountIs(MAX_STEPS),
+			onStepFinish: ({ text, toolCalls }) => {
+				if (text && callbacks?.onThinking) {
+					callbacks.onThinking([text])
+				}
+				if (toolCalls) {
+					for (const tc of toolCalls) {
+						if (tc.toolName === 'complete') {
+							completeResult = tc.input as CompleteResult
+						}
+					}
+				}
+			},
 		})
 
-		if (callbacks?.onThinking && result.reasoning) {
-			callbacks.onThinking(
-				result.reasoning.map((r: { text: string }) => r.text),
-			)
+		// Check final step for complete tool call
+		const completeCall = result.toolCalls.find(
+			(c) => c.toolName === 'complete',
+		)
+		if (completeCall && 'input' in completeCall) {
+			completeResult = completeCall.input as CompleteResult
 		}
 
-		const data = result.output
-
-		if (!data.changed || data.operations.length === 0) {
+		// No changes made
+		if (changes.length === 0) {
 			return {
 				status: 'dismissed',
-				output: data.evolution || 'No changes needed',
+				output: completeResult?.evolution || 'No changes needed',
 				usage: result.usage,
 			}
 		}
 
-		// Apply operations mechanically
-		const newItems = applyOperations(context.currentItems, data.operations)
+		// Read final state from store
+		const records = await collection.list()
+		const newItems: ListItem[] = records.map((r) => r.data as ListItem)
 
 		return {
 			status: 'synthesized',
 			newItems,
-			significance: data.significance as Significance,
-			evolution: data.evolution,
-			reasoning: data.reasoning,
+			significance: (completeResult?.significance as Significance) ?? 'routine',
+			evolution: completeResult?.evolution ?? `${changes.length} operations applied`,
+			reasoning: completeResult?.reasoning,
 			usage: result.usage,
 		}
 	} catch (error) {
 		return { status: 'error', error }
 	}
-}
-
-// ── Operation application ──────────────────────────────────────────────────
-
-type RawOperation =
-	| { type: 'add'; item: { data: Record<string, unknown>; confidence?: number; signals?: string[] } }
-	| { type: 'update'; id: string; changes: { data?: Record<string, unknown>; confidence?: number; signals?: string[] } }
-	| { type: 'remove'; id: string; reason: string }
-
-function applyOperations(
-	currentItems: ListItem[],
-	operations: RawOperation[],
-): ListItem[] {
-	const items = [...currentItems]
-	const now = new Date().toISOString()
-
-	for (const op of operations) {
-		switch (op.type) {
-			case 'add': {
-				const newItem: ListItem = {
-					id: `item_${nanoid()}`,
-					data: op.item.data,
-					metadata: {
-						confidence: op.item.confidence ?? 0.5,
-						firstSeen: now,
-						lastUpdated: now,
-						signals: op.item.signals ?? [],
-					},
-				}
-				items.push(newItem)
-				break
-			}
-			case 'update': {
-				const idx = items.findIndex((item) => item.id === op.id)
-				if (idx === -1) break
-
-				const existing = items[idx]
-				items[idx] = {
-					...existing,
-					data: op.changes.data
-						? { ...existing.data, ...op.changes.data }
-						: existing.data,
-					metadata: {
-						...existing.metadata,
-						...(op.changes.confidence !== undefined && {
-							confidence: op.changes.confidence,
-						}),
-						...(op.changes.signals && {
-							signals: [
-								...new Set([
-									...existing.metadata.signals,
-									...op.changes.signals,
-								]),
-							],
-						}),
-						lastUpdated: now,
-					},
-				}
-				break
-			}
-			case 'remove': {
-				const removeIdx = items.findIndex((item) => item.id === op.id)
-				if (removeIdx !== -1) {
-					items.splice(removeIdx, 1)
-				}
-				break
-			}
-		}
-	}
-
-	return items
 }

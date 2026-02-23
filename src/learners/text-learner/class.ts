@@ -50,9 +50,6 @@ export class TextLearner extends BaseLearner<string, ResolvedTextLearnerConfig> 
 	}
 
 	async setUnderstanding(understanding: string): Promise<void> {
-		if (!this.validateUnderstandingData(understanding)) {
-			console.error(`[${this.id}] Understanding failed schema validation, storing anyway`)
-		}
 		this.understanding = understanding
 
 		// Write-through to store

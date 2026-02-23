@@ -3,13 +3,17 @@
  *
  * Generates JSON Schema objects via LLM that describe the structure
  * of observation and understanding data for this learner's domain.
+ *
+ * Uses plain text generation (not structured output) because the thing
+ * we're asking the model to produce — a JSON Schema with arbitrary
+ * properties — can't be described ahead of time in a Zod schema.
  */
 
 import type { LanguageModel } from 'ai'
 import { z } from 'zod'
-import { generate, Output } from '../../llm'
+import { generate } from '../../llm'
 
-// ── Output schema for LLM response ──────────────────────────────────────────
+// ── Validation schema for parsing LLM text output ────────────────────────────
 
 const jsonSchemaOutputSchema = z.object({
 	schema: z
@@ -20,7 +24,7 @@ const jsonSchemaOutputSchema = z.object({
 // ── Prompts ─────────────────────────────────────────────────────────────────
 
 function observationSchemaPrompt(instructions: string, identity: string): string {
-	return `You are generating a JSON Schema that defines the structure of a single observation item.
+	return `You are designing a data schema for an observation agent. This is a schema DESIGN task — reason about what structure best captures this domain before producing the schema.
 
 The agent's purpose:
 "${instructions}"
@@ -28,30 +32,36 @@ The agent's purpose:
 The observer's identity:
 "${identity}"
 
-Generate a JSON Schema object that describes what a single observed item looks like.
-The schema should capture the key fields that would be extracted from raw data for this domain.
+STEP 1: Think about the domain. Ask yourself:
+- What kind of information will appear in raw text about this topic?
+- What field uniquely identifies each item? (a name? a title? a combination?)
+- Are there natural categories or types? (use enums — always include "other" as a catch-all)
+- Are there numeric values with known ranges? (ratings, prices, quantities)
+- Are there boolean flags? (is_open, is_verified, etc.)
+- What information will realistically be extractable from conversational text? (don't include fields like phone numbers, URLs, or coordinates unless the instructions specifically mention them)
+- What's always present vs sometimes mentioned?
 
-Requirements:
-- Must be a valid JSON Schema with "type": "object"
-- Include "properties" with appropriate types (string, number, boolean, array, etc.)
-- Use "enum" where the values are a known fixed set
-- Include "required" for essential fields
-- Add "description" to each property
-- Keep it focused — only fields relevant to the agent's purpose
-- Do NOT include metadata fields (id, timestamp, confidence) — only domain data
+STEP 2: Produce a JSON Schema based on your reasoning.
 
-Example for a food-tracking agent:
-{
-  "type": "object",
-  "properties": {
-    "item": { "type": "string", "description": "Name of the food item" },
-    "meal": { "type": "string", "enum": ["breakfast", "lunch", "dinner", "snack"] },
-    "calories": { "type": "number", "description": "Estimated calories" }
-  },
-  "required": ["item", "meal"]
-}
+This schema guides EXTRACTION from unpredictable raw text. Be flexible — the observer doesn't control what comes in.
 
-Respond with JSON only: { "schema": { ... } }`
+Schema rules:
+- "type" must be "object"
+- FLAT structure only — no nested objects. Every property must be a primitive (string, number, boolean) or an array of primitives.
+- Mark 1-3 core identifying fields as "required" — the fields that define what this item IS. Everything else optional.
+- No metadata fields (id, timestamp, confidence) — domain data only.
+- Only include fields that are relevant to the agent's purpose and realistically extractable.
+
+Constraint guidelines — only use constraints that affect SEMANTICS, not formatting:
+- "description": always — explain what the field captures
+- "enum": for known categories (always include "other" as catch-all)
+- "default": when a sensible default exists
+- "minimum" / "maximum": for bounded numbers (e.g., ratings 0-5)
+- Do NOT use "pattern" or "format" — they reject valid data that's just formatted differently
+- Do NOT use "minLength" / "maxLength" — the observer should extract whatever it finds
+
+Respond with your reasoning first, then the JSON schema in this exact format:
+{ "schema": { "type": "object", "properties": { ... }, "required": [ ... ] } }`
 }
 
 function understandingSchemaPrompt(instructions: string, identity: string): string {
@@ -78,6 +88,20 @@ Requirements:
 Respond with JSON only: { "schema": { ... } }`
 }
 
+// ── Helpers ─────────────────────────────────────────────────────────────────
+
+function extractJson(text: string): string {
+	// Strip markdown code fences
+	let cleaned = text.replace(/^```(?:json)?\s*\n?/i, '').replace(/\n?```\s*$/i, '').trim()
+	// Find first { to last }
+	const start = cleaned.indexOf('{')
+	const end = cleaned.lastIndexOf('}')
+	if (start !== -1 && end > start) {
+		cleaned = cleaned.slice(start, end + 1)
+	}
+	return cleaned
+}
+
 // ── Public API ──────────────────────────────────────────────────────────────
 
 export async function generateObservationSchema(
@@ -85,13 +109,12 @@ export async function generateObservationSchema(
 	instructions: string,
 	identity: string,
 ): Promise<Record<string, unknown>> {
-	const { output } = await generate({
+	const result = await generate({
 		model,
 		prompt: observationSchemaPrompt(instructions, identity),
-		output: Output.object({ schema: jsonSchemaOutputSchema }),
-		repairSchema: jsonSchemaOutputSchema,
 	})
-	return output.schema
+	const parsed = jsonSchemaOutputSchema.parse(JSON.parse(extractJson(result.text)))
+	return parsed.schema
 }
 
 export async function generateUnderstandingSchema(
@@ -99,11 +122,10 @@ export async function generateUnderstandingSchema(
 	instructions: string,
 	identity: string,
 ): Promise<Record<string, unknown>> {
-	const { output } = await generate({
+	const result = await generate({
 		model,
 		prompt: understandingSchemaPrompt(instructions, identity),
-		output: Output.object({ schema: jsonSchemaOutputSchema }),
-		repairSchema: jsonSchemaOutputSchema,
 	})
-	return output.schema
+	const parsed = jsonSchemaOutputSchema.parse(JSON.parse(extractJson(result.text)))
+	return parsed.schema
 }

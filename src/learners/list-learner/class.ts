@@ -73,7 +73,7 @@ export class ListLearner extends BaseLearner<ListItem[], ResolvedListLearnerConf
 		})
 	}
 
-	protected async restoreUnderstandingFromStore(): Promise<void> {
+	protected async restoreUnderstanding(): Promise<void> {
 		const records = await this.store.understanding.list()
 		if (records.length > 0) {
 			this.items = records.map((r) => r.data as ListItem)
@@ -150,8 +150,8 @@ export class ListLearner extends BaseLearner<ListItem[], ResolvedListLearnerConf
 
 	// ── State persistence (adds understand identity) ──────────────────────────
 
-	protected async saveStateToStore(): Promise<void> {
-		await super.saveStateToStore()
+	protected async persistState(): Promise<void> {
+		await super.persistState()
 		const now = new Date().toISOString()
 		const existing = await this.store.state.get('understand_identity')
 		if (existing) {
@@ -161,8 +161,8 @@ export class ListLearner extends BaseLearner<ListItem[], ResolvedListLearnerConf
 		}
 	}
 
-	protected async restoreStateFromStore(): Promise<boolean> {
-		const baseRestored = await super.restoreStateFromStore()
+	protected async restoreState(): Promise<boolean> {
+		const baseRestored = await super.restoreState()
 		if (!baseRestored) return false
 
 		const understandIdentity = await this.store.state.get('understand_identity')

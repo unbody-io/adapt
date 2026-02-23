@@ -177,7 +177,7 @@ export abstract class BaseLearner<
 	/**
 	 * Restore understanding from store into local cache (called during init).
 	 */
-	protected abstract restoreUnderstandingFromStore(): Promise<void>
+	protected abstract restoreUnderstanding(): Promise<void>
 
 	/**
 	 * Hook for type-specific config updates (e.g. governance).
@@ -234,7 +234,7 @@ export abstract class BaseLearner<
 
 		try {
 			// Try restoring identities/prompts from store.state (skip LLM calls)
-			const restored = await this.restoreStateFromStore()
+			const restored = await this.restoreState()
 
 			if (!restored) {
 				// Generate observe identity + prompt via LLM
@@ -257,11 +257,11 @@ export abstract class BaseLearner<
 				)
 
 				// Persist to store.state for future inits
-				await this.saveStateToStore()
+				await this.persistState()
 			}
 
 			// Restore understanding from store (for persistent adapters)
-			await this.restoreUnderstandingFromStore()
+			await this.restoreUnderstanding()
 
 			// Create query method
 			this._queryMethod = this.createQueryMethod()
@@ -292,7 +292,7 @@ export abstract class BaseLearner<
 	 * Save identities and prompts to store.state.
 	 * Subclasses override to add type-specific state (e.g. understand identity).
 	 */
-	protected async saveStateToStore(): Promise<void> {
+	protected async persistState(): Promise<void> {
 		const now = new Date().toISOString()
 		const entries: Array<{ id: string; value: unknown }> = [
 			{ id: 'observe_identity', value: this._observeIdentity },
@@ -315,7 +315,7 @@ export abstract class BaseLearner<
 	 * Returns true if all required state was found, false otherwise.
 	 * Subclasses override to restore type-specific state.
 	 */
-	protected async restoreStateFromStore(): Promise<boolean> {
+	protected async restoreState(): Promise<boolean> {
 		const [observeIdentity, observePrompt, understandPrompt] = await Promise.all([
 			this.store.state.get('observe_identity'),
 			this.store.state.get('observe_prompt'),
@@ -805,7 +805,7 @@ export abstract class BaseLearner<
 			await Promise.all(promises)
 
 			// Persist regenerated state to store
-			await this.saveStateToStore()
+			await this.persistState()
 
 			this.emit('learner:prompts:regenerated', {
 				learnerId: this.id,

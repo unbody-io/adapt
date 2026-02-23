@@ -75,7 +75,7 @@ export class TextLearner extends BaseLearner<string, ResolvedTextLearnerConfig> 
 		})
 	}
 
-	protected async restoreUnderstandingFromStore(): Promise<void> {
+	protected async restoreUnderstanding(): Promise<void> {
 		const record = await this.store.understanding.get('current')
 		if (record) {
 			this.understanding = record.data as string
@@ -164,8 +164,8 @@ export class TextLearner extends BaseLearner<string, ResolvedTextLearnerConfig> 
 
 	// ── State persistence (adds understand identity) ──────────────────────────
 
-	protected async saveStateToStore(): Promise<void> {
-		await super.saveStateToStore()
+	protected async persistState(): Promise<void> {
+		await super.persistState()
 		const now = new Date().toISOString()
 		const existing = await this.store.state.get('understand_identity')
 		if (existing) {
@@ -175,8 +175,8 @@ export class TextLearner extends BaseLearner<string, ResolvedTextLearnerConfig> 
 		}
 	}
 
-	protected async restoreStateFromStore(): Promise<boolean> {
-		const baseRestored = await super.restoreStateFromStore()
+	protected async restoreState(): Promise<boolean> {
+		const baseRestored = await super.restoreState()
 		if (!baseRestored) return false
 
 		const understandIdentity = await this.store.state.get('understand_identity')

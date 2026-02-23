@@ -148,7 +148,7 @@ function createUnderstandTools(
 
 		addItem: tool({
 			description:
-				'Add a new item to the collection. Returns the new item ID.',
+				'Add a new item to the collection. Automatically checks for duplicates — if similar items exist, returns them so you can use updateItem instead.',
 			inputSchema: z.object({
 				data: dataSchema.describe('The item data matching the collection schema'),
 				confidence: z
@@ -164,6 +164,25 @@ function createUnderstandTools(
 			}),
 			execute: async (params) => {
 				const data = params.data as Record<string, unknown>
+
+				// Force dedup: search for similar items before adding
+				const searchTerms = Object.values(data)
+					.filter((v) => typeof v === 'string')
+					.slice(0, 3)
+				for (const term of searchTerms) {
+					const matches = await collection.search(term as string)
+					if (matches.length > 0) {
+						return {
+							success: false,
+							reason: 'Similar items already exist. Use updateItem to merge new data instead of creating a duplicate.',
+							existingItems: matches.map((r) => {
+								const item = r.data as ListItem
+								return { id: r.id, data: item.data }
+							}),
+						}
+					}
+				}
+
 				const id = `item_${nanoid()}`
 				const now = new Date().toISOString()
 				const listItem: ListItem = {

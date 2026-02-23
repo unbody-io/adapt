@@ -33,6 +33,9 @@ export class MemoryCollection<T extends { id: string }>
 	private items: T[] = []
 
 	async add(item: T): Promise<void> {
+		if (this.items.some((i) => i.id === item.id)) {
+			throw new Error(`Record with id "${item.id}" already exists`)
+		}
 		this.items.push(item)
 	}
 

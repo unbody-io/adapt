@@ -218,42 +218,45 @@ export class SQLiteStore implements Store {
 		this.db.exec(`
 			CREATE TABLE IF NOT EXISTS observations (
 				id TEXT PRIMARY KEY,
-				data TEXT,
-				metadata_importance REAL,
-				metadata_tokens INTEGER,
-				metadata_status TEXT,
-				metadata_created_at TEXT
+				data TEXT NOT NULL,
+				metadata_importance REAL NOT NULL,
+				metadata_tokens INTEGER NOT NULL,
+				metadata_status TEXT NOT NULL,
+				metadata_created_at TEXT NOT NULL
 			)
 		`)
 		this.db.exec(`
 			CREATE TABLE IF NOT EXISTS understanding (
 				id TEXT PRIMARY KEY,
-				data TEXT,
-				metadata_confidence REAL,
-				metadata_created_at TEXT,
-				metadata_updated_at TEXT
+				data TEXT NOT NULL,
+				metadata_confidence REAL NOT NULL,
+				metadata_created_at TEXT NOT NULL,
+				metadata_updated_at TEXT NOT NULL
 			)
 		`)
 		this.db.exec(`
 			CREATE TABLE IF NOT EXISTS evolution (
 				id TEXT PRIMARY KEY,
-				summary TEXT,
+				summary TEXT NOT NULL,
 				reasoning TEXT,
-				significance TEXT,
-				created_at TEXT
+				significance TEXT NOT NULL,
+				created_at TEXT NOT NULL
 			)
 		`)
 		this.db.exec(`
 			CREATE TABLE IF NOT EXISTS state (
 				id TEXT PRIMARY KEY,
-				value TEXT,
-				updated_at TEXT
+				value TEXT NOT NULL,
+				updated_at TEXT NOT NULL
 			)
 		`)
 
 		// Indexes for common filter queries
 		this.db.exec(`
-			CREATE INDEX IF NOT EXISTS idx_observations_status ON observations(metadata_status)
+			CREATE INDEX IF NOT EXISTS idx_observations_status ON observations(metadata_status);
+			CREATE INDEX IF NOT EXISTS idx_understanding_updated ON understanding(metadata_updated_at);
+			CREATE INDEX IF NOT EXISTS idx_evolution_created ON evolution(created_at);
+			CREATE INDEX IF NOT EXISTS idx_state_updated ON state(updated_at);
 		`)
 
 		this.observations = new SQLiteCollection<ObservationRecord>(

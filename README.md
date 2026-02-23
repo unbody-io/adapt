@@ -113,13 +113,19 @@ The orchestration layer that:
 
 ### Learners
 
-Independent learning agents that:
+Independent learning agents with specialized understanding types:
+
+- **TextLearner** — Builds free-text understanding (prose summaries, narratives)
+- **ListLearner** — Maintains structured collections (items with confidence, signals, metadata)
+
+All learners share a common base (`BaseLearner`) and:
 
 - Have specific focus areas (e.g., "coding philosophy", "preferences", "behavioral patterns")
 - Observe incoming data for relevance
 - Build understanding over time through synthesis
 - Answer queries from their specialized perspective
 - Report confidence and knowledge gaps
+- Auto-generate observation and understanding schemas
 
 ### Two-Phase Learning
 
@@ -127,12 +133,13 @@ Brain uses a two-phase approach:
 
 1. **Observe Phase**: Extract relevant information from raw data
    - Filters noise, focuses on purpose-specific content
-   - Buffers observations until synthesis threshold
+   - Buffers observations in the store as `pending`
 
-2. **Synthesize Phase**: Update understanding from buffered observations
+2. **Understand Phase**: Update understanding from buffered observations
+   - Triggers when pending count reaches threshold
    - Merges new insights with existing knowledge
-   - Produces evolved understanding
-   - Strategies: cumulative (merge), replace (rewrite), hybrid
+   - Marks processed observations (never deleted)
+   - Records evolution history with significance tracking
 
 ### Self-Evolution (Living Brain)
 
@@ -254,18 +261,20 @@ Brain uses a layered architecture:
           ▼               ▼               ▼
     ┌─────────┐     ┌─────────┐     ┌─────────┐
     │Learner 1│     │Learner 2│ ... │Learner N│
-    │ (Text)  │     │ (Text)  │     │ (Text)  │
+    │ (Text)  │     │ (List)  │     │ (Text)  │
     └────┬────┘     └────┬────┘     └────┬────┘
          │               │               │
-         │ Observe → Buffer → Synthesize │
+         │  Observe → Store → Understand │
          │                               │
          └───────────────┬───────────────┘
                          │
-                         ▼
-                   ┌───────────┐
-                   │ LLM Layer │
-                   │ (ai-sdk)  │
-                   └───────────┘
+              ┌──────────┼──────────┐
+              ▼                     ▼
+        ┌───────────┐        ┌───────────┐
+        │ LLM Layer │        │   Store   │
+        │ (ai-sdk)  │        │ (Memory/  │
+        └───────────┘        │  SQLite)  │
+                             └───────────┘
 ```
 
 For detailed architecture diagrams, see [docs/ARCHITECTURE-DIAGRAMS.md](docs/ARCHITECTURE-DIAGRAMS.md).
@@ -276,6 +285,7 @@ For detailed architecture diagrams, see [docs/ARCHITECTURE-DIAGRAMS.md](docs/ARC
 - **LLM SDK**: Vercel AI SDK v6
 - **Providers**: OpenRouter (multi-provider access)
 - **Validation**: Zod schemas
+- **Storage**: In-memory (MemoryStore) or SQLite (SQLiteStore via better-sqlite3)
 - **Server**: Hono (lightweight, fast)
 - **Events**: Server-Sent Events (SSE) for real-time updates
 
@@ -345,13 +355,14 @@ brain-v0/
 │   │   ├── agent.ts        # Synthesis agent
 │   │   └── prompts/        # System prompts
 │   ├── learners/           # Learner implementations
-│   │   └── text-learner/
-│   │       ├── class.ts    # TextLearner
-│   │       ├── learning-methods/
-│   │       │   └── two-phase/  # Observe + Synthesize
-│   │       └── query-methods/
-│   │           ├── direct/     # Structured output query
-│   │           └── tool-based/ # Tool loop query
+│   │   ├── base/           # BaseLearner (shared observe/understand/query)
+│   │   ├── text-learner/   # TextLearner (free-text understanding)
+│   │   ├── list-learner/   # ListLearner (structured collections)
+│   │   ├── observer/       # Shared observer logic
+│   │   └── stores/         # Store adapters
+│   │       ├── types.ts    # Collection/Store interfaces
+│   │       ├── memory.ts   # MemoryStore (in-memory)
+│   │       └── sqlite.ts   # SQLiteStore (better-sqlite3)
 │   ├── llm/                # LLM wrapper (JSON repair, usage tracking)
 │   └── utils/              # Shared utilities
 ├── server/                 # Web UI
@@ -360,10 +371,12 @@ brain-v0/
 │       └── index.html      # Single-page UI
 ├── evals/                  # Evaluation scripts
 │   ├── datasets/           # Test data
-│   └── reports/            # Eval results
+│   └── scripts/            # Eval scripts (store, pipeline, etc.)
 └── docs/                   # Documentation
     ├── ARCHITECTURE-DIAGRAMS.md
     └── specs/              # Design specs
+        ├── v2/             # Current specs (store, schema, learner refactor)
+        └── archive/        # Superseded specs
 ```
 
 ### Running Tests
@@ -443,17 +456,17 @@ const brain = new Brain({
 ## Limitations & Future Work
 
 ### Current Limitations
-- **Memory**: Understanding stored in-memory only (no persistence yet)
 - **Scale**: Not optimized for large-scale data (100K+ events)
-- **Learner types**: Only TextLearner implemented (no structured data, images, etc.)
+- **Learner types**: TextLearner and ListLearner only (no images, audio, etc.)
 - **Evaluation**: Limited eval datasets and metrics
 
 ### Roadmap
 
 - [x] Advanced governance (auto-merging, splitting learners)
-- [ ] Persistent storage (vector DB integration)
-- [ ] Learner state serialization/deserialization
-- [ ] More learner types (StructuredLearner, VisionLearner, etc.)
+- [x] Persistent storage (SQLite adapter)
+- [x] Learner state serialization/restore from store
+- [x] Multiple learner types (TextLearner, ListLearner)
+- [x] Schema generation (observation + understanding schemas)
 - [ ] Streaming injection (real-time data sources)
 - [ ] Benchmark suite (accuracy, calibration, cost)
 - [ ] Multi-Brain federation (Brain networks)

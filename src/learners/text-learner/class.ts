@@ -162,6 +162,30 @@ export class TextLearner extends BaseLearner<string, ResolvedTextLearnerConfig> 
 		})
 	}
 
+	// ── State persistence (adds understand identity) ──────────────────────────
+
+	protected async saveStateToStore(): Promise<void> {
+		await super.saveStateToStore()
+		const now = new Date().toISOString()
+		const existing = await this.store.state.get('understand_identity')
+		if (existing) {
+			await this.store.state.update('understand_identity', { value: this._understandIdentity, updatedAt: now })
+		} else {
+			await this.store.state.add({ id: 'understand_identity', value: this._understandIdentity, updatedAt: now })
+		}
+	}
+
+	protected async restoreStateFromStore(): Promise<boolean> {
+		const baseRestored = await super.restoreStateFromStore()
+		if (!baseRestored) return false
+
+		const understandIdentity = await this.store.state.get('understand_identity')
+		if (!understandIdentity) return false
+
+		this._understandIdentity = understandIdentity.value as UnderstandIdentity
+		return true
+	}
+
 	// ── Text-specific accessors ────────────────────────────────────────────────
 
 	getObserveIdentity() {
@@ -172,24 +196,12 @@ export class TextLearner extends BaseLearner<string, ResolvedTextLearnerConfig> 
 		return this._understandIdentity
 	}
 
-	getSynthesizeIdentity() {
-		return this._understandIdentity
-	}
-
 	getGovernance() {
 		return { ...this.config.governance }
 	}
 
 	getQueryMethodName(): string {
 		return 'tool-based'
-	}
-
-	getUnderstandThresholds() {
-		return { ...this.config.understand.thresholds }
-	}
-
-	getSynthesizeThresholds() {
-		return this.getUnderstandThresholds()
 	}
 
 	// ── Type-specific update (only governance) ─────────────────────────────────

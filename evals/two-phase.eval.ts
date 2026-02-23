@@ -396,7 +396,7 @@ async function runEval(options: EvalOptions) {
 	await learner.init()
 
 	const observeIdentity = learner.getObserveIdentity()?.identity ?? '(none)'
-	const synthesizeIdentity = learner.getSynthesizeIdentity()?.identity ?? '(none)'
+	const synthesizeIdentity = learner.getUnderstandIdentity()?.identity ?? '(none)'
 
 	// Track records
 	const learnRecords: LearnRecord[] = []

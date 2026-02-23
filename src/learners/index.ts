@@ -75,7 +75,6 @@ export type {
 } from './list-learner'
 
 export type {
-	EvolutionEntry,
 	Learner,
 	LearnerHealth,
 	LearnerMetadata,

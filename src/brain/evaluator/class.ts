@@ -205,7 +205,7 @@ export class Evaluator extends TypedEmitter<EvaluatorEventMap> {
 					id: learner.id,
 					name: learner.id,
 					purpose: this.extractPurpose(learner.instructions),
-					understandingSize: learner.getUnderstanding().length,
+					understandingSize: String(learner.getUnderstanding()).length,
 					health: {
 						activation: health.activation,
 						status: health.status,

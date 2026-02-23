@@ -155,7 +155,7 @@ async function main() {
 		},
 	})
 	console.log(`  Changed fields: [${update2.changedFields.join(', ')}]`)
-	console.log(`  New thresholds: minImportance=${learner.getSynthesizeThresholds().minImportance}`)
+	console.log(`  New thresholds: minImportance=${learner.getUnderstandThresholds().minImportance}`)
 
 	// Update 3: Change governance strategy
 	logger.logSection('5c. Update — switch to cumulative strategy')

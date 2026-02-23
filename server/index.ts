@@ -98,7 +98,7 @@ function getBrainConfigSnapshot(b: Brain) {
 	// Read learner-level config from first learner (representative sample)
 	const firstLearner = b.getLearners()[0]
 	const learnerConfig = firstLearner ? {
-		thresholds: firstLearner.getSynthesizeThresholds(),
+		thresholds: firstLearner.getUnderstandThresholds(),
 		queryMethod: firstLearner.getQueryMethodName(),
 		governance: firstLearner.getGovernance(),
 	} : null
@@ -467,27 +467,27 @@ app.post('/brain/ask', async (c) => {
 	}
 })
 
-app.get('/brain/status', (c) => {
+app.get('/brain/status', async (c) => {
 	if (!brain) {
 		return c.json({ status: 'not_initialized' })
 	}
 
-	const learners = brain.getLearners().map((l) => ({
+	const learners = await Promise.all(brain.getLearners().map(async (l) => ({
 		id: l.id,
 		name: l.name,
 		description: l.description,
 		instructions: l.instructions,
 		understanding: l.getUnderstanding(),
-		evolution: l.getEvolution(),
-		buffer: l.getBufferState(),
-		bufferObservations: l.getBufferedObservations(),
+		evolution: await l.getEvolution(),
+		buffer: await l.getBufferState(),
+		bufferObservations: await l.getBufferedObservations(),
 		health: l.getHealth(),
 		governance: l.getGovernance(),
-		synthesizeThresholds: l.getSynthesizeThresholds(),
+		understandThresholds: l.getUnderstandThresholds(),
 		observePrompt: l.getObserveSystemPrompt(),
-		synthesizePrompt: l.getSynthesizeSystemPrompt(),
+		understandPrompt: l.getUnderstandSystemPrompt(),
 		queryMethod: l.getQueryMethodName(),
-	}))
+	})))
 
 	return c.json({
 		status: 'initialized',

@@ -40,7 +40,7 @@ import type {
 export class Brain extends TypedEmitter<BrainEventMap> {
 	prompt: string
 	readonly config: ResolvedBrainConfig
-	readonly learners: Map<string, BaseLearner<any>> = new Map()
+	readonly learners: Map<string, BaseLearner<unknown>> = new Map()
 	private learnerNames: Map<string, string> = new Map()
 	private initialized = false
 	private evaluator?: Evaluator
@@ -147,7 +147,7 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 			thresholds?: { minImportance?: number; maxObservations?: number }
 			health?: Partial<LearnerHealth>
 		},
-	): Promise<BaseLearner<any>> {
+	): Promise<BaseLearner<unknown>> {
 		const shared = {
 			id: config.id,
 			model: this.config.model,
@@ -167,7 +167,7 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 			},
 		}
 
-		let learner: BaseLearner<any>
+		let learner: BaseLearner<unknown>
 
 		if (config.type === 'list') {
 			learner = new ListLearner({
@@ -226,21 +226,21 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 	/**
 	 * Add a learner manually
 	 */
-	async addLearner(config: GeneratedLearnerConfig): Promise<BaseLearner<any>> {
+	async addLearner(config: GeneratedLearnerConfig): Promise<BaseLearner<unknown>> {
 		return this.createLearnerFromConfig(config)
 	}
 
 	/**
 	 * Get all learners
 	 */
-	getLearners(): BaseLearner<any>[] {
+	getLearners(): BaseLearner<unknown>[] {
 		return Array.from(this.learners.values())
 	}
 
 	/**
 	 * Get a specific learner by ID
 	 */
-	getLearner(id: string): BaseLearner<any> | undefined {
+	getLearner(id: string): BaseLearner<unknown> | undefined {
 		return this.learners.get(id)
 	}
 
@@ -570,7 +570,7 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 	 * const learner = await brain.createLearner('Track API design patterns and best practices')
 	 * ```
 	 */
-	async createLearner(guidance: string): Promise<BaseLearner<any>> {
+	async createLearner(guidance: string): Promise<BaseLearner<unknown>> {
 		if (!this.evolutionOrchestrator) {
 			throw new Error(
 				'Evolution is not enabled. Set config.evolution.enabled = true',
@@ -610,7 +610,7 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 	async mergeLearners(
 		learnerIds: string[],
 		guidance: string,
-	): Promise<BaseLearner<any>> {
+	): Promise<BaseLearner<unknown>> {
 		if (!this.evolutionOrchestrator) {
 			throw new Error(
 				'Evolution is not enabled. Set config.evolution.enabled = true',
@@ -650,7 +650,7 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 	async splitLearner(
 		learnerId: string,
 		guidance: string,
-	): Promise<BaseLearner<any>[]> {
+	): Promise<BaseLearner<unknown>[]> {
 		if (!this.evolutionOrchestrator) {
 			throw new Error(
 				'Evolution is not enabled. Set config.evolution.enabled = true',
@@ -689,7 +689,7 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 	async updateLearner(
 		learnerId: string,
 		guidance: string,
-	): Promise<BaseLearner<any>> {
+	): Promise<BaseLearner<unknown>> {
 		if (!this.evolutionOrchestrator) {
 			throw new Error(
 				'Evolution is not enabled. Set config.evolution.enabled = true',

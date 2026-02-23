@@ -10,12 +10,6 @@ import type { SharedLearnerEventMap } from '../base/types'
 import type { Store } from '../stores'
 import type { Strategy } from './strategies'
 
-// Re-export for backward compat
-export type { TokenUsage } from '../types'
-export type { UnderstandThresholds } from '../base/types'
-export type { QueryResult } from '../base/query'
-export type { EventUsage } from '../base/types'
-
 /**
  * TextLearner event map
  *

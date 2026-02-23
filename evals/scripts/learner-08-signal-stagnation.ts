@@ -65,7 +65,7 @@ async function main() {
 	logger.logState('Learner State', {
 		name: learner.name,
 		stagnationWindow: learner.getHealth().signalThresholds.maxObservationsWithoutSynthesis,
-		minImportance: learner.getSynthesizeThresholds().minImportance,
+		minImportance: learner.getUnderstandThresholds().minImportance,
 	})
 
 	logger.logSection('Action: Ingest low-importance observations to trigger stagnation')

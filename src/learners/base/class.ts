@@ -16,7 +16,6 @@ import { nanoid } from 'nanoid'
 import { TypedEmitter } from '../../types/events'
 import type { LearnerActivity } from '../../brain/evaluator/types'
 import type {
-	EvolutionEntry,
 	Learner,
 	LearnerHealth,
 	LearnerMetadata,
@@ -26,7 +25,7 @@ import type {
 } from '../types'
 import { initObserve, observe } from '../observer'
 import type { ObserveIdentity } from '../observer'
-import type { Store } from '../stores'
+import type { EvolutionRecord, Store } from '../stores'
 import type { QueryCallbacks, QueryMethod, QueryOptions, QueryResult } from '../base/query'
 import type {
 	BaseResolvedConfig,
@@ -234,24 +233,32 @@ export abstract class BaseLearner<
 		this.emit('learner:init:started', { learnerId: this.id })
 
 		try {
-			// Generate observe identity + prompt
-			const observeBlueprintModel =
-				this.config.observer.blueprintModel ?? this.config.model
-			const observeResult = await initObserve(
-				observeBlueprintModel,
-				this.instructions,
-				this.focus || undefined,
-			)
-			this._observeIdentity = observeResult.identity
-			this.observeSystemPrompt = observeResult.systemPrompt
+			// Try restoring identities/prompts from store.state (skip LLM calls)
+			const restored = await this.restoreStateFromStore()
 
-			// Generate understand identity + prompt (type-specific)
-			const understandBlueprintModel =
-				this.config.understand.blueprintModel ?? this.config.model
-			await this.regenUnderstandPrompt(
-				understandBlueprintModel,
-				this.instructions,
-			)
+			if (!restored) {
+				// Generate observe identity + prompt via LLM
+				const observeBlueprintModel =
+					this.config.observer.blueprintModel ?? this.config.model
+				const observeResult = await initObserve(
+					observeBlueprintModel,
+					this.instructions,
+					this.focus || undefined,
+				)
+				this._observeIdentity = observeResult.identity
+				this.observeSystemPrompt = observeResult.systemPrompt
+
+				// Generate understand identity + prompt (type-specific)
+				const understandBlueprintModel =
+					this.config.understand.blueprintModel ?? this.config.model
+				await this.regenUnderstandPrompt(
+					understandBlueprintModel,
+					this.instructions,
+				)
+
+				// Persist to store.state for future inits
+				await this.saveStateToStore()
+			}
 
 			// Restore understanding from store (for persistent adapters)
 			await this.restoreUnderstandingFromStore()
@@ -279,6 +286,52 @@ export abstract class BaseLearner<
 		}
 	}
 
+	// ── State persistence (identities + prompts in store.state) ───────────
+
+	/**
+	 * Save identities and prompts to store.state.
+	 * Subclasses override to add type-specific state (e.g. understand identity).
+	 */
+	protected async saveStateToStore(): Promise<void> {
+		const now = new Date().toISOString()
+		const entries: Array<{ id: string; value: unknown }> = [
+			{ id: 'observe_identity', value: this._observeIdentity },
+			{ id: 'observe_prompt', value: this.observeSystemPrompt },
+			{ id: 'understand_prompt', value: this.understandSystemPrompt },
+		]
+
+		for (const entry of entries) {
+			const existing = await this.store.state.get(entry.id)
+			if (existing) {
+				await this.store.state.update(entry.id, { value: entry.value, updatedAt: now })
+			} else {
+				await this.store.state.add({ id: entry.id, value: entry.value, updatedAt: now })
+			}
+		}
+	}
+
+	/**
+	 * Restore identities and prompts from store.state.
+	 * Returns true if all required state was found, false otherwise.
+	 * Subclasses override to restore type-specific state.
+	 */
+	protected async restoreStateFromStore(): Promise<boolean> {
+		const [observeIdentity, observePrompt, understandPrompt] = await Promise.all([
+			this.store.state.get('observe_identity'),
+			this.store.state.get('observe_prompt'),
+			this.store.state.get('understand_prompt'),
+		])
+
+		if (!observeIdentity || !observePrompt || !understandPrompt) {
+			return false
+		}
+
+		this._observeIdentity = observeIdentity.value as ObserveIdentity
+		this.observeSystemPrompt = observePrompt.value as string
+		this.understandSystemPrompt = understandPrompt.value as string
+		return true
+	}
+
 	// ── Identity ────────────────────────────────────────────────────────────
 
 	get origin(): LearnerOrigin {
@@ -297,9 +350,8 @@ export abstract class BaseLearner<
 		return this.understandSystemPrompt
 	}
 
-	// Keep old name for backward compat
-	getSynthesizeSystemPrompt(): string | null {
-		return this.understandSystemPrompt
+	getUnderstandThresholds() {
+		return { ...this.config.understand.thresholds }
 	}
 
 	// ── Learn (pipeline: observe → store → understand) ────────────────────
@@ -752,6 +804,9 @@ export abstract class BaseLearner<
 
 			await Promise.all(promises)
 
+			// Persist regenerated state to store
+			await this.saveStateToStore()
+
 			this.emit('learner:prompts:regenerated', {
 				learnerId: this.id,
 				observePrompt: this.observeSystemPrompt!,
@@ -775,9 +830,8 @@ export abstract class BaseLearner<
 
 	// ── Accessors ───────────────────────────────────────────────────────────
 
-	getEvolution(): EvolutionEntry[] {
-		// TODO: read from store.evolution when fully migrated
-		return []
+	async getEvolution(): Promise<EvolutionRecord[]> {
+		return this.store.evolution.list()
 	}
 
 	getHealth(): LearnerHealth {

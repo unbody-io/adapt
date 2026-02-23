@@ -171,7 +171,7 @@ async function main() {
 		},
 	})
 	console.log(`  Changed fields: [${update2.changedFields.join(', ')}]`)
-	console.log(`  New thresholds: minImportance=${learner.getSynthesizeThresholds().minImportance}`)
+	console.log(`  New thresholds: minImportance=${learner.getUnderstandThresholds().minImportance}`)
 	console.log(`  New governance: maxItems=${learner.getGovernance().maxItems}`)
 
 	// Update 3: Change pruning strategy

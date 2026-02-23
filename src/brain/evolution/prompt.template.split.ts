@@ -12,7 +12,7 @@ import { stringifyUnderstanding } from './utils'
  */
 export function splitPromptTemplate(
 	guidance: string,
-	learner: BaseLearner<any>,
+	learner: BaseLearner<unknown>,
 	brainPrompt: string,
 ): string {
 	return `# Brain Context

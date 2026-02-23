@@ -9,15 +9,6 @@ export type LearnerOrigin = 'prompt' | 'developer' | 'emergent'
 export type LearnerStatus = 'active' | 'dormant'
 export type Significance = 'routine' | 'notable' | 'critical'
 
-/**
- * Entry tracking how understanding evolved over time
- */
-export interface EvolutionEntry {
-	summary: string // what changed and why
-	significance: Significance
-	timestamp: string // ISO 8601
-}
-
 export interface LearnerHealth {
 	activation: number // 0.0 - 1.0
 	threshold: number // gates participation

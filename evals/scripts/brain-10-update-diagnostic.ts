@@ -178,7 +178,7 @@ function snapshotLearner(learner: ReturnType<Brain['getLearners']>[0]) {
 		understandingLength: learner.getUnderstanding().length,
 		understandingPreview: truncate(learner.getUnderstanding(), 300),
 		bufferState: learner.getBufferState(),
-		thresholds: learner.getSynthesizeThresholds(),
+		thresholds: learner.getUnderstandThresholds(),
 		governance: learner.getGovernance(),
 		queryMethod: learner.getQueryMethodName(),
 		governance: {
@@ -187,7 +187,7 @@ function snapshotLearner(learner: ReturnType<Brain['getLearners']>[0]) {
 			signalThresholds: learner.getHealth().signalThresholds,
 		},
 		observePromptPreview: truncate(learner.getObserveSystemPrompt() ?? '(null)', 300),
-		synthesizePromptPreview: truncate(learner.getSynthesizeSystemPrompt() ?? '(null)', 300),
+		understandPromptPreview: truncate(learner.getUnderstandSystemPrompt() ?? '(null)', 300),
 	}
 }
 
@@ -750,7 +750,7 @@ async function main() {
 		report.p('**Full Observe Prompt:**')
 		report.code(learner.getObserveSystemPrompt() ?? '(null)')
 		report.p('**Full Synthesize Prompt:**')
-		report.code(learner.getSynthesizeSystemPrompt() ?? '(null)')
+		report.code(learner.getUnderstandSystemPrompt() ?? '(null)')
 	}
 
 	// ═══════════════════════════════════════════════════════════════════════

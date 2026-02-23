@@ -308,7 +308,7 @@ async function main() {
 	// Hard: each learner has new threshold
 	for (const learner of brain.getLearners()) {
 		assertEqual(
-			learner.getSynthesizeThresholds().maxObservations,
+			learner.getUnderstandThresholds().maxObservations,
 			3,
 			`Threshold: ${learner.id} maxObservations is 3`,
 		)

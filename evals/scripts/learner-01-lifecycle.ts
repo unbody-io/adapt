@@ -78,7 +78,7 @@ async function main() {
 			name: learner.name,
 			description: learner.description,
 			instructions: learner.instructions,
-			thresholds: learner.getSynthesizeThresholds(),
+			thresholds: learner.getUnderstandThresholds(),
 			governance: {
 				activation: learner.getHealth().activation,
 				status: learner.getHealth().status,
@@ -104,12 +104,12 @@ async function main() {
 		'Learner instructions match config',
 	)
 	assertEqual(
-		learner.getSynthesizeThresholds().minImportance,
+		learner.getUnderstandThresholds().minImportance,
 		learnerConfig.thresholds.minImportance,
 		'minImportance threshold matches',
 	)
 	assertEqual(
-		learner.getSynthesizeThresholds().maxObservations,
+		learner.getUnderstandThresholds().maxObservations,
 		learnerConfig.thresholds.maxObservations,
 		'maxObservations threshold matches',
 	)

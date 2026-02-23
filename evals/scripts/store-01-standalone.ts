@@ -3,10 +3,12 @@
  *
  * Tests the store module in complete isolation — no Brain, no LLM, no dependencies.
  * Verifies all Collection<T> operations across all 4 namespaces.
+ * Runs the full suite against both MemoryStore and SQLiteStore.
  */
 
 import {
 	MemoryStore,
+	SQLiteStore,
 	type Store,
 	type ObservationRecord,
 	type UnderstandingRecord,
@@ -76,12 +78,14 @@ function makeEvolution(
 	significance: 'routine' | 'notable' | 'critical',
 	summary: string,
 ): EvolutionRecord {
-	return { id, significance, summary, createdAt: new Date().toISOString() }
+	return { id, significance, summary, created_at: new Date().toISOString() }
 }
 
 function makeState(id: string, value: unknown): StateRecord {
-	return { id, value, updatedAt: new Date().toISOString() }
+	return { id, value, updated_at: new Date().toISOString() }
 }
+
+type CreateStore = () => Store
 
 // ── Test: Collection CRUD (generic, works for any namespace) ────────────────
 
@@ -176,10 +180,10 @@ async function testCollectionCRUD<T extends { id: string }>(
 
 // ── Test: list(filter) and count(filter) ────────────────────────────────────
 
-async function testFiltering() {
+async function testFiltering(createStore: CreateStore) {
 	section('Filtering — list(filter) and count(filter)')
 
-	const store = new MemoryStore()
+	const store = createStore()
 
 	// Add observations with different statuses
 	await store.observations.add(makeObservation('obs-1', 'first observation', 0.8, 'pending'))
@@ -210,14 +214,16 @@ async function testFiltering() {
 	// list without filter
 	const allObs = await store.observations.list()
 	assertEqual(allObs.length, 4, 'list() returns all 4')
+
+	await store.dispose()
 }
 
 // ── Test: addBatch ──────────────────────────────────────────────────────────
 
-async function testAddBatch() {
+async function testAddBatch(createStore: CreateStore) {
 	section('addBatch')
 
-	const store = new MemoryStore()
+	const store = createStore()
 
 	const observations = [
 		makeObservation('batch-1', 'observation A', 0.5),
@@ -231,14 +237,16 @@ async function testAddBatch() {
 	const first = await store.observations.get('batch-1')
 	assert(first !== undefined, 'first batch item retrievable')
 	assertEqual(first?.data, 'observation A', 'first batch item has correct data')
+
+	await store.dispose()
 }
 
 // ── Test: Pipeline simulation (TextLearner-style) ───────────────────────────
 
-async function testTextPipeline() {
+async function testTextPipeline(createStore: CreateStore) {
 	section('Text pipeline simulation')
 
-	const store = new MemoryStore()
+	const store = createStore()
 
 	// 1. Store initial state
 	await store.state.add(makeState('instructions', 'Track TypeScript best practices'))
@@ -307,14 +315,16 @@ async function testTextPipeline() {
 	assertEqual(await store.evolution.count(), 2, 'evolution tracks 2 entries')
 
 	console.log('\n  Text pipeline simulation complete')
+
+	await store.dispose()
 }
 
 // ── Test: Pipeline simulation (ListLearner-style) ───────────────────────────
 
-async function testListPipeline() {
+async function testListPipeline(createStore: CreateStore) {
 	section('List pipeline simulation')
 
-	const store = new MemoryStore()
+	const store = createStore()
 
 	// 1. Store initial state
 	await store.state.add(makeState('instructions', 'Track technology stack: tools, frameworks, libraries'))
@@ -371,14 +381,16 @@ async function testListPipeline() {
 	assert(names.includes('Tailwind CSS'), 'Tailwind added')
 
 	console.log('\n  List pipeline simulation complete')
+
+	await store.dispose()
 }
 
 // ── Test: Cross-namespace isolation ─────────────────────────────────────────
 
-async function testIsolation() {
+async function testIsolation(createStore: CreateStore) {
 	section('Cross-namespace isolation')
 
-	const store = new MemoryStore()
+	const store = createStore()
 
 	await store.understanding.add(makeUnderstanding('u-1', 'some understanding'))
 	await store.observations.add(makeObservation('obs-1', 'some observation', 0.5))
@@ -397,15 +409,17 @@ async function testIsolation() {
 	assertEqual(await store.understanding.count(), 0, 'understanding removed')
 	assertEqual(await store.evolution.count(), 1, 'evolution still unaffected')
 	assertEqual(await store.state.count(), 1, 'state still unaffected')
+
+	await store.dispose()
 }
 
 // ── Test: Two stores are independent ────────────────────────────────────────
 
-async function testStoreIndependence() {
+async function testStoreIndependence(createStore: CreateStore) {
 	section('Store independence (two stores do not share data)')
 
-	const store1 = new MemoryStore()
-	const store2 = new MemoryStore()
+	const store1 = createStore()
+	const store2 = createStore()
 
 	await store1.observations.add(makeObservation('obs-1', 'only in store1', 0.5))
 	await store2.observations.add(makeObservation('obs-2', 'only in store2', 0.6))
@@ -415,14 +429,17 @@ async function testStoreIndependence() {
 	assertEqual(await store2.observations.count(), 2, 'store2 has 2 observations')
 	assertEqual(await store1.observations.get('obs-2'), undefined, 'store1 cannot see store2 data')
 	assertEqual(await store2.observations.get('obs-1'), undefined, 'store2 cannot see store1 data')
+
+	await store1.dispose()
+	await store2.dispose()
 }
 
 // ── Test: dispose ───────────────────────────────────────────────────────────
 
-async function testDispose() {
+async function testDispose(createStore: CreateStore) {
 	section('dispose')
 
-	const store = new MemoryStore()
+	const store = createStore()
 	await store.observations.add(makeObservation('obs-1', 'test', 0.5))
 
 	// dispose should not throw
@@ -431,59 +448,73 @@ async function testDispose() {
 	console.log('  ✓ dispose completes without error')
 }
 
-// ── Run all ─────────────────────────────────────────────────────────────────
+// ── Run all tests for a given adapter ───────────────────────────────────────
+
+async function runSuite(adapterName: string, createStore: CreateStore) {
+	console.log(`\n${'═'.repeat(60)}`)
+	console.log(`  ${adapterName}`)
+	console.log('═'.repeat(60))
+
+	// Generic CRUD tests for each namespace (fresh store per namespace)
+	const s1 = createStore()
+	await testCollectionCRUD(
+		'observations',
+		s1.observations,
+		(id) => makeObservation(id, `observation ${id}`, 0.5 + Math.random() * 0.5),
+		() => ({ data: 'updated content', metadata_importance: 0.99 }),
+	)
+	await s1.dispose()
+
+	const s2 = createStore()
+	await testCollectionCRUD(
+		'evolution',
+		s2.evolution,
+		(id) => makeEvolution(id, 'routine', `evolution ${id}`),
+		() => ({ significance: 'critical' as const, summary: 'updated summary' }),
+	)
+	await s2.dispose()
+
+	const s3 = createStore()
+	await testCollectionCRUD(
+		'state',
+		s3.state,
+		(id) => makeState(id, { key: id }),
+		() => ({ value: 'updated value' }),
+	)
+	await s3.dispose()
+
+	const s4 = createStore()
+	await testCollectionCRUD(
+		'understanding',
+		s4.understanding,
+		(id) => makeUnderstanding(id, `understanding ${id}`),
+		() => ({ data: 'updated understanding', metadata_confidence: 0.95 }),
+	)
+	await s4.dispose()
+
+	// Feature-specific tests
+	await testFiltering(createStore)
+	await testAddBatch(createStore)
+
+	// Pipeline simulations
+	await testTextPipeline(createStore)
+	await testListPipeline(createStore)
+
+	// Isolation & independence
+	await testIsolation(createStore)
+	await testStoreIndependence(createStore)
+
+	// Dispose
+	await testDispose(createStore)
+}
+
+// ── Main ─────────────────────────────────────────────────────────────────────
 
 async function main() {
 	console.log('Store standalone test\n')
 
-	const store = new MemoryStore()
-
-	// Generic CRUD tests for each namespace
-	await testCollectionCRUD(
-		'observations',
-		store.observations,
-		(id) => makeObservation(id, `observation ${id}`, 0.5 + Math.random() * 0.5),
-		() => ({ data: 'updated content', metadata_importance: 0.99 }),
-	)
-
-	const store2 = new MemoryStore()
-	await testCollectionCRUD(
-		'evolution',
-		store2.evolution,
-		(id) => makeEvolution(id, 'routine', `evolution ${id}`),
-		() => ({ significance: 'critical' as const, summary: 'updated summary' }),
-	)
-
-	const store3 = new MemoryStore()
-	await testCollectionCRUD(
-		'state',
-		store3.state,
-		(id) => makeState(id, { key: id }),
-		() => ({ value: 'updated value' }),
-	)
-
-	const store4 = new MemoryStore()
-	await testCollectionCRUD(
-		'understanding',
-		store4.understanding,
-		(id) => makeUnderstanding(id, `understanding ${id}`),
-		() => ({ data: 'updated understanding', metadata_confidence: 0.95 }),
-	)
-
-	// Feature-specific tests
-	await testFiltering()
-	await testAddBatch()
-
-	// Pipeline simulations
-	await testTextPipeline()
-	await testListPipeline()
-
-	// Isolation & independence
-	await testIsolation()
-	await testStoreIndependence()
-
-	// Dispose
-	await testDispose()
+	await runSuite('MemoryStore', () => new MemoryStore())
+	await runSuite('SQLiteStore', () => new SQLiteStore())
 
 	// Summary
 	console.log(`\n${'═'.repeat(60)}`)

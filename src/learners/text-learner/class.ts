@@ -188,9 +188,9 @@ export class TextLearner extends BaseLearner<string, ResolvedTextLearnerConfig> 
 		const now = new Date().toISOString()
 		const existing = await this.store.state.get('understand_identity')
 		if (existing) {
-			await this.store.state.update('understand_identity', { value: this._understandIdentity, updatedAt: now })
+			await this.store.state.update('understand_identity', { value: this._understandIdentity, updated_at: now })
 		} else {
-			await this.store.state.add({ id: 'understand_identity', value: this._understandIdentity, updatedAt: now })
+			await this.store.state.add({ id: 'understand_identity', value: this._understandIdentity, updated_at: now })
 		}
 	}
 

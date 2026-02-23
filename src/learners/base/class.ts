@@ -328,9 +328,9 @@ export abstract class BaseLearner<
 		for (const entry of entries) {
 			const existing = await this.store.state.get(entry.id)
 			if (existing) {
-				await this.store.state.update(entry.id, { value: entry.value, updatedAt: now })
+				await this.store.state.update(entry.id, { value: entry.value, updated_at: now })
 			} else {
-				await this.store.state.add({ id: entry.id, value: entry.value, updatedAt: now })
+				await this.store.state.add({ id: entry.id, value: entry.value, updated_at: now })
 			}
 		}
 	}
@@ -988,7 +988,7 @@ export abstract class BaseLearner<
 					summary: result.evolution,
 					significance: result.significance,
 					reasoning: result.reasoning,
-					createdAt: new Date().toISOString(),
+					created_at: new Date().toISOString(),
 				})
 
 				this.emit('learner:synthesized', {

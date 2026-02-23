@@ -79,7 +79,7 @@ export interface EvolutionRecord {
 	summary: string
 	reasoning?: string
 	significance: Significance
-	createdAt: string // ISO 8601
+	created_at: string // ISO 8601
 }
 
 /**
@@ -89,5 +89,5 @@ export interface EvolutionRecord {
 export interface StateRecord {
 	id: string // acts as key name (e.g. "identity", "observe_prompt")
 	value: unknown
-	updatedAt: string // ISO 8601
+	updated_at: string // ISO 8601
 }

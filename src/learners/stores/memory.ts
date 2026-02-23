@@ -17,7 +17,7 @@ import type {
 // ── Helpers ─────────────────────────────────────────────────────────────────
 
 /** Recursively extract all string values from an object */
-function extractStrings(obj: unknown): string[] {
+export function extractStrings(obj: unknown): string[] {
 	if (typeof obj === 'string') return [obj]
 	if (obj === null || obj === undefined) return []
 	if (Array.isArray(obj)) return obj.flatMap(extractStrings)
@@ -60,7 +60,7 @@ export class MemoryCollection<T extends { id: string }>
 	async delete(id: string): Promise<void> {
 		const idx = this.items.findIndex((item) => item.id === id)
 		if (idx === -1) {
-			throw new Error(`Record not found: ${id}`)
+			throw new Error(`Record with id "${id}" not found`)
 		}
 		this.items.splice(idx, 1)
 	}

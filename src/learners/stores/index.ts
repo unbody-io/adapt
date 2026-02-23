@@ -7,4 +7,5 @@ export type {
 	StateRecord,
 } from './types'
 
-export { MemoryCollection, MemoryStore } from './memory'
+export { MemoryCollection, MemoryStore, extractStrings } from './memory'
+export { SQLiteCollection, SQLiteStore } from './sqlite'

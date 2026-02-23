@@ -179,7 +179,7 @@ async function main() {
 	const textEvolution = await textStore.evolution.list()
 	assertGreaterThan(textEvolution.length, 0, 'Text: evolution record stored')
 	assertDefined(textEvolution[0].significance, 'Text: evolution has significance')
-	assertDefined(textEvolution[0].createdAt, 'Text: evolution has createdAt')
+	assertDefined(textEvolution[0].created_at, 'Text: evolution has created_at')
 
 	// Events
 	assertEventEmitted(events, 'learner:observe:started')

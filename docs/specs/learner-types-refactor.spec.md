@@ -197,30 +197,7 @@ Same as today — single LLM call:
 
 ### ListDefaultMethod synthesis
 
-Single **structured** LLM call — NOT agentic:
-- Input: current items + buffered observations
-- Output: structured operations
-
-```typescript
-// LLM output schema
-{
-  operations: Array<
-    | { type: "add", item: { data: any, metadata?: any } }
-    | { type: "update", id: string, changes: { data?: any, metadata?: any } }
-    | { type: "remove", id: string, reason: string }
-  >,
-  evolution: string,        // what changed and why
-  significance: "routine" | "notable" | "critical"
-}
-```
-
-Code then executes these operations mechanically against the in-memory list.
-
-### Why not agentic for ListLearner
-
-The pattern for list synthesis is always: match observation to item → add/update/remove. This is a single decision pass, not an exploratory multi-step reasoning task. A structured LLM call is simpler, cheaper, and more predictable.
-
-Graph/Vector learners (future) will need agentic synthesis because their understanding is too large for context and requires iterative search.
+**Superseded**: This section originally specified a single structured LLM call. Per architecture-v2.spec.md, ListLearner understand must be **agentic** — the LLM uses store methods as tools to add/update/remove items iteratively. See `docs/specs/v2/learner-refactor.spec.md` Section B8 for the corrected design.
 
 ---
 
@@ -410,6 +387,6 @@ The decomposition prompt needs updating to explain when to use Text vs List:
 - Persistent storage (Turso, SQLite, or any DB)
 - GraphLearner / VectorLearner
 - Semantic deduplication (needs LLM, defer)
-- Agentic synthesis
+- ~~Agentic synthesis~~ (now in scope per architecture-v2.spec.md — ListLearner understand is agentic)
 - New query methods beyond tool-based
 - Changes to the evolution/evaluator system (it works with BaseLearner)

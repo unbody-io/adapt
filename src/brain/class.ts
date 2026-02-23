@@ -157,11 +157,11 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 			name: config.name,
 			description: config.description,
 			health: config.health,
-			synthesize: {
+			understand: {
 				thresholds: {
-					maxObservations: BRAIN_DEFAULTS.learning.synthesize.thresholds.maxObservations,
-					maxTokens: BRAIN_DEFAULTS.learning.synthesize.thresholds.maxTokens,
-					minImportance: BRAIN_DEFAULTS.learning.synthesize.thresholds.minImportance,
+					maxObservations: BRAIN_DEFAULTS.learning.understand.thresholds.maxObservations,
+					maxTokens: BRAIN_DEFAULTS.learning.understand.thresholds.maxTokens,
+					minImportance: BRAIN_DEFAULTS.learning.understand.thresholds.minImportance,
 					...config.thresholds,
 				},
 			},
@@ -347,9 +347,17 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 			const learnerArray = this.getLearners()
 
 			// Skip learners with no understanding and no buffered observations
-			const queryableLearners = learnerArray.filter((l) => {
-				return !!l.getUnderstanding() || l.getBufferState().count > 0
-			})
+			const bufferStates = await Promise.all(
+				learnerArray.map(async (l) => ({
+					learner: l,
+					buffer: await l.getBufferState(),
+				})),
+			)
+			const queryableLearners = bufferStates
+				.filter(({ learner, buffer }) => {
+					return !!learner.getUnderstanding() || buffer.count > 0
+				})
+				.map(({ learner }) => learner)
 
 			// Query all learners in parallel
 			const learnerResults = await Promise.all(
@@ -833,12 +841,12 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 		// Map learning.* mechanical fields to learnerUpdate shape
 		if (updates.learning?.model) learnerUpdate.model ??= updates.learning.model
 		if (updates.learning?.blueprintModel) learnerUpdate.blueprintModel ??= updates.learning.blueprintModel
-		if (updates.learning?.observe) {
-			learnerUpdate.observe = updates.learning.observe
+		if (updates.learning?.observer) {
+			learnerUpdate.observer = updates.learning.observer
 		}
-		if (updates.learning?.synthesize) {
-			const s = updates.learning.synthesize
-			learnerUpdate.synthesize = {
+		if (updates.learning?.understand) {
+			const s = updates.learning.understand
+			learnerUpdate.understand = {
 				...(s.model ? { model: s.model } : {}),
 				...(s.blueprintModel ? { blueprintModel: s.blueprintModel } : {}),
 				...(s.thresholds ? { thresholds: s.thresholds } : {}),

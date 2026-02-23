@@ -3,6 +3,4 @@
  */
 
 export { TextLearner } from './class'
-// Learning methods
-export { TextDefaultMethod } from './learning-methods'
 export * from './types'

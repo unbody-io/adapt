@@ -1,18 +1,10 @@
 /**
- * Meta-prompt for generating synthesize identity
- *
- * Explains what synthesis does and asks LLM to generate
- * domain-specific identity from instructions.
+ * Meta-prompt for generating text understand identity
  */
 
-import { compare, skillsToPromptText } from '../../../cognitive-skills'
+import { compare, skillsToPromptText } from '../../cognitive-skills'
 
-/**
- * Meta-prompt template for generating synthesize identity
- *
- * @param instructions - The learner's purpose/instructions
- */
-export function synthesizeIdentityPromptTemplate(instructions: string): string {
+export function understandIdentityPromptTemplate(instructions: string): string {
 	const skillsText = skillsToPromptText(compare.skills)
 
 	return `You are generating the identity for a Synthesizer — an agent that builds understanding.

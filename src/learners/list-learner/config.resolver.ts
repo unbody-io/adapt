@@ -30,23 +30,29 @@ export function resolveListLearnerConfig(
 		instructions: config.instructions,
 		id: config.id ?? `learner_${nanoid()}`,
 		origin: config.origin ?? LIST_LEARNER_DEFAULTS.origin,
-		observe: {
-			model: cascade(config.observe?.model, model),
-			blueprintModel: cascade(config.observe?.blueprintModel, blueprintModel),
+		observer: {
+			model: cascade(config.observer?.model, model),
+			blueprintModel: cascade(
+				config.observer?.blueprintModel,
+				blueprintModel,
+			),
 		},
-		synthesize: {
-			model: cascade(config.synthesize?.model, model),
-			blueprintModel: cascade(config.synthesize?.blueprintModel, blueprintModel),
+		understand: {
+			model: cascade(config.understand?.model, model),
+			blueprintModel: cascade(
+				config.understand?.blueprintModel,
+				blueprintModel,
+			),
 			thresholds: {
 				maxObservations:
-					config.synthesize?.thresholds?.maxObservations ??
-					LIST_LEARNER_DEFAULTS.synthesize.thresholds.maxObservations,
+					config.understand?.thresholds?.maxObservations ??
+					LIST_LEARNER_DEFAULTS.understand.thresholds.maxObservations,
 				maxTokens:
-					config.synthesize?.thresholds?.maxTokens ??
-					LIST_LEARNER_DEFAULTS.synthesize.thresholds.maxTokens,
+					config.understand?.thresholds?.maxTokens ??
+					LIST_LEARNER_DEFAULTS.understand.thresholds.maxTokens,
 				minImportance:
-					config.synthesize?.thresholds?.minImportance ??
-					LIST_LEARNER_DEFAULTS.synthesize.thresholds.minImportance,
+					config.understand?.thresholds?.minImportance ??
+					LIST_LEARNER_DEFAULTS.understand.thresholds.minImportance,
 			},
 		},
 		query: {

@@ -1,5 +1,5 @@
 /**
- * Schema for observe phase identity
+ * Schema for observe phase identity (shared across all learner types)
  *
  * Generated once at init from instructions.
  * Provides domain-specific context for observation.

@@ -1,5 +1,5 @@
 /**
- * Types for the Observe phase
+ * Types for the Observe phase (shared across all learner types)
  *
  * Observe is purely attention-oriented — extract what's relevant to purpose.
  * No comparison to understanding, no classification, just extraction.

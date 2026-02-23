@@ -58,7 +58,7 @@ export class MergeHandler extends EvolutionActionHandler<MergeActionResult> {
 				const newLearner =
 					await this.brain.createLearnerFromConfig(completeConfig)
 
-				newLearner.setUnderstanding(understanding)
+				await newLearner.setUnderstanding(understanding)
 
 				for (const learnerId of decision.targets) {
 					this.brain.__removeLearner(learnerId)

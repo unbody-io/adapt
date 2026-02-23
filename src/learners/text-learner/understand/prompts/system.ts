@@ -1,21 +1,13 @@
 /**
- * System prompt template for synthesize phase
- *
- * Combines generated identity with fixed synthesis framework.
+ * System prompt template for text understand phase
  */
 
-import { compare } from '../../../cognitive-skills'
-import { type Strategy, strategyPrompts } from '../../../strategies'
-import type { SynthesizeIdentity } from './schema.identity'
+import { compare } from '../../cognitive-skills'
+import { type Strategy, strategyPrompts } from '../../strategies'
+import type { UnderstandIdentity } from '../schema.identity'
 
-/**
- * Build system prompt from generated identity and strategy
- *
- * @param identity - Generated synthesize identity
- * @param strategy - Understanding maintenance strategy
- */
-export function synthesizeSystemPromptTemplate(
-	identity: SynthesizeIdentity,
+export function understandSystemPromptTemplate(
+	identity: UnderstandIdentity,
 	strategy: Strategy,
 ): string {
 	const skills = Object.entries(compare.skills).map(([key, value]) => ({

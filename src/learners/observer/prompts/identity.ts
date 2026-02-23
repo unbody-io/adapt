@@ -1,5 +1,5 @@
 /**
- * Meta-prompt for generating observe identity
+ * Meta-prompt for generating observe identity (shared across all learner types)
  *
  * Explains what an observer does and asks LLM to generate
  * domain-specific identity and domain label from instructions.

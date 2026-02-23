@@ -1,5 +1,5 @@
 /**
- * User prompt template for observe phase
+ * User prompt template for observe phase (shared across all learner types)
  *
  * Provides data for observation. Used on each observe call.
  */

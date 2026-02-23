@@ -1,22 +1,26 @@
 /**
- * List-learner synthesize phase
+ * List understand phase
  *
  * Takes current items + buffered observations → produces structured operations.
  * Operations (add/update/remove) are mechanically applied to the items list.
- * Identity generation follows same pattern as text-learner.
+ * Identity generation follows same pattern as text understand.
  */
 
 import type { LanguageModel } from 'ai'
 import { z } from 'zod'
 import { nanoid } from 'nanoid'
-import { generate, Output } from '../../../../llm'
-import type { Usage } from '../../../base/learning-method'
-import type { Significance } from '../../../types'
-import type { ListItem } from '../../types'
+import { generate, Output } from '../../../llm'
+import type { Significance } from '../../types'
+import type { ListItem } from '../types'
+import type {
+	UnderstandCallbacks,
+	UnderstandContext,
+	UnderstandOutput,
+} from './types'
 
 // ── Identity schema ────────────────────────────────────────────────────────
 
-const synthesizeIdentitySchema = z.object({
+const understandIdentitySchema = z.object({
 	identity: z
 		.string()
 		.describe(
@@ -24,7 +28,7 @@ const synthesizeIdentitySchema = z.object({
 		),
 })
 
-export type SynthesizeIdentity = z.infer<typeof synthesizeIdentitySchema>
+export type UnderstandIdentity = z.infer<typeof understandIdentitySchema>
 
 // ── Operations output schema ───────────────────────────────────────────────
 
@@ -64,7 +68,7 @@ const operationSchema = z.discriminatedUnion('type', [
 	}),
 ])
 
-const synthesizeOutputSchema = z.object({
+const understandOutputSchema = z.object({
 	changed: z
 		.boolean()
 		.describe('Whether the observations warrant any changes to the collection'),
@@ -103,7 +107,7 @@ Respond with JSON only:
 // ── System prompt template ─────────────────────────────────────────────────
 
 function systemPrompt(
-	identity: SynthesizeIdentity,
+	identity: UnderstandIdentity,
 	currentItems: ListItem[],
 ): string {
 	const itemsSummary =
@@ -162,57 +166,34 @@ Respond with JSON only:
 
 // ── Public API ─────────────────────────────────────────────────────────────
 
-export interface SynthesizeInitResult {
-	identity: SynthesizeIdentity
+export interface UnderstandInitResult {
+	identity: UnderstandIdentity
 	systemPrompt: string
 }
 
-export async function initSynthesize(
+export async function initUnderstand(
 	model: LanguageModel,
 	instructions: string,
-): Promise<SynthesizeInitResult> {
+): Promise<UnderstandInitResult> {
 	const prompt = identityPrompt(instructions)
 
 	const { output: identity } = await generate({
 		model,
 		prompt,
-		output: Output.object({ schema: synthesizeIdentitySchema }),
-		repairSchema: synthesizeIdentitySchema,
+		output: Output.object({ schema: understandIdentitySchema }),
+		repairSchema: understandIdentitySchema,
 	})
 
 	// System prompt is partially generated now; currentItems injected at call time
 	return { identity, systemPrompt: '' }
 }
 
-export interface SynthesizeContext {
-	learnerId: string
-	instructions: string
-	currentItems: ListItem[]
-	observations: string[]
-}
-
-export interface SynthesizeCallbacks {
-	onThinking?: (thoughts: string[]) => void
-}
-
-export type SynthesizeOutput =
-	| {
-			status: 'synthesized'
-			newItems: ListItem[]
-			significance: Significance
-			evolution: string
-			reasoning?: string
-			usage?: Usage
-	  }
-	| { status: 'dismissed'; output: string; usage?: Usage }
-	| { status: 'error'; error: unknown }
-
-export async function synthesize(
+export async function understand(
 	model: LanguageModel,
-	identity: SynthesizeIdentity,
-	context: SynthesizeContext,
-	callbacks?: SynthesizeCallbacks,
-): Promise<SynthesizeOutput> {
+	identity: UnderstandIdentity,
+	context: UnderstandContext,
+	callbacks?: UnderstandCallbacks,
+): Promise<UnderstandOutput> {
 	try {
 		const system = systemPrompt(identity, context.currentItems)
 		const prompt = `New observations to integrate:\n\n${context.observations.map((o, i) => `${i + 1}. ${o}`).join('\n')}\n\nDecide what operations to apply to the collection.`
@@ -221,8 +202,8 @@ export async function synthesize(
 			model,
 			system,
 			prompt,
-			output: Output.object({ schema: synthesizeOutputSchema }),
-			repairSchema: synthesizeOutputSchema,
+			output: Output.object({ schema: understandOutputSchema }),
+			repairSchema: understandOutputSchema,
 		})
 
 		if (callbacks?.onThinking && result.reasoning) {

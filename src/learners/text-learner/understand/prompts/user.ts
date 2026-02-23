@@ -1,17 +1,8 @@
 /**
- * User prompt template for synthesize phase
- *
- * Provides current understanding and buffered observations.
- * Used on each synthesize call.
+ * User prompt template for text understand phase
  */
 
-/**
- * User prompt template for synthesize
- *
- * @param currentUnderstanding - Current understanding (empty string if none)
- * @param observations - Buffered observations to synthesize
- */
-export function synthesizeUserPromptTemplate(
+export function understandUserPromptTemplate(
 	currentUnderstanding: string,
 	observations: string[],
 ): string {

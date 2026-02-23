@@ -1,29 +1,14 @@
 /**
- * Schema for synthesize phase output
- *
- * Synthesize updates understanding based on observations.
+ * Schema for text understand phase output
  */
 
 import { z } from 'zod'
 
-/**
- * Significance levels
- */
 export const significanceEnum = z.enum(['routine', 'notable', 'critical'])
+export const understandStatusEnum = z.enum(['synthesized', 'dismissed'])
 
-/**
- * Status enum for synthesize output
- */
-export const synthesizeStatusEnum = z.enum(['synthesized', 'dismissed'])
-
-/**
- * Schema for synthesize phase output
- *
- * - synthesized: understanding was updated
- * - dismissed: observations didn't change understanding
- */
-export const synthesizeOutputSchema = z.object({
-	status: synthesizeStatusEnum.describe(
+export const understandOutputSchema = z.object({
+	status: understandStatusEnum.describe(
 		"'synthesized' if understanding was updated, 'dismissed' if no changes needed",
 	),
 	newUnderstanding: z
@@ -47,4 +32,4 @@ export const synthesizeOutputSchema = z.object({
 		),
 })
 
-export type SynthesizeSchemaOutput = z.infer<typeof synthesizeOutputSchema>
+export type UnderstandSchemaOutput = z.infer<typeof understandOutputSchema>

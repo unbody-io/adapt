@@ -1,23 +1,19 @@
 export { BaseLearner } from './class'
-export type { BaseLearnerInit } from './class'
+export type {
+	BaseLearnerInit,
+	LearnCallbacks,
+	LearnOptions,
+	LearnOutput,
+	UnderstandCallResult,
+} from './class'
 export type {
 	SharedLearnerEventMap,
 	EventUsage,
 	BaseResolvedConfig,
 	BaseLearnerUpdateInput,
+	UnderstandThresholds,
 } from './types'
-export type {
-	InitOutput,
-	LearnCallbacks,
-	LearnOptions,
-	LearnOutput,
-	LearningMethod,
-	SynthesizeThresholds,
-	Usage,
-} from './learning-method'
-export { ObservationBuffer } from './learning-method'
-export type { BufferedObservation } from './learning-method'
-export { ToolBasedMethod } from './query-method'
+export { ToolBasedMethod } from './query'
 export type {
 	QueryCallbacks,
 	QueryContext,
@@ -26,4 +22,4 @@ export type {
 	QueryOptions,
 	QueryResult,
 	ToolBasedConfig,
-} from './query-method'
+} from './query'

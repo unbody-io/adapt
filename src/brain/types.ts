@@ -3,7 +3,7 @@ import type { GeneratedLearnerConfig } from '../learners/schema.config'
 import type { Strategy } from '../learners/text-learner/strategies'
 import type { SharedLearnerEventMap } from '../learners/base/types'
 import type { TokenUsage } from '../learners/types'
-import type { LearnOutput } from '../learners/base/learning-method'
+import type { LearnOutput } from '../learners/base/class'
 import type {
 	CascadableConfig,
 	ResolvedCascadableConfig,
@@ -16,14 +16,14 @@ import type { EvolutionDecision } from './evaluator/types'
 // ─────────────────────────────────────────────────────────────────────────────
 
 /**
- * Observe phase configuration
+ * Observer phase configuration
  */
-export interface ObservePhaseConfig extends CascadableConfig {}
+export interface ObserverPhaseConfig extends CascadableConfig {}
 
 /**
- * Synthesize phase configuration
+ * Understand phase configuration
  */
-export interface SynthesizePhaseConfig extends CascadableConfig {
+export interface UnderstandPhaseConfig extends CascadableConfig {
 	thresholds?: {
 		maxObservations?: number
 		maxTokens?: number
@@ -59,8 +59,8 @@ export interface LearningConfig extends CascadableConfig {
 	name?: string
 	/** Learner description (semantic — goes through evaluator) */
 	description?: string
-	observe?: ObservePhaseConfig
-	synthesize?: SynthesizePhaseConfig
+	observer?: ObserverPhaseConfig
+	understand?: UnderstandPhaseConfig
 	query?: QueryPhaseConfig
 	governance?: GovernanceConfig
 }
@@ -136,14 +136,14 @@ export interface BrainConfig extends CascadableConfig {
 // ─────────────────────────────────────────────────────────────────────────────
 
 /**
- * Resolved observe phase config
+ * Resolved observer phase config
  */
-export interface ResolvedObservePhaseConfig extends ResolvedCascadableConfig {}
+export interface ResolvedObserverPhaseConfig extends ResolvedCascadableConfig {}
 
 /**
- * Resolved synthesize phase config
+ * Resolved understand phase config
  */
-export interface ResolvedSynthesizePhaseConfig
+export interface ResolvedUnderstandPhaseConfig
 	extends ResolvedCascadableConfig {
 	thresholds: {
 		maxObservations: number
@@ -171,8 +171,8 @@ export interface ResolvedGovernanceConfig {
  * Resolved learning config
  */
 export interface ResolvedLearningConfig extends ResolvedCascadableConfig {
-	observe: ResolvedObservePhaseConfig
-	synthesize: ResolvedSynthesizePhaseConfig
+	observer: ResolvedObserverPhaseConfig
+	understand: ResolvedUnderstandPhaseConfig
 	query: ResolvedQueryPhaseConfig
 	governance: ResolvedGovernanceConfig
 }

@@ -7,7 +7,7 @@ export const BRAIN_DEFAULTS = {
 		batchSize: 20,
 	},
 	learning: {
-		synthesize: {
+		understand: {
 			thresholds: {
 				maxObservations: 10,
 				maxTokens: 8000,

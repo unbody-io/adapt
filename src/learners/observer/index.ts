@@ -1,15 +1,16 @@
 /**
- * Observe phase - direct method
+ * Shared observer module — type-agnostic observe phase
  *
  * Extracts what's relevant to purpose from data.
  * Uses identity generation + system prompt pattern.
+ * Shared across all learner types (text, list, etc.).
  */
 
 import type { LanguageModel } from 'ai'
-import { generate, Output } from '../../../../../llm'
-import { observeIdentityPromptTemplate } from './prompt.template.identity'
-import { observeSystemPromptTemplate } from './prompt.template.system'
-import { observeUserPromptTemplate } from './prompt.template.user'
+import { generate, Output } from '../../llm'
+import { observeIdentityPromptTemplate } from './prompts/identity'
+import { observeSystemPromptTemplate } from './prompts/system'
+import { observeUserPromptTemplate } from './prompts/user'
 import type { ObserveIdentity } from './schema.identity'
 import { observeIdentitySchema } from './schema.identity'
 import { observeOutputSchema } from './schema.output'
@@ -111,3 +112,4 @@ export async function observe(
 export type { ObserveIdentity } from './schema.identity'
 export { observeIdentitySchema } from './schema.identity'
 export { observeOutputSchema } from './schema.output'
+export type { ObserveOutput, ObserveContext, ObserveCallbacks, Usage } from './types'

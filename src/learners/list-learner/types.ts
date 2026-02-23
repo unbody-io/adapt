@@ -6,15 +6,15 @@
 
 import type { LanguageModel } from 'ai'
 import type { CascadableConfig } from '../../types/config'
-import type { BaseResolvedConfig } from '../base'
+import type { BaseResolvedConfig, UnderstandThresholds } from '../base/types'
 import type { EventsFromMap } from '../../types/events'
 import type {
 	LearnerHealth,
 	LearnerOrigin,
 	Significance,
 } from '../types'
-import type { SynthesizeThresholds } from '../base/learning-method'
 import type { SharedLearnerEventMap } from '../base/types'
+import type { Store } from '../stores'
 
 // ── Core types ─────────────────────────────────────────────────────────────
 
@@ -113,15 +113,17 @@ export interface ListLearnerConfig extends CascadableConfig {
 	description?: string
 	/** How the learner was created */
 	origin?: LearnerOrigin
+	/** Injected store (defaults to MemoryStore if not provided) */
+	store?: Store
 	/** List-specific governance (dedup, maxItems, pruning) */
 	governance?: ListGovernanceConfig
-	/** Observe phase configuration */
-	observe?: { model?: LanguageModel; blueprintModel?: LanguageModel }
-	/** Synthesize phase configuration */
-	synthesize?: {
+	/** Observer phase configuration */
+	observer?: { model?: LanguageModel; blueprintModel?: LanguageModel }
+	/** Understand phase configuration */
+	understand?: {
 		model?: LanguageModel
 		blueprintModel?: LanguageModel
-		thresholds?: SynthesizeThresholds
+		thresholds?: UnderstandThresholds
 	}
 	/** Query phase configuration */
 	query?: { model?: LanguageModel }

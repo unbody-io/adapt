@@ -11,23 +11,15 @@ import { cascade } from '../../utils/cascade'
 import { TEXT_LEARNER_DEFAULTS } from './config.defaults'
 import type { ResolvedTextLearnerConfig, TextLearnerConfig } from './types'
 
-/**
- * Resolve TextLearnerConfig to ResolvedTextLearnerConfig
- *
- * @param config - The input config
- * @param parentModels - Optional parent models for cascade (from Brain)
- */
 export function resolveTextLearnerConfig(
 	config: TextLearnerConfig,
 	parentModels?: ParentModels,
 ): ResolvedTextLearnerConfig {
-	// Resolve base models with cascade
 	const model = config.model ?? parentModels?.model
 	if (!model) {
 		throw new Error('TextLearner requires a model')
 	}
 
-	// blueprintModel cascade: local override > parent blueprintModel > local model > parent model
 	const blueprintModel = cascade(
 		config.blueprintModel,
 		parentModels?.blueprintModel,
@@ -41,29 +33,29 @@ export function resolveTextLearnerConfig(
 		instructions: config.instructions,
 		id: config.id ?? `learner_${nanoid()}`,
 		origin: config.origin ?? TEXT_LEARNER_DEFAULTS.origin,
-		observe: {
-			method: config.observe?.method ?? TEXT_LEARNER_DEFAULTS.observe.method,
-			model: cascade(config.observe?.model, model),
-			blueprintModel: cascade(config.observe?.blueprintModel, blueprintModel),
-		},
-		synthesize: {
-			method:
-				config.synthesize?.method ?? TEXT_LEARNER_DEFAULTS.synthesize.method,
-			model: cascade(config.synthesize?.model, model),
+		observer: {
+			model: cascade(config.observer?.model, model),
 			blueprintModel: cascade(
-				config.synthesize?.blueprintModel,
+				config.observer?.blueprintModel,
+				blueprintModel,
+			),
+		},
+		understand: {
+			model: cascade(config.understand?.model, model),
+			blueprintModel: cascade(
+				config.understand?.blueprintModel,
 				blueprintModel,
 			),
 			thresholds: {
 				maxObservations:
-					config.synthesize?.thresholds?.maxObservations ??
-					TEXT_LEARNER_DEFAULTS.synthesize.thresholds.maxObservations,
+					config.understand?.thresholds?.maxObservations ??
+					TEXT_LEARNER_DEFAULTS.understand.thresholds.maxObservations,
 				maxTokens:
-					config.synthesize?.thresholds?.maxTokens ??
-					TEXT_LEARNER_DEFAULTS.synthesize.thresholds.maxTokens,
+					config.understand?.thresholds?.maxTokens ??
+					TEXT_LEARNER_DEFAULTS.understand.thresholds.maxTokens,
 				minImportance:
-					config.synthesize?.thresholds?.minImportance ??
-					TEXT_LEARNER_DEFAULTS.synthesize.thresholds.minImportance,
+					config.understand?.thresholds?.minImportance ??
+					TEXT_LEARNER_DEFAULTS.understand.thresholds.minImportance,
 			},
 		},
 		query: {

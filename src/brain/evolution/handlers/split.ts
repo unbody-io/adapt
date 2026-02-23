@@ -62,7 +62,7 @@ export class SplitHandler extends EvolutionActionHandler<SplitActionResult> {
 					const newLearner =
 						await this.brain.createLearnerFromConfig(completeConfig)
 
-					newLearner.setUnderstanding(config.understanding)
+					await newLearner.setUnderstanding(config.understanding)
 
 					newLearnerIds.push(newLearner.id)
 				}

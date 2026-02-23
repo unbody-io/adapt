@@ -1,19 +1,11 @@
 /**
- * Schema for synthesize phase identity
- *
- * Generated once at init from instructions.
- * Provides domain-specific context for synthesis.
+ * Schema for text understand phase identity
  */
 
 import { z } from 'zod'
-import { compare } from '../../../cognitive-skills'
+import { compare } from '../cognitive-skills'
 
-/**
- * Schema for generated synthesize identity
- *
- * Simplified: identity is free-form text, skills are explicit overrides
- */
-export const synthesizeIdentitySchema = z.object({
+export const understandIdentitySchema = z.object({
 	identity: z
 		.string()
 		.describe(
@@ -37,4 +29,4 @@ export const synthesizeIdentitySchema = z.object({
 		),
 })
 
-export type SynthesizeIdentity = z.infer<typeof synthesizeIdentitySchema>
+export type UnderstandIdentity = z.infer<typeof understandIdentitySchema>

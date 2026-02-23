@@ -15,7 +15,15 @@ import type {
 	Significance,
 	TokenUsage,
 } from '../types'
-import type { SynthesizeThresholds } from './learning-method'
+
+/**
+ * Thresholds that trigger the understand phase
+ */
+export interface UnderstandThresholds {
+	maxObservations?: number
+	maxTokens?: number
+	minImportance?: number
+}
 
 /**
  * Base resolved config — common fields shared across all learner types.
@@ -26,11 +34,11 @@ export interface BaseResolvedConfig extends ResolvedCascadableConfig {
 	instructions: string
 	id: string
 	origin: LearnerOrigin
-	observe: { model: LanguageModel; blueprintModel: LanguageModel }
-	synthesize: {
+	observer: { model: LanguageModel; blueprintModel: LanguageModel }
+	understand: {
 		model: LanguageModel
 		blueprintModel: LanguageModel
-		thresholds: Required<SynthesizeThresholds>
+		thresholds: Required<UnderstandThresholds>
 	}
 	query: { model: LanguageModel }
 }
@@ -50,11 +58,11 @@ export interface BaseLearnerUpdateInput {
 	blueprintModel?: LanguageModel
 	instructions?: string
 	focus?: string
-	observe?: { model?: LanguageModel; blueprintModel?: LanguageModel }
-	synthesize?: {
+	observer?: { model?: LanguageModel; blueprintModel?: LanguageModel }
+	understand?: {
 		model?: LanguageModel
 		blueprintModel?: LanguageModel
-		thresholds?: SynthesizeThresholds
+		thresholds?: UnderstandThresholds
 	}
 	query?: { model?: LanguageModel }
 	health?: Partial<LearnerHealth>
@@ -107,7 +115,7 @@ export interface SharedLearnerEventMap {
 	}
 	'learner:observe:error': { learnerId: string; error: unknown }
 
-	// Synthesize phase
+	// Synthesize phase (event names preserved for backward compat)
 	'learner:synthesize:started': {
 		learnerId: string
 		observationCount: number
@@ -185,7 +193,7 @@ export interface SharedLearnerEventMap {
 	'learner:prompts:regenerated': {
 		learnerId: string
 		observePrompt: string
-		synthesizePrompt: string
+		understandPrompt: string
 	}
 	'learner:understanding:set': {
 		learnerId: string

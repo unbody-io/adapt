@@ -1,10 +1,10 @@
 /**
- * System prompt template for observe phase
+ * System prompt template for observe phase (shared across all learner types)
  *
  * Combines generated identity with fixed observation framework.
  */
 
-import type { ObserveIdentity } from './schema.identity'
+import type { ObserveIdentity } from '../schema.identity'
 
 /**
  * Build system prompt from generated identity

@@ -1,5 +1,5 @@
 /**
- * Schema for observe phase output
+ * Schema for observe phase output (shared across all learner types)
  *
  * Observe extracts what's relevant to purpose.
  * No classification, no comparison to understanding - just extraction.

@@ -327,6 +327,73 @@ export async function initUnderstand(
 	return { identity, systemPrompt: '' }
 }
 
+// ── Adjust prompt ─────────────────────────────────────────────────────────
+
+function adjustIdentityPrompt(
+	directive: string,
+	newInstructions: string,
+	currentIdentity: UnderstandIdentity,
+): string {
+	return `You are adjusting a Synthesizer identity for a list-tracking agent.
+
+## Current State
+
+**Instructions** (already updated):
+"${newInstructions}"
+
+**Current Synthesizer Identity**:
+"${currentIdentity.identity}"
+
+## Adjustment Directive
+
+"${directive}"
+
+## Your Task
+
+Update the synthesizer identity to align with the updated instructions and directive.
+The identity should specify:
+- What types of items you maintain in the collection
+- What makes two observations refer to the same item (matching criteria)
+- When to add a new item vs update an existing one
+- When to remove an item
+- Significance criteria: what's routine (minor updates), notable (new important items), critical (major changes)
+- Write in second person ("You maintain...", "You add new items when...")
+
+## Rules
+
+- This is an INCREMENTAL adjustment, not a full rewrite
+- Preserve criteria that are still relevant
+- Update item types, matching rules, and significance criteria to match the new instructions
+- If the directive narrows scope, tighten the identity accordingly
+- If the directive broadens scope, expand while keeping existing specificity
+
+Respond with JSON only:
+{
+  "identity": "You maintain ..."
+}`
+}
+
+/**
+ * Adjust list understand phase — evolves identity from a directive
+ */
+export async function adjustUnderstand(
+	model: LanguageModel,
+	directive: string,
+	newInstructions: string,
+	currentIdentity: UnderstandIdentity,
+): Promise<UnderstandInitResult> {
+	const prompt = adjustIdentityPrompt(directive, newInstructions, currentIdentity)
+
+	const { output: identity } = await generate({
+		model,
+		prompt,
+		output: Output.object({ schema: understandIdentitySchema }),
+		repairSchema: understandIdentitySchema,
+	})
+
+	return { identity, systemPrompt: '' }
+}
+
 export async function understand(
 	model: LanguageModel,
 	identity: UnderstandIdentity,

@@ -4,57 +4,103 @@ import { BaseLearner } from '../base/class'
 import type { UnderstandCallResult } from '../base/class'
 import { ToolBasedMethod } from '../base/query'
 import type { QueryMethod } from '../base/query'
-import { MemoryStore } from '../stores'
 import { resolveListLearnerConfig } from './config.resolver'
 import { applyListGovernance } from './governance'
-import { initUnderstand, understand } from './understand'
-import type { UnderstandIdentity } from './understand'
+import { adjustUnderstand, initUnderstand, understand } from './understand'
 import { buildListQueryPrompt, createListQueryTools } from './query-tools'
 import { generateObservationSchema } from './schema'
 import type {
 	ListItem,
 	ListLearnerConfig,
-	ListLearnerUpdateResult,
-	ResolvedListLearnerConfig,
+	ListLearnerState,
 } from './types'
 
 /**
  * ListLearner - A learning agent that maintains understanding as a collection of items
  *
  * Post-understand governance (dedup, maxItems, pruning) is handled in postProcessUnderstanding.
- * Store is injected (defaults to MemoryStore).
+ * Store is injected — caller must provide it.
  */
-export class ListLearner extends BaseLearner<ListItem[], ResolvedListLearnerConfig> {
-	private items: ListItem[] = []
-	private _understandIdentity: UnderstandIdentity | null = null
+export class ListLearner extends BaseLearner<ListItem[], ListLearnerState> {
+	get type(): string {
+		return 'list'
+	}
 
 	constructor(rawConfig: ListLearnerConfig, parentModels?: ParentModels) {
 		const config = resolveListLearnerConfig(rawConfig, parentModels)
-		super({
-			id: config.id,
-			name: rawConfig.name || config.id,
+		const maxObsForStagnation = 3 * (config.understand.thresholds.maxObservations ?? 10)
+
+		const initialState: ListLearnerState = {
 			instructions: config.instructions,
+			name: rawConfig.name || config.id,
+			description: rawConfig.description ?? '',
+			focus: rawConfig.focus ?? null,
 			origin: config.origin,
-			store: rawConfig.store ?? new MemoryStore(),
-			focus: rawConfig.focus,
-			description: rawConfig.description,
-			health: rawConfig.health,
-			maxObservationsForStagnation:
-				3 * (config.understand.thresholds.maxObservations ?? 10),
-		})
-		this.config = config
+			models: {
+				default: config.model,
+				blueprint: config.blueprintModel,
+				observer: config.observer.model,
+				observer_blueprint: config.observer.blueprintModel,
+				understand: config.understand.model,
+				understand_blueprint: config.understand.blueprintModel,
+				query: config.query.model,
+			},
+			observe_identity: null,
+			observe_prompt: null,
+			understand_prompt: null,
+			understand_identity: null,
+			observation_schema: null,
+			understanding_schema: null,
+			thresholds: {
+				maxObservations: config.understand.thresholds.maxObservations,
+				maxTokens: config.understand.thresholds.maxTokens,
+				minImportance: config.understand.thresholds.minImportance,
+			},
+			health: {
+				activation: 0,
+				threshold: 0.3,
+				status: 'dormant',
+				lastAccessed: new Date(),
+				signalThresholds: {
+					maxDismissalRate: 0.8,
+					minRelevance: 0.3,
+					minConfidence: 0.3,
+					maxObservationsWithoutSynthesis: maxObsForStagnation,
+					...rawConfig.health?.signalThresholds,
+				},
+			},
+			metrics: {
+				ingestion: {
+					observationCount: 0,
+					dismissalCount: 0,
+					dismissalRate: 0,
+					synthesisCount: 0,
+					observationsSinceLastSynthesis: 0,
+				},
+				query: {
+					count: 0,
+					relevanceScores: [],
+					confidenceScores: [],
+					gaps: [],
+				},
+			},
+			stagnation_signal_fired: false,
+			dismissal_signal_fired: false,
+			governance: config.governance,
+		}
+
+		super(config.id, rawConfig.store, initialState)
 	}
 
 	// ── Abstract implementations ───────────────────────────────────────────────
 
-	getUnderstanding(): ListItem[] {
-		return this.items
+	async getUnderstanding(): Promise<ListItem[]> {
+		const records = await this.store.understanding.list()
+		return records.map((r) => r.data as ListItem)
 	}
 
 	async setUnderstanding(items: ListItem[]): Promise<void> {
-		this.items = items
-
-		// Write-through to store — replace all understanding records
+		// Replace all understanding records
 		await this.store.understanding.clear()
 		if (items.length > 0) {
 			await this.store.understanding.addBatch(
@@ -74,20 +120,15 @@ export class ListLearner extends BaseLearner<ListItem[], ResolvedListLearnerConf
 		})
 	}
 
-	protected async restoreUnderstanding(): Promise<void> {
-		const records = await this.store.understanding.list()
-		if (records.length > 0) {
-			this.items = records.map((r) => r.data as ListItem)
-		}
+	async getSummary(): Promise<string> {
+		const count = await this.store.understanding.count()
+		if (count === 0) return '(no items yet)'
+		return `${count} items tracked`
 	}
 
-	getSummary(): string {
-		if (this.items.length === 0) return '(no items yet)'
-		return `${this.items.length} items tracked`
-	}
-
-	hasKnowledge(): boolean {
-		return this.items.length > 0
+	async hasKnowledge(): Promise<boolean> {
+		const count = await this.store.understanding.count()
+		return count > 0
 	}
 
 	protected async regenUnderstandPrompt(
@@ -95,9 +136,28 @@ export class ListLearner extends BaseLearner<ListItem[], ResolvedListLearnerConf
 		instructions: string,
 	): Promise<void> {
 		const result = await initUnderstand(model, instructions)
-		this._understandIdentity = result.identity
-		// For list, the system prompt is generated per call (includes current items)
-		this.understandSystemPrompt = '(list-understand: identity initialized)'
+		await this.setState({
+			understand_identity: result.identity,
+			// For list, the system prompt is generated per call (includes current items)
+			understand_prompt: '(list-understand: identity initialized)',
+		} as Partial<ListLearnerState>)
+	}
+
+	protected async adjustUnderstandPrompt(
+		model: LanguageModel,
+		directive: string,
+		newInstructions: string,
+	): Promise<void> {
+		const result = await adjustUnderstand(
+			model,
+			directive,
+			newInstructions,
+			this.state.understand_identity!,
+		)
+		await this.setState({
+			understand_identity: result.identity,
+			understand_prompt: '(list-understand: identity adjusted)',
+		} as Partial<ListLearnerState>)
 	}
 
 	protected async callUnderstand(
@@ -108,14 +168,14 @@ export class ListLearner extends BaseLearner<ListItem[], ResolvedListLearnerConf
 	): Promise<UnderstandCallResult> {
 		const result = await understand(
 			model,
-			this._understandIdentity!,
+			this.state.understand_identity!,
 			{
 				learnerId: this.id,
-				instructions: this.instructions,
+				instructions: this.state.instructions,
 				observations,
 			},
 			this.store.understanding,
-			this.understandingSchema ?? undefined,
+			this.state.understanding_schema ?? undefined,
 			callbacks,
 		)
 
@@ -140,11 +200,11 @@ export class ListLearner extends BaseLearner<ListItem[], ResolvedListLearnerConf
 	}
 
 	protected postProcessUnderstanding(raw: ListItem[]): ListItem[] {
-		return applyListGovernance(raw, this.config.governance)
+		return applyListGovernance(raw, this.state.governance)
 	}
 
 	protected createQueryMethod(): QueryMethod {
-		return new ToolBasedMethod(this.config.query.model, {
+		return new ToolBasedMethod(this.state.models.query, {
 			tools: createListQueryTools(() => this.getUnderstanding()),
 			buildPrompt: buildListQueryPrompt,
 		})
@@ -153,41 +213,15 @@ export class ListLearner extends BaseLearner<ListItem[], ResolvedListLearnerConf
 	// ── Schema generation (LLM-generated for list) ──────────────────────────────
 
 	protected async generateSchemas(model: LanguageModel, instructions: string) {
-		const observeIdentity = this._observeIdentity?.identity ?? instructions
+		const observeIdentity = this.state.observe_identity?.identity ?? instructions
 		const observationSchema = await generateObservationSchema(model, instructions, observeIdentity)
-		// Understanding schema defaults to observation schema — same shape.
-		// Only diverges when explicitly provided by the user.
 		return { observationSchema, understandingSchema: observationSchema }
-	}
-
-	// ── State persistence (adds understand identity) ──────────────────────────
-
-	protected async persistState(): Promise<void> {
-		await super.persistState()
-		const now = new Date().toISOString()
-		const existing = await this.store.state.get('understand_identity')
-		if (existing) {
-			await this.store.state.update('understand_identity', { value: this._understandIdentity, updated_at: now })
-		} else {
-			await this.store.state.add({ id: 'understand_identity', value: this._understandIdentity, updated_at: now })
-		}
-	}
-
-	protected async restoreState(): Promise<boolean> {
-		const baseRestored = await super.restoreState()
-		if (!baseRestored) return false
-
-		const understandIdentity = await this.store.state.get('understand_identity')
-		if (!understandIdentity) return false
-
-		this._understandIdentity = understandIdentity.value as UnderstandIdentity
-		return true
 	}
 
 	// ── List-specific accessors ────────────────────────────────────────────────
 
-	getItemCount(): number {
-		return this.items.length
+	async getItemCount(): Promise<number> {
+		return this.store.understanding.count()
 	}
 
 	getQueryMethodName(): string {
@@ -195,7 +229,7 @@ export class ListLearner extends BaseLearner<ListItem[], ResolvedListLearnerConf
 	}
 
 	getGovernance() {
-		return { ...this.config.governance }
+		return { ...this.state.governance }
 	}
 
 	// ── Type-specific update (only governance) ─────────────────────────────────
@@ -203,20 +237,23 @@ export class ListLearner extends BaseLearner<ListItem[], ResolvedListLearnerConf
 	protected applyTypeSpecificUpdates(
 		updates: Record<string, unknown>,
 		changedFields: string[],
-	): void {
+	): Partial<ListLearnerState> {
 		const u = updates as Partial<ListLearnerConfig>
+		const result: Partial<ListLearnerState> = {}
 
 		if (u.governance) {
-			Object.assign(this.config.governance, u.governance)
+			result.governance = { ...this.state.governance, ...u.governance }
 			changedFields.push('governance')
 		}
+
+		return result
 	}
 
 	// ── Typed update wrapper ───────────────────────────────────────────────────
 
 	async update(
 		updates: Partial<ListLearnerConfig>,
-	): Promise<ListLearnerUpdateResult> {
+	): Promise<{ changedFields: string[] }> {
 		return super.update(updates as Record<string, unknown>)
 	}
 }

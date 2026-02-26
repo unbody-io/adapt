@@ -8,6 +8,7 @@
 import type { LanguageModel } from 'ai'
 import { generate, Output } from '../../../llm'
 import type { Strategy } from '../strategies'
+import { understandAdjustPromptTemplate } from './prompts/adjust'
 import { understandIdentityPromptTemplate } from './prompts/identity'
 import { understandSystemPromptTemplate } from './prompts/system'
 import { understandUserPromptTemplate } from './prompts/user'
@@ -37,6 +38,44 @@ export async function initUnderstand(
 	strategy: Strategy,
 ): Promise<UnderstandInitResult> {
 	const prompt = understandIdentityPromptTemplate(instructions)
+
+	const { output: identity } = await generate({
+		model,
+		prompt,
+		output: Output.object({ schema: understandIdentitySchema }),
+		repairSchema: understandIdentitySchema,
+	})
+
+	const systemPrompt = understandSystemPromptTemplate(identity, strategy)
+
+	return { identity, systemPrompt }
+}
+
+/**
+ * Adjust text understand phase — evolves identity from a directive
+ *
+ * Unlike initUnderstand (which generates from scratch), this shows the LLM
+ * the current identity so it can make incremental adjustments.
+ *
+ * @param model - Language model to use
+ * @param directive - Natural language directive describing what to change
+ * @param newInstructions - The already-resolved new instructions
+ * @param currentIdentity - The current understand identity
+ * @param strategy - The synthesis strategy
+ * @returns Adjusted identity and system prompt
+ */
+export async function adjustUnderstand(
+	model: LanguageModel,
+	directive: string,
+	newInstructions: string,
+	currentIdentity: UnderstandIdentity,
+	strategy: Strategy,
+): Promise<UnderstandInitResult> {
+	const prompt = understandAdjustPromptTemplate(
+		directive,
+		newInstructions,
+		currentIdentity,
+	)
 
 	const { output: identity } = await generate({
 		model,

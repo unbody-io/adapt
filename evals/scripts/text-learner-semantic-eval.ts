@@ -6,6 +6,7 @@
  */
 
 import { TextLearner } from '../../src/learners/text-learner/class'
+import { MemoryStore } from '../../src/learners/stores'
 import { logger } from '../helpers/logger'
 import { createOpenRouter } from '@openrouter/ai-sdk-provider'
 
@@ -37,11 +38,12 @@ async function main() {
 			'You are a coffee knowledge tracker. Watch for information about coffee ' +
 			'brewing methods, bean origins, roasting profiles, flavor notes, and ' +
 			'preparation techniques. Focus on practical, actionable knowledge.',
+		store: new MemoryStore(),
 		governance: { strategy: 'continuous' },
-		synthesize: {
+		understand: {
 			thresholds: {
 				minImportance: 0.3,
-				maxObservations: 3, // Low threshold — synthesize after 3 observations
+				maxObservations: 3,
 			},
 		},
 	})
@@ -76,7 +78,7 @@ async function main() {
 	logger.logState('Learner created', {
 		id: learner.id,
 		name: learner.name,
-		understanding: learner.getUnderstanding() || '(empty)',
+		understanding: (await learner.getUnderstanding()) || '(empty)',
 		buffer: learner.getBufferState(),
 	})
 
@@ -96,7 +98,7 @@ async function main() {
 	])
 
 	const afterBatch1 = {
-		understanding: learner.getUnderstanding(),
+		understanding: await learner.getUnderstanding(),
 		buffer: learner.getBufferState(),
 		metrics: learner.getMetrics(),
 	}
@@ -193,7 +195,7 @@ async function main() {
 	])
 
 	const afterBatch2 = {
-		understanding: learner.getUnderstanding(),
+		understanding: await learner.getUnderstanding(),
 		buffer: learner.getBufferState(),
 		metrics: learner.getMetrics(),
 	}
@@ -234,7 +236,7 @@ async function main() {
 	}
 
 	console.log('\n  Final state:')
-	console.log(`    Understanding length: ${learner.getUnderstanding().length} chars`)
+	console.log(`    Understanding length: ${(await learner.getUnderstanding()).length} chars`)
 	console.log(`    Buffer count: ${learner.getBufferState().count}`)
 	console.log(`    Metrics: ${JSON.stringify(learner.getMetrics(), null, 2)}`)
 	console.log(`    Health: ${JSON.stringify(learner.getHealth(), null, 2)}`)
@@ -242,7 +244,7 @@ async function main() {
 	logger.logSection('10. Semantic checks')
 
 	// Check: understanding exists after ingestion
-	const hasUnderstanding = learner.getUnderstanding().length > 0
+	const hasUnderstanding = (await learner.getUnderstanding()).length > 0
 	logger.logAssertion('Understanding was generated', hasUnderstanding)
 
 	// Check: init events fired

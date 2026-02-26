@@ -1,5 +1,9 @@
 /**
  * Update action handler - updates existing learner configuration
+ *
+ * Uses both methods for what each is designed for:
+ * - learner.adjust(directive) for behavioral evolution (instructions, identity, prompts, schemas)
+ * - learner.update({...}) for mechanical config (name, description, thresholds)
  */
 
 import { Output } from 'ai'
@@ -11,12 +15,6 @@ import { updateOutputSchema } from '../schemas/update'
 import { updateSystemPrompt } from '../prompt.system.update'
 import { updatePromptTemplate } from '../prompt.template.update'
 
-/**
- * Handler for 'update' evolution action
- *
- * Processes each target in each decision sequentially.
- * A single decision can target multiple learners (same guidance applied per-learner).
- */
 export class UpdateHandler extends EvolutionActionHandler<UpdateActionResult> {
 	async execute(decisions: EvolutionDecision[]): Promise<UpdateActionResult> {
 		const allUpdatedLearnerIds: string[] = []
@@ -35,28 +33,36 @@ export class UpdateHandler extends EvolutionActionHandler<UpdateActionResult> {
 					const result = await generate({
 						model: this.brain.config.model,
 						system: updateSystemPrompt,
-						prompt: updatePromptTemplate(
+						prompt: await updatePromptTemplate(
 							decision.guidance,
-							learner as any,
+							learner,
 							this.brain.prompt,
 						),
 						output: Output.object({ schema: updateOutputSchema }),
 						repairSchema: updateOutputSchema,
 					})
 
-					const { updates } = result.output
+					const { mechanical, behavioral } = result.output
 
-					// Adapt flat thresholds to nested synthesize.thresholds shape
-					const { thresholds, ...rest } = updates
-					const adapted = {
-						...rest,
-						...(thresholds ? { synthesize: { thresholds } } : {}),
+					// Behavioral evolution via adjust() — incremental/adaptive
+					if (behavioral && behavioral.trim().length > 0) {
+						await learner.adjust(behavioral)
 					}
 
-					await (learner as any).update(adapted)
+					// Mechanical config via update() — specific field values
+					const { thresholds, ...rest } = mechanical
+					const hasMechanical =
+						rest.name || rest.description || thresholds
+					if (hasMechanical) {
+						const adapted = {
+							...rest,
+							...(thresholds ? { understand: { thresholds } } : {}),
+						}
+						await learner.update(adapted)
+					}
 
-					if (updates.name) {
-						this.brain.__updateLearnerName(learnerId, updates.name)
+					if (mechanical.name) {
+						this.brain.__updateLearnerName(learnerId, mechanical.name)
 					}
 
 					allUpdatedLearnerIds.push(learnerId)

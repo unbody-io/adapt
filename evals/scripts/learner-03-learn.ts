@@ -56,7 +56,7 @@ async function main() {
 
 	logger.logSection('Before State')
 
-	const beforeUnderstanding = learner.getUnderstanding()
+	const beforeUnderstanding = await learner.getUnderstanding()
 	const beforeBuffer = learner.getBufferState()
 
 	logger.logState('Before Learning', {
@@ -75,7 +75,7 @@ async function main() {
 
 	logger.logState('After First Ingest', {
 		bufferCount: afterIngest1Buffer.count,
-		understanding: learner.getUnderstanding() || '(empty)',
+		understanding: (await learner.getUnderstanding()) || '(empty)',
 	})
 
 	logger.logMetric('Buffer observations', beforeBuffer.count, afterIngest1Buffer.count)
@@ -90,7 +90,7 @@ async function main() {
 
 	logger.logState('After Second Ingest', {
 		bufferCount: afterIngest2Buffer.count,
-		understanding: learner.getUnderstanding() || '(empty)',
+		understanding: (await learner.getUnderstanding()) || '(empty)',
 	})
 
 	logger.logMetric('Buffer observations', afterIngest1Buffer.count, afterIngest2Buffer.count)
@@ -105,7 +105,7 @@ async function main() {
 	await new Promise((resolve) => setTimeout(resolve, 2000))
 
 	const afterSynthesisBuffer = learner.getBufferState()
-	const afterSynthesisUnderstanding = learner.getUnderstanding()
+	const afterSynthesisUnderstanding = await learner.getUnderstanding()
 
 	logger.logState('After Synthesis', {
 		bufferCount: afterSynthesisBuffer.count,

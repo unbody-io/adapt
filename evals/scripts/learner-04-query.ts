@@ -65,7 +65,7 @@ async function main() {
 
 	logger.logSection('Before State')
 
-	const beforeUnderstanding = learner.getUnderstanding()
+	const beforeUnderstanding = await learner.getUnderstanding()
 
 	logger.logState('Learner State', {
 		hasUnderstanding: !!beforeUnderstanding,

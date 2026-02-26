@@ -257,6 +257,38 @@
     .learner-status.synthesizing { background: #3f2f1a; color: #facc15; }
     .learner-status.ready { background: #1a3f1a; color: #4ade80; }
 
+    .learner-type-badge {
+      font-size: 9px;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 3px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .learner-type-badge.text { background: #1a2a3f; color: #60a5fa; border: 1px solid #2a3a5f; }
+    .learner-type-badge.list { background: #2a1a3f; color: #a78bfa; border: 1px solid #3a2a5f; }
+
+    .adjust-row {
+      display: flex;
+      gap: 4px;
+      padding: 6px 12px 8px;
+    }
+    .adjust-row input {
+      flex: 1;
+      font-size: 11px;
+      padding: 4px 8px;
+      background: #1a1a2e;
+      border: 1px solid #333;
+      color: #e0e0e0;
+      border-radius: 4px;
+    }
+    .adjust-row button {
+      width: auto;
+      font-size: 10px;
+      padding: 4px 8px;
+      white-space: nowrap;
+    }
+
     .learner-card-body {
       padding: 12px;
     }
@@ -1809,6 +1841,7 @@
       <div class="status">
         <span class="status-dot" id="statusDot"></span>
         <span id="statusText">Disconnected</span>
+        <span id="storeBadge" style="display:none;margin-left:8px;padding:2px 8px;border-radius:4px;font-size:10px;background:#1a2a1a;color:#4ade80;border:1px solid #2a3a2a;"></span>
       </div>
     </header>
 
@@ -1933,7 +1966,7 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
             </select>
           </div>
           <div class="form-group">
-            <label>Synthesize Model</label>
+            <label>Understand Model</label>
             <select id="synthesizeModel" class="model-select">
               <option value="">(same as primary)</option>
               <optgroup label="Fastest">
@@ -1999,7 +2032,7 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
             </select>
           </div>
           <div class="form-group">
-            <label>Synthesize Blueprint</label>
+            <label>Understand Blueprint</label>
             <select id="synthesizeBlueprintModel" class="model-select">
               <option value="">(same as blueprint)</option>
               <optgroup label="Fastest">
@@ -2072,6 +2105,50 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
         </div>
 
         </div><!-- /section-learning -->
+
+        <!-- Storage Config -->
+        <div class="section-title collapsible-toggle" data-target="section-storage">Storage <span class="section-chevron">&#9662;</span></div>
+        <div class="section-body" id="section-storage">
+          <div style="font-size:10px;color:#4a9eff;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">Brain Store</div>
+          <div class="form-group">
+            <label>Type</label>
+            <select id="brainStoreType">
+              <option value="memory">Memory (ephemeral)</option>
+              <option value="sqlite-memory">SQLite In-Memory (ephemeral)</option>
+              <option value="sqlite">SQLite File (persistent)</option>
+            </select>
+          </div>
+          <div class="form-group" id="brainStorePathGroup" style="display:none;">
+            <label>Path</label>
+            <input type="text" id="brainStorePath" placeholder="server/data/default" value="server/data/default">
+          </div>
+          <div style="font-size:10px;color:#a78bfa;text-transform:uppercase;letter-spacing:0.5px;margin:12px 0 6px;">Learner Store</div>
+          <div class="form-group">
+            <label>Type</label>
+            <select id="learnerStoreType">
+              <option value="memory">Memory (ephemeral)</option>
+              <option value="sqlite-memory">SQLite In-Memory (ephemeral)</option>
+              <option value="sqlite">SQLite File (persistent)</option>
+            </select>
+          </div>
+          <div class="form-group" id="learnerStorePathGroup" style="display:none;">
+            <label>Path</label>
+            <input type="text" id="learnerStorePath" placeholder="server/data/default" value="server/data/default">
+            <div style="font-size:10px;color:#666;margin-top:2px;">Relative to project root. Reuse a path to restore a previous brain.</div>
+          </div>
+        </div><!-- /section-storage -->
+
+        <!-- Init Options -->
+        <div class="section-title collapsible-toggle" data-target="section-init-opts">Init Options <span class="section-chevron">&#9656;</span></div>
+        <div class="section-body collapsed" id="section-init-opts">
+          <div class="form-group">
+            <label style="display:flex;align-items:center;gap:6px;">
+              <input type="checkbox" id="autoSetup" checked style="width:auto;">
+              Auto Setup (LLM decomposition)
+            </label>
+            <div style="font-size:10px;color:#666;margin-top:2px;">When off, only explicit learners are created — no LLM call.</div>
+          </div>
+        </div><!-- /section-init-opts -->
 
         <!-- Evolution Config -->
         <div class="section-title collapsible-toggle" data-target="section-evolution">Evolution <span class="section-chevron">&#9662;</span></div>
@@ -2150,6 +2227,7 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
         </div><!-- /section-governance -->
 
         <button id="initBtn">Initialize Brain</button>
+        <button id="destroyBrainBtn" class="secondary" style="display:none; margin-top:6px; background:#2a1515; color:#f87171; border:1px solid #7f1d1d;">Destroy Brain</button>
         <button id="updateBrainBtn" class="secondary" style="display:none; margin-top:6px;">Update Brain</button>
 
         <!-- Update History -->
@@ -2418,8 +2496,9 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
           <button class="modal-tab active" data-tab="overview">Overview</button>
           <button class="modal-tab" data-tab="settings">Settings</button>
           <button class="modal-tab" data-tab="observe">Observe Prompt</button>
-          <button class="modal-tab" data-tab="synthesize">Synthesize Prompt</button>
+          <button class="modal-tab" data-tab="synthesize">Understand Prompt</button>
           <button class="modal-tab" data-tab="understanding">Understanding</button>
+          <button class="modal-tab" data-tab="schemas">Schemas</button>
           <button class="modal-tab" data-tab="config">Config</button>
           <button class="modal-tab" data-tab="query">Query</button>
         </div>
@@ -2468,7 +2547,7 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
               </select>
             </div>
             <div class="form-group">
-              <label>Synthesize Model</label>
+              <label>Understand Model</label>
               <select id="modalSynthesizeModel" class="model-select">
                 <option value="">(inherit from brain)</option>
               </select>
@@ -2568,6 +2647,13 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
           <pre id="modalUnderstanding"></pre>
         </div>
 
+        <div class="modal-tab-content" id="modal-schemas">
+          <h4 style="margin:0 0 8px;color:#ccc;">Observation Schema</h4>
+          <pre id="modalObservationSchema" style="margin-bottom:16px;"></pre>
+          <h4 style="margin:0 0 8px;color:#ccc;">Understanding Schema</h4>
+          <pre id="modalUnderstandingSchema"></pre>
+        </div>
+
         <div class="modal-tab-content" id="modal-config">
           <pre id="modalConfig"></pre>
         </div>
@@ -2582,6 +2668,38 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
           </div>
           <div id="modalQueryResult" style="display:none;"></div>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Create Learner Modal -->
+  <div class="modal-overlay" id="createLearnerModal" style="display:none;">
+    <div class="modal" style="max-width:480px;">
+      <div class="modal-header">
+        <h3 class="modal-title">Create Learner</h3>
+        <button class="modal-close" id="createLearnerClose">&times;</button>
+      </div>
+      <div style="padding:16px;display:flex;flex-direction:column;gap:12px;">
+        <div class="form-group">
+          <label>Name</label>
+          <input type="text" id="createLearnerName" placeholder="e.g. Tech Preferences">
+        </div>
+        <div class="form-group">
+          <label>Type</label>
+          <select id="createLearnerType">
+            <option value="text">Text (narrative prose understanding)</option>
+            <option value="list">List (structured item collection)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Instructions</label>
+          <textarea id="createLearnerInstructions" rows="4" placeholder="What should this learner observe and track?"></textarea>
+        </div>
+        <div class="form-group">
+          <label>Description <span style="color:#666;font-weight:normal;">(optional)</span></label>
+          <input type="text" id="createLearnerDescription" placeholder="Brief description for query routing">
+        </div>
+        <button id="createLearnerSubmit">Create Learner</button>
       </div>
     </div>
   </div>
@@ -3101,10 +3219,9 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
       return n.toString()
     }
 
-    /** Detect learner type from governance shape */
+    /** Get learner type from status response */
     function getLearnerType(data) {
-      if (data.governance?.deduplication !== undefined) return 'list'
-      return 'text'
+      return data.type || 'text'
     }
 
     /** Short governance summary for cards */
@@ -3132,7 +3249,22 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
     const maxObservations = document.getElementById('maxObservations')
     const minImportance = document.getElementById('minImportance')
     const queryMethod = document.getElementById('queryMethod')
+    const brainStoreType = document.getElementById('brainStoreType')
+    const brainStorePath = document.getElementById('brainStorePath')
+    const brainStorePathGroup = document.getElementById('brainStorePathGroup')
+    const learnerStoreType = document.getElementById('learnerStoreType')
+    const learnerStorePath = document.getElementById('learnerStorePath')
+    const learnerStorePathGroup = document.getElementById('learnerStorePathGroup')
+    const autoSetupCheckbox = document.getElementById('autoSetup')
     const initBtn = document.getElementById('initBtn')
+
+    // Toggle store path visibility
+    brainStoreType.addEventListener('change', () => {
+      brainStorePathGroup.style.display = brainStoreType.value === 'sqlite' ? '' : 'none'
+    })
+    learnerStoreType.addEventListener('change', () => {
+      learnerStorePathGroup.style.display = learnerStoreType.value === 'sqlite' ? '' : 'none'
+    })
     const projectSelect = document.getElementById('projectSelect')
     const sessionList = document.getElementById('sessionList')
     const userMessagesOnly = document.getElementById('userMessagesOnly')
@@ -3147,6 +3279,7 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
     const askBtn = document.getElementById('askBtn')
     const learnerModal = document.getElementById('learnerModal')
     const updateBrainBtn = document.getElementById('updateBrainBtn')
+    const destroyBrainBtn = document.getElementById('destroyBrainBtn')
     const evolutionEnabled = document.getElementById('evolutionEnabled')
     const autoEvaluate = document.getElementById('autoEvaluate')
     const signalThreshold = document.getElementById('signalThreshold')
@@ -3206,6 +3339,40 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
         await updateLearners()
       } catch (err) {
         showToast(`Split failed: ${err.message}`, 'error')
+      }
+    }
+
+    async function removeLearnerFromCard(learnerId) {
+      if (!confirm(`Remove learner "${learnerId}"? This is a simple removal (no evolution).`)) return
+      try {
+        const res = await fetch(`/brain/learners/${learnerId}/remove`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+        })
+        if (!res.ok) throw new Error((await res.json()).error)
+        showToast(`Removed learner: ${learnerId}`, 'success')
+        await updateLearners()
+      } catch (err) {
+        showToast(`Remove failed: ${err.message}`, 'error')
+      }
+    }
+
+    async function adjustLearnerFromCard(learnerId) {
+      const input = document.getElementById(`adjust-${learnerId}`)
+      const directive = input?.value?.trim()
+      if (!directive) return
+      try {
+        const res = await fetch(`/brain/learners/${learnerId}/adjust`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ directive })
+        })
+        if (!res.ok) throw new Error((await res.json()).error)
+        input.value = ''
+        showToast(`Adjusted learner: ${learnerId}`, 'success')
+        await updateLearners()
+      } catch (err) {
+        showToast(`Adjust failed: ${err.message}`, 'error')
       }
     }
 
@@ -3352,19 +3519,19 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
       // Diff learning config
       const learning = {}
       if (current.observeModel !== prev.observeModel) {
-        learning.observe = { model: current.observeModel || undefined }
+        learning.observer = { model: current.observeModel || undefined }
         hasChanges = true
       }
       if (current.observeBlueprintModel !== prev.observeBlueprintModel) {
-        learning.observe = { ...(learning.observe || {}), blueprintModel: current.observeBlueprintModel || undefined }
+        learning.observer = { ...(learning.observer || {}), blueprintModel: current.observeBlueprintModel || undefined }
         hasChanges = true
       }
       if (current.synthesizeModel !== prev.synthesizeModel) {
-        learning.synthesize = { model: current.synthesizeModel || undefined }
+        learning.understand = { model: current.synthesizeModel || undefined }
         hasChanges = true
       }
       if (current.synthesizeBlueprintModel !== prev.synthesizeBlueprintModel) {
-        learning.synthesize = { ...(learning.synthesize || {}), blueprintModel: current.synthesizeBlueprintModel || undefined }
+        learning.understand = { ...(learning.understand || {}), blueprintModel: current.synthesizeBlueprintModel || undefined }
         hasChanges = true
       }
       // Thresholds
@@ -3378,11 +3545,7 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
         hasChanges = true
       }
       if (Object.keys(thresholds).length > 0) {
-        learning.synthesize = { ...(learning.synthesize || {}), thresholds }
-      }
-      if (current.queryMethod !== prev.queryMethod) {
-        learning.query = { method: current.queryMethod }
-        hasChanges = true
+        learning.understand = { ...(learning.understand || {}), thresholds }
       }
       if (current.governanceStrategy !== prev.governanceStrategy || current.governanceMaxTokens !== prev.governanceMaxTokens) {
         learning.governance = {
@@ -3512,12 +3675,12 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
       const minImp = parseFloat(document.getElementById('modalMinImportance').value)
       const lType = getLearnerType(data)
 
-      if (obsModel) body.observe = { model: obsModel }
-      if (synModel) body.synthesize = { ...(body.synthesize || {}), model: synModel }
+      if (obsModel) body.observer = { model: obsModel }
+      if (synModel) body.understand = { ...(body.understand || {}), model: synModel }
 
-      const currentThresholds = data.synthesizeThresholds || {}
+      const currentThresholds = data.understandThresholds || {}
       if (maxObs !== (currentThresholds.maxObservations || 10) || minImp !== (currentThresholds.minImportance || 0.3)) {
-        body.synthesize = { ...(body.synthesize || {}), thresholds: { maxObservations: maxObs, minImportance: minImp } }
+        body.understand = { ...(body.understand || {}), thresholds: { maxObservations: maxObs, minImportance: minImp } }
       }
 
       const currentGovr = data.governance || {}
@@ -3567,7 +3730,7 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
         timestamp: new Date().toISOString(),
         target: currentModalLearnerId,
         changedFields: Object.keys(body),
-        previousValues: { synthesizeThresholds: currentThresholds, governance: currentGovr, queryMethod: data.queryMethod },
+        previousValues: { understandThresholds: currentThresholds, governance: currentGovr, queryMethod: data.queryMethod },
       })
       renderUpdateHistory()
 
@@ -3595,24 +3758,50 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
       }
     }
 
-    // --- Add Learner ---
+    // --- Add Learner (modal) ---
     const addLearnerBtn = document.getElementById('addLearnerBtn')
-    addLearnerBtn.addEventListener('click', async () => {
-      const name = prompt('Learner name:')
-      if (!name || !name.trim()) return
-      const instructions = prompt('Instructions (what should this learner observe and track?):')
-      if (!instructions || !instructions.trim()) return
-      addLearnerBtn.disabled = true
-      addLearnerBtn.textContent = 'Creating...'
+    const createLearnerModal = document.getElementById('createLearnerModal')
+    const createLearnerClose = document.getElementById('createLearnerClose')
+    const createLearnerSubmit = document.getElementById('createLearnerSubmit')
+
+    addLearnerBtn.addEventListener('click', () => {
+      document.getElementById('createLearnerName').value = ''
+      document.getElementById('createLearnerType').value = 'text'
+      document.getElementById('createLearnerInstructions').value = ''
+      document.getElementById('createLearnerDescription').value = ''
+      createLearnerModal.style.display = 'flex'
+    })
+
+    createLearnerClose.addEventListener('click', () => {
+      createLearnerModal.style.display = 'none'
+    })
+
+    createLearnerModal.addEventListener('click', (e) => {
+      if (e.target === createLearnerModal) createLearnerModal.style.display = 'none'
+    })
+
+    createLearnerSubmit.addEventListener('click', async () => {
+      const name = document.getElementById('createLearnerName').value.trim()
+      const type = document.getElementById('createLearnerType').value
+      const instructions = document.getElementById('createLearnerInstructions').value.trim()
+      const description = document.getElementById('createLearnerDescription').value.trim()
+
+      if (!name) return alert('Name is required')
+      if (!instructions) return alert('Instructions are required')
+
+      createLearnerSubmit.disabled = true
+      createLearnerSubmit.innerHTML = '<span class="spinner"></span>Creating...'
+
       try {
         const res = await fetch('/brain/learners/create', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name: name.trim(), instructions: instructions.trim() }),
+          body: JSON.stringify({ name, type, instructions, ...(description ? { description } : {}) }),
         })
         const result = await res.json()
         if (res.ok) {
-          showToast('synthesized', result.learnerId, 'New learner created: ' + name.trim())
+          showToast('synthesized', result.learnerId, 'New learner created: ' + name)
+          createLearnerModal.style.display = 'none'
           updateLearners()
         } else {
           showToast('critical', 'brain', 'Create failed: ' + result.error)
@@ -3620,8 +3809,8 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
       } catch (err) {
         showToast('critical', 'brain', 'Error: ' + err.message)
       } finally {
-        addLearnerBtn.disabled = false
-        addLearnerBtn.textContent = '+ Add Learner'
+        createLearnerSubmit.disabled = false
+        createLearnerSubmit.textContent = 'Create Learner'
       }
     })
 
@@ -4446,6 +4635,7 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
         initBtn.disabled = true
         initBtn.classList.add('secondary')
         updateBrainBtn.style.display = ''
+        destroyBrainBtn.style.display = ''
         enableEvoActions()
         document.getElementById('brainDashboard').style.display = ''
         updateLearners()
@@ -4459,8 +4649,8 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
           blueprint: blueprintModel.value || model.value,
           observe: observeModel.value || model.value,
           observeBlueprint: observeBlueprintModel.value || blueprintModel.value || model.value,
-          synthesize: synthesizeModel.value || model.value,
-          synthesizeBlueprint: synthesizeBlueprintModel.value || blueprintModel.value || model.value
+          understand: synthesizeModel.value || model.value,
+          understandBlueprint: synthesizeBlueprintModel.value || blueprintModel.value || model.value
         }
       }
 
@@ -4665,9 +4855,9 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
         showToast(toastType, data.learnerId, data.evolution || 'Understanding updated', {
           significance: data.significance
         })
-        // Track usage for synthesize phase
+        // Track usage for understand phase
         if (data.usage) {
-          trackUsage(configuredModels.synthesize || configuredModels.primary, 'synthesize', data.usage, data.learnerId)
+          trackUsage(configuredModels.understand || configuredModels.primary, 'understand', data.usage, data.learnerId)
         }
         updateLearnersUI()
         updateLearners()
@@ -4723,16 +4913,21 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
             prompt: brainPrompt.value,
             model: model.value,
             blueprintModel: blueprintModel.value || undefined,
-            observeModel: observeModel.value || undefined,
-            observeBlueprintModel: observeBlueprintModel.value || undefined,
-            synthesizeModel: synthesizeModel.value || undefined,
-            synthesizeBlueprintModel: synthesizeBlueprintModel.value || undefined,
+            observerModel: observeModel.value || undefined,
+            observerBlueprintModel: observeBlueprintModel.value || undefined,
+            understandModel: synthesizeModel.value || undefined,
+            understandBlueprintModel: synthesizeBlueprintModel.value || undefined,
             strategy: strategy.value,
             batchSize: parseInt(batchSize.value),
             maxObservations: parseInt(maxObservations.value),
             minImportance: parseFloat(minImportance.value),
             queryMethod: queryMethod.value,
             governanceMaxTokens: parseInt(governanceMaxTokens.value),
+            brainStore: brainStoreType.value,
+            ...(brainStoreType.value === 'sqlite' ? { brainStorePath: brainStorePath.value || 'server/data/default' } : {}),
+            learnerStore: learnerStoreType.value,
+            ...(learnerStoreType.value === 'sqlite' ? { learnerStorePath: learnerStorePath.value || 'server/data/default' } : {}),
+            autoSetup: autoSetupCheckbox.checked,
             evolution: {
               enabled: evolutionEnabled.checked,
               autoEvaluate: autoEvaluate.checked,
@@ -4742,6 +4937,18 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
         })
 
         const data = await res.json()
+        if (res.status === 409) {
+          if (confirm('Brain is already running. Destroy it and re-initialize?')) {
+            await fetch('/brain/destroy', { method: 'POST' })
+            initBtn.disabled = false
+            initBtn.textContent = 'Initialize Brain'
+            initBtn.click()
+          } else {
+            initBtn.disabled = false
+            initBtn.textContent = 'Initialize Brain'
+          }
+          return
+        }
         if (!res.ok) {
           alert('Error: ' + data.error)
           initBtn.disabled = false
@@ -4919,12 +5126,48 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
         initBtn.textContent = 'Initialized'
         initBtn.classList.add('secondary')
         updateBrainBtn.style.display = ''
+        destroyBrainBtn.style.display = ''
         addLearnerBtn.style.display = ''
+
+        // Update store badge (shows both brain + learner store)
+        const storeBadge = document.getElementById('storeBadge')
+        if (data.store) {
+          storeBadge.style.display = ''
+          const storeLabel = (s) => {
+            if (!s) return 'Memory'
+            if (s.type === 'sqlite') return 'SQLite: ' + (s.path || '?')
+            if (s.type === 'sqlite-memory') return 'SQLite :memory:'
+            return 'Memory'
+          }
+          const bLabel = storeLabel(data.store.brain)
+          const lLabel = storeLabel(data.store.learner)
+          storeBadge.innerHTML = `<span style="margin-right:6px;">B: ${bLabel}</span><span>L: ${lLabel}</span>`
+          const hasFile = data.store.brain?.type === 'sqlite' || data.store.learner?.type === 'sqlite'
+          storeBadge.style.background = hasFile ? '#1a2a1a' : '#2a2a1a'
+          storeBadge.style.color = hasFile ? '#4ade80' : '#facc15'
+        }
         queryInput.disabled = false
         askBtn.disabled = false
 
         // Populate brain-level config from status
         if (data.prompt) brainPrompt.value = data.prompt
+        if (data.modelId) {
+          const modelEl = document.getElementById('model')
+          if (modelEl) modelEl.value = data.modelId
+        }
+        if (data.store) {
+          const bsEl = document.getElementById('brainStoreType')
+          const lsEl = document.getElementById('learnerStoreType')
+          const bpEl = document.getElementById('brainStorePath')
+          const lpEl = document.getElementById('learnerStorePath')
+          if (bsEl) bsEl.value = data.store.brain?.type || 'memory'
+          if (lsEl) lsEl.value = data.store.learner?.type || 'memory'
+          if (bpEl && data.store.brain?.path) bpEl.value = data.store.brain.path
+          if (lpEl && data.store.learner?.path) lpEl.value = data.store.learner.path
+          // Toggle path input visibility
+          if (bpEl) bpEl.parentElement.style.display = data.store.brain?.type === 'sqlite' ? '' : 'none'
+          if (lpEl) lpEl.parentElement.style.display = data.store.learner?.type === 'sqlite' ? '' : 'none'
+        }
         if (data.evolution) {
           evolutionEnabled.checked = data.evolution.enabled !== false
           autoEvaluate.checked = data.evolution.autoEvaluate !== false
@@ -4991,7 +5234,7 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
         const bufferTokens = data.buffer?.totalTokens || 0
         const bufferObservations = data.bufferObservations || []
         const evolutionCount = data.evolution?.length || 0
-        const thresholds = data.synthesizeThresholds || {}
+        const thresholds = data.understandThresholds || {}
         const maxObs = thresholds.maxObservations || 10
         const maxTokens = thresholds.maxTokens || 8000
 
@@ -5111,7 +5354,10 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
 
         card.innerHTML = `
           <div class="learner-card-header">
-            <h3 title="${escapeHtml(id)}">${escapeHtml(displayName)}</h3>
+            <div style="display:flex;align-items:center;gap:6px;">
+              <h3 title="${escapeHtml(id)}">${escapeHtml(displayName)}</h3>
+              <span class="learner-type-badge ${getLearnerType(data)}">${getLearnerType(data).toUpperCase()}</span>
+            </div>
             <div class="learner-header-right">
               <span class="learner-stat-badge">${evolutionCount} updates</span>
               <span class="learner-status ${state.status}">${state.status}</span>
@@ -5174,7 +5420,12 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
             </div>
             <div class="learner-card-actions">
               <button onclick="event.stopPropagation(); splitLearnerFromCard('${id}')">Split</button>
-              <button class="danger" onclick="event.stopPropagation(); deleteLearnerFromCard('${id}')">Delete</button>
+              <button onclick="event.stopPropagation(); removeLearnerFromCard('${id}')">Remove</button>
+              <button class="danger" onclick="event.stopPropagation(); deleteLearnerFromCard('${id}')">Delete (Evolve)</button>
+            </div>
+            <div class="adjust-row" onclick="event.stopPropagation();">
+              <input type="text" id="adjust-${id}" placeholder="Adjust directive..." />
+              <button onclick="event.stopPropagation(); adjustLearnerFromCard('${id}')">Adjust</button>
             </div>
           </div>
         `
@@ -5190,7 +5441,7 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
         const id = canvas.dataset.learner
         const data = learnerStates[id]?.data || {}
         const bufferCount = data.buffer?.count || 0
-        const maxObs = (data.synthesizeThresholds || {}).maxObservations || 10
+        const maxObs = (data.understandThresholds || {}).maxObservations || 10
         const pct = maxObs > 0 ? bufferCount / maxObs : 0
         const color = pct >= 1 ? '#4ade80' : pct >= 0.7 ? '#f59e0b' : '#555'
         drawRingGauge(canvas, pct, bufferCount + '/' + maxObs, color)
@@ -5267,10 +5518,14 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
         ? JSON.stringify(data.understanding, null, 2)
         : (data.understanding || 'No understanding yet')
       document.getElementById('modalObservePrompt').textContent = data.observePrompt || 'Not initialized yet'
-      document.getElementById('modalSynthesizePrompt').textContent = data.synthesizePrompt || 'Not initialized yet'
+      document.getElementById('modalSynthesizePrompt').textContent = data.understandPrompt || 'Not initialized yet'
+      document.getElementById('modalObservationSchema').textContent = data.observationSchema
+        ? JSON.stringify(data.observationSchema, null, 2) : 'Not generated yet'
+      document.getElementById('modalUnderstandingSchema').textContent = data.understandingSchema
+        ? JSON.stringify(data.understandingSchema, null, 2) : 'Not generated yet'
 
       // Settings tab
-      const thresholds = data.synthesizeThresholds || {}
+      const thresholds = data.understandThresholds || {}
       document.getElementById('modalMaxObservations').value = thresholds.maxObservations || 10
       document.getElementById('modalMinImportance').value = thresholds.minImportance || 0.3
       const lType = getLearnerType(data)
@@ -5298,7 +5553,7 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
         description: data.description,
         instructions: data.instructions,
         governance: data.governance,
-        synthesizeThresholds: data.synthesizeThresholds,
+        understandThresholds: data.understandThresholds,
         queryMethod: data.queryMethod,
         health: data.health,
         buffer: data.buffer
@@ -5508,6 +5763,28 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
 
     initBtn.addEventListener('click', initBrain)
     updateBrainBtn.addEventListener('click', updateBrain)
+    destroyBrainBtn.addEventListener('click', async () => {
+      if (!confirm('Destroy the current brain? This will close all store connections. SQLite data on disk is preserved.')) return
+      destroyBrainBtn.disabled = true
+      destroyBrainBtn.textContent = 'Destroying...'
+      try {
+        await fetch('/brain/destroy', { method: 'POST' })
+        // Reset UI to init state
+        initBtn.disabled = false
+        initBtn.textContent = 'Initialize Brain'
+        initBtn.classList.remove('secondary')
+        destroyBrainBtn.style.display = 'none'
+        updateBrainBtn.style.display = 'none'
+        addLearnerBtn.style.display = 'none'
+        document.getElementById('learnersGrid').innerHTML = ''
+        document.getElementById('brainDashboard').style.display = 'none'
+        showToast('observed', 'brain', 'Brain destroyed')
+      } catch (err) {
+        alert('Error: ' + err.message)
+      }
+      destroyBrainBtn.disabled = false
+      destroyBrainBtn.textContent = 'Destroy Brain'
+    })
     saveOverviewBtn.addEventListener('click', saveLearnerOverview)
     saveSettingsBtn.addEventListener('click', saveLearnerSettings)
     projectSelect.addEventListener('change', (e) => {

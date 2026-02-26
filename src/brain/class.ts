@@ -1,24 +1,30 @@
+import { tool } from 'ai'
 import type { CallSettings } from 'ai'
+import { z } from 'zod'
 import { nanoid } from 'nanoid'
 import {
 	BaseLearner,
 	type GeneratedLearnerConfig,
 	type LearnerHealth,
-	ListLearner,
-	TextLearner,
+	type LearnerTypeDescriptor,
+	MemoryStore,
+	type Store,
 	type TokenUsage,
+	textLearnerDescriptor,
+	listLearnerDescriptor,
 } from '../learners'
 import { generate, Output } from '../llm'
 import { TypedEmitter } from '../types/events'
 import { synthesize } from './agent'
 import { BRAIN_DEFAULTS } from './config.defaults'
-import { resolveBrainConfig } from './config.resolver'
 import { Evaluator } from './evaluator/class'
 import { EVOLUTION_ACTIONS, type EvolutionDecision } from './evaluator/types'
 import { EvolutionOrchestrator } from './evolution/orchestrator'
 import type { AggregatedEvolutionResult } from './evolution/types'
 import { rootDecompositionPrompt } from './prompts/prompt.template.root-decomposition'
 import { brainDecompositionSchema } from './schemas/schema.brain-decomposition'
+import { MemoryBrainStore } from './stores'
+import type { BrainStore } from './stores'
 import type {
 	BrainAskResult,
 	BrainConfig,
@@ -26,8 +32,19 @@ import type {
 	BrainInjectOptions,
 	BrainInjectResult,
 	BrainUpdateResult,
+	ConsultOptions,
+	ConsultResult,
+	LearnerBatchResult,
 	ResolvedBrainConfig,
 } from './types'
+import {
+	type BrainModelSlots,
+	type BrainState,
+	type BrainStateTransform,
+	createInitialBrainState,
+	serializeBrainModelSlots,
+} from './state'
+import { getInternalLearnerConfigs, INTERNAL_LEARNER_IDS } from './internal-learners'
 
 /**
  * Brain - A learning system that auto-generates and coordinates multiple learners
@@ -38,27 +55,147 @@ import type {
  * Emits events for all operations and forwards learner events.
  */
 export class Brain extends TypedEmitter<BrainEventMap> {
-	prompt: string
-	readonly config: ResolvedBrainConfig
+	// Persisted state — single source of truth (backed by store.state)
+	private state: BrainState
+
+	// Persistence layer
+	readonly store: BrainStore
+
+	// State transforms (serialize/deserialize for non-serializable fields)
+	private readonly stateTransforms: Record<string, BrainStateTransform> = {
+		models: {
+			serialize: (value: unknown) =>
+				serializeBrainModelSlots(value as BrainModelSlots),
+			deserialize: () => this.state.models,
+		},
+	}
+
+	// Runtime (rebuilt on init)
 	readonly learners: Map<string, BaseLearner<unknown>> = new Map()
+	readonly internalLearners: Map<string, BaseLearner<unknown>> = new Map()
+	readonly learnerTypes: Map<string, LearnerTypeDescriptor>
 	private learnerNames: Map<string, string> = new Map()
 	private initialized = false
 	private evaluator?: Evaluator
 	private evolutionOrchestrator?: EvolutionOrchestrator
 
-	// Coverage gap tracking
-	private coverageGapCount = 0
-	private recentQueryCount = 0
+	// Constructor config (not persisted, used during init only)
+	private readonly learnerStoreFactory: (learnerId: string) => Store
+	private readonly autoSetup: boolean
+	private readonly configLearners?: GeneratedLearnerConfig[]
+	private readonly internalLearnersConfig: BrainConfig['internalLearners']
+	private readonly dismissedBatchMaxSize: number
 
 	constructor(rawConfig: BrainConfig) {
 		super()
-		this.config = resolveBrainConfig(rawConfig)
-		this.prompt = this.config.prompt
+
+		const model = rawConfig.model
+		const blueprintModel = rawConfig.blueprintModel ?? model
+
+		this.state = createInitialBrainState({
+			prompt: rawConfig.prompt,
+			model,
+			blueprintModel,
+			initModel: rawConfig.init?.model ?? blueprintModel,
+			queryModel: rawConfig.query?.model ?? model,
+			batchSize: rawConfig.ingest?.batchSize ?? BRAIN_DEFAULTS.ingest.batchSize,
+			evolution: {
+				enabled: rawConfig.evolution?.enabled ?? BRAIN_DEFAULTS.evolution.enabled,
+				evaluatorSignalThreshold:
+					rawConfig.evolution?.evaluatorSignalThreshold ??
+					BRAIN_DEFAULTS.evolution.evaluatorSignalThreshold,
+				autoEvaluate:
+					rawConfig.evolution?.autoEvaluate ?? BRAIN_DEFAULTS.evolution.autoEvaluate,
+				coverageGap: {
+					relevanceThreshold: rawConfig.evolution?.coverageGap?.relevanceThreshold ?? 0.3,
+					gapCountThreshold: rawConfig.evolution?.coverageGap?.gapCountThreshold ?? 5,
+					windowSize: rawConfig.evolution?.coverageGap?.windowSize ?? 20,
+				},
+			},
+		})
+		this.store = rawConfig.store ?? new MemoryBrainStore()
+		this.learnerStoreFactory = rawConfig.learning?.store ?? (() => new MemoryStore())
+		this.autoSetup = rawConfig.autoSetup ?? true
+		this.configLearners = rawConfig.learners
+		this.internalLearnersConfig = rawConfig.internalLearners
+		this.dismissedBatchMaxSize = rawConfig.dismissedBatchBuffer?.maxSize ?? BRAIN_DEFAULTS.dismissedBatchBuffer.maxSize
+
+		// Register learner type descriptors (default: text + list)
+		this.learnerTypes = new Map([
+			[textLearnerDescriptor.type, textLearnerDescriptor],
+			[listLearnerDescriptor.type, listLearnerDescriptor],
+		])
+	}
+
+	// ── Public accessors (read from state) ──────────────────────────────────
+
+	get prompt(): string {
+		return this.state.prompt
+	}
+
+	/**
+	 * Computed view of state in the ResolvedBrainConfig shape.
+	 * External readers (evaluator, evolution handlers, evals) use this.
+	 * Internally, always read from this.state directly.
+	 */
+	get config(): ResolvedBrainConfig {
+		return {
+			prompt: this.state.prompt,
+			model: this.state.models.default,
+			blueprintModel: this.state.models.blueprint,
+			init: { model: this.state.models.init },
+			query: { model: this.state.models.query },
+			ingest: this.state.ingest,
+			evolution: this.state.evolution,
+		}
+	}
+
+	// ─────────────────────────────────────────────────────────────────────────
+	// State persistence (mirrors BaseLearner pattern)
+	// ─────────────────────────────────────────────────────────────────────────
+
+	/**
+	 * Update cache + persist changed keys to store.state.
+	 * Each top-level key in updates → one row in store.state.
+	 */
+	private async setState(updates: Partial<BrainState>): Promise<void> {
+		Object.assign(this.state, updates)
+		const now = new Date().toISOString()
+		for (const [key, value] of Object.entries(updates)) {
+			const transform = this.stateTransforms[key]
+			const serialized = transform ? transform.serialize(value) : value
+			const existing = await this.store.state.get(key)
+			if (existing) {
+				await this.store.state.update(key, { value: serialized, updated_at: now })
+			} else {
+				await this.store.state.add({ id: key, value: serialized, updated_at: now })
+			}
+		}
+	}
+
+	/**
+	 * Load all state from store.state into cache.
+	 * Returns true if state was found, false otherwise.
+	 */
+	private async loadState(): Promise<boolean> {
+		const records = await this.store.state.list()
+		if (records.length === 0) return false
+
+		for (const record of records) {
+			const transform = this.stateTransforms[record.id]
+			const deserialized = transform ? transform.deserialize(record.value) : record.value
+			;(this.state as unknown as Record<string, unknown>)[record.id] = deserialized
+		}
+
+		return true
 	}
 
 	/**
 	 * Explicitly initialize the Brain (parse prompt and generate learners)
 	 * Called automatically on first inject() or ask() if not called explicitly.
+	 *
+	 * Tries restore-from-store first. If state exists, recreates learners from
+	 * store.learners list (no LLM call). Otherwise, does fresh LLM decomposition.
 	 */
 	async initialize(): Promise<void> {
 		if (this.initialized) return
@@ -66,9 +203,51 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 		this.emit('brain:init:started', {})
 
 		try {
+			// Try restore from store first
+			const restored = await this.loadState()
+
+			if (restored) {
+				await this.restoreLearners()
+				await this.restoreInternalLearners()
+			} else {
+				await this.freshInitialize()
+			}
+
+			// Initialize Evaluator and EvolutionOrchestrator if evolution is enabled
+			this.initEvolution()
+
+			this.initialized = true
+			this.emit('brain:init:completed', {
+				learnerIds: Array.from(this.learners.keys()),
+			})
+		} catch (error) {
+			const errorMessage =
+				error instanceof Error ? error.message : String(error)
+			this.emit('brain:init:failed', { error: errorMessage })
+			throw error
+		}
+	}
+
+	/**
+	 * Fresh initialization: create explicit learners + LLM decomposition → persist state
+	 *
+	 * Flow:
+	 * 1. If explicit `learners` provided → create those first
+	 * 2. If `autopilot` is true → also run LLM decomposition for additional learners
+	 * 3. Persist brain state for future restores
+	 */
+	private async freshInitialize(): Promise<void> {
+		// 1. Create explicit learners if provided
+		if (this.configLearners?.length) {
+			for (const config of this.configLearners) {
+				await this.createLearnerFromConfig(config)
+			}
+		}
+
+		// 2. LLM decomposition (when autopilot is on)
+		if (this.autoSetup) {
 			this.emit('brain:init:config:generating', {})
 
-			// Try to generate learner configs, with JSON repair fallback
 			const { output, usage: llmUsage } = await this.generateLearnerConfigs()
 
 			if (!output) {
@@ -89,41 +268,209 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 			})
 
 			for (const config of output.learners) {
+				// Skip if a learner with this ID was already created from explicit config
+				if (this.learners.has(config.id)) continue
 				await this.createLearnerFromConfig(config)
 			}
+		}
 
-			// Initialize Evaluator and EvolutionOrchestrator if evolution is enabled
-			if (this.config.evolution.enabled) {
-				this.evaluator = new Evaluator(
-					this,
-					this.config.evolution.evaluatorSignalThreshold,
-				)
+		// Create internal learners
+		await this.createInternalLearners()
 
-				// Forward all Evaluator events through Brain
-				this.evaluator.on((event) => {
-					this.emit(event.type as keyof BrainEventMap, event.payload as never)
-				})
+		// Persist brain state for future restores
+		await this.setState({ ...this.state })
+	}
 
-				// Auto-execute decisions from signal-triggered evaluations
-				this.evaluator.on('evaluator:evaluation:completed', async (event) => {
-					if (event.source === 'auto' && event.decisions.length > 0) {
-						await this.executeEvolutionDecisions(event.decisions)
-					}
-				})
+	/**
+	 * Restore learners from store.learners list (no LLM call).
+	 * Each record is just { id, type }. The learner's own store has everything
+	 * else — init() → loadState() handles the rest.
+	 */
+	private async restoreLearners(): Promise<void> {
+		const records = await this.store.learners.list()
 
-				// Initialize evolution orchestrator
-				this.evolutionOrchestrator = new EvolutionOrchestrator(this)
+		for (const record of records) {
+			const descriptor = this.learnerTypes.get(record.type)
+			if (!descriptor) {
+				throw new Error(`Unknown learner type: ${record.type}`)
 			}
 
-			this.initialized = true
-			this.emit('brain:init:completed', {
-				learnerIds: Array.from(this.learners.keys()),
+			const learner = descriptor.factory({
+				id: record.id,
+				model: this.state.models.default,
+				blueprintModel: this.state.models.blueprint,
+				// Placeholder values — init() → loadState() overwrites from learner's own store
+				instructions: '',
+				name: '',
+				description: '',
+				origin: 'prompt' as const,
+				store: this.learnerStoreFactory(record.id),
 			})
-		} catch (error) {
-			const errorMessage =
-				error instanceof Error ? error.message : String(error)
-			this.emit('brain:init:failed', { error: errorMessage })
-			throw error
+
+			// Forward all learner events through Brain
+			learner.on((event) => {
+				this.emit(event.type as keyof BrainEventMap, event.payload as never)
+			})
+
+			learner.on('learner:signal', (event) => {
+				this.signal({
+					source: event.learnerId,
+					description: event.description,
+				})
+			})
+
+			// Feed synthesis events to global injection understanding
+			this.wireExternalLearnerSynthesisEvents(learner)
+
+			// init() → loadState() restores everything from the learner's own store
+			await learner.init()
+
+			this.learners.set(record.id, learner)
+			this.learnerNames.set(record.id, learner.name)
+		}
+	}
+
+	/**
+	 * Restore internal learners from store.internalLearners (no LLM call).
+	 * Same pattern as restoreLearners() but writes to this.internalLearners.
+	 * Internal learner signals are NOT forwarded to the evaluator.
+	 */
+	private async restoreInternalLearners(): Promise<void> {
+		const records = await this.store.internalLearners.list()
+
+		for (const record of records) {
+			const descriptor = this.learnerTypes.get(record.type)
+			if (!descriptor) {
+				throw new Error(`Unknown learner type: ${record.type}`)
+			}
+
+			const learner = descriptor.factory({
+				id: record.id,
+				model: this.state.models.default,
+				blueprintModel: this.state.models.blueprint,
+				instructions: '',
+				name: '',
+				description: '',
+				origin: 'prompt' as const,
+				store: this.learnerStoreFactory(record.id),
+			})
+
+			// Forward events through Brain but do NOT forward signals to evaluator
+			learner.on((event) => {
+				this.emit(event.type as keyof BrainEventMap, event.payload as never)
+			})
+
+			await learner.init()
+
+			this.internalLearners.set(record.id, learner)
+		}
+	}
+
+	/**
+	 * Create internal learners from definitions during fresh init.
+	 * Uses the same factory as external learners but stores in the internal map/store.
+	 */
+	private async createInternalLearners(): Promise<void> {
+		const configs = getInternalLearnerConfigs(this.internalLearnersConfig)
+
+		for (const config of configs) {
+			const descriptor = this.learnerTypes.get(config.type)
+			if (!descriptor) continue
+
+			const governance = config.type === 'text' && !config.governance
+				? { strategy: BRAIN_DEFAULTS.learning.governance.strategy, maxTokens: BRAIN_DEFAULTS.learning.governance.maxTokens }
+				: config.governance
+
+			const learner = descriptor.factory({
+				id: config.id,
+				model: this.state.models.default,
+				blueprintModel: this.state.models.blueprint,
+				instructions: config.instructions,
+				origin: 'prompt' as const,
+				name: config.name,
+				description: config.description,
+				store: this.learnerStoreFactory(config.id),
+				governance,
+				understand: {
+					thresholds: {
+						maxObservations: 3,
+						maxTokens: BRAIN_DEFAULTS.learning.understand.thresholds.maxTokens,
+						minImportance: 0.1,
+					},
+				},
+			})
+
+			// Forward events but do NOT forward signals to evaluator
+			learner.on((event) => {
+				this.emit(event.type as keyof BrainEventMap, event.payload as never)
+			})
+
+			await learner.init()
+
+			this.internalLearners.set(config.id, learner)
+			await this.store.internalLearners.add({
+				id: config.id,
+				type: config.type,
+			})
+		}
+	}
+
+	/**
+	 * Initialize evolution system (evaluator + orchestrator)
+	 */
+	private initEvolution(): void {
+		if (!this.state.evolution.enabled) return
+
+		this.evaluator = new Evaluator(
+			this,
+			this.state.evolution.evaluatorSignalThreshold,
+		)
+
+		// Forward all Evaluator events through Brain
+		this.evaluator.on((event) => {
+			this.emit(event.type as keyof BrainEventMap, event.payload as never)
+		})
+
+		// Auto-execute decisions from signal-triggered evaluations
+		this.evaluator.on('evaluator:evaluation:completed', async (event) => {
+			if (event.source === 'auto' && event.decisions.length > 0) {
+				await this.executeEvolutionDecisions(event.decisions)
+			}
+		})
+
+		// Initialize evolution orchestrator
+		this.evolutionOrchestrator = new EvolutionOrchestrator(this)
+
+		// Re-inject dismissed batches after evolution creates new learners
+		this.on('evolution:action:executed', (event) => {
+			if (event.action === 'create' && event.result.newLearnerIds?.length) {
+				this.reinjectDismissedBatches(event.result.newLearnerIds).catch((err) => {
+				console.error(`[internal-learner] feed error:`, err?.message ?? err)
+			})
+			}
+		})
+
+		// Restore evolution history from store
+		this.restoreEvolutionHistory()
+	}
+
+	/**
+	 * Restore evolution history from brain store into evaluator
+	 */
+	private async restoreEvolutionHistory(): Promise<void> {
+		if (!this.evaluator) return
+
+		const records = await this.store.evolution.list()
+		for (const record of records) {
+			const decisions = record.decisions as Array<{
+				action: string
+				targets: string[]
+				reasoning: string
+			}>
+			this.evaluator.restoreHistoryEntry({
+				timestamp: new Date(record.created_at),
+				decisions,
+			})
 		}
 	}
 
@@ -132,8 +479,8 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 	 */
 	private async generateLearnerConfigs() {
 		return generate({
-			model: this.config.init.model,
-			prompt: rootDecompositionPrompt(this.prompt),
+			model: this.state.models.init,
+			prompt: rootDecompositionPrompt(this.prompt, Array.from(this.learnerTypes.values())),
 			output: Output.object({ schema: brainDecompositionSchema }),
 			repairSchema: brainDecompositionSchema,
 		})
@@ -150,8 +497,8 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 	): Promise<BaseLearner<unknown>> {
 		const shared = {
 			id: config.id,
-			model: this.config.model,
-			blueprintModel: this.config.blueprintModel,
+			model: this.state.models.default,
+			blueprintModel: this.state.models.blueprint,
 			instructions: config.instructions,
 			origin: 'prompt' as const,
 			name: config.name,
@@ -167,22 +514,21 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 			},
 		}
 
-		let learner: BaseLearner<unknown>
-
-		if (config.type === 'list') {
-			learner = new ListLearner({
-				...shared,
-				governance: config.governance,
-			})
-		} else {
-			learner = new TextLearner({
-				...shared,
-				governance: config.governance ?? {
-					strategy: BRAIN_DEFAULTS.learning.governance.strategy,
-					maxTokens: BRAIN_DEFAULTS.learning.governance.maxTokens,
-				},
-			} as any)
+		const descriptor = this.learnerTypes.get(config.type)
+		if (!descriptor) {
+			throw new Error(`Unknown learner type: ${config.type}`)
 		}
+
+		// Apply default governance for text learners if not provided
+		const governance = config.type === 'text' && !config.governance
+			? { strategy: BRAIN_DEFAULTS.learning.governance.strategy, maxTokens: BRAIN_DEFAULTS.learning.governance.maxTokens }
+			: config.governance
+
+		const learner = descriptor.factory({
+			...shared,
+			store: this.learnerStoreFactory(config.id),
+			governance,
+		})
 
 		// Forward all learner events through Brain
 		learner.on((event) => {
@@ -199,11 +545,20 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 			})
 		})
 
+		// Feed synthesis events to global injection understanding
+		this.wireExternalLearnerSynthesisEvents(learner)
+
 		// Initialize the learner (generates observe/synthesize prompts)
 		await learner.init()
 
 		this.learners.set(config.id, learner)
 		this.learnerNames.set(config.id, config.name)
+
+		// Persist learner ref (learner's own store has everything else)
+		await this.store.learners.add({
+			id: config.id,
+			type: config.type,
+		})
 
 		this.emit('brain:learner:added', {
 			learnerId: config.id,
@@ -231,6 +586,34 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 	}
 
 	/**
+	 * Remove a learner (basic tier — no evolution required)
+	 *
+	 * Disposes learner store, removes from map, emits event.
+	 */
+	async removeLearner(id: string): Promise<void> {
+		const learner = this.learners.get(id)
+		if (!learner) {
+			throw new Error(`Learner ${id} not found`)
+		}
+		await this.__removeLearner(id)
+	}
+
+	/**
+	 * Adjust a learner's behavior (basic tier — no evolution required)
+	 *
+	 * Pass-through to learner.adjust(directive). Incrementally evolves
+	 * the learner's instructions, prompts, and schemas.
+	 */
+	async adjustLearner(id: string, directive: string): Promise<BaseLearner<unknown>> {
+		const learner = this.learners.get(id)
+		if (!learner) {
+			throw new Error(`Learner ${id} not found`)
+		}
+		await learner.adjust(directive)
+		return learner
+	}
+
+	/**
 	 * Get all learners
 	 */
 	getLearners(): BaseLearner<unknown>[] {
@@ -242,6 +625,13 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 	 */
 	getLearner(id: string): BaseLearner<unknown> | undefined {
 		return this.learners.get(id)
+	}
+
+	/**
+	 * Get a specific internal learner by ID
+	 */
+	getInternalLearner(id: string): BaseLearner<unknown> | undefined {
+		return this.internalLearners.get(id)
 	}
 
 	/**
@@ -261,7 +651,7 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 		const learnerArray = this.getLearners()
 
 		// Split items into batches by batchSize
-		const batchSize = this.config.ingest.batchSize
+		const batchSize = this.state.ingest.batchSize
 		const batches: unknown[][] = []
 		for (let i = 0; i < items.length; i += batchSize) {
 			batches.push(items.slice(i, i + batchSize))
@@ -304,6 +694,9 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 					batchIndex,
 					results: learnerResults,
 				})
+
+				// Check if all learners dismissed this batch
+				await this.handleDismissedBatch(batchId, batch, learnerResults)
 
 				batchResults.push({
 					id: batchId,
@@ -353,10 +746,14 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 					buffer: await l.getBufferState(),
 				})),
 			)
-			const queryableLearners = bufferStates
-				.filter(({ learner, buffer }) => {
-					return !!learner.getUnderstanding() || buffer.count > 0
-				})
+			const queryableLearnerChecks = await Promise.all(
+				bufferStates.map(async ({ learner, buffer }) => ({
+					learner,
+					hasKnowledge: !!(await learner.getUnderstanding()) || buffer.count > 0,
+				})),
+			)
+			const queryableLearners = queryableLearnerChecks
+				.filter(({ hasKnowledge }) => hasKnowledge)
 				.map(({ learner }) => learner)
 
 			// Query all learners in parallel
@@ -378,19 +775,24 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 			// Check for coverage gaps
 			this.checkCoverageGap(learnerResults)
 
+			// Feed internal learners (fire-and-forget)
+			this.feedAskToInternalLearners(query, learnerResults)
+
 			this.emit('brain:ask:synthesis:started', {
 				queryId,
 				learnerResponses: learnerResults,
 			})
 
-			// Synthesize responses
+			// Synthesize responses (with consult tools for internal learners)
 			const { model: modelOverride, ...generateOptions } = options ?? {}
+			const consultTools = await this.buildConsultTools()
 			const result = await synthesize(
-				modelOverride ?? this.config.query.model,
+				modelOverride ?? this.state.models.query,
 				{
 					brainPrompt: this.prompt,
 					query,
 					responses: learnerResults,
+					consultTools,
 					...generateOptions,
 				},
 			)
@@ -417,6 +819,86 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 	}
 
 	/**
+	 * Query internal learners for Brain's self-knowledge.
+	 *
+	 * @param query - Question to ask internal learners
+	 * @param options - Optional: target a specific internal learner by ID
+	 */
+	async consult(query: string, options?: ConsultOptions): Promise<ConsultResult> {
+		await this.ensureInitialized()
+
+		// Target a specific internal learner
+		if (options?.learner) {
+			const learner = this.internalLearners.get(options.learner)
+			if (!learner) {
+				throw new Error(`Internal learner ${options.learner} not found`)
+			}
+			const result = await learner.query(query)
+			return {
+				insight: result.insight,
+				sources: [{
+					learnerId: learner.id,
+					relevance: result.relevance,
+					confidence: result.confidence,
+					insight: result.insight,
+				}],
+				gaps: result.gaps ? result.gaps.split('\n').filter(Boolean) : [],
+			}
+		}
+
+		// Query all internal learners
+		const learnerArray = Array.from(this.internalLearners.values())
+		if (learnerArray.length === 0) {
+			return { insight: '', sources: [], gaps: [] }
+		}
+
+		// Check which learners have knowledge
+		const queryable = await Promise.all(
+			learnerArray.map(async (l) => ({
+				learner: l,
+				hasKnowledge: await l.hasKnowledge(),
+			})),
+		)
+		const withKnowledge = queryable.filter((q) => q.hasKnowledge).map((q) => q.learner)
+
+		if (withKnowledge.length === 0) {
+			return { insight: '', sources: [], gaps: [] }
+		}
+
+		// Query in parallel
+		const responses = await Promise.all(
+			withKnowledge.map(async (learner) => {
+				const result = await learner.query(query)
+				return {
+					learnerId: learner.id,
+					name: learner.name,
+					relevant: result.relevant,
+					relevance: result.relevance,
+					confidence: result.confidence,
+					insight: result.insight,
+					gaps: result.gaps ? result.gaps.split('\n').filter(Boolean) : [],
+				}
+			}),
+		)
+
+		// Synthesize
+		const result = await synthesize(
+			this.state.models.query,
+			{
+				brainPrompt: this.prompt,
+				query,
+				responses,
+			},
+		)
+
+		return {
+			insight: result.insight,
+			sources: result.sources,
+			gaps: result.gaps,
+		}
+	}
+
+	/**
 	 * Send a signal to the evolution system (Living Brain)
 	 *
 	 * @param signal - Signal with source and description
@@ -438,34 +920,315 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 	}
 
 	/**
+	 * Trigger evolution directly, bypassing the signal buffer.
+	 * Sends the signal as a bypass signal to the evaluator for immediate evaluation.
+	 */
+	async triggerEvolution(signal: { source: string; description: string }): Promise<void> {
+		if (!this.evaluator) return
+
+		this.signal({
+			source: signal.source,
+			description: signal.description,
+			bypass: true,
+		})
+	}
+
+	/**
+	 * Build consult tools for ask() synthesis — one tool per internal learner with knowledge.
+	 */
+	private async buildConsultTools(): Promise<Record<string, unknown> | undefined> {
+		if (this.internalLearners.size === 0) return undefined
+
+		const consultInputSchema = z.object({
+			question: z.string().describe('The question to ask this knowledge source'),
+		})
+
+		const toolDefs: Array<{ id: string; name: string; description: string }> = [
+			{
+				id: INTERNAL_LEARNER_IDS.globalInjectionUnderstanding,
+				name: 'consultGlobalUnderstanding',
+				description: 'Query the system\'s cross-domain understanding of all ingested data. Use when the question spans multiple knowledge areas.',
+			},
+			{
+				id: INTERNAL_LEARNER_IDS.globalQueryUnderstanding,
+				name: 'consultQueryPatterns',
+				description: 'Query patterns of what users have been asking. Use to understand query trends and topic clusters.',
+			},
+			{
+				id: INTERNAL_LEARNER_IDS.injectionGaps,
+				name: 'consultInjectionGaps',
+				description: 'Query what topics have been consistently missed by the system. Use when asking about coverage gaps.',
+			},
+			{
+				id: INTERNAL_LEARNER_IDS.queryGaps,
+				name: 'consultQueryGaps',
+				description: 'Query what questions the system has been unable to answer well. Use when asking about knowledge limitations.',
+			},
+		]
+
+		const tools: Record<string, unknown> = {}
+
+		// Only include tools for internal learners that have knowledge
+		for (const def of toolDefs) {
+			const learner = this.internalLearners.get(def.id)
+			if (!learner) continue
+
+			if (!(await learner.hasKnowledge())) continue
+
+			tools[def.name] = tool({
+				description: def.description,
+				inputSchema: consultInputSchema,
+				execute: async ({ question }: { question: string }) => {
+					const result = await learner.query(question)
+					return {
+						relevant: result.relevant,
+						insight: result.insight,
+						gaps: result.gaps,
+					}
+				},
+			})
+		}
+
+		return Object.keys(tools).length > 0 ? tools : undefined
+	}
+
+	/**
+	 * Re-inject pending dismissed batches into newly created learners.
+	 * If accepted → remove from buffer. If dismissed again → increment retryCount.
+	 */
+	private async reinjectDismissedBatches(newLearnerIds: string[]): Promise<void> {
+		const pending = await this.store.dismissedBatches.list({ status: 'pending' })
+		if (pending.length === 0) return
+
+		const newLearners = newLearnerIds
+			.map((id) => this.learners.get(id))
+			.filter((l): l is BaseLearner<unknown> => l !== undefined)
+		if (newLearners.length === 0) return
+
+		const resolvedGaps: string[] = []
+
+		for (const batch of pending) {
+			const data = batch.data as unknown[]
+
+			let accepted = false
+			for (const learner of newLearners) {
+				const result = await learner.learn(data)
+				if (result.status !== 'observe:dismissed') {
+					accepted = true
+					break
+				}
+			}
+
+			if (accepted) {
+				await this.store.dismissedBatches.delete(batch.id)
+				const gaps = batch.gaps as string[] | undefined
+				if (gaps?.length) resolvedGaps.push(...gaps)
+			} else {
+				await this.store.dismissedBatches.update(batch.id, {
+					retryCount: batch.retryCount + 1,
+					status: 'retried',
+				})
+			}
+		}
+
+		// Notify gap learner that these gaps are now covered
+		if (resolvedGaps.length > 0) {
+			const gapLearner = this.internalLearners.get(INTERNAL_LEARNER_IDS.injectionGaps)
+			if (gapLearner) {
+				const resolvedText = `Gap resolved: new learner(s) created to cover previously dismissed topics. Now covered: ${resolvedGaps.join(', ')}.`
+				gapLearner.learn([resolvedText]).catch((err) => {
+					const msg = err instanceof Error ? err.message : String(err)
+					console.error(`[internal-learner] gap resolution feed error:`, msg)
+				})
+			}
+		}
+	}
+
+	/**
+	 * Feed ask() data to internal learners.
+	 * - Global query understanding always receives query data
+	 * - Query gap learner receives when all responses have low relevance
+	 */
+	private async feedAskToInternalLearners(
+		query: string,
+		learnerResults: Array<{ learnerId: string; relevance: number; gaps: string[] }>,
+	): Promise<void> {
+		const now = new Date().toISOString()
+		const { relevanceThreshold } = this.state.evolution.coverageGap
+
+		// Feed global query understanding (every ask)
+		const queryLearner = this.internalLearners.get(
+			INTERNAL_LEARNER_IDS.globalQueryUnderstanding,
+		)
+		if (queryLearner) {
+			const relevantLearners = learnerResults
+				.filter((r) => r.relevance >= relevanceThreshold)
+				.map((r) => r.learnerId)
+			const allGaps = learnerResults.flatMap((r) => r.gaps)
+
+			try {
+				await queryLearner.learn([{
+					question: query,
+					relevantLearners,
+					gaps: allGaps,
+					timestamp: now,
+				}])
+			} catch (err) {
+				const msg = err instanceof Error ? err.message : String(err)
+				console.error(`[internal-learner] query feed error:`, msg)
+			}
+		}
+
+		// Feed query gap learner (only when all learners have low relevance)
+		const allLowRelevance = learnerResults.every(
+			(r) => r.relevance < relevanceThreshold,
+		)
+		if (allLowRelevance) {
+			const gapLearner = this.internalLearners.get(
+				INTERNAL_LEARNER_IDS.queryGaps,
+			)
+			if (gapLearner) {
+				const allGaps = learnerResults.flatMap((r) => r.gaps)
+				try {
+					await gapLearner.learn([{
+						question: query,
+						gaps: allGaps,
+						timestamp: now,
+					}])
+				} catch (err) {
+					const msg = err instanceof Error ? err.message : String(err)
+					console.error(`[internal-learner] query gap feed error:`, msg)
+				}
+			}
+		}
+	}
+
+	/**
+	 * Wire an external learner's synthesis events to the global injection understanding learner.
+	 * Feeds all synthesis events — the internal learner's observer decides relevance.
+	 */
+	private wireExternalLearnerSynthesisEvents(learner: BaseLearner<unknown>): void {
+		learner.on('learner:synthesized', (event) => {
+			const globalLearner = this.internalLearners.get(
+				INTERNAL_LEARNER_IDS.globalInjectionUnderstanding,
+			)
+			if (!globalLearner) return
+
+			globalLearner.learn([{
+				learnerId: event.learnerId,
+				summary: typeof event.newUnderstanding === 'string'
+					? event.newUnderstanding.slice(0, 500)
+					: JSON.stringify(event.newUnderstanding).slice(0, 500),
+				significance: event.significance,
+				evolution: event.evolution,
+			}]).catch((err) => {
+				console.error(`[internal-learner] feed error:`, err?.message ?? err)
+			})
+		})
+	}
+
+	/**
+	 * Handle a batch that was dismissed by all external learners.
+	 * Persists to dismissed batch buffer and feeds the injection gap learner.
+	 */
+	private async handleDismissedBatch(
+		batchId: string,
+		batch: unknown[],
+		learnerResults: LearnerBatchResult[],
+	): Promise<void> {
+		const allDismissed = learnerResults.every(
+			(r) => r.result.status === 'observe:dismissed',
+		)
+		if (!allDismissed) return
+
+		// Collect gaps from all dismissals
+		const gaps: string[] = []
+		for (const r of learnerResults) {
+			if (r.result.status === 'observe:dismissed' && r.result.gaps) {
+				gaps.push(...r.result.gaps)
+			}
+		}
+
+		const now = new Date().toISOString()
+
+		// Persist dismissed batch
+		await this.store.dismissedBatches.add({
+			id: batchId,
+			data: batch,
+			gaps,
+			timestamp: now,
+			retryCount: 0,
+			status: 'pending',
+		})
+
+		// Size-based eviction
+		const count = await this.store.dismissedBatches.count()
+		if (count > this.dismissedBatchMaxSize) {
+			const all = await this.store.dismissedBatches.list()
+			all.sort((a, b) => a.timestamp.localeCompare(b.timestamp))
+			const toEvict = all.slice(0, count - this.dismissedBatchMaxSize)
+			for (const record of toEvict) {
+				await this.store.dismissedBatches.delete(record.id)
+			}
+		}
+
+		// Feed injection gap learner (awaited so observations are stored before we continue)
+		const gapLearner = this.internalLearners.get(INTERNAL_LEARNER_IDS.injectionGaps)
+		if (gapLearner) {
+			try {
+				const readableDate = new Date().toLocaleString('en-US', {
+					month: 'long', day: 'numeric', year: 'numeric',
+					hour: 'numeric', minute: '2-digit', hour12: true,
+				})
+				const gapText = gaps.length > 0
+					? `[${readableDate}] Injection gap: all ${learnerResults.length} learner(s) dismissed incoming data. Topics not covered: ${gaps.join(', ')}.`
+					: `[${readableDate}] Injection gap: all ${learnerResults.length} learner(s) dismissed incoming data. No learner matched this content.`
+				await gapLearner.learn([gapText])
+			} catch (err) {
+				const msg = err instanceof Error ? err.message : String(err)
+				console.error(`[internal-learner] injection gap feed error:`, msg)
+			}
+		}
+
+		// Trigger direct evolution with gap context
+		this.triggerEvolution({
+			source: 'brain:injection-gap',
+			description: `All learners dismissed batch ${batchId}. Gaps: ${gaps.join('; ')}`,
+		}).catch((err) => {
+			const msg = err instanceof Error ? err.message : String(err)
+			console.error(`[internal-learner] evolution trigger error:`, msg)
+		})
+	}
+
+	/**
 	 * Check for coverage gaps after ask() collects learner responses
 	 */
 	private checkCoverageGap(
 		responses: Array<{ relevance: number }>,
 	): void {
-		if (!this.config.evolution.enabled) return
+		if (!this.state.evolution.enabled) return
 
 		const { relevanceThreshold, gapCountThreshold, windowSize } =
-			this.config.evolution.coverageGap
+			this.state.evolution.coverageGap
 
-		this.recentQueryCount++
+		this.state.recentQueryCount++
 
 		const allLowRelevance = responses.every(
 			(r) => r.relevance < relevanceThreshold,
 		)
 		if (allLowRelevance) {
-			this.coverageGapCount++
+			this.state.coverageGapCount++
 		}
 
-		if (this.recentQueryCount >= windowSize) {
-			if (this.coverageGapCount >= gapCountThreshold) {
+		if (this.state.recentQueryCount >= windowSize) {
+			if (this.state.coverageGapCount >= gapCountThreshold) {
 				this.signal({
 					source: 'brain',
-					description: `Coverage gap: ${this.coverageGapCount} of last ${this.recentQueryCount} queries had no relevant learner`,
+					description: `Coverage gap: ${this.state.coverageGapCount} of last ${this.state.recentQueryCount} queries had no relevant learner`,
 				})
 			}
-			this.coverageGapCount = 0
-			this.recentQueryCount = 0
+			this.state.coverageGapCount = 0
+			this.state.recentQueryCount = 0
 		}
 	}
 
@@ -529,9 +1292,14 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 	 * Internal: Remove learner (used by evolution handlers)
 	 * @internal
 	 */
-	__removeLearner(learnerId: string): void {
+	async __removeLearner(learnerId: string): Promise<void> {
+		const learner = this.learners.get(learnerId)
+		if (learner) {
+			await learner.dispose()
+		}
 		this.learners.delete(learnerId)
 		this.learnerNames.delete(learnerId)
+		await this.store.learners.delete(learnerId)
 		this.emit('brain:learner:removed', { learnerId })
 	}
 
@@ -745,7 +1513,7 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 	 * Accepts a partial of the constructor config. Each field is categorized by
 	 * its downstream effect:
 	 *
-	 * 1. **Brain-only** — stored on this.config, no downstream propagation
+	 * 1. **Brain-only** — persisted to state, no downstream propagation
 	 * 2. **Mechanical cascade** — forwarded to all learners via learner.update()
 	 * 3. **Signal-driven** — semantic changes routed through the evaluator
 	 *
@@ -756,85 +1524,135 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 		const changedFields: string[] = []
 		const learnerResults: BrainUpdateResult['learnerResults'] = []
 		let evolutionResults: BrainUpdateResult['evolutionResults'] | undefined
+		const stateChanges: Partial<BrainState> = {}
 
-		// ── 1. Brain-only fields ──
+		// ── 1. Collect brain-only state changes ──
+
+		// Model slot changes
+		let modelsChanged = false
+		const newModels = { ...this.state.models }
 
 		if (updates.init?.model !== undefined) {
-			this.config.init.model = updates.init.model
+			newModels.init = updates.init.model
+			modelsChanged = true
 			changedFields.push('init.model')
 		}
 		if (updates.query?.model !== undefined) {
-			this.config.query.model = updates.query.model
+			newModels.query = updates.query.model
+			modelsChanged = true
 			changedFields.push('query.model')
 		}
+		if (updates.model !== undefined) {
+			newModels.default = updates.model
+			modelsChanged = true
+			changedFields.push('model')
+		}
+		if (updates.blueprintModel !== undefined) {
+			newModels.blueprint = updates.blueprintModel
+			modelsChanged = true
+			changedFields.push('blueprintModel')
+		}
+		if (modelsChanged) {
+			stateChanges.models = newModels
+		}
+
 		if (updates.ingest?.batchSize !== undefined) {
-			this.config.ingest.batchSize = updates.ingest.batchSize
+			stateChanges.ingest = { batchSize: updates.ingest.batchSize }
 			changedFields.push('ingest.batchSize')
 		}
 
 		// Evolution config
 		if (updates.evolution) {
+			const evo = { ...this.state.evolution }
+			let evoChanged = false
+
 			if (
 				updates.evolution.enabled !== undefined &&
-				updates.evolution.enabled !== this.config.evolution.enabled
+				updates.evolution.enabled !== this.state.evolution.enabled
 			) {
-				this.config.evolution.enabled = updates.evolution.enabled
+				evo.enabled = updates.evolution.enabled
+				evoChanged = true
 				changedFields.push('evolution.enabled')
-
-				if (updates.evolution.enabled && !this.evaluator && this.initialized) {
-					this.evaluator = new Evaluator(
-						this,
-						this.config.evolution.evaluatorSignalThreshold,
-					)
-					this.evaluator.on((event) => {
-						this.emit(event.type as keyof BrainEventMap, event.payload as never)
-					})
-					this.evolutionOrchestrator = new EvolutionOrchestrator(this)
-				}
 			}
 
 			if (
 				updates.evolution.evaluatorSignalThreshold !== undefined &&
 				updates.evolution.evaluatorSignalThreshold !==
-					this.config.evolution.evaluatorSignalThreshold
+					this.state.evolution.evaluatorSignalThreshold
 			) {
-				this.config.evolution.evaluatorSignalThreshold =
-					updates.evolution.evaluatorSignalThreshold
+				evo.evaluatorSignalThreshold = updates.evolution.evaluatorSignalThreshold
+				evoChanged = true
 				changedFields.push('evolution.evaluatorSignalThreshold')
-
-				if (this.evaluator) {
-					this.evaluator = new Evaluator(
-						this,
-						updates.evolution.evaluatorSignalThreshold,
-					)
-					this.evaluator.on((event) => {
-						this.emit(event.type as keyof BrainEventMap, event.payload as never)
-					})
-				}
 			}
 
 			if (
 				updates.evolution.autoEvaluate !== undefined &&
-				updates.evolution.autoEvaluate !== this.config.evolution.autoEvaluate
+				updates.evolution.autoEvaluate !== this.state.evolution.autoEvaluate
 			) {
-				this.config.evolution.autoEvaluate = updates.evolution.autoEvaluate
+				evo.autoEvaluate = updates.evolution.autoEvaluate
+				evoChanged = true
 				changedFields.push('evolution.autoEvaluate')
 			}
+
+			if (evoChanged) {
+				stateChanges.evolution = evo
+			}
+		}
+
+		// Prompt (capture old value before applying)
+		const semanticChanges: string[] = []
+
+		if (updates.prompt !== undefined && updates.prompt !== this.state.prompt) {
+			const oldPrompt = this.state.prompt
+			stateChanges.prompt = updates.prompt
+			changedFields.push('prompt')
+			semanticChanges.push(
+				`Brain purpose has been updated by the user.\n` +
+				`Previous purpose: ${oldPrompt}\n` +
+				`New purpose: ${updates.prompt}\n\n` +
+				`IMPORTANT: This update does NOT necessarily mean all existing learners should be deleted and recreated. ` +
+				`Consider the relationship between the old and new purpose:\n` +
+				`- If the new purpose is a REFINEMENT or NARROWING of the old one, ADJUST existing learners to match.\n` +
+				`- If the new purpose OVERLAPS with the old one, keep learners whose knowledge is still relevant (check "What it has learned so far"), adjust their instructions, and only create new ones for gaps.\n` +
+				`- If the new purpose ADDS a new dimension, create new learners for the new area while keeping existing ones.\n` +
+				`- Only DELETE a learner if its accumulated knowledge is genuinely irrelevant to the new purpose.\n` +
+				`- Prefer ADJUST over DELETE+CREATE — adjusting preserves accumulated understanding, deleting destroys it.`
+			)
+		}
+
+		// ── Apply all state changes ──
+
+		if (Object.keys(stateChanges).length > 0) {
+			await this.setState(stateChanges)
+		}
+
+		// ── Side effects after state applied ──
+
+		if (
+			changedFields.includes('evolution.enabled') &&
+			this.state.evolution.enabled && !this.evaluator && this.initialized
+		) {
+			this.initEvolution()
+		}
+
+		if (changedFields.includes('evolution.evaluatorSignalThreshold') && this.evaluator) {
+			this.evaluator = new Evaluator(
+				this,
+				this.state.evolution.evaluatorSignalThreshold,
+			)
+			this.evaluator.on((event) => {
+				this.emit(event.type as keyof BrainEventMap, event.payload as never)
+			})
 		}
 
 		// ── 2. Mechanical cascade to learners ──
 
-		// Shared learner update — each learner's update() picks up what it recognizes
 		const learnerUpdate: Record<string, unknown> = {}
 
 		if (updates.model !== undefined) {
-			this.config.model = updates.model
-			changedFields.push('model')
 			learnerUpdate.model = updates.model
 		}
 		if (updates.blueprintModel !== undefined) {
-			this.config.blueprintModel = updates.blueprintModel
-			changedFields.push('blueprintModel')
 			learnerUpdate.blueprintModel = updates.blueprintModel
 		}
 
@@ -856,43 +1674,19 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 			learnerUpdate.query = updates.learning.query
 		}
 		if (updates.learning?.governance) {
-			const m = updates.learning.governance
-			learnerUpdate.governance = {
-				...(m.strategy ? { strategy: m.strategy } : {}),
-				...(m.maxTokens !== undefined ? { maxTokens: m.maxTokens } : {}),
-			}
+			learnerUpdate.governance = updates.learning.governance
 		}
 
 		// Forward to all learners (each ignores fields it doesn't recognize)
 		if (Object.keys(learnerUpdate).length > 0) {
 			for (const learner of this.learners.values()) {
-				const result = await learner.update(learnerUpdate as any)
+				const result = await learner.update(learnerUpdate)
 				learnerResults.push({ learnerId: learner.id, changedFields: result.changedFields })
 			}
 		}
 
 		// ── 3. Signal-driven (semantic changes) ──
 
-		const semanticChanges: string[] = []
-
-		if (updates.prompt !== undefined && updates.prompt !== this.prompt) {
-			const oldPrompt = this.prompt
-			this.prompt = updates.prompt
-			this.config.prompt = updates.prompt
-			changedFields.push('prompt')
-			semanticChanges.push(
-				`Brain purpose has been updated by the user.\n` +
-				`Previous purpose: ${oldPrompt}\n` +
-				`New purpose: ${updates.prompt}\n\n` +
-				`IMPORTANT: This update does NOT necessarily mean all existing learners should be deleted and recreated. ` +
-				`Consider the relationship between the old and new purpose:\n` +
-				`- If the new purpose is a REFINEMENT or NARROWING of the old one, ADJUST existing learners to match.\n` +
-				`- If the new purpose OVERLAPS with the old one, keep learners whose knowledge is still relevant (check "What it has learned so far"), adjust their instructions, and only create new ones for gaps.\n` +
-				`- If the new purpose ADDS a new dimension, create new learners for the new area while keeping existing ones.\n` +
-				`- Only DELETE a learner if its accumulated knowledge is genuinely irrelevant to the new purpose.\n` +
-				`- Prefer ADJUST over DELETE+CREATE — adjusting preserves accumulated understanding, deleting destroys it.`
-			)
-		}
 		if (updates.learning?.instructions) {
 			semanticChanges.push(`Learner instructions update requested: ${updates.learning.instructions}`)
 		}
@@ -928,9 +1722,25 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 
 		return {
 			changedFields,
-			config: { ...this.config },
+			config: this.config,
 			learnerResults,
 			evolutionResults,
 		}
+	}
+
+	/**
+	 * Dispose Brain: disposes all learners and the brain store
+	 */
+	async dispose(): Promise<void> {
+		for (const learner of this.learners.values()) {
+			await learner.dispose()
+		}
+		for (const learner of this.internalLearners.values()) {
+			await learner.dispose()
+		}
+		this.learners.clear()
+		this.internalLearners.clear()
+		this.learnerNames.clear()
+		await this.store.dispose()
 	}
 }

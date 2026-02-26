@@ -7,7 +7,9 @@
  */
 
 import type { LanguageModel } from 'ai'
+import { z } from 'zod'
 import { generate, Output } from '../../llm'
+import { observeAdjustPromptTemplate } from './prompts/adjust'
 import { observeIdentityPromptTemplate } from './prompts/identity'
 import { observeSystemPromptTemplate } from './prompts/system'
 import { observeUserPromptTemplate } from './prompts/user'
@@ -15,6 +17,15 @@ import type { ObserveIdentity } from './schema.identity'
 import { observeIdentitySchema } from './schema.identity'
 import { observeOutputSchema, buildObserveOutputSchema } from './schema.output'
 import type { ObserveCallbacks, ObserveContext, ObserveOutput } from './types'
+
+/**
+ * Schema for adjust output — identity fields + resolved instructions
+ */
+const adjustObserveOutputSchema = observeIdentitySchema.extend({
+	instructions: z
+		.string()
+		.describe('The updated instructions after applying the directive'),
+})
 
 /**
  * Result from observe init
@@ -49,6 +60,60 @@ export async function initObserve(
 	const systemPrompt = observeSystemPromptTemplate(identity)
 
 	return { identity, systemPrompt }
+}
+
+/**
+ * Result from observe adjust
+ */
+export interface AdjustObserveResult {
+	newInstructions: string
+	identity: ObserveIdentity
+	systemPrompt: string
+}
+
+/**
+ * Adjust observe phase — evolves identity and resolves new instructions from a directive
+ *
+ * Unlike initObserve (which generates from scratch), this shows the LLM
+ * the current state so it can make incremental adjustments.
+ *
+ * @param model - Language model to use
+ * @param directive - Natural language directive describing what to change
+ * @param currentInstructions - The learner's current instructions
+ * @param currentIdentity - The current observer identity
+ * @param focus - Optional focus areas
+ * @returns New instructions, adjusted identity, and system prompt
+ */
+export async function adjustObserve(
+	model: LanguageModel,
+	directive: string,
+	currentInstructions: string,
+	currentIdentity: ObserveIdentity,
+	focus?: string,
+): Promise<AdjustObserveResult> {
+	const prompt = observeAdjustPromptTemplate(
+		directive,
+		currentInstructions,
+		currentIdentity,
+		focus,
+	)
+
+	const { output } = await generate({
+		model,
+		prompt,
+		output: Output.object({ schema: adjustObserveOutputSchema }),
+		repairSchema: adjustObserveOutputSchema,
+	})
+
+	const newInstructions = output.instructions
+	const identity: ObserveIdentity = {
+		identity: output.identity,
+		domain: output.domain,
+	}
+
+	const systemPrompt = observeSystemPromptTemplate(identity)
+
+	return { newInstructions, identity, systemPrompt }
 }
 
 /**
@@ -95,12 +160,14 @@ export async function observe(
 				status: 'observed',
 				output: data.output,
 				importance: data.importance ?? 0.5,
+				gaps: data.gaps ?? [],
 				usage: result.usage,
 			}
 		} else {
 			return {
 				status: 'dismissed',
 				output: data.output,
+				gaps: data.gaps ?? [],
 				usage: result.usage,
 			}
 		}

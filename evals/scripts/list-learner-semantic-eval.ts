@@ -6,6 +6,7 @@
  */
 
 import { ListLearner } from '../../src/learners/list-learner/class'
+import { MemoryStore } from '../../src/learners/stores'
 import { logger } from '../helpers/logger'
 import { createOpenRouter } from '@openrouter/ai-sdk-provider'
 
@@ -36,7 +37,8 @@ async function main() {
 			'You track restaurants, cafes, and food establishments. For each place, extract: ' +
 			'name, cuisine type, location/neighborhood, notable dishes, price range, and any quality signals ' +
 			'(ratings, reviews, awards). Focus on distinctive details that make each place unique.',
-		synthesize: {
+		store: new MemoryStore(),
+		understand: {
 			thresholds: {
 				minImportance: 0.3,
 				maxObservations: 3,
@@ -78,7 +80,7 @@ async function main() {
 	logger.logState('Learner created', {
 		id: learner.id,
 		name: learner.name,
-		items: learner.getItemCount(),
+		items: await learner.getItemCount(),
 		buffer: learner.getBufferState(),
 	})
 
@@ -98,8 +100,8 @@ async function main() {
 	])
 
 	const afterBatch1 = {
-		items: learner.getUnderstanding(),
-		itemCount: learner.getItemCount(),
+		items: await learner.getUnderstanding(),
+		itemCount: await learner.getItemCount(),
 		buffer: learner.getBufferState(),
 		metrics: learner.getMetrics(),
 	}
@@ -212,8 +214,8 @@ async function main() {
 	])
 
 	const afterBatch2 = {
-		items: learner.getUnderstanding(),
-		itemCount: learner.getItemCount(),
+		items: await learner.getUnderstanding(),
+		itemCount: await learner.getItemCount(),
 		buffer: learner.getBufferState(),
 		metrics: learner.getMetrics(),
 	}
@@ -264,7 +266,7 @@ async function main() {
 	}
 
 	console.log('\n  Final state:')
-	console.log(`    Item count: ${learner.getItemCount()}`)
+	console.log(`    Item count: ${await learner.getItemCount()}`)
 	console.log(`    Buffer count: ${learner.getBufferState().count}`)
 	console.log(`    Metrics: ${JSON.stringify(learner.getMetrics(), null, 2)}`)
 	console.log(`    Health: ${JSON.stringify(learner.getHealth(), null, 2)}`)
@@ -274,8 +276,8 @@ async function main() {
 	logger.logSection('10. Semantic checks')
 
 	// Items were created
-	const hasItems = learner.getItemCount() > 0
-	logger.logAssertion('Items were created', hasItems, `count=${learner.getItemCount()}`)
+	const hasItems = (await learner.getItemCount()) > 0
+	logger.logAssertion('Items were created', hasItems, `count=${await learner.getItemCount()}`)
 
 	// Init events
 	logger.logAssertion('Init events fired', events.some(e => e.type === 'learner:init:started') && events.some(e => e.type === 'learner:init:completed'))
@@ -309,7 +311,7 @@ async function main() {
 	logger.logAssertion('Query count tracked (7+)', learner.getMetrics().query.count >= 7, `count=${learner.getMetrics().query.count}`)
 
 	// Items are structured (have data and metadata)
-	const items = learner.getUnderstanding()
+	const items = await learner.getUnderstanding()
 	if (items.length > 0) {
 		const firstItem = items[0]
 		logger.logAssertion('Items have id', !!firstItem.id, `id=${firstItem.id}`)
@@ -318,7 +320,7 @@ async function main() {
 		logger.logAssertion('Items have confidence', typeof firstItem.metadata.confidence === 'number', `confidence=${firstItem.metadata.confidence}`)
 	}
 
-	logger.logSuccess(`Eval complete in ${elapsed()}s — ${events.length} total events, ${learner.getItemCount()} items tracked`)
+	logger.logSuccess(`Eval complete in ${elapsed()}s — ${events.length} total events, ${await learner.getItemCount()} items tracked`)
 }
 
 main().catch((error) => {

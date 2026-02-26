@@ -1,7 +1,7 @@
 import type { CallSettings, LanguageModel } from 'ai'
 import { z } from 'zod'
 import type { TokenUsage } from '../learners/types'
-import { generate, Output } from '../llm'
+import { generate, Output, stepCountIs } from '../llm'
 import { buildSynthesisSystemPrompt } from './prompts/prompt.synthesis.system'
 import { buildSynthesisUserPrompt } from './prompts/prompt.synthesis.user'
 import type { BrainAskResult, LearnerResponse } from './types'
@@ -23,6 +23,8 @@ export interface SynthesisOptions extends CallSettings {
 	brainPrompt: string
 	query: string
 	responses: LearnerResponse[]
+	/** Optional consult tools for querying internal learners during synthesis */
+	consultTools?: Record<string, unknown>
 }
 
 /**
@@ -42,9 +44,10 @@ export async function synthesize(
 	model: LanguageModel,
 	options: SynthesisOptions,
 ): Promise<SynthesisResult> {
-	const { brainPrompt, query, responses, ...generateOptions } = options
+	const { brainPrompt, query, responses, consultTools, ...generateOptions } = options
 
-	const system = buildSynthesisSystemPrompt(brainPrompt)
+	const hasTools = consultTools && Object.keys(consultTools).length > 0
+	const system = buildSynthesisSystemPrompt(brainPrompt, hasTools)
 	const prompt = buildSynthesisUserPrompt(query, responses)
 
 	const result = await generate({
@@ -53,6 +56,8 @@ export async function synthesize(
 		prompt,
 		output: Output.object({ schema: synthesisOutputSchema }),
 		repairSchema: synthesisOutputSchema,
+		// biome-ignore lint: consultTools is built from tool() calls, safe to cast
+		...(hasTools ? { tools: consultTools as Record<string, import('ai').Tool>, stopWhen: stepCountIs(5) } : {}),
 		...generateOptions,
 	})
 

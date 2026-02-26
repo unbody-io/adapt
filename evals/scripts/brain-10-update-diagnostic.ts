@@ -169,14 +169,15 @@ function snapshotBrainConfig(brain: Brain) {
 	}
 }
 
-function snapshotLearner(learner: ReturnType<Brain['getLearners']>[0]) {
+async function snapshotLearner(learner: ReturnType<Brain['getLearners']>[0]) {
+	const understanding = await learner.getUnderstanding()
 	return {
 		id: learner.id,
 		name: learner.name,
 		instructions: truncate(learner.instructions, 200),
 		description: learner.description ?? '(none)',
-		understandingLength: learner.getUnderstanding().length,
-		understandingPreview: truncate(learner.getUnderstanding(), 300),
+		understandingLength: understanding.length,
+		understandingPreview: truncate(understanding, 300),
 		bufferState: learner.getBufferState(),
 		thresholds: learner.getUnderstandThresholds(),
 		governance: learner.getGovernance(),
@@ -191,8 +192,8 @@ function snapshotLearner(learner: ReturnType<Brain['getLearners']>[0]) {
 	}
 }
 
-function snapshotAllLearners(brain: Brain) {
-	return brain.getLearners().map(snapshotLearner)
+async function snapshotAllLearners(brain: Brain) {
+	return Promise.all(brain.getLearners().map(snapshotLearner))
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -259,7 +260,7 @@ async function main() {
 	report.json('Config', snapshotBrainConfig(brain))
 
 	report.h3('Generated Learners')
-	const initLearners = snapshotAllLearners(brain)
+	const initLearners = await snapshotAllLearners(brain)
 	for (const l of initLearners) {
 		report.h4(`Learner: ${l.name} (${l.id})`)
 		report.json('State', l)
@@ -349,14 +350,14 @@ async function main() {
 	// Helper: Take a full snapshot
 	// ═══════════════════════════════════════════════════════════════════════
 
-	function snapshot(label: string) {
+	async function snapshot(label: string) {
 		report.h3(`Snapshot: ${label}`)
 		report.json('Brain Config', snapshotBrainConfig(brain))
 		report.kv('Learner Count', brain.learners.size)
 		report.blank()
 
 		for (const learner of brain.getLearners()) {
-			const snap = snapshotLearner(learner)
+			const snap = await snapshotLearner(learner)
 			report.h4(`${snap.name} (${snap.id})`)
 			report.kv('Understanding Length', snap.understandingLength)
 			report.kv('Buffer', `${snap.bufferState.count} items, avg importance ${snap.bufferState.avgImportance.toFixed(2)}`)
@@ -418,7 +419,7 @@ async function main() {
 
 		report.h3('Before')
 		report.json('Brain Config', snapshotBrainConfig(brain))
-		const beforeLearners = snapshotAllLearners(brain)
+		const beforeLearners = await snapshotAllLearners(brain)
 		report.json('Learner Summary', beforeLearners.map(l => ({
 			id: l.id, name: l.name, understandingLength: l.understandingLength,
 			understandingPreview: truncate(l.understandingPreview, 150),
@@ -472,7 +473,7 @@ async function main() {
 
 		report.json('Brain Config', snapshotBrainConfig(brain))
 
-		const afterLearners = snapshotAllLearners(brain)
+		const afterLearners = await snapshotAllLearners(brain)
 		report.json('Learner Summary', afterLearners.map(l => ({
 			id: l.id, name: l.name, understandingLength: l.understandingLength,
 			understandingPreview: truncate(l.understandingPreview, 150),
@@ -622,7 +623,7 @@ async function main() {
 
 	if (phaseGroups[0]) {
 		await ingestBatch('Phase 1', phaseGroups[0])
-		snapshot('After Phase 1')
+		await snapshot('After Phase 1')
 		await runQueries('After Phase 1', QUERIES.slice(0, 2))
 	}
 
@@ -631,7 +632,7 @@ async function main() {
 
 	if (phaseGroups[1]) {
 		await ingestBatch('Phase 2', phaseGroups[1])
-		snapshot('After Phase 2')
+		await snapshot('After Phase 2')
 		await runQueries('After Phase 2', QUERIES)
 	}
 
@@ -646,7 +647,7 @@ async function main() {
 
 	if (phaseGroups[2]) {
 		await ingestBatch('Phase 3', phaseGroups[2])
-		snapshot('After Phase 3')
+		await snapshot('After Phase 3')
 		// Run 5 queries — enough to trigger confidence signals if they're low
 		await runQueries('After Phase 3', POST_UPDATE_QUERIES)
 	}
@@ -672,7 +673,7 @@ async function main() {
 
 	if (phaseGroups[3]) {
 		await ingestBatch('Phase 5', phaseGroups[3])
-		snapshot('After Phase 5')
+		await snapshot('After Phase 5')
 		await runQueries('After Phase 5', POST_UPDATE_QUERIES.slice(0, 3))
 	}
 
@@ -693,7 +694,7 @@ async function main() {
 
 	if (phaseGroups[4]) {
 		await ingestBatch('Phase 6', phaseGroups[4])
-		snapshot('After Phase 6 (Final)')
+		await snapshot('After Phase 6 (Final)')
 		await runQueries('Final Queries', QUERIES)
 	}
 
@@ -742,11 +743,11 @@ async function main() {
 	// Final learner states (full)
 	report.h3('Final Learner States')
 	for (const learner of brain.getLearners()) {
-		const snap = snapshotLearner(learner)
+		const snap = await snapshotLearner(learner)
 		report.h4(`${snap.name} (${snap.id})`)
 		report.json('Full State', snap)
 		report.p('**Full Understanding:**')
-		report.code(learner.getUnderstanding())
+		report.code(await learner.getUnderstanding())
 		report.p('**Full Observe Prompt:**')
 		report.code(learner.getObserveSystemPrompt() ?? '(null)')
 		report.p('**Full Synthesize Prompt:**')

@@ -101,7 +101,7 @@ async function main() {
 		targetInstructions: target.instructions,
 		targetObservePrompt: target.getObserveSystemPrompt(),
 		targetUnderstandPrompt: target.getUnderstandSystemPrompt(),
-		targetUnderstanding: target.getUnderstanding(),
+		targetUnderstanding: await target.getUnderstanding(),
 	}
 
 	logger.logState('Baseline', {
@@ -163,7 +163,7 @@ async function main() {
 
 	// Hard: understanding NOT wiped
 	assertEqual(
-		target.getUnderstanding(),
+		await target.getUnderstanding(),
 		baselineState.targetUnderstanding,
 		'Direct: understanding preserved',
 	)
@@ -340,7 +340,7 @@ async function main() {
 	resetSection()
 
 	// Clear understanding for a clean test
-	const preRouteUnderstanding = target.getUnderstanding()
+	const preRouteUnderstanding = await target.getUnderstanding()
 	// Note: we don't call setUnderstanding('') — we just inject matching content
 	// and verify the learner processes it (understanding grows)
 
@@ -349,7 +349,7 @@ async function main() {
 		'DataLoader batches and caches database calls within a single GraphQL request to solve the N+1 problem.',
 	])
 
-	const postRouteUnderstanding = target.getUnderstanding()
+	const postRouteUnderstanding = await target.getUnderstanding()
 	logger.logMetric(
 		'Route: understanding growth',
 		preRouteUnderstanding.length,

@@ -1,11 +1,16 @@
 // Base
 export { BaseLearner } from './base'
 export type {
-	BaseLearnerInit,
 	LearnCallbacks,
 	LearnOptions,
 	LearnOutput,
 	UnderstandCallResult,
+} from './base'
+export type {
+	BaseLearnerState,
+	ModelSlots,
+	StoredModelRef,
+	StateTransform,
 } from './base'
 export type {
 	SharedLearnerEventMap,
@@ -82,4 +87,9 @@ export type {
 	LearnerStatus,
 	Significance,
 	TokenUsage,
+	LearnerTypeDescriptor,
 } from './types'
+
+// Descriptors
+export { textLearnerDescriptor } from './text-learner/descriptor'
+export { listLearnerDescriptor } from './list-learner/descriptor'

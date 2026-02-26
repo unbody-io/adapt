@@ -16,7 +16,7 @@ import type { ListItem } from './types'
  * Create list-specific query tools that close over learner state
  */
 export function createListQueryTools(
-	getItems: () => ListItem[],
+	getItems: () => Promise<ListItem[]>,
 ) {
 	return {
 		getItems: tool({
@@ -33,7 +33,7 @@ export function createListQueryTools(
 					.describe('Value to match (case-insensitive substring)'),
 			}),
 			execute: async (params) => {
-				const items = getItems()
+				const items = await getItems()
 				if (!params.filterKey || !params.filterValue) {
 					return {
 						count: items.length,
@@ -62,7 +62,7 @@ export function createListQueryTools(
 				query: z.string().describe('Search query text'),
 			}),
 			execute: async (params) => {
-				const items = getItems()
+				const items = await getItems()
 				const query = params.query.toLowerCase()
 				const matches = items.filter((item) =>
 					JSON.stringify(item.data).toLowerCase().includes(query),
@@ -81,7 +81,7 @@ export function createListQueryTools(
 				id: z.string().describe('The item ID'),
 			}),
 			execute: async (params) => {
-				const items = getItems()
+				const items = await getItems()
 				const item = items.find((i) => i.id === params.id)
 				if (!item) return { found: false }
 				return { found: true, item }

@@ -6,6 +6,7 @@
 
 import type { LanguageModel } from 'ai'
 import type { CascadableConfig } from '../../types/config'
+import type { BaseLearnerState } from '../base/state'
 import type { BaseResolvedConfig, UnderstandThresholds } from '../base/types'
 import type { EventsFromMap } from '../../types/events'
 import type {
@@ -15,6 +16,7 @@ import type {
 } from '../types'
 import type { SharedLearnerEventMap } from '../base/types'
 import type { Store } from '../stores'
+import type { UnderstandIdentity } from './understand'
 
 // ── Core types ─────────────────────────────────────────────────────────────
 
@@ -113,8 +115,8 @@ export interface ListLearnerConfig extends CascadableConfig {
 	description?: string
 	/** How the learner was created */
 	origin?: LearnerOrigin
-	/** Injected store (defaults to MemoryStore if not provided) */
-	store?: Store
+	/** Injected store */
+	store: Store
 	/** List-specific governance (dedup, maxItems, pruning) */
 	governance?: ListGovernanceConfig
 	/** Observer phase configuration */
@@ -140,4 +142,11 @@ export interface ResolvedListLearnerConfig extends BaseResolvedConfig {
 export interface ListLearnerUpdateResult {
 	changedFields: string[]
 	config: ResolvedListLearnerConfig
+}
+
+// ── State ──────────────────────────────────────────────────────────────────
+
+export interface ListLearnerState extends BaseLearnerState {
+	understand_identity: UnderstandIdentity | null
+	governance: ResolvedListGovernanceConfig
 }

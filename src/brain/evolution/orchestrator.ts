@@ -5,6 +5,7 @@
 import type { Brain } from '../class'
 import type { EvolutionDecision } from '../evaluator/types'
 import { EVOLUTION_ACTIONS } from '../evaluator/types'
+import { isInternalLearnerId } from '../internal-learners'
 import { CreateHandler } from './handlers/create'
 import { MergeHandler } from './handlers/merge'
 import { SplitHandler } from './handlers/split'
@@ -38,6 +39,11 @@ export class EvolutionOrchestrator {
 	 * @returns Aggregated results from all handlers
 	 */
 	async executeDecisions(decisions: EvolutionDecision[]): Promise<AggregatedEvolutionResult> {
+		// Filter out decisions targeting internal learners (protected from evolution)
+		const filtered = decisions.filter(
+			(d) => !d.targets.some(isInternalLearnerId),
+		)
+
 		const aggregated: AggregatedEvolutionResult = {
 			created: [],
 			updated: [],
@@ -48,7 +54,7 @@ export class EvolutionOrchestrator {
 
 		const grouped = new Map<string, EvolutionDecision[]>()
 
-		for (const decision of decisions) {
+		for (const decision of filtered) {
 			const group = grouped.get(decision.action) ?? []
 			group.push(decision)
 			grouped.set(decision.action, group)
@@ -76,6 +82,11 @@ export class EvolutionOrchestrator {
 	 * @returns Result of the action execution
 	 */
 	async executeSingleDecision(decision: EvolutionDecision): Promise<any> {
+		// Protect internal learners from evolution
+		if (decision.targets.some(isInternalLearnerId)) {
+			throw new Error('Cannot evolve internal learners')
+		}
+
 		const handler = this.handlers.get(decision.action)
 
 		if (!handler) {

@@ -10,11 +10,28 @@ import { stringifyUnderstanding } from './utils'
 /**
  * Format merge prompt with learner data and guidance
  */
-export function mergePromptTemplate(
+export async function mergePromptTemplate(
 	guidance: string,
 	learners: BaseLearner<unknown>[],
 	brainPrompt: string,
-): string {
+): Promise<string> {
+	const learnerSections = await Promise.all(
+		learners.map(async (learner, idx) => {
+			const understanding = await learner.getUnderstanding()
+			return `## Learner ${idx + 1}: ${learner.id}
+
+**Name**: ${learner.id}
+**Description**: ${learner.description || 'N/A'}
+**Instructions**:
+${learner.instructions}
+
+**Understanding**:
+${stringifyUnderstanding(understanding)}
+
+---`
+		}),
+	)
+
 	return `# Brain Context
 
 **Purpose**: ${brainPrompt}
@@ -25,21 +42,7 @@ ${guidance}
 
 # Learners to Merge
 
-${learners
-	.map(
-		(learner, idx) => `## Learner ${idx + 1}: ${learner.id}
-
-**Name**: ${learner.id}
-**Description**: ${learner.description || 'N/A'}
-**Instructions**:
-${learner.instructions}
-
-**Understanding**:
-${stringifyUnderstanding(learner.getUnderstanding())}
-
----`,
-	)
-	.join('\n\n')}
+${learnerSections.join('\n\n')}
 
 # Your Task
 

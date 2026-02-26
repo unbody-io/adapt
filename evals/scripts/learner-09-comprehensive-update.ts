@@ -132,7 +132,7 @@ async function main() {
 	})
 
 	// After 2 learns with continuous strategy, should have understanding
-	const tsUnderstanding = learner.getUnderstanding()
+	const tsUnderstanding = await learner.getUnderstanding()
 	logger.logState('TS Understanding', {
 		length: tsUnderstanding.length,
 		preview: tsUnderstanding.substring(0, 300),
@@ -276,7 +276,7 @@ async function main() {
 		output: (cookLearn2 as any).output?.substring(0, 200),
 	})
 
-	const cookingUnderstanding = learner.getUnderstanding()
+	const cookingUnderstanding = await learner.getUnderstanding()
 	logger.logState('Cooking Understanding', {
 		length: cookingUnderstanding.length,
 		preview: cookingUnderstanding.substring(0, 300),
@@ -676,7 +676,7 @@ async function main() {
 	logger.logState('Final Learner State', {
 		name: learner.name,
 		instructions: learner.instructions.substring(0, 60) + '...',
-		understanding: learner.getUnderstanding().substring(0, 200) + '...',
+		understanding: (await learner.getUnderstanding()).substring(0, 200) + '...',
 		thresholds: learner.getUnderstandThresholds(),
 		governance: {
 			activation: learner.getHealth().activation,

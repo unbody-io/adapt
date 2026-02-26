@@ -51,26 +51,35 @@ export class Evaluator extends TypedEmitter<EvaluatorEventMap> {
 	 */
 	signal(signal: Signal): void {
 		this.signals.push(signal)
+		this.maybeEvaluate()
+	}
 
+	/**
+	 * Start an evaluation if conditions are met and one isn't already running.
+	 */
+	private maybeEvaluate(): void {
 		if (this.isEvaluating) return
+		if (this.signals.length === 0) return
 
-		// Auto-evaluate: bypass signals trigger immediately, otherwise wait for threshold
-		if (
-			signal.bypass ||
-			(this.signals.length >= this.threshold &&
-			this.brain.config.evolution.autoEvaluate)
-		) {
-			this.isEvaluating = true
-			this.evaluate('auto')
-				.catch((error) => {
-					this.emit('evaluator:evaluation:failed', {
-						error: error instanceof Error ? error.message : String(error),
-					})
+		const hasBypass = this.signals.some((s) => s.bypass)
+		const meetsThreshold =
+			this.signals.length >= this.threshold &&
+			this.brain.config.evolution.autoEvaluate
+
+		if (!hasBypass && !meetsThreshold) return
+
+		this.isEvaluating = true
+		this.evaluate('auto')
+			.catch((error) => {
+				this.emit('evaluator:evaluation:failed', {
+					error: error instanceof Error ? error.message : String(error),
 				})
-				.finally(() => {
-					this.isEvaluating = false
-				})
-		}
+			})
+			.finally(() => {
+				this.isEvaluating = false
+				// Signals may have arrived during evaluation — check again
+				this.maybeEvaluate()
+			})
 	}
 
 	/**
@@ -88,13 +97,17 @@ export class Evaluator extends TypedEmitter<EvaluatorEventMap> {
 			return []
 		}
 
+		// Snapshot how many signals we're consuming. Signals arriving during
+		// the LLM call stay in the buffer for the next evaluation.
+		const consumedCount = this.signals.length
+
 		this.emit('evaluator:evaluation:started', {
-			signalCount: this.signals.length,
+			signalCount: consumedCount,
 		})
 
 		try {
 			// Build context for LLM
-			const context = this.buildContext()
+			const context = await this.buildContext()
 
 			// Create tools with brain context
 			const getUnderstandings = createGetUnderstandingsTool(this.brain)
@@ -108,12 +121,13 @@ export class Evaluator extends TypedEmitter<EvaluatorEventMap> {
 			}
 
 			// Call LLM with tools
+			const prompt = this.formatEvaluationPrompt(context)
 			const result = await generate({
 				model: this.brain.config.blueprintModel,
 				system: evaluatorSystemPrompt,
-				prompt: this.formatEvaluationPrompt(context),
+				prompt,
 				tools,
-				toolChoice: 'required',
+				toolChoice: 'auto',
 				stopWhen: stepCountIs(MAX_EVALUATION_STEPS),
 			})
 
@@ -148,18 +162,27 @@ export class Evaluator extends TypedEmitter<EvaluatorEventMap> {
 			})
 
 			// Record history (capped at 10)
-			this.history.push({
+			const historyEntry: EvolutionHistoryEntry = {
 				timestamp: new Date(),
 				decisions: decisions.map((d) => ({
 					action: d.action,
 					targets: d.targets,
 					reasoning: d.reasoning,
 				})),
-			})
+			}
+			this.history.push(historyEntry)
 			if (this.history.length > 10) this.history.shift()
 
-			// Clear signal buffer after successful evaluation
-			this.signals = []
+			// Persist to brain store
+			await this.brain.store.evolution.add({
+				id: `eval_${Date.now()}`,
+				decisions: historyEntry.decisions,
+				source,
+				created_at: historyEntry.timestamp.toISOString(),
+			})
+
+			// Remove only consumed signals — preserve any that arrived during evaluation
+			this.signals.splice(0, consumedCount)
 
 			return decisions
 		} catch (error) {
@@ -189,23 +212,28 @@ export class Evaluator extends TypedEmitter<EvaluatorEventMap> {
 	}
 
 	/**
+	 * Restore a history entry from persisted store
+	 */
+	restoreHistoryEntry(entry: EvolutionHistoryEntry): void {
+		this.history.push(entry)
+		if (this.history.length > 10) this.history.shift()
+	}
+
+	/**
 	 * Build context object for evaluation
 	 */
-	private buildContext() {
-		return {
-			brain: {
-				prompt: this.brain.prompt,
-				learnerCount: this.brain.learners.size,
-			},
-			includeUnderstanding: this.includeUnderstanding,
-			learners: Array.from(this.brain.learners.values()).map((learner) => {
+	private async buildContext() {
+		const learners = await Promise.all(
+			Array.from(this.brain.learners.values()).map(async (learner) => {
 				const health = learner.getHealth()
 				const metrics = learner.getMetrics()
+				const understanding = await learner.getUnderstanding()
 				return {
 					id: learner.id,
 					name: learner.id,
+					type: learner.type,
 					purpose: this.extractPurpose(learner.instructions),
-					understandingSize: String(learner.getUnderstanding()).length,
+					understandingSize: String(understanding).length,
 					health: {
 						activation: health.activation,
 						status: health.status,
@@ -220,6 +248,15 @@ export class Evaluator extends TypedEmitter<EvaluatorEventMap> {
 					},
 				}
 			}),
+		)
+
+		return {
+			brain: {
+				prompt: this.brain.prompt,
+				learnerCount: this.brain.learners.size,
+			},
+			includeUnderstanding: this.includeUnderstanding,
+			learners,
 		}
 	}
 
@@ -227,7 +264,7 @@ export class Evaluator extends TypedEmitter<EvaluatorEventMap> {
 	 * Format the evaluation prompt with signals and context
 	 */
 	private formatEvaluationPrompt(
-		context: ReturnType<typeof this.buildContext>,
+		context: Awaited<ReturnType<typeof this.buildContext>>,
 	): string {
 		return evaluationPromptTemplate(context, this.signals)
 	}

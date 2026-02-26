@@ -15,9 +15,7 @@
 import { createOpenRouter } from '@openrouter/ai-sdk-provider'
 import type { LanguageModel } from 'ai'
 import { resolveTextLearnerConfig } from '../src/learners/text-learner/config.resolver'
-import { resolveBrainConfig } from '../src/brain/config.resolver'
 import type { TextLearnerConfig } from '../src/learners/text-learner/types'
-import type { BrainConfig } from '../src/brain/types'
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Setup - Create distinguishable models for testing
@@ -208,117 +206,9 @@ function testTextLearnerOverridesParent() {
 	assertEqual('observe.blueprintModel uses learner override MODEL_D', MODEL_D, resolved.observe.blueprintModel)
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Test 6: Brain Config Resolution
-// ─────────────────────────────────────────────────────────────────────────────
-
-function testBrainConfigResolution() {
-	console.log('\n═══ Test 6: Brain Config Resolution ═══\n')
-
-	const config: BrainConfig = {
-		prompt: 'Test brain',
-		model: MODEL_A,
-	}
-
-	const resolved = resolveBrainConfig(config)
-
-	// Model cascades to all nested configs
-	assertEqual('model → resolved.model', MODEL_A, resolved.model)
-	assertEqual('model → blueprintModel (fallback)', MODEL_A, resolved.blueprintModel)
-	assertEqual('model → init.model', MODEL_A, resolved.init.model)
-	assertEqual('model → query.model', MODEL_A, resolved.query.model)
-	assertEqual('model → learning.model', MODEL_A, resolved.learning.model)
-	assertEqual('model → learning.blueprintModel', MODEL_A, resolved.learning.blueprintModel)
-	assertEqual('model → learning.observe.model', MODEL_A, resolved.learning.observe.model)
-	assertEqual('model → learning.synthesize.model', MODEL_A, resolved.learning.synthesize.model)
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Test 7: Brain Config with Overrides
-// ─────────────────────────────────────────────────────────────────────────────
-
-function testBrainConfigWithOverrides() {
-	console.log('\n═══ Test 7: Brain Config with Overrides ═══\n')
-
-	const config: BrainConfig = {
-		prompt: 'Test brain',
-		model: MODEL_A,
-		blueprintModel: MODEL_B, // Different blueprint model
-		init: {
-			model: MODEL_C, // Custom model for init/decomposition
-		},
-		learning: {
-			observe: {
-				model: MODEL_D, // Custom model for observe phase
-			},
-		},
-	}
-
-	const resolved = resolveBrainConfig(config)
-
-	// Top level
-	assertEqual('model stays MODEL_A', MODEL_A, resolved.model)
-	assertEqual('blueprintModel overridden to MODEL_B', MODEL_B, resolved.blueprintModel)
-
-	// Init uses explicit override
-	assertEqual('init.model OVERRIDDEN to MODEL_C', MODEL_C, resolved.init.model)
-
-	// Query inherits from top level
-	assertEqual('query.model inherits MODEL_A', MODEL_A, resolved.query.model)
-
-	// Learning phase overrides
-	assertEqual('learning.model inherits MODEL_A', MODEL_A, resolved.learning.model)
-	assertEqual('learning.blueprintModel inherits MODEL_B', MODEL_B, resolved.learning.blueprintModel)
-	assertEqual('learning.observe.model OVERRIDDEN to MODEL_D', MODEL_D, resolved.learning.observe.model)
-	assertEqual('learning.observe.blueprintModel inherits MODEL_B', MODEL_B, resolved.learning.observe.blueprintModel)
-	assertEqual('learning.synthesize.model inherits MODEL_A', MODEL_A, resolved.learning.synthesize.model)
-	assertEqual('learning.synthesize.blueprintModel inherits MODEL_B', MODEL_B, resolved.learning.synthesize.blueprintModel)
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Test 8: Deep Override Chain
-// ─────────────────────────────────────────────────────────────────────────────
-
-function testDeepOverrideChain() {
-	console.log('\n═══ Test 8: Deep Override Chain ═══\n')
-
-	// Complex scenario: Brain sets defaults, learning overrides some, phases override others
-	const config: BrainConfig = {
-		prompt: 'Test brain',
-		model: MODEL_A, // Default
-		blueprintModel: MODEL_B, // Default blueprint
-		learning: {
-			model: MODEL_C, // Learning overrides runtime
-			// blueprintModel not set - should inherit MODEL_B
-			observe: {
-				// model not set - should inherit MODEL_C (from learning)
-				blueprintModel: MODEL_D, // Observe overrides blueprint only
-			},
-			synthesize: {
-				model: MODEL_D, // Synthesize overrides runtime
-				// blueprintModel not set - should inherit MODEL_B (from top)
-			},
-		},
-	}
-
-	const resolved = resolveBrainConfig(config)
-
-	// Verify cascade chain
-	assertEqual('brain.model = MODEL_A', MODEL_A, resolved.model)
-	assertEqual('brain.blueprintModel = MODEL_B', MODEL_B, resolved.blueprintModel)
-
-	// Learning level
-	assertEqual('learning.model OVERRIDDEN to MODEL_C', MODEL_C, resolved.learning.model)
-	assertEqual('learning.blueprintModel inherits MODEL_B', MODEL_B, resolved.learning.blueprintModel)
-
-	// Observe: model from learning, blueprintModel overridden
-	assertEqual('observe.model inherits learning MODEL_C', MODEL_C, resolved.learning.observe.model)
-	assertEqual('observe.blueprintModel OVERRIDDEN to MODEL_D', MODEL_D, resolved.learning.observe.blueprintModel)
-
-	// Synthesize: model overridden, blueprintModel from top
-	assertEqual('synthesize.model OVERRIDDEN to MODEL_D', MODEL_D, resolved.learning.synthesize.model)
-	assertEqual('synthesize.blueprintModel inherits top MODEL_B', MODEL_B, resolved.learning.synthesize.blueprintModel)
-}
+// Tests 6-8 (Brain Config Resolution) removed — Brain no longer has a
+// standalone resolver. Config is resolved inline in the constructor and
+// stored directly in BrainState. Use `new Brain(config).config` to verify.
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Test 9: Non-Model Config Values Don't Cascade
@@ -392,9 +282,7 @@ function runAllTests() {
 	testTextLearnerPhaseOverride()
 	testTextLearnerWithParentModels()
 	testTextLearnerOverridesParent()
-	testBrainConfigResolution()
-	testBrainConfigWithOverrides()
-	testDeepOverrideChain()
+	// Tests 6-8 removed (Brain resolver deleted)
 	testNonModelConfigsUsesDefaults()
 	testPartialPhaseConfigMerge()
 

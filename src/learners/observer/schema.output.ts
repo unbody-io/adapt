@@ -34,6 +34,11 @@ export const observeOutputSchema = z.object({
 		.describe(
 			'How important this observation is (0.0 to 1.0). Use 0.5 if dismissed.',
 		),
+	gaps: z
+		.array(z.string())
+		.describe(
+			'When dismissed: briefly describe what topics or content you encountered but could not claim as relevant to your domain. One topic per string. Empty array if observed.',
+		),
 })
 
 export type ObserveSchemaOutput = z.infer<typeof observeOutputSchema>
@@ -61,6 +66,11 @@ export function buildObserveOutputSchema(observationSchema: Record<string, unkno
 			.max(1)
 			.describe(
 				'How important this observation is (0.0 to 1.0). Use 0.5 if dismissed.',
+			),
+		gaps: z
+			.array(z.string())
+			.describe(
+				'When dismissed: briefly describe what topics or content you encountered but could not claim as relevant to your domain. One topic per string. Empty array if observed.',
 			),
 	})
 }

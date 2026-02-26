@@ -50,13 +50,17 @@ If relevant content found:
 {
   "status": "observed",
   "output": ["first discrete observation", "second discrete observation", "...one fact per string"],
-  "importance": 0.0 to 1.0
+  "importance": 0.0 to 1.0,
+  "gaps": []
 }
 
 If nothing relevant:
 {
   "status": "dismissed",
   "output": [],
-  "importance": 0.5
-}`
+  "importance": 0.5,
+  "gaps": ["what topic 1 was about", "what topic 2 was about"]
+}
+
+When dismissing, briefly describe in "gaps" what topics or content you encountered but could not claim as relevant to your ${identity.domain ? 'domain' : 'purpose'}. One topic per string.`
 }

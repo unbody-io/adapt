@@ -4,55 +4,100 @@ import { BaseLearner } from '../base/class'
 import type { UnderstandCallResult } from '../base/class'
 import { ToolBasedMethod } from '../base/query'
 import type { QueryMethod } from '../base/query'
-import { MemoryStore } from '../stores'
 import { resolveTextLearnerConfig } from './config.resolver'
 import { applyStrategy } from './strategies'
-import { initUnderstand, understand } from './understand'
-import type { UnderstandIdentity } from './understand'
+import { adjustUnderstand, initUnderstand, understand } from './understand'
 import { buildTextQueryPrompt, createReadUnderstandingTool } from './query-tools'
 import type {
-	ResolvedTextLearnerConfig,
 	TextLearnerConfig,
-	TextLearnerUpdateResult,
+	TextLearnerState,
 } from './types'
 
 /**
  * TextLearner - A learning agent that maintains understanding as narrative text
  *
  * Strategy application is handled in postProcessUnderstanding.
- * Store is injected (defaults to MemoryStore).
+ * Store is injected — caller must provide it.
  */
-export class TextLearner extends BaseLearner<string, ResolvedTextLearnerConfig> {
-	private understanding = ''
-	private _understandIdentity: UnderstandIdentity | null = null
+export class TextLearner extends BaseLearner<string, TextLearnerState> {
+	get type(): string {
+		return 'text'
+	}
 
 	constructor(rawConfig: TextLearnerConfig, parentModels?: ParentModels) {
 		const config = resolveTextLearnerConfig(rawConfig, parentModels)
-		super({
-			id: config.id,
-			name: rawConfig.name || config.id,
+		const maxObsForStagnation = 3 * (config.understand.thresholds.maxObservations ?? 10)
+
+		const initialState: TextLearnerState = {
 			instructions: config.instructions,
+			name: rawConfig.name || config.id,
+			description: rawConfig.description ?? '',
+			focus: rawConfig.focus ?? null,
 			origin: config.origin,
-			store: rawConfig.store ?? new MemoryStore(),
-			focus: rawConfig.focus,
-			description: rawConfig.description,
-			health: rawConfig.health,
-			maxObservationsForStagnation:
-				3 * (config.understand.thresholds.maxObservations ?? 10),
-		})
-		this.config = config
+			models: {
+				default: config.model,
+				blueprint: config.blueprintModel,
+				observer: config.observer.model,
+				observer_blueprint: config.observer.blueprintModel,
+				understand: config.understand.model,
+				understand_blueprint: config.understand.blueprintModel,
+				query: config.query.model,
+			},
+			observe_identity: null,
+			observe_prompt: null,
+			understand_prompt: null,
+			understand_identity: null,
+			observation_schema: null,
+			understanding_schema: null,
+			thresholds: {
+				maxObservations: config.understand.thresholds.maxObservations,
+				maxTokens: config.understand.thresholds.maxTokens,
+				minImportance: config.understand.thresholds.minImportance,
+			},
+			health: {
+				activation: 0,
+				threshold: 0.3,
+				status: 'dormant',
+				lastAccessed: new Date(),
+				signalThresholds: {
+					maxDismissalRate: 0.8,
+					minRelevance: 0.3,
+					minConfidence: 0.3,
+					maxObservationsWithoutSynthesis: maxObsForStagnation,
+					...rawConfig.health?.signalThresholds,
+				},
+			},
+			metrics: {
+				ingestion: {
+					observationCount: 0,
+					dismissalCount: 0,
+					dismissalRate: 0,
+					synthesisCount: 0,
+					observationsSinceLastSynthesis: 0,
+				},
+				query: {
+					count: 0,
+					relevanceScores: [],
+					confidenceScores: [],
+					gaps: [],
+				},
+			},
+			stagnation_signal_fired: false,
+			dismissal_signal_fired: false,
+			governance: config.governance,
+		}
+
+		super(config.id, rawConfig.store, initialState)
 	}
 
 	// ── Abstract implementations ───────────────────────────────────────────────
 
-	getUnderstanding(): string {
-		return this.understanding
+	async getUnderstanding(): Promise<string> {
+		const record = await this.store.understanding.get('current')
+		return record ? (record.data as string) : ''
 	}
 
 	async setUnderstanding(understanding: string): Promise<void> {
-		this.understanding = understanding
-
-		// Write-through to store
 		const existing = await this.store.understanding.get('current')
 		if (existing) {
 			await this.store.understanding.update('current', {
@@ -75,19 +120,14 @@ export class TextLearner extends BaseLearner<string, ResolvedTextLearnerConfig> 
 		})
 	}
 
-	protected async restoreUnderstanding(): Promise<void> {
+	async getSummary(): Promise<string> {
+		const understanding = await this.getUnderstanding()
+		return understanding || '(no understanding yet)'
+	}
+
+	async hasKnowledge(): Promise<boolean> {
 		const record = await this.store.understanding.get('current')
-		if (record) {
-			this.understanding = record.data as string
-		}
-	}
-
-	getSummary(): string {
-		return this.understanding || '(no understanding yet)'
-	}
-
-	hasKnowledge(): boolean {
-		return !!this.understanding
+		return !!record?.data
 	}
 
 	protected async regenUnderstandPrompt(
@@ -97,10 +137,30 @@ export class TextLearner extends BaseLearner<string, ResolvedTextLearnerConfig> 
 		const result = await initUnderstand(
 			model,
 			instructions,
-			this.config.governance.strategy,
+			this.state.governance.strategy,
 		)
-		this._understandIdentity = result.identity
-		this.understandSystemPrompt = result.systemPrompt
+		await this.setState({
+			understand_identity: result.identity,
+			understand_prompt: result.systemPrompt,
+		} as Partial<TextLearnerState>)
+	}
+
+	protected async adjustUnderstandPrompt(
+		model: LanguageModel,
+		directive: string,
+		newInstructions: string,
+	): Promise<void> {
+		const result = await adjustUnderstand(
+			model,
+			directive,
+			newInstructions,
+			this.state.understand_identity!,
+			this.state.governance.strategy,
+		)
+		await this.setState({
+			understand_identity: result.identity,
+			understand_prompt: result.systemPrompt,
+		} as Partial<TextLearnerState>)
 	}
 
 	protected async callUnderstand(
@@ -111,10 +171,10 @@ export class TextLearner extends BaseLearner<string, ResolvedTextLearnerConfig> 
 	): Promise<UnderstandCallResult> {
 		const result = await understand(
 			model,
-			this.understandSystemPrompt!,
+			this.state.understand_prompt!,
 			{
 				learnerId: this.id,
-				instructions: this.instructions,
+				instructions: this.state.instructions,
 				currentUnderstanding: understanding,
 				observations,
 			},
@@ -144,14 +204,14 @@ export class TextLearner extends BaseLearner<string, ResolvedTextLearnerConfig> 
 	protected async postProcessUnderstanding(raw: string): Promise<string> {
 		const result = await applyStrategy({
 			understanding: raw,
-			model: this.config.model,
-			config: this.config.governance,
+			model: this.state.models.default,
+			config: this.state.governance,
 		})
 		return result.understanding
 	}
 
 	protected createQueryMethod(): QueryMethod {
-		return new ToolBasedMethod(this.config.query.model, {
+		return new ToolBasedMethod(this.state.models.query, {
 			tools: {
 				readUnderstanding: createReadUnderstandingTool(
 					() => this.getUnderstanding(),
@@ -181,42 +241,18 @@ export class TextLearner extends BaseLearner<string, ResolvedTextLearnerConfig> 
 		}
 	}
 
-	// ── State persistence (adds understand identity) ──────────────────────────
-
-	protected async persistState(): Promise<void> {
-		await super.persistState()
-		const now = new Date().toISOString()
-		const existing = await this.store.state.get('understand_identity')
-		if (existing) {
-			await this.store.state.update('understand_identity', { value: this._understandIdentity, updated_at: now })
-		} else {
-			await this.store.state.add({ id: 'understand_identity', value: this._understandIdentity, updated_at: now })
-		}
-	}
-
-	protected async restoreState(): Promise<boolean> {
-		const baseRestored = await super.restoreState()
-		if (!baseRestored) return false
-
-		const understandIdentity = await this.store.state.get('understand_identity')
-		if (!understandIdentity) return false
-
-		this._understandIdentity = understandIdentity.value as UnderstandIdentity
-		return true
-	}
-
 	// ── Text-specific accessors ────────────────────────────────────────────────
 
 	getObserveIdentity() {
-		return this._observeIdentity
+		return this.state.observe_identity
 	}
 
 	getUnderstandIdentity() {
-		return this._understandIdentity
+		return this.state.understand_identity
 	}
 
 	getGovernance() {
-		return { ...this.config.governance }
+		return { ...this.state.governance }
 	}
 
 	getQueryMethodName(): string {
@@ -228,30 +264,37 @@ export class TextLearner extends BaseLearner<string, ResolvedTextLearnerConfig> 
 	protected applyTypeSpecificUpdates(
 		updates: Record<string, unknown>,
 		changedFields: string[],
-	): void {
+	): Partial<TextLearnerState> {
 		const u = updates as Partial<TextLearnerConfig>
+		const result: Partial<TextLearnerState> = {}
 
-		if (
-			u.governance?.strategy !== undefined &&
-			u.governance.strategy !== this.config.governance.strategy
-		) {
-			this.config.governance.strategy = u.governance.strategy
-			changedFields.push('governance.strategy')
+		if (u.governance) {
+			const newGov = { ...this.state.governance }
+			if (
+				u.governance.strategy !== undefined &&
+				u.governance.strategy !== this.state.governance.strategy
+			) {
+				newGov.strategy = u.governance.strategy
+				changedFields.push('governance.strategy')
+			}
+			if (
+				u.governance.maxTokens !== undefined &&
+				u.governance.maxTokens !== this.state.governance.maxTokens
+			) {
+				newGov.maxTokens = u.governance.maxTokens
+				changedFields.push('governance.maxTokens')
+			}
+			result.governance = newGov
 		}
-		if (
-			u.governance?.maxTokens !== undefined &&
-			u.governance.maxTokens !== this.config.governance.maxTokens
-		) {
-			this.config.governance.maxTokens = u.governance.maxTokens
-			changedFields.push('governance.maxTokens')
-		}
+
+		return result
 	}
 
 	// ── Typed update wrapper ───────────────────────────────────────────────────
 
 	async update(
 		updates: Partial<TextLearnerConfig>,
-	): Promise<TextLearnerUpdateResult> {
+	): Promise<{ changedFields: string[] }> {
 		return super.update(updates as Record<string, unknown>)
 	}
 }

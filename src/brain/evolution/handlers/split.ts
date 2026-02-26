@@ -1,22 +1,20 @@
 /**
  * Split action handler - divides one learner into multiple focused learners
+ *
+ * Type-aware: preserves source learner type in split results,
+ * uses descriptor's splitUnderstandingSchema for LLM output.
  */
 
 import { Output } from 'ai'
+import { z } from 'zod'
 import { EvolutionActionHandler } from '../base-handler'
 import type { EvolutionDecision } from '../../evaluator/types'
 import type { SplitActionResult } from '../types'
 import { generate } from '../../../llm'
-import { splitOutputSchema } from '../schemas/split'
 import { splitSystemPrompt } from '../prompt.system.split'
 import { splitPromptTemplate } from '../prompt.template.split'
 import { createCompleteConfig } from '../utils'
 
-/**
- * Handler for 'split' evolution action
- *
- * Processes each split decision sequentially.
- */
 export class SplitHandler extends EvolutionActionHandler<SplitActionResult> {
 	async execute(decisions: EvolutionDecision[]): Promise<SplitActionResult> {
 		const allNewLearnerIds: string[] = []
@@ -37,16 +35,38 @@ export class SplitHandler extends EvolutionActionHandler<SplitActionResult> {
 					throw new Error(`Learner ${learnerId} not found`)
 				}
 
+				// Get type descriptor for understanding schema
+				const learnerType = learner.type
+				const descriptor = this.brain.learnerTypes.get(learnerType)
+				if (!descriptor) {
+					throw new Error(`Unknown learner type: ${learnerType}`)
+				}
+
+				// Build dynamic schema with type-specific understanding
+				const splitSchema = z.object({
+					learners: z
+						.array(
+							z.object({
+								name: z.string().describe('Name for the split learner'),
+								description: z.string().describe('Description of this split learner purpose'),
+								instructions: z.string().describe('Focused instructions defining scope and responsibilities'),
+								understanding: descriptor.splitUnderstandingSchema,
+							}),
+						)
+						.min(2)
+						.describe('Array of 2 or more focused learners'),
+				})
+
 				const result = await generate({
 					model: this.brain.config.model,
 					system: splitSystemPrompt,
-					prompt: splitPromptTemplate(
+					prompt: await splitPromptTemplate(
 						decision.guidance,
 						learner,
 						this.brain.prompt,
 					),
-					output: Output.object({ schema: splitOutputSchema }),
-					repairSchema: splitOutputSchema,
+					output: Output.object({ schema: splitSchema }),
+					repairSchema: splitSchema,
 				})
 
 				const { learners: splitConfigs } = result.output
@@ -58,6 +78,7 @@ export class SplitHandler extends EvolutionActionHandler<SplitActionResult> {
 						name: config.name,
 						description: config.description,
 						instructions: config.instructions,
+						type: learnerType as 'text' | 'list',
 					})
 					const newLearner =
 						await this.brain.createLearnerFromConfig(completeConfig)
@@ -67,7 +88,7 @@ export class SplitHandler extends EvolutionActionHandler<SplitActionResult> {
 					newLearnerIds.push(newLearner.id)
 				}
 
-				this.brain.__removeLearner(learnerId)
+				await this.brain.__removeLearner(learnerId)
 
 				allNewLearnerIds.push(...newLearnerIds)
 				allDeletedLearnerIds.push(learnerId)

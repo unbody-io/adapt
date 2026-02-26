@@ -85,12 +85,12 @@ async function main() {
 		learner1: {
 			id: learner1.id,
 			name: learner1.name,
-			understanding: learner1.getUnderstanding()?.substring(0, 50) + '...',
+			understanding: (await learner1.getUnderstanding())?.substring(0, 50) + '...',
 		},
 		learner2: {
 			id: learner2.id,
 			name: learner2.name,
-			understanding: learner2.getUnderstanding()?.substring(0, 50) + '...',
+			understanding: (await learner2.getUnderstanding())?.substring(0, 50) + '...',
 		},
 	})
 
@@ -111,7 +111,7 @@ async function main() {
 			name: mergedLearner.name,
 			description: mergedLearner.description,
 			instructions: mergedLearner.instructions.substring(0, 100) + '...',
-			understanding: mergedLearner.getUnderstanding()?.substring(0, 100) + '...',
+			understanding: (await mergedLearner.getUnderstanding())?.substring(0, 100) + '...',
 		},
 	}
 
@@ -135,7 +135,7 @@ async function main() {
 	assertGreaterThan(mergedLearner.instructions.length, 20, 'Merged learner has instructions')
 
 	// New learner understanding combines both
-	const understanding = mergedLearner.getUnderstanding()
+	const understanding = await mergedLearner.getUnderstanding()
 	assertTrue(!!understanding, 'Merged learner has understanding')
 	assertGreaterThan(understanding!.length, 50, 'Merged understanding is substantial')
 

@@ -50,30 +50,13 @@ The architecture spec is the correct design. The whole point of the store layer 
 
 ---
 
-### 3. `repairSchema` usage looks wrong
-
-`list-learner/schema.ts:92`:
-```typescript
-const { output } = await generate({
-    model,
-    prompt: observationSchemaPrompt(instructions, identity),
-    output: Output.object({ schema: jsonSchemaOutputSchema }),
-    repairSchema: jsonSchemaOutputSchema,
-})
-```
-
-`repairSchema` expects a Zod schema to repair malformed JSON output — but this passes the same schema used for `Output.object()`. Is `repairSchema` even a real option on the `generate()` call in your LLM wrapper? If it's an AI SDK feature, verify it works this way. If it's not a real option, it's dead code that silently does nothing.
-
-**Action**: Verify `repairSchema` is a supported option. If not, remove it.
-
----
-
 ## Summary
 
 | # | Issue | Severity | Action |
 |---|-------|----------|--------|
 | 1 | ListLearner understand is single-shot, not agentic | **Critical** | Redesign as tool-based agent per architecture-v2.spec.md |
 | 2 | Validation logic in `setUnderstanding()` | **Medium** | Remove from setter. Moves to agentic tools for list, delete for text. |
-| 3 | `repairSchema` may be dead code | **Low** | Verify it's a real option, remove if not. |
+
+~~Issue 3 (`repairSchema`): Withdrawn. `repairSchema` is a custom addition in `src/llm/index.ts` — catches `NoObjectGeneratedError`, repairs malformed JSON, validates against the schema. Passing same schema for output and repair is the standard pattern.~~
 
 **Note on spec conflict**: `learner-types-refactor.spec.md` explicitly says "NOT agentic" for ListLearner understand. `architecture-v2.spec.md` says the opposite. The architecture spec is the authoritative design — the refactor spec's shortcut must be corrected. Update `learner-types-refactor.spec.md` to align with the architecture spec.

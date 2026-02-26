@@ -31,7 +31,7 @@ export class DeleteHandler extends EvolutionActionHandler<DeleteActionResult> {
 						continue
 					}
 
-					this.brain.__removeLearner(learnerId)
+					await this.brain.__removeLearner(learnerId)
 
 					deletedIds.push(learnerId)
 				}

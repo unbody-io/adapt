@@ -55,6 +55,7 @@ export interface EvolutionDecision {
 export interface LearnerContext {
 	id: string
 	name: string
+	type: string
 	purpose: string
 	understandingSize: number
 	health: {

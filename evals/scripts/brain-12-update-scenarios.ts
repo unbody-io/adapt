@@ -101,7 +101,7 @@ async function main() {
 		learnerCount: brain.learners.size,
 		learnerIds: Array.from(brain.learners.keys()),
 		understandings: new Map(
-			brain.getLearners().map((l) => [l.id, l.getUnderstanding()]),
+			await Promise.all(brain.getLearners().map(async (l) => [l.id, await l.getUnderstanding()] as const)),
 		),
 	}
 
@@ -129,7 +129,7 @@ async function main() {
 		learnerCount: brain.learners.size,
 		learnerIds: Array.from(brain.learners.keys()),
 		understandings: new Map(
-			brain.getLearners().map((l) => [l.id, l.getUnderstanding()]),
+			await Promise.all(brain.getLearners().map(async (l) => [l.id, await l.getUnderstanding()] as const)),
 		),
 	}
 
@@ -196,7 +196,7 @@ async function main() {
 		const learner = brain.getLearner(oldId)
 		if (learner) {
 			const oldLen = preAdditive.understandings.get(oldId)?.length ?? 0
-			const newLen = learner.getUnderstanding().length
+			const newLen = (await learner.getUnderstanding()).length
 			logger.logMetric(`Additive: ${oldId} understanding`, oldLen, newLen)
 		} else {
 			logger.logWarning(`Additive: learner ${oldId} was removed during evolution`)

@@ -109,15 +109,15 @@ async function main() {
 	await dumpStore(store, 'after batch 1')
 
 	log('Cached understanding', {
-		count: learner.getUnderstanding().length,
-		items: learner.getUnderstanding().map((i) => ({ id: i.id, data: i.data })),
+		count: (await learner.getUnderstanding()).length,
+		items: (await learner.getUnderstanding()).map((i) => ({ id: i.id, data: i.data })),
 	})
 
 	// ── Batch 2: Update existing + new restaurant ──────────────────────────
 
 	console.log('\n  >> Batch 2: Update Sushi Nakazawa hours + add Le Bernardin')
 
-	const itemCountBefore = learner.getUnderstanding().length
+	const itemCountBefore = (await learner.getUnderstanding()).length
 
 	const result2 = await learner.learn([
 		'Sushi Nakazawa has expanded their hours — now open Monday through Saturday. Their rating is still 4.8.',
@@ -127,7 +127,7 @@ async function main() {
 	log('Batch 2 learn() result', { status: result2.status })
 	await dumpStore(store, 'after batch 2')
 
-	log('Item count change', { before: itemCountBefore, after: learner.getUnderstanding().length })
+	log('Item count change', { before: itemCountBefore, after: (await learner.getUnderstanding()).length })
 
 	// ── Query ──────────────────────────────────────────────────────────────
 
@@ -148,7 +148,7 @@ async function main() {
 
 	section('Scenario 2: Dedup — feed duplicate observations')
 
-	const itemCountBeforeDedup = learner.getUnderstanding().length
+	const itemCountBeforeDedup = (await learner.getUnderstanding()).length
 
 	console.log(`  >> Feeding same restaurants again (Sushi Nakazawa + Joe's Pizza)`)
 	console.log(`  >> Items before: ${itemCountBeforeDedup}`)
@@ -163,8 +163,8 @@ async function main() {
 
 	log('Dedup item count', {
 		before: itemCountBeforeDedup,
-		after: learner.getUnderstanding().length,
-		doubled: learner.getUnderstanding().length >= itemCountBeforeDedup * 2,
+		after: (await learner.getUnderstanding()).length,
+		doubled: (await learner.getUnderstanding()).length >= itemCountBeforeDedup * 2,
 	})
 
 	// ══════════════════════════════════════════════════════════════════════════
@@ -206,9 +206,9 @@ async function main() {
 	await dumpStore(smallStore, 'governance after batch 2')
 
 	log('Governance final', {
-		itemCount: smallLearner.getUnderstanding().length,
+		itemCount: (await smallLearner.getUnderstanding()).length,
 		maxItems: 3,
-		withinLimit: smallLearner.getUnderstanding().length <= 3,
+		withinLimit: (await smallLearner.getUnderstanding()).length <= 3,
 	})
 
 	// ══════════════════════════════════════════════════════════════════════════

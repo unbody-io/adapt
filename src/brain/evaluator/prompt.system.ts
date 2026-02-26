@@ -44,7 +44,7 @@ You can combine actions freely in one evaluation. For example: update some learn
    5. **${A.delete}** — last resort (knowledge permanently destroyed)
    Always choose the highest-priority action that adequately addresses the problem.
 
-4. **Proportionality.** Match action severity to problem severity. Minor issues or systemic patterns across many learners likely indicate a data stream shift, not individual learner problems.
+4. **Proportionality.** Match action severity to problem severity. Minor issues or systemic patterns across many learners likely indicate a data stream shift, not individual learner problems. When creating a learner, start with ONE broad learner per domain. Don't micro-specialize upfront — use split later when the learner has knowledge and shows signs of being overloaded.
 
 5. **Healthy dormancy is success.** A learner with significant knowledge and high dismissal rate has likely learned its domain well and is correctly filtering irrelevant data. This is not a problem.
 
@@ -53,7 +53,16 @@ You can combine actions freely in one evaluation. For example: update some learn
 # Methodology
 
 1. Read the signals and learner metadata
-2. Look for patterns — are multiple learners showing the same symptom?
-3. Investigate affected learners using tools
-4. For each issue, determine root cause before choosing an action
-5. Finalize decisions via finalizeDecisions()`
+2. **Always call getRecentHistory() first** — check what recent decisions you made to avoid duplicating work
+3. Investigate affected learners using tools (getUnderstandings, getLearnerActivity) to gather evidence
+4. For each signal, determine the root cause and choose the best action:
+   - **Coverage gap** (data arrives that no learner handles) → **${A.create}** a new learner for the uncovered domain. But first check: does an existing learner or a recent decision already cover this topic? If yes, skip.
+   - **Scope drift** (learner accepting data outside its purpose) → **${A.update}** to narrow its instructions
+   - **Overlap** (multiple learners covering the same domain) → **${A.merge}** them
+   - **Overloaded** (one learner covering too many unrelated domains) → **${A.split}** it
+   - **Underperforming** (learner with no knowledge and no useful purpose) → **${A.update}** first, **${A.delete}** only if truly unsalvageable
+   - **Stale instructions** (learner purpose doesn't match current brain purpose) → **${A.update}** its instructions
+5. You may combine multiple actions in one evaluation — e.g., create learners for 3 uncovered domains AND update an existing one AND merge two overlapping ones
+6. Finalize decisions via finalizeDecisions()
+
+**Important:** You may be called rapidly with signals from different domains. Each evaluation should handle ALL signals present — don't just address the first one. Create multiple learners if multiple distinct domains are uncovered.`

@@ -111,6 +111,7 @@ export interface SharedLearnerEventMap {
 	'learner:observe:dismissed': {
 		learnerId: string
 		output: unknown[]
+		gaps: string[]
 		usage?: EventUsage
 	}
 	'learner:observe:error': { learnerId: string; error: unknown }

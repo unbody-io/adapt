@@ -262,7 +262,7 @@ async function runEval() {
 	console.log('Understanding snapshots:')
 	console.log('─'.repeat(70))
 	for (const learner of learners) {
-		const understanding = learner.getUnderstanding()
+		const understanding = await learner.getUnderstanding()
 		console.log(`\n[${learner.id}] (${understanding.length} chars)`)
 		console.log(understanding.slice(0, 500) + (understanding.length > 500 ? '...' : ''))
 	}

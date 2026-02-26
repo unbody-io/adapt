@@ -409,7 +409,7 @@ async function runEval(options: EvalOptions) {
 	console.log('Processing events...')
 	for (let i = 0; i < events.length; i++) {
 		const event = events[i]
-		const prevUnderstanding = learner.getUnderstanding()
+		const prevUnderstanding = await learner.getUnderstanding()
 
 		const result = await learner.learn([event])
 		const bufferState = learner.getBufferState()
@@ -420,7 +420,7 @@ async function runEval(options: EvalOptions) {
 			eventType: event.type,
 			eventPreview: getEventContent(event),
 			status: result.status,
-			understandingLength: learner.getUnderstanding().length,
+			understandingLength: (await learner.getUnderstanding()).length,
 			bufferCount: bufferState.count,
 		}
 
@@ -435,7 +435,7 @@ async function runEval(options: EvalOptions) {
 			synthesisRecords.push({
 				triggerEventId: event.id,
 				previousLength: prevUnderstanding.length,
-				newLength: learner.getUnderstanding().length,
+				newLength: (await learner.getUnderstanding()).length,
 				significance: result.significance,
 				evolution: result.evolution,
 			})
@@ -453,14 +453,14 @@ async function runEval(options: EvalOptions) {
 	const bufferState = learner.getBufferState()
 	if (bufferState.count > 0) {
 		console.log(`Forcing final synthesis (${bufferState.count} buffered observations)...`)
-		const prevUnderstanding = learner.getUnderstanding()
+		const prevUnderstanding = await learner.getUnderstanding()
 		const result = await learner.learn([], { forceSynthesize: true })
 
 		if (result.status === 'synthesized') {
 			synthesisRecords.push({
 				triggerEventId: 'final-flush',
 				previousLength: prevUnderstanding.length,
-				newLength: learner.getUnderstanding().length,
+				newLength: (await learner.getUnderstanding()).length,
 				significance: result.significance,
 				evolution: result.evolution,
 			})
@@ -499,7 +499,7 @@ async function runEval(options: EvalOptions) {
 		learnRecords,
 		synthesisRecords,
 		queryRecords,
-		learner.getUnderstanding(),
+		await learner.getUnderstanding(),
 		observeIdentity,
 		synthesizeIdentity,
 		endTime - startTime,

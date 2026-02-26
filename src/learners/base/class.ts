@@ -4,8 +4,12 @@
  * Owns the full pipeline: observe → store → understand → governance.
  * Store is injected — learner has no knowledge of storage backend.
  *
+ * All serializable config and runtime data lives in `this.state`,
+ * cached in memory and backed by `store.state`.
+ * Understanding is NOT cached — it lives in `store.understanding`.
+ *
  * Subclasses implement type-specific behavior:
- * - regenObservePrompt, regenUnderstandPrompt (identity/prompt generation)
+ * - regenUnderstandPrompt (identity/prompt generation)
  * - callUnderstand, postProcessUnderstanding (understand phase)
  * - getUnderstanding, setUnderstanding, getSummary, hasKnowledge
  * - createQueryMethod, applyTypeSpecificUpdates
@@ -25,15 +29,14 @@ import type {
 	Significance,
 } from '../types'
 import { initObserve, observe } from '../observer'
-import type { ObserveIdentity } from '../observer'
 import type { EvolutionRecord, Store } from '../stores'
 import type { QueryCallbacks, QueryMethod, QueryOptions, QueryResult } from '../base/query'
 import type {
-	BaseResolvedConfig,
 	BaseLearnerUpdateInput,
 	SharedLearnerEventMap,
-	UnderstandThresholds,
 } from './types'
+import type { BaseLearnerState, ModelSlots, StateTransform } from './state'
+import { serializeModelSlots } from './state'
 
 /**
  * Output from learn() - discriminated union of all possible outcomes
@@ -85,115 +88,76 @@ export type UnderstandCallResult =
 	| { status: 'dismissed'; output: string; usage?: { inputTokens?: number; outputTokens?: number; totalTokens?: number } }
 	| { status: 'error'; error: unknown }
 
-/**
- * Configuration for BaseLearner constructor
- */
-export interface BaseLearnerInit {
-	id: string
-	name: string
-	instructions: string
-	origin: LearnerOrigin
-	store: Store
-	focus?: string
-	description?: string
-	health?: Partial<LearnerHealth>
-	maxObservationsForStagnation?: number
-}
-
 export abstract class BaseLearner<
 	TUnderstanding,
-	TConfig extends BaseResolvedConfig = BaseResolvedConfig,
+	TState extends BaseLearnerState = BaseLearnerState,
 >
 	extends TypedEmitter<SharedLearnerEventMap>
 	implements Learner<TUnderstanding>
 {
 	readonly id: string
-	name: string
-	instructions: string
-	focus?: string
-	description?: string
-
-	protected _origin: LearnerOrigin
 	protected store: Store
-	protected _queryMethod!: QueryMethod
-	protected config!: TConfig
-	protected health: LearnerHealth
-	protected metrics: LearnerMetrics = {
-		ingestion: {
-			observationCount: 0,
-			dismissalCount: 0,
-			dismissalRate: 0,
-			synthesisCount: 0,
-			observationsSinceLastSynthesis: 0,
+	protected state: TState
+	protected queryMethod!: QueryMethod
+
+	// Lazy init promise (for ensureInit)
+	private initPromise: Promise<{ observeSystemPrompt: string; understandSystemPrompt: string }> | null = null
+
+	/**
+	 * Transform registry for store ↔ cache boundary.
+	 * Keys not in the registry pass through as-is (identity transform).
+	 * Subclasses can extend this in their constructor.
+	 */
+	protected stateTransforms: Record<string, StateTransform> = {
+		models: {
+			serialize: (v) => serializeModelSlots(v as ModelSlots),
+			// On load, keep live models from constructor — store only has refs
+			deserialize: (_stored) => this.state.models,
 		},
-		query: {
-			count: 0,
-			relevanceScores: [],
-			confidenceScores: [],
-			gaps: [],
+		health: {
+			serialize: (v) => {
+				const h = v as LearnerHealth
+				return {
+					...h,
+					lastAccessed: h.lastAccessed.toISOString(),
+				}
+			},
+			deserialize: (v) => {
+				const h = v as Record<string, unknown>
+				return {
+					...h,
+					lastAccessed: new Date(h.lastAccessed as string),
+				}
+			},
 		},
 	}
 
-	// Observer state
-	protected _observeIdentity: ObserveIdentity | null = null
-	protected observeSystemPrompt: string | null = null
-	protected understandSystemPrompt: string | null = null
-
-	// Schemas (JSON Schema objects — define observation/understanding shape)
-	protected observationSchema: Record<string, unknown> | null = null
-	protected understandingSchema: Record<string, unknown> | null = null
-
-	// Lazy init promise (for ensureInit)
-	private _initPromise: Promise<{ observeSystemPrompt: string; understandSystemPrompt: string }> | null = null
-
-	// Signal fire-once flags (reset when condition clears)
-	protected stagnationSignalFired = false
-	protected dismissalSignalFired = false
-
-	constructor(init: BaseLearnerInit) {
+	constructor(
+		id: string,
+		store: Store,
+		initialState: TState,
+	) {
 		super()
-		this.id = init.id
-		this.name = init.name
-		this.instructions = init.instructions
-		this._origin = init.origin
-		this.store = init.store
-		this.focus = init.focus
-		this.description = init.description
-
-		this.health = {
-			activation: 0,
-			threshold: 0.3,
-			status: 'dormant',
-			lastAccessed: new Date(),
-			signalThresholds: {
-				maxDismissalRate: 0.8,
-				minRelevance: 0.3,
-				minConfidence: 0.3,
-				maxObservationsWithoutSynthesis: init.maxObservationsForStagnation ?? 30,
-				...init.health?.signalThresholds,
-			},
-		}
+		this.id = id
+		this.store = store
+		this.state = initialState
 	}
 
 	// ── Abstract — each subclass implements ─────────────────────────────────
 
-	abstract getUnderstanding(): TUnderstanding
+	abstract getUnderstanding(): Promise<TUnderstanding>
 	abstract setUnderstanding(value: TUnderstanding): Promise<void>
-	abstract getSummary(): string
-	abstract hasKnowledge(): boolean
-
-	/**
-	 * Restore understanding from store into local cache (called during init).
-	 */
-	protected abstract restoreUnderstanding(): Promise<void>
+	abstract getSummary(): Promise<string>
+	abstract hasKnowledge(): Promise<boolean>
 
 	/**
 	 * Hook for type-specific config updates (e.g. governance).
+	 * Returns partial state updates to be merged and persisted.
 	 */
 	protected abstract applyTypeSpecificUpdates(
 		updates: Record<string, unknown>,
 		changedFields: string[],
-	): void
+	): Partial<TState>
 
 	/**
 	 * Regenerate understand prompt (type-specific — text uses strategy, list uses identity)
@@ -237,6 +201,42 @@ export abstract class BaseLearner<
 		understandingSchema: Record<string, unknown>
 	}>
 
+	// ── State persistence ────────────────────────────────────────────────────
+
+	/**
+	 * Update cache + persist changed keys to store.state.
+	 * Each top-level key in updates → one row in store.state.
+	 */
+	protected async setState(updates: Partial<TState>): Promise<void> {
+		Object.assign(this.state, updates)
+		const now = new Date().toISOString()
+		for (const [key, value] of Object.entries(updates)) {
+			const transform = this.stateTransforms[key]
+			const serialized = transform ? transform.serialize(value) : value
+			const existing = await this.store.state.get(key)
+			if (existing) {
+				await this.store.state.update(key, { value: serialized, updated_at: now })
+			} else {
+				await this.store.state.add({ id: key, value: serialized, updated_at: now })
+			}
+		}
+	}
+
+	/**
+	 * Load all state from store.state into cache.
+	 * Returns true if state was found, false otherwise.
+	 */
+	protected async loadState(): Promise<boolean> {
+		const records = await this.store.state.list()
+		if (records.length === 0) return false
+		for (const record of records) {
+			const transform = this.stateTransforms[record.id]
+			;(this.state as Record<string, unknown>)[record.id] =
+				transform ? transform.deserialize(record.value) : record.value
+		}
+		return true
+	}
+
 	// ── Init ────────────────────────────────────────────────────────────────
 
 	async init(): Promise<{
@@ -245,62 +245,58 @@ export abstract class BaseLearner<
 	}> {
 		if (this.isInitialized()) {
 			return {
-				observeSystemPrompt: this.observeSystemPrompt!,
-				understandSystemPrompt: this.understandSystemPrompt!,
+				observeSystemPrompt: this.state.observe_prompt!,
+				understandSystemPrompt: this.state.understand_prompt!,
 			}
 		}
 
 		this.emit('learner:init:started', { learnerId: this.id })
 
 		try {
-			// Try restoring identities/prompts from store.state (skip LLM calls)
-			const restored = await this.restoreState()
+			// Try restoring state from store (skip LLM calls)
+			const restored = await this.loadState()
 
 			if (!restored) {
 				// Generate observe identity + prompt via LLM
-				const observeBlueprintModel =
-					this.config.observer.blueprintModel ?? this.config.model
 				const observeResult = await initObserve(
-					observeBlueprintModel,
-					this.instructions,
-					this.focus || undefined,
+					this.state.models.observer_blueprint,
+					this.state.instructions,
+					this.state.focus || undefined,
 				)
-				this._observeIdentity = observeResult.identity
-				this.observeSystemPrompt = observeResult.systemPrompt
 
 				// Generate understand identity + prompt (type-specific)
-				const understandBlueprintModel =
-					this.config.understand.blueprintModel ?? this.config.model
 				await this.regenUnderstandPrompt(
-					understandBlueprintModel,
-					this.instructions,
+					this.state.models.understand_blueprint,
+					this.state.instructions,
 				)
 
 				// Generate schemas (type-specific)
-				const schemaBlueprintModel = this.config.blueprintModel ?? this.config.model
-				const schemas = await this.generateSchemas(schemaBlueprintModel, this.instructions)
-				this.observationSchema = schemas.observationSchema
-				this.understandingSchema = schemas.understandingSchema
+				const schemas = await this.generateSchemas(
+					this.state.models.blueprint,
+					this.state.instructions,
+				)
 
-				// Persist to store.state for future inits
-				await this.persistState()
+				// Persist all generated artifacts to store
+				await this.setState({
+					observe_identity: observeResult.identity,
+					observe_prompt: observeResult.systemPrompt,
+					observation_schema: schemas.observationSchema,
+					understanding_schema: schemas.understandingSchema,
+				} as Partial<TState>)
 			}
 
-			// Restore understanding from store (for persistent adapters)
-			await this.restoreUnderstanding()
-
 			// Create query method
-			this._queryMethod = this.createQueryMethod()
+			this.queryMethod = this.createQueryMethod()
 
 			this.emit('learner:init:completed', {
 				learnerId: this.id,
-				systemPrompt: this.observeSystemPrompt!,
+				systemPrompt: this.state.observe_prompt!,
 				usage: { inputTokens: 0, outputTokens: 0, totalTokens: 0 },
 			})
 
 			return {
-				observeSystemPrompt: this.observeSystemPrompt!,
-				understandSystemPrompt: this.understandSystemPrompt ?? '',
+				observeSystemPrompt: this.state.observe_prompt!,
+				understandSystemPrompt: this.state.understand_prompt ?? '',
 			}
 		} catch (err) {
 			const error = err instanceof Error ? err : new Error(String(err))
@@ -312,108 +308,70 @@ export abstract class BaseLearner<
 		}
 	}
 
-	// ── State persistence (identities + prompts in store.state) ───────────
+	// ── Validation ──────────────────────────────────────────────────────────
 
-	/**
-	 * Save identities and prompts to store.state.
-	 * Subclasses override to add type-specific state (e.g. understand identity).
-	 */
-	protected async persistState(): Promise<void> {
-		const now = new Date().toISOString()
-		const entries: Array<{ id: string; value: unknown }> = [
-			{ id: 'observe_identity', value: this._observeIdentity },
-			{ id: 'observe_prompt', value: this.observeSystemPrompt },
-			{ id: 'understand_prompt', value: this.understandSystemPrompt },
-			{ id: 'observation_schema', value: this.observationSchema },
-			{ id: 'understanding_schema', value: this.understandingSchema },
-		]
-
-		for (const entry of entries) {
-			const existing = await this.store.state.get(entry.id)
-			if (existing) {
-				await this.store.state.update(entry.id, { value: entry.value, updated_at: now })
-			} else {
-				await this.store.state.add({ id: entry.id, value: entry.value, updated_at: now })
-			}
-		}
-	}
-
-	/**
-	 * Restore identities and prompts from store.state.
-	 * Returns true if all required state was found, false otherwise.
-	 * Subclasses override to restore type-specific state.
-	 */
-	protected async restoreState(): Promise<boolean> {
-		const [observeIdentity, observePrompt, understandPrompt, obsSchema, undSchema] = await Promise.all([
-			this.store.state.get('observe_identity'),
-			this.store.state.get('observe_prompt'),
-			this.store.state.get('understand_prompt'),
-			this.store.state.get('observation_schema'),
-			this.store.state.get('understanding_schema'),
-		])
-
-		if (!observeIdentity || !observePrompt || !understandPrompt || !obsSchema || !undSchema) {
-			return false
-		}
-
-		this._observeIdentity = observeIdentity.value as ObserveIdentity
-		this.observeSystemPrompt = observePrompt.value as string
-		this.understandSystemPrompt = understandPrompt.value as string
-		this.observationSchema = obsSchema.value as Record<string, unknown>
-		this.understandingSchema = undSchema.value as Record<string, unknown>
-		return true
-	}
-
-	/**
-	 * Validate data against a schema. Returns true if valid or no schema set.
-	 * Used for Layer 2 validation before store writes.
-	 */
 	protected validateObservationData(data: unknown): boolean {
-		if (!this.observationSchema) return true
-		return z.fromJSONSchema(this.observationSchema).safeParse(data).success
+		if (!this.state.observation_schema) return true
+		return z.fromJSONSchema(this.state.observation_schema).safeParse(data).success
 	}
 
 	protected validateUnderstandingData(data: unknown): boolean {
-		if (!this.understandingSchema) return true
-		return z.fromJSONSchema(this.understandingSchema).safeParse(data).success
+		if (!this.state.understanding_schema) return true
+		return z.fromJSONSchema(this.state.understanding_schema).safeParse(data).success
 	}
 
 	// ── Identity ────────────────────────────────────────────────────────────
 
+	get instructions(): string {
+		return this.state.instructions
+	}
+
+	get name(): string {
+		return this.state.name
+	}
+
+	get description(): string {
+		return this.state.description
+	}
+
+	get focus(): string | null {
+		return this.state.focus
+	}
+
 	get origin(): LearnerOrigin {
-		return this._origin
+		return this.state.origin
 	}
 
 	isInitialized(): boolean {
-		return this.observeSystemPrompt !== null
+		return this.state.observe_prompt !== null
 	}
 
 	private async ensureInit(): Promise<void> {
 		if (this.isInitialized()) return
-		if (!this._initPromise) {
-			this._initPromise = this.init()
+		if (!this.initPromise) {
+			this.initPromise = this.init()
 		}
-		await this._initPromise
+		await this.initPromise
 	}
 
 	getObserveSystemPrompt(): string | null {
-		return this.observeSystemPrompt
+		return this.state.observe_prompt
 	}
 
 	getUnderstandSystemPrompt(): string | null {
-		return this.understandSystemPrompt
+		return this.state.understand_prompt
 	}
 
 	getUnderstandThresholds() {
-		return { ...this.config.understand.thresholds }
+		return { ...this.state.thresholds }
 	}
 
 	getObservationSchema(): Record<string, unknown> | null {
-		return this.observationSchema
+		return this.state.observation_schema
 	}
 
 	getUnderstandingSchema(): Record<string, unknown> | null {
-		return this.understandingSchema
+		return this.state.understanding_schema
 	}
 
 	// ── Learn (pipeline: observe → store → understand) ────────────────────
@@ -422,14 +380,11 @@ export abstract class BaseLearner<
 		await this.ensureInit()
 
 		try {
-			const observeModel = this.config.observer.model ?? this.config.model
-			const understandModel = this.config.understand.model ?? this.config.model
-
 			// Handle forceSynthesize with empty data
 			if (options?.forceSynthesize && batch.length === 0) {
 				const pendingCount = await this.store.observations.count({ metadata_status: 'pending' })
 				if (pendingCount > 0) {
-					return this.understandFromStore(understandModel)
+					return this.understandFromStore(this.state.models.understand)
 				}
 			}
 
@@ -440,10 +395,10 @@ export abstract class BaseLearner<
 			})
 
 			const observeResult = await observe(
-				observeModel,
-				this.observeSystemPrompt!,
-				{ learnerId: this.id, instructions: this.instructions, data: batch },
-				this.observationSchema ?? undefined,
+				this.state.models.observer,
+				this.state.observe_prompt!,
+				{ learnerId: this.id, instructions: this.state.instructions, data: batch },
+				this.state.observation_schema ?? undefined,
 				{
 					onThinking: (thoughts) => {
 						this.emit('learner:observe:thinking', {
@@ -472,7 +427,7 @@ export abstract class BaseLearner<
 			}
 
 			// Filter by importance threshold
-			const minImportance = this.config.understand.thresholds.minImportance
+			const minImportance = this.state.thresholds.minImportance
 			if (minImportance !== undefined && observeResult.importance < minImportance) {
 				const result: LearnOutput = {
 					status: 'observe:dismissed',
@@ -503,7 +458,7 @@ export abstract class BaseLearner<
 			// Check if understand should happen
 			const shouldUnderstand =
 				options?.forceSynthesize ||
-				(await this.shouldUnderstand(this.config.understand.thresholds))
+				(await this.shouldUnderstand(this.state.thresholds))
 
 			if (!shouldUnderstand) {
 				const bufferState = await this.getBufferState()
@@ -517,7 +472,7 @@ export abstract class BaseLearner<
 			}
 
 			// Phase 2: Understand
-			const understandResult = await this.understandFromStore(understandModel)
+			const understandResult = await this.understandFromStore(this.state.models.understand)
 			return understandResult
 		} catch (err) {
 			const error = err instanceof Error ? err : new Error(String(err))
@@ -540,9 +495,10 @@ export abstract class BaseLearner<
 			observationCount: observations.length,
 		})
 
+		const understanding = await this.getUnderstanding()
 		const understandResult = await this.callUnderstand(
 			model,
-			this.getUnderstanding(),
+			understanding,
 			observations,
 			{
 				onThinking: (thoughts) => {
@@ -621,18 +577,18 @@ export abstract class BaseLearner<
 	}
 
 	protected async shouldUnderstand(
-		thresholds: Required<UnderstandThresholds>,
+		thresholds: { maxObservations: number; maxTokens: number },
 	): Promise<boolean> {
 		const { count, totalTokens } = await this.getBufferState()
 		return count >= thresholds.maxObservations || totalTokens >= thresholds.maxTokens
 	}
 
-	// ── Query (concrete — delegates to _queryMethod) ────────────────────────
+	// ── Query (concrete — delegates to queryMethod) ────────────────────────
 
 	async query(question: string, options?: QueryOptions): Promise<QueryResult> {
 		await this.ensureInit()
-		this.health.lastAccessed = new Date()
-		this.metrics.query.count++
+		this.state.health.lastAccessed = new Date()
+		this.state.metrics.query.count++
 
 		this.emit('learner:query:started', {
 			learnerId: this.id,
@@ -641,7 +597,7 @@ export abstract class BaseLearner<
 
 		// Short-circuit if learner has no knowledge at all
 		const bufferState = await this.getBufferState()
-		if (!this.hasKnowledge() && bufferState.count === 0) {
+		if (!(await this.hasKnowledge()) && bufferState.count === 0) {
 			const emptyResult: QueryResult = {
 				relevant: false,
 				relevance: 0,
@@ -663,10 +619,10 @@ export abstract class BaseLearner<
 		}
 
 		try {
-			const result = await this._queryMethod.query(
+			const result = await this.queryMethod.query(
 				{
 					learnerId: this.id,
-					instructions: this.instructions,
+					instructions: this.state.instructions,
 					question,
 				},
 				options,
@@ -710,53 +666,83 @@ export abstract class BaseLearner<
 
 	async update(
 		updates: BaseLearnerUpdateInput & Record<string, unknown>,
-	): Promise<{ changedFields: string[]; config: TConfig }> {
+	): Promise<{ changedFields: string[] }> {
+		const changedFields: string[] = []
+		let needsObserveRegen = false
+		let needsUnderstandRegen = false
+		let needsSchemaRegen = false
+		const stateUpdates: Partial<TState> = {} as Partial<TState>
+
 		if (updates.id !== undefined && updates.id !== this.id) {
 			throw new Error(
 				'Cannot update immutable field "id". Learner identity cannot be changed.',
 			)
 		}
 
-		const changedFields: string[] = []
-		let needsObserveRegen = false
-		let needsUnderstandRegen = false
-		let needsSchemaRegen = false
-
 		// ── Metadata (passive) ──
 
-		if (updates.name !== undefined && updates.name !== this.name) {
-			this.name = updates.name
+		if (updates.name !== undefined && updates.name !== this.state.name) {
+			;(stateUpdates as Record<string, unknown>).name = updates.name
 			changedFields.push('name')
 		}
 
-		if (updates.description !== undefined && updates.description !== this.description) {
-			this.description = updates.description
+		if (updates.description !== undefined && updates.description !== this.state.description) {
+			;(stateUpdates as Record<string, unknown>).description = updates.description
 			changedFields.push('description')
 		}
 
-		if (updates.origin !== undefined && updates.origin !== this.config.origin) {
-			this.config.origin = updates.origin
-			this._origin = updates.origin
+		if (updates.origin !== undefined && updates.origin !== this.state.origin) {
+			;(stateUpdates as Record<string, unknown>).origin = updates.origin
 			changedFields.push('origin')
 		}
 
 		// ── Models (reactive) ──
 
-		if (updates.model !== undefined) {
-			this.config.model = updates.model
-			changedFields.push('model')
-		}
+		if (updates.model !== undefined || updates.blueprintModel !== undefined ||
+			updates.observer?.model !== undefined || updates.observer?.blueprintModel !== undefined ||
+			updates.understand?.model !== undefined || updates.understand?.blueprintModel !== undefined ||
+			updates.query?.model !== undefined) {
 
-		if (updates.blueprintModel !== undefined) {
-			this.config.blueprintModel = updates.blueprintModel
-			changedFields.push('blueprintModel')
+			const newModels = { ...this.state.models }
+			if (updates.model !== undefined) {
+				newModels.default = updates.model
+				changedFields.push('model')
+			}
+			if (updates.blueprintModel !== undefined) {
+				newModels.blueprint = updates.blueprintModel
+				changedFields.push('blueprintModel')
+			}
+			if (updates.observer?.model !== undefined) {
+				newModels.observer = updates.observer.model
+				changedFields.push('observer.model')
+			}
+			if (updates.observer?.blueprintModel !== undefined) {
+				newModels.observer_blueprint = updates.observer.blueprintModel
+				changedFields.push('observer.blueprintModel')
+				needsObserveRegen = true
+			}
+			if (updates.understand?.model !== undefined) {
+				newModels.understand = updates.understand.model
+				changedFields.push('understand.model')
+			}
+			if (updates.understand?.blueprintModel !== undefined) {
+				newModels.understand_blueprint = updates.understand.blueprintModel
+				changedFields.push('understand.blueprintModel')
+				needsUnderstandRegen = true
+			}
+			if (updates.query?.model !== undefined) {
+				newModels.query = updates.query.model
+				changedFields.push('query.model')
+				this.queryMethod.update({ model: updates.query.model })
+			}
+
+			;(stateUpdates as Record<string, unknown>).models = newModels
 		}
 
 		// ── Instructions (reactive) ──
 
-		if (updates.instructions !== undefined && updates.instructions !== this.instructions) {
-			this.instructions = updates.instructions
-			this.config.instructions = updates.instructions
+		if (updates.instructions !== undefined && updates.instructions !== this.state.instructions) {
+			;(stateUpdates as Record<string, unknown>).instructions = updates.instructions
 			changedFields.push('instructions')
 			needsObserveRegen = true
 			needsUnderstandRegen = true
@@ -765,112 +751,89 @@ export abstract class BaseLearner<
 
 		// ── Focus (reactive) ──
 
-		if (updates.focus !== undefined && updates.focus !== this.focus) {
-			this.focus = updates.focus
+		if (updates.focus !== undefined && updates.focus !== this.state.focus) {
+			;(stateUpdates as Record<string, unknown>).focus = updates.focus
 			changedFields.push('focus')
 			needsObserveRegen = true
 		}
 
-		// ── Observer config (reactive) ──
+		// ── Thresholds ──
 
-		if (updates.observer) {
-			if (updates.observer.model !== undefined) {
-				this.config.observer.model = updates.observer.model
-				changedFields.push('observer.model')
-			}
-			if (updates.observer.blueprintModel !== undefined) {
-				this.config.observer.blueprintModel = updates.observer.blueprintModel
-				changedFields.push('observer.blueprintModel')
-				needsObserveRegen = true
-			}
-		}
-
-		// ── Understand config (reactive) ──
-
-		if (updates.understand) {
-			if (updates.understand.model !== undefined) {
-				this.config.understand.model = updates.understand.model
-				changedFields.push('understand.model')
-			}
-			if (updates.understand.blueprintModel !== undefined) {
-				this.config.understand.blueprintModel = updates.understand.blueprintModel
-				changedFields.push('understand.blueprintModel')
-				needsUnderstandRegen = true
-			}
-			if (updates.understand.thresholds) {
-				Object.assign(this.config.understand.thresholds, updates.understand.thresholds)
-				changedFields.push('understand.thresholds')
-			}
-		}
-
-		// ── Query config ──
-
-		if (updates.query?.model !== undefined) {
-			this.config.query.model = updates.query.model
-			changedFields.push('query.model')
-			this._queryMethod.update({ model: updates.query.model })
+		if (updates.understand?.thresholds) {
+			const newThresholds = { ...this.state.thresholds, ...updates.understand.thresholds }
+			;(stateUpdates as Record<string, unknown>).thresholds = newThresholds
+			changedFields.push('understand.thresholds')
 		}
 
 		// ── Health config (passive, nested) ──
 
 		if (updates.health) {
+			const newHealth = { ...this.state.health }
 			if (updates.health.threshold !== undefined) {
-				this.health.threshold = updates.health.threshold
+				newHealth.threshold = updates.health.threshold
 				changedFields.push('health.threshold')
 			}
 			if (updates.health.signalThresholds) {
 				const st = updates.health.signalThresholds
+				newHealth.signalThresholds = { ...newHealth.signalThresholds }
 				if (st.maxDismissalRate !== undefined) {
-					this.health.signalThresholds.maxDismissalRate = st.maxDismissalRate
+					newHealth.signalThresholds.maxDismissalRate = st.maxDismissalRate
 					changedFields.push('health.signalThresholds.maxDismissalRate')
 				}
 				if (st.minConfidence !== undefined) {
-					this.health.signalThresholds.minConfidence = st.minConfidence
+					newHealth.signalThresholds.minConfidence = st.minConfidence
 					changedFields.push('health.signalThresholds.minConfidence')
 				}
 				if (st.maxObservationsWithoutSynthesis !== undefined) {
-					this.health.signalThresholds.maxObservationsWithoutSynthesis =
+					newHealth.signalThresholds.maxObservationsWithoutSynthesis =
 						st.maxObservationsWithoutSynthesis
 					changedFields.push('health.signalThresholds.maxObservationsWithoutSynthesis')
 				}
 			}
+			;(stateUpdates as Record<string, unknown>).health = newHealth
 		}
 
 		// ── Type-specific updates (subclass implements) ──
 
-		this.applyTypeSpecificUpdates(updates, changedFields)
+		const typeSpecificUpdates = this.applyTypeSpecificUpdates(updates, changedFields)
+		Object.assign(stateUpdates, typeSpecificUpdates)
 
 		// ── Force regen if prompts don't exist yet (first init) ──
 
-		if (this.observeSystemPrompt === null) needsObserveRegen = true
-		if (this.understandSystemPrompt === null) needsUnderstandRegen = true
-		if (this.observationSchema === null) needsSchemaRegen = true
+		if (this.state.observe_prompt === null) needsObserveRegen = true
+		if (this.state.understand_prompt === null) needsUnderstandRegen = true
+		if (this.state.observation_schema === null) needsSchemaRegen = true
 
 		// ── Regenerate prompts ──
 
+		// Apply state updates collected so far (so regen uses fresh instructions/focus)
+		if (Object.keys(stateUpdates).length > 0) {
+			await this.setState(stateUpdates)
+		}
+
 		if (needsObserveRegen || needsUnderstandRegen || needsSchemaRegen) {
 			const promises: Promise<void>[] = []
+			const regenUpdates: Partial<TState> = {} as Partial<TState>
 
 			if (needsObserveRegen) {
-				const observeBlueprintModel =
-					this.config.observer.blueprintModel ?? this.config.model
 				promises.push(
 					initObserve(
-						observeBlueprintModel,
-						this.instructions,
-						this.focus || undefined,
+						this.state.models.observer_blueprint,
+						this.state.instructions,
+						this.state.focus || undefined,
 					).then((result) => {
-						this._observeIdentity = result.identity
-						this.observeSystemPrompt = result.systemPrompt
+						;(regenUpdates as Record<string, unknown>).observe_identity = result.identity
+						;(regenUpdates as Record<string, unknown>).observe_prompt = result.systemPrompt
 					}),
 				)
 			}
 
 			if (needsUnderstandRegen) {
-				const understandBlueprintModel =
-					this.config.understand.blueprintModel ?? this.config.model
 				promises.push(
-					this.regenUnderstandPrompt(understandBlueprintModel, this.instructions),
+					this.regenUnderstandPrompt(
+						this.state.models.understand_blueprint,
+						this.state.instructions,
+					),
 				)
 			}
 
@@ -878,19 +841,23 @@ export abstract class BaseLearner<
 
 			// Regenerate schemas if instructions changed
 			if (needsSchemaRegen) {
-				const schemaBlueprintModel = this.config.blueprintModel ?? this.config.model
-				const schemas = await this.generateSchemas(schemaBlueprintModel, this.instructions)
-				this.observationSchema = schemas.observationSchema
-				this.understandingSchema = schemas.understandingSchema
+				const schemas = await this.generateSchemas(
+					this.state.models.blueprint,
+					this.state.instructions,
+				)
+				;(regenUpdates as Record<string, unknown>).observation_schema = schemas.observationSchema
+				;(regenUpdates as Record<string, unknown>).understanding_schema = schemas.understandingSchema
 			}
 
-			// Persist regenerated state to store
-			await this.persistState()
+			// Persist regenerated state
+			if (Object.keys(regenUpdates).length > 0) {
+				await this.setState(regenUpdates)
+			}
 
 			this.emit('learner:prompts:regenerated', {
 				learnerId: this.id,
-				observePrompt: this.observeSystemPrompt!,
-				understandPrompt: this.understandSystemPrompt ?? '',
+				observePrompt: this.state.observe_prompt!,
+				understandPrompt: this.state.understand_prompt ?? '',
 			})
 		}
 
@@ -898,14 +865,11 @@ export abstract class BaseLearner<
 			this.emit('learner:config:updated', {
 				learnerId: this.id,
 				changedFields,
-				config: { ...this.config },
+				config: { ...this.state },
 			})
 		}
 
-		return {
-			changedFields,
-			config: { ...this.config } as TConfig,
-		}
+		return { changedFields }
 	}
 
 	// ── Accessors ───────────────────────────────────────────────────────────
@@ -915,17 +879,17 @@ export abstract class BaseLearner<
 	}
 
 	getHealth(): LearnerHealth {
-		return { ...this.health }
+		return { ...this.state.health }
 	}
 
 	getMetrics(): LearnerMetrics {
 		return {
-			ingestion: { ...this.metrics.ingestion },
+			ingestion: { ...this.state.metrics.ingestion },
 			query: {
-				...this.metrics.query,
-				relevanceScores: [...this.metrics.query.relevanceScores],
-				confidenceScores: [...this.metrics.query.confidenceScores],
-				gaps: [...this.metrics.query.gaps],
+				...this.state.metrics.query,
+				relevanceScores: [...this.state.metrics.query.relevanceScores],
+				confidenceScores: [...this.state.metrics.query.confidenceScores],
+				gaps: [...this.state.metrics.query.gaps],
 			},
 		}
 	}
@@ -933,15 +897,15 @@ export abstract class BaseLearner<
 	getMetadata(): LearnerMetadata {
 		return {
 			id: this.id,
-			instructions: this.instructions,
-			origin: this.origin,
+			instructions: this.state.instructions,
+			origin: this.state.origin,
 			health: this.getHealth(),
 		}
 	}
 
 	getActivity(): LearnerActivity {
 		return {
-			ingestion: { ...this.metrics.ingestion },
+			ingestion: { ...this.state.metrics.ingestion },
 			recentObservations: [],
 		}
 	}
@@ -985,11 +949,11 @@ export abstract class BaseLearner<
 
 			case 'synthesized': {
 				this.trackIngestion()
-				this.metrics.ingestion.synthesisCount++
-				this.metrics.ingestion.observationsSinceLastSynthesis = 0
-				this.stagnationSignalFired = false
+				this.state.metrics.ingestion.synthesisCount++
+				this.state.metrics.ingestion.observationsSinceLastSynthesis = 0
+				this.state.stagnation_signal_fired = false
 
-				const previousUnderstanding = this.getUnderstanding()
+				const previousUnderstanding = await this.getUnderstanding()
 				await this.setUnderstanding(result.newUnderstanding as TUnderstanding)
 
 				// Store evolution entry
@@ -1037,15 +1001,15 @@ export abstract class BaseLearner<
 	}
 
 	protected trackIngestion(dismissed = false): void {
-		this.metrics.ingestion.observationCount++
-		this.metrics.ingestion.observationsSinceLastSynthesis++
+		this.state.metrics.ingestion.observationCount++
+		this.state.metrics.ingestion.observationsSinceLastSynthesis++
 		if (dismissed) {
-			this.metrics.ingestion.dismissalCount++
+			this.state.metrics.ingestion.dismissalCount++
 		}
-		this.metrics.ingestion.dismissalRate =
-			this.metrics.ingestion.observationCount > 0
-				? this.metrics.ingestion.dismissalCount /
-					this.metrics.ingestion.observationCount
+		this.state.metrics.ingestion.dismissalRate =
+			this.state.metrics.ingestion.observationCount > 0
+				? this.state.metrics.ingestion.dismissalCount /
+					this.state.metrics.ingestion.observationCount
 				: 0
 	}
 
@@ -1053,54 +1017,54 @@ export abstract class BaseLearner<
 		const WINDOW_SIZE = 10
 		const MAX_GAPS = 50
 
-		this.metrics.query.relevanceScores.push(result.relevance)
-		if (this.metrics.query.relevanceScores.length > WINDOW_SIZE) {
-			this.metrics.query.relevanceScores.shift()
+		this.state.metrics.query.relevanceScores.push(result.relevance)
+		if (this.state.metrics.query.relevanceScores.length > WINDOW_SIZE) {
+			this.state.metrics.query.relevanceScores.shift()
 		}
 
-		this.metrics.query.confidenceScores.push(result.confidence)
-		if (this.metrics.query.confidenceScores.length > WINDOW_SIZE) {
-			this.metrics.query.confidenceScores.shift()
+		this.state.metrics.query.confidenceScores.push(result.confidence)
+		if (this.state.metrics.query.confidenceScores.length > WINDOW_SIZE) {
+			this.state.metrics.query.confidenceScores.shift()
 		}
 
 		if (result.gaps) {
 			const gaps = result.gaps.split('\n').filter(Boolean)
-			this.metrics.query.gaps.push(...gaps)
-			if (this.metrics.query.gaps.length > MAX_GAPS) {
-				this.metrics.query.gaps = this.metrics.query.gaps.slice(-MAX_GAPS)
+			this.state.metrics.query.gaps.push(...gaps)
+			if (this.state.metrics.query.gaps.length > MAX_GAPS) {
+				this.state.metrics.query.gaps = this.state.metrics.query.gaps.slice(-MAX_GAPS)
 			}
 		}
 	}
 
 	protected updateGovernance(relevance: number): void {
-		const previousStatus = this.health.status
+		const previousStatus = this.state.health.status
 
-		this.health.activation =
-			this.health.activation * 0.8 + relevance * 0.2
+		this.state.health.activation =
+			this.state.health.activation * 0.8 + relevance * 0.2
 
-		if (this.health.activation >= this.health.threshold) {
-			this.health.status = 'active'
+		if (this.state.health.activation >= this.state.health.threshold) {
+			this.state.health.status = 'active'
 		}
 
-		this.health.lastAccessed = new Date()
+		this.state.health.lastAccessed = new Date()
 
 		this.emit('learner:health:updated', {
 			learnerId: this.id,
-			activation: this.health.activation,
-			status: this.health.status,
+			activation: this.state.health.activation,
+			status: this.state.health.status,
 			previousStatus:
-				previousStatus !== this.health.status ? previousStatus : undefined,
+				previousStatus !== this.state.health.status ? previousStatus : undefined,
 		})
 	}
 
 	protected checkAndEmitSignals(): void {
-		const { signalThresholds } = this.health
-		const { ingestion, query } = this.metrics
+		const { signalThresholds } = this.state.health
+		const { ingestion, query } = this.state.metrics
 
 		if (ingestion.observationCount > 10) {
 			if (ingestion.dismissalRate > signalThresholds.maxDismissalRate) {
-				if (!this.dismissalSignalFired) {
-					this.dismissalSignalFired = true
+				if (!this.state.dismissal_signal_fired) {
+					this.state.dismissal_signal_fired = true
 					this.emit('learner:signal', {
 						learnerId: this.id,
 						description: `High dismissal rate: rejecting ${(ingestion.dismissalRate * 100).toFixed(0)}% of observations`,
@@ -1109,7 +1073,7 @@ export abstract class BaseLearner<
 					})
 				}
 			} else {
-				this.dismissalSignalFired = false
+				this.state.dismissal_signal_fired = false
 			}
 		}
 
@@ -1124,7 +1088,7 @@ export abstract class BaseLearner<
 					timestamp: new Date(),
 					metrics: { avgRelevance },
 				})
-				this.metrics.query.relevanceScores = []
+				this.state.metrics.query.relevanceScores = []
 			}
 		}
 
@@ -1139,16 +1103,16 @@ export abstract class BaseLearner<
 					timestamp: new Date(),
 					metrics: { avgConfidence },
 				})
-				this.metrics.query.confidenceScores = []
+				this.state.metrics.query.confidenceScores = []
 			}
 		}
 
 		if (
-			!this.stagnationSignalFired &&
+			!this.state.stagnation_signal_fired &&
 			ingestion.observationsSinceLastSynthesis >
 				signalThresholds.maxObservationsWithoutSynthesis
 		) {
-			this.stagnationSignalFired = true
+			this.state.stagnation_signal_fired = true
 			this.emit('learner:signal', {
 				learnerId: this.id,
 				description: `Stagnation: no synthesis in ${ingestion.observationsSinceLastSynthesis} observations`,

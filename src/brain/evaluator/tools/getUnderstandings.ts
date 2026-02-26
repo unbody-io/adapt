@@ -33,7 +33,7 @@ export function createGetUnderstandingsTool(brain: Brain) {
 			for (const id of learnerIds) {
 				const learner = brain.learners.get(id)
 				if (learner) {
-					const understanding = learner.getUnderstanding()
+					const understanding = await learner.getUnderstanding()
 					if (!understanding) {
 						result[id] = '(no understanding accumulated yet)'
 					} else if (typeof understanding === 'string') {

@@ -10,11 +10,13 @@ import { stringifyUnderstanding } from './utils'
 /**
  * Format split prompt with learner data and guidance
  */
-export function splitPromptTemplate(
+export async function splitPromptTemplate(
 	guidance: string,
 	learner: BaseLearner<unknown>,
 	brainPrompt: string,
-): string {
+): Promise<string> {
+	const understanding = await learner.getUnderstanding()
+
 	return `# Brain Context
 
 **Purpose**: ${brainPrompt}
@@ -32,7 +34,7 @@ ${guidance}
 ${learner.instructions}
 
 **Understanding**:
-${stringifyUnderstanding(learner.getUnderstanding())}
+${stringifyUnderstanding(understanding)}
 
 **Health**:
 - Activation: ${learner.getHealth().activation.toFixed(2)}

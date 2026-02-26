@@ -77,7 +77,7 @@ Deployment: Docker containers, Kubernetes orchestration, AWS/GCP cloud platforms
 		broadLearner: {
 			id: broadLearner.id,
 			name: broadLearner.name,
-			understanding: broadLearner.getUnderstanding()?.substring(0, 150) + '...',
+			understanding: (await broadLearner.getUnderstanding())?.substring(0, 150) + '...',
 		},
 	})
 
@@ -93,13 +93,13 @@ Deployment: Docker containers, Kubernetes orchestration, AWS/GCP cloud platforms
 
 	const afterState = {
 		learnersCount: afterLearnerCount,
-		newLearners: newLearners.map((l: TextLearner) => ({
+		newLearners: await Promise.all(newLearners.map(async (l: TextLearner) => ({
 			id: l.id,
 			name: l.name,
 			description: l.description,
 			instructionsPreview: l.instructions.substring(0, 80) + '...',
-			understandingPreview: l.getUnderstanding()?.substring(0, 80) + '...',
-		})),
+			understandingPreview: (await l.getUnderstanding())?.substring(0, 80) + '...',
+		}))),
 	}
 
 	logger.logState('Brain After Split', afterState)
@@ -120,7 +120,7 @@ Deployment: Docker containers, Kubernetes orchestration, AWS/GCP cloud platforms
 		assertTrue(!!learner.description, `Learner ${learner.id} has description`)
 		assertGreaterThan(learner.instructions.length, 20, `Learner ${learner.id} has instructions`)
 
-		const understanding = learner.getUnderstanding()
+		const understanding = await learner.getUnderstanding()
 		assertTrue(!!understanding, `Learner ${learner.id} has understanding`)
 		assertGreaterThan(understanding!.length, 30, `Learner ${learner.id} understanding is substantial`)
 	}

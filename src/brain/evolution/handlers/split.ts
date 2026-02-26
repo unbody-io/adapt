@@ -40,7 +40,7 @@ export class SplitHandler extends EvolutionActionHandler<SplitActionResult> {
 				const result = await generate({
 					model: this.brain.config.model,
 					system: splitSystemPrompt,
-					prompt: splitPromptTemplate(
+					prompt: await splitPromptTemplate(
 						decision.guidance,
 						learner,
 						this.brain.prompt,

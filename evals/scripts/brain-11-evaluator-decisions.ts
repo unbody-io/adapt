@@ -354,11 +354,11 @@ async function main() {
 				}
 			}
 
-			const learnersBefore = brain.getLearners().map(l => ({
+			const learnersBefore = await Promise.all(brain.getLearners().map(async l => ({
 				id: l.id,
-				understanding: l.getUnderstanding().length,
+				understanding: (await l.getUnderstanding()).length,
 				purpose: truncate(l.instructions, 120),
-			}))
+			})))
 
 			report.h3('Learners')
 			report.table(

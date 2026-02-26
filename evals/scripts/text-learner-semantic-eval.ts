@@ -78,7 +78,7 @@ async function main() {
 	logger.logState('Learner created', {
 		id: learner.id,
 		name: learner.name,
-		understanding: learner.getUnderstanding() || '(empty)',
+		understanding: (await learner.getUnderstanding()) || '(empty)',
 		buffer: learner.getBufferState(),
 	})
 
@@ -98,7 +98,7 @@ async function main() {
 	])
 
 	const afterBatch1 = {
-		understanding: learner.getUnderstanding(),
+		understanding: await learner.getUnderstanding(),
 		buffer: learner.getBufferState(),
 		metrics: learner.getMetrics(),
 	}
@@ -195,7 +195,7 @@ async function main() {
 	])
 
 	const afterBatch2 = {
-		understanding: learner.getUnderstanding(),
+		understanding: await learner.getUnderstanding(),
 		buffer: learner.getBufferState(),
 		metrics: learner.getMetrics(),
 	}
@@ -236,7 +236,7 @@ async function main() {
 	}
 
 	console.log('\n  Final state:')
-	console.log(`    Understanding length: ${learner.getUnderstanding().length} chars`)
+	console.log(`    Understanding length: ${(await learner.getUnderstanding()).length} chars`)
 	console.log(`    Buffer count: ${learner.getBufferState().count}`)
 	console.log(`    Metrics: ${JSON.stringify(learner.getMetrics(), null, 2)}`)
 	console.log(`    Health: ${JSON.stringify(learner.getHealth(), null, 2)}`)
@@ -244,7 +244,7 @@ async function main() {
 	logger.logSection('10. Semantic checks')
 
 	// Check: understanding exists after ingestion
-	const hasUnderstanding = learner.getUnderstanding().length > 0
+	const hasUnderstanding = (await learner.getUnderstanding()).length > 0
 	logger.logAssertion('Understanding was generated', hasUnderstanding)
 
 	// Check: init events fired

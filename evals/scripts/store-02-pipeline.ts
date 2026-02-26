@@ -139,7 +139,7 @@ async function runPipeline(adapterName: string, createStore: CreateStore) {
 
 	// Cache vs store
 	logger.logState('Text: cache vs store', {
-		cachedUnderstanding: textLearner.getUnderstanding()?.slice(0, 200),
+		cachedUnderstanding: (await textLearner.getUnderstanding())?.slice(0, 200),
 		storeUnderstanding: ((await textStore.understanding.get('current'))?.data as string)?.slice(0, 200),
 	})
 
@@ -196,9 +196,9 @@ async function runPipeline(adapterName: string, createStore: CreateStore) {
 	// Cache vs store
 	const listUnderstanding = await listStore.understanding.list()
 	logger.logState('List: cache vs store', {
-		cachedItemCount: listLearner.getUnderstanding().length,
+		cachedItemCount: (await listLearner.getUnderstanding()).length,
 		storeItemCount: listUnderstanding.length,
-		cachedItems: listLearner.getUnderstanding(),
+		cachedItems: await listLearner.getUnderstanding(),
 		storeItems: listUnderstanding.map((u) => ({
 			id: u.id,
 			data: u.data,
@@ -210,7 +210,7 @@ async function runPipeline(adapterName: string, createStore: CreateStore) {
 
 	logger.logSection('Restore: New learner from existing store')
 
-	const savedUnderstanding = textLearner.getUnderstanding()
+	const savedUnderstanding = await textLearner.getUnderstanding()
 
 	const textLearner2 = new TextLearner({
 		id: 'text-restore-test',
@@ -226,8 +226,8 @@ async function runPipeline(adapterName: string, createStore: CreateStore) {
 
 	logger.logState('Restore result', {
 		originalUnderstanding: savedUnderstanding?.slice(0, 200),
-		restoredUnderstanding: textLearner2.getUnderstanding()?.slice(0, 200),
-		match: savedUnderstanding === textLearner2.getUnderstanding(),
+		restoredUnderstanding: (await textLearner2.getUnderstanding())?.slice(0, 200),
+		match: savedUnderstanding === (await textLearner2.getUnderstanding()),
 		restoredObsSchema: textLearner2.getObservationSchema(),
 		restoredUndSchema: textLearner2.getUnderstandingSchema(),
 	})

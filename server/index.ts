@@ -477,7 +477,7 @@ app.get('/brain/status', async (c) => {
 		name: l.name,
 		description: l.description,
 		instructions: l.instructions,
-		understanding: l.getUnderstanding(),
+		understanding: await l.getUnderstanding(),
 		evolution: await l.getEvolution(),
 		buffer: await l.getBufferState(),
 		bufferObservations: await l.getBufferedObservations(),

@@ -10,14 +10,14 @@ import { stringifyUnderstanding } from './utils'
 /**
  * Format update prompt with learner data and guidance
  */
-export function updatePromptTemplate(
+export async function updatePromptTemplate(
 	guidance: string,
 	learner: BaseLearner<unknown>,
 	brainPrompt: string,
-): string {
+): Promise<string> {
 	const health = learner.getHealth()
 	const metrics = learner.getMetrics()
-	const understanding = stringifyUnderstanding(learner.getUnderstanding())
+	const understanding = stringifyUnderstanding(await learner.getUnderstanding())
 
 	const thresholds = learner.getUnderstandThresholds()
 

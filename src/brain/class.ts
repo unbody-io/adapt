@@ -359,10 +359,14 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 					buffer: await l.getBufferState(),
 				})),
 			)
-			const queryableLearners = bufferStates
-				.filter(({ learner, buffer }) => {
-					return !!learner.getUnderstanding() || buffer.count > 0
-				})
+			const queryableLearnerChecks = await Promise.all(
+				bufferStates.map(async ({ learner, buffer }) => ({
+					learner,
+					hasKnowledge: !!(await learner.getUnderstanding()) || buffer.count > 0,
+				})),
+			)
+			const queryableLearners = queryableLearnerChecks
+				.filter(({ hasKnowledge }) => hasKnowledge)
 				.map(({ learner }) => learner)
 
 			// Query all learners in parallel

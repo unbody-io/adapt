@@ -94,7 +94,7 @@ export class Evaluator extends TypedEmitter<EvaluatorEventMap> {
 
 		try {
 			// Build context for LLM
-			const context = this.buildContext()
+			const context = await this.buildContext()
 
 			// Create tools with brain context
 			const getUnderstandings = createGetUnderstandingsTool(this.brain)
@@ -191,21 +191,17 @@ export class Evaluator extends TypedEmitter<EvaluatorEventMap> {
 	/**
 	 * Build context object for evaluation
 	 */
-	private buildContext() {
-		return {
-			brain: {
-				prompt: this.brain.prompt,
-				learnerCount: this.brain.learners.size,
-			},
-			includeUnderstanding: this.includeUnderstanding,
-			learners: Array.from(this.brain.learners.values()).map((learner) => {
+	private async buildContext() {
+		const learners = await Promise.all(
+			Array.from(this.brain.learners.values()).map(async (learner) => {
 				const health = learner.getHealth()
 				const metrics = learner.getMetrics()
+				const understanding = await learner.getUnderstanding()
 				return {
 					id: learner.id,
 					name: learner.id,
 					purpose: this.extractPurpose(learner.instructions),
-					understandingSize: String(learner.getUnderstanding()).length,
+					understandingSize: String(understanding).length,
 					health: {
 						activation: health.activation,
 						status: health.status,
@@ -220,6 +216,15 @@ export class Evaluator extends TypedEmitter<EvaluatorEventMap> {
 					},
 				}
 			}),
+		)
+
+		return {
+			brain: {
+				prompt: this.brain.prompt,
+				learnerCount: this.brain.learners.size,
+			},
+			includeUnderstanding: this.includeUnderstanding,
+			learners,
 		}
 	}
 
@@ -227,7 +232,7 @@ export class Evaluator extends TypedEmitter<EvaluatorEventMap> {
 	 * Format the evaluation prompt with signals and context
 	 */
 	private formatEvaluationPrompt(
-		context: ReturnType<typeof this.buildContext>,
+		context: Awaited<ReturnType<typeof this.buildContext>>,
 	): string {
 		return evaluationPromptTemplate(context, this.signals)
 	}

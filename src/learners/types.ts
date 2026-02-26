@@ -57,7 +57,7 @@ export interface Learner<TUnderstanding = unknown> {
 	readonly origin: LearnerOrigin
 
 	// Current state
-	getUnderstanding(): TUnderstanding
+	getUnderstanding(): Promise<TUnderstanding>
 	getHealth(): LearnerHealth
 	getMetrics(): LearnerMetrics
 
@@ -66,7 +66,7 @@ export interface Learner<TUnderstanding = unknown> {
 	query(question: string): Promise<unknown>
 
 	// Introspection
-	getSummary(): string
+	getSummary(): Promise<string>
 	getMetadata(): LearnerMetadata
 }
 

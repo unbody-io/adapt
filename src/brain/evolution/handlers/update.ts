@@ -35,7 +35,7 @@ export class UpdateHandler extends EvolutionActionHandler<UpdateActionResult> {
 					const result = await generate({
 						model: this.brain.config.model,
 						system: updateSystemPrompt,
-						prompt: updatePromptTemplate(
+						prompt: await updatePromptTemplate(
 							decision.guidance,
 							learner as any,
 							this.brain.prompt,

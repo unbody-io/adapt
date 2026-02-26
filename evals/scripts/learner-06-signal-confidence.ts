@@ -69,7 +69,7 @@ async function main() {
 
 	logger.logState('Learner State', {
 		name: learner.name,
-		understanding: learner.getUnderstanding()?.substring(0, 100) + '...',
+		understanding: (await learner.getUnderstanding())?.substring(0, 100) + '...',
 		confidenceThreshold: learner.getHealth().signalThresholds.minConfidence,
 	})
 

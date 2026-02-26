@@ -16,7 +16,7 @@ import type { QueryContext } from '../base/query'
  * if no synthesis has happened yet.
  */
 export function createReadUnderstandingTool(
-	getUnderstanding: () => string,
+	getUnderstanding: () => Promise<string>,
 	getBufferedObservations: () => Promise<Array<{ text: string; importance: number }>>,
 ) {
 	return tool({
@@ -24,7 +24,7 @@ export function createReadUnderstandingTool(
 			'Read the learner\'s current understanding. Call this first to access your knowledge before answering.',
 		inputSchema: z.object({}),
 		execute: async () => {
-			const understanding = getUnderstanding()
+			const understanding = await getUnderstanding()
 			if (understanding) return understanding
 
 			const observations = await getBufferedObservations()

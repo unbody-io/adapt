@@ -75,8 +75,8 @@ export interface TextLearnerConfig extends CascadableConfig {
 	description?: string
 	/** How the learner was created */
 	origin?: LearnerOrigin
-	/** Injected store (defaults to MemoryStore if not provided) */
-	store?: Store
+	/** Injected store */
+	store: Store
 	/** Governance settings for understanding management */
 	governance?: TextGovernanceConfig
 	/** Observer phase configuration */

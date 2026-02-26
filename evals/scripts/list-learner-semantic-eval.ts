@@ -6,6 +6,7 @@
  */
 
 import { ListLearner } from '../../src/learners/list-learner/class'
+import { MemoryStore } from '../../src/learners/stores'
 import { logger } from '../helpers/logger'
 import { createOpenRouter } from '@openrouter/ai-sdk-provider'
 
@@ -36,7 +37,8 @@ async function main() {
 			'You track restaurants, cafes, and food establishments. For each place, extract: ' +
 			'name, cuisine type, location/neighborhood, notable dishes, price range, and any quality signals ' +
 			'(ratings, reviews, awards). Focus on distinctive details that make each place unique.',
-		synthesize: {
+		store: new MemoryStore(),
+		understand: {
 			thresholds: {
 				minImportance: 0.3,
 				maxObservations: 3,

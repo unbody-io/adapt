@@ -2,6 +2,7 @@ import type { LanguageModel } from 'ai'
 import type { GeneratedLearnerConfig } from '../learners/schema.config'
 import type { Strategy } from '../learners/text-learner/strategies'
 import type { SharedLearnerEventMap } from '../learners/base/types'
+import type { Store } from '../learners/stores'
 import type { TokenUsage } from '../learners/types'
 import type { LearnOutput } from '../learners/base/class'
 import type {
@@ -129,6 +130,8 @@ export interface BrainConfig extends CascadableConfig {
 	learning?: LearningConfig
 	/** Evolution config (Living Brain) */
 	evolution?: EvolutionConfig
+	/** Factory for creating per-learner stores. Defaults to () => new MemoryStore() */
+	storeFactory?: () => Store
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

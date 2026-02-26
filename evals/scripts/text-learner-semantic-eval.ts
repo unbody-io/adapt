@@ -6,6 +6,7 @@
  */
 
 import { TextLearner } from '../../src/learners/text-learner/class'
+import { MemoryStore } from '../../src/learners/stores'
 import { logger } from '../helpers/logger'
 import { createOpenRouter } from '@openrouter/ai-sdk-provider'
 
@@ -37,11 +38,12 @@ async function main() {
 			'You are a coffee knowledge tracker. Watch for information about coffee ' +
 			'brewing methods, bean origins, roasting profiles, flavor notes, and ' +
 			'preparation techniques. Focus on practical, actionable knowledge.',
+		store: new MemoryStore(),
 		governance: { strategy: 'continuous' },
-		synthesize: {
+		understand: {
 			thresholds: {
 				minImportance: 0.3,
-				maxObservations: 3, // Low threshold — synthesize after 3 observations
+				maxObservations: 3,
 			},
 		},
 	})

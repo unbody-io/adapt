@@ -143,6 +143,9 @@ export abstract class BaseLearner<
 	protected observationSchema: Record<string, unknown> | null = null
 	protected understandingSchema: Record<string, unknown> | null = null
 
+	// Lazy init promise (for ensureInit)
+	private _initPromise: Promise<{ observeSystemPrompt: string; understandSystemPrompt: string }> | null = null
+
 	// Signal fire-once flags (reset when condition clears)
 	protected stagnationSignalFired = false
 	protected dismissalSignalFired = false
@@ -385,6 +388,14 @@ export abstract class BaseLearner<
 		return this.observeSystemPrompt !== null
 	}
 
+	private async ensureInit(): Promise<void> {
+		if (this.isInitialized()) return
+		if (!this._initPromise) {
+			this._initPromise = this.init()
+		}
+		await this._initPromise
+	}
+
 	getObserveSystemPrompt(): string | null {
 		return this.observeSystemPrompt
 	}
@@ -408,9 +419,7 @@ export abstract class BaseLearner<
 	// ── Learn (pipeline: observe → store → understand) ────────────────────
 
 	async learn(batch: unknown[], options?: LearnOptions): Promise<LearnOutput> {
-		if (!this.isInitialized()) {
-			throw new Error('Learner not initialized. Call init() first.')
-		}
+		await this.ensureInit()
 
 		try {
 			const observeModel = this.config.observer.model ?? this.config.model
@@ -621,6 +630,7 @@ export abstract class BaseLearner<
 	// ── Query (concrete — delegates to _queryMethod) ────────────────────────
 
 	async query(question: string, options?: QueryOptions): Promise<QueryResult> {
+		await this.ensureInit()
 		this.health.lastAccessed = new Date()
 		this.metrics.query.count++
 

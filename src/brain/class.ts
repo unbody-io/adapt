@@ -5,6 +5,8 @@ import {
 	type GeneratedLearnerConfig,
 	type LearnerHealth,
 	ListLearner,
+	MemoryStore,
+	type Store,
 	TextLearner,
 	type TokenUsage,
 } from '../learners'
@@ -43,6 +45,7 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 	readonly learners: Map<string, BaseLearner<unknown>> = new Map()
 	private learnerNames: Map<string, string> = new Map()
 	private initialized = false
+	private storeFactory: () => Store
 	private evaluator?: Evaluator
 	private evolutionOrchestrator?: EvolutionOrchestrator
 
@@ -54,6 +57,7 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 		super()
 		this.config = resolveBrainConfig(rawConfig)
 		this.prompt = this.config.prompt
+		this.storeFactory = rawConfig.storeFactory ?? (() => new MemoryStore())
 	}
 
 	/**
@@ -172,11 +176,13 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 		if (config.type === 'list') {
 			learner = new ListLearner({
 				...shared,
+				store: this.storeFactory(),
 				governance: config.governance,
 			})
 		} else {
 			learner = new TextLearner({
 				...shared,
+				store: this.storeFactory(),
 				governance: config.governance ?? {
 					strategy: BRAIN_DEFAULTS.learning.governance.strategy,
 					maxTokens: BRAIN_DEFAULTS.learning.governance.maxTokens,

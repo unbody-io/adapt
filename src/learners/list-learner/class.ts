@@ -4,7 +4,6 @@ import { BaseLearner } from '../base/class'
 import type { UnderstandCallResult } from '../base/class'
 import { ToolBasedMethod } from '../base/query'
 import type { QueryMethod } from '../base/query'
-import { MemoryStore } from '../stores'
 import { resolveListLearnerConfig } from './config.resolver'
 import { applyListGovernance } from './governance'
 import { initUnderstand, understand } from './understand'
@@ -22,7 +21,7 @@ import type {
  * ListLearner - A learning agent that maintains understanding as a collection of items
  *
  * Post-understand governance (dedup, maxItems, pruning) is handled in postProcessUnderstanding.
- * Store is injected (defaults to MemoryStore).
+ * Store is injected — caller must provide it.
  */
 export class ListLearner extends BaseLearner<ListItem[], ResolvedListLearnerConfig> {
 	private items: ListItem[] = []
@@ -35,7 +34,7 @@ export class ListLearner extends BaseLearner<ListItem[], ResolvedListLearnerConf
 			name: rawConfig.name || config.id,
 			instructions: config.instructions,
 			origin: config.origin,
-			store: rawConfig.store ?? new MemoryStore(),
+			store: rawConfig.store,
 			focus: rawConfig.focus,
 			description: rawConfig.description,
 			health: rawConfig.health,

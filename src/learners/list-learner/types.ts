@@ -113,8 +113,8 @@ export interface ListLearnerConfig extends CascadableConfig {
 	description?: string
 	/** How the learner was created */
 	origin?: LearnerOrigin
-	/** Injected store (defaults to MemoryStore if not provided) */
-	store?: Store
+	/** Injected store */
+	store: Store
 	/** List-specific governance (dedup, maxItems, pruning) */
 	governance?: ListGovernanceConfig
 	/** Observer phase configuration */

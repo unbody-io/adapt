@@ -18,7 +18,7 @@ import { createOpenRouter } from '@openrouter/ai-sdk-provider'
 import { readdirSync, readFileSync, writeFileSync, mkdirSync } from 'fs'
 import { join, basename, dirname } from 'path'
 import { fileURLToPath } from 'url'
-import { TextLearner, type LearnOutput } from '../src/learners'
+import { TextLearner, MemoryStore, type LearnOutput } from '../src/learners'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 
@@ -388,6 +388,7 @@ async function runEval(options: EvalOptions) {
 		id: `eval-${options.dataset}-${options.instructions ? 'custom' : learnerConfig.id}`,
 		model: openrouter(MODEL),
 		instructions,
+		store: new MemoryStore(),
 		governance: { strategy: 'continuous' },
 	})
 

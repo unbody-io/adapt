@@ -11,3 +11,11 @@ export type {
 	LearnerBatchResult,
 	LearnerResponse,
 } from './types'
+export type {
+	BrainStore,
+	BrainCollection,
+	BrainStateRecord,
+	BrainRegistryRecord,
+	BrainEvolutionRecord,
+} from './stores'
+export { MemoryBrainStore } from './stores'

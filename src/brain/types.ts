@@ -11,6 +11,7 @@ import type {
 } from '../types/config'
 import type { EventsFromMap } from '../types/events'
 import type { EvolutionDecision } from './evaluator/types'
+import type { BrainStore } from './stores'
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Learning Config (passed to learners)
@@ -130,8 +131,10 @@ export interface BrainConfig extends CascadableConfig {
 	learning?: LearningConfig
 	/** Evolution config (Living Brain) */
 	evolution?: EvolutionConfig
-	/** Factory for creating per-learner stores. Defaults to () => new MemoryStore() */
-	storeFactory?: () => Store
+	/** Factory for creating per-learner stores. Receives learnerId for restore routing. */
+	storeFactory?: (learnerId: string) => Store
+	/** Brain's own persistence store. Defaults to MemoryBrainStore. */
+	store?: BrainStore
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -396,7 +399,7 @@ export interface BrainOwnEventMap {
 		source: 'auto' | 'manual'
 		decisionCount: number
 		decisions: Array<{
-			action: 'create' | 'merge' | 'split' | 'adjust' | 'delete'
+			action: 'create' | 'merge' | 'split' | 'update' | 'delete'
 			reasoning: string
 			guidance: string
 			targets: string[]
@@ -413,7 +416,7 @@ export interface BrainOwnEventMap {
 		timestamp: Date
 	}
 	'evolution:action:executed': {
-		action: 'create' | 'merge' | 'split' | 'adjust' | 'delete'
+		action: 'create' | 'merge' | 'split' | 'update' | 'delete'
 		reasoning: string
 		guidance: string
 		targets: string[]

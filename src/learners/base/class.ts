@@ -145,6 +145,7 @@ export abstract class BaseLearner<
 
 	// ── Abstract — each subclass implements ─────────────────────────────────
 
+	abstract get type(): string
 	abstract getUnderstanding(): Promise<TUnderstanding>
 	abstract setUnderstanding(value: TUnderstanding): Promise<void>
 	abstract getSummary(): Promise<string>
@@ -990,6 +991,13 @@ export abstract class BaseLearner<
 			ingestion: { ...this.state.metrics.ingestion },
 			recentObservations: [],
 		}
+	}
+
+	/**
+	 * Dispose of the learner and its store
+	 */
+	async dispose(): Promise<void> {
+		await this.store.dispose()
 	}
 
 	// ── Shared bookkeeping ──────────────────────────────────────────────────

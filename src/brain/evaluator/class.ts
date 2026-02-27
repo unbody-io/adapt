@@ -148,15 +148,24 @@ export class Evaluator extends TypedEmitter<EvaluatorEventMap> {
 			})
 
 			// Record history (capped at 10)
-			this.history.push({
+			const historyEntry: EvolutionHistoryEntry = {
 				timestamp: new Date(),
 				decisions: decisions.map((d) => ({
 					action: d.action,
 					targets: d.targets,
 					reasoning: d.reasoning,
 				})),
-			})
+			}
+			this.history.push(historyEntry)
 			if (this.history.length > 10) this.history.shift()
+
+			// Persist to brain store
+			await this.brain.brainStore.evolution.add({
+				id: `eval_${Date.now()}`,
+				decisions: historyEntry.decisions,
+				source,
+				created_at: historyEntry.timestamp.toISOString(),
+			})
 
 			// Clear signal buffer after successful evaluation
 			this.signals = []
@@ -189,6 +198,14 @@ export class Evaluator extends TypedEmitter<EvaluatorEventMap> {
 	}
 
 	/**
+	 * Restore a history entry from persisted store
+	 */
+	restoreHistoryEntry(entry: EvolutionHistoryEntry): void {
+		this.history.push(entry)
+		if (this.history.length > 10) this.history.shift()
+	}
+
+	/**
 	 * Build context object for evaluation
 	 */
 	private async buildContext() {
@@ -200,6 +217,7 @@ export class Evaluator extends TypedEmitter<EvaluatorEventMap> {
 				return {
 					id: learner.id,
 					name: learner.id,
+					type: learner.type,
 					purpose: this.extractPurpose(learner.instructions),
 					understandingSize: String(understanding).length,
 					health: {

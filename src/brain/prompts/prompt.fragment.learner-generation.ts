@@ -3,9 +3,13 @@
  *
  * Contains the 7 principles playbook and output format guidance.
  * Embedded by both the root decomposition prompt and evolution create prompt.
+ *
+ * Type section is built dynamically from registered descriptors.
  */
 
-export const learnerGenerationFragment = `Follow these principles when generating learner configurations:
+import type { LearnerTypeDescriptor } from '../../learners/types'
+
+const principlesSection = `Follow these principles when generating learner configurations:
 
 PRINCIPLE 1: UNDERSTAND BEFORE DECOMPOSING
 
@@ -103,23 +107,30 @@ For each learner, provide:
 
   Track answers to:
   - [Concrete question 1]
-  - [Concrete question 2]
+  - [Concrete question 2]`
 
-- type: "text" or "list"
+function buildTypeSection(descriptors: LearnerTypeDescriptor[]): string {
+	const typeNames = descriptors.map((d) => `"${d.type}"`).join(' or ')
+	const typeDescriptions = descriptors
+		.map((d) => `  ${d.type.toUpperCase()} learners (type: "${d.type}") — ${d.description}`)
+		.join('\n\n')
 
-  TEXT learners (type: "text") — build narrative prose understanding.
-  Best for: qualitative patterns, preferences, philosophies, interconnected concepts, nuanced reasoning.
-  - governance: { strategy: "continuous" | "cumulative" | "decay" }
-    - continuous: Single growing understanding (default, good for most cases)
-    - cumulative: Summarize when understanding gets large (good for high-volume data)
-    - decay: Weight recent observations higher (good for tracking evolving preferences)
+	return `
+- type: ${typeNames}
 
-  LIST learners (type: "list") — track structured collections of discrete items.
-  Best for: entities, catalogs, inventories, tools/technologies used, specific preferences as countable items.
-  - governance: { deduplication?: "strict" | "none", maxItems?: number, pruning?: "oldest" | "least-confident" | "none" }
-    - Defaults are sensible (strict dedup, 200 maxItems, oldest pruning) — omit unless specific needs.
+${typeDescriptions}
 
   How to choose:
   - If the learner builds understanding by synthesizing patterns across observations → text
   - If the learner tracks a growing/changing set of distinct things → list
   - When in doubt, prefer text — it's more flexible`
+}
+
+/**
+ * Build the learner generation prompt fragment dynamically from descriptors.
+ */
+export function learnerGenerationFragment(
+	descriptors: LearnerTypeDescriptor[],
+): string {
+	return principlesSection + buildTypeSection(descriptors)
+}

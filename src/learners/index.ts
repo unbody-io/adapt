@@ -87,4 +87,9 @@ export type {
 	LearnerStatus,
 	Significance,
 	TokenUsage,
+	LearnerTypeDescriptor,
 } from './types'
+
+// Descriptors
+export { textLearnerDescriptor } from './text-learner/descriptor'
+export { listLearnerDescriptor } from './list-learner/descriptor'

@@ -64,6 +64,7 @@ export function evaluationPromptTemplate(
 ${context.learners
 	.map(
 		(l) => `### ${l.id}
+- **Type**: ${l.type}
 - **Purpose**: ${l.purpose}
 - **Knowledge**: ${classifyKnowledgeSize(l.understandingSize)} (${l.understandingSize} chars)
 - **Status**: ${l.health.status} (activation: ${l.health.activation.toFixed(2)})

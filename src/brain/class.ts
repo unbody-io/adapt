@@ -4,11 +4,12 @@ import {
 	BaseLearner,
 	type GeneratedLearnerConfig,
 	type LearnerHealth,
-	ListLearner,
+	type LearnerTypeDescriptor,
 	MemoryStore,
 	type Store,
-	TextLearner,
 	type TokenUsage,
+	textLearnerDescriptor,
+	listLearnerDescriptor,
 } from '../learners'
 import { generate, Output } from '../llm'
 import { TypedEmitter } from '../types/events'
@@ -21,6 +22,8 @@ import { EvolutionOrchestrator } from './evolution/orchestrator'
 import type { AggregatedEvolutionResult } from './evolution/types'
 import { rootDecompositionPrompt } from './prompts/prompt.template.root-decomposition'
 import { brainDecompositionSchema } from './schemas/schema.brain-decomposition'
+import { MemoryBrainStore } from './stores'
+import type { BrainStore } from './stores'
 import type {
 	BrainAskResult,
 	BrainConfig,
@@ -45,7 +48,9 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 	readonly learners: Map<string, BaseLearner<unknown>> = new Map()
 	private learnerNames: Map<string, string> = new Map()
 	private initialized = false
-	private storeFactory: () => Store
+	private storeFactory: (learnerId: string) => Store
+	readonly brainStore: BrainStore
+	readonly learnerTypes: Map<string, LearnerTypeDescriptor>
 	private evaluator?: Evaluator
 	private evolutionOrchestrator?: EvolutionOrchestrator
 
@@ -58,11 +63,77 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 		this.config = resolveBrainConfig(rawConfig)
 		this.prompt = this.config.prompt
 		this.storeFactory = rawConfig.storeFactory ?? (() => new MemoryStore())
+		this.brainStore = rawConfig.store ?? new MemoryBrainStore()
+
+		// Register learner type descriptors (default: text + list)
+		this.learnerTypes = new Map([
+			[textLearnerDescriptor.type, textLearnerDescriptor],
+			[listLearnerDescriptor.type, listLearnerDescriptor],
+		])
+	}
+
+	// ─────────────────────────────────────────────────────────────────────────
+	// Brain State Management
+	// ─────────────────────────────────────────────────────────────────────────
+
+	/**
+	 * Persist Brain state to store. Updates in-memory cache + upserts each key.
+	 */
+	private async setState(updates: Record<string, unknown>): Promise<void> {
+		const now = new Date().toISOString()
+		for (const [key, value] of Object.entries(updates)) {
+			const existing = await this.brainStore.state.get(key)
+			if (existing) {
+				await this.brainStore.state.update(key, { value, updated_at: now })
+			} else {
+				await this.brainStore.state.add({ id: key, value, updated_at: now })
+			}
+		}
+	}
+
+	/**
+	 * Load Brain state from store. Returns true if state was found and restored.
+	 */
+	private async loadState(): Promise<boolean> {
+		const records = await this.brainStore.state.list()
+		if (records.length === 0) return false
+
+		for (const record of records) {
+			switch (record.id) {
+				case 'prompt':
+					this.prompt = record.value as string
+					this.config.prompt = this.prompt
+					break
+				case 'coverageGapCount':
+					this.coverageGapCount = record.value as number
+					break
+				case 'recentQueryCount':
+					this.recentQueryCount = record.value as number
+					break
+				// config models are NOT restored from store — use live instances from constructor
+			}
+		}
+
+		return true
+	}
+
+	/**
+	 * Persist current Brain state snapshot
+	 */
+	private async persistState(): Promise<void> {
+		await this.setState({
+			prompt: this.prompt,
+			coverageGapCount: this.coverageGapCount,
+			recentQueryCount: this.recentQueryCount,
+		})
 	}
 
 	/**
 	 * Explicitly initialize the Brain (parse prompt and generate learners)
 	 * Called automatically on first inject() or ask() if not called explicitly.
+	 *
+	 * Tries restore-from-store first. If state exists, recreates learners from
+	 * registry (no LLM call). Otherwise, does fresh LLM decomposition.
 	 */
 	async initialize(): Promise<void> {
 		if (this.initialized) return
@@ -70,54 +141,17 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 		this.emit('brain:init:started', {})
 
 		try {
-			this.emit('brain:init:config:generating', {})
+			// Try restore from store first
+			const restored = await this.loadState()
 
-			// Try to generate learner configs, with JSON repair fallback
-			const { output, usage: llmUsage } = await this.generateLearnerConfigs()
-
-			if (!output) {
-				const error = 'Failed to generate learner configurations'
-				this.emit('brain:init:failed', { error })
-				throw new Error(error)
-			}
-
-			const usage: TokenUsage = {
-				inputTokens: llmUsage?.inputTokens ?? 0,
-				outputTokens: llmUsage?.outputTokens ?? 0,
-				totalTokens: llmUsage?.totalTokens ?? 0,
-			}
-
-			this.emit('brain:init:config:generated', {
-				configs: output.learners,
-				usage,
-			})
-
-			for (const config of output.learners) {
-				await this.createLearnerFromConfig(config)
+			if (restored) {
+				await this.restoreFromRegistry()
+			} else {
+				await this.freshInitialize()
 			}
 
 			// Initialize Evaluator and EvolutionOrchestrator if evolution is enabled
-			if (this.config.evolution.enabled) {
-				this.evaluator = new Evaluator(
-					this,
-					this.config.evolution.evaluatorSignalThreshold,
-				)
-
-				// Forward all Evaluator events through Brain
-				this.evaluator.on((event) => {
-					this.emit(event.type as keyof BrainEventMap, event.payload as never)
-				})
-
-				// Auto-execute decisions from signal-triggered evaluations
-				this.evaluator.on('evaluator:evaluation:completed', async (event) => {
-					if (event.source === 'auto' && event.decisions.length > 0) {
-						await this.executeEvolutionDecisions(event.decisions)
-					}
-				})
-
-				// Initialize evolution orchestrator
-				this.evolutionOrchestrator = new EvolutionOrchestrator(this)
-			}
+			this.initEvolution()
 
 			this.initialized = true
 			this.emit('brain:init:completed', {
@@ -132,12 +166,152 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 	}
 
 	/**
+	 * Fresh initialization: LLM decomposition → create learners → persist state
+	 */
+	private async freshInitialize(): Promise<void> {
+		this.emit('brain:init:config:generating', {})
+
+		const { output, usage: llmUsage } = await this.generateLearnerConfigs()
+
+		if (!output) {
+			const error = 'Failed to generate learner configurations'
+			this.emit('brain:init:failed', { error })
+			throw new Error(error)
+		}
+
+		const usage: TokenUsage = {
+			inputTokens: llmUsage?.inputTokens ?? 0,
+			outputTokens: llmUsage?.outputTokens ?? 0,
+			totalTokens: llmUsage?.totalTokens ?? 0,
+		}
+
+		this.emit('brain:init:config:generated', {
+			configs: output.learners,
+			usage,
+		})
+
+		for (const config of output.learners) {
+			await this.createLearnerFromConfig(config)
+		}
+
+		// Persist brain state for future restores
+		await this.persistState()
+	}
+
+	/**
+	 * Restore learners from registry records (no LLM call)
+	 */
+	private async restoreFromRegistry(): Promise<void> {
+		const records = await this.brainStore.registry.list()
+
+		for (const record of records) {
+			const descriptor = this.learnerTypes.get(record.type)
+			if (!descriptor) {
+				throw new Error(`Unknown learner type in registry: ${record.type}`)
+			}
+
+			const configSnapshot = record.config as {
+				governance?: Record<string, unknown>
+				thresholds?: { minImportance?: number; maxObservations?: number; maxTokens?: number }
+			}
+
+			const learner = descriptor.factory({
+				id: record.id,
+				model: this.config.model,
+				blueprintModel: this.config.blueprintModel,
+				instructions: record.instructions,
+				name: record.name,
+				description: record.description,
+				origin: 'prompt' as const,
+				store: this.storeFactory(record.id),
+				governance: configSnapshot.governance,
+				understand: {
+					thresholds: {
+						maxObservations: BRAIN_DEFAULTS.learning.understand.thresholds.maxObservations,
+						maxTokens: BRAIN_DEFAULTS.learning.understand.thresholds.maxTokens,
+						minImportance: BRAIN_DEFAULTS.learning.understand.thresholds.minImportance,
+						...configSnapshot.thresholds,
+					},
+				},
+			})
+
+			// Forward all learner events through Brain
+			learner.on((event) => {
+				this.emit(event.type as keyof BrainEventMap, event.payload as never)
+			})
+
+			learner.on('learner:signal', (event) => {
+				this.signal({
+					source: event.learnerId,
+					description: event.description,
+				})
+			})
+
+			// Init restores state from store (prompts, understanding, etc.)
+			await learner.init()
+
+			this.learners.set(record.id, learner)
+			this.learnerNames.set(record.id, record.name)
+		}
+	}
+
+	/**
+	 * Initialize evolution system (evaluator + orchestrator)
+	 */
+	private initEvolution(): void {
+		if (!this.config.evolution.enabled) return
+
+		this.evaluator = new Evaluator(
+			this,
+			this.config.evolution.evaluatorSignalThreshold,
+		)
+
+		// Forward all Evaluator events through Brain
+		this.evaluator.on((event) => {
+			this.emit(event.type as keyof BrainEventMap, event.payload as never)
+		})
+
+		// Auto-execute decisions from signal-triggered evaluations
+		this.evaluator.on('evaluator:evaluation:completed', async (event) => {
+			if (event.source === 'auto' && event.decisions.length > 0) {
+				await this.executeEvolutionDecisions(event.decisions)
+			}
+		})
+
+		// Initialize evolution orchestrator
+		this.evolutionOrchestrator = new EvolutionOrchestrator(this)
+
+		// Restore evolution history from store
+		this.restoreEvolutionHistory()
+	}
+
+	/**
+	 * Restore evolution history from brain store into evaluator
+	 */
+	private async restoreEvolutionHistory(): Promise<void> {
+		if (!this.evaluator) return
+
+		const records = await this.brainStore.evolution.list()
+		for (const record of records) {
+			const decisions = record.decisions as Array<{
+				action: string
+				targets: string[]
+				reasoning: string
+			}>
+			this.evaluator.restoreHistoryEntry({
+				timestamp: new Date(record.created_at),
+				decisions,
+			})
+		}
+	}
+
+	/**
 	 * Generate learner configs from prompt via LLM
 	 */
 	private async generateLearnerConfigs() {
 		return generate({
 			model: this.config.init.model,
-			prompt: rootDecompositionPrompt(this.prompt),
+			prompt: rootDecompositionPrompt(this.prompt, Array.from(this.learnerTypes.values())),
 			output: Output.object({ schema: brainDecompositionSchema }),
 			repairSchema: brainDecompositionSchema,
 		})
@@ -171,24 +345,21 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 			},
 		}
 
-		let learner: BaseLearner<unknown>
-
-		if (config.type === 'list') {
-			learner = new ListLearner({
-				...shared,
-				store: this.storeFactory(),
-				governance: config.governance,
-			})
-		} else {
-			learner = new TextLearner({
-				...shared,
-				store: this.storeFactory(),
-				governance: config.governance ?? {
-					strategy: BRAIN_DEFAULTS.learning.governance.strategy,
-					maxTokens: BRAIN_DEFAULTS.learning.governance.maxTokens,
-				},
-			} as any)
+		const descriptor = this.learnerTypes.get(config.type)
+		if (!descriptor) {
+			throw new Error(`Unknown learner type: ${config.type}`)
 		}
+
+		// Apply default governance for text learners if not provided
+		const governance = config.type === 'text' && !config.governance
+			? { strategy: BRAIN_DEFAULTS.learning.governance.strategy, maxTokens: BRAIN_DEFAULTS.learning.governance.maxTokens }
+			: config.governance
+
+		const learner = descriptor.factory({
+			...shared,
+			store: this.storeFactory(config.id),
+			governance,
+		})
 
 		// Forward all learner events through Brain
 		learner.on((event) => {
@@ -210,6 +381,22 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 
 		this.learners.set(config.id, learner)
 		this.learnerNames.set(config.id, config.name)
+
+		// Persist to registry
+		const now = new Date().toISOString()
+		await this.brainStore.registry.add({
+			id: config.id,
+			type: config.type,
+			name: config.name,
+			description: config.description || '',
+			instructions: config.instructions,
+			config: {
+				governance,
+				thresholds: shared.understand.thresholds,
+			},
+			created_at: now,
+			updated_at: now,
+		})
 
 		this.emit('brain:learner:added', {
 			learnerId: config.id,
@@ -234,6 +421,39 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 	 */
 	async addLearner(config: GeneratedLearnerConfig): Promise<BaseLearner<unknown>> {
 		return this.createLearnerFromConfig(config)
+	}
+
+	/**
+	 * Remove a learner (basic tier — no evolution required)
+	 *
+	 * Disposes learner store, removes from map, emits event.
+	 */
+	async removeLearner(id: string): Promise<void> {
+		const learner = this.learners.get(id)
+		if (!learner) {
+			throw new Error(`Learner ${id} not found`)
+		}
+		await this.__removeLearner(id)
+	}
+
+	/**
+	 * Adjust a learner's behavior (basic tier — no evolution required)
+	 *
+	 * Pass-through to learner.adjust(directive). Incrementally evolves
+	 * the learner's instructions, prompts, and schemas.
+	 */
+	async adjustLearner(id: string, directive: string): Promise<BaseLearner<unknown>> {
+		const learner = this.learners.get(id)
+		if (!learner) {
+			throw new Error(`Learner ${id} not found`)
+		}
+		await learner.adjust(directive)
+		// Update registry with new instructions
+		await this.brainStore.registry.update(id, {
+			instructions: learner.instructions,
+			updated_at: new Date().toISOString(),
+		})
+		return learner
 	}
 
 	/**
@@ -539,9 +759,14 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 	 * Internal: Remove learner (used by evolution handlers)
 	 * @internal
 	 */
-	__removeLearner(learnerId: string): void {
+	async __removeLearner(learnerId: string): Promise<void> {
+		const learner = this.learners.get(learnerId)
+		if (learner) {
+			await learner.dispose()
+		}
 		this.learners.delete(learnerId)
 		this.learnerNames.delete(learnerId)
+		await this.brainStore.registry.delete(learnerId)
 		this.emit('brain:learner:removed', { learnerId })
 	}
 
@@ -792,14 +1017,7 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 				changedFields.push('evolution.enabled')
 
 				if (updates.evolution.enabled && !this.evaluator && this.initialized) {
-					this.evaluator = new Evaluator(
-						this,
-						this.config.evolution.evaluatorSignalThreshold,
-					)
-					this.evaluator.on((event) => {
-						this.emit(event.type as keyof BrainEventMap, event.payload as never)
-					})
-					this.evolutionOrchestrator = new EvolutionOrchestrator(this)
+					this.initEvolution()
 				}
 			}
 
@@ -866,17 +1084,13 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 			learnerUpdate.query = updates.learning.query
 		}
 		if (updates.learning?.governance) {
-			const m = updates.learning.governance
-			learnerUpdate.governance = {
-				...(m.strategy ? { strategy: m.strategy } : {}),
-				...(m.maxTokens !== undefined ? { maxTokens: m.maxTokens } : {}),
-			}
+			learnerUpdate.governance = updates.learning.governance
 		}
 
 		// Forward to all learners (each ignores fields it doesn't recognize)
 		if (Object.keys(learnerUpdate).length > 0) {
 			for (const learner of this.learners.values()) {
-				const result = await learner.update(learnerUpdate as any)
+				const result = await learner.update(learnerUpdate)
 				learnerResults.push({ learnerId: learner.id, changedFields: result.changedFields })
 			}
 		}
@@ -942,5 +1156,17 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 			learnerResults,
 			evolutionResults,
 		}
+	}
+
+	/**
+	 * Dispose Brain: disposes all learners and the brain store
+	 */
+	async dispose(): Promise<void> {
+		for (const learner of this.learners.values()) {
+			await learner.dispose()
+		}
+		this.learners.clear()
+		this.learnerNames.clear()
+		await this.brainStore.dispose()
 	}
 }

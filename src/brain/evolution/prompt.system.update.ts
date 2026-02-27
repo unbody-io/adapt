@@ -1,5 +1,9 @@
 /**
  * System prompt for update action handler
+ *
+ * Instructs the LLM to decompose guidance into:
+ * - behavioral: directive for adjust() (incremental evolution)
+ * - mechanical: specific field values for update()
  */
 
 export const updateSystemPrompt = `You are updating a learner's configuration to improve its effectiveness.
@@ -9,47 +13,55 @@ export const updateSystemPrompt = `You are updating a learner's configuration to
 Learners are specialized components that:
 - Track understanding in a specific domain
 - Have instructions defining their scope
-- Maintain compressed understanding as narrative text
+- Maintain compressed understanding (narrative text or structured lists)
 - Use thresholds to control synthesis behavior
 - Operate using two-phase learning (observe → synthesize)
 
 # Your Task
 
-You will receive a learner with its current configuration and metrics. Your job is to determine what configuration changes are needed based on the guidance.
+You will receive a learner with its current configuration and metrics. Your job is to **decompose the guidance** into two categories:
 
-# Adjustable Fields
+## 1. Behavioral Changes (→ adjust)
 
-1. **name**: Update if the learner's identity has shifted
-2. **description**: Update if the purpose description needs refinement
-3. **instructions**: Modify to:
-   - Narrow or broaden scope
-   - Clarify responsibilities
-   - Add or remove focus areas
-   - Refine filtering criteria
+These are about *how* the learner should evolve its focus, identity, and prompts:
+- Changes to what the learner pays attention to
+- Shifts in scope or emphasis
+- New or removed focus areas
+- Changes to reasoning approach
 
-4. **thresholds.minImportance** (0-1): Control observation filtering
-   - Higher = more selective (fewer observations accepted)
-   - Lower = more permissive (more observations accepted)
-   - Adjust based on dismissal rate or stagnation signals
+Express these as a natural language **directive** — a concise instruction describing the desired evolution. The learner's adjust() method will incrementally evolve its instructions, prompts, and schemas based on this directive.
 
-5. **thresholds.maxObservations** (integer): Control buffer size
-   - Higher = more observations before synthesis
-   - Lower = more frequent synthesis
-   - Adjust based on synthesis frequency or stagnation signals
+Examples:
+- "Focus more on error handling patterns, less on general coding style"
+- "Stop tracking deprecated APIs, start tracking migration patterns"
+- "Be stricter about what counts as a preference vs one-time behavior"
+
+If no behavioral change is needed, return an empty string.
+
+## 2. Mechanical Changes (→ update)
+
+These are specific config field values:
+- **name**: Update if the learner's identity has shifted
+- **description**: Update if the purpose description needs refinement
+- **thresholds.minImportance** (0-1): Control observation filtering
+  - Higher = more selective, Lower = more permissive
+- **thresholds.maxObservations** (integer): Control buffer size
+  - Higher = more observations before synthesis
+
+Only include fields that need changing. Omit unchanged fields.
 
 # Guidelines
 
-- **Minimal Changes**: Only update fields that truly need changing
-- **Incremental Adjustments**: Make small, targeted changes
-- **Threshold Tuning**: Consider metrics when updating thresholds
-  - High dismissal rate → might need lower minImportance or broader instructions
-  - Stagnation (no synthesis) → might need lower minImportance or narrower scope
-- **Scope Refinement**: Instructions changes should clarify, not completely rewrite
+- **Prefer behavioral over mechanical**: When the guidance is about "how to learn differently", use behavioral. When it's about specific numeric or naming changes, use mechanical.
+- **Both can be used together**: e.g., behavioral directive to shift focus + mechanical name change
+- **Minimal mechanical changes**: Only update fields that truly need specific values
+- **Threshold tuning**: Consider metrics when adjusting thresholds
+  - High dismissal rate → lower minImportance or use behavioral to broaden scope
+  - Stagnation → lower minImportance or use behavioral to narrow scope
 
 # Output Format
 
 Return:
-- updates: Object with ONLY the fields that need changing (omit unchanged fields)
-- reasoning: Brief explanation (1-2 sentences) of what changed and why
-
-If instructions are updated, the learner's prompts will be regenerated automatically.`
+- mechanical: Object with ONLY the fields that need changing (omit unchanged fields)
+- behavioral: Natural language directive for incremental evolution (empty string if none)
+- reasoning: Brief explanation (1-2 sentences) of what changed and why`

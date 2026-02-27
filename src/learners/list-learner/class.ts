@@ -22,6 +22,10 @@ import type {
  * Store is injected — caller must provide it.
  */
 export class ListLearner extends BaseLearner<ListItem[], ListLearnerState> {
+	get type(): string {
+		return 'list'
+	}
+
 	constructor(rawConfig: ListLearnerConfig, parentModels?: ParentModels) {
 		const config = resolveListLearnerConfig(rawConfig, parentModels)
 		const maxObsForStagnation = 3 * (config.understand.thresholds.maxObservations ?? 10)

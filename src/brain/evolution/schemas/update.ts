@@ -1,26 +1,20 @@
 /**
  * Zod schema for update action LLM output
+ *
+ * Decomposes guidance into:
+ * - mechanical: specific field values (name, description, thresholds)
+ * - behavioral: directive for learner.adjust() (incremental evolution)
  */
 
 import { z } from 'zod'
 
-/**
- * Schema for update action output
- *
- * LLM generates partial config updates for a learner
- * Only includes fields that should be modified
- */
 export const updateOutputSchema = z.object({
-	updates: z.object({
+	mechanical: z.object({
 		name: z.string().optional().describe('Updated name (if needed)'),
 		description: z
 			.string()
 			.optional()
 			.describe('Updated description (if needed)'),
-		instructions: z
-			.string()
-			.optional()
-			.describe('Updated instructions (if scope needs refinement)'),
 		thresholds: z
 			.object({
 				minImportance: z
@@ -38,7 +32,14 @@ export const updateOutputSchema = z.object({
 			})
 			.optional()
 			.describe('Updated synthesis thresholds (if needed)'),
-	}),
+	}).describe('Mechanical config changes — specific field values'),
+	behavioral: z
+		.string()
+		.describe(
+			'Directive for incremental behavioral evolution (for adjust()). ' +
+			'Describes how the learner should evolve its focus, instructions, and prompts. ' +
+			'Empty string if no behavioral change needed.',
+		),
 	reasoning: z
 		.string()
 		.describe('Explanation of what changed and why (1-2 sentences)'),

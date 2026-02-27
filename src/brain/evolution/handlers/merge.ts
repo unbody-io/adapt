@@ -1,23 +1,21 @@
 /**
  * Merge action handler - combines multiple learners into one
+ *
+ * Type-aware: validates all source learners are same type,
+ * uses descriptor's mergeUnderstandingSchema for LLM output.
  */
 
 import { Output } from 'ai'
+import { z } from 'zod'
 import { EvolutionActionHandler } from '../base-handler'
 import type { EvolutionDecision } from '../../evaluator/types'
 import type { MergeActionResult } from '../types'
 import type { BaseLearner } from '../../../learners/base/class'
 import { generate } from '../../../llm'
-import { mergeOutputSchema } from '../schemas/merge'
 import { mergeSystemPrompt } from '../prompt.system.merge'
 import { mergePromptTemplate } from '../prompt.template.merge'
 import { createCompleteConfig } from '../utils'
 
-/**
- * Handler for 'merge' evolution action
- *
- * Processes each merge decision sequentially.
- */
 export class MergeHandler extends EvolutionActionHandler<MergeActionResult> {
 	async execute(decisions: EvolutionDecision[]): Promise<MergeActionResult> {
 		const allNewLearnerIds: string[] = []
@@ -40,6 +38,30 @@ export class MergeHandler extends EvolutionActionHandler<MergeActionResult> {
 					learners.push(learner)
 				}
 
+				// All source learners must be the same type
+				const learnerType = learners[0].type
+				if (!learners.every((l) => l.type === learnerType)) {
+					throw new Error(
+						'Cross-type merge is not supported. All source learners must be the same type.',
+					)
+				}
+
+				// Get type descriptor for understanding schema
+				const descriptor = this.brain.learnerTypes.get(learnerType)
+				if (!descriptor) {
+					throw new Error(`Unknown learner type: ${learnerType}`)
+				}
+
+				// Build dynamic schema with type-specific understanding
+				const mergeSchema = z.object({
+					config: z.object({
+						name: z.string().describe('Name for the merged learner'),
+						description: z.string().describe('Description of the merged learner purpose'),
+						instructions: z.string().describe('Combined instructions defining scope and responsibilities'),
+					}),
+					understanding: descriptor.mergeUnderstandingSchema,
+				})
+
 				const result = await generate({
 					model: this.brain.config.model,
 					system: mergeSystemPrompt,
@@ -48,20 +70,23 @@ export class MergeHandler extends EvolutionActionHandler<MergeActionResult> {
 						learners,
 						this.brain.prompt,
 					),
-					output: Output.object({ schema: mergeOutputSchema }),
-					repairSchema: mergeOutputSchema,
+					output: Output.object({ schema: mergeSchema }),
+					repairSchema: mergeSchema,
 				})
 
 				const { config, understanding } = result.output
 
-				const completeConfig = createCompleteConfig(config)
+				const completeConfig = createCompleteConfig({
+					...config,
+					type: learnerType as 'text' | 'list',
+				})
 				const newLearner =
 					await this.brain.createLearnerFromConfig(completeConfig)
 
 				await newLearner.setUnderstanding(understanding)
 
 				for (const learnerId of decision.targets) {
-					this.brain.__removeLearner(learnerId)
+					await this.brain.__removeLearner(learnerId)
 				}
 
 				allNewLearnerIds.push(newLearner.id)

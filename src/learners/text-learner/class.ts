@@ -20,6 +20,10 @@ import type {
  * Store is injected — caller must provide it.
  */
 export class TextLearner extends BaseLearner<string, TextLearnerState> {
+	get type(): string {
+		return 'text'
+	}
+
 	constructor(rawConfig: TextLearnerConfig, parentModels?: ParentModels) {
 		const config = resolveTextLearnerConfig(rawConfig, parentModels)
 		const maxObsForStagnation = 3 * (config.understand.thresholds.maxObservations ?? 10)

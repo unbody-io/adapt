@@ -27,7 +27,7 @@ export class CreateHandler extends EvolutionActionHandler<CreateActionResult> {
 
 			const result = await generate({
 				model: this.brain.config.model,
-				prompt: createPromptTemplate(guidance, this.brain.prompt),
+				prompt: createPromptTemplate(guidance, this.brain.prompt, Array.from(this.brain.learnerTypes.values())),
 				output: Output.object({ schema: learnerConfigsSchema }),
 				repairSchema: learnerConfigsSchema,
 			})

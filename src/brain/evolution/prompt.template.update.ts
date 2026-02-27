@@ -59,18 +59,22 @@ ${understanding.slice(0, 500)}${understanding.length > 500 ? '...' : ''}
 
 # Your Task
 
-Based on the guidance, determine what configuration changes are needed for this learner.
+Based on the guidance, decompose the needed changes into two categories:
 
-You can update:
+**Behavioral** (for adjust — incremental evolution):
+- Changes to focus, scope, emphasis, reasoning approach
+- Express as a natural language directive
+- Empty string if no behavioral change needed
+
+**Mechanical** (for update — specific field values):
 - name: Change the learner's name
 - description: Update the description
-- instructions: Refine scope or responsibilities
 - thresholds.minImportance: Adjust importance threshold (0-1)
 - thresholds.maxObservations: Adjust buffer size (integer)
-
-Only include fields that need to change. If a field doesn't need updating, omit it.
+- Only include fields that need to change
 
 Provide:
-- updates: Object with only the fields that should change
+- mechanical: Object with only the fields that should change
+- behavioral: Directive for incremental evolution (empty string if none)
 - reasoning: Brief explanation of what changed and why (1-2 sentences)`
 }

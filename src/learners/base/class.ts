@@ -28,7 +28,7 @@ import type {
 	LearnerOrigin,
 	Significance,
 } from '../types'
-import { initObserve, observe } from '../observer'
+import { adjustObserve, initObserve, observe } from '../observer'
 import type { EvolutionRecord, Store } from '../stores'
 import type { QueryCallbacks, QueryMethod, QueryOptions, QueryResult } from '../base/query'
 import type {
@@ -165,6 +165,16 @@ export abstract class BaseLearner<
 	protected abstract regenUnderstandPrompt(
 		model: LanguageModel,
 		instructions: string,
+	): Promise<void>
+
+	/**
+	 * Adjust understand prompt from a directive (type-specific)
+	 * Unlike regen (stateless), this passes current identity so the LLM can evolve it.
+	 */
+	protected abstract adjustUnderstandPrompt(
+		model: LanguageModel,
+		directive: string,
+		newInstructions: string,
 	): Promise<void>
 
 	/**
@@ -868,6 +878,78 @@ export abstract class BaseLearner<
 				config: { ...this.state },
 			})
 		}
+
+		return { changedFields }
+	}
+
+	// ── Adjust ──────────────────────────────────────────────────────────────
+
+	/**
+	 * Adjust learner behavior from a natural language directive.
+	 *
+	 * Unlike update() (which replaces instructions and regenerates from scratch),
+	 * adjust() shows the LLM the current state so it can evolve incrementally.
+	 * The directive is natural language: "also track X", "stop tracking Y", "be stricter", etc.
+	 *
+	 * Does NOT touch persisted data (observations, understandings, evolution records).
+	 */
+	async adjust(directive: string): Promise<{ changedFields: string[] }> {
+		await this.ensureInit()
+
+		// 1. Adjust observe (shared) — resolves new instructions + new observe identity
+		const observeResult = await adjustObserve(
+			this.state.models.observer_blueprint,
+			directive,
+			this.state.instructions,
+			this.state.observe_identity!,
+			this.state.focus || undefined,
+		)
+
+		// 2. Persist new instructions + observe artifacts
+		await this.setState({
+			instructions: observeResult.newInstructions,
+			observe_identity: observeResult.identity,
+			observe_prompt: observeResult.systemPrompt,
+		} as Partial<TState>)
+
+		// 3. Adjust understand (type-specific)
+		await this.adjustUnderstandPrompt(
+			this.state.models.understand_blueprint,
+			directive,
+			observeResult.newInstructions,
+		)
+
+		// 4. Regenerate schemas from new instructions (stateless is fine for schemas)
+		const schemas = await this.generateSchemas(
+			this.state.models.blueprint,
+			observeResult.newInstructions,
+		)
+		await this.setState({
+			observation_schema: schemas.observationSchema,
+			understanding_schema: schemas.understandingSchema,
+		} as Partial<TState>)
+
+		const changedFields = [
+			'instructions',
+			'observe_identity',
+			'observe_prompt',
+			'understand_identity',
+			'understand_prompt',
+			'observation_schema',
+			'understanding_schema',
+		]
+
+		this.emit('learner:prompts:regenerated', {
+			learnerId: this.id,
+			observePrompt: this.state.observe_prompt!,
+			understandPrompt: this.state.understand_prompt ?? '',
+		})
+
+		this.emit('learner:config:updated', {
+			learnerId: this.id,
+			changedFields,
+			config: { ...this.state },
+		})
 
 		return { changedFields }
 	}

@@ -6,7 +6,7 @@ import { ToolBasedMethod } from '../base/query'
 import type { QueryMethod } from '../base/query'
 import { resolveListLearnerConfig } from './config.resolver'
 import { applyListGovernance } from './governance'
-import { initUnderstand, understand } from './understand'
+import { adjustUnderstand, initUnderstand, understand } from './understand'
 import { buildListQueryPrompt, createListQueryTools } from './query-tools'
 import { generateObservationSchema } from './schema'
 import type {
@@ -136,6 +136,23 @@ export class ListLearner extends BaseLearner<ListItem[], ListLearnerState> {
 			understand_identity: result.identity,
 			// For list, the system prompt is generated per call (includes current items)
 			understand_prompt: '(list-understand: identity initialized)',
+		} as Partial<ListLearnerState>)
+	}
+
+	protected async adjustUnderstandPrompt(
+		model: LanguageModel,
+		directive: string,
+		newInstructions: string,
+	): Promise<void> {
+		const result = await adjustUnderstand(
+			model,
+			directive,
+			newInstructions,
+			this.state.understand_identity!,
+		)
+		await this.setState({
+			understand_identity: result.identity,
+			understand_prompt: '(list-understand: identity adjusted)',
 		} as Partial<ListLearnerState>)
 	}
 

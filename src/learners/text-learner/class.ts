@@ -6,7 +6,7 @@ import { ToolBasedMethod } from '../base/query'
 import type { QueryMethod } from '../base/query'
 import { resolveTextLearnerConfig } from './config.resolver'
 import { applyStrategy } from './strategies'
-import { initUnderstand, understand } from './understand'
+import { adjustUnderstand, initUnderstand, understand } from './understand'
 import { buildTextQueryPrompt, createReadUnderstandingTool } from './query-tools'
 import type {
 	TextLearnerConfig,
@@ -133,6 +133,24 @@ export class TextLearner extends BaseLearner<string, TextLearnerState> {
 		const result = await initUnderstand(
 			model,
 			instructions,
+			this.state.governance.strategy,
+		)
+		await this.setState({
+			understand_identity: result.identity,
+			understand_prompt: result.systemPrompt,
+		} as Partial<TextLearnerState>)
+	}
+
+	protected async adjustUnderstandPrompt(
+		model: LanguageModel,
+		directive: string,
+		newInstructions: string,
+	): Promise<void> {
+		const result = await adjustUnderstand(
+			model,
+			directive,
+			newInstructions,
+			this.state.understand_identity!,
 			this.state.governance.strategy,
 		)
 		await this.setState({

@@ -48,7 +48,7 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 	readonly learners: Map<string, BaseLearner<unknown>> = new Map()
 	private learnerNames: Map<string, string> = new Map()
 	private initialized = false
-	private storeFactory: (learnerId: string) => Store
+	private learnerStoreFactory: (learnerId: string) => Store
 	readonly brainStore: BrainStore
 	readonly learnerTypes: Map<string, LearnerTypeDescriptor>
 	private evaluator?: Evaluator
@@ -62,7 +62,7 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 		super()
 		this.config = resolveBrainConfig(rawConfig)
 		this.prompt = this.config.prompt
-		this.storeFactory = rawConfig.storeFactory ?? (() => new MemoryStore())
+		this.learnerStoreFactory = rawConfig.learning?.store ?? (() => new MemoryStore())
 		this.brainStore = rawConfig.store ?? new MemoryBrainStore()
 
 		// Register learner type descriptors (default: text + list)
@@ -223,7 +223,7 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 				name: record.name,
 				description: record.description,
 				origin: 'prompt' as const,
-				store: this.storeFactory(record.id),
+				store: this.learnerStoreFactory(record.id),
 				governance: configSnapshot.governance,
 				understand: {
 					thresholds: {
@@ -357,7 +357,7 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 
 		const learner = descriptor.factory({
 			...shared,
-			store: this.storeFactory(config.id),
+			store: this.learnerStoreFactory(config.id),
 			governance,
 		})
 

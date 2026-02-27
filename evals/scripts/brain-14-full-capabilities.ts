@@ -55,10 +55,12 @@ async function runSuite(suiteName: string, createBrainStore: () => BrainStore) {
 - Tools and frameworks used (as a list/catalog)`,
 		model: openrouter(MODEL),
 		store: brainStore,
-		storeFactory: (learnerId: string) => {
-			const store = new MemoryStore()
-			learnerStores.set(learnerId, store)
-			return store
+		learning: {
+			store: (learnerId: string) => {
+				const store = new MemoryStore()
+				learnerStores.set(learnerId, store)
+				return store
+			},
 		},
 		evolution: {
 			enabled: true,
@@ -210,13 +212,15 @@ async function runSuite(suiteName: string, createBrainStore: () => BrainStore) {
 		prompt: 'will be overwritten by restore',
 		model: openrouter(MODEL),
 		store: brainStore,
-		storeFactory: (learnerId: string) => {
-			// Reuse existing learner stores (simulating same DB)
-			const existing = learnerStores.get(learnerId)
-			if (existing) return existing
-			const store = new MemoryStore()
-			learnerStores.set(learnerId, store)
-			return store
+		learning: {
+			store: (learnerId: string) => {
+				// Reuse existing learner stores (simulating same DB)
+				const existing = learnerStores.get(learnerId)
+				if (existing) return existing
+				const store = new MemoryStore()
+				learnerStores.set(learnerId, store)
+				return store
+			},
 		},
 		evolution: {
 			enabled: true,

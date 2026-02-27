@@ -65,6 +65,8 @@ export interface LearningConfig extends CascadableConfig {
 	understand?: UnderstandPhaseConfig
 	query?: QueryPhaseConfig
 	governance?: GovernanceConfig
+	/** Factory for creating per-learner stores. Receives learnerId for restore routing. */
+	store?: (learnerId: string) => Store
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -131,8 +133,6 @@ export interface BrainConfig extends CascadableConfig {
 	learning?: LearningConfig
 	/** Evolution config (Living Brain) */
 	evolution?: EvolutionConfig
-	/** Factory for creating per-learner stores. Receives learnerId for restore routing. */
-	storeFactory?: (learnerId: string) => Store
 	/** Brain's own persistence store. Defaults to MemoryBrainStore. */
 	store?: BrainStore
 }

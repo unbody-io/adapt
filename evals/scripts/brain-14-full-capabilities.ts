@@ -89,9 +89,9 @@ async function runSuite(suiteName: string, createBrainStore: () => BrainStore) {
 		)
 	}
 
-	// Verify registry was populated
-	const registryCount = await brainStore.registry.count()
-	assertEqual(registryCount, learners.length, 'Registry has one entry per learner')
+	// Verify learner list was populated
+	const learnerCount = await brainStore.learners.count()
+	assertEqual(learnerCount, learners.length, 'Learner list has one entry per learner')
 
 	// Verify brain state was persisted
 	const stateCount = await brainStore.state.count()
@@ -155,14 +155,9 @@ async function runSuite(suiteName: string, createBrainStore: () => BrainStore) {
 		'Instructions changed after adjust',
 	)
 
-	// Verify registry was updated
-	const registryRecord = await brainStore.registry.get(firstLearner.id)
-	assertDefined(registryRecord, 'Adjusted learner still in registry')
-	assertEqual(
-		registryRecord.instructions,
-		adjusted.instructions,
-		'Registry instructions match adjusted learner',
-	)
+	// Verify learner still in brain store
+	const learnerRecord = await brainStore.learners.get(firstLearner.id)
+	assertDefined(learnerRecord, 'Adjusted learner still in brain store')
 
 	// Remove a learner (if there are 2+)
 	if (learners.length >= 2) {
@@ -173,29 +168,28 @@ async function runSuite(suiteName: string, createBrainStore: () => BrainStore) {
 
 		assertTrue(!brain.learners.has(removeId), 'Removed learner gone from Brain map')
 
-		const removedRegistry = await brainStore.registry.get(removeId)
-		assertTrue(removedRegistry === undefined, 'Removed learner gone from registry')
+		const removedLearner = await brainStore.learners.get(removeId)
+		assertTrue(removedLearner === undefined, 'Removed learner gone from brain store')
 
 		assertEventEmitted(events, 'brain:learner:removed', (p) => p.learnerId === removeId)
 	}
 
 	// ── Phase 5: Registry Verification ──────────────────────────────────────
 
-	logger.logSection('Phase 5: Registry Verification')
+	logger.logSection('Phase 5: Learner List Verification')
 
 	const remainingLearners = brain.getLearners()
-	const registryList = await brainStore.registry.list()
+	const learnerList = await brainStore.learners.list()
 	assertEqual(
-		registryList.length,
+		learnerList.length,
 		remainingLearners.length,
-		'Registry count matches remaining learners',
+		'Learner list count matches remaining learners',
 	)
 
 	for (const learner of remainingLearners) {
-		const record = await brainStore.registry.get(learner.id)
-		assertDefined(record, `Registry has entry for learner ${learner.id}`)
-		assertEqual(record.type, learner.type, `Registry type matches for ${learner.id}`)
-		assertEqual(record.instructions, learner.instructions, `Registry instructions match for ${learner.id}`)
+		const record = await brainStore.learners.get(learner.id)
+		assertDefined(record, `Brain store has entry for learner ${learner.id}`)
+		assertEqual(record.type, learner.type, `Stored type matches for ${learner.id}`)
 	}
 
 	// ── Phase 6: Persist → Restore ──────────────────────────────────────────

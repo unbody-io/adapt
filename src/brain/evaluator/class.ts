@@ -160,7 +160,7 @@ export class Evaluator extends TypedEmitter<EvaluatorEventMap> {
 			if (this.history.length > 10) this.history.shift()
 
 			// Persist to brain store
-			await this.brain.brainStore.evolution.add({
+			await this.brain.store.evolution.add({
 				id: `eval_${Date.now()}`,
 				decisions: historyEntry.decisions,
 				source,

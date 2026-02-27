@@ -135,101 +135,42 @@ export interface BrainConfig extends CascadableConfig {
 	evolution?: EvolutionConfig
 	/** Brain's own persistence store. Defaults to MemoryBrainStore. */
 	store?: BrainStore
+	/** Explicit learner definitions (uses existing text/list types). Created on init. */
+	learners?: GeneratedLearnerConfig[]
+	/**
+	 * When true (default), Brain auto-generates learners from the prompt via LLM.
+	 * When false, only explicit `learners` are used — no LLM decomposition.
+	 * Both `prompt` and `learners` can coexist regardless of this flag.
+	 */
+	autoSetup?: boolean
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Resolved Brain Config
+// Resolved Brain Config (computed view of BrainState — returned by brain.config getter)
 // ─────────────────────────────────────────────────────────────────────────────
 
 /**
- * Resolved observer phase config
- */
-export interface ResolvedObserverPhaseConfig extends ResolvedCascadableConfig {}
-
-/**
- * Resolved understand phase config
- */
-export interface ResolvedUnderstandPhaseConfig
-	extends ResolvedCascadableConfig {
-	thresholds: {
-		maxObservations: number
-		maxTokens: number
-		minImportance: number
-	}
-}
-
-/**
- * Resolved query phase config
- */
-export interface ResolvedQueryPhaseConfig {
-	model: LanguageModel
-}
-
-/**
- * Resolved governance config
- */
-export interface ResolvedGovernanceConfig {
-	strategy: Strategy
-	maxTokens: number
-}
-
-/**
- * Resolved learning config
- */
-export interface ResolvedLearningConfig extends ResolvedCascadableConfig {
-	observer: ResolvedObserverPhaseConfig
-	understand: ResolvedUnderstandPhaseConfig
-	query: ResolvedQueryPhaseConfig
-	governance: ResolvedGovernanceConfig
-}
-
-/**
- * Resolved init phase config
- */
-export interface ResolvedInitPhaseConfig {
-	model: LanguageModel
-}
-
-/**
- * Resolved brain query config
- */
-export interface ResolvedBrainQueryConfig {
-	model: LanguageModel
-}
-
-/**
- * Resolved ingest config
- */
-export interface ResolvedIngestConfig {
-	batchSize: number
-}
-
-/**
- * Resolved evolution config
- */
-export interface ResolvedEvolutionConfig {
-	enabled: boolean
-	evaluatorSignalThreshold: number
-	autoEvaluate: boolean
-	coverageGap: {
-		relevanceThreshold: number
-		gapCountThreshold: number
-		windowSize: number
-	}
-}
-
-/**
- * Fully resolved Brain config - all values defined
+ * Computed view of BrainState in the traditional config shape.
  *
- * Note: `learning` is intentionally absent. Each learner owns its own config.
- * Use `brain.learners` to read learner configs.
+ * Returned by `brain.config` getter. NOT a stored value — it's derived
+ * from `this.state` on every access. External readers (evaluator, evolution
+ * handlers, evals) consume this shape.
  */
 export interface ResolvedBrainConfig extends ResolvedCascadableConfig {
 	prompt: string
-	init: ResolvedInitPhaseConfig
-	query: ResolvedBrainQueryConfig
-	ingest: ResolvedIngestConfig
-	evolution: ResolvedEvolutionConfig
+	init: { model: LanguageModel }
+	query: { model: LanguageModel }
+	ingest: { batchSize: number }
+	evolution: {
+		enabled: boolean
+		evaluatorSignalThreshold: number
+		autoEvaluate: boolean
+		coverageGap: {
+			relevanceThreshold: number
+			gapCountThreshold: number
+			windowSize: number
+		}
+	}
 }
 
 /**

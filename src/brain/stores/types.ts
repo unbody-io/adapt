@@ -23,7 +23,7 @@ export interface BrainCollection<T extends { id: string }> {
 
 export interface BrainStore {
 	state: BrainCollection<BrainStateRecord>
-	registry: BrainCollection<BrainRegistryRecord>
+	learners: BrainCollection<BrainLearnerRecord>
 	evolution: BrainCollection<BrainEvolutionRecord>
 	dispose(): Promise<void>
 }
@@ -37,16 +37,10 @@ export interface BrainStateRecord {
 	updated_at: string
 }
 
-/** One record per learner in the registry */
-export interface BrainRegistryRecord {
+/** One record per learner — minimal ref, learner's own store has everything else */
+export interface BrainLearnerRecord {
 	id: string // learner ID
 	type: string // 'text' | 'list' | future types
-	name: string
-	description: string
-	instructions: string
-	config: unknown // serialized learner config snapshot (governance, thresholds, etc.)
-	created_at: string
-	updated_at: string
 }
 
 /** Evaluator decisions history */

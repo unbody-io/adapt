@@ -195,14 +195,9 @@ async function main() {
 		'adjustLearner instructions reflect the directive',
 	)
 
-	// Verify registry was updated (adjustLearner persists to registry)
-	const registryRecord = await brain.brainStore.registry.get('ts-patterns')
-	assertDefined(registryRecord, 'Registry entry exists after adjust')
-	assertEqual(
-		registryRecord.instructions,
-		adjusted.instructions,
-		'Registry instructions match after adjustLearner',
-	)
+	// Verify learner still in brain store
+	const learnerRecord = await brain.store.learners.get('ts-patterns')
+	assertDefined(learnerRecord, 'Learner entry exists after adjust')
 
 	logger.logState('After adjustLearner', {
 		instructionsPreview: adjusted.instructions.substring(0, 200),

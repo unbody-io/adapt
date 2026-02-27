@@ -9,7 +9,7 @@ import Database from 'better-sqlite3'
 import type {
 	BrainCollection,
 	BrainEvolutionRecord,
-	BrainRegistryRecord,
+	BrainLearnerRecord,
 	BrainStateRecord,
 	BrainStore,
 } from './types'
@@ -27,15 +27,9 @@ const stateColumns: ColumnDef[] = [
 	{ name: 'updated_at', json: false },
 ]
 
-const registryColumns: ColumnDef[] = [
+const learnersColumns: ColumnDef[] = [
 	{ name: 'id', json: false },
 	{ name: 'type', json: false },
-	{ name: 'name', json: false },
-	{ name: 'description', json: false },
-	{ name: 'instructions', json: false },
-	{ name: 'config', json: true },
-	{ name: 'created_at', json: false },
-	{ name: 'updated_at', json: false },
 ]
 
 const evolutionColumns: ColumnDef[] = [
@@ -194,7 +188,7 @@ export class SQLiteBrainCollection<T extends { id: string }>
 export class SQLiteBrainStore implements BrainStore {
 	private db: Database.Database
 	state: SQLiteBrainCollection<BrainStateRecord>
-	registry: SQLiteBrainCollection<BrainRegistryRecord>
+	learners: SQLiteBrainCollection<BrainLearnerRecord>
 	evolution: SQLiteBrainCollection<BrainEvolutionRecord>
 
 	constructor(path: string = ':memory:') {
@@ -209,15 +203,9 @@ export class SQLiteBrainStore implements BrainStore {
 			)
 		`)
 		this.db.exec(`
-			CREATE TABLE IF NOT EXISTS registry (
+			CREATE TABLE IF NOT EXISTS learners (
 				id TEXT PRIMARY KEY,
-				type TEXT NOT NULL,
-				name TEXT NOT NULL,
-				description TEXT NOT NULL,
-				instructions TEXT NOT NULL,
-				config TEXT NOT NULL,
-				created_at TEXT NOT NULL,
-				updated_at TEXT NOT NULL
+				type TEXT NOT NULL
 			)
 		`)
 		this.db.exec(`
@@ -232,8 +220,7 @@ export class SQLiteBrainStore implements BrainStore {
 		// Indexes for common filter queries
 		this.db.exec(`
 			CREATE INDEX IF NOT EXISTS idx_state_updated ON state(updated_at);
-			CREATE INDEX IF NOT EXISTS idx_registry_type ON registry(type);
-			CREATE INDEX IF NOT EXISTS idx_registry_updated ON registry(updated_at);
+			CREATE INDEX IF NOT EXISTS idx_learners_type ON learners(type);
 			CREATE INDEX IF NOT EXISTS idx_evolution_created ON evolution(created_at);
 		`)
 
@@ -242,10 +229,10 @@ export class SQLiteBrainStore implements BrainStore {
 			'state',
 			stateColumns,
 		)
-		this.registry = new SQLiteBrainCollection<BrainRegistryRecord>(
+		this.learners = new SQLiteBrainCollection<BrainLearnerRecord>(
 			this.db,
-			'registry',
-			registryColumns,
+			'learners',
+			learnersColumns,
 		)
 		this.evolution = new SQLiteBrainCollection<BrainEvolutionRecord>(
 			this.db,

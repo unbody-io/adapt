@@ -11,7 +11,7 @@ import {
 	SQLiteBrainStore,
 	type BrainStore,
 	type BrainStateRecord,
-	type BrainRegistryRecord,
+	type BrainLearnerRecord,
 	type BrainEvolutionRecord,
 } from '../../src/brain/stores'
 
@@ -49,23 +49,8 @@ function makeState(id: string, value: unknown): BrainStateRecord {
 	return { id, value, updated_at: new Date().toISOString() }
 }
 
-function makeRegistry(
-	id: string,
-	type: string,
-	name: string,
-	instructions: string,
-): BrainRegistryRecord {
-	const now = new Date().toISOString()
-	return {
-		id,
-		type,
-		name,
-		description: `${name} description`,
-		instructions,
-		config: { governance: {}, thresholds: { minImportance: 0.3 } },
-		created_at: now,
-		updated_at: now,
-	}
+function makeLearner(id: string, type: string): BrainLearnerRecord {
+	return { id, type }
 }
 
 function makeEvolution(id: string, source: string): BrainEvolutionRecord {
@@ -181,29 +166,29 @@ async function testFiltering(createStore: CreateStore) {
 
 	const store = createStore()
 
-	// Add registry records with different types
-	await store.registry.add(makeRegistry('l-1', 'text', 'Text Learner 1', 'Track patterns'))
-	await store.registry.add(makeRegistry('l-2', 'text', 'Text Learner 2', 'Track habits'))
-	await store.registry.add(makeRegistry('l-3', 'list', 'List Learner 1', 'Track items'))
-	await store.registry.add(makeRegistry('l-4', 'list', 'List Learner 2', 'Track tools'))
+	// Add learner records with different types
+	await store.learners.add(makeLearner('l-1', 'text'))
+	await store.learners.add(makeLearner('l-2', 'text'))
+	await store.learners.add(makeLearner('l-3', 'list'))
+	await store.learners.add(makeLearner('l-4', 'list'))
 
 	// list with filter
-	const textLearners = await store.registry.list({ type: 'text' })
+	const textLearners = await store.learners.list({ type: 'text' })
 	assertEqual(textLearners.length, 2, 'list(type=text) returns 2 text learners')
 	assert(textLearners.every((r) => r.type === 'text'), 'all filtered items are text type')
 
-	const listLearners = await store.registry.list({ type: 'list' })
+	const listLearners = await store.learners.list({ type: 'list' })
 	assertEqual(listLearners.length, 2, 'list(type=list) returns 2 list learners')
 
 	// count with filter
-	const textCount = await store.registry.count({ type: 'text' })
+	const textCount = await store.learners.count({ type: 'text' })
 	assertEqual(textCount, 2, 'count(type=text) returns 2')
 
-	const listCount = await store.registry.count({ type: 'list' })
+	const listCount = await store.learners.count({ type: 'list' })
 	assertEqual(listCount, 2, 'count(type=list) returns 2')
 
 	// count without filter
-	const totalCount = await store.registry.count()
+	const totalCount = await store.learners.count()
 	assertEqual(totalCount, 4, 'count() returns total of 4')
 
 	// Evolution source filtering
@@ -277,49 +262,31 @@ async function testStatePipeline(createStore: CreateStore) {
 	await store.dispose()
 }
 
-// ── Test: Registry pipeline simulation ──────────────────────────────────────
+// ── Test: Learners pipeline simulation ───────────────────────────────────────
 
-async function testRegistryPipeline(createStore: CreateStore) {
-	section('Registry pipeline simulation')
+async function testLearnersPipeline(createStore: CreateStore) {
+	section('Learners pipeline simulation')
 
 	const store = createStore()
 
 	// 1. Register learners (simulating createLearnerFromConfig)
-	await store.registry.add(makeRegistry('ts-learner', 'text', 'TypeScript Patterns', 'Track TS patterns'))
-	await store.registry.add(makeRegistry('react-learner', 'text', 'React Practices', 'Track React practices'))
-	await store.registry.add(makeRegistry('tools-learner', 'list', 'Tools Catalog', 'Track tools'))
+	await store.learners.add(makeLearner('ts-learner', 'text'))
+	await store.learners.add(makeLearner('react-learner', 'text'))
+	await store.learners.add(makeLearner('tools-learner', 'list'))
 
-	assertEqual(await store.registry.count(), 3, '3 learners registered')
+	assertEqual(await store.learners.count(), 3, '3 learners registered')
 
-	// 2. Update a learner (simulating adjustLearner)
-	await store.registry.update('ts-learner', {
-		instructions: 'Track advanced TS patterns including generics and conditional types',
-		updated_at: new Date().toISOString(),
-	})
+	// 2. Remove a learner (simulating removeLearner)
+	await store.learners.delete('react-learner')
+	assertEqual(await store.learners.count(), 2, '2 learners after removal')
+	assertEqual(await store.learners.get('react-learner'), undefined, 'removed learner gone')
 
-	const updated = await store.registry.get('ts-learner')
-	assert(
-		updated?.instructions.includes('advanced'),
-		'registry updated with new instructions after adjust',
-	)
-
-	// 3. Remove a learner (simulating removeLearner)
-	await store.registry.delete('react-learner')
-	assertEqual(await store.registry.count(), 2, '2 learners after removal')
-	assertEqual(await store.registry.get('react-learner'), undefined, 'removed learner gone from registry')
-
-	// 4. Restore all learners (simulating restoreFromRegistry)
-	const allLearners = await store.registry.list()
-	assertEqual(allLearners.length, 2, 'restored 2 learners from registry')
+	// 3. Restore all learners (simulating restoreLearners)
+	const allLearners = await store.learners.list()
+	assertEqual(allLearners.length, 2, 'restored 2 learners')
 
 	const types = allLearners.map((l) => l.type).sort()
 	assertEqual(types, ['list', 'text'], 'both text and list types preserved')
-
-	// 5. Verify config serialization round-trip (JSON in state/registry)
-	const toolsLearner = await store.registry.get('tools-learner')
-	assert(toolsLearner !== undefined, 'tools learner exists in registry')
-	const config = toolsLearner?.config as { governance: Record<string, unknown>; thresholds: { minImportance: number } }
-	assertEqual(config.thresholds.minImportance, 0.3, 'config JSON round-trips correctly')
 
 	await store.dispose()
 }
@@ -387,18 +354,18 @@ async function testIsolation(createStore: CreateStore) {
 	const store = createStore()
 
 	await store.state.add(makeState('key-1', 'state value'))
-	await store.registry.add(makeRegistry('r-1', 'text', 'Learner', 'instructions'))
+	await store.learners.add(makeLearner('r-1', 'text'))
 	await store.evolution.add(makeEvolution('e-1', 'auto'))
 
 	// Clear one namespace, others unaffected
 	await store.state.clear()
 	assertEqual(await store.state.count(), 0, 'state cleared')
-	assertEqual(await store.registry.count(), 1, 'registry unaffected')
+	assertEqual(await store.learners.count(), 1, 'learners unaffected')
 	assertEqual(await store.evolution.count(), 1, 'evolution unaffected')
 
 	// Delete from one namespace
-	await store.registry.delete('r-1')
-	assertEqual(await store.registry.count(), 0, 'registry removed')
+	await store.learners.delete('r-1')
+	assertEqual(await store.learners.count(), 0, 'learner removed')
 	assertEqual(await store.evolution.count(), 1, 'evolution still unaffected')
 
 	await store.dispose()
@@ -412,14 +379,14 @@ async function testStoreIndependence(createStore: CreateStore) {
 	const store1 = createStore()
 	const store2 = createStore()
 
-	await store1.registry.add(makeRegistry('l-1', 'text', 'Only in store1', 'instructions'))
-	await store2.registry.add(makeRegistry('l-2', 'list', 'Only in store2', 'instructions'))
-	await store2.registry.add(makeRegistry('l-3', 'list', 'Also in store2', 'instructions'))
+	await store1.learners.add(makeLearner('l-1', 'text'))
+	await store2.learners.add(makeLearner('l-2', 'list'))
+	await store2.learners.add(makeLearner('l-3', 'list'))
 
-	assertEqual(await store1.registry.count(), 1, 'store1 has 1 registry entry')
-	assertEqual(await store2.registry.count(), 2, 'store2 has 2 registry entries')
-	assertEqual(await store1.registry.get('l-2'), undefined, 'store1 cannot see store2 data')
-	assertEqual(await store2.registry.get('l-1'), undefined, 'store2 cannot see store1 data')
+	assertEqual(await store1.learners.count(), 1, 'store1 has 1 learner entry')
+	assertEqual(await store2.learners.count(), 2, 'store2 has 2 learner entries')
+	assertEqual(await store1.learners.get('l-2'), undefined, 'store1 cannot see store2 data')
+	assertEqual(await store2.learners.get('l-1'), undefined, 'store2 cannot see store1 data')
 
 	await store1.dispose()
 	await store2.dispose()
@@ -457,10 +424,10 @@ async function runSuite(adapterName: string, createStore: CreateStore) {
 
 	const s2 = createStore()
 	await testCollectionCRUD(
-		'registry',
-		s2.registry,
-		(id) => makeRegistry(id, 'text', `Learner ${id}`, `Instructions for ${id}`),
-		() => ({ name: 'Updated Name', description: 'Updated description', updated_at: new Date().toISOString() }),
+		'learners',
+		s2.learners,
+		(id) => makeLearner(id, 'text'),
+		() => ({ type: 'list' }),
 	)
 	await s2.dispose()
 
@@ -479,7 +446,7 @@ async function runSuite(adapterName: string, createStore: CreateStore) {
 
 	// Pipeline simulations
 	await testStatePipeline(createStore)
-	await testRegistryPipeline(createStore)
+	await testLearnersPipeline(createStore)
 	await testEvolutionPipeline(createStore)
 
 	// Isolation & independence

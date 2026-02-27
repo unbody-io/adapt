@@ -8,7 +8,7 @@
 import type {
 	BrainCollection,
 	BrainEvolutionRecord,
-	BrainRegistryRecord,
+	BrainLearnerRecord,
 	BrainStateRecord,
 	BrainStore,
 } from './types'
@@ -85,7 +85,7 @@ export class MemoryBrainCollection<T extends { id: string }>
 
 export class MemoryBrainStore implements BrainStore {
 	state = new MemoryBrainCollection<BrainStateRecord>()
-	registry = new MemoryBrainCollection<BrainRegistryRecord>()
+	learners = new MemoryBrainCollection<BrainLearnerRecord>()
 	evolution = new MemoryBrainCollection<BrainEvolutionRecord>()
 
 	async dispose(): Promise<void> {

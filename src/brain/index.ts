@@ -15,7 +15,7 @@ export type {
 	BrainStore,
 	BrainCollection,
 	BrainStateRecord,
-	BrainRegistryRecord,
+	BrainLearnerRecord,
 	BrainEvolutionRecord,
 } from './stores'
 export { MemoryBrainStore } from './stores'

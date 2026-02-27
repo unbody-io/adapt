@@ -2,7 +2,7 @@ export type {
 	BrainCollection,
 	BrainStore,
 	BrainStateRecord,
-	BrainRegistryRecord,
+	BrainLearnerRecord,
 	BrainEvolutionRecord,
 } from './types'
 

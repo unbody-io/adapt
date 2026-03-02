@@ -5,13 +5,16 @@
  */
 import { Hono } from 'hono'
 import { cors } from 'hono/cors'
-import { serveStatic } from 'hono/bun'
+import { serveStatic } from '@hono/node-server/serve-static'
 import { streamSSE } from 'hono/streaming'
+import { serve } from '@hono/node-server'
 import { createOpenRouter } from '@openrouter/ai-sdk-provider'
 import type { LanguageModel } from 'ai'
 import { appendFileSync, mkdirSync, existsSync } from 'node:fs'
 import { join } from 'node:path'
 import { Brain } from '../src'
+import { SQLiteStore } from '../src/learners/stores/sqlite'
+import { SQLiteBrainStore } from '../src/brain/stores/sqlite'
 import { parseClaudeSessions, listClaudeProjects, listClaudeSessions } from './lib/claude-parser'
 import type { BrainConfig } from '../src/brain/types'
 
@@ -69,11 +72,14 @@ function logEvent(event: string, data: unknown) {
 		const d = data as { learnerId: string }
 		appendToLog(`[${timestamp}] DISMISSED [${d.learnerId}]`)
 	} else if (event === 'learner:synthesized') {
-		const d = data as { learnerId: string; significance: string; evolution: string; newUnderstanding: string }
+		const d = data as { learnerId: string; significance: string; evolution: string; newUnderstanding: unknown }
 		appendToLog(`[${timestamp}] SYNTHESIZED [${d.learnerId}] significance=${d.significance}`)
 		appendToLog(`  Evolution: ${d.evolution}`)
-		appendToLog(`  Understanding (${d.newUnderstanding.length} chars):`)
-		appendToLog(`  ${d.newUnderstanding.slice(0, 500)}${d.newUnderstanding.length > 500 ? '...' : ''}`)
+		const preview = typeof d.newUnderstanding === 'string'
+			? d.newUnderstanding
+			: JSON.stringify(d.newUnderstanding)
+		appendToLog(`  Understanding (${preview.length} chars):`)
+		appendToLog(`  ${preview.slice(0, 500)}${preview.length > 500 ? '...' : ''}`)
 	} else if (event === 'brain:ask:completed') {
 		const d = data as { insight: string; gaps: string[] }
 		appendToLog(`[${timestamp}] QUERY RESPONSE:`)
@@ -163,7 +169,7 @@ function extractErrorMessage(error: unknown): string {
 		}
 
 		// Check for data property (common in API errors)
-		const errorObj = error as Record<string, unknown>
+		const errorObj = error as unknown as Record<string, unknown>
 		if (errorObj.data && typeof errorObj.data === 'object') {
 			messages.push(`Data: ${JSON.stringify(errorObj.data)}`)
 		}
@@ -181,20 +187,35 @@ function extractErrorMessage(error: unknown): string {
 
 // --- Types ---
 
+type StoreType = 'memory' | 'sqlite-memory' | 'sqlite'
+
 interface InitRequest {
 	prompt: string
 	model?: string
 	blueprintModel?: string
-	observeModel?: string
-	observeBlueprintModel?: string
-	synthesizeModel?: string
-	synthesizeBlueprintModel?: string
+	observerModel?: string
+	observerBlueprintModel?: string
+	understandModel?: string
+	understandBlueprintModel?: string
 	batchSize?: number
 	strategy?: 'continuous' | 'cumulative' | 'decay'
 	maxObservations?: number
 	minImportance?: number
 	queryMethod?: 'direct' | 'tool-based'
 	governanceMaxTokens?: number
+	brainStore?: StoreType
+	brainStorePath?: string
+	learnerStore?: StoreType
+	learnerStorePath?: string
+	autoSetup?: boolean
+	learners?: Array<{
+		id: string
+		name: string
+		instructions: string
+		description: string
+		type: 'text' | 'list'
+		governance?: Record<string, unknown>
+	}>
 	evolution?: {
 		enabled?: boolean
 		autoEvaluate?: boolean
@@ -219,7 +240,41 @@ interface AskRequest {
 // --- State ---
 
 let brain: Brain | null = null
+let brainStoreInfo: {
+	brain: { type: StoreType; path?: string }
+	learner: { type: StoreType; path?: string }
+} = { brain: { type: 'memory' }, learner: { type: 'memory' } }
 let sseClients: Set<(event: string, data: unknown) => void> = new Set()
+
+// --- Store Helpers ---
+
+function buildBrainStore(type: StoreType, path?: string): { store: import('../src/brain/stores').BrainStore | undefined; info: { type: StoreType; path?: string } } {
+	switch (type) {
+		case 'sqlite': {
+			const dbDir = join(process.cwd(), path || 'server/data/default')
+			mkdirSync(dbDir, { recursive: true })
+			return { store: new SQLiteBrainStore(join(dbDir, 'brain.db')), info: { type, path: path || 'server/data/default' } }
+		}
+		case 'sqlite-memory':
+			return { store: new SQLiteBrainStore(':memory:'), info: { type } }
+		default:
+			return { store: undefined, info: { type: 'memory' } }
+	}
+}
+
+function buildLearnerStoreFactory(type: StoreType, path?: string): { factory: ((id: string) => import('../src/learners/stores/types').Store) | undefined; info: { type: StoreType; path?: string } } {
+	switch (type) {
+		case 'sqlite': {
+			const dbDir = join(process.cwd(), path || 'server/data/default')
+			mkdirSync(dbDir, { recursive: true })
+			return { factory: (id: string) => new SQLiteStore(join(dbDir, `learner-${id}.db`)), info: { type, path: path || 'server/data/default' } }
+		}
+		case 'sqlite-memory':
+			return { factory: (_id: string) => new SQLiteStore(':memory:'), info: { type } }
+		default:
+			return { factory: undefined, info: { type: 'memory' } }
+	}
+}
 
 // --- App ---
 
@@ -308,6 +363,10 @@ function broadcast(event: string, data: unknown) {
 // --- Brain Endpoints ---
 
 app.post('/brain/init', async (c) => {
+	if (brain) {
+		return c.json({ error: 'Brain already initialized. Call POST /brain/destroy first.' }, 409)
+	}
+
 	const body = await c.req.json<InitRequest>()
 
 	if (!body.prompt) {
@@ -318,28 +377,36 @@ app.post('/brain/init', async (c) => {
 		apiKey: process.env.OPENROUTER_API_KEY,
 	})
 
-	const primaryModel = openrouter(body.model || 'anthropic/claude-sonnet-4')
+	const modelId = body.model || 'anthropic/claude-sonnet-4'
+	const primaryModel = openrouter(modelId)
 	const blueprintModel = body.blueprintModel ? openrouter(body.blueprintModel) : undefined
-	const observeModel = body.observeModel ? openrouter(body.observeModel) : undefined
-	const observeBlueprintModel = body.observeBlueprintModel ? openrouter(body.observeBlueprintModel) : undefined
-	const synthesizeModel = body.synthesizeModel ? openrouter(body.synthesizeModel) : undefined
-	const synthesizeBlueprintModel = body.synthesizeBlueprintModel ? openrouter(body.synthesizeBlueprintModel) : undefined
+	const observerModel = body.observerModel ? openrouter(body.observerModel) : undefined
+	const observerBlueprintModel = body.observerBlueprintModel ? openrouter(body.observerBlueprintModel) : undefined
+	const understandModel = body.understandModel ? openrouter(body.understandModel) : undefined
+	const understandBlueprintModel = body.understandBlueprintModel ? openrouter(body.understandBlueprintModel) : undefined
+
+	// Build stores independently for brain and learner levels
+	const brainStoreResult = buildBrainStore(body.brainStore || 'memory', body.brainStorePath)
+	const learnerStoreResult = buildLearnerStoreFactory(body.learnerStore || 'memory', body.learnerStorePath)
+	brainStoreInfo = { brain: brainStoreResult.info, learner: learnerStoreResult.info }
 
 	const config: BrainConfig = {
 		prompt: body.prompt,
 		model: primaryModel,
 		blueprintModel,
+		autoSetup: body.autoSetup ?? true,
+		...(body.learners ? { learners: body.learners } : {}),
 		ingest: {
 			batchSize: body.batchSize || 20,
 		},
 		learning: {
-			observe: {
-				model: observeModel,
-				blueprintModel: observeBlueprintModel,
+			observer: {
+				model: observerModel,
+				blueprintModel: observerBlueprintModel,
 			},
-			synthesize: {
-				model: synthesizeModel,
-				blueprintModel: synthesizeBlueprintModel,
+			understand: {
+				model: understandModel,
+				blueprintModel: understandBlueprintModel,
 				thresholds: {
 					maxObservations: body.maxObservations,
 					minImportance: body.minImportance,
@@ -349,10 +416,9 @@ app.post('/brain/init', async (c) => {
 				strategy: body.strategy,
 				...(body.governanceMaxTokens ? { maxTokens: body.governanceMaxTokens } : {}),
 			},
-			query: {
-				method: body.queryMethod,
-			},
+			...(learnerStoreResult.factory ? { store: learnerStoreResult.factory } : {}),
 		},
+		...(brainStoreResult.store ? { store: brainStoreResult.store } : {}),
 		...(body.evolution ? { evolution: body.evolution } : {}),
 	}
 
@@ -388,6 +454,24 @@ app.post('/brain/init', async (c) => {
 		const message = extractErrorMessage(error)
 		console.error('[Brain Init Error]', error)
 		broadcast('server:brain:error', { error: message })
+		return c.json({ error: message }, 500)
+	}
+})
+
+app.post('/brain/destroy', async (c) => {
+	if (!brain) {
+		return c.json({ error: 'No brain to destroy.' }, 400)
+	}
+
+	try {
+		await brain.dispose()
+		brain = null
+		brainStoreInfo = { brain: { type: 'memory' }, learner: { type: 'memory' } }
+		broadcast('server:brain:destroyed', {})
+		return c.json({ ok: true })
+	} catch (error) {
+		const message = extractErrorMessage(error)
+		console.error('[Brain Destroy Error]', error)
 		return c.json({ error: message }, 500)
 	}
 })
@@ -474,25 +558,33 @@ app.get('/brain/status', async (c) => {
 
 	const learners = await Promise.all(brain.getLearners().map(async (l) => ({
 		id: l.id,
+		type: l.type,
 		name: l.name,
 		description: l.description,
 		instructions: l.instructions,
+		focus: l.focus,
+		origin: l.origin,
 		understanding: await l.getUnderstanding(),
 		evolution: await l.getEvolution(),
 		buffer: await l.getBufferState(),
 		bufferObservations: await l.getBufferedObservations(),
 		health: l.getHealth(),
+		metrics: l.getMetrics(),
 		governance: l.getGovernance(),
 		understandThresholds: l.getUnderstandThresholds(),
 		observePrompt: l.getObserveSystemPrompt(),
 		understandPrompt: l.getUnderstandSystemPrompt(),
+		observationSchema: l.getObservationSchema(),
+		understandingSchema: l.getUnderstandingSchema(),
 		queryMethod: l.getQueryMethodName(),
 	})))
 
 	return c.json({
 		status: 'initialized',
 		prompt: brain.prompt,
+		modelId: getModelId(brain.config.model),
 		evolution: brain.config.evolution,
+		store: brainStoreInfo,
 		learners,
 	})
 })
@@ -517,13 +609,13 @@ app.post('/brain/update', async (c) => {
 			instructions?: string
 			name?: string
 			description?: string
-			observe?: { model?: string; blueprintModel?: string }
-			synthesize?: {
+			observer?: { model?: string; blueprintModel?: string }
+			understand?: {
 				model?: string
 				blueprintModel?: string
 				thresholds?: { maxObservations?: number; maxTokens?: number; minImportance?: number }
 			}
-			query?: { model?: string; method?: 'tool-based' | 'direct' }
+			query?: { model?: string }
 			governance?: { strategy?: 'continuous' | 'cumulative' | 'decay'; maxTokens?: number }
 		}
 		evolution?: {
@@ -550,23 +642,22 @@ app.post('/brain/update', async (c) => {
 			...(body.learning.instructions ? { instructions: body.learning.instructions } : {}),
 			...(body.learning.name ? { name: body.learning.name } : {}),
 			...(body.learning.description ? { description: body.learning.description } : {}),
-			...(body.learning.observe ? {
-				observe: {
-					...(body.learning.observe.model ? { model: openrouter(body.learning.observe.model) } : {}),
-					...(body.learning.observe.blueprintModel ? { blueprintModel: openrouter(body.learning.observe.blueprintModel) } : {}),
+			...(body.learning.observer ? {
+				observer: {
+					...(body.learning.observer.model ? { model: openrouter(body.learning.observer.model) } : {}),
+					...(body.learning.observer.blueprintModel ? { blueprintModel: openrouter(body.learning.observer.blueprintModel) } : {}),
 				},
 			} : {}),
-			...(body.learning.synthesize ? {
-				synthesize: {
-					...(body.learning.synthesize.model ? { model: openrouter(body.learning.synthesize.model) } : {}),
-					...(body.learning.synthesize.blueprintModel ? { blueprintModel: openrouter(body.learning.synthesize.blueprintModel) } : {}),
-					...(body.learning.synthesize.thresholds ? { thresholds: body.learning.synthesize.thresholds } : {}),
+			...(body.learning.understand ? {
+				understand: {
+					...(body.learning.understand.model ? { model: openrouter(body.learning.understand.model) } : {}),
+					...(body.learning.understand.blueprintModel ? { blueprintModel: openrouter(body.learning.understand.blueprintModel) } : {}),
+					...(body.learning.understand.thresholds ? { thresholds: body.learning.understand.thresholds } : {}),
 				},
 			} : {}),
 			...(body.learning.query ? {
 				query: {
 					...(body.learning.query.model ? { model: openrouter(body.learning.query.model) } : {}),
-					...(body.learning.query.method ? { method: body.learning.query.method } : {}),
 				},
 			} : {}),
 			...(body.learning.governance ? { governance: body.learning.governance } : {}),
@@ -605,9 +696,9 @@ app.post('/brain/learners/:id/update', async (c) => {
 		description?: string
 		instructions?: string
 		model?: string
-		observe?: { model?: string }
-		synthesize?: { model?: string; thresholds?: { maxObservations?: number; minImportance?: number } }
-		query?: { method?: 'tool-based' | 'direct' }
+		observer?: { model?: string }
+		understand?: { model?: string; thresholds?: { maxObservations?: number; minImportance?: number } }
+		query?: { model?: string }
 		governance?: Record<string, unknown>
 		health?: { signalThresholds?: { maxDismissalRate?: number; minConfidence?: number; maxObservationsWithoutSynthesis?: number } }
 	}>()
@@ -619,14 +710,14 @@ app.post('/brain/learners/:id/update', async (c) => {
 	if (body.description !== undefined) updates.description = body.description
 	if (body.instructions !== undefined) updates.instructions = body.instructions
 	if (body.model) updates.model = openrouter(body.model)
-	if (body.observe?.model) updates.observe = { model: openrouter(body.observe.model) }
-	if (body.synthesize) {
-		updates.synthesize = {
-			...(body.synthesize.model ? { model: openrouter(body.synthesize.model) } : {}),
-			...(body.synthesize.thresholds ? { thresholds: body.synthesize.thresholds } : {}),
+	if (body.observer?.model) updates.observer = { model: openrouter(body.observer.model) }
+	if (body.understand) {
+		updates.understand = {
+			...(body.understand.model ? { model: openrouter(body.understand.model) } : {}),
+			...(body.understand.thresholds ? { thresholds: body.understand.thresholds } : {}),
 		}
 	}
-	if (body.query) updates.query = body.query
+	if (body.query?.model) updates.query = { model: openrouter(body.query.model) }
 	if (body.governance) updates.governance = body.governance
 	if (body.health) updates.health = body.health
 
@@ -685,6 +776,8 @@ app.post('/brain/learners/create', async (c) => {
 		name: string
 		instructions: string
 		description?: string
+		type?: 'text' | 'list'
+		governance?: Record<string, unknown>
 	}>()
 
 	if (!body.name || !body.instructions) {
@@ -697,7 +790,9 @@ app.post('/brain/learners/create', async (c) => {
 			id,
 			name: body.name,
 			instructions: body.instructions,
-			description: body.description,
+			description: body.description ?? body.name,
+			type: body.type ?? 'text',
+			governance: body.governance,
 		})
 		broadcast('server:learner:created', { learnerId: learner.id, name: body.name })
 		return c.json({ learnerId: learner.id })
@@ -808,6 +903,53 @@ app.post('/brain/evolve/delete', async (c) => {
 	}
 })
 
+// --- Learner Lifecycle Endpoints (no evolution required) ---
+
+app.post('/brain/learners/:id/remove', async (c) => {
+	if (!brain) {
+		return c.json({ error: 'Brain not initialized. Call /brain/init first.' }, 400)
+	}
+
+	const learnerId = c.req.param('id')
+
+	try {
+		await brain.removeLearner(learnerId)
+		broadcast('server:learner:removed', { learnerId })
+		return c.json({ ok: true })
+	} catch (error) {
+		const message = extractErrorMessage(error)
+		console.error('[Learner Remove Error]', error)
+		return c.json({ error: message }, 500)
+	}
+})
+
+app.post('/brain/learners/:id/adjust', async (c) => {
+	if (!brain) {
+		return c.json({ error: 'Brain not initialized. Call /brain/init first.' }, 400)
+	}
+
+	const learnerId = c.req.param('id')
+	const body = await c.req.json<{ directive: string }>()
+
+	if (!body.directive) {
+		return c.json({ error: 'directive is required' }, 400)
+	}
+
+	try {
+		const learner = await brain.adjustLearner(learnerId, body.directive)
+		broadcast('server:learner:adjusted', { learnerId, directive: body.directive })
+		return c.json({
+			ok: true,
+			learnerId: learner.id,
+			instructions: learner.instructions,
+		})
+	} catch (error) {
+		const message = extractErrorMessage(error)
+		console.error('[Learner Adjust Error]', error)
+		return c.json({ error: message }, 500)
+	}
+})
+
 // --- Learner Action Endpoints ---
 
 app.post('/brain/learners/:id/synthesize', async (c) => {
@@ -882,6 +1024,18 @@ app.get('/', (c) => c.redirect('/ui/'))
 
 const port = Number(process.env.PORT) || 3210
 
+// Graceful shutdown — dispose brain store on exit
+async function shutdown() {
+	if (brain) {
+		console.log('[Shutdown] Disposing brain...')
+		await brain.dispose()
+		console.log('[Shutdown] Done.')
+	}
+	process.exit(0)
+}
+process.on('SIGINT', shutdown)
+process.on('SIGTERM', shutdown)
+
 console.log(`
 Brain Monitor Server
 ====================
@@ -890,8 +1044,7 @@ API:    http://localhost:${port}/brain/*
 Events: http://localhost:${port}/brain/events (SSE)
 `)
 
-export default {
-	port,
+serve({
 	fetch: app.fetch,
-	idleTimeout: 120, // 2 minutes - keep SSE connections alive longer
-}
+	port,
+})

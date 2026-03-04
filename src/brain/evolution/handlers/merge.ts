@@ -68,7 +68,7 @@ export class MergeHandler extends EvolutionActionHandler<MergeActionResult> {
 					prompt: await mergePromptTemplate(
 						decision.guidance,
 						learners,
-						this.brain.prompt,
+						this.brain.promptContext?.purpose ?? this.brain.prompt,
 					),
 					output: Output.object({ schema: mergeSchema }),
 					repairSchema: mergeSchema,

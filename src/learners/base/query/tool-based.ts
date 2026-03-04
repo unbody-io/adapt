@@ -41,7 +41,6 @@ const completeSchema = z.object({
 		.describe(
 			'How well could you answer from your understanding? 0.0 = you have nothing on this topic, 1.0 = you fully answered. If outside your scope, this should be 0.0',
 		),
-	insight: z.string().describe('The insight or response to the query'),
 	gaps: z.array(z.string()).describe('What could not be answered'),
 })
 
@@ -84,7 +83,7 @@ const cognitiveTools = {
 	}),
 	complete: tool({
 		description:
-			'Finalize query response with relevance assessment, confidence score, insight, and identified gaps.',
+			'Finalize the query. Call this AFTER generateResponse. Provides metadata only — the response you already generated is your answer.',
 		inputSchema: completeSchema,
 		// No execute — done tool
 	}),
@@ -127,6 +126,7 @@ export class ToolBasedMethod implements QueryMethod {
 		}
 
 		let completeResult: CompleteParams | null = null
+		let lastResponse: string | null = null
 
 		const handleStep = ({
 			usage,
@@ -157,6 +157,10 @@ export class ToolBasedMethod implements QueryMethod {
 
 			if (toolCalls) {
 				for (const tc of toolCalls) {
+					if (tc.toolName === 'generateResponse') {
+						const input = tc.input as { response: string }
+						lastResponse = input.response
+					}
 					if (tc.toolName === 'complete') {
 						completeResult = tc.input as CompleteParams
 					}
@@ -179,12 +183,15 @@ export class ToolBasedMethod implements QueryMethod {
 			...generateOptions,
 		})
 
-		// Check final step for complete tool call
-		const completeCall = result.toolCalls.find(
-			(c) => c.toolName === 'complete',
-		)
-		if (completeCall && 'input' in completeCall) {
-			completeResult = completeCall.input as CompleteParams
+		// Check final step for tool calls
+		for (const tc of result.toolCalls) {
+			if (tc.toolName === 'generateResponse' && 'input' in tc) {
+				const input = tc.input as { response: string }
+				lastResponse = input.response
+			}
+			if (tc.toolName === 'complete' && 'input' in tc) {
+				completeResult = tc.input as CompleteParams
+			}
 		}
 
 		if (completeResult) {
@@ -192,7 +199,7 @@ export class ToolBasedMethod implements QueryMethod {
 				relevant: completeResult.relevant,
 				relevance: completeResult.relevance,
 				confidence: completeResult.confidence,
-				insight: completeResult.insight,
+				insight: lastResponse || '',
 				gaps: (completeResult.gaps || []).join('\n'),
 				usage: totalUsage,
 			}

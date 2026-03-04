@@ -13,7 +13,7 @@ import { stringifyUnderstanding } from './utils'
 export async function updatePromptTemplate(
 	guidance: string,
 	learner: BaseLearner<unknown>,
-	brainPrompt: string,
+	purpose: string,
 ): Promise<string> {
 	const health = learner.getHealth()
 	const metrics = learner.getMetrics()
@@ -23,7 +23,7 @@ export async function updatePromptTemplate(
 
 	return `# Brain Context
 
-**Purpose**: ${brainPrompt}
+**Purpose**: ${purpose}
 
 # Adjustment Guidance
 

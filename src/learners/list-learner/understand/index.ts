@@ -38,20 +38,14 @@ export type UnderstandIdentity = z.infer<typeof understandIdentitySchema>
 // ── Identity prompt ────────────────────────────────────────────────────────
 
 function identityPrompt(instructions: string): string {
-	return `You are creating a Synthesizer identity for a list-tracking agent.
+	return `You are creating a Synthesizer identity for a collection-tracking agent.
 
-The Synthesizer's role: maintain a structured collection of items. Given new observations, decide what to add, update, or remove.
+Root question: "Does this observation add, update, or change something in my collection?"
 
 The agent's purpose:
 "${instructions}"
 
-Generate a synthesizer identity that specifies:
-- What types of items you maintain in the collection
-- What makes two observations refer to the same item (matching criteria)
-- When to add a new item vs update an existing one
-- When to remove an item
-- Significance criteria: what's routine (minor updates), notable (new important items), critical (major changes)
-- Write in second person ("You maintain...", "You add new items when...")
+The identity should specify: what items you maintain, how you match duplicates, when to add vs update vs remove, significance criteria (routine/notable/critical). Write in second person.
 
 Respond with JSON only:
 {
@@ -64,13 +58,11 @@ Respond with JSON only:
 function systemPrompt(identity: UnderstandIdentity): string {
 	return `${identity.identity}
 
-You have tools to manage a collection of items. Process the given observations by:
-1. Listing or searching existing items to understand what's already tracked
-2. For each observation: search for matches before adding — avoid duplicates
-3. Add new items, update existing ones with new info, or remove stale ones
-4. When updating, merge new data with existing data — don't replace
+Your root question for each observation: "What does this tell me — is it new, does it update something I track, or does it change a status or priority?"
 
-When done processing all observations, call the complete tool with a summary.`
+Each item tracks one distinct thing. Confidence reflects how well-supported it is. Signals mark what kind of evidence you've seen.
+
+Use your tools to sense your collection before changing it. Call complete when done.`
 }
 
 // ── Tool creation ──────────────────────────────────────────────────────────
@@ -151,12 +143,6 @@ function createUnderstandTools(
 				'Add a new item to the collection. Automatically checks for duplicates — if similar items exist, returns them so you can use updateItem instead.',
 			inputSchema: z.object({
 				data: dataSchema.describe('The item data matching the collection schema'),
-				confidence: z
-					.number()
-					.min(0)
-					.max(1)
-					.optional()
-					.describe('Confidence score (0-1), defaults to 0.5'),
 				signals: z
 					.array(z.string())
 					.optional()
@@ -165,17 +151,26 @@ function createUnderstandTools(
 			execute: async (params) => {
 				const data = params.data as Record<string, unknown>
 
-				// Force dedup: search for similar items before adding
-				const searchTerms = Object.values(data)
-					.filter((v) => typeof v === 'string')
-					.slice(0, 3)
-				for (const term of searchTerms) {
-					const matches = await collection.search(term as string)
-					if (matches.length > 0) {
+				// Force dedup: search each significant word from the primary identifier
+				// Uses per-word OR to catch near-duplicates (e.g. "Custom Fields" vs "Custom Fields on Tasks")
+				const firstStringField = Object.values(data).find(
+					(v) => typeof v === 'string',
+				) as string | undefined
+				if (firstStringField) {
+					const words = firstStringField
+						.split(/[\s/]+/)
+						.filter((w) => w.length > 2)
+						.slice(0, 4)
+					const seen = new Map<string, UnderstandingRecord>()
+					for (const word of words) {
+						const hits = await collection.search(word)
+						for (const h of hits) seen.set(h.id, h)
+					}
+					if (seen.size > 0) {
 						return {
 							success: false,
 							reason: 'Similar items already exist. Use updateItem to merge new data instead of creating a duplicate.',
-							existingItems: matches.map((r) => {
+							existingItems: [...seen.values()].map((r) => {
 								const item = r.data as ListItem
 								return { id: r.id, data: item.data }
 							}),
@@ -189,7 +184,8 @@ function createUnderstandTools(
 					id,
 					data,
 					metadata: {
-						confidence: params.confidence ?? 0.5,
+						confidence: 0,
+						touchCount: 1,
 						firstSeen: now,
 						lastUpdated: now,
 						signals: params.signals ?? [],
@@ -198,7 +194,7 @@ function createUnderstandTools(
 				await collection.add({
 					id,
 					data: listItem as unknown,
-					metadata_confidence: listItem.metadata.confidence,
+					metadata_confidence: 0,
 					metadata_created_at: now,
 					metadata_updated_at: now,
 				})
@@ -217,7 +213,6 @@ function createUnderstandTools(
 			inputSchema: z.object({
 				id: z.string().describe('ID of the item to update'),
 				data: dataSchema.optional().describe('Fields to update/add in the item data'),
-				confidence: z.number().min(0).max(1).optional(),
 				signals: z
 					.array(z.string())
 					.optional()
@@ -245,9 +240,7 @@ function createUnderstandTools(
 					data: mergedData,
 					metadata: {
 						...existingItem.metadata,
-						...(params.confidence !== undefined && {
-							confidence: params.confidence,
-						}),
+						touchCount: (existingItem.metadata.touchCount ?? 1) + 1,
 						signals: mergedSignals,
 						lastUpdated: now,
 					},
@@ -334,38 +327,18 @@ function adjustIdentityPrompt(
 	newInstructions: string,
 	currentIdentity: UnderstandIdentity,
 ): string {
-	return `You are adjusting a Synthesizer identity for a list-tracking agent.
+	return `You are adjusting a Synthesizer's identity for a collection-tracking agent.
 
 ## Current State
 
-**Instructions** (already updated):
-"${newInstructions}"
+**Instructions**: "${newInstructions}"
+**Identity**: "${currentIdentity.identity}"
 
-**Current Synthesizer Identity**:
-"${currentIdentity.identity}"
-
-## Adjustment Directive
+## Directive
 
 "${directive}"
 
-## Your Task
-
-Update the synthesizer identity to align with the updated instructions and directive.
-The identity should specify:
-- What types of items you maintain in the collection
-- What makes two observations refer to the same item (matching criteria)
-- When to add a new item vs update an existing one
-- When to remove an item
-- Significance criteria: what's routine (minor updates), notable (new important items), critical (major changes)
-- Write in second person ("You maintain...", "You add new items when...")
-
-## Rules
-
-- This is an INCREMENTAL adjustment, not a full rewrite
-- Preserve criteria that are still relevant
-- Update item types, matching rules, and significance criteria to match the new instructions
-- If the directive narrows scope, tighten the identity accordingly
-- If the directive broadens scope, expand while keeping existing specificity
+Adjust incrementally — preserve criteria that still apply, update for the new scope. If ambiguous, preserve more rather than less.
 
 Respond with JSON only:
 {
@@ -454,9 +427,25 @@ export async function understand(
 			}
 		}
 
-		// Read final state from store
+		// Normalize confidence: relative to max touchCount across collection
 		const records = await collection.list()
-		const newItems: ListItem[] = records.map((r) => r.data as ListItem)
+		const allItems = records.map((r) => ({ record: r, item: r.data as ListItem }))
+		const maxTouches = Math.max(1, ...allItems.map((x) => x.item.metadata.touchCount ?? 1))
+
+		for (const { record, item } of allItems) {
+			const newConfidence = (item.metadata.touchCount ?? 1) / maxTouches
+			if (Math.abs(newConfidence - item.metadata.confidence) > 0.001) {
+				item.metadata.confidence = newConfidence
+				await collection.update(record.id, {
+					data: item as unknown,
+					metadata_confidence: newConfidence,
+				})
+			}
+		}
+
+		// Read final state from store
+		const finalRecords = await collection.list()
+		const newItems: ListItem[] = finalRecords.map((r) => r.data as ListItem)
 
 		return {
 			status: 'synthesized',

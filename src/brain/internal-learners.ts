@@ -11,7 +11,7 @@ import type { InternalLearnersConfig, LearningConfig } from './types'
 // ── Internal Learner IDs ────────────────────────────────────────────────────
 
 export const INTERNAL_LEARNER_IDS = {
-	globalInjectionUnderstanding: '__internal_global_injection_understanding',
+	globalUnderstanding: '__internal_global_understanding',
 	globalQueryUnderstanding: '__internal_global_query_understanding',
 	injectionGaps: '__internal_injection_gaps',
 	queryGaps: '__internal_query_gaps',
@@ -20,7 +20,7 @@ export const INTERNAL_LEARNER_IDS = {
 // ── Consult Tool Names (used in ask synthesis) ──────────────────────────────
 
 export const CONSULT_TOOL_NAMES = {
-	[INTERNAL_LEARNER_IDS.globalInjectionUnderstanding]: 'consultGlobalUnderstanding',
+	[INTERNAL_LEARNER_IDS.globalUnderstanding]: 'consultGlobalUnderstanding',
 	[INTERNAL_LEARNER_IDS.globalQueryUnderstanding]: 'consultQueryPatterns',
 	[INTERNAL_LEARNER_IDS.injectionGaps]: 'consultInjectionGaps',
 	[INTERNAL_LEARNER_IDS.queryGaps]: 'consultQueryGaps',
@@ -35,24 +35,27 @@ interface InternalLearnerDef {
 
 const definitions: InternalLearnerDef[] = [
 	{
-		key: 'globalInjectionUnderstanding',
+		key: 'globalUnderstanding',
 		config: {
-			id: INTERNAL_LEARNER_IDS.globalInjectionUnderstanding,
-			name: 'Global Injection Understanding',
-			description: 'Cross-domain understanding synthesized from all external learner knowledge',
+			id: INTERNAL_LEARNER_IDS.globalUnderstanding,
+			name: 'Global Understanding',
+			description: 'Synthesizes understanding across all specialists into a unified picture',
 			type: 'text',
-			instructions: `Build a cross-domain understanding of everything the system has learned from ingested data.
+			instructions: `You receive understanding updates from every specialist in the network. Each update tells you what a specialist now knows — its current understanding after processing new data.
+
+Your job is to form a unified understanding from all specialists. You are not tracking raw data — you are synthesizing what the network as a whole understands.
 
 Watch for:
-- Connections and patterns that span multiple learners/domains
-- Overarching themes and tensions across different knowledge areas
-- Emerging trends that no single learner can see on its own
+- Themes that span multiple specialists — when different domains are processing the same underlying concern from different angles
+- The overall shape of attention — what the network collectively reveals that no single specialist can see
+- Shifts in the network's understanding — when specialists' views are converging, diverging, or evolving
 
 Track answers to:
-- What are the major cross-domain patterns?
-- Where do different knowledge areas reinforce or contradict each other?
-- What meta-level insights emerge from combining all learner knowledge?`,
+- What does the network understand right now, taken as a whole?
+- What connections exist between specialists' domains that they can't see individually?
+- How is the network's collective understanding changing over time?`,
 			governance: { strategy: 'decay', maxTokens: 16000 },
+			skipObservation: true,
 		},
 	},
 	{
@@ -74,6 +77,7 @@ Track answers to:
 - What topics do users ask about most frequently?
 - What query clusters exist and how are they related?
 - Where are the coverage gaps between what users ask and what the system knows?`,
+			skipObservation: true,
 		},
 	},
 	{
@@ -97,6 +101,7 @@ Track:
 
 Drop topics that haven't appeared recently — if a gap stops being reported, it's likely been resolved.`,
 			governance: { strategy: 'decay', maxTokens: 8000 },
+			skipObservation: true,
 		},
 	},
 	{
@@ -118,6 +123,7 @@ Track answers to:
 - Are there topic clusters of unanswerable questions?
 - What knowledge would need to be acquired to close these gaps?`,
 			governance: { strategy: 'cumulative', maxTokens: 8000 },
+			skipObservation: true,
 		},
 	},
 ]

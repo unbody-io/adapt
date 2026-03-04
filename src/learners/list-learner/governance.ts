@@ -43,23 +43,23 @@ function dedup(items: ListItem[]): ListItem[] {
 			continue
 		}
 
-		// Keep higher confidence; on tie, keep most recently updated
-		if (
-			item.metadata.confidence > existing.metadata.confidence ||
-			(item.metadata.confidence === existing.metadata.confidence &&
-				item.metadata.lastUpdated > existing.metadata.lastUpdated)
-		) {
-			seen.set(key, {
-				...item,
-				metadata: {
-					...item.metadata,
-					firstSeen: existing.metadata.firstSeen < item.metadata.firstSeen
-						? existing.metadata.firstSeen
-						: item.metadata.firstSeen,
-					signals: [...new Set([...existing.metadata.signals, ...item.metadata.signals])],
-				},
-			})
-		}
+		// Merge: combine touchCounts and signals, keep most recently updated data
+		const winner =
+			item.metadata.lastUpdated > existing.metadata.lastUpdated
+				? item
+				: existing
+		seen.set(key, {
+			...winner,
+			metadata: {
+				...winner.metadata,
+				touchCount: (existing.metadata.touchCount ?? 1) + (item.metadata.touchCount ?? 1),
+				confidence: Math.max(existing.metadata.confidence, item.metadata.confidence),
+				firstSeen: existing.metadata.firstSeen < item.metadata.firstSeen
+					? existing.metadata.firstSeen
+					: item.metadata.firstSeen,
+				signals: [...new Set([...existing.metadata.signals, ...item.metadata.signals])],
+			},
+		})
 	}
 
 	return [...seen.values()]

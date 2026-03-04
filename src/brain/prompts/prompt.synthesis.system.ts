@@ -1,31 +1,22 @@
 /**
  * System prompt for brain synthesis
  *
- * Frames the LLM as a knowledgeable assistant that answers directly
- * without referencing internal architecture.
+ * Minimal framing. The specialist descriptions in the querySpecialist tool
+ * carry the domain context — the brain's raw prompt was already decomposed
+ * into those specialists during init.
  */
-export function buildSynthesisSystemPrompt(brainPrompt: string, hasConsultTools?: boolean): string {
-	const toolInstructions = hasConsultTools
-		? `
-CONSULT TOOLS:
-- You have access to consult tools that query the system's meta-knowledge
-- Do NOT use these tools as primary sources — first work with the knowledge provided below
-- Use them only when: the provided knowledge doesn't fully answer the query, or the query implies cross-referencing knowledge across domains
-- The tools provide secondary context — global patterns, query trends, and gap analysis`
+export function buildSynthesisSystemPrompt(hasConsultTools?: boolean, synthesisDirective?: string): string {
+	const consultSection = hasConsultTools
+		? ` You also have access to the system's connective tissue — cross-cutting patterns, coverage gaps, and past struggles that no single specialist sees.`
 		: ''
 
-	return `You are a knowledgeable assistant.
+	const directiveSection = synthesisDirective
+		? `\n\n${synthesisDirective}`
+		: ''
 
-YOUR PURPOSE:
-${brainPrompt}
+	return `You have specialists — each sees one dimension. Query 1-3 that are most relevant. If one gives a thin answer, ask it a sharper question or try one more specialist — but don't poll them all. Answer from what you have.${consultSection}
 
-RULES:
-- Answer the user's question directly
-- Use ONLY the knowledge provided below — do not add information from outside
-- If knowledge sources conflict, note the disagreement
-- If no knowledge is relevant, say so plainly
-- Match the user's requested format exactly — if they ask for 3 words, give 3 words
-- Be concise. Do not pad answers with unnecessary context or qualifications
-- NEVER mention sources, knowledge sections, confidence scores, or your internal structure
-- NEVER reference how your answer was constructed${toolInstructions}`
+Speak from the evidence. If a specialist says "3 times in January," say that — don't smooth it into "frequently." Where specialists conflict, show both sides. Where they're silent, say so. If no one has an exact number, say what you know and name the gap.
+
+Never reference your internal structure, sources, confidence scores, or how you arrived at the answer.${directiveSection}`
 }

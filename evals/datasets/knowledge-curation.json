@@ -1,0 +1,549 @@
+{
+  "metadata": {
+    "name": "Knowledge Curation - Maya (Local-First Software Research)",
+    "description": "A researcher exploring local-first software over 6 weeks. Bookmarks, paper highlights, tweets, blog excerpts, and personal notes.",
+    "eventCount": 72,
+    "timespan": "2024-10-01 to 2024-11-12",
+    "groundTruth": {
+      "contradictions": [
+        {
+          "topic": "CRDT performance at scale",
+          "source1": "evt_028 (Kleppmann paper highlight: CRDTs scale well to thousands of peers)",
+          "source2": "evt_045 (Figma eng blog: CRDTs don't scale, we had to abandon them for >50 concurrent editors)",
+          "resolution": "Different context — academic vs production, document editing vs design tool"
+        },
+        {
+          "topic": "Offline-first necessity",
+          "source1": "evt_012 (blog post: offline-first is essential for real apps)",
+          "source2": "evt_058 (tweet thread: most apps don't need offline, it's over-engineered)"
+        }
+      ],
+      "topicFrequency": {
+        "CRDTs": 18,
+        "offline-first": 9,
+        "sync protocols": 6,
+        "P2P networking": 3,
+        "local-first principles": 7,
+        "Automerge": 5,
+        "Yjs": 4
+      },
+      "knowledgeDepth": {
+        "deep": ["CRDTs", "Automerge", "local-first principles"],
+        "moderate": ["offline-first", "Yjs", "sync protocols"],
+        "shallow": ["P2P networking", "WebRTC"]
+      },
+      "temporalProgression": [
+        "Week 1-2: General local-first exploration (principles, blog posts, Ink & Switch paper)",
+        "Week 3: Deep dive into CRDTs (papers, implementations, comparisons)",
+        "Week 4: Practical concerns emerge (performance, scaling, Figma's experience)",
+        "Week 5-6: Implementation focus (Automerge vs Yjs, sync protocols, personal project notes)"
+      ]
+    }
+  },
+  "events": [
+    {
+      "id": "evt_001",
+      "timestamp": "2024-10-01T09:15:00Z",
+      "type": "bookmark",
+      "source": "browser",
+      "content": "Bookmarked: 'Local-First Software: You Own Your Data' by Ink & Switch (inkandswitch.com). The foundational paper on local-first software. Key principles: data lives on device, network optional, collaboration without servers. Tagged: local-first, principles, foundational."
+    },
+    {
+      "id": "evt_002",
+      "timestamp": "2024-10-01T09:45:00Z",
+      "type": "highlight",
+      "source": "reader-app",
+      "content": "Highlight from 'Local-First Software' paper: 'We have identified seven ideals for local-first software: (1) no spinners, (2) your work is not trapped on one device, (3) the network is optional, (4) seamless collaboration, (5) the Long Now, (6) security and privacy by default, (7) you retain ultimate ownership and control.'"
+    },
+    {
+      "id": "evt_003",
+      "timestamp": "2024-10-01T14:30:00Z",
+      "type": "note",
+      "source": "obsidian",
+      "content": "Personal note: Started reading about local-first software today. The Ink & Switch paper is really compelling. The idea that your data should survive the company that made the app — that's what 'the Long Now' means. I wonder how realistic this is for complex apps though."
+    },
+    {
+      "id": "evt_004",
+      "timestamp": "2024-10-02T10:00:00Z",
+      "type": "bookmark",
+      "source": "browser",
+      "content": "Bookmarked: 'CRDTs: The Hard Parts' by Martin Kleppmann (YouTube talk). 45min talk covering the theory behind CRDTs, why they're needed for local-first, and the unsolved problems. Tagged: CRDTs, theory, video."
+    },
+    {
+      "id": "evt_005",
+      "timestamp": "2024-10-02T11:30:00Z",
+      "type": "tweet_save",
+      "source": "twitter",
+      "content": "Saved tweet by @martinkl: 'CRDTs are not just about offline editing. They're about giving users agency over their own data. The server becomes optional, not authoritative.' 342 likes, 89 retweets."
+    },
+    {
+      "id": "evt_006",
+      "timestamp": "2024-10-03T08:20:00Z",
+      "type": "bookmark",
+      "source": "browser",
+      "content": "Bookmarked: 'An Introduction to Conflict-Free Replicated Data Types' (arxiv.org). Academic paper by Shapiro et al. covering the mathematical foundations of CRDTs — state-based vs operation-based, convergence proofs. Tagged: CRDTs, academic, foundations."
+    },
+    {
+      "id": "evt_007",
+      "timestamp": "2024-10-03T15:00:00Z",
+      "type": "highlight",
+      "source": "reader-app",
+      "content": "Highlight from Shapiro CRDT paper: 'A state-based CRDT requires that the merge function forms a semilattice — it must be commutative, associative, and idempotent. This guarantees eventual consistency without coordination.'"
+    },
+    {
+      "id": "evt_008",
+      "timestamp": "2024-10-04T09:00:00Z",
+      "type": "bookmark",
+      "source": "browser",
+      "content": "Bookmarked: 'Automerge: A JSON-like data structure for building collaborative applications' (automerge.org). Library by Ink & Switch for building local-first apps with CRDTs. Tagged: Automerge, library, CRDTs, practical."
+    },
+    {
+      "id": "evt_009",
+      "timestamp": "2024-10-04T10:30:00Z",
+      "type": "note",
+      "source": "obsidian",
+      "content": "Personal note: Three days into local-first research. The CRDT math is elegant but I'm wondering about real-world performance. Merging state-based CRDTs means sending the entire state — that can't scale to large documents, right? Need to find benchmarks."
+    },
+    {
+      "id": "evt_010",
+      "timestamp": "2024-10-05T11:00:00Z",
+      "type": "bookmark",
+      "source": "browser",
+      "content": "Bookmarked: 'Yjs: A CRDT framework for shared editing' (github.com/yjs). Yjs is focused on text editing CRDTs, claims to be significantly faster than Automerge. Benchmarks show 10-100x faster for text operations. Tagged: Yjs, library, CRDTs, performance."
+    },
+    {
+      "id": "evt_011",
+      "timestamp": "2024-10-05T14:00:00Z",
+      "type": "tweet_save",
+      "source": "twitter",
+      "content": "Saved tweet thread by @kevin_jahns (Yjs creator): 'Yjs uses a different encoding than Automerge. We encode operations as a flat list with run-length encoding. This makes Yjs ~100x faster for text editing benchmarks. But it's not just speed — the encoding also means smaller sync messages.' 4 tweets in thread."
+    },
+    {
+      "id": "evt_012",
+      "timestamp": "2024-10-06T09:30:00Z",
+      "type": "blog_clip",
+      "source": "reader-app",
+      "content": "Clipped from 'Why Offline-First is Essential' (localfirst.dev): 'Building offline-first isn't about airplane mode. It's about reliability, speed, and user trust. Every app that depends on a server round-trip for basic operations is fundamentally fragile. The question isn't whether users will be offline — it's whether your app degrades gracefully when the network is unreliable, slow, or gone.'"
+    },
+    {
+      "id": "evt_013",
+      "timestamp": "2024-10-07T08:15:00Z",
+      "type": "bookmark",
+      "source": "browser",
+      "content": "Bookmarked: 'Peritext: A CRDT for Rich Text' by Ink & Switch (inkandswitch.com). Research on applying CRDTs specifically to rich text editing — handling bold, italic, links, etc. in a conflict-free way. Tagged: CRDTs, rich-text, Ink-and-Switch."
+    },
+    {
+      "id": "evt_014",
+      "timestamp": "2024-10-07T10:00:00Z",
+      "type": "highlight",
+      "source": "reader-app",
+      "content": "Highlight from Peritext paper: 'Existing CRDTs handle plain text well, but rich text introduces new challenges: formatting spans can overlap, split, or conflict in ways that plain character insertion cannot. We introduce a new approach where formatting marks are anchored to positions in the text, not to character ranges.'"
+    },
+    {
+      "id": "evt_015",
+      "timestamp": "2024-10-08T13:00:00Z",
+      "type": "note",
+      "source": "obsidian",
+      "content": "Personal note: Week 1 summary. I've gone from 'what is local-first?' to understanding the CRDT foundations. Key insight: the math guarantees convergence but says nothing about performance or UX. The gap between theory and practice seems huge. Automerge vs Yjs is interesting — different tradeoffs. Need to understand sync protocols next."
+    },
+    {
+      "id": "evt_016",
+      "timestamp": "2024-10-09T09:00:00Z",
+      "type": "bookmark",
+      "source": "browser",
+      "content": "Bookmarked: 'Sync Protocols for Local-First Apps' (jamsocket.com). Overview of different sync approaches: WebSocket relay, WebRTC peer-to-peer, and hybrid. Compares tradeoffs of each. Tagged: sync, protocols, networking."
+    },
+    {
+      "id": "evt_017",
+      "timestamp": "2024-10-09T11:30:00Z",
+      "type": "highlight",
+      "source": "reader-app",
+      "content": "Highlight from sync protocols article: 'The simplest sync architecture is a relay server — peers send changes to the server, which broadcasts to other peers. This isn't truly peer-to-peer, but it avoids NAT traversal issues and works everywhere. For most local-first apps, this is the pragmatic choice.'"
+    },
+    {
+      "id": "evt_018",
+      "timestamp": "2024-10-10T08:30:00Z",
+      "type": "tweet_save",
+      "source": "twitter",
+      "content": "Saved tweet by @pvh (Peter van Hardenberg, Ink & Switch): 'Hot take: P2P is a distraction for local-first software. You don't need true peer-to-peer to get the benefits of local-first. A relay server that stores encrypted blobs gives you 90% of the value with 10% of the complexity.' 567 likes."
+    },
+    {
+      "id": "evt_019",
+      "timestamp": "2024-10-10T14:00:00Z",
+      "type": "bookmark",
+      "source": "browser",
+      "content": "Bookmarked: 'WebRTC for Local-First Apps' (webrtc.org guide). Guide to using WebRTC for direct peer-to-peer connections in the browser. Covers STUN/TURN servers, NAT traversal, data channels. Tagged: P2P, WebRTC, networking."
+    },
+    {
+      "id": "evt_020",
+      "timestamp": "2024-10-11T09:15:00Z",
+      "type": "note",
+      "source": "obsidian",
+      "content": "Personal note: The sync question is more nuanced than I thought. True P2P (WebRTC) is complex — NAT traversal, STUN/TURN servers, connection management. But relay servers mean you still depend on infrastructure. Peter van Hardenberg's point about encrypted blobs on a relay is pragmatic. For my project, relay probably makes sense to start."
+    },
+    {
+      "id": "evt_021",
+      "timestamp": "2024-10-12T10:00:00Z",
+      "type": "bookmark",
+      "source": "browser",
+      "content": "Bookmarked: 'Automerge 2.0: Performance Improvements' (automerge.org/blog). Automerge rewrote their core in Rust compiled to WASM. Claims 100x speedup over original JS implementation. Now competitive with Yjs on many benchmarks. Tagged: Automerge, performance, WASM."
+    },
+    {
+      "id": "evt_022",
+      "timestamp": "2024-10-12T11:00:00Z",
+      "type": "highlight",
+      "source": "reader-app",
+      "content": "Highlight from Automerge 2.0 blog: 'With the Rust core, Automerge can now load a document with 260,000 edits in 0.5 seconds. The previous JS implementation took over 30 seconds for the same document. We believe this makes Automerge viable for production use cases that were previously impractical.'"
+    },
+    {
+      "id": "evt_023",
+      "timestamp": "2024-10-13T08:00:00Z",
+      "type": "tweet_save",
+      "source": "twitter",
+      "content": "Saved tweet by @alexgoodman: 'Just migrated our collaborative editor from OT to Automerge 2.0. The simplicity is unreal — no server-side logic for conflict resolution, no operational transforms to debug. CRDTs + local-first is the future of collaborative apps.' 234 likes."
+    },
+    {
+      "id": "evt_024",
+      "timestamp": "2024-10-14T09:30:00Z",
+      "type": "bookmark",
+      "source": "browser",
+      "content": "Bookmarked: 'CRDTs in Practice: Lessons from 5 Years at Figma' (figma.com/blog). Figma's engineering team on their experience with CRDTs for real-time design collaboration. Tagged: CRDTs, Figma, production, lessons-learned."
+    },
+    {
+      "id": "evt_025",
+      "timestamp": "2024-10-14T14:00:00Z",
+      "type": "highlight",
+      "source": "reader-app",
+      "content": "Highlight from Figma CRDTs blog: 'We started with CRDTs for our multiplayer engine, but the reality of a design tool with complex object relationships pushed us beyond what standard CRDT libraries offer. We ended up building custom data structures that borrow CRDT ideas but aren't pure CRDTs. The academic literature didn't prepare us for the edge cases.'"
+    },
+    {
+      "id": "evt_026",
+      "timestamp": "2024-10-15T08:45:00Z",
+      "type": "note",
+      "source": "obsidian",
+      "content": "Personal note: Week 2 summary. Diving deeper into CRDTs now. The Automerge 2.0 performance improvements are impressive — Rust/WASM making a real difference. But the Figma blog is sobering. They found that pure CRDTs weren't enough for a complex real-world app. The gap between library demos and production is real. I keep coming back to this theme."
+    },
+    {
+      "id": "evt_027",
+      "timestamp": "2024-10-16T09:00:00Z",
+      "type": "bookmark",
+      "source": "browser",
+      "content": "Bookmarked: 'A Comprehensive Study of CRDTs' by Kleppmann et al. (2023 revision). Updated survey paper covering state of CRDT research, including new results on performance and scalability. Tagged: CRDTs, survey, academic, Kleppmann."
+    },
+    {
+      "id": "evt_028",
+      "timestamp": "2024-10-16T14:30:00Z",
+      "type": "highlight",
+      "source": "reader-app",
+      "content": "Highlight from Kleppmann survey: 'Recent advances in CRDT design have addressed many early performance concerns. Modern operation-based CRDTs with delta-state propagation can scale efficiently to thousands of concurrent peers while maintaining sub-second merge times. The theoretical performance ceiling for CRDTs is comparable to centralized approaches.'"
+    },
+    {
+      "id": "evt_029",
+      "timestamp": "2024-10-17T10:00:00Z",
+      "type": "bookmark",
+      "source": "browser",
+      "content": "Bookmarked: 'Local-First Auth: How to Handle Authentication Without a Server' (localfirst.dev). Discusses authentication patterns for local-first apps — device keys, capability-based auth, key rotation. Tagged: auth, security, local-first."
+    },
+    {
+      "id": "evt_030",
+      "timestamp": "2024-10-17T15:00:00Z",
+      "type": "tweet_save",
+      "source": "twitter",
+      "content": "Saved tweet by @geoffreylitt: 'The biggest unsolved problem in local-first isn't CRDTs or sync. It's schema evolution. What happens when you ship v2 of your app and the data format changes? With a server, you run a migration. With local-first, you have N devices with N versions of the schema.' 892 likes, 201 retweets."
+    },
+    {
+      "id": "evt_031",
+      "timestamp": "2024-10-18T09:00:00Z",
+      "type": "bookmark",
+      "source": "browser",
+      "content": "Bookmarked: 'Cambria: Schema Evolution for CRDTs' by Ink & Switch (inkandswitch.com). Research project addressing schema migration in local-first apps using bidirectional lenses. Tagged: schema, migration, CRDTs, Ink-and-Switch."
+    },
+    {
+      "id": "evt_032",
+      "timestamp": "2024-10-18T11:00:00Z",
+      "type": "highlight",
+      "source": "reader-app",
+      "content": "Highlight from Cambria paper: 'We propose using bidirectional lenses to translate between schema versions. A lens is a pair of transformations: one from v1 to v2, and one from v2 back to v1. This allows devices running different app versions to continue collaborating seamlessly.'"
+    },
+    {
+      "id": "evt_033",
+      "timestamp": "2024-10-19T08:30:00Z",
+      "type": "note",
+      "source": "obsidian",
+      "content": "Personal note: Schema evolution is a real problem I hadn't considered. Geoffrey Litt's tweet nailed it. Cambria's lens approach is interesting but feels academic — bidirectional lenses are notoriously hard to write. For my project, I might just version the CRDT document and handle migration on load. Not elegant but pragmatic."
+    },
+    {
+      "id": "evt_034",
+      "timestamp": "2024-10-20T10:00:00Z",
+      "type": "bookmark",
+      "source": "browser",
+      "content": "Bookmarked: 'Electric SQL: Sync for Modern Apps' (electric-sql.com). A sync layer that sits between PostgreSQL and local SQLite. Uses CRDTs under the hood but presents a familiar SQL interface. Tagged: sync, SQL, CRDTs, practical."
+    },
+    {
+      "id": "evt_035",
+      "timestamp": "2024-10-20T14:00:00Z",
+      "type": "bookmark",
+      "source": "browser",
+      "content": "Bookmarked: 'Replicache: Client-Side Sync Framework' (replicache.dev). Sync framework that uses server-authoritative model with client-side speculation. Not pure local-first but uses similar patterns. Tagged: sync, framework, practical."
+    },
+    {
+      "id": "evt_036",
+      "timestamp": "2024-10-21T09:00:00Z",
+      "type": "tweet_save",
+      "source": "twitter",
+      "content": "Saved tweet by @tantaman (Matt Wonlaw): 'The local-first ecosystem is fragmenting. Automerge, Yjs, Electric, Replicache, Zero, Triplit — each with different tradeoffs. Developers are paralyzed by choice. We need convergence on standards, not more frameworks.' 445 likes."
+    },
+    {
+      "id": "evt_037",
+      "timestamp": "2024-10-21T15:00:00Z",
+      "type": "note",
+      "source": "obsidian",
+      "content": "Personal note: The ecosystem fragmentation is real. I've now bookmarked: Automerge, Yjs, Electric SQL, Replicache, and there are more I haven't looked at. Each has different assumptions about server involvement, data model, and sync strategy. For my project I'm leaning Automerge because of the Ink & Switch ecosystem, but the Yjs performance numbers are hard to ignore."
+    },
+    {
+      "id": "evt_038",
+      "timestamp": "2024-10-22T08:00:00Z",
+      "type": "bookmark",
+      "source": "browser",
+      "content": "Bookmarked: 'CRDT Comparison: Automerge vs Yjs vs Diamond Types' (josephg.com). Seph Gentle's detailed comparison of three CRDT implementations, with benchmarks and architectural analysis. Tagged: CRDTs, comparison, benchmarks, Automerge, Yjs."
+    },
+    {
+      "id": "evt_039",
+      "timestamp": "2024-10-22T10:30:00Z",
+      "type": "highlight",
+      "source": "reader-app",
+      "content": "Highlight from CRDT comparison article: 'Diamond Types (my project) outperforms both Automerge and Yjs on raw editing benchmarks by using a novel Run-Length Encoded (RLE) representation. However, Automerge has the richest feature set and best documentation, while Yjs has the largest ecosystem of editor integrations. Performance alone doesn't determine the best choice.'"
+    },
+    {
+      "id": "evt_040",
+      "timestamp": "2024-10-23T09:15:00Z",
+      "type": "bookmark",
+      "source": "browser",
+      "content": "Bookmarked: 'Building a Local-First To-Do App with Automerge' (automerge.org/docs/tutorial). Step-by-step tutorial for building a basic collaborative to-do app using Automerge. Tagged: Automerge, tutorial, practical, beginner."
+    },
+    {
+      "id": "evt_041",
+      "timestamp": "2024-10-23T14:00:00Z",
+      "type": "note",
+      "source": "obsidian",
+      "content": "Personal note: Followed the Automerge tutorial. It's surprisingly simple for basic cases — define your document schema, make changes locally, sync with peers. The API hides most of the CRDT complexity. But I can already see where things get complicated: what if my to-do app needs categories, drag-and-drop reordering, and nested sub-tasks? The tutorial doesn't cover any of that."
+    },
+    {
+      "id": "evt_042",
+      "timestamp": "2024-10-24T09:00:00Z",
+      "type": "bookmark",
+      "source": "browser",
+      "content": "Bookmarked: 'Offline-First Web Apps: A Practical Guide' (web.dev). Google's guide to building offline-first progressive web apps. Covers service workers, IndexedDB, sync strategies. Tagged: offline-first, PWA, practical, Google."
+    },
+    {
+      "id": "evt_043",
+      "timestamp": "2024-10-24T11:00:00Z",
+      "type": "highlight",
+      "source": "reader-app",
+      "content": "Highlight from web.dev guide: 'Service workers give you a programmable network proxy. Combined with IndexedDB for structured storage, you can build apps that work fully offline. The key insight: treat the network as a progressive enhancement, not a requirement.'"
+    },
+    {
+      "id": "evt_044",
+      "timestamp": "2024-10-25T08:30:00Z",
+      "type": "tweet_save",
+      "source": "twitter",
+      "content": "Saved tweet by @jlongster (James Long, creator of Actual Budget): 'I've been building offline-first apps for 5 years. The hardest part isn't the tech — it's the UX. How do you show users that changes are synced? How do you handle conflicts they can understand? The CRDT handles the data, but the UI problem is unsolved.' 678 likes."
+    },
+    {
+      "id": "evt_045",
+      "timestamp": "2024-10-26T09:00:00Z",
+      "type": "blog_clip",
+      "source": "reader-app",
+      "content": "Clipped from 'Why We Moved Away from CRDTs' (figma.com/blog/engineering): 'After 3 years with CRDTs as our collaboration backbone, we made the difficult decision to move to a hybrid approach. Pure CRDTs couldn't handle our scale — with 50+ concurrent editors on a complex design file, merge times became unacceptable. We now use a server-authoritative model for the object tree with CRDT-inspired conflict resolution at the property level. The lesson: CRDTs are brilliant for text and simple data, but complex structured documents need custom solutions.'"
+    },
+    {
+      "id": "evt_046",
+      "timestamp": "2024-10-26T10:30:00Z",
+      "type": "note",
+      "source": "obsidian",
+      "content": "Personal note: This Figma post directly contradicts the Kleppmann survey that says CRDTs scale to thousands of peers. But the context is different — Kleppmann is talking about operation-based CRDTs with delta propagation for text/JSON, Figma has a complex design tool with rich object relationships. Scale means different things in different contexts. Still, it's important to note: CRDTs have limits."
+    },
+    {
+      "id": "evt_047",
+      "timestamp": "2024-10-27T09:00:00Z",
+      "type": "bookmark",
+      "source": "browser",
+      "content": "Bookmarked: 'Loro: High-Performance CRDTs' (loro.dev). New CRDT library built in Rust, claiming better performance than both Automerge and Yjs. Uses a novel 'Movable Tree' CRDT for hierarchical data. Tagged: CRDTs, library, performance, Rust."
+    },
+    {
+      "id": "evt_048",
+      "timestamp": "2024-10-28T08:00:00Z",
+      "type": "bookmark",
+      "source": "browser",
+      "content": "Bookmarked: 'The Local-First Landscape in 2024' (localfirstweb.dev/survey). Community survey of 500+ developers building local-first apps. Key findings: 62% use Yjs, 23% use Automerge, 15% other. Top challenge: testing sync logic (78% cite it as 'hard' or 'very hard'). Tagged: local-first, survey, ecosystem."
+    },
+    {
+      "id": "evt_049",
+      "timestamp": "2024-10-28T14:00:00Z",
+      "type": "highlight",
+      "source": "reader-app",
+      "content": "Highlight from 2024 survey: '78% of respondents cited testing sync logic as their biggest challenge. The second most common challenge was debugging merge conflicts (67%). Only 12% reported performance issues, suggesting that modern CRDT libraries have largely solved the performance problem for typical use cases.'"
+    },
+    {
+      "id": "evt_050",
+      "timestamp": "2024-10-29T09:30:00Z",
+      "type": "note",
+      "source": "obsidian",
+      "content": "Personal note: Week 4. Interesting finding from the community survey — performance isn't the top concern anymore, it's testing and debugging. This aligns with what I'm seeing: the libraries are fast enough, but understanding what happens when things go wrong is hard. No good debugging tools for CRDTs. You can't just look at a database to see the state."
+    },
+    {
+      "id": "evt_051",
+      "timestamp": "2024-10-30T08:15:00Z",
+      "type": "bookmark",
+      "source": "browser",
+      "content": "Bookmarked: 'P2P Networking for Local-First' (libp2p.io). Overview of libp2p networking stack for peer-to-peer applications. Covers transport protocols, peer discovery, content routing. Tagged: P2P, networking, libp2p."
+    },
+    {
+      "id": "evt_052",
+      "timestamp": "2024-10-30T15:00:00Z",
+      "type": "tweet_save",
+      "source": "twitter",
+      "content": "Saved tweet by @maboroshi: 'Every time I try to use WebRTC for a local-first app, I spend more time debugging NAT traversal than building features. TURN servers are expensive, STUN servers are unreliable. The web platform needs better P2P primitives.' 312 likes."
+    },
+    {
+      "id": "evt_053",
+      "timestamp": "2024-10-31T09:00:00Z",
+      "type": "bookmark",
+      "source": "browser",
+      "content": "Bookmarked: 'Automerge-Repo: Production-Ready Sync for Automerge' (automerge.org/docs/repos). Automerge-repo provides ready-made sync, storage, and networking adapters. Supports WebSocket relay, BroadcastChannel, and pluggable transports. Tagged: Automerge, sync, practical, library."
+    },
+    {
+      "id": "evt_054",
+      "timestamp": "2024-10-31T11:30:00Z",
+      "type": "highlight",
+      "source": "reader-app",
+      "content": "Highlight from Automerge-Repo docs: 'Automerge-repo handles the plumbing of local-first apps: storing documents in IndexedDB, syncing over WebSockets, and managing document handles. You focus on your app logic, not the sync infrastructure. A typical setup requires ~10 lines of configuration.'"
+    },
+    {
+      "id": "evt_055",
+      "timestamp": "2024-11-01T08:00:00Z",
+      "type": "note",
+      "source": "obsidian",
+      "content": "Personal note: Starting to narrow down my tech stack for the project. Automerge + automerge-repo seems like the most complete solution. Yjs is faster but the ecosystem around Automerge (automerge-repo, cambria for schema evolution, Ink & Switch research backing) is more cohesive. Performance difference probably won't matter for my use case (small documents, <10 collaborators)."
+    },
+    {
+      "id": "evt_056",
+      "timestamp": "2024-11-02T09:00:00Z",
+      "type": "bookmark",
+      "source": "browser",
+      "content": "Bookmarked: 'CRDT Optimizations: Beyond Naive Merge' (arxiv.org). Paper on advanced CRDT optimization techniques — delta CRDTs, compressed representations, bloom filter-based sync. Tagged: CRDTs, performance, optimization, academic."
+    },
+    {
+      "id": "evt_057",
+      "timestamp": "2024-11-02T14:00:00Z",
+      "type": "highlight",
+      "source": "reader-app",
+      "content": "Highlight from CRDT optimizations paper: 'Delta-state CRDTs reduce bandwidth by transmitting only the changes since the last sync, rather than the full state. Combined with bloom filter-based difference detection, this reduces sync payload size by 95% compared to naive state-based approaches.'"
+    },
+    {
+      "id": "evt_058",
+      "timestamp": "2024-11-03T10:00:00Z",
+      "type": "tweet_save",
+      "source": "twitter",
+      "content": "Saved tweet thread by @devongovett: 'Controversial opinion: most apps don't need offline-first. The vast majority of users have reliable internet. Building offline-first adds massive complexity for a scenario that affects <5% of usage time. Ship a loading spinner and move on. The local-first community is solving a problem most users don't have.' 3 tweets, 1.2k likes, heated replies."
+    },
+    {
+      "id": "evt_059",
+      "timestamp": "2024-11-03T11:00:00Z",
+      "type": "tweet_save",
+      "source": "twitter",
+      "content": "Saved reply by @pvh to @devongovett: 'It's not about airplane mode. It's about latency. Every app that round-trips to a server for writes gives users a worse experience than one that writes locally and syncs in the background. You don't notice the loading spinner anymore because you've been trained to accept it.' 856 likes."
+    },
+    {
+      "id": "evt_060",
+      "timestamp": "2024-11-03T15:00:00Z",
+      "type": "note",
+      "source": "obsidian",
+      "content": "Personal note: The Devon Govett vs PVH debate is interesting. Devon has a point that offline-first adds complexity. But PVH's reframe about latency is compelling — it's not just offline, it's about instant local writes. For MY project (a note-taking tool), offline support actually matters because I want to use it on planes and in cafes with bad wifi. But I can see Devon's argument for most SaaS apps."
+    },
+    {
+      "id": "evt_061",
+      "timestamp": "2024-11-04T09:00:00Z",
+      "type": "bookmark",
+      "source": "browser",
+      "content": "Bookmarked: 'Yjs Ecosystem: Extensions and Integrations' (docs.yjs.dev). Yjs has integrations for ProseMirror, TipTap, CodeMirror, Monaco, Quill, and more. The largest ecosystem of editor bindings for any CRDT library. Tagged: Yjs, ecosystem, editors, integrations."
+    },
+    {
+      "id": "evt_062",
+      "timestamp": "2024-11-04T14:00:00Z",
+      "type": "highlight",
+      "source": "reader-app",
+      "content": "Highlight from Yjs docs: 'Y.js provides bindings for every major rich text editor. This means you can add real-time collaboration to an existing editor with minimal code changes. The binding translates editor operations into Y.js operations and vice versa.'"
+    },
+    {
+      "id": "evt_063",
+      "timestamp": "2024-11-05T08:30:00Z",
+      "type": "bookmark",
+      "source": "browser",
+      "content": "Bookmarked: 'DXOS: A Platform for Local-First Apps' (dxos.org). Full platform including CRDT-based data framework (ECHO), networking (Mesh), and identity (HALO). Tagged: platform, local-first, DXOS, CRDTs."
+    },
+    {
+      "id": "evt_064",
+      "timestamp": "2024-11-05T14:00:00Z",
+      "type": "note",
+      "source": "obsidian",
+      "content": "Personal note: The more platforms I find (DXOS, Electric SQL, Replicache, Triplit), the more I realize how early this space is. Everyone is building their own stack from scratch. There's no 'Rails for local-first' yet. This is both exciting and daunting. For my project, I'm going to stick with Automerge and build the sync layer myself using automerge-repo."
+    },
+    {
+      "id": "evt_065",
+      "timestamp": "2024-11-06T09:00:00Z",
+      "type": "bookmark",
+      "source": "browser",
+      "content": "Bookmarked: 'End-to-End Encryption for Local-First Apps' (braid.org). How to combine CRDTs with E2E encryption. Covers key management, access control, and encrypted sync. Tagged: encryption, security, local-first, CRDTs."
+    },
+    {
+      "id": "evt_066",
+      "timestamp": "2024-11-07T10:00:00Z",
+      "type": "highlight",
+      "source": "reader-app",
+      "content": "Highlight from E2E encryption article: 'The fundamental tension: CRDTs need to merge state from multiple peers, but E2E encryption means the relay server can't read the state. The solution is to encrypt the CRDT operations, not the document state. Each peer decrypts incoming operations, applies them to their local state, and re-encrypts outgoing operations.'"
+    },
+    {
+      "id": "evt_067",
+      "timestamp": "2024-11-07T15:00:00Z",
+      "type": "note",
+      "source": "obsidian",
+      "content": "Personal note: E2E encryption with CRDTs is an important piece I hadn't fully considered. If the relay server can't read the data, that's true local-first — the server is just a dumb pipe. But key management is a nightmare for collaborative apps. Who holds the keys? How do you revoke access? This could be a whole research area on its own. Parking this for now."
+    },
+    {
+      "id": "evt_068",
+      "timestamp": "2024-11-08T09:00:00Z",
+      "type": "bookmark",
+      "source": "browser",
+      "content": "Bookmarked: 'Automerge Performance Deep-Dive' (madebyevan.com). Detailed benchmarks comparing Automerge 2.0 vs Yjs vs OT-based solutions. Includes memory usage, CPU time, and network overhead. Tagged: Automerge, Yjs, performance, benchmarks."
+    },
+    {
+      "id": "evt_069",
+      "timestamp": "2024-11-08T11:30:00Z",
+      "type": "highlight",
+      "source": "reader-app",
+      "content": "Highlight from performance deep-dive: 'For documents under 100KB and fewer than 10 concurrent editors, all three approaches (Automerge, Yjs, OT) perform comparably. Differences emerge at scale: Yjs wins on raw speed, Automerge wins on merge correctness, and OT wins on server simplicity. Choose based on your constraints, not benchmarks.'"
+    },
+    {
+      "id": "evt_070",
+      "timestamp": "2024-11-09T09:00:00Z",
+      "type": "note",
+      "source": "obsidian",
+      "content": "Personal note: Week 5-6 summary. I've now surveyed the entire local-first landscape. My key takeaways:\n1. CRDTs are the foundation — mature enough for production in most cases\n2. The hard problems are UX, testing, and schema evolution — not performance\n3. Automerge with automerge-repo is my stack choice\n4. Start with relay sync, add P2P later if needed\n5. Don't over-engineer — simple documents first, complex structures later\n6. The Figma experience is a cautionary tale about premature optimization"
+    },
+    {
+      "id": "evt_071",
+      "timestamp": "2024-11-10T08:00:00Z",
+      "type": "bookmark",
+      "source": "browser",
+      "content": "Bookmarked: 'Testing CRDTs: Strategies and Tools' (zed.dev/blog). Zed editor team on how they test their CRDT-based collaboration. Covers property-based testing, fuzzing, and deterministic simulation. Tagged: testing, CRDTs, Zed, practical."
+    },
+    {
+      "id": "evt_072",
+      "timestamp": "2024-11-12T09:00:00Z",
+      "type": "tweet_save",
+      "source": "twitter",
+      "content": "Saved tweet by @tantaman: 'After 2 years of building local-first apps: the technology works. CRDTs are production-ready. The gap is in developer experience — docs, debugging tools, testing frameworks. We need to stop building new CRDT implementations and start building the tools around them.' 934 likes, 187 retweets."
+    }
+  ]
+}

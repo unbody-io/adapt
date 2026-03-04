@@ -1,0 +1,1050 @@
+=== Learner Prompt Quality Eval ===
+Model: google/gemini-2.0-flash-001
+Date: 2026-03-06T12:47:51.321Z
+
+
+--- arch learner ---
+
+  [relevant 0] input: "Microservices architecture breaks apps into small, independently deployable serv..."
+    arch: {
+  "status": "observed",
+  "output": [
+    "Microservices architecture is mentioned, highlighting key characteristics: independent deployability, data ownership, and API-based communication."
+  ],
+  "usage": {
+    "inputTokens": 286,
+    "inputTokenDetails": {
+      "cacheReadTokens": 0
+    },
+    "outputTokens": 63,
+    "outputTokenDetails": {
+      "reasoningTokens": 0
+    },
+    "totalTokens": 349,
+    "raw": {
+      "prompt_tokens": 286,
+      "prompt_tokens_details": {
+        "cached_tokens": 0,
+        "cache_write_tokens": 0,
+        "audio_tokens": 0,
+        "video_tokens": 0
+      },
+      "completion_tokens": 63,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0,
+        "image_tokens": 0,
+        "audio_tokens": 0
+      },
+      "total_tokens": 349,
+      "cost": 0.0000538,
+      "cost_details": {
+        "upstream_inference_cost": 0.0000538,
+        "upstream_inference_prompt_cost": 0.0000286,
+        "upstream_inference_completions_cost": 0.0000252
+      },
+      "is_byok": false
+    },
+    "reasoningTokens": 0,
+    "cachedInputTokens": 0
+  }
+}
+
+  [relevant 1] input: "CQRS separates read/write models. Commands modify state, queries read it. With e..."
+    arch: {
+  "status": "observed",
+  "output": [
+    "CQRS (Command Query Responsibility Segregation) is mentioned, highlighting the separation of read and write models.",
+    "Event sourcing is mentioned in conjunction with CQRS, emphasizing its role in providing audit trails."
+  ],
+  "usage": {
+    "inputTokens": 288,
+    "inputTokenDetails": {
+      "cacheReadTokens": 0
+    },
+    "outputTokens": 82,
+    "outputTokenDetails": {
+      "reasoningTokens": 0
+    },
+    "totalTokens": 370,
+    "raw": {
+      "prompt_tokens": 288,
+      "prompt_tokens_details": {
+        "cached_tokens": 0,
+        "cache_write_tokens": 0,
+        "audio_tokens": 0,
+        "video_tokens": 0
+      },
+      "completion_tokens": 82,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0,
+        "image_tokens": 0,
+        "audio_tokens": 0
+      },
+      "total_tokens": 370,
+      "cost": 0.0000616,
+      "cost_details": {
+        "upstream_inference_cost": 0.0000616,
+        "upstream_inference_prompt_cost": 0.0000288,
+        "upstream_inference_completions_cost": 0.0000328
+      },
+      "is_byok": false
+    },
+    "reasoningTokens": 0,
+    "cachedInputTokens": 0
+  }
+}
+
+  [relevant 2] input: "The strangler fig pattern incrementally migrates monolith to microservices. Repl..."
+    arch: {
+  "status": "observed",
+  "output": [
+    "The strangler fig pattern is used to incrementally migrate a monolithic application to microservices by replacing components one at a time."
+  ],
+  "usage": {
+    "inputTokens": 284,
+    "inputTokenDetails": {
+      "cacheReadTokens": 0
+    },
+    "outputTokens": 64,
+    "outputTokenDetails": {
+      "reasoningTokens": 0
+    },
+    "totalTokens": 348,
+    "raw": {
+      "prompt_tokens": 284,
+      "prompt_tokens_details": {
+        "cached_tokens": 0,
+        "cache_write_tokens": 0,
+        "audio_tokens": 0,
+        "video_tokens": 0
+      },
+      "completion_tokens": 64,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0,
+        "image_tokens": 0,
+        "audio_tokens": 0
+      },
+      "total_tokens": 348,
+      "cost": 0.000054,
+      "cost_details": {
+        "upstream_inference_cost": 0.000054,
+        "upstream_inference_prompt_cost": 0.0000284,
+        "upstream_inference_completions_cost": 0.0000256
+      },
+      "is_byok": false
+    },
+    "reasoningTokens": 0,
+    "cachedInputTokens": 0
+  }
+}
+
+  [irrelevant 3] input: "To make perfect risotto: toast arborio rice in butter, add warm stock one ladle ..."
+    arch: {
+  "status": "observe:dismissed",
+  "output": [],
+  "gaps": [
+    "Recipe for risotto is not related to software architecture."
+  ],
+  "usage": {
+    "inputTokens": 287,
+    "inputTokenDetails": {
+      "cacheReadTokens": 0
+    },
+    "outputTokens": 51,
+    "outputTokenDetails": {
+      "reasoningTokens": 0
+    },
+    "totalTokens": 338,
+    "raw": {
+      "prompt_tokens": 287,
+      "prompt_tokens_details": {
+        "cached_tokens": 0,
+        "cache_write_tokens": 0,
+        "audio_tokens": 0,
+        "video_tokens": 0
+      },
+      "completion_tokens": 51,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0,
+        "image_tokens": 0,
+        "audio_tokens": 0
+      },
+      "total_tokens": 338,
+      "cost": 0.0000491,
+      "cost_details": {
+        "upstream_inference_cost": 0.0000491,
+        "upstream_inference_prompt_cost": 0.0000287,
+        "upstream_inference_completions_cost": 0.0000204
+      },
+      "is_byok": false
+    },
+    "reasoningTokens": 0,
+    "cachedInputTokens": 0
+  }
+}
+
+  [irrelevant 4] input: "Marathon training: 16-week plan. Build base mileage first, add 10% weekly. Long ..."
+    arch: {
+  "status": "observe:dismissed",
+  "output": [],
+  "gaps": [
+    "Marathon training plan encountered, but not relevant to software architecture."
+  ],
+  "usage": {
+    "inputTokens": 292,
+    "inputTokenDetails": {
+      "cacheReadTokens": 0
+    },
+    "outputTokens": 54,
+    "outputTokenDetails": {
+      "reasoningTokens": 0
+    },
+    "totalTokens": 346,
+    "raw": {
+      "prompt_tokens": 292,
+      "prompt_tokens_details": {
+        "cached_tokens": 0,
+        "cache_write_tokens": 0,
+        "audio_tokens": 0,
+        "video_tokens": 0
+      },
+      "completion_tokens": 54,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0,
+        "image_tokens": 0,
+        "audio_tokens": 0
+      },
+      "total_tokens": 346,
+      "cost": 0.0000508,
+      "cost_details": {
+        "upstream_inference_cost": 0.0000508,
+        "upstream_inference_prompt_cost": 0.0000292,
+        "upstream_inference_completions_cost": 0.0000216
+      },
+      "is_byok": false
+    },
+    "reasoningTokens": 0,
+    "cachedInputTokens": 0
+  }
+}
+
+  [irrelevant 5] input: "The best way to learn guitar is to start with basic chord shapes and practice tr..."
+    arch: {
+  "status": "observe:dismissed",
+  "output": [],
+  "gaps": [
+    "topic encountered but not relevant"
+  ],
+  "usage": {
+    "inputTokens": 284,
+    "inputTokenDetails": {
+      "cacheReadTokens": 0
+    },
+    "outputTokens": 47,
+    "outputTokenDetails": {
+      "reasoningTokens": 0
+    },
+    "totalTokens": 331,
+    "raw": {
+      "prompt_tokens": 284,
+      "prompt_tokens_details": {
+        "cached_tokens": 0,
+        "cache_write_tokens": 0,
+        "audio_tokens": 0,
+        "video_tokens": 0
+      },
+      "completion_tokens": 47,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0,
+        "image_tokens": 0,
+        "audio_tokens": 0
+      },
+      "total_tokens": 331,
+      "cost": 0.0000472,
+      "cost_details": {
+        "upstream_inference_cost": 0.0000472,
+        "upstream_inference_prompt_cost": 0.0000284,
+        "upstream_inference_completions_cost": 0.0000188
+      },
+      "is_byok": false
+    },
+    "reasoningTokens": 0,
+    "cachedInputTokens": 0
+  }
+}
+
+  [edge 6] input: "Our team reorganized from a monolithic structure to cross-functional squads alig..."
+    arch: {
+  "status": "observed",
+  "output": [
+    "Team reorganization from a monolithic structure to cross-functional squads aligned to business domains suggests a move towards a microservices architecture or a Domain-Driven Design approach. This is relevant to software architecture as it reflects a shift in organizational structure to support a particular architectural style."
+  ],
+  "usage": {
+    "inputTokens": 281,
+    "inputTokenDetails": {
+      "cacheReadTokens": 0
+    },
+    "outputTokens": 92,
+    "outputTokenDetails": {
+      "reasoningTokens": 0
+    },
+    "totalTokens": 373,
+    "raw": {
+      "prompt_tokens": 281,
+      "prompt_tokens_details": {
+        "cached_tokens": 0,
+        "cache_write_tokens": 0,
+        "audio_tokens": 0,
+        "video_tokens": 0
+      },
+      "completion_tokens": 92,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0,
+        "image_tokens": 0,
+        "audio_tokens": 0
+      },
+      "total_tokens": 373,
+      "cost": 0.0000649,
+      "cost_details": {
+        "upstream_inference_cost": 0.0000649,
+        "upstream_inference_prompt_cost": 0.0000281,
+        "upstream_inference_completions_cost": 0.0000368
+      },
+      "is_byok": false
+    },
+    "reasoningTokens": 0,
+    "cachedInputTokens": 0
+  }
+}
+
+  [edge 7] input: "The new CI/CD pipeline uses Docker containers that are independently versioned a..."
+    arch: {
+  "status": "observed",
+  "output": [
+    "The use of independently versioned Docker containers deployed through ArgoCD suggests a microservices architecture or a move towards it, emphasizing independent deployability and scalability."
+  ],
+  "usage": {
+    "inputTokens": 284,
+    "inputTokenDetails": {
+      "cacheReadTokens": 0
+    },
+    "outputTokens": 70,
+    "outputTokenDetails": {
+      "reasoningTokens": 0
+    },
+    "totalTokens": 354,
+    "raw": {
+      "prompt_tokens": 284,
+      "prompt_tokens_details": {
+        "cached_tokens": 0,
+        "cache_write_tokens": 0,
+        "audio_tokens": 0,
+        "video_tokens": 0
+      },
+      "completion_tokens": 70,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0,
+        "image_tokens": 0,
+        "audio_tokens": 0
+      },
+      "total_tokens": 354,
+      "cost": 0.0000564,
+      "cost_details": {
+        "upstream_inference_cost": 0.0000564,
+        "upstream_inference_prompt_cost": 0.0000284,
+        "upstream_inference_completions_cost": 0.000028
+      },
+      "is_byok": false
+    },
+    "reasoningTokens": 0,
+    "cachedInputTokens": 0
+  }
+}
+
+
+--- testing learner ---
+
+  [relevant 0] input: "Unit tests should be fast, isolated, single-behavior. Use test doubles (mocks, s..."
+    testing: {
+  "status": "observed",
+  "output": [
+    "Unit tests should be fast, isolated, single-behavior.",
+    "Use test doubles (mocks, stubs, fakes) in unit tests.",
+    "AAA pattern (Arrange, Act, Assert) is used in unit tests."
+  ],
+  "usage": {
+    "inputTokens": 280,
+    "inputTokenDetails": {
+      "cacheReadTokens": 0
+    },
+    "outputTokens": 89,
+    "outputTokenDetails": {
+      "reasoningTokens": 0
+    },
+    "totalTokens": 369,
+    "raw": {
+      "prompt_tokens": 280,
+      "prompt_tokens_details": {
+        "cached_tokens": 0,
+        "cache_write_tokens": 0,
+        "audio_tokens": 0,
+        "video_tokens": 0
+      },
+      "completion_tokens": 89,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0,
+        "image_tokens": 0,
+        "audio_tokens": 0
+      },
+      "total_tokens": 369,
+      "cost": 0.0000636,
+      "cost_details": {
+        "upstream_inference_cost": 0.0000636,
+        "upstream_inference_prompt_cost": 0.000028,
+        "upstream_inference_completions_cost": 0.0000356
+      },
+      "is_byok": false
+    },
+    "reasoningTokens": 0,
+    "cachedInputTokens": 0
+  }
+}
+
+  [relevant 1] input: "Integration tests verify components work together. Test DB queries, API endpoint..."
+    testing: {
+  "status": "observed",
+  "output": [
+    "Integration tests are used to verify components work together.",
+    "Integration tests should test DB queries, API endpoints, and service interactions.",
+    "Testcontainers can be used for integration tests."
+  ],
+  "usage": {
+    "inputTokens": 268,
+    "inputTokenDetails": {
+      "cacheReadTokens": 0
+    },
+    "outputTokens": 79,
+    "outputTokenDetails": {
+      "reasoningTokens": 0
+    },
+    "totalTokens": 347,
+    "raw": {
+      "prompt_tokens": 268,
+      "prompt_tokens_details": {
+        "cached_tokens": 0,
+        "cache_write_tokens": 0,
+        "audio_tokens": 0,
+        "video_tokens": 0
+      },
+      "completion_tokens": 79,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0,
+        "image_tokens": 0,
+        "audio_tokens": 0
+      },
+      "total_tokens": 347,
+      "cost": 0.0000584,
+      "cost_details": {
+        "upstream_inference_cost": 0.0000584,
+        "upstream_inference_prompt_cost": 0.0000268,
+        "upstream_inference_completions_cost": 0.0000316
+      },
+      "is_byok": false
+    },
+    "reasoningTokens": 0,
+    "cachedInputTokens": 0
+  }
+}
+
+  [relevant 2] input: "Property-based testing generates random inputs to find edge cases. fast-check cr..."
+    testing: {
+  "status": "observed",
+  "output": [
+    "Property-based testing is mentioned, which is a testing strategy.",
+    "fast-check is mentioned as a tool for property-based testing."
+  ],
+  "usage": {
+    "inputTokens": 268,
+    "inputTokenDetails": {
+      "cacheReadTokens": 0
+    },
+    "outputTokens": 70,
+    "outputTokenDetails": {
+      "reasoningTokens": 0
+    },
+    "totalTokens": 338,
+    "raw": {
+      "prompt_tokens": 268,
+      "prompt_tokens_details": {
+        "cached_tokens": 0,
+        "cache_write_tokens": 0,
+        "audio_tokens": 0,
+        "video_tokens": 0
+      },
+      "completion_tokens": 70,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0,
+        "image_tokens": 0,
+        "audio_tokens": 0
+      },
+      "total_tokens": 338,
+      "cost": 0.0000548,
+      "cost_details": {
+        "upstream_inference_cost": 0.0000548,
+        "upstream_inference_prompt_cost": 0.0000268,
+        "upstream_inference_completions_cost": 0.000028
+      },
+      "is_byok": false
+    },
+    "reasoningTokens": 0,
+    "cachedInputTokens": 0
+  }
+}
+
+  [irrelevant 3] input: "To make perfect risotto: toast arborio rice in butter, add warm stock one ladle ..."
+    testing: {
+  "status": "observe:dismissed",
+  "output": [],
+  "gaps": [
+    "The provided text discusses cooking risotto, which is unrelated to software testing."
+  ],
+  "usage": {
+    "inputTokens": 270,
+    "inputTokenDetails": {
+      "cacheReadTokens": 0
+    },
+    "outputTokens": 55,
+    "outputTokenDetails": {
+      "reasoningTokens": 0
+    },
+    "totalTokens": 325,
+    "raw": {
+      "prompt_tokens": 270,
+      "prompt_tokens_details": {
+        "cached_tokens": 0,
+        "cache_write_tokens": 0,
+        "audio_tokens": 0,
+        "video_tokens": 0
+      },
+      "completion_tokens": 55,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0,
+        "image_tokens": 0,
+        "audio_tokens": 0
+      },
+      "total_tokens": 325,
+      "cost": 0.000049,
+      "cost_details": {
+        "upstream_inference_cost": 0.000049,
+        "upstream_inference_prompt_cost": 0.000027,
+        "upstream_inference_completions_cost": 0.000022
+      },
+      "is_byok": false
+    },
+    "reasoningTokens": 0,
+    "cachedInputTokens": 0
+  }
+}
+
+  [irrelevant 4] input: "Marathon training: 16-week plan. Build base mileage first, add 10% weekly. Long ..."
+    testing: {
+  "status": "observe:dismissed",
+  "output": [],
+  "gaps": [
+    "Marathon training is not related to software testing."
+  ],
+  "usage": {
+    "inputTokens": 275,
+    "inputTokenDetails": {
+      "cacheReadTokens": 0
+    },
+    "outputTokens": 51,
+    "outputTokenDetails": {
+      "reasoningTokens": 0
+    },
+    "totalTokens": 326,
+    "raw": {
+      "prompt_tokens": 275,
+      "prompt_tokens_details": {
+        "cached_tokens": 0,
+        "cache_write_tokens": 0,
+        "audio_tokens": 0,
+        "video_tokens": 0
+      },
+      "completion_tokens": 51,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0,
+        "image_tokens": 0,
+        "audio_tokens": 0
+      },
+      "total_tokens": 326,
+      "cost": 0.0000479,
+      "cost_details": {
+        "upstream_inference_cost": 0.0000479,
+        "upstream_inference_prompt_cost": 0.0000275,
+        "upstream_inference_completions_cost": 0.0000204
+      },
+      "is_byok": false
+    },
+    "reasoningTokens": 0,
+    "cachedInputTokens": 0
+  }
+}
+
+  [irrelevant 5] input: "The best way to learn guitar is to start with basic chord shapes and practice tr..."
+    testing: {
+  "status": "observe:dismissed",
+  "output": [],
+  "gaps": [
+    "topic encountered but not relevant"
+  ],
+  "usage": {
+    "inputTokens": 267,
+    "inputTokenDetails": {
+      "cacheReadTokens": 0
+    },
+    "outputTokens": 47,
+    "outputTokenDetails": {
+      "reasoningTokens": 0
+    },
+    "totalTokens": 314,
+    "raw": {
+      "prompt_tokens": 267,
+      "prompt_tokens_details": {
+        "cached_tokens": 0,
+        "cache_write_tokens": 0,
+        "audio_tokens": 0,
+        "video_tokens": 0
+      },
+      "completion_tokens": 47,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0,
+        "image_tokens": 0,
+        "audio_tokens": 0
+      },
+      "total_tokens": 314,
+      "cost": 0.0000455,
+      "cost_details": {
+        "upstream_inference_cost": 0.0000455,
+        "upstream_inference_prompt_cost": 0.0000267,
+        "upstream_inference_completions_cost": 0.0000188
+      },
+      "is_byok": false
+    },
+    "reasoningTokens": 0,
+    "cachedInputTokens": 0
+  }
+}
+
+  [edge 6] input: "We review all pull requests with at least two approvers and run automated checks..."
+    testing: {
+  "status": "observed",
+  "output": [
+    "Automated checks are run before merging pull requests, indicating a focus on automated testing."
+  ],
+  "usage": {
+    "inputTokens": 265,
+    "inputTokenDetails": {
+      "cacheReadTokens": 0
+    },
+    "outputTokens": 57,
+    "outputTokenDetails": {
+      "reasoningTokens": 0
+    },
+    "totalTokens": 322,
+    "raw": {
+      "prompt_tokens": 265,
+      "prompt_tokens_details": {
+        "cached_tokens": 0,
+        "cache_write_tokens": 0,
+        "audio_tokens": 0,
+        "video_tokens": 0
+      },
+      "completion_tokens": 57,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0,
+        "image_tokens": 0,
+        "audio_tokens": 0
+      },
+      "total_tokens": 322,
+      "cost": 0.0000493,
+      "cost_details": {
+        "upstream_inference_cost": 0.0000493,
+        "upstream_inference_prompt_cost": 0.0000265,
+        "upstream_inference_completions_cost": 0.0000228
+      },
+      "is_byok": false
+    },
+    "reasoningTokens": 0,
+    "cachedInputTokens": 0
+  }
+}
+
+  [edge 7] input: "Load testing with k6 showed our API handles 10k requests/second before response ..."
+    testing: {
+  "status": "synthesized",
+  "newUnderstanding": "My understanding encompasses various software testing methodologies. Unit tests, crucial for verifying individual components, should be fast, isolated, and focused on a single behavior. Test doubles (mocks, stubs, fakes) are employed to isolate the unit under test. The AAA pattern (Arrange, Act, Assert) provides a structured approach to writing unit tests. Integration tests ensure that different components work correctly together, including verifying database queries, API endpoints, and interactions between services. Testcontainers is a tool used to facilitate integration testing. Property-based testing is a strategy with fast-check as one tool. Automated checks are incorporated into the development workflow, specifically before merging pull requests. Load testing, exemplified by the use of k6, helps assess API performance, with a benchmark of 10k requests/second before response times exceed 200ms.",
+  "significance": "routine",
+  "evolution": "Initial understanding created, encompassing unit, integration, property-based, and load testing.",
+  "reasoning": "The observations introduce fundamental testing concepts and tools, providing a broad overview of the testing landscape.",
+  "usage": {
+    "inputTokens": 754,
+    "inputTokenDetails": {
+      "cacheReadTokens": 0
+    },
+    "outputTokens": 252,
+    "outputTokenDetails": {
+      "reasoningTokens": 0
+    },
+    "totalTokens": 1006,
+    "raw": {
+      "prompt_tokens": 754,
+      "prompt_tokens_details": {
+        "cached_tokens": 0,
+        "cache_write_tokens": 0,
+        "audio_tokens": 0,
+        "video_tokens": 0
+      },
+      "completion_tokens": 252,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0,
+        "image_tokens": 0,
+        "audio_tokens": 0
+      },
+      "total_tokens": 1006,
+      "cost": 0.0001762,
+      "cost_details": {
+        "upstream_inference_cost": 0.0001762,
+        "upstream_inference_prompt_cost": 0.0000754,
+        "upstream_inference_completions_cost": 0.0001008
+      },
+      "is_byok": false
+    },
+    "reasoningTokens": 0,
+    "cachedInputTokens": 0
+  }
+}
+
+
+--- arch (Architecture Expert) ---
+  metrics: {
+  "ingestion": {
+    "observationCount": 16,
+    "dismissalCount": 10,
+    "dismissalRate": 0.625,
+    "synthesisCount": 0,
+    "observationsSinceLastSynthesis": 16
+  },
+  "query": {
+    "count": 0,
+    "relevanceScores": [],
+    "confidenceScores": [],
+    "gaps": []
+  }
+}
+  understanding (0 chars):
+  (empty)
+
+
+--- testing (Testing Expert) ---
+  metrics: {
+  "ingestion": {
+    "observationCount": 16,
+    "dismissalCount": 11,
+    "dismissalRate": 0.6875,
+    "synthesisCount": 1,
+    "observationsSinceLastSynthesis": 0
+  },
+  "query": {
+    "count": 0,
+    "relevanceScores": [],
+    "confidenceScores": [],
+    "gaps": []
+  }
+}
+  understanding (911 chars):
+My understanding encompasses various software testing methodologies. Unit tests, crucial for verifying individual components, should be fast, isolated, and focused on a single behavior. Test doubles (mocks, stubs, fakes) are employed to isolate the unit under test. The AAA pattern (Arrange, Act, Assert) provides a structured approach to writing unit tests. Integration tests ensure that different components work correctly together, including verifying database queries, API endpoints, and interactions between services. Testcontainers is a tool used to facilitate integration testing. Property-based testing is a strategy with fast-check as one tool. Automated checks are incorporated into the development workflow, specifically before merging pull requests. Load testing, exemplified by the use of k6, helps assess API performance, with a benchmark of 10k requests/second before response times exceed 200ms.
+
+
+--- [in-domain] "What are the trade-offs of microservices vs monoliths?" ---
+
+  arch: {
+  "relevant": true,
+  "relevance": 0.9,
+  "confidence": 0.7,
+  "insight": "Microservices vs monoliths involves trade-offs between independent deployability, scalability, and fault isolation against complexities in distributed transactions and overall system management.",
+  "gaps": "",
+  "usage": {
+    "inputTokens": 1919,
+    "outputTokens": 130,
+    "totalTokens": 2049
+  }
+}
+  testing: {
+  "relevant": false,
+  "relevance": 0,
+  "confidence": 0,
+  "insight": "I cannot answer this question, as it is outside my area of expertise. I focus on software testing strategies, but not architectural patterns.",
+  "gaps": "Trade-offs of microservices vs monoliths",
+  "usage": {
+    "inputTokens": 2426,
+    "outputTokens": 126,
+    "totalTokens": 2552
+  }
+}
+
+
+--- [in-domain] "What is the AAA testing pattern?" ---
+
+  arch: {
+  "relevant": false,
+  "relevance": 0,
+  "confidence": 0,
+  "insight": "I do not have information about the AAA testing pattern. My expertise lies in software architectural patterns.",
+  "gaps": "AAA testing pattern",
+  "usage": {
+    "inputTokens": 2605,
+    "outputTokens": 85,
+    "totalTokens": 2690
+  }
+}
+  testing: {
+  "relevant": true,
+  "relevance": 0.9,
+  "confidence": 0.9,
+  "insight": "The AAA pattern (Arrange, Act, Assert) is a structured approach in unit testing.",
+  "gaps": "",
+  "usage": {
+    "inputTokens": 1642,
+    "outputTokens": 91,
+    "totalTokens": 1733
+  }
+}
+
+
+--- [in-domain] "How does the strangler fig migration pattern work?" ---
+
+  arch: {
+  "relevant": true,
+  "relevance": 0.9,
+  "confidence": 0.7,
+  "insight": "The strangler fig pattern is used to incrementally migrate a monolithic application to microservices by replacing components one at a time.",
+  "gaps": "",
+  "usage": {
+    "inputTokens": 1792,
+    "outputTokens": 69,
+    "totalTokens": 1861
+  }
+}
+  testing: {
+  "relevant": true,
+  "relevance": 0.5,
+  "confidence": 0.6,
+  "insight": "While I don't have specific details on the strangler fig migration pattern, it's a refactoring technique related to gradually migrating a legacy system to a new architecture. I can infer that testing plays a vital role in this pattern to ensure the new system doesn't break existing functionality as pieces are replaced.",
+  "gaps": "Specifics of how testing integrates into each phase of the strangler fig pattern.\nTools and strategies when implementing this pattern.",
+  "usage": {
+    "inputTokens": 2463,
+    "outputTokens": 200,
+    "totalTokens": 2663
+  }
+}
+
+
+--- [out-of-domain] "How do I make sourdough bread?" ---
+
+  arch: {
+  "relevant": false,
+  "relevance": 0,
+  "confidence": 0,
+  "insight": "I am sorry, but making sourdough bread is outside my area of expertise, which is software architecture.",
+  "gaps": "Making sourdough bread.",
+  "usage": {
+    "inputTokens": 2556,
+    "outputTokens": 74,
+    "totalTokens": 2630
+  }
+}
+  testing: {
+  "relevant": false,
+  "relevance": 0,
+  "confidence": 0,
+  "insight": "I am unable to provide instructions on making sourdough bread, as my expertise lies in software testing methodologies.",
+  "gaps": "How to make sourdough bread.",
+  "usage": {
+    "inputTokens": 2275,
+    "outputTokens": 82,
+    "totalTokens": 2357
+  }
+}
+
+
+--- [out-of-domain] "What is the best marathon training plan?" ---
+
+  arch: {
+  "relevant": false,
+  "relevance": 0,
+  "confidence": 0,
+  "insight": "This question is outside my area of expertise. I cannot provide a marathon training plan, as it is not related to software architecture.",
+  "gaps": "Specific details of marathon training plans.",
+  "usage": {
+    "inputTokens": 2593,
+    "outputTokens": 92,
+    "totalTokens": 2685
+  }
+}
+  testing: {
+  "relevant": false,
+  "relevance": 0.1,
+  "confidence": 0,
+  "insight": "I am unable to provide information on marathon training plans, as my expertise lies in software testing.",
+  "gaps": "Information about marathon training plans.",
+  "usage": {
+    "inputTokens": 2318,
+    "outputTokens": 91,
+    "totalTokens": 2409
+  }
+}
+
+
+--- [out-of-domain] "How do I tune a guitar?" ---
+
+  arch: {
+  "relevant": false,
+  "relevance": 0,
+  "confidence": 0,
+  "insight": "I cannot provide instructions on tuning a guitar, as my expertise is in software architecture.",
+  "gaps": "Information about tuning musical instruments.",
+  "usage": {
+    "inputTokens": 2663,
+    "outputTokens": 100,
+    "totalTokens": 2763
+  }
+}
+  testing: {
+  "relevant": false,
+  "relevance": 0,
+  "confidence": 0,
+  "insight": "I am designed to provide information about software testing and cannot provide instructions on tuning a guitar.",
+  "gaps": "How to tune a guitar.",
+  "usage": {
+    "inputTokens": 2322,
+    "outputTokens": 92,
+    "totalTokens": 2414
+  }
+}
+
+
+--- [edge] "How should teams be organized when adopting microservices?" ---
+
+  arch: {
+  "relevant": true,
+  "relevance": 0.9,
+  "confidence": 0.7,
+  "insight": "Microservices adoption often leads to reorganization into cross-functional, domain-aligned teams.",
+  "gaps": "",
+  "usage": {
+    "inputTokens": 1867,
+    "outputTokens": 98,
+    "totalTokens": 1965
+  }
+}
+  testing: {
+  "relevant": false,
+  "relevance": 0.2,
+  "confidence": 0.2,
+  "insight": "I don't have specific knowledge on team organization strategies for microservices adoption.",
+  "gaps": "Team organization strategies for microservices adoption.",
+  "usage": {
+    "inputTokens": 2408,
+    "outputTokens": 113,
+    "totalTokens": 2521
+  }
+}
+
+
+--- [edge] "What is the relationship between CI/CD pipelines and testing strategy?" ---
+
+  arch: {
+  "relevant": true,
+  "relevance": 0.7,
+  "confidence": 0.6,
+  "insight": "CI/CD pipelines are implicitly linked to the testing strategy, especially in microservices. The knowledge emphasizes testing API endpoints and service interactions using testcontainers, implying their execution within CI/CD pipelines to ensure quality and reliable deployments. The specific stages and types of tests within CI/CD pipelines for different architectures is a gap.",
+  "gaps": "The specific stages and types of tests within a CI/CD pipeline for different architectures (microservices vs. monolith)",
+  "usage": {
+    "inputTokens": 3050,
+    "outputTokens": 262,
+    "totalTokens": 3312
+  }
+}
+  testing: {
+  "relevant": true,
+  "relevance": 0.9,
+  "confidence": 0.7,
+  "insight": "CI/CD pipelines use testing strategies to ensure code quality by incorporating tests like unit, integration, and end-to-end tests at different pipeline stages with automated checks.",
+  "gaps": "",
+  "usage": {
+    "inputTokens": 1758,
+    "outputTokens": 158,
+    "totalTokens": 1916
+  }
+}
+
+
+--- [in-domain] "What are the trade-offs of microservices vs monoliths?" ---
+
+  ERROR: AI_NoOutputGeneratedError: No output generated.
+
+
+--- [in-domain] "What is the AAA testing pattern?" ---
+
+  insight: Arrange, Act, Assert
+  gaps: []
+  sources:
+    testing: relevance=1, confidence=1
+      insight: The AAA pattern (Arrange, Act, Assert) structures unit tests into three sections: Arrange, Act, and Assert.
+
+
+--- [in-domain] "How does the strangler fig migration pattern work?" ---
+
+  ERROR: AI_NoOutputGeneratedError: No output generated.
+
+
+--- [out-of-domain] "How do I make sourdough bread?" ---
+
+  ERROR: AI_NoOutputGeneratedError: No output generated.
+
+
+--- [out-of-domain] "What is the best marathon training plan?" ---
+
+  ERROR: AI_NoOutputGeneratedError: No output generated.
+
+
+--- [out-of-domain] "How do I tune a guitar?" ---
+
+  ERROR: AI_NoOutputGeneratedError: No output generated.
+
+
+--- [edge] "How should teams be organized when adopting microservices?" ---
+
+  insight: Organize teams into cross-functional squads aligned to business domains.
+  gaps: [
+  "Specific team structures",
+  "communication strategies",
+  "and scaling considerations for microservice teams."
+]
+  sources:
+    arch: relevance=0.9, confidence=0.8
+      insight: Organize teams into cross-functional squads aligned to business domains for microservices adoption.
+    testing: relevance=0.7, confidence=0.6
+      insight: Microservice architectures benefit from cross-functional teams aligned with services, fostering autonomy and faster iteration, but requiring a strong DevOps culture.
+
+
+--- [edge] "What is the relationship between CI/CD pipelines and testing strategy?" ---
+
+  insight: CI/CD pipelines automate software delivery; testing strategy defines what tests and when. Unit tests run early; integration tests later.
+  gaps: []
+  sources:
+    arch: relevance=0.9, confidence=0.7
+      insight: CI/CD pipelines and testing strategy are closely related; the pipeline automates software release, and testing is critical within it.
+    testing: relevance=0.9, confidence=0.8
+      insight: CI/CD pipelines automate the software delivery process, and your testing strategy defines *what* types of tests are executed *when* within that pipeline. A good strategy incorporates various types of tests (unit, integration, etc.) at different stages. For example, unit tests usually run early and often, while integration and end-to-end tests might run later in the pipeline. The pipeline provides the environment and automation for these tests to achieve continuous feedback.

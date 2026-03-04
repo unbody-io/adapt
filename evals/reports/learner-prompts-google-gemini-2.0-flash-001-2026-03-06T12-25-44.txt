@@ -1,0 +1,84 @@
+=== Learner Prompt Quality Eval ===
+Model: google/gemini-2.0-flash-001
+Date: 2026-03-06T12:22:20.482Z
+
+
+  --- arch learner ---
+    [relevant 0] observed — Microservices architecture breaks apps into small, independently deployable s...
+    [relevant 1] observed — CQRS separates read/write models. Commands modify state, queries read it. Wit...
+    [relevant 2] observed — The strangler fig pattern incrementally migrates monolith to microservices. R...
+    [irrelevant 0] observe:dismissed — To make perfect risotto: toast arborio rice in butter, add warm stock one lad...
+      gaps: Recipe for risotto encountered, not relevant to software architecture.
+    [irrelevant 1] observe:dismissed — Marathon training: 16-week plan. Build base mileage first, add 10% weekly. Lo...
+      gaps: Marathon training plan encountered, but not relevant to software architecture patterns.
+    [irrelevant 2] observe:dismissed — The best way to learn guitar is to start with basic chord shapes and practice...
+      gaps: topic encountered but not relevant
+    [edge 0] observed — Our team reorganized from a monolithic structure to cross-functional squads a...
+    [edge 1] observed — The new CI/CD pipeline uses Docker containers that are independently versione...
+
+  --- testing learner ---
+    [relevant 0] observed — Unit tests should be fast, isolated, single-behavior. Use test doubles (mocks...
+    [relevant 1] observed — Integration tests verify components work together. Test DB queries, API endpo...
+    [relevant 2] observed — Property-based testing generates random inputs to find edge cases. fast-check...
+    [irrelevant 0] observe:dismissed — To make perfect risotto: toast arborio rice in butter, add warm stock one lad...
+      gaps: The provided text is about cooking risotto, not software testing.
+    [irrelevant 1] observe:dismissed — Marathon training: 16-week plan. Build base mileage first, add 10% weekly. Lo...
+      gaps: Marathon training plan encountered, not related to software testing.
+    [irrelevant 2] observe:dismissed — The best way to learn guitar is to start with basic chord shapes and practice...
+      gaps: The data is about learning guitar, not software testing.
+    [edge 0] observed — We review all pull requests with at least two approvers and run automated che...
+    [edge 1] synthesized — Load testing with k6 showed our API handles 10k requests/second before respon...
+
+  Observer Summary:
+    arch: relevant=3/3, irrelevant_dismissed=3/3, edge_accepted=2/2
+    testing: relevant=3/3, irrelevant_dismissed=3/3, edge_accepted=2/2
+
+  arch (Architecture Expert):
+    Understanding: 0 chars
+    Observations: 16, Synthesis: 0
+
+  testing (Testing Expert):
+    Understanding: 994 chars
+    Observations: 16, Synthesis: 1
+    --- Full Understanding ---
+Software testing encompasses various levels and techniques throughout the development lifecycle. Unit tests should be fast, isolated, and focused on testing a single behavior, often employing test doubles (mocks, stubs, fakes) to isolate the unit under test. The AAA (Arrange, Act, Assert) pattern provides a structured approach to writing unit tests. Integration tests focus on verifying the interaction between components, such as database queries, API endpoints, and service interactions. Testcontainers can be utilized to manage dependencies for integration tests, creating reproducible environments. Property-based testing, exemplified by frameworks like fast-check, involves defining properties that the system should satisfy and automatically generating test cases to verify those properties. Automated checks are performed before merging pull requests, highlighting the importance of test automation. Performance testing includes load testing, which can be performed with tools like k6.
+    --- End ---
+
+  In-domain questions:
+
+    Q: What are the trade-offs of microservices vs monoliths?
+      arch: relevance=0.90, confidence=0.80
+      testing: relevance=0.60, confidence=0.50
+      Insight: Software Architecture is a significant gap. Also, Software Testing is a related gap.
+
+    Q: What is the AAA testing pattern?
+      testing: relevance=1.00, confidence=1.00
+      Insight: The AAA pattern helps structure unit tests.
+
+    Q: How does the strangler fig migration pattern work?
+      arch: relevance=1.00, confidence=0.90
+      Insight: Incremental migration to microservices.
+
+  Out-of-domain questions:
+
+    Q: How do I make sourdough bread?
+      ERROR: No output generated.
+
+    Q: What is the best marathon training plan?
+      ERROR: No output generated.
+
+    Q: How do I tune a guitar?
+      ERROR: No output generated.
+
+  Edge questions:
+
+    Q: How should teams be organized when adopting microservices?
+      ERROR: No output generated.
+
+    Q: What is the relationship between CI/CD pipelines and testing strategy?
+      arch: relevance=0.50, confidence=0.50
+      testing: relevance=0.90, confidence=0.80
+      Insight: CI/CD pipelines integrate and automate testing strategy to ensure code quality.
+
+  Query Summary:
+    In-domain avg: relevance=0.88, confidence=0.80

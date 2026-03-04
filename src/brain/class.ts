@@ -15,7 +15,7 @@ import {
 } from '../learners'
 import { generate, Output } from '../llm'
 import { TypedEmitter } from '../types/events'
-import { synthesize } from './agent'
+import { synthesize, synthesizeDirect, type SpecialistDef } from './agent'
 import { BRAIN_DEFAULTS } from './config.defaults'
 import { Evaluator } from './evaluator/class'
 import { EVOLUTION_ACTIONS, type EvolutionDecision } from './evaluator/types'
@@ -45,6 +45,7 @@ import {
 	serializeBrainModelSlots,
 } from './state'
 import { getInternalLearnerConfigs, INTERNAL_LEARNER_IDS } from './internal-learners'
+import { decomposeBrainPromptTemplate, promptContextSchema } from './prompts/prompt.decompose-brain-prompt'
 
 /**
  * Brain - A learning system that auto-generates and coordinates multiple learners
@@ -85,6 +86,8 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 	private readonly configLearners?: GeneratedLearnerConfig[]
 	private readonly internalLearnersConfig: BrainConfig['internalLearners']
 	private readonly dismissedBatchMaxSize: number
+	private reinjectTimer: ReturnType<typeof setTimeout> | null = null
+	private pendingReinjectLearnerIds: Set<string> = new Set()
 
 	constructor(rawConfig: BrainConfig) {
 		super()
@@ -131,6 +134,14 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 
 	get prompt(): string {
 		return this.state.prompt
+	}
+
+	get promptContext() {
+		return this.state.promptContext
+	}
+
+	get evolutionContext(): string | null {
+		return this.state.promptContext?.evolutionGuidance ?? null
 	}
 
 	/**
@@ -274,11 +285,32 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 			}
 		}
 
+		// Decompose brain prompt into reusable context (purpose, evolution guidance, synthesis directive)
+		await this.decomposeBrainPrompt()
+
 		// Create internal learners
 		await this.createInternalLearners()
 
 		// Persist brain state for future restores
 		await this.setState({ ...this.state })
+	}
+
+	/**
+	 * Decompose brain prompt into reusable context via LLM.
+	 * Extracts purpose, evolution guidance, and synthesis directive.
+	 * Result stored in state — skipped on restore.
+	 */
+	private async decomposeBrainPrompt(): Promise<void> {
+		const prompt = decomposeBrainPromptTemplate(this.state.prompt)
+
+		const { output } = await generate({
+			model: this.state.models.blueprint,
+			prompt,
+			output: Output.object({ schema: promptContextSchema }),
+			repairSchema: promptContextSchema,
+		})
+
+		this.state.promptContext = output
 	}
 
 	/**
@@ -360,6 +392,9 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 				this.emit(event.type as keyof BrainEventMap, event.payload as never)
 			})
 
+			// Wire synthesis events to evaluator as "system knowledge updated" signals
+			this.wireInternalLearnerSignals(learner)
+
 			await learner.init()
 
 			this.internalLearners.set(record.id, learner)
@@ -391,6 +426,7 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 				description: config.description,
 				store: this.learnerStoreFactory(config.id),
 				governance,
+				skipObservation: config.skipObservation,
 				understand: {
 					thresholds: {
 						maxObservations: 3,
@@ -404,6 +440,9 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 			learner.on((event) => {
 				this.emit(event.type as keyof BrainEventMap, event.payload as never)
 			})
+
+			// Wire synthesis events to evaluator as "system knowledge updated" signals
+			this.wireInternalLearnerSignals(learner)
 
 			await learner.init()
 
@@ -441,12 +480,43 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 		// Initialize evolution orchestrator
 		this.evolutionOrchestrator = new EvolutionOrchestrator(this)
 
-		// Re-inject dismissed batches after evolution creates new learners
+		// Re-inject dismissed batches when new learners are added.
+		// Debounce with 5s window to collect all new learner IDs into a single pass,
+		// so every batch is tried against all new learners before delete/update.
+		this.on('brain:learner:added', (event) => {
+			this.pendingReinjectLearnerIds.add(event.learnerId)
+			if (this.reinjectTimer) clearTimeout(this.reinjectTimer)
+			this.reinjectTimer = setTimeout(() => {
+				const ids = Array.from(this.pendingReinjectLearnerIds)
+				this.pendingReinjectLearnerIds.clear()
+				this.reinjectTimer = null
+				this.reinjectDismissedBatches(ids).catch((err: unknown) => {
+					const msg = err instanceof Error ? err.message : String(err)
+					console.error(`[brain] re-injection error:`, msg)
+				})
+			}, 5000)
+		})
+
+		// Feed gap learner resolution observations after evolution actions
 		this.on('evolution:action:executed', (event) => {
-			if (event.action === 'create' && event.result.newLearnerIds?.length) {
-				this.reinjectDismissedBatches(event.result.newLearnerIds).catch((err) => {
-				console.error(`[internal-learner] feed error:`, err?.message ?? err)
-			})
+			const gapLearner = this.internalLearners.get(INTERNAL_LEARNER_IDS.injectionGaps)
+			if (!gapLearner) return
+
+			const { action, guidance } = event
+			let text: string | undefined
+
+			if (action === 'create') {
+				text = `A new specialist has been created to cover previously uncovered domains. ${guidance}`
+			} else if (action === 'update' && this.guidanceMentionsGaps(guidance)) {
+				text = `An existing specialist was updated to cover previously uncovered domains. ${guidance}`
+			} else if (action === 'merge' && this.guidanceMentionsGaps(guidance)) {
+				text = `Specialists were consolidated to cover previously uncovered domains. ${guidance}`
+			}
+
+			if (text) {
+				gapLearner.learn([text]).catch((err) => {
+					console.error(`[brain] gap resolution feed error:`, err?.message ?? err)
+				})
 			}
 		})
 
@@ -528,6 +598,7 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 			...shared,
 			store: this.learnerStoreFactory(config.id),
 			governance,
+			skipObservation: config.skipObservation,
 		})
 
 		// Forward all learner events through Brain
@@ -722,80 +793,32 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 	/**
 	 * Ask all learners and synthesize a unified response
 	 *
-	 * Query is sent to ALL learners. Responses are synthesized via LLM.
-	 *
 	 * @param query - The question to ask
-	 * @param options - Optional generation options (temperature, etc.)
+	 * @param options.mode - 'direct' (default, fast: 2 LLM calls) or 'deep' (agentic)
 	 */
 	async ask(
 		query: string,
-		options?: CallSettings & { model?: import('ai').LanguageModel },
+		options?: CallSettings & { model?: import('ai').LanguageModel; mode?: 'direct' | 'deep' },
 	): Promise<BrainAskResult> {
 		await this.ensureInitialized()
 
+		const mode = options?.mode ?? 'direct'
 		const queryId = `query_${nanoid()}`
 		this.emit('brain:ask:started', { queryId, query })
 
 		try {
-			const learnerArray = this.getLearners()
+			const { model: modelOverride, mode: _mode, ...generateOptions } = options ?? {}
+			const synthesisModel = modelOverride ?? this.state.models.query
 
-			// Skip learners with no understanding and no buffered observations
-			const bufferStates = await Promise.all(
-				learnerArray.map(async (l) => ({
-					learner: l,
-					buffer: await l.getBufferState(),
-				})),
-			)
-			const queryableLearnerChecks = await Promise.all(
-				bufferStates.map(async ({ learner, buffer }) => ({
-					learner,
-					hasKnowledge: !!(await learner.getUnderstanding()) || buffer.count > 0,
-				})),
-			)
-			const queryableLearners = queryableLearnerChecks
-				.filter(({ hasKnowledge }) => hasKnowledge)
-				.map(({ learner }) => learner)
+			const result = mode === 'direct'
+				? await this.askDirect(query, synthesisModel, generateOptions)
+				: await this.askDeep(query, synthesisModel, generateOptions)
 
-			// Query all learners in parallel
-			const learnerResults = await Promise.all(
-				queryableLearners.map(async (learner) => {
-					const result = await learner.query(query, options)
-					return {
-						learnerId: learner.id,
-						name: this.learnerNames.get(learner.id) ?? learner.id,
-						relevant: result.relevant,
-						relevance: result.relevance,
-						confidence: result.confidence,
-						insight: result.insight,
-						gaps: result.gaps ? result.gaps.split('\n').filter(Boolean) : [],
-					}
-				}),
-			)
-
-			// Check for coverage gaps
-			this.checkCoverageGap(learnerResults)
-
-			// Feed internal learners (fire-and-forget)
-			this.feedAskToInternalLearners(query, learnerResults)
-
-			this.emit('brain:ask:synthesis:started', {
-				queryId,
-				learnerResponses: learnerResults,
-			})
-
-			// Synthesize responses (with consult tools for internal learners)
-			const { model: modelOverride, ...generateOptions } = options ?? {}
-			const consultTools = await this.buildConsultTools()
-			const result = await synthesize(
-				modelOverride ?? this.state.models.query,
-				{
-					brainPrompt: this.prompt,
-					query,
-					responses: learnerResults,
-					consultTools,
-					...generateOptions,
-				},
-			)
+			this.feedAskToInternalLearners(query, result.sources.map((s) => ({
+				learnerId: s.learnerId,
+				relevance: s.relevance,
+				gaps: [],
+			})))
 
 			this.emit('brain:ask:completed', {
 				queryId,
@@ -816,6 +839,86 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 			this.emit('brain:ask:failed', { queryId, error: errorMessage })
 			throw error
 		}
+	}
+
+	/**
+	 * Direct ask — query all learners in parallel (single LLM each), then one synthesis call
+	 */
+	private async askDirect(
+		query: string,
+		model: import('ai').LanguageModel,
+		generateOptions: CallSettings,
+	) {
+		const learnerArray = this.getLearners()
+
+		const learnerQueries = await Promise.all(
+			learnerArray.map(async (learner) => {
+				const [understanding, buffer] = await Promise.all([
+					learner.getUnderstanding(),
+					learner.getBufferState(),
+				])
+				if (!understanding && buffer.count === 0) return null
+				const result = await learner.query(query, { mode: 'direct', ...generateOptions })
+				return { id: learner.id, ...result }
+			}),
+		)
+
+		const specialistResults = learnerQueries
+			.filter((r): r is NonNullable<typeof r> => r !== null && r.relevant)
+			.map((r) => ({ id: r.id, relevance: r.relevance, confidence: r.confidence, insight: r.insight, gaps: r.gaps }))
+
+		const globalLearner = this.internalLearners.get('__internal_global_understanding')
+		const globalUnderstanding = globalLearner
+			? await globalLearner.getUnderstanding() as string
+			: undefined
+
+		return synthesizeDirect(model, {
+			synthesisDirective: this.state.promptContext?.synthesisDirective ?? undefined,
+			query,
+			specialistResults,
+			globalUnderstanding: globalUnderstanding || undefined,
+			...generateOptions,
+		})
+	}
+
+	/**
+	 * Deep ask — agentic synthesis, LLM decides which specialists to consult
+	 */
+	private async askDeep(
+		query: string,
+		model: import('ai').LanguageModel,
+		generateOptions: CallSettings,
+	) {
+		const learnerArray = this.getLearners()
+
+		const specialists: SpecialistDef[] = []
+		for (const learner of learnerArray) {
+			const [understanding, buffer] = await Promise.all([
+				learner.getUnderstanding(),
+				learner.getBufferState(),
+			])
+			if (!understanding && buffer.count === 0) continue
+			specialists.push({
+				id: learner.id,
+				name: this.learnerNames.get(learner.id) ?? learner.id,
+				description: learner.description || this.learnerNames.get(learner.id) || learner.id,
+				query: (question, queryOptions) => learner.query(question, { ...generateOptions, ...queryOptions }),
+			})
+		}
+
+		this.emit('brain:ask:synthesis:started', {
+			queryId: `query_${nanoid()}`,
+			specialists: specialists.map((s) => s.id),
+		})
+
+		const consultTools = await this.buildConsultTools()
+		return synthesize(model, {
+			synthesisDirective: this.state.promptContext?.synthesisDirective ?? undefined,
+			query,
+			specialists,
+			consultTools,
+			...generateOptions,
+		})
 	}
 
 	/**
@@ -865,29 +968,20 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 			return { insight: '', sources: [], gaps: [] }
 		}
 
-		// Query in parallel
-		const responses = await Promise.all(
-			withKnowledge.map(async (learner) => {
-				const result = await learner.query(query)
-				return {
-					learnerId: learner.id,
-					name: learner.name,
-					relevant: result.relevant,
-					relevance: result.relevance,
-					confidence: result.confidence,
-					insight: result.insight,
-					gaps: result.gaps ? result.gaps.split('\n').filter(Boolean) : [],
-				}
-			}),
-		)
+		// Build specialists from internal learners
+		const specialists: SpecialistDef[] = withKnowledge.map((learner) => ({
+			id: learner.id,
+			name: learner.name,
+			description: learner.description || learner.name,
+			query: (question: string) => learner.query(question),
+		}))
 
-		// Synthesize
 		const result = await synthesize(
 			this.state.models.query,
 			{
-				brainPrompt: this.prompt,
+				synthesisDirective: this.state.promptContext?.synthesisDirective ?? undefined,
 				query,
-				responses,
+				specialists,
 			},
 		)
 
@@ -936,7 +1030,7 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 	/**
 	 * Build consult tools for ask() synthesis — one tool per internal learner with knowledge.
 	 */
-	private async buildConsultTools(): Promise<Record<string, unknown> | undefined> {
+	private async buildConsultTools(): Promise<Record<string, import('ai').Tool> | undefined> {
 		if (this.internalLearners.size === 0) return undefined
 
 		const consultInputSchema = z.object({
@@ -945,28 +1039,23 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 
 		const toolDefs: Array<{ id: string; name: string; description: string }> = [
 			{
-				id: INTERNAL_LEARNER_IDS.globalInjectionUnderstanding,
+				id: INTERNAL_LEARNER_IDS.globalUnderstanding,
 				name: 'consultGlobalUnderstanding',
-				description: 'Query the system\'s cross-domain understanding of all ingested data. Use when the question spans multiple knowledge areas.',
-			},
-			{
-				id: INTERNAL_LEARNER_IDS.globalQueryUnderstanding,
-				name: 'consultQueryPatterns',
-				description: 'Query patterns of what users have been asking. Use to understand query trends and topic clusters.',
+				description: 'The system\'s cross-cutting narrative — causal connections, meta-patterns, and temporal arcs that no single knowledge section captures alone. Useful when the question asks about root causes, overall trajectory, or how different areas interact.',
 			},
 			{
 				id: INTERNAL_LEARNER_IDS.injectionGaps,
-				name: 'consultInjectionGaps',
-				description: 'Query what topics have been consistently missed by the system. Use when asking about coverage gaps.',
+				name: 'consultCoverageGaps',
+				description: 'What the system has been unable to absorb — topics and data that fell outside all specialists\' scope.',
 			},
 			{
 				id: INTERNAL_LEARNER_IDS.queryGaps,
-				name: 'consultQueryGaps',
-				description: 'Query what questions the system has been unable to answer well. Use when asking about knowledge limitations.',
+				name: 'consultAnswerGaps',
+				description: 'Questions the system has struggled to answer well in the past.',
 			},
 		]
 
-		const tools: Record<string, unknown> = {}
+		const tools: Record<string, import('ai').Tool> = {}
 
 		// Only include tools for internal learners that have knowledge
 		for (const def of toolDefs) {
@@ -997,8 +1086,9 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 	 * If accepted → remove from buffer. If dismissed again → increment retryCount.
 	 */
 	private async reinjectDismissedBatches(newLearnerIds: string[]): Promise<void> {
-		const pending = await this.store.dismissedBatches.list({ status: 'pending' })
-		if (pending.length === 0) return
+		const all = await this.store.dismissedBatches.list()
+		const unresolved = all.filter(b => b.status === 'pending' || b.status === 'retried')
+		if (unresolved.length === 0) return
 
 		const newLearners = newLearnerIds
 			.map((id) => this.learners.get(id))
@@ -1007,19 +1097,19 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 
 		const resolvedGaps: string[] = []
 
-		for (const batch of pending) {
+		for (const batch of unresolved) {
 			const data = batch.data as unknown[]
 
-			let accepted = false
+			// Try every new learner — don't stop at first acceptance
+			let anyAccepted = false
 			for (const learner of newLearners) {
 				const result = await learner.learn(data)
 				if (result.status !== 'observe:dismissed') {
-					accepted = true
-					break
+					anyAccepted = true
 				}
 			}
 
-			if (accepted) {
+			if (anyAccepted) {
 				await this.store.dismissedBatches.delete(batch.id)
 				const gaps = batch.gaps as string[] | undefined
 				if (gaps?.length) resolvedGaps.push(...gaps)
@@ -1035,7 +1125,7 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 		if (resolvedGaps.length > 0) {
 			const gapLearner = this.internalLearners.get(INTERNAL_LEARNER_IDS.injectionGaps)
 			if (gapLearner) {
-				const resolvedText = `Gap resolved: new learner(s) created to cover previously dismissed topics. Now covered: ${resolvedGaps.join(', ')}.`
+				const resolvedText = `Previously dismissed data has now been absorbed by a new specialist. Topics now covered: ${resolvedGaps.join(', ')}.`
 				gapLearner.learn([resolvedText]).catch((err) => {
 					const msg = err instanceof Error ? err.message : String(err)
 					console.error(`[internal-learner] gap resolution feed error:`, msg)
@@ -1104,26 +1194,60 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 	}
 
 	/**
-	 * Wire an external learner's synthesis events to the global injection understanding learner.
-	 * Feeds all synthesis events — the internal learner's observer decides relevance.
+	 * Check if evolution guidance text references coverage gaps.
+	 */
+	private guidanceMentionsGaps(guidance: string): boolean {
+		const lower = guidance.toLowerCase()
+		return lower.includes('gap') || lower.includes('uncovered')
+			|| lower.includes('missing') || lower.includes('not covered')
+			|| lower.includes('dismissed')
+	}
+
+	/**
+	 * Notify the evaluator when an internal learner synthesizes.
+	 */
+	private wireInternalLearnerSignals(learner: BaseLearner<unknown>): void {
+		learner.on('learner:synthesized', (event) => {
+			this.signal({
+				source: 'system',
+				description: `${learner.name} updated: ${event.evolution || 'new understanding'}`,
+			})
+		})
+	}
+
+	/**
+	 * Wire an external learner's synthesis events to the global understanding learner.
+	 * Feeds understanding updates so the global learner can form a unified picture.
 	 */
 	private wireExternalLearnerSynthesisEvents(learner: BaseLearner<unknown>): void {
 		learner.on('learner:synthesized', (event) => {
 			const globalLearner = this.internalLearners.get(
-				INTERNAL_LEARNER_IDS.globalInjectionUnderstanding,
+				INTERNAL_LEARNER_IDS.globalUnderstanding,
 			)
 			if (!globalLearner) return
 
-			globalLearner.learn([{
-				learnerId: event.learnerId,
-				summary: typeof event.newUnderstanding === 'string'
-					? event.newUnderstanding.slice(0, 500)
-					: JSON.stringify(event.newUnderstanding).slice(0, 500),
-				significance: event.significance,
-				evolution: event.evolution,
-			}]).catch((err) => {
-				console.error(`[internal-learner] feed error:`, err?.message ?? err)
-			})
+			const feedGlobal = (understanding: string) => {
+				globalLearner.learn([{
+					learnerId: event.learnerId,
+					understanding,
+					significance: event.significance,
+					evolution: event.evolution,
+				}]).catch((err) => {
+					console.error(`[internal-learner] feed error:`, err?.message ?? err)
+				})
+			}
+
+			if (typeof event.newUnderstanding === 'string') {
+				// Text learner — understanding is already prose
+				feedGlobal(event.newUnderstanding)
+			} else {
+				// List learner — query for a prose compilation
+				learner.query('Compile everything you know into a comprehensive summary.').then((result) => {
+					feedGlobal(result.insight || JSON.stringify(event.newUnderstanding))
+				}).catch((err) => {
+					console.error(`[internal-learner] list summary query error:`, err?.message ?? err)
+				})
+			}
 		})
 	}
 
@@ -1172,17 +1296,30 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 			}
 		}
 
+		// When there are no external learners, skip the gap learner (nothing to verify)
+		// and signal the evaluator directly with the actual data content
+		if (learnerResults.length === 0) {
+			const summary = batch
+				.map((item) => {
+					if (typeof item === 'string') return item
+					const obj = item as Record<string, unknown>
+					return [obj.title, obj.type, obj.context].filter(Boolean).join(' — ')
+				})
+				.join('; ')
+			this.signal({
+				source: 'system',
+				description: `No learners exist to handle incoming data. Items: ${summary}`,
+			})
+			return
+		}
+
 		// Feed injection gap learner (awaited so observations are stored before we continue)
 		const gapLearner = this.internalLearners.get(INTERNAL_LEARNER_IDS.injectionGaps)
 		if (gapLearner) {
 			try {
-				const readableDate = new Date().toLocaleString('en-US', {
-					month: 'long', day: 'numeric', year: 'numeric',
-					hour: 'numeric', minute: '2-digit', hour12: true,
-				})
 				const gapText = gaps.length > 0
-					? `[${readableDate}] Injection gap: all ${learnerResults.length} learner(s) dismissed incoming data. Topics not covered: ${gaps.join(', ')}.`
-					: `[${readableDate}] Injection gap: all ${learnerResults.length} learner(s) dismissed incoming data. No learner matched this content.`
+					? `Data arrived that no specialist could absorb. Topics identified: ${gaps.join(', ')}. This content has been set aside for now.`
+					: `Data arrived that no specialist could absorb. No topics could be identified from this content. It has been set aside for now.`
 				await gapLearner.learn([gapText])
 			} catch (err) {
 				const msg = err instanceof Error ? err.message : String(err)
@@ -1190,46 +1327,6 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 			}
 		}
 
-		// Trigger direct evolution with gap context
-		this.triggerEvolution({
-			source: 'brain:injection-gap',
-			description: `All learners dismissed batch ${batchId}. Gaps: ${gaps.join('; ')}`,
-		}).catch((err) => {
-			const msg = err instanceof Error ? err.message : String(err)
-			console.error(`[internal-learner] evolution trigger error:`, msg)
-		})
-	}
-
-	/**
-	 * Check for coverage gaps after ask() collects learner responses
-	 */
-	private checkCoverageGap(
-		responses: Array<{ relevance: number }>,
-	): void {
-		if (!this.state.evolution.enabled) return
-
-		const { relevanceThreshold, gapCountThreshold, windowSize } =
-			this.state.evolution.coverageGap
-
-		this.state.recentQueryCount++
-
-		const allLowRelevance = responses.every(
-			(r) => r.relevance < relevanceThreshold,
-		)
-		if (allLowRelevance) {
-			this.state.coverageGapCount++
-		}
-
-		if (this.state.recentQueryCount >= windowSize) {
-			if (this.state.coverageGapCount >= gapCountThreshold) {
-				this.signal({
-					source: 'brain',
-					description: `Coverage gap: ${this.state.coverageGapCount} of last ${this.state.recentQueryCount} queries had no relevant learner`,
-				})
-			}
-			this.state.coverageGapCount = 0
-			this.state.recentQueryCount = 0
-		}
 	}
 
 	/**
@@ -1241,7 +1338,7 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 	 * @returns Array of evolution decisions (empty if no changes needed)
 	 * @throws Error if evolution is not enabled
 	 */
-	async evaluateEvolution(options?: { dryRun?: boolean; includeUnderstanding?: boolean }): Promise<{
+	async evaluateEvolution(options?: { dryRun?: boolean }): Promise<{
 		decisions: EvolutionDecision[]
 		results: AggregatedEvolutionResult
 	}> {
@@ -1249,10 +1346,6 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 			throw new Error(
 				'Evolution is not enabled. Set config.evolution.enabled = true',
 			)
-		}
-
-		if (options?.includeUnderstanding !== undefined) {
-			this.evaluator.includeUnderstanding = options.includeUnderstanding
 		}
 
 		const decisions = await this.evaluator.evaluate('manual')
@@ -1627,6 +1720,12 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 		}
 
 		// ── Side effects after state applied ──
+
+		// Re-decompose brain prompt when it changes
+		if (changedFields.includes('prompt')) {
+			await this.decomposeBrainPrompt()
+			await this.setState({ promptContext: this.state.promptContext })
+		}
 
 		if (
 			changedFields.includes('evolution.enabled') &&

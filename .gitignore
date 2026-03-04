@@ -6,3 +6,6 @@ dist/
 .DS_Store
 server/logs/
 server/data/
+
+# Eval data (SQLite stores)
+evals/.data/

@@ -1,0 +1,93 @@
+/**
+ * DirectMethod — single-shot query method
+ *
+ * Dumps raw understanding into context, single LLM call, no tools.
+ * Fast path: one call vs ToolBasedMethod's agentic loop.
+ */
+
+import type { LanguageModel } from 'ai'
+import { z } from 'zod'
+import { generate, Output } from '../../../llm'
+import type { TokenUsage } from '../../types'
+import type {
+	QueryContext,
+	QueryMethod,
+	QueryMethodUpdateConfig,
+	QueryOptions,
+	QueryResult,
+} from './types'
+
+const responseSchema = z.object({
+	relevant: z.boolean().describe('Is this query within your area of expertise?'),
+	relevance: z
+		.number()
+		.min(0)
+		.max(1)
+		.describe('How related is this query to your domain? 0 = outside scope, 1 = core'),
+	confidence: z
+		.number()
+		.min(0)
+		.max(1)
+		.describe('How well could you answer? 0 = nothing on this, 1 = fully answered'),
+	response: z.string().describe('Your answer — be specific, cite what you know'),
+	gaps: z.array(z.string()).describe('What could not be answered'),
+})
+
+export interface DirectConfig {
+	/** Returns the learner's raw understanding as a string */
+	getUnderstanding: () => Promise<string>
+	/** Builds the system prompt for the query */
+	buildPrompt: (context: QueryContext, understanding: string) => string
+}
+
+export class DirectMethod implements QueryMethod {
+	readonly name = 'direct'
+	private model: LanguageModel
+	private config: DirectConfig
+
+	constructor(model: LanguageModel, config: DirectConfig) {
+		this.model = model
+		this.config = config
+	}
+
+	update(config: QueryMethodUpdateConfig): void {
+		if (config.model !== undefined) {
+			this.model = config.model
+		}
+	}
+
+	async query(
+		context: QueryContext,
+		options?: QueryOptions,
+	): Promise<QueryResult> {
+		const understanding = await this.config.getUnderstanding()
+		const { model: modelOverride, ...generateOptions } = options ?? {}
+
+		const system = this.config.buildPrompt(context, understanding)
+
+		const result = await generate({
+			model: modelOverride ?? this.model,
+			system,
+			prompt: context.question,
+			output: Output.object({ schema: responseSchema }),
+			repairSchema: responseSchema,
+			...generateOptions,
+		})
+
+		const output = result.output as z.infer<typeof responseSchema>
+		const usage: TokenUsage = {
+			inputTokens: result.usage?.inputTokens ?? 0,
+			outputTokens: result.usage?.outputTokens ?? 0,
+			totalTokens: result.usage?.totalTokens ?? 0,
+		}
+
+		return {
+			relevant: output.relevant,
+			relevance: output.relevance,
+			confidence: output.confidence,
+			insight: output.response,
+			gaps: output.gaps.join('\n'),
+			usage,
+		}
+	}
+}

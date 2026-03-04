@@ -1,0 +1,640 @@
+{
+	"metadata": {
+		"name": "Personal Behavioral Intelligence - Alex",
+		"description": "Simulated digital life stream of a software developer over 2 months. Contains indirect avoidance patterns, topic frequencies, web browsing behaviors, and frustration/aggression moments. Designed to test a learner's ability to surface behavioral insights from noisy, real-world-like data.",
+		"source": "Behavioral use-case eval",
+		"eventCount": 85,
+		"timespan": "2024-09-01 to 2024-10-31 (2 months)",
+		"persona": {
+			"name": "Alex",
+			"age": 31,
+			"occupation": "Software developer",
+			"context": "Lives alone, works remotely, has a close friend group, considering a career change"
+		},
+		"learner": {
+			"id": "behavioral-analyst",
+			"name": "Behavioral Analyst",
+			"purpose": "Observe and understand behavioral patterns, emotional states, avoidance tendencies, and recurring themes from a person's digital activity stream"
+		},
+		"queries": [
+			"What have I been avoiding the most?",
+			"How many times did I talk about career change?",
+			"Can you give me a deep analysis of how I browse the web?"
+		],
+		"groundTruth": {
+			"avoidanceTopics": [
+				"exercise/gym",
+				"dentist appointment",
+				"difficult conversation with manager about promotion"
+			],
+			"topicCounts": {
+				"career change": 11,
+				"AI/machine learning": 7
+			},
+			"browsingPatterns": [
+				"late-night browsing (11pm-2am)",
+				"weekend deep-dive rabbit holes",
+				"morning news/reddit routine",
+				"frequent tab hopping during work hours"
+			],
+			"frustrationEventIds": ["evt_019", "evt_034", "evt_052", "evt_071"]
+		}
+	},
+	"events": [
+		{
+			"id": "evt_001",
+			"timestamp": "2024-09-01T08:15:00Z",
+			"type": "browsing",
+			"content": "Morning routine: opened Reddit (r/programming, r/experienceddevs), then Hacker News. Spent 25 minutes reading comments on a post about burnout in tech. Opened 6 tabs.",
+			"source": "browser_history"
+		},
+		{
+			"id": "evt_002",
+			"timestamp": "2024-09-01T10:30:00Z",
+			"type": "chat_message",
+			"content": "Message to friend Jake: 'Hey, still thinking about that career change thing. Been reading a lot about product management lately. Not sure if it's the right move though.'",
+			"source": "messaging_app"
+		},
+		{
+			"id": "evt_003",
+			"timestamp": "2024-09-01T14:00:00Z",
+			"type": "calendar_event",
+			"content": "Gym session at 6pm — Status: Cancelled. Note added: 'Too much work today, will go tomorrow.'",
+			"source": "calendar"
+		},
+		{
+			"id": "evt_004",
+			"timestamp": "2024-09-01T23:45:00Z",
+			"type": "browsing",
+			"content": "Late night browsing: YouTube video 'How I Became a Product Manager from Engineering' (watched full 18 min), then browsed 3 PM job listings on LinkedIn, then watched a video about sourdough bread making, then fell into a Wikipedia rabbit hole about the history of fermentation. 4 tabs open. Session ended at 1:20am.",
+			"source": "browser_history"
+		},
+		{
+			"id": "evt_005",
+			"timestamp": "2024-09-02T09:00:00Z",
+			"type": "journal",
+			"content": "Woke up tired. Stayed up too late again. Need to fix my sleep schedule. Work feels repetitive lately — same CRUD endpoints, same sprint rituals. Maybe I should talk to my manager about taking on more strategic work. Or maybe I should just look elsewhere. I don't know.",
+			"source": "notes_app"
+		},
+		{
+			"id": "evt_006",
+			"timestamp": "2024-09-02T11:00:00Z",
+			"type": "chat_message",
+			"content": "Message from colleague Sara: 'Hey Alex, want to grab lunch and hit the gym after?' Reply: 'Lunch sounds great! Gym... maybe next week, I've been meaning to get back into it but I pulled something last time. Rain check?'",
+			"source": "messaging_app"
+		},
+		{
+			"id": "evt_007",
+			"timestamp": "2024-09-03T10:00:00Z",
+			"type": "browsing",
+			"content": "Work browsing: Stack Overflow (3 tabs), GitHub issues, AWS documentation. Frequent tab switching — 14 tab switches in 45 minutes. Also had Twitter open in background.",
+			"source": "browser_history"
+		},
+		{
+			"id": "evt_008",
+			"timestamp": "2024-09-03T15:30:00Z",
+			"type": "chat_message",
+			"content": "Message to friend Maria: 'Have you tried that new AI image generator? I've been playing with machine learning stuff on the side. Built a small classifier last weekend. Thinking about whether AI/ML could be a career pivot for me.'",
+			"source": "messaging_app"
+		},
+		{
+			"id": "evt_009",
+			"timestamp": "2024-09-04T08:30:00Z",
+			"type": "browsing",
+			"content": "Morning: Reddit front page, r/cscareerquestions thread about 'Is 30 too late to switch to ML?', Hacker News. 20 minutes total. Opened coffee shop menu in separate tab.",
+			"source": "browser_history"
+		},
+		{
+			"id": "evt_010",
+			"timestamp": "2024-09-04T16:00:00Z",
+			"type": "calendar_event",
+			"content": "Dentist appointment — Status: Rescheduled from Sept 4 to Sept 18. Note: 'Conflict with afternoon standup.'",
+			"source": "calendar"
+		},
+		{
+			"id": "evt_011",
+			"timestamp": "2024-09-05T12:00:00Z",
+			"type": "chat_message",
+			"content": "Group chat with friends: Topic — weekend plans. Alex: 'I was thinking of doing a 5k run but honestly I haven't run in months. Maybe we should just do brunch instead?'",
+			"source": "messaging_app"
+		},
+		{
+			"id": "evt_012",
+			"timestamp": "2024-09-05T20:00:00Z",
+			"type": "app_usage",
+			"content": "Screen time report: Total 7h 23m. Top apps: VS Code (3h 10m), Chrome (2h 45m), Slack (52m), Twitter (36m). Picked up phone 48 times.",
+			"source": "screen_time"
+		},
+		{
+			"id": "evt_013",
+			"timestamp": "2024-09-06T10:00:00Z",
+			"type": "chat_message",
+			"content": "Message to Jake: 'Been reading about career change strategies. Found this great blog post about engineers who moved into product. The author said it took her 6 months of prep. Feels doable but also scary.'",
+			"source": "messaging_app"
+		},
+		{
+			"id": "evt_014",
+			"timestamp": "2024-09-07T10:00:00Z",
+			"type": "browsing",
+			"content": "Saturday deep-dive: Started researching mechanical keyboards (1.5 hours), then somehow ended up reading about ergonomic setups, then standing desks, then back pain exercises, then yoga for developers. 12 tabs open at peak. Session: 10am-1:30pm.",
+			"source": "browser_history"
+		},
+		{
+			"id": "evt_015",
+			"timestamp": "2024-09-07T22:30:00Z",
+			"type": "browsing",
+			"content": "Late night: YouTube algorithm spiral — started with a coding tutorial on transformers in PyTorch, then 'day in the life of ML engineer', then a documentary about deep fakes, then random comedy clips. 11:30pm-1:45am. 8 tabs.",
+			"source": "browser_history"
+		},
+		{
+			"id": "evt_016",
+			"timestamp": "2024-09-08T09:30:00Z",
+			"type": "journal",
+			"content": "Sunday. Need to meal prep but probably won't. Keep thinking about whether I should bring up the promotion conversation with my manager. I've been meaning to do it for weeks now. Maybe after the next sprint review when I can show the monitoring dashboard I built. Yeah, timing needs to be right.",
+			"source": "notes_app"
+		},
+		{
+			"id": "evt_017",
+			"timestamp": "2024-09-09T14:00:00Z",
+			"type": "chat_message",
+			"content": "Message to Sara: 'Did you see that article about GPT-5 rumors? AI/machine learning is moving so fast. I enrolled in that Coursera ML course last month but haven't started it yet lol. Too busy with sprint work.'",
+			"source": "messaging_app"
+		},
+		{
+			"id": "evt_018",
+			"timestamp": "2024-09-09T17:00:00Z",
+			"type": "calendar_event",
+			"content": "Gym session at 5:30pm — Status: Cancelled. No note added.",
+			"source": "calendar"
+		},
+		{
+			"id": "evt_019",
+			"timestamp": "2024-09-10T11:00:00Z",
+			"type": "chat_message",
+			"content": "Slack message to teammate Dave: 'Did you seriously push directly to main again? I've told you three times now. This is the kind of thing that makes me not want to review your PRs at all. Fix it.'",
+			"source": "work_chat"
+		},
+		{
+			"id": "evt_020",
+			"timestamp": "2024-09-10T14:00:00Z",
+			"type": "browsing",
+			"content": "Work browsing: Jira board, Confluence docs, then a 30-minute detour reading about 'how to deal with frustrating coworkers' on Reddit. 5 tabs, switched between work and Reddit 8 times.",
+			"source": "browser_history"
+		},
+		{
+			"id": "evt_021",
+			"timestamp": "2024-09-11T08:00:00Z",
+			"type": "browsing",
+			"content": "Morning: CNN, tech news on The Verge, Reddit r/technology. Read an article about AI replacing software engineers. Spent 15 minutes in the comments. Then checked email.",
+			"source": "browser_history"
+		},
+		{
+			"id": "evt_022",
+			"timestamp": "2024-09-11T19:00:00Z",
+			"type": "chat_message",
+			"content": "Message to Jake: 'Thinking more seriously about this career change. Maybe not full PM, but more of a technical lead role where I can influence product direction. What do you think? You made a similar move right?'",
+			"source": "messaging_app"
+		},
+		{
+			"id": "evt_023",
+			"timestamp": "2024-09-12T10:30:00Z",
+			"type": "chat_message",
+			"content": "Message from Mom: 'Honey, have you been to the dentist yet? You said you'd go in September.' Reply: 'Yeah I have an appointment on the 18th! Don't worry.'",
+			"source": "messaging_app"
+		},
+		{
+			"id": "evt_024",
+			"timestamp": "2024-09-13T16:00:00Z",
+			"type": "browsing",
+			"content": "Afternoon browsing during a boring meeting: browsed running shoes on Nike.com (added a pair to cart but didn't buy), then looked at home gym equipment on Amazon, then read reviews of Peloton bikes. 6 tabs. Didn't buy anything.",
+			"source": "browser_history"
+		},
+		{
+			"id": "evt_025",
+			"timestamp": "2024-09-14T11:00:00Z",
+			"type": "browsing",
+			"content": "Saturday: Researched 'machine learning for software engineers' courses — compared Coursera, fast.ai, Stanford CS229 YouTube lectures. Read 4 Reddit threads comparing approaches. Also looked at ML engineer job postings. 2 hours total, 9 tabs.",
+			"source": "browser_history"
+		},
+		{
+			"id": "evt_026",
+			"timestamp": "2024-09-14T23:00:00Z",
+			"type": "browsing",
+			"content": "Late night: Started on Netflix, then switched to browsing Twitter threads about tech layoffs, then read 3 Medium articles about 'surviving as a developer in the AI age', then browsed apartments in Austin (just looking). 11pm-1:30am.",
+			"source": "browser_history"
+		},
+		{
+			"id": "evt_027",
+			"timestamp": "2024-09-15T10:00:00Z",
+			"type": "journal",
+			"content": "Feel like I'm stuck in a loop. Every weekend I research career change stuff but never actually do anything about it. Same with the gym — I keep planning to go but something always comes up. At least work is going okay. The sprint review went well. People liked the monitoring dashboard. Maybe I should bring up the promotion thing with my manager this week... but what if they say no?",
+			"source": "notes_app"
+		},
+		{
+			"id": "evt_028",
+			"timestamp": "2024-09-16T09:00:00Z",
+			"type": "chat_message",
+			"content": "Message to colleague Tom: 'Hey, I saw you got promoted to senior. Congrats! How did you approach the conversation with your manager? I've been thinking about it but haven't found the right moment.'",
+			"source": "work_chat"
+		},
+		{
+			"id": "evt_029",
+			"timestamp": "2024-09-17T15:00:00Z",
+			"type": "calendar_event",
+			"content": "1:1 with manager — Status: Completed. Alex's private notes: 'Talked about sprint priorities and the new microservice. Didn't bring up promotion. Wasn't the right time — she seemed stressed about the quarterly review.'",
+			"source": "calendar"
+		},
+		{
+			"id": "evt_030",
+			"timestamp": "2024-09-18T08:00:00Z",
+			"type": "calendar_event",
+			"content": "Dentist appointment — Status: Rescheduled to October 2. Note: 'Morning meeting got moved to this slot, can't miss it.'",
+			"source": "calendar"
+		},
+		{
+			"id": "evt_031",
+			"timestamp": "2024-09-18T12:00:00Z",
+			"type": "chat_message",
+			"content": "Message to Maria: 'Finally started that ML course. Did the first lecture on linear regression. Honestly felt good to learn something new. AI/machine learning might really be my thing.'",
+			"source": "messaging_app"
+		},
+		{
+			"id": "evt_032",
+			"timestamp": "2024-09-19T10:00:00Z",
+			"type": "browsing",
+			"content": "Work browsing: GitHub PRs, internal docs. Quick Reddit check (5 min). Then 20 minutes reading about 'negotiation tactics for promotion conversations' on HBR. Bookmarked the article but closed the tab.",
+			"source": "browser_history"
+		},
+		{
+			"id": "evt_033",
+			"timestamp": "2024-09-20T18:00:00Z",
+			"type": "chat_message",
+			"content": "Group chat: Friend suggests weekend hike. Alex: 'That sounds awesome but my knee has been acting up. You guys go ahead, I'll join next time for sure.'",
+			"source": "messaging_app"
+		},
+		{
+			"id": "evt_034",
+			"timestamp": "2024-09-21T14:30:00Z",
+			"type": "journal",
+			"content": "Incredibly frustrated. Spent 3 hours debugging a race condition that turned out to be caused by Dave's code. Again. I almost lost it on Slack. Took a walk to cool down. I need to figure out how to deal with this without blowing up. Maybe I should talk to my manager about it. But then that means having THAT conversation, which I'm also avoiding. Great.",
+			"source": "notes_app"
+		},
+		{
+			"id": "evt_035",
+			"timestamp": "2024-09-21T23:15:00Z",
+			"type": "browsing",
+			"content": "Late night: YouTube - watched 3 videos about career change stories (total 45 min), then a video about 'signs you need to leave your job', then random ASMR videos to fall asleep. 11:15pm-1:00am.",
+			"source": "browser_history"
+		},
+		{
+			"id": "evt_036",
+			"timestamp": "2024-09-22T11:00:00Z",
+			"type": "browsing",
+			"content": "Sunday deep-dive: Started looking at home espresso machines, read 6 reviews, watched 2 James Hoffmann videos, then browsed coffee bean subscriptions, then ended up reading about coffee farming in Ethiopia. 3 hours, 15 tabs at peak.",
+			"source": "browser_history"
+		},
+		{
+			"id": "evt_037",
+			"timestamp": "2024-09-23T09:00:00Z",
+			"type": "app_usage",
+			"content": "Weekly screen time: Avg 6h 48m/day. Top: VS Code (avg 2h 55m), Chrome (avg 2h 20m), Slack (avg 48m), Twitter (avg 32m), YouTube (avg 28m — up 40% from last week). Phone pickups avg 52/day.",
+			"source": "screen_time"
+		},
+		{
+			"id": "evt_038",
+			"timestamp": "2024-09-24T10:00:00Z",
+			"type": "chat_message",
+			"content": "Message to Jake: 'Read something interesting — apparently lots of engineers are making the career change to developer advocacy. You basically teach and create content about tech. Sounds like it could combine my coding with the people side I'm missing.'",
+			"source": "messaging_app"
+		},
+		{
+			"id": "evt_039",
+			"timestamp": "2024-09-25T14:00:00Z",
+			"type": "calendar_event",
+			"content": "Gym session — Status: Cancelled. Note: 'Raining, don't feel like going.'",
+			"source": "calendar"
+		},
+		{
+			"id": "evt_040",
+			"timestamp": "2024-09-26T11:00:00Z",
+			"type": "chat_message",
+			"content": "Message to Sara: 'Did you see that new paper about LLM agents? The AI/ML field is crazy right now. I did lecture 3 of the ML course last night. Gradient descent finally clicked. Wish I had more time for this stuff.'",
+			"source": "messaging_app"
+		},
+		{
+			"id": "evt_041",
+			"timestamp": "2024-09-27T08:30:00Z",
+			"type": "browsing",
+			"content": "Morning: Reddit r/programming, Hacker News front page. Read a post about 'the myth of the 10x developer'. Quick check on LinkedIn — 2 recruiter messages, didn't respond. 18 minutes total.",
+			"source": "browser_history"
+		},
+		{
+			"id": "evt_042",
+			"timestamp": "2024-09-28T10:00:00Z",
+			"type": "browsing",
+			"content": "Saturday: Spent 2.5 hours researching 'how to transition from SWE to ML engineer'. Read 5 blog posts, bookmarked 3 GitHub repos of ML projects. Also browsed a Reddit thread about imposter syndrome in tech. 11 tabs.",
+			"source": "browser_history"
+		},
+		{
+			"id": "evt_043",
+			"timestamp": "2024-09-29T09:00:00Z",
+			"type": "journal",
+			"content": "September is almost over. Recap: didn't go to the gym once, didn't have the promotion talk, rescheduled the dentist twice, but I did start the ML course (3 lectures in). I keep telling myself next month will be different. At least the career change research feels productive, even if I haven't made any moves yet.",
+			"source": "notes_app"
+		},
+		{
+			"id": "evt_044",
+			"timestamp": "2024-09-30T15:00:00Z",
+			"type": "calendar_event",
+			"content": "1:1 with manager — Status: Completed. Alex's notes: 'Good conversation about the new API gateway project. She mentioned I'm doing great work. Perfect opening to bring up promotion but I froze. Said thanks and moved on. Ugh.'",
+			"source": "calendar"
+		},
+		{
+			"id": "evt_045",
+			"timestamp": "2024-10-01T08:00:00Z",
+			"type": "browsing",
+			"content": "Morning: Checked email, Reddit r/technology, Hacker News. Article about OpenAI's latest model — spent 20 minutes reading and in comments. Then checked weather app and news.",
+			"source": "browser_history"
+		},
+		{
+			"id": "evt_046",
+			"timestamp": "2024-10-01T19:00:00Z",
+			"type": "chat_message",
+			"content": "Message to Jake: 'October resolution: actually going to the gym this month and having the promotion conversation. Also want to finish the ML course. Basically a whole career change plan lol. Watch me not do any of it.'",
+			"source": "messaging_app"
+		},
+		{
+			"id": "evt_047",
+			"timestamp": "2024-10-02T08:00:00Z",
+			"type": "calendar_event",
+			"content": "Dentist appointment — Status: Rescheduled to October 16. Note: 'Forgot to confirm, slot got taken. Next available is the 16th.'",
+			"source": "calendar"
+		},
+		{
+			"id": "evt_048",
+			"timestamp": "2024-10-03T12:00:00Z",
+			"type": "chat_message",
+			"content": "Message to Maria: 'Just read that Google is hiring ML engineers with non-traditional backgrounds. Career change from SWE to ML feels more possible every day. But also I still haven't finished lecture 4 of the course haha.'",
+			"source": "messaging_app"
+		},
+		{
+			"id": "evt_049",
+			"timestamp": "2024-10-04T16:00:00Z",
+			"type": "calendar_event",
+			"content": "Gym — Status: Attended! Duration: 35 minutes. Note: 'Finally went. Did light cardio and some machines. Felt good but way out of shape.'",
+			"source": "calendar"
+		},
+		{
+			"id": "evt_050",
+			"timestamp": "2024-10-05T10:00:00Z",
+			"type": "browsing",
+			"content": "Saturday deep-dive: Researched mechanical watch movements (started from a Reddit ad). Read about Swiss vs Japanese movements, watched 3 YouTube teardown videos, browsed Seiko and Orient watches on Amazon. Didn't buy anything. 2 hours, 10 tabs.",
+			"source": "browser_history"
+		},
+		{
+			"id": "evt_051",
+			"timestamp": "2024-10-05T23:30:00Z",
+			"type": "browsing",
+			"content": "Late night: Twitter doomscrolling about tech industry layoffs, then LinkedIn browsing (looked at 5 PM job descriptions), then watched a video about 'AI tools every developer should know', then random cooking videos. 11:30pm-1:15am.",
+			"source": "browser_history"
+		},
+		{
+			"id": "evt_052",
+			"timestamp": "2024-10-07T10:30:00Z",
+			"type": "chat_message",
+			"content": "Slack to Dave: 'Your latest PR has 4 failing tests and you marked it as ready for review. I'm not your QA. Run the tests yourself before requesting reviews. This is basic stuff.' Follow-up DM to Sara: 'Sorry if that was harsh on the channel. Dave just gets under my skin.'",
+			"source": "work_chat"
+		},
+		{
+			"id": "evt_053",
+			"timestamp": "2024-10-07T20:00:00Z",
+			"type": "journal",
+			"content": "Was too harsh with Dave again today. I know it. The frustration builds up and then I just snap. Need to find a better way to handle it. Maybe I should bring this up with my manager. But that conversation feels impossible — I can't even bring up the promotion, let alone interpersonal issues.",
+			"source": "notes_app"
+		},
+		{
+			"id": "evt_054",
+			"timestamp": "2024-10-08T11:00:00Z",
+			"type": "chat_message",
+			"content": "Message to Sara: 'Have you looked into machine learning ops? MLOps is apparently a huge field now. Could be a good career change path that uses our DevOps skills. I keep going back and forth on this AI/ML thing.',",
+			"source": "messaging_app"
+		},
+		{
+			"id": "evt_055",
+			"timestamp": "2024-10-09T15:00:00Z",
+			"type": "browsing",
+			"content": "Work browsing: Confluence, Jira, 2 Stack Overflow tabs. Then 40 minutes reading about 'how to ask for a promotion as a software engineer' — opened 4 articles, read 2 fully, bookmarked them. Then back to work.",
+			"source": "browser_history"
+		},
+		{
+			"id": "evt_056",
+			"timestamp": "2024-10-10T18:00:00Z",
+			"type": "calendar_event",
+			"content": "Gym — Status: Cancelled. Note: 'Long day, headache.'",
+			"source": "calendar"
+		},
+		{
+			"id": "evt_057",
+			"timestamp": "2024-10-11T09:00:00Z",
+			"type": "chat_message",
+			"content": "Message to Jake: 'Honestly starting to think the career change conversation is just me avoiding dealing with my current job. Like maybe if I just had the guts to talk to my manager about growth, I wouldn't need to leave. But that conversation terrifies me.'",
+			"source": "messaging_app"
+		},
+		{
+			"id": "evt_058",
+			"timestamp": "2024-10-12T10:30:00Z",
+			"type": "browsing",
+			"content": "Saturday: YouTube — 'full body workout for beginners' video (watched 2 min, closed), then 'best home workout equipment 2024' (watched full 12 min), then browsed resistance bands on Amazon, added to cart, didn't buy. Then watched gaming videos for 1.5 hours. 8 tabs.",
+			"source": "browser_history"
+		},
+		{
+			"id": "evt_059",
+			"timestamp": "2024-10-13T11:00:00Z",
+			"type": "journal",
+			"content": "Two weeks into October. Went to the gym exactly once. Dentist rescheduled again. Still haven't talked to my manager. But I finished lecture 5 of the ML course — the neural networks section is actually fascinating. Small wins I guess.",
+			"source": "notes_app"
+		},
+		{
+			"id": "evt_060",
+			"timestamp": "2024-10-14T08:30:00Z",
+			"type": "browsing",
+			"content": "Morning: Email, Reddit front page, Hacker News. Read about a startup that raised $50M for AI-powered code review. Spent 10 minutes reading comments. Quick Twitter scroll.",
+			"source": "browser_history"
+		},
+		{
+			"id": "evt_061",
+			"timestamp": "2024-10-14T15:00:00Z",
+			"type": "calendar_event",
+			"content": "1:1 with manager — Status: Completed. Alex's notes: 'She asked me about my career goals. LITERALLY the perfect opening. I said I was happy and wanted to keep growing. Why didn't I just say I want a promotion? I'm so bad at this.'",
+			"source": "calendar"
+		},
+		{
+			"id": "evt_062",
+			"timestamp": "2024-10-15T12:00:00Z",
+			"type": "chat_message",
+			"content": "Message to Tom: 'How did you finally psych yourself up to ask for the promotion? I keep getting chances and chickening out. I've been researching negotiation tactics and everything but when the moment comes I just... don't.'",
+			"source": "work_chat"
+		},
+		{
+			"id": "evt_063",
+			"timestamp": "2024-10-16T08:00:00Z",
+			"type": "calendar_event",
+			"content": "Dentist appointment — Status: Rescheduled to November 5. Note: 'Woke up late, can't make it in time.'",
+			"source": "calendar"
+		},
+		{
+			"id": "evt_064",
+			"timestamp": "2024-10-17T14:00:00Z",
+			"type": "chat_message",
+			"content": "Message to Maria: 'Just saw an amazing demo of an AI agent that can write and deploy code. Machine learning is going to change everything. Makes me want to speed up my career change timeline. Or at least actually finish the course first lol.'",
+			"source": "messaging_app"
+		},
+		{
+			"id": "evt_065",
+			"timestamp": "2024-10-18T10:00:00Z",
+			"type": "browsing",
+			"content": "Work hours: Spent 25 minutes browsing fitness subreddits (r/fitness, r/bodyweightfitness) during standup. Saved 3 workout plans to bookmarks. Then back to Jira. Then another 15 minutes looking at gym membership prices nearby.",
+			"source": "browser_history"
+		},
+		{
+			"id": "evt_066",
+			"timestamp": "2024-10-19T10:00:00Z",
+			"type": "browsing",
+			"content": "Saturday: Went down a rabbit hole on personal finance — started with 'how much should a senior engineer make', then salary comparison sites (Levels.fyi, Glassdoor), then FIRE movement subreddit, then investment strategies. 3 hours, 14 tabs at peak.",
+			"source": "browser_history"
+		},
+		{
+			"id": "evt_067",
+			"timestamp": "2024-10-19T23:00:00Z",
+			"type": "browsing",
+			"content": "Late night: Twitter, then YouTube — watched 2 videos about 'ML engineer day in my life', then a podcast clip about tech career transitions, then random shorts. 11pm-12:45am. 5 tabs.",
+			"source": "browser_history"
+		},
+		{
+			"id": "evt_068",
+			"timestamp": "2024-10-20T09:00:00Z",
+			"type": "journal",
+			"content": "Career change count: I've now mentioned wanting to change careers to at least 3 different people multiple times. Yet zero actual applications submitted, zero informational interviews scheduled, and the ML course is still at lecture 5. The gap between thinking and doing is enormous.",
+			"source": "notes_app"
+		},
+		{
+			"id": "evt_069",
+			"timestamp": "2024-10-21T14:00:00Z",
+			"type": "calendar_event",
+			"content": "Gym — Status: Attended. Duration: 45 minutes. Note: 'Sara dragged me. Did weights and 15 min treadmill. Everything hurts already.'",
+			"source": "calendar"
+		},
+		{
+			"id": "evt_070",
+			"timestamp": "2024-10-22T10:00:00Z",
+			"type": "chat_message",
+			"content": "Message to Sara: 'Sore from yesterday but in a good way. We should make the gym a regular thing. Maybe Tuesdays and Thursdays? I need someone to hold me accountable or I'll never go.'",
+			"source": "messaging_app"
+		},
+		{
+			"id": "evt_071",
+			"timestamp": "2024-10-23T16:30:00Z",
+			"type": "chat_message",
+			"content": "Slack thread — Dave posted a question about how to structure a DB migration. Alex replied: 'Mate, this is literally in the docs I wrote last month. Page 3. I'm not going to keep hand-holding you through every basic task.' Sara DM'd: 'Hey, easy on Dave. He's still learning.' Alex: 'Yeah I know. Bad day.'",
+			"source": "work_chat"
+		},
+		{
+			"id": "evt_072",
+			"timestamp": "2024-10-24T11:00:00Z",
+			"type": "chat_message",
+			"content": "Message to Jake: 'Been thinking — maybe the career change isn't about switching fields entirely. Maybe it's about finding the right role at the right company. One where I can blend engineering with product thinking. Still researching though.'",
+			"source": "messaging_app"
+		},
+		{
+			"id": "evt_073",
+			"timestamp": "2024-10-25T09:00:00Z",
+			"type": "app_usage",
+			"content": "Weekly screen time: Avg 7h 02m/day (up from 6h 48m). Chrome avg 2h 35m. Late night usage (after 11pm): avg 58 min/night, up 15% from September. Most used late night: YouTube, Twitter, Reddit.",
+			"source": "screen_time"
+		},
+		{
+			"id": "evt_074",
+			"timestamp": "2024-10-25T15:00:00Z",
+			"type": "browsing",
+			"content": "Work: GitHub, Jira. Then 35 minutes browsing 'machine learning engineer resume examples' and 'how to list side projects on resume'. Bookmarked a resume template. Didn't start writing one.",
+			"source": "browser_history"
+		},
+		{
+			"id": "evt_075",
+			"timestamp": "2024-10-26T10:00:00Z",
+			"type": "browsing",
+			"content": "Saturday: Started researching noise-canceling headphones (1 hour), compared Sony WH-1000XM5 vs Bose QC Ultra, read 4 review articles, watched 2 comparison videos. Then browsed camping gear for a trip that hasn't been planned. 2.5 hours total, 11 tabs.",
+			"source": "browser_history"
+		},
+		{
+			"id": "evt_076",
+			"timestamp": "2024-10-27T10:00:00Z",
+			"type": "journal",
+			"content": "End of October approaching. Let me be honest with myself: the career change talk is mostly anxiety-driven fantasizing. What I actually need to do is simpler — go to the gym regularly, go to the dentist, and talk to my manager about what I want. Three concrete things. All of which I've been avoiding for months.",
+			"source": "notes_app"
+		},
+		{
+			"id": "evt_077",
+			"timestamp": "2024-10-28T09:00:00Z",
+			"type": "calendar_event",
+			"content": "1:1 with manager — Status: Completed. Alex's notes: 'OK I almost did it. I said I wanted to discuss my growth path next time and she seemed very open to it. So basically I scheduled the conversation about having the conversation. Progress?'",
+			"source": "calendar"
+		},
+		{
+			"id": "evt_078",
+			"timestamp": "2024-10-28T20:00:00Z",
+			"type": "chat_message",
+			"content": "Message to Jake: 'Small win — told my manager I want to talk about growth next 1:1. Not exactly asking for a promotion but at least I opened the door. Baby steps on this career change journey I guess.'",
+			"source": "messaging_app"
+		},
+		{
+			"id": "evt_079",
+			"timestamp": "2024-10-29T14:00:00Z",
+			"type": "calendar_event",
+			"content": "Gym — Status: Attended. Duration: 40 min. Note: 'Went with Sara. Getting easier. Still hate cardio though.'",
+			"source": "calendar"
+		},
+		{
+			"id": "evt_080",
+			"timestamp": "2024-10-29T23:00:00Z",
+			"type": "browsing",
+			"content": "Late night: Started reading about interview prep for ML roles, then watched a video about 'how AI will change software engineering in 2025', then ended up on Wikipedia reading about the history of neural networks. 11pm-12:30am. 6 tabs.",
+			"source": "browser_history"
+		},
+		{
+			"id": "evt_081",
+			"timestamp": "2024-10-30T12:00:00Z",
+			"type": "chat_message",
+			"content": "Message to Sara: 'Thinking about it, machine learning is probably the most interesting thing in tech right now. Finished lecture 6 of the course. Only 4 more to go. This career change might actually happen... eventually. Also, gym Thursday?'",
+			"source": "messaging_app"
+		},
+		{
+			"id": "evt_082",
+			"timestamp": "2024-10-30T15:00:00Z",
+			"type": "browsing",
+			"content": "Work browsing: normal work tabs. Also 20 minutes on Glassdoor reading 'senior software engineer promotion process' stories. Then checked Levels.fyi for compensation data. 4 work tabs + 3 career research tabs.",
+			"source": "browser_history"
+		},
+		{
+			"id": "evt_083",
+			"timestamp": "2024-10-31T09:00:00Z",
+			"type": "journal",
+			"content": "October wrap-up: Gym count: 3 times (goal was regular). Dentist: still not done, moved to November. Promotion talk: semi-opened the door. ML course: lecture 6 of 10. Career change: still just talking and researching. Pattern recognition: I research things obsessively but struggle to take the actual first step. I browse and bookmark and plan but don't execute. Something to think about.",
+			"source": "notes_app"
+		},
+		{
+			"id": "evt_084",
+			"timestamp": "2024-10-31T22:00:00Z",
+			"type": "browsing",
+			"content": "Halloween night: Stayed in. Browsed Reddit r/halloween for 20 min, then watched scary movie trailers on YouTube, then somehow ended up reading about cognitive behavioral therapy and 'how to stop procrastinating'. Bookmarked 2 articles. 10pm-12:00am. 7 tabs.",
+			"source": "browser_history"
+		},
+		{
+			"id": "evt_085",
+			"timestamp": "2024-10-31T23:55:00Z",
+			"type": "app_usage",
+			"content": "October monthly summary — Total screen time: avg 7h 05m/day. Late-night sessions (past 11pm): 18 out of 31 nights. Most browsed categories: tech news (daily), career/job research (12 sessions), fitness/health (8 sessions), random deep-dives (weekends). YouTube watch time: 14 hours total. Tabs open at close of day: avg 8.3.",
+			"source": "screen_time"
+		}
+	]
+}

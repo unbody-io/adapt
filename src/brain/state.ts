@@ -22,6 +22,7 @@
  */
 
 import type { LanguageModel } from 'ai'
+import type { PromptContext } from './prompts/prompt.decompose-brain-prompt'
 
 // ── Model types ─────────────────────────────────────────────────────────────
 
@@ -55,6 +56,9 @@ export interface BrainState {
 	// Identity
 	prompt: string
 
+	// LLM-extracted context from brain prompt (null before init)
+	promptContext: PromptContext | null
+
 	// Models (LanguageModel in cache; StoredBrainModelRef in store)
 	models: BrainModelSlots
 
@@ -75,9 +79,6 @@ export interface BrainState {
 		}
 	}
 
-	// Runtime counters (coverage gap tracking)
-	coverageGapCount: number
-	recentQueryCount: number
 }
 
 // ── Transform types ─────────────────────────────────────────────────────────
@@ -135,6 +136,7 @@ export function createInitialBrainState(config: {
 }): BrainState {
 	return {
 		prompt: config.prompt,
+		promptContext: null,
 		models: {
 			default: config.model,
 			blueprint: config.blueprintModel,
@@ -145,7 +147,5 @@ export function createInitialBrainState(config: {
 			batchSize: config.batchSize,
 		},
 		evolution: config.evolution,
-		coverageGapCount: 0,
-		recentQueryCount: 0,
 	}
 }

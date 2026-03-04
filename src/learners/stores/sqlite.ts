@@ -16,6 +16,26 @@ import type {
 } from './types'
 import { extractStrings } from './memory'
 
+// ── FTS helpers ──────────────────────────────────────────────────────────────
+
+/** Extract all string content from a record for FTS indexing */
+function ftsContent(item: Record<string, unknown>, jsonCols: string[]): string {
+	const parts: string[] = []
+	for (const col of jsonCols) {
+		const raw = item[col]
+		if (raw !== undefined && raw !== null) {
+			parts.push(...extractStrings(raw))
+		}
+	}
+	// Also include non-JSON string columns
+	for (const [key, val] of Object.entries(item)) {
+		if (!jsonCols.includes(key) && typeof val === 'string' && key !== 'id') {
+			parts.push(val)
+		}
+	}
+	return parts.join(' ')
+}
+
 // ── Column metadata ──────────────────────────────────────────────────────────
 
 interface ColumnDef {
@@ -59,11 +79,24 @@ const stateColumns: ColumnDef[] = [
 export class SQLiteCollection<T extends { id: string }>
 	implements Collection<T>
 {
+	private ftsTable: string | null = null
+	private jsonCols: string[]
+
 	constructor(
 		private db: Database.Database,
 		private table: string,
 		private columns: ColumnDef[],
-	) {}
+		opts?: { fts?: boolean },
+	) {
+		this.jsonCols = columns.filter((c) => c.json).map((c) => c.name)
+
+		if (opts?.fts) {
+			this.ftsTable = `${table}_fts`
+			db.exec(
+				`CREATE VIRTUAL TABLE IF NOT EXISTS ${this.ftsTable} USING fts5(id, content, tokenize='porter unicode61')`,
+			)
+		}
+	}
 
 	async add(item: T): Promise<void> {
 		const cols = this.columns.map((c) => c.name)
@@ -78,6 +111,13 @@ export class SQLiteCollection<T extends { id: string }>
 				`INSERT INTO ${this.table} (${cols.join(', ')}) VALUES (${placeholders.join(', ')})`,
 			)
 			.run(...values)
+
+		if (this.ftsTable) {
+			const content = ftsContent(item as Record<string, unknown>, this.jsonCols)
+			this.db
+				.prepare(`INSERT INTO ${this.ftsTable} (id, content) VALUES (?, ?)`)
+				.run((item as Record<string, unknown>).id, content)
+		}
 	}
 
 	async get(id: string): Promise<T | undefined> {
@@ -128,6 +168,13 @@ export class SQLiteCollection<T extends { id: string }>
 				`UPDATE ${this.table} SET ${setClauses.join(', ')} WHERE id = ?`,
 			)
 			.run(...values, id)
+
+		if (this.ftsTable) {
+			const content = ftsContent(merged as Record<string, unknown>, this.jsonCols)
+			this.db
+				.prepare(`UPDATE ${this.ftsTable} SET content = ? WHERE id = ?`)
+				.run(content, id)
+		}
 	}
 
 	async delete(id: string): Promise<void> {
@@ -137,10 +184,18 @@ export class SQLiteCollection<T extends { id: string }>
 		if (result.changes === 0) {
 			throw new Error(`Record with id "${id}" not found`)
 		}
+		if (this.ftsTable) {
+			this.db
+				.prepare(`DELETE FROM ${this.ftsTable} WHERE id = ?`)
+				.run(id)
+		}
 	}
 
 	async clear(): Promise<void> {
 		this.db.prepare(`DELETE FROM ${this.table}`).run()
+		if (this.ftsTable) {
+			this.db.prepare(`DELETE FROM ${this.ftsTable}`).run()
+		}
 	}
 
 	async count(filter?: Record<string, unknown>): Promise<number> {
@@ -160,6 +215,24 @@ export class SQLiteCollection<T extends { id: string }>
 	}
 
 	async search(query: string): Promise<T[]> {
+		if (this.ftsTable) {
+			// FTS5 tokenizes into words — "Enterprise SSO" matches records containing both words
+			// Escape special FTS5 characters and quote each term
+			const terms = query
+				.split(/\s+/)
+				.filter(Boolean)
+				.map((t) => `"${t.replace(/"/g, '""')}"`)
+			if (terms.length === 0) return []
+			const ftsQuery = terms.join(' AND ')
+			const rows = this.db
+				.prepare(
+					`SELECT t.* FROM ${this.table} t INNER JOIN ${this.ftsTable} f ON t.id = f.id WHERE f.${this.ftsTable} MATCH ?`,
+				)
+				.all(ftsQuery) as Record<string, unknown>[]
+			return rows.map((r) => this.parseRow(r))
+		}
+
+		// Fallback: in-memory substring search
 		const all = await this.list()
 		const q = query.toLowerCase()
 		return all.filter((item) =>
@@ -173,6 +246,11 @@ export class SQLiteCollection<T extends { id: string }>
 		const stmt = this.db.prepare(
 			`INSERT INTO ${this.table} (${cols.join(', ')}) VALUES (${placeholders.join(', ')})`,
 		)
+		const ftsStmt = this.ftsTable
+			? this.db.prepare(
+					`INSERT INTO ${this.ftsTable} (id, content) VALUES (?, ?)`,
+				)
+			: null
 
 		const insertMany = this.db.transaction((rows: T[]) => {
 			for (const item of rows) {
@@ -182,6 +260,13 @@ export class SQLiteCollection<T extends { id: string }>
 					return def.json ? JSON.stringify(raw) : (raw ?? null)
 				})
 				stmt.run(...values)
+				if (ftsStmt) {
+					const content = ftsContent(
+						item as Record<string, unknown>,
+						this.jsonCols,
+					)
+					ftsStmt.run((item as Record<string, unknown>).id, content)
+				}
 			}
 		})
 
@@ -268,6 +353,7 @@ export class SQLiteStore implements Store {
 			this.db,
 			'understanding',
 			understandingColumns,
+			{ fts: true },
 		)
 		this.evolution = new SQLiteCollection<EvolutionRecord>(
 			this.db,

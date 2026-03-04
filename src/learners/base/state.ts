@@ -83,6 +83,9 @@ export interface BaseLearnerState {
 	metrics: LearnerMetrics
 	stagnation_signal_fired: boolean
 	dismissal_signal_fired: boolean
+
+	// Skip observation phase — data goes directly to buffer
+	skipObservation: boolean
 }
 
 // ── Transform types ─────────────────────────────────────────────────────────

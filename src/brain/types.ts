@@ -124,7 +124,7 @@ export type InternalLearnerToggle = boolean | Partial<LearningConfig>
  * Configuration for Brain's internal learners
  */
 export interface InternalLearnersConfig {
-	globalInjectionUnderstanding?: InternalLearnerToggle
+	globalUnderstanding?: InternalLearnerToggle
 	globalQueryUnderstanding?: InternalLearnerToggle
 	injectionGaps?: InternalLearnerToggle
 	queryGaps?: InternalLearnerToggle
@@ -353,7 +353,7 @@ export interface BrainOwnEventMap {
 	'brain:ask:started': { queryId: string; query: string }
 	'brain:ask:synthesis:started': {
 		queryId: string
-		learnerResponses: LearnerResponse[]
+		specialists: string[]
 	}
 	'brain:ask:completed': {
 		queryId: string

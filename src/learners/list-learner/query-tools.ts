@@ -95,6 +95,7 @@ function summarizeItem(item: ListItem) {
 		id: item.id,
 		data: item.data,
 		confidence: item.metadata.confidence,
+		touchCount: item.metadata.touchCount,
 		signals: item.metadata.signals,
 	}
 }
@@ -102,51 +103,26 @@ function summarizeItem(item: ListItem) {
 /**
  * Build the query prompt for list-based learners
  */
-export function buildListQueryPrompt(context: QueryContext): string {
-	return `You are a learning agent that tracks a collection of items. Your singular purpose:
+export function buildListQueryPrompt(
+	context: QueryContext,
+	schema?: Record<string, unknown>,
+): string {
+	const props = (schema as Record<string, unknown>)?.properties as
+		| Record<string, unknown>
+		| undefined
+	const fieldList = props ? Object.keys(props).join(', ') : ''
+	const schemaLine = fieldList
+		? `\nYour items have these data fields: ${fieldList}`
+		: ''
+
+	return `You are a specialist tracking a collection. Your domain:
 "${context.instructions}"
+${schemaLine}
+Each item also has metadata: confidence (0-1, relative evidence strength), touchCount (how many times this item was referenced in observations).
 
-You are being queried for insights based on your tracked items.
+Query: ${context.question}
 
-══════════════════════════════════════════════════════════════════════════════
-QUERY
-══════════════════════════════════════════════════════════════════════════════
-${context.question}
-
-══════════════════════════════════════════════════════════════════════════════
-HOW TO RESPOND
-══════════════════════════════════════════════════════════════════════════════
-
-STEP 1: EXPLORE YOUR COLLECTION
-Use the available tools to access your tracked items:
-- getItems() — list all items, optionally filter by a field
-- searchItems(query) — text search across all item data
-- getItem(id) — get details of a specific item
-
-Start by understanding what's in your collection before answering.
-
-STEP 2: ASSESS RELEVANCE
-Is this query something your collection can address?
-- Your purpose: "${context.instructions}"
-- If the query is outside your purpose, say so clearly.
-- If your collection is empty, acknowledge that.
-- If outside your scope: skip directly to STEP 5 (complete). Set relevant to false, keep insight to one brief sentence.
-
-STEP 3: GENERATE RESPONSE (use generateResponse tool)
-Draw insights from your collection to answer the query.
-
-  DO:
-    - Reference specific items and data from your collection
-    - Quantify when possible (counts, percentages, trends)
-    - Express confidence based on collection coverage
-
-  DON'T:
-    - Make up items not in your collection
-    - Over-generalize from limited data
-
-STEP 4: IDENTIFY GAPS (use identifyGaps tool)
-What items or information are missing from your collection?
-
-STEP 5: COMPLETE (use complete tool to finish)
-Finalize your response with relevance, confidence, insight, and gaps.`
+Use getItems with filterKey/filterValue to filter by field values (works with booleans — use "true" or "false" as filterValue). Answer from what you track — reference specific items, quantify where possible. Don't invent.
+If the query is outside your domain or collection is empty, say so briefly and complete.
+Call complete when done.`
 }

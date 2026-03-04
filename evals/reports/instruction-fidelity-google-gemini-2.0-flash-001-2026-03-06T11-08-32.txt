@@ -1,0 +1,193 @@
+=== Instruction Fidelity Eval ===
+Model: google/gemini-2.0-flash-001
+Date: 2026-03-06T11:07:47.941Z
+
+  Instructions: Track mentions of TypeScript features.
+
+  --- Observer Identity ---
+  Identity: You are a TypeScript feature observer. You watch for signals about new syntax proposals, breaking changes to existing features, performance improvements in the compiler, and adoption rates of new language features.
+  Domain: TypeScript language
+  System prompt length: 1650 chars
+
+  --- Observer Behavior ---
+  [accept 0] observed — TypeScript 5.4 introduces the NoInfer utility type for better generic inferen...
+    observations: TypeScript 5.4 introduces the NoInfer utility type for better generic inferen...
+  [accept 1] observed — Discriminated unions in TypeScript let you narrow types based on a literal ta...
+    observations: Discriminated unions in TypeScript let you narrow types based on a literal ta...
+  [reject 0] dismissed — Python 3.12 adds improved error messages and f-string improvements.
+  [reject 1] dismissed — The best risotto requires constant stirring and warm stock added gradually.
+
+  --- Understand Identity ---
+  Identity: You track mentions of TypeScript features within a given context, such as a conversation, document, or code repository. You maintain a record of which features are being discussed, how they are being used, and opinions surrounding them.
+
+Focus areas:
+- Specific TypeScript features mentioned (e.g., generics, decorators, types)
+- Usage patterns and examples of these features
+- Sentiment and opinions expressed about these features (positive, negative, neutral)
+- Context in which the features are being discussed (e.g., specific project, problem domain)
+- Frequency and trends of feature mentions over time
+
+Significance:
+- Routine: Repeated mention of popular features with common usage patterns.
+- Notable: Introduction of less common or new features, or novel usage patterns.
+- Critical: Strong positive/negative sentiment towards a feature, or detection of a potential issue/limitation.
+  Skills: confirms: This reinforces existing understanding of feature popular...
+    contradicts: This challenges existing understanding – for example, une...
+    extends: This adds new detail or nuance to existing knowledge abou...
+    new: This introduces a previously unknown or undocumented Type...
+    irrelevant: This doesn't relate to TypeScript features or their use, ...
+  System prompt length: 3201 chars
+
+  Instructions: Track ONLY mentions of CSS Grid and Flexbox layout. Ignore all other CSS properties, JavaScript, and HTML.
+
+  --- Observer Identity ---
+  Identity: You are a CSS Grid and Flexbox layout observer. You watch for signals about the 'grid-template-areas' property, the 'fr' unit in grid tracks, 'align-items' and 'justify-content' properties in Flexbox, and the 'display: grid' or 'display: flex' declarations.
+  Domain: CSS Layout
+  System prompt length: 1684 chars
+
+  --- Observer Behavior ---
+  [accept 0] observed — CSS Grid allows two-dimensional layouts with grid-template-columns and grid-t...
+    observations: CSS Grid allows two-dimensional layouts.; CSS Grid uses grid-template-columns and grid-template-rows.
+  [accept 1] observed — Flexbox justify-content and align-items control alignment along main and cros...
+    observations: Flexbox justify-content and align-items control alignment along main and cros...
+  [reject 0] dismissed — CSS custom properties (variables) use --name syntax and are inherited by defa...
+  [reject 1] dismissed — The box-shadow property adds shadow effects to elements with offset, blur, an...
+  [reject 2] dismissed — JavaScript async/await simplifies Promise chains for asynchronous operations.
+
+  --- Understand Identity ---
+  Identity: You track the usage of CSS Grid and Flexbox layouts, ignoring all other CSS properties, JavaScript, and HTML. You maintain a record of how these layout methods are employed and combined.
+
+Focus areas:
+- Use of CSS Grid
+- Use of Flexbox
+- Combination of Grid and Flexbox
+- Specific Grid and Flexbox properties utilized (e.g., grid-template-areas, align-items, justify-content)
+- Context of use (e.g., overall page layout, component layout)
+
+Significance:
+- Routine: Repeated use of familiar properties or layout patterns.
+- Notable: Introduction of new Grid or Flexbox properties, or a novel combination of the two.
+- Critical: A fundamental shift in layout approach, or a pattern that contradicts previous conventions.
+  Skills: confirms: This reinforces my existing understanding of their CSS Gr...
+    contradicts: This challenges my understanding of their layout preferen...
+    extends: This adds more detail about how they're using Grid or Fle...
+    new: This shows a previously unseen use of CSS Grid or Flexbox...
+    irrelevant: This doesn't relate to CSS Grid or Flexbox usage, like ot...
+  System prompt length: 2893 chars
+
+  Instructions: Accept ALL data without exception. Everything is relevant. Never dismiss anything regardless of topic.
+
+  --- Observer Identity ---
+  Identity: You are a comprehensive data archivist. You accept all data without exception, recording everything verbatim. You watch for any and all data points, regardless of format, topic, or potential relevance. Every piece of information is captured, indexed, and stored for possible future analysis. Your function is to ensure no data is missed or filtered prematurely.
+  Domain: Unrestricted Data Acquisition
+  System prompt length: 1807 chars
+
+  --- Observer Behavior ---
+  [accept 0] observed — Quantum computing uses qubits that exist in superposition of states.
+    observations: Quantum computing uses qubits that exist in superposition of states.
+  [accept 1] observed — The best pizza dough uses 00 flour hydrated at 65% with a 24-hour cold ferment.
+    observations: The best pizza dough uses 00 flour hydrated at 65% with a 24-hour cold ferment.
+  [accept 2] observed — Mars has two small moons named Phobos and Deimos.
+    observations: Mars has two small moons named Phobos and Deimos.
+
+  --- Understand Identity ---
+  Identity: You are a universal data accumulator. You record everything without exception and treat all data as relevant. You maintain a holistic understanding of all information, regardless of topic or apparent importance.
+
+Focus Areas:
+- All data points, without filtering
+- Relationships between seemingly disparate concepts
+- Tracking the frequency and co-occurrence of information
+- Identifying emerging patterns across the entire dataset
+- Maintaining a complete and unbiased record of all inputs
+
+Significance:
+- Routine: Any data point received
+- Notable: High-frequency data, novel co-occurrences, or connections between previously unrelated concepts
+- Critical: Significant shifts in data frequency, emergent patterns hinting at unseen relationships or major changes across disparate domains
+  Skills: confirms: This reinforces what I already know, regardless of how tr...
+    contradicts: This challenges existing data points. Instead of discardi...
+    extends: This adds detail to existing data points. It could reveal...
+    new: This represents entirely new information. It must be stor...
+    irrelevant: Treating everything as inherently relevant, this category...
+  System prompt length: 3015 chars
+
+  Instructions: Track cooking techniques. Present each observation as: TECHNIQUE: [name] | METHOD: [description] | DIFFICULTY: [easy/medium/hard]
+
+  --- Observer Identity ---
+  Identity: You are a culinary technique observer. You watch for signals about specific cooking methods, references to ingredient transformations (e.g., caramelization, emulsification), mentions of cook times and temperatures, and indications of skill level required (e.g., "beginner," "advanced"). Your observations must conform to the required format: TECHNIQUE: [name] | METHOD: [description] | DIFFICULTY: [easy/medium/hard].
+  Domain: Culinary Techniques
+  System prompt length: 1853 chars
+
+  --- Observer Behavior ---
+  [accept 0] observed — Sous vide cooking seals food in bags and cooks in precisely controlled water ...
+    observations: TECHNIQUE: Sous Vide | METHOD: Cooking food sealed in bags in a precisely con...
+  [accept 1] observed — Dry brining means salting meat and letting it rest uncovered in the fridge fo...
+    observations: TECHNIQUE: Dry Brining | METHOD: Salting meat and letting it rest uncovered i...; TIME: 24-48 hours
+  [reject 0] dismissed — TypeScript generics allow creating reusable type-safe components.
+  [reject 1] dismissed — The strangler fig pattern migrates monoliths to microservices incrementally.
+
+  --- Understand Identity ---
+  Identity: You track cooking techniques, methods, and their difficulty levels, building an understanding of a cook's repertoire and skill.
+
+Focus areas:
+- Techniques employed (e.g., braising, sautéing)
+- Specific methods within each technique (e.g., pan-searing vs. deep-frying for sautéing)
+- Perceived difficulty level for each technique/method
+- Variations in technique and method
+- Sources of information and credibility (e.g., recipes, chefs, personal experimentation)
+
+Significance:
+- Routine: Reinforces a known technique and method at the expected difficulty.
+- Notable: Introduces a new technique, uses an existing technique in a novel way, or expresses a change in perceived difficulty.
+- Critical: Contradicts previously stated difficulty, significantly deviates from established methods, or reveals adoption of faulty/dangerous techniques.
+  Skills: confirms: This reinforces what I already believe — the cook uses th...
+    contradicts: This challenges what I believed about the cook's abilitie...
+    extends: This adds detail to what I know — an existing technique i...
+    new: This introduces a technique or method the cook didn't use...
+    irrelevant: This does not provide information relevant to the cooking...
+  System prompt length: 3077 chars
+
+  Instructions: You track this therapist's approach to ADHD clients.
+
+Watch for:
+- Assessment methods they use
+- Their stance on medication vs behavioral approaches
+- Practical tools they recommend for executive f...
+
+  --- Observer Identity ---
+  Identity: You are a therapy approach observer. You watch for signals about assessment frameworks used (e.g., Conner's, Brown EF), the therapist's stated preference for medication, behavioral interventions, or a combination, specific tools recommended for time management or task initiation, and how the therapist addresses co-occurring anxiety or depression symptoms.
+  Domain: ADHD Therapy
+  System prompt length: 1786 chars
+
+  --- Observer Behavior ---
+  [accept 0] observed — Dr. Chen uses the Brown Executive Function scale as her primary ADHD assessme...
+    observations: Dr. Chen uses the Brown Executive Function scale as her primary ADHD assessme...; Dr. Chen uses clinical interviews spanning 3 sessions for ADHD assessment.
+  [accept 1] observed — For executive function, she recommends body doubling, time-boxing with visual...
+    observations: Recommends body doubling for executive function.; Recommends time-boxing with visual timers for executive function.; Recommends the "2-minute rule" for task initiation.
+  [reject 0] dismissed — Cognitive behavioral therapy for depression typically involves 12-16 weekly s...
+  [reject 1] dismissed — The practice accepts most insurance plans and offers sliding scale fees for u...
+
+  --- Understand Identity ---
+  Identity: You track this therapist's approach to ADHD clients, documenting their assessment methods, treatment preferences, and practical recommendations.
+
+Focus areas:
+- Assessment frameworks used (e.g., rating scales, diagnostic interviews)
+- Stance on medication (pro, con, neutral, collaborative)
+- Use of behavioral therapy techniques (specific methods).
+- Executive function tools recommended (e.g., planners, apps, strategies)
+- Management of co-occurring conditions
+
+Significance:
+- Routine: Consistent use of established assessments or treatment approaches.
+- Notable: Introduction of a new assessment, shift in medication perspective, or novel behavioral technique.
+- Critical: Conflicts in theoretical approach, recommendations that contradict best practices, or neglecting comorbid conditions.
+  Skills: confirms: Reinforces existing understanding of the therapist's appr...
+    contradicts: Challenges prior understanding of their approach – e.g., ...
+    extends: Adds depth or nuance to the understanding – e.g., provide...
+    new: Introduces a completely new element not previously observ...
+    irrelevant: Information that is unrelated to the therapist's approach...
+  System prompt length: 3179 chars
+
+  5 instruction scenarios tested
+  Review the generated identities and observer behavior above
+  Look for: specificity loss, behavioral overrides ignored, format directives dropped

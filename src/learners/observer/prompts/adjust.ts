@@ -1,9 +1,5 @@
 /**
  * Prompt template for adjusting an existing observer identity
- *
- * Unlike the identity prompt (used at init), this shows the LLM
- * the current state so it can evolve rather than replace.
- * Also resolves new canonical instructions from the directive.
  */
 
 import type { ObserveIdentity } from '../schema.identity'
@@ -27,50 +23,25 @@ export function observeAdjustPromptTemplate(
 		: ''
 
 	const domainSection = currentIdentity.domain
-		? `\n**Observer Domain**: ${currentIdentity.domain}`
-		: '\n**Observer Domain**: (cross-domain)'
+		? `\n**Domain**: ${currentIdentity.domain}`
+		: '\n**Domain**: (cross-domain)'
 
-	return `You are adjusting an existing Observer — an agent that notices what matters in data.
+	return `You are adjusting an Observer's identity.
 
 ## Current State
 
-**Instructions** (the learner's purpose):
-"${currentInstructions}"
+**Instructions**: "${currentInstructions}"
+**Identity**: "${currentIdentity.identity}"${domainSection}${focusSection}
 
-**Observer Identity**:
-"${currentIdentity.identity}"
-${domainSection}${focusSection}
-
-## Adjustment Directive
+## Directive
 
 "${directive}"
 
-## Your Task
+Apply the directive incrementally — preserve what should stay, change what the directive asks for. Keep 3-5 specific signals. Preserve specificity from the current identity.
 
-Apply the directive to evolve the current state. Produce:
+If the directive is ambiguous, preserve more rather than less.
 
-1. **Updated instructions** — The learner's purpose after applying the directive.
-   Preserve everything that should stay. Only change what the directive asks for.
-
-2. **Updated observer identity** — Written in second person ("You are a...").
-   Include 3-5 specific signals/patterns to watch for.
-   Be specific and actionable for this domain, not generic.
-
-3. **Updated domain** — A short phrase (2-5 words) for the broad subject area.
-   Omit if cross-domain or general-purpose.
-
-## Rules
-
-- This is an INCREMENTAL adjustment, not a full rewrite
-- Preserve accumulated specificity from the current identity
-- "also track X" → ADD to identity, don't replace existing signals
-- "stop tracking X" → REMOVE from identity
-- "only track X" → REPLACE (the directive is explicit about replacing)
-- If the directive is ambiguous, preserve more rather than less
-
-## CRITICAL: Response Format
-
-You MUST respond with valid JSON only. No markdown, no explanations, just the JSON object:
+Respond with JSON only:
 
 {
   "instructions": "the updated instructions",

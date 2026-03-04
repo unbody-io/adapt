@@ -2,7 +2,7 @@ import type { LanguageModel } from 'ai'
 import type { ParentModels } from '../../types/config'
 import { BaseLearner } from '../base/class'
 import type { UnderstandCallResult } from '../base/class'
-import { ToolBasedMethod } from '../base/query'
+import { DirectMethod, ToolBasedMethod } from '../base/query'
 import type { QueryMethod } from '../base/query'
 import { resolveListLearnerConfig } from './config.resolver'
 import { applyListGovernance } from './governance'
@@ -87,6 +87,7 @@ export class ListLearner extends BaseLearner<ListItem[], ListLearnerState> {
 			stagnation_signal_fired: false,
 			dismissal_signal_fired: false,
 			governance: config.governance,
+			skipObservation: rawConfig.skipObservation ?? false,
 		}
 
 		super(config.id, rawConfig.store, initialState)
@@ -204,9 +205,22 @@ export class ListLearner extends BaseLearner<ListItem[], ListLearnerState> {
 	}
 
 	protected createQueryMethod(): QueryMethod {
+		const schema = this.state.understanding_schema
 		return new ToolBasedMethod(this.state.models.query, {
 			tools: createListQueryTools(() => this.getUnderstanding()),
-			buildPrompt: buildListQueryPrompt,
+			buildPrompt: (ctx) => buildListQueryPrompt(ctx, schema ?? undefined),
+		})
+	}
+
+	protected createDirectQueryMethod(): QueryMethod {
+		return new DirectMethod(this.state.models.query, {
+			getUnderstanding: async () => {
+				const items = await this.getUnderstanding()
+				if (items.length === 0) return '(empty — no items yet)'
+				return JSON.stringify(items.map((item) => item.data), null, 2)
+			},
+			buildPrompt: (ctx, understanding) =>
+				`You are a specialist tracking a collection. Your domain:\n"${ctx.instructions}"\n\n# Your Data (${understanding === '(empty — no items yet)' ? '0' : 'JSON array of'} items)\n${understanding}\n\nAnswer from your data. Be specific — reference items, quantify where possible. Don't fabricate.`,
 		})
 	}
 

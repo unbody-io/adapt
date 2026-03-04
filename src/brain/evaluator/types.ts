@@ -27,16 +27,6 @@ export interface Signal {
 	description: string
 	timestamp: Date
 	bypass?: boolean
-	metrics?: {
-		dismissalRate?: number
-		avgRelevance?: number
-		avgConfidence?: number
-		gapCount?: number
-		bufferCount?: number
-		activation?: number
-		observationsSinceLastSynthesis?: number
-		severity?: 'minor' | 'moderate' | 'severe'
-	}
 }
 
 /**
@@ -56,18 +46,16 @@ export interface LearnerContext {
 	id: string
 	name: string
 	type: string
-	purpose: string
-	understandingSize: number
+	instructions: string
 	health: {
 		activation: number
 		status: string
-		lastAccessed: Date
 	}
 	metrics: {
-		queryCount: number
-		dismissalRate: number
+		observationCount: number
 		synthesisCount: number
-		observationsSinceLastSynthesis: number
+		dismissalRate: number
+		queryCount: number
 	}
 }
 
@@ -77,25 +65,13 @@ export interface LearnerContext {
 export interface EvaluationContext {
 	brain: {
 		prompt: string
+		evolutionContext: string | null
 		learnerCount: number
 	}
 	learners: LearnerContext[]
-	includeUnderstanding: boolean
+	dismissedBatchCount: number
 }
 
-/**
- * Learner activity data for evaluation investigation
- */
-export interface LearnerActivity {
-	ingestion: {
-		observationCount: number
-		dismissalCount: number
-		dismissalRate: number
-		synthesisCount: number
-		observationsSinceLastSynthesis: number
-	}
-	recentObservations: Array<{ text: string; importance: number }>
-}
 
 /**
  * Record of past evaluation decisions (in-memory, capped)

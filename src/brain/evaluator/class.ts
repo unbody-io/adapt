@@ -6,8 +6,8 @@
  * (create, merge, split, update, delete) are needed.
  *
  * Tool-based approach:
- * - LLM receives signals + learner metadata (lightweight context)
- * - LLM can call getUnderstandings() to fetch learner knowledge as needed
+ * - LLM receives signals + specialist metadata (lightweight context)
+ * - LLM can call inspectSpecialist(), querySpecialist(), consultSystemKnowledge(), etc.
  * - LLM calls finalizeDecisions() when done investigating
  */
 
@@ -16,9 +16,11 @@ import { generate, stepCountIs } from '../../llm'
 import { evaluatorSystemPrompt } from './prompt.system'
 import { evaluationPromptTemplate } from './prompt.template.evaluation'
 import {
-	createGetUnderstandingsTool,
-	createGetLearnerActivityTool,
-	createGetRecentHistoryTool,
+	createInspectSpecialistTool,
+	createQuerySpecialistTool,
+	createConsultSystemKnowledgeTool,
+	createReviewDismissedDataTool,
+	createReviewRecentDecisionsTool,
 	finalizeDecisions,
 	type FinalizeDecisionsParams,
 } from './tools'
@@ -38,7 +40,6 @@ export class Evaluator extends TypedEmitter<EvaluatorEventMap> {
 	private isEvaluating = false
 	private readonly threshold: number
 	private readonly brain: Brain
-	includeUnderstanding = true
 
 	constructor(brain: Brain, threshold: number = 5) {
 		super()
@@ -86,8 +87,8 @@ export class Evaluator extends TypedEmitter<EvaluatorEventMap> {
 	 * Evaluate buffered signals and generate evolution decisions
 	 *
 	 * Uses tool-based approach:
-	 * 1. LLM sees signals + learner metadata
-	 * 2. LLM calls getUnderstandings() to investigate as needed
+	 * 1. LLM sees signals + specialist metadata
+	 * 2. LLM calls tools to investigate as needed
 	 * 3. LLM calls finalizeDecisions() to return decisions
 	 *
 	 * @returns Array of evolution decisions (can be empty)
@@ -110,13 +111,12 @@ export class Evaluator extends TypedEmitter<EvaluatorEventMap> {
 			const context = await this.buildContext()
 
 			// Create tools with brain context
-			const getUnderstandings = createGetUnderstandingsTool(this.brain)
-			const getLearnerActivity = createGetLearnerActivityTool(this.brain)
-			const getRecentHistory = createGetRecentHistoryTool(this.history)
 			const tools = {
-				getUnderstandings,
-				getLearnerActivity,
-				getRecentHistory,
+				inspectSpecialist: createInspectSpecialistTool(this.brain),
+				querySpecialist: createQuerySpecialistTool(this.brain),
+				consultSystemKnowledge: createConsultSystemKnowledgeTool(this.brain),
+				reviewDismissedData: createReviewDismissedDataTool(this.brain),
+				reviewRecentDecisions: createReviewRecentDecisionsTool(this.history),
 				finalizeDecisions,
 			}
 
@@ -223,40 +223,37 @@ export class Evaluator extends TypedEmitter<EvaluatorEventMap> {
 	 * Build context object for evaluation
 	 */
 	private async buildContext() {
-		const learners = await Promise.all(
-			Array.from(this.brain.learners.values()).map(async (learner) => {
-				const health = learner.getHealth()
-				const metrics = learner.getMetrics()
-				const understanding = await learner.getUnderstanding()
-				return {
-					id: learner.id,
-					name: learner.id,
-					type: learner.type,
-					purpose: this.extractPurpose(learner.instructions),
-					understandingSize: String(understanding).length,
-					health: {
-						activation: health.activation,
-						status: health.status,
-						lastAccessed: health.lastAccessed,
-					},
-					metrics: {
-						queryCount: metrics.query.count,
-						dismissalRate: metrics.ingestion.dismissalRate,
-						synthesisCount: metrics.ingestion.synthesisCount,
-						observationsSinceLastSynthesis:
-							metrics.ingestion.observationsSinceLastSynthesis,
-					},
-				}
-			}),
-		)
+		const learners = Array.from(this.brain.learners.values()).map((learner) => {
+			const health = learner.getHealth()
+			const metrics = learner.getMetrics()
+			return {
+				id: learner.id,
+				name: learner.name,
+				type: learner.type,
+				instructions: learner.instructions,
+				health: {
+					activation: health.activation,
+					status: health.status,
+				},
+				metrics: {
+					observationCount: metrics.ingestion.observationCount,
+					synthesisCount: metrics.ingestion.synthesisCount,
+					dismissalRate: metrics.ingestion.dismissalRate,
+					queryCount: metrics.query.count,
+				},
+			}
+		})
+
+		const dismissedBatchCount = await this.brain.store.dismissedBatches.count()
 
 		return {
 			brain: {
 				prompt: this.brain.prompt,
+				evolutionContext: this.brain.evolutionContext,
 				learnerCount: this.brain.learners.size,
 			},
-			includeUnderstanding: this.includeUnderstanding,
 			learners,
+			dismissedBatchCount,
 		}
 	}
 
@@ -267,15 +264,5 @@ export class Evaluator extends TypedEmitter<EvaluatorEventMap> {
 		context: Awaited<ReturnType<typeof this.buildContext>>,
 	): string {
 		return evaluationPromptTemplate(context, this.signals)
-	}
-
-	/**
-	 * Extract the first line or sentence from instructions as purpose
-	 */
-	private extractPurpose(instructions: string): string {
-		// Try to get first sentence or first line
-		const firstLine = instructions.split('\n')[0]
-		const firstSentence = firstLine.split(/[.!?]/)[0]
-		return firstSentence.trim() || firstLine.trim()
 	}
 }

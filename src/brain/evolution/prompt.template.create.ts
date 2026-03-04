@@ -1,37 +1,42 @@
 /**
- * Template for create action prompt
+ * Template for evolution create action prompt.
  *
- * Embeds the learner generation fragment with evolution-specific guidance.
+ * Simplified from the initial setup decomposition framework —
+ * focuses on generating ONE well-scoped specialist.
  */
 
 import type { LearnerTypeDescriptor } from '../../learners/types'
-import { learnerGenerationFragment } from '../prompts/prompt.fragment.learner-generation'
 
 /**
  * Format create prompt with joined guidance and Brain context
  */
 export function createPromptTemplate(
 	guidance: string,
-	brainPrompt: string,
+	purpose: string,
 	descriptors: LearnerTypeDescriptor[],
 ): string {
-	return `You are creating new learners for an existing learning system.
+	const typeList = descriptors
+		.map((d) => `- "${d.type}": ${d.description}`)
+		.join('\n')
 
-# Brain Purpose
+	return `You are adding a new specialist to a living knowledge network.
 
-${brainPrompt}
+# Network Purpose
+${purpose}
 
-# Creation Guidance
-
+# What's Needed
 ${guidance}
 
-# Important: Prefer Fewer, Broader Learners
+# Instructions
+Generate ONE specialist configuration that covers the domain described above.
+A single broad specialist is better than multiple narrow ones — the network
+can split it later when the specialist has enough knowledge to differentiate.
 
-This is an evolution create — you are adding coverage for a gap in the system. Unless the guidance explicitly requests multiple learners, create exactly ONE learner that broadly covers the domain. A single well-scoped learner is almost always better than multiple narrow specialists at this stage. The system can split a broad learner into specialists later once it has accumulated enough knowledge.
-
-# Learner Generation Principles
-
-${learnerGenerationFragment(descriptors)}
-
-Generate the learner configurations based on the guidance above. Remember: prefer ONE broad learner per domain.`
+Provide:
+- id: kebab-case identifier
+- name: human-readable display name
+- description: brief description for routing (what questions this specialist answers)
+- instructions: structured instructions with a core directive, watch conditions, and questions to track
+- type: one of:
+${typeList}`
 }

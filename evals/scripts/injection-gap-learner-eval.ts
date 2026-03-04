@@ -100,7 +100,7 @@ async function main() {
 			},
 		},
 		internalLearners: {
-			globalInjectionUnderstanding: false,
+			globalUnderstanding: false,
 			globalQueryUnderstanding: false,
 			injectionGaps: true,
 			queryGaps: false,

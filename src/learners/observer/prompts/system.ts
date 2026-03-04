@@ -1,7 +1,7 @@
 /**
  * System prompt template for observe phase (shared across all learner types)
  *
- * Combines generated identity with fixed observation framework.
+ * Combines generated identity with concise observation framework.
  */
 
 import type { ObserveIdentity } from '../schema.identity'
@@ -12,55 +12,23 @@ import type { ObserveIdentity } from '../schema.identity'
  * @param identity - Generated observe identity
  */
 export function observeSystemPromptTemplate(identity: ObserveIdentity): string {
+	const domainRef = identity.domain ? 'domain' : 'purpose'
 	const domainSection = identity.domain
-		? `Your domain: ${identity.domain}
-
-Data may be fully relevant, partly relevant, or entirely outside your domain.
-Evaluate whether the content literally relates to your domain.
-Do not draw abstract parallels or metaphorical connections —
-if the data is not directly about your domain, dismiss it.`
-		: `Evaluate whether the content directly relates to your purpose.
-Do not draw abstract parallels or metaphorical connections —
-if the data is not directly relevant, dismiss it.`
+		? `Your domain: ${identity.domain}\n\nBe literal — if the data isn't directly about your domain, dismiss it. No abstract parallels.`
+		: `Be literal — if the data isn't directly relevant to your purpose, dismiss it. No abstract parallels.`
 
 	return `${identity.identity}
 
-## Relevance
 ${domainSection}
 
-## Importance
+Your root question: "Is this worth remembering for my purpose?"
 
-Rate how significant each observation is for your purpose:
-- **Low (0.0-0.3)**: Minor detail, weak signal
-- **Medium (0.4-0.6)**: Clear signal, useful data point
-- **High (0.7-1.0)**: Strong signal, explicit statement, notable pattern
+Rate importance 0.0-1.0 based on signal strength for your ${domainRef}.
 
-## Observation Guidelines
+Respond with JSON only. ALL fields required.
 
-**Be selective**: Only extract facts that directly relate to your ${identity.domain ? 'domain' : 'purpose'}.
-**Be literal**: Quote or closely paraphrase what the source actually says.
-**Be direct**: One fact per line, no commentary.
+If relevant: { "status": "observed", "output": ["observation 1", "observation 2"], "importance": 0.0-1.0, "gaps": [] }
+If not: { "status": "dismissed", "output": [], "importance": 0.5, "gaps": ["topic encountered but not relevant"] }
 
-## CRITICAL: Response Format
-
-You MUST respond with valid JSON only. No markdown, no explanations, just the JSON object.
-ALL fields are required.
-
-If relevant content found:
-{
-  "status": "observed",
-  "output": ["first discrete observation", "second discrete observation", "...one fact per string"],
-  "importance": 0.0 to 1.0,
-  "gaps": []
-}
-
-If nothing relevant:
-{
-  "status": "dismissed",
-  "output": [],
-  "importance": 0.5,
-  "gaps": ["what topic 1 was about", "what topic 2 was about"]
-}
-
-When dismissing, briefly describe in "gaps" what topics or content you encountered but could not claim as relevant to your ${identity.domain ? 'domain' : 'purpose'}. One topic per string.`
+Gaps: briefly note topics you encountered but couldn't claim as relevant to your ${domainRef}.`
 }

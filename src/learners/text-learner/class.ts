@@ -2,7 +2,7 @@ import type { LanguageModel } from 'ai'
 import type { ParentModels } from '../../types/config'
 import { BaseLearner } from '../base/class'
 import type { UnderstandCallResult } from '../base/class'
-import { ToolBasedMethod } from '../base/query'
+import { DirectMethod, ToolBasedMethod } from '../base/query'
 import type { QueryMethod } from '../base/query'
 import { resolveTextLearnerConfig } from './config.resolver'
 import { applyStrategy } from './strategies'
@@ -85,6 +85,7 @@ export class TextLearner extends BaseLearner<string, TextLearnerState> {
 			stagnation_signal_fired: false,
 			dismissal_signal_fired: false,
 			governance: config.governance,
+			skipObservation: rawConfig.skipObservation ?? false,
 		}
 
 		super(config.id, rawConfig.store, initialState)
@@ -219,6 +220,14 @@ export class TextLearner extends BaseLearner<string, TextLearnerState> {
 				),
 			},
 			buildPrompt: buildTextQueryPrompt,
+		})
+	}
+
+	protected createDirectQueryMethod(): QueryMethod {
+		return new DirectMethod(this.state.models.query, {
+			getUnderstanding: () => this.getUnderstanding(),
+			buildPrompt: (ctx, understanding) =>
+				`You are a specialist. Your domain:\n"${ctx.instructions}"\n\n# Your Understanding\n${understanding || '(empty — no knowledge yet)'}\n\nAnswer from your understanding. Be specific — cite data points, counts, dates. If you don't have enough, say so. Don't fabricate.`,
 		})
 	}
 

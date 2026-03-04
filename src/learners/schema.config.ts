@@ -43,4 +43,5 @@ Track answers to:
  */
 export type GeneratedLearnerConfig = z.infer<typeof learnerConfigSchema> & {
 	governance?: Record<string, unknown>
+	skipObservation?: boolean
 }

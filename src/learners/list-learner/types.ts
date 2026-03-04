@@ -25,6 +25,7 @@ export interface ListItem {
 	data: Record<string, unknown>
 	metadata: {
 		confidence: number
+		touchCount: number
 		firstSeen: string
 		lastUpdated: string
 		signals: string[]
@@ -131,6 +132,8 @@ export interface ListLearnerConfig extends CascadableConfig {
 	query?: { model?: LanguageModel }
 	/** Health configuration (Living Brain) */
 	health?: Partial<LearnerHealth>
+	/** Skip observation phase — data goes directly to understanding buffer */
+	skipObservation?: boolean
 }
 
 // ── Resolved config ────────────────────────────────────────────────────────

@@ -3,7 +3,7 @@
  */
 
 import { z } from 'zod'
-import { compare } from '../cognitive-skills'
+import { compare, dynamics } from '../cognitive-skills'
 
 export const understandIdentitySchema = z.object({
 	identity: z
@@ -25,7 +25,23 @@ export const understandIdentitySchema = z.object({
 			}),
 		)
 		.describe(
-			'Cognitive skills with descriptions - original or customized for this domain',
+			'Content relationship skills with descriptions - original or customized for this domain',
+		),
+	dynamicsSkills: z
+		.array(
+			z.object({
+				skill: dynamics.dynamicsSkillEnum.describe(
+					'The skill name from the dynamics skill-set',
+				),
+				description: z
+					.string()
+					.describe(
+						'The skill description - original or customized for domain',
+					),
+			}),
+		)
+		.describe(
+			'Dynamics skills with descriptions - how temporal patterns manifest in this domain',
 		),
 })
 

@@ -63,7 +63,7 @@ export class SplitHandler extends EvolutionActionHandler<SplitActionResult> {
 					prompt: await splitPromptTemplate(
 						decision.guidance,
 						learner,
-						this.brain.prompt,
+						this.brain.promptContext?.purpose ?? this.brain.prompt,
 					),
 					output: Output.object({ schema: splitSchema }),
 					repairSchema: splitSchema,

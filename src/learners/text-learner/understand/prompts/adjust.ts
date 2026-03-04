@@ -1,11 +1,8 @@
 /**
  * Prompt template for adjusting an existing text synthesizer identity
- *
- * Unlike the identity prompt (used at init), this shows the LLM
- * the current identity so it can evolve rather than replace.
  */
 
-import { compare, skillsToPromptText } from '../../cognitive-skills'
+import { compare, dynamics, skillsToPromptText } from '../../cognitive-skills'
 import type { UnderstandIdentity } from '../schema.identity'
 
 /**
@@ -20,57 +17,43 @@ export function understandAdjustPromptTemplate(
 	newInstructions: string,
 	currentIdentity: UnderstandIdentity,
 ): string {
-	const skillsText = skillsToPromptText(compare.skills)
+	const compareSkillsText = skillsToPromptText(compare.skills)
+	const dynamicsSkillsText = skillsToPromptText(dynamics.skills)
 
 	const currentSkills = currentIdentity.skills
 		.map((s) => `- **${s.skill}**: ${s.description}`)
 		.join('\n')
 
-	return `You are adjusting an existing Synthesizer — an agent that builds understanding from observations.
+	const currentDynamicsSkills = currentIdentity.dynamicsSkills
+		.map((s) => `- **${s.skill}**: ${s.description}`)
+		.join('\n')
+
+	return `You are adjusting a Synthesizer's identity.
 
 ## Current State
 
-**Instructions** (already updated):
-"${newInstructions}"
-
-**Current Synthesizer Identity**:
-"${currentIdentity.identity}"
-
-**Current Skills**:
+**Instructions**: "${newInstructions}"
+**Identity**: "${currentIdentity.identity}"
+**Content Skills**:
 ${currentSkills}
+**Dynamics Skills**:
+${currentDynamicsSkills}
 
-## Adjustment Directive
+## Directive
 
 "${directive}"
 
-## Available Cognitive Skills
+## Cognitive Skills
 
-${skillsText}
+### Content Relationship
+${compareSkillsText}
 
-## Your Task
+### Dynamics
+${dynamicsSkillsText}
 
-Adjust the synthesizer identity and skills to align with the updated instructions and directive.
+Adjust incrementally — preserve skills that still apply, update focus and significance for the new scope. If the directive is ambiguous, preserve more rather than less.
 
-1. **Updated identity** (plain text) covering:
-   - Who you are (second person: "You track...", "You maintain...")
-   - Your focus areas (3-5 specific aspects)
-   - Significance criteria (what's routine vs notable vs critical)
-
-2. **Updated skills** — for each cognitive skill, provide a description:
-   - If the current description still works, keep it as-is
-   - If it needs adjustment for the new focus, customize it
-
-## Rules
-
-- This is an INCREMENTAL adjustment, not a full rewrite
-- Preserve skill descriptions that are still relevant
-- Update focus areas and significance criteria to match the new instructions
-- If the directive narrows scope, tighten the identity accordingly
-- If the directive broadens scope, expand while keeping existing specificity
-
-## CRITICAL: Response Format
-
-You MUST respond with valid JSON only. No markdown, no explanations, just the JSON object with "identity" and "skills" fields:
+Respond with JSON only:
 
 {
   "identity": "You track...",
@@ -80,6 +63,13 @@ You MUST respond with valid JSON only. No markdown, no explanations, just the JS
     { "skill": "extends", "description": "..." },
     { "skill": "new", "description": "..." },
     { "skill": "irrelevant", "description": "..." }
+  ],
+  "dynamicsSkills": [
+    { "skill": "recurs", "description": "..." },
+    { "skill": "intensifies", "description": "..." },
+    { "skill": "fades", "description": "..." },
+    { "skill": "shifts", "description": "..." },
+    { "skill": "avoids", "description": "..." }
   ]
 }`
 }

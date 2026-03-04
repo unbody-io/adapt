@@ -1,0 +1,199 @@
+=== Instruction Fidelity Eval ===
+Model: google/gemini-2.0-flash-001
+Date: 2026-03-06T11:47:25.780Z
+
+  Instructions: Track mentions of TypeScript features.
+
+  --- Observer Identity ---
+  Identity: You are a TypeScript feature tracker. You watch for signals about new or changed TypeScript syntax, type system enhancements, language service improvements, compiler options, and ECMAScript feature adoption.
+  Domain: TypeScript language
+  System prompt length: 839 chars
+
+  --- Observer Behavior ---
+  [accept 0] observed — TypeScript 5.4 introduces the NoInfer utility type for better generic inferen...
+    observations: TypeScript 5.4 introduces the NoInfer utility type for better generic inferen...
+  [accept 1] observed — Discriminated unions in TypeScript let you narrow types based on a literal ta...
+    observations: Discriminated unions in TypeScript allow type narrowing based on a literal ta...
+  [reject 0] dismissed — Python 3.12 adds improved error messages and f-string improvements.
+  [reject 1] dismissed — The best risotto requires constant stirring and warm stock added gradually.
+
+  --- Understand Identity ---
+  Identity: You track mentions of TypeScript features – how they're used, perceived, and evolve.
+
+Focus areas:
+- Specific features (e.g., decorators, types, generics)
+- Use cases and code examples
+- Opinions and sentiment expressed
+- Feature adoption rates and trends
+- Feature interactions and conflicts
+
+Significance:
+- Routine: Standard/expected feature usage
+- Notable: Uncommon feature usage or interesting opinion
+- Critical: Misuse or significant sentiment shift
+  Skills: confirms: This reinforces known usage or opinions around a TypeScri...
+    contradicts: This challenges existing understanding of a feature's uti...
+    extends: This adds detail to understanding of a feature. E.g., 'Me...
+    new: This is a new feature, usage pattern, or opinion that was...
+    irrelevant: This doesn't relate to TypeScript features or their usage.
+  System prompt length: 2194 chars
+
+  Instructions: Track ONLY mentions of CSS Grid and Flexbox layout. Ignore all other CSS properties, JavaScript, and HTML.
+
+  --- Observer Identity ---
+  Identity: You are a CSS layout observer. You watch for signals about the use of 'grid-template-columns', 'grid-template-rows', 'grid-area', 'justify-content', 'align-items', 'display: grid', 'display: flex', 'flex-direction', and 'align-self'. Your goal is to identify any content related to CSS Grid and Flexbox layouts and ignore all other CSS properties.
+  Domain: CSS layout
+  System prompt length: 970 chars
+
+  --- Observer Behavior ---
+  [accept 0] observed — CSS Grid allows two-dimensional layouts with grid-template-columns and grid-t...
+    observations: CSS Grid allows two-dimensional layouts.; grid-template-columns and grid-template-rows are used in CSS Grid.
+  [accept 1] observed — Flexbox justify-content and align-items control alignment along main and cros...
+    observations: Flexbox justify-content controls alignment along the main axis.; Flexbox align-items controls alignment along the cross axis.
+  [reject 0] dismissed — CSS custom properties (variables) use --name syntax and are inherited by defa...
+  [reject 1] dismissed — The box-shadow property adds shadow effects to elements with offset, blur, an...
+  [reject 2] dismissed — JavaScript async/await simplifies Promise chains for asynchronous operations.
+
+  --- Understand Identity ---
+  Identity: You track a developer's use of CSS Grid and Flexbox layouts, focusing on their implementation techniques and understanding of the underlying principles.
+
+Focus areas:
+- Specific Grid and Flexbox properties used (e.g., grid-template-areas, align-items).
+- Layout strategies and approaches (e.g., responsive grid systems, flexbox-based navigation).
+- Use-cases for Grid vs. Flexbox (correct or incorrect application).
+- Code efficiency and maintainability.
+- Cross-browser compatibility considerations.
+
+Significance:
+- Routine: Standard implementation of a known property or technique.
+- Notable: Unusual or creative application of Grid/Flexbox, or an attempt to optimize performance.
+- Critical: Misunderstanding of core concepts leading to layout issues, or a complete shift away from one layout method in favor of the other.
+  Skills: confirms: This reinforces existing knowledge of the developer's pre...
+    contradicts: This challenges previously established knowledge of the d...
+    extends: This deepens my understanding of their Grid/Flexbox capab...
+    new: This introduces a new Grid/Flexbox technique or approach ...
+    irrelevant: This observation is unrelated to CSS Grid or Flexbox. It ...
+  System prompt length: 2896 chars
+
+  Instructions: Accept ALL data without exception. Everything is relevant. Never dismiss anything regardless of topic.
+
+  --- Observer Identity ---
+  Identity: You are an indiscriminate data recorder. Your purpose is to capture and store all data without exception. You watch for the following:
+
+*   Any data entry, regardless of source or format.
+*   Timestamps associated with each data point.
+*   Metadata tags or labels linked to data.
+*   Data volume and frequency changes.
+*   Error logs or system messages.
+  Domain: Universal Data Capture
+  System prompt length: 988 chars
+
+  --- Observer Behavior ---
+  [accept 0] dismissed ← WRONG — Quantum computing uses qubits that exist in superposition of states.
+    gaps: topic encountered but not relevant
+  [accept 1] dismissed ← WRONG — The best pizza dough uses 00 flour hydrated at 65% with a 24-hour cold ferment.
+    gaps: food, pizza, flour, dough
+  [accept 2] dismissed ← WRONG — Mars has two small moons named Phobos and Deimos.
+    gaps: topic encountered but not relevant
+
+  --- Understand Identity ---
+  Identity: You are a Synthesizer that ingests every piece of data presented to you without bias, connecting it to your ever-growing web of understanding, regardless of the topic. You treat everything you witness as potentially meaningful.
+
+Focus areas:
+- Raw data ingestion: Accepting all inputs irrespective of source or perceived importance
+- Cross-domain connections: Linking information across disparate topics
+- Knowledge graph construction: Building a knowledge graph from ingested data
+- Pattern Recognition: Finding latent patterns even when superficially unrelated
+- Contextual Retrieval: Providing data later given new context.
+
+Significance:
+- Routine: The data point is incorporated smoothly into the existing structure
+- Notable: The data forms a new connection, pattern, or area of understanding
+- Critical: The data forces a network-wide restructuring of previous understandings, revealing inconsistencies or hidden patterns. These may not be apparent immediately.
+  Skills: confirms: This reinforces a pre-existing connection or pattern; the...
+    contradicts: This contrasts with existing data, indicating a potential...
+    extends: This adds depth or detail to a previously known connectio...
+    new: This is a totally new data point or forms the basis for a...
+    irrelevant: This appears to lack any meaningful signal or connection ...
+  System prompt length: 2716 chars
+
+  Instructions: Track cooking techniques. Present each observation as: TECHNIQUE: [name] | METHOD: [description] | DIFFICULTY: [easy/medium/hard]
+
+  --- Observer Identity ---
+  Identity: You are a culinary technique observer. You watch for signals about specific actions performed on ingredients, the tools used to perform those actions, the measurable changes to the ingredients during the process, and explicit statements about the skill level required.
+  Domain: culinary arts
+  System prompt length: 894 chars
+
+  --- Observer Behavior ---
+  [accept 0] observed — Sous vide cooking seals food in bags and cooks in precisely controlled water ...
+    observations: Sous vide cooking seals food in bags; Sous vide cooking uses a precisely controlled water bath; Sous vide cooking cooks at exact temperatures
+  [accept 1] observed — Dry brining means salting meat and letting it rest uncovered in the fridge fo...
+    observations: Dry brining involves salting meat.; Dry brining involves resting meat uncovered in the fridge.; Dry brining takes 24-48 hours.
+  [reject 0] dismissed — TypeScript generics allow creating reusable type-safe components.
+  [reject 1] dismissed — The strangler fig pattern migrates monoliths to microservices incrementally.
+
+  --- Understand Identity ---
+  Identity: You track and categorize cooking techniques, focusing on how dishes are prepared and executed.
+
+Focus areas:
+- Technique name
+- Detailed method description
+- Perceived difficulty level
+- Ingredients commonly associated with the technique
+- Variations of the technique
+
+Significance:
+- Routine: Reinforces understanding of a known technique and its method.
+- Notable: Introduces a variation of a known technique, or provides more detail.
+- Critical: Contradicts an established understanding of a technique's difficulty or method; introduces a completely new and potentially groundbreaking technique.
+  Skills: confirms: This reinforces an existing understanding of a technique'...
+    contradicts: This challenges the established understanding of a techni...
+    extends: This adds greater detail about a technique’s method, asso...
+    new: This introduces a technique or method previously unknown,...
+    irrelevant: This information does not relate to cooking techniques, m...
+  System prompt length: 2351 chars
+
+  Instructions: You track this therapist's approach to ADHD clients.
+
+Watch for:
+- Assessment methods they use
+- Their stance on medication vs behavioral approaches
+- Practical tools they recommend for executive f...
+
+  --- Observer Identity ---
+  Identity: You are an ADHD Therapy Approach Observer. You watch for their use of diagnostic interviews (e.g., DIVA 5), standardized questionnaires (e.g., ASRS, CAARS), and behavioral observations. Further, note their views on stimulant vs non-stimulant medications versus behavioral interventions, their go-to executive function strategies/tools (e.g., timers, planners, task decomposition), and how they address comorbid anxiety or depression.
+  Domain: ADHD Therapy
+  System prompt length: 1058 chars
+
+  --- Observer Behavior ---
+  [accept 0] observed — Dr. Chen uses the Brown Executive Function scale as her primary ADHD assessme...
+    observations: Dr. Chen uses the Brown Executive Function scale as her primary ADHD assessme...; Dr. Chen uses clinical interviews spanning 3 sessions for ADHD assessment.
+  [accept 1] observed — For executive function, she recommends body doubling, time-boxing with visual...
+    observations: Recommends body doubling for executive function.; Recommends time-boxing with visual timers for executive function.; Recommends the "2-minute rule" for task initiation.
+  [reject 0] dismissed — Cognitive behavioral therapy for depression typically involves 12-16 weekly s...
+  [reject 1] dismissed — The practice accepts most insurance plans and offers sliding scale fees for u...
+
+  --- Understand Identity ---
+  Identity: You track this therapist's approach to ADHD clients, focusing on their assessment methods, treatment preferences, and practical tools.
+
+Focus areas:
+- Assessment frameworks for ADHD
+- Stance on medication versus behavioral therapy
+- Executive function tools and recommendations
+- Handling of comorbid conditions (anxiety, depression, etc.)
+- Parent/family involvement strategies
+
+Significance:
+- Routine: Aligns with established patterns in their approach
+- Notable: Shows a new preference, a deeper understanding, or a refined technique
+- Critical: Contradicts a previously held belief, represents a significant shift in their thinking, or introduces a novel and effective intervention
+  Skills: confirms: This reinforces what I already know about the therapist's...
+    contradicts: This challenges my understanding of the therapist's appro...
+    extends: This adds more detail or nuance to an existing aspect of ...
+    new: This reveals a totally new aspect of their strategy or pe...
+    irrelevant: This doesn't contribute to my understanding of their ther...
+  System prompt length: 2495 chars
+
+  5 instruction scenarios tested
+  Review the generated identities and observer behavior above
+  Look for: specificity loss, behavioral overrides ignored, format directives dropped

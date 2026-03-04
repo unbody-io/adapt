@@ -220,6 +220,20 @@ interface InitRequest {
 		enabled?: boolean
 		autoEvaluate?: boolean
 		evaluatorSignalThreshold?: number
+		coverageGap?: {
+			relevanceThreshold?: number
+			gapCountThreshold?: number
+			windowSize?: number
+		}
+	}
+	internalLearners?: {
+		globalInjectionUnderstanding?: boolean
+		globalQueryUnderstanding?: boolean
+		injectionGaps?: boolean
+		queryGaps?: boolean
+	}
+	dismissedBatchBuffer?: {
+		maxSize?: number
 	}
 }
 
@@ -420,6 +434,8 @@ app.post('/brain/init', async (c) => {
 		},
 		...(brainStoreResult.store ? { store: brainStoreResult.store } : {}),
 		...(body.evolution ? { evolution: body.evolution } : {}),
+		...(body.internalLearners ? { internalLearners: body.internalLearners } : {}),
+		...(body.dismissedBatchBuffer ? { dismissedBatchBuffer: body.dismissedBatchBuffer } : {}),
 	}
 
 	// Start session log
@@ -551,12 +567,48 @@ app.post('/brain/ask', async (c) => {
 	}
 })
 
-app.get('/brain/status', async (c) => {
+app.post('/brain/consult', async (c) => {
 	if (!brain) {
-		return c.json({ status: 'not_initialized' })
+		return c.json({ error: 'Brain not initialized. Call /brain/init first.' }, 400)
 	}
 
-	const learners = await Promise.all(brain.getLearners().map(async (l) => ({
+	const body = await c.req.json<{ query: string; learner?: string }>()
+
+	if (!body.query) {
+		return c.json({ error: 'query is required' }, 400)
+	}
+
+	broadcast('server:consult:started', { query: body.query, learner: body.learner })
+
+	try {
+		const result = await brain.consult(body.query, body.learner ? { learner: body.learner } : undefined)
+		broadcast('server:consult:completed', { result })
+		return c.json(result)
+	} catch (error) {
+		const message = extractErrorMessage(error)
+		console.error('[Brain Consult Error]', error)
+		broadcast('server:consult:error', { error: message })
+		return c.json({ error: message }, 500)
+	}
+})
+
+app.get('/brain/dismissed-batches', async (c) => {
+	if (!brain) {
+		return c.json({ error: 'Brain not initialized. Call /brain/init first.' }, 400)
+	}
+
+	try {
+		const batches = await brain.store.dismissedBatches.list()
+		return c.json(batches)
+	} catch (error) {
+		const message = extractErrorMessage(error)
+		console.error('[Dismissed Batches Error]', error)
+		return c.json({ error: message }, 500)
+	}
+})
+
+async function serializeLearner(l: ReturnType<Brain['getLearners']>[number]) {
+	return {
 		id: l.id,
 		type: l.type,
 		name: l.name,
@@ -577,15 +629,31 @@ app.get('/brain/status', async (c) => {
 		observationSchema: l.getObservationSchema(),
 		understandingSchema: l.getUnderstandingSchema(),
 		queryMethod: l.getQueryMethodName(),
-	})))
+	}
+}
+
+app.get('/brain/status', async (c) => {
+	if (!brain) {
+		return c.json({ status: 'not_initialized' })
+	}
+
+	const learners = await Promise.all(brain.getLearners().map(serializeLearner))
+	const internalLearners = await Promise.all(
+		Array.from(brain.internalLearners.values()).map(serializeLearner)
+	)
+
+	const dismissedBatches = await brain.store.dismissedBatches.list()
 
 	return c.json({
 		status: 'initialized',
 		prompt: brain.prompt,
 		modelId: getModelId(brain.config.model),
 		evolution: brain.config.evolution,
+		evolutionContext: brain.evolutionContext,
 		store: brainStoreInfo,
 		learners,
+		internalLearners,
+		dismissedBatchCount: dismissedBatches.length,
 	})
 })
 
@@ -622,6 +690,11 @@ app.post('/brain/update', async (c) => {
 			enabled?: boolean
 			evaluatorSignalThreshold?: number
 			autoEvaluate?: boolean
+			coverageGap?: {
+				relevanceThreshold?: number
+				gapCountThreshold?: number
+				windowSize?: number
+			}
 		}
 	}>()
 

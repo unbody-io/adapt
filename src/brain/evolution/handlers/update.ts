@@ -36,7 +36,7 @@ export class UpdateHandler extends EvolutionActionHandler<UpdateActionResult> {
 						prompt: await updatePromptTemplate(
 							decision.guidance,
 							learner,
-							this.brain.prompt,
+							this.brain.promptContext?.purpose ?? this.brain.prompt,
 						),
 						output: Output.object({ schema: updateOutputSchema }),
 						repairSchema: updateOutputSchema,

@@ -1,0 +1,498 @@
+{
+  "metadata": {
+    "name": "Codebase Onboarding - Priya (Analytics Dashboard)",
+    "description": "A new developer reading through an analytics dashboard codebase. Architecture docs, file headers, PR descriptions, code review comments, and onboarding notes.",
+    "eventCount": 65,
+    "groundTruth": {
+      "architecture": {
+        "frontend": "React 18 + TypeScript, feature-folder structure, React Query for server state",
+        "api": "Express + GraphQL (Apollo Server), migrating from REST",
+        "pipeline": "Kafka for event ingestion → ClickHouse for analytics storage",
+        "cache": "Redis for dashboard query caching, manual invalidation",
+        "infra": "Docker Compose locally, Kubernetes in prod, LaunchDarkly feature flags"
+      },
+      "conventions": [
+        "Barrel exports (index.ts) in every feature folder",
+        "Zod schemas for all API input validation",
+        "React Query for all server-state data fetching (no raw fetch/axios)",
+        "Feature folders: src/features/{name}/{components,hooks,api,types}.ts",
+        "Conventional commits, squash merge to main",
+        "No default exports — named exports only"
+      ],
+      "techDebt": [
+        "Legacy REST endpoints (src/api/routes/) alongside new GraphQL (src/api/graphql/) — 40% of traffic still hits REST",
+        "Raw SQL queries in ClickHouse service instead of using the query builder — hard to maintain",
+        "No E2E tests — only unit tests and a few integration tests for critical paths"
+      ],
+      "dependencies": {
+        "dashboardFlow": "Dashboard components → useAnalytics hook → analyticsApi → GraphQL resolvers → ClickHouse service → ClickHouse DB",
+        "eventFlow": "Client SDK → Kafka topic → event-processor service → ClickHouse insert",
+        "cacheFlow": "GraphQL resolvers check Redis → on miss, query ClickHouse → cache result → return"
+      },
+      "gotchas": [
+        "ClickHouse is eventually consistent — queries may lag 2-3 seconds behind writes",
+        "Redis cache invalidation is manual via admin endpoint, no automatic TTL for dashboard queries",
+        "Feature flags via LaunchDarkly — check flags before enabling new dashboard widgets",
+        "The event-processor service has no dead letter queue — failed events are logged but lost",
+        "ClickHouse doesn't support UPDATE/DELETE — corrections require insert of new row with version flag"
+      ]
+    }
+  },
+  "events": [
+    {
+      "id": "evt_001",
+      "timestamp": "2024-10-01T09:00:00Z",
+      "type": "architecture_doc",
+      "source": "confluence",
+      "content": "Architecture Overview (last updated 3 months ago):\n\nThe analytics dashboard has four main components:\n1. Frontend: React 18 + TypeScript SPA, served via nginx\n2. API Layer: Express server with Apollo Server for GraphQL\n3. Event Pipeline: Kafka-based event ingestion from client SDKs\n4. Storage: ClickHouse for analytics data, Redis for caching\n\nData flow: Client SDKs emit events → Kafka → event-processor service → ClickHouse. Dashboard queries go through GraphQL → ClickHouse (with Redis cache layer)."
+    },
+    {
+      "id": "evt_002",
+      "timestamp": "2024-10-01T09:30:00Z",
+      "type": "file_header",
+      "source": "codebase",
+      "content": "File: src/features/dashboard/components/AnalyticsChart.tsx\n\n/**\n * AnalyticsChart — renders time-series data from the useAnalytics hook.\n * Uses Recharts for visualization. Data is fetched via React Query\n * and cached for 30 seconds on the client side.\n *\n * Props: metricName, timeRange, granularity\n * Hook dependency: useAnalytics(metricName, timeRange, granularity)\n */"
+    },
+    {
+      "id": "evt_003",
+      "timestamp": "2024-10-01T10:00:00Z",
+      "type": "file_header",
+      "source": "codebase",
+      "content": "File: src/features/dashboard/hooks/useAnalytics.ts\n\n/**\n * useAnalytics — React Query wrapper for analytics data.\n * Calls analyticsApi.getMetric() and handles loading/error states.\n * Cache key: ['analytics', metricName, timeRange, granularity]\n * Stale time: 30s, refetch on window focus disabled.\n *\n * Important: All dashboard data fetching MUST go through this hook.\n * Do not use raw fetch or axios for analytics queries.\n */"
+    },
+    {
+      "id": "evt_004",
+      "timestamp": "2024-10-01T10:30:00Z",
+      "type": "file_header",
+      "source": "codebase",
+      "content": "File: src/features/dashboard/api/analyticsApi.ts\n\n/**\n * analyticsApi — typed client for the analytics GraphQL API.\n * Uses graphql-request under the hood. All queries are typed\n * with codegen-generated types from the GraphQL schema.\n *\n * Exports: getMetric, getTopEvents, getRetention, getFunnel\n * Each function maps to a GraphQL query defined in src/api/graphql/queries/\n */"
+    },
+    {
+      "id": "evt_005",
+      "timestamp": "2024-10-01T11:00:00Z",
+      "type": "onboarding_note",
+      "source": "personal",
+      "content": "Onboarding note: The data flow for the dashboard is pretty clear. React components use a useAnalytics hook, which uses React Query to call the analyticsApi, which makes GraphQL calls. Everything is typed end-to-end which is nice. Need to understand the server side next — how do the GraphQL resolvers actually query ClickHouse?"
+    },
+    {
+      "id": "evt_006",
+      "timestamp": "2024-10-01T14:00:00Z",
+      "type": "file_header",
+      "source": "codebase",
+      "content": "File: src/api/graphql/resolvers/analyticsResolver.ts\n\n/**\n * Analytics GraphQL resolvers.\n * Each resolver checks Redis cache first. On cache miss,\n * queries ClickHouse via the clickhouseService, caches the result,\n * then returns it.\n *\n * Cache invalidation is NOT automatic — use the admin endpoint\n * POST /admin/cache/invalidate to clear specific cache keys.\n * This is a known limitation (see TECH-DEBT-42).\n */"
+    },
+    {
+      "id": "evt_007",
+      "timestamp": "2024-10-01T14:30:00Z",
+      "type": "file_header",
+      "source": "codebase",
+      "content": "File: src/services/clickhouseService.ts\n\n/**\n * ClickHouse query service.\n * WARNING: Most queries here are raw SQL strings. We started a\n * query builder (src/lib/clickhouse-qb/) but it only covers\n * simple SELECT queries. Complex analytics queries are still\n * hand-written SQL. This is tech debt — see TECH-DEBT-17.\n *\n * Important: ClickHouse is eventually consistent. After an insert,\n * queries may not reflect the new data for 2-3 seconds.\n * Do not write tests that assert on data immediately after insert.\n */"
+    },
+    {
+      "id": "evt_008",
+      "timestamp": "2024-10-01T15:00:00Z",
+      "type": "onboarding_note",
+      "source": "personal",
+      "content": "Onboarding note: Found the full chain now. Dashboard → useAnalytics hook → analyticsApi (GraphQL client) → GraphQL resolvers → Redis cache check → ClickHouse service → ClickHouse DB. Two things stand out: (1) Redis cache invalidation is manual, which seems fragile, and (2) raw SQL in the ClickHouse service is acknowledged tech debt."
+    },
+    {
+      "id": "evt_009",
+      "timestamp": "2024-10-02T09:00:00Z",
+      "type": "file_header",
+      "source": "codebase",
+      "content": "File: src/features/dashboard/index.ts\n\n// Barrel export for the dashboard feature\nexport { DashboardPage } from './components/DashboardPage'\nexport { AnalyticsChart } from './components/AnalyticsChart'\nexport { MetricCard } from './components/MetricCard'\nexport { useAnalytics } from './hooks/useAnalytics'\nexport { useDashboardFilters } from './hooks/useDashboardFilters'\nexport type { DashboardConfig, MetricDefinition } from './types'"
+    },
+    {
+      "id": "evt_010",
+      "timestamp": "2024-10-02T09:30:00Z",
+      "type": "file_header",
+      "source": "codebase",
+      "content": "File: src/features/events/index.ts\n\n// Barrel export for the events feature\nexport { EventExplorer } from './components/EventExplorer'\nexport { EventTimeline } from './components/EventTimeline'\nexport { useEventStream } from './hooks/useEventStream'\nexport { useEventSearch } from './hooks/useEventSearch'\nexport { eventApi } from './api/eventApi'\nexport type { AnalyticsEvent, EventFilter } from './types'"
+    },
+    {
+      "id": "evt_011",
+      "timestamp": "2024-10-02T10:00:00Z",
+      "type": "file_header",
+      "source": "codebase",
+      "content": "File: src/features/funnels/index.ts\n\n// Barrel export for the funnels feature\nexport { FunnelBuilder } from './components/FunnelBuilder'\nexport { FunnelVisualization } from './components/FunnelVisualization'\nexport { useFunnelAnalysis } from './hooks/useFunnelAnalysis'\nexport { funnelApi } from './api/funnelApi'\nexport type { FunnelStep, FunnelConfig } from './types'"
+    },
+    {
+      "id": "evt_012",
+      "timestamp": "2024-10-02T10:30:00Z",
+      "type": "onboarding_note",
+      "source": "personal",
+      "content": "Onboarding note: The codebase uses feature folders consistently. Each feature (dashboard, events, funnels) has the same structure: components/, hooks/, api/, types.ts, and an index.ts barrel export. Named exports only — I haven't seen a single default export anywhere. This is clean and consistent."
+    },
+    {
+      "id": "evt_013",
+      "timestamp": "2024-10-02T11:00:00Z",
+      "type": "pr_description",
+      "source": "github",
+      "content": "PR #487: Add retention analysis feature\n\nAdds the retention analysis feature with the standard feature-folder structure:\n- src/features/retention/components/RetentionGrid.tsx\n- src/features/retention/hooks/useRetention.ts\n- src/features/retention/api/retentionApi.ts\n- src/features/retention/types.ts\n- src/features/retention/index.ts\n\nFollows existing patterns: React Query for data fetching, Zod for input validation, barrel exports. Added unit tests for the useRetention hook and RetentionGrid component."
+    },
+    {
+      "id": "evt_014",
+      "timestamp": "2024-10-02T14:00:00Z",
+      "type": "code_review",
+      "source": "github",
+      "content": "Code review comment on PR #487 by @seniorlead:\n\"Nice work following the feature-folder pattern. One note: please add Zod validation for the retention query params in the API layer too, not just the frontend form. We validate at both boundaries — client input AND API input. See how dashboardApi does it with the MetricQuerySchema.\""
+    },
+    {
+      "id": "evt_015",
+      "timestamp": "2024-10-02T15:00:00Z",
+      "type": "architecture_doc",
+      "source": "confluence",
+      "content": "API Layer — REST vs GraphQL Migration Status:\n\nWe are migrating from REST to GraphQL. Current status:\n- GraphQL (new): Dashboard queries, funnel analysis, retention — ~60% of traffic\n- REST (legacy): Event ingestion endpoints, user management, admin tools — ~40% of traffic\n\nThe REST endpoints are in src/api/routes/ and the GraphQL schema is in src/api/graphql/.\nBoth use the same underlying services (clickhouseService, userService, etc.).\n\nDO NOT add new REST endpoints. All new features should use GraphQL.\nThe REST endpoints will be deprecated once all clients have migrated."
+    },
+    {
+      "id": "evt_016",
+      "timestamp": "2024-10-03T09:00:00Z",
+      "type": "file_header",
+      "source": "codebase",
+      "content": "File: src/api/graphql/schema.graphql (excerpt)\n\ntype Query {\n  metric(name: String!, timeRange: TimeRangeInput!, granularity: Granularity!): MetricResult!\n  topEvents(limit: Int!, timeRange: TimeRangeInput!): [EventSummary!]!\n  retention(cohort: CohortInput!, periods: Int!): RetentionResult!\n  funnel(steps: [FunnelStepInput!]!, timeRange: TimeRangeInput!): FunnelResult!\n}\n\ninput TimeRangeInput {\n  start: DateTime!\n  end: DateTime!\n}\n\nenum Granularity {\n  HOUR\n  DAY\n  WEEK\n  MONTH\n}"
+    },
+    {
+      "id": "evt_017",
+      "timestamp": "2024-10-03T09:30:00Z",
+      "type": "file_header",
+      "source": "codebase",
+      "content": "File: src/api/validation/schemas.ts\n\n/**\n * Zod validation schemas for all API inputs.\n * Every GraphQL resolver and REST endpoint MUST validate inputs\n * using these schemas before processing.\n *\n * Convention: schema names match the GraphQL input type names\n * with 'Schema' suffix. E.g., TimeRangeInput → TimeRangeSchema\n */"
+    },
+    {
+      "id": "evt_018",
+      "timestamp": "2024-10-03T10:00:00Z",
+      "type": "onboarding_note",
+      "source": "personal",
+      "content": "Onboarding note: Validation pattern is clear. Zod schemas in src/api/validation/schemas.ts, used in both GraphQL resolvers and REST routes. Named to match GraphQL types. The team validates at both client and server boundaries — belt and suspenders approach. Makes sense for a data-heavy app."
+    },
+    {
+      "id": "evt_019",
+      "timestamp": "2024-10-03T11:00:00Z",
+      "type": "file_header",
+      "source": "codebase",
+      "content": "File: src/pipeline/event-processor/index.ts\n\n/**\n * Event processor — Kafka consumer that writes analytics events to ClickHouse.\n *\n * Consumes from: 'analytics-events' topic\n * Writes to: ClickHouse 'events' and 'event_properties' tables\n *\n * Processing: validates event schema (Zod), enriches with geo/device data,\n * batches inserts (every 1000 events or 5 seconds, whichever comes first).\n *\n * KNOWN ISSUE: No dead letter queue. If an event fails validation or\n * ClickHouse insert fails, the event is logged to stderr and skipped.\n * Lost events are not recoverable. See TECH-DEBT-23.\n */"
+    },
+    {
+      "id": "evt_020",
+      "timestamp": "2024-10-03T14:00:00Z",
+      "type": "file_header",
+      "source": "codebase",
+      "content": "File: src/pipeline/event-processor/schema.ts\n\n/**\n * Event validation schemas for the Kafka consumer.\n * Events must match one of the registered event types.\n * Unknown event types are rejected (and lost — no DLQ).\n *\n * Schema definitions use Zod and are shared with the client SDK\n * via the @analytics/event-types package.\n */"
+    },
+    {
+      "id": "evt_021",
+      "timestamp": "2024-10-03T15:00:00Z",
+      "type": "onboarding_note",
+      "source": "personal",
+      "content": "Onboarding note: The event pipeline is Kafka → event-processor → ClickHouse. Batch inserts for performance (1000 events or 5s). But there's no dead letter queue! Failed events just get logged and lost. That seems like a significant reliability gap for an analytics product. Tagged TECH-DEBT-23."
+    },
+    {
+      "id": "evt_022",
+      "timestamp": "2024-10-04T09:00:00Z",
+      "type": "file_header",
+      "source": "codebase",
+      "content": "File: src/services/redis.ts\n\n/**\n * Redis client and cache utilities.\n * Used for: dashboard query caching, rate limiting, session storage.\n *\n * Dashboard cache keys follow pattern: 'dash:{queryHash}'\n * Default TTL: none (manual invalidation only for dashboard queries).\n * Rate limit keys: 'rl:{ip}:{endpoint}' with 60s TTL.\n *\n * To invalidate dashboard cache: POST /admin/cache/invalidate\n * with { pattern: 'dash:*' } or specific key.\n */"
+    },
+    {
+      "id": "evt_023",
+      "timestamp": "2024-10-04T09:30:00Z",
+      "type": "code_review",
+      "source": "github",
+      "content": "Code review comment on PR #492 by @backend-lead:\n\"Why are you using raw ClickHouse SQL here? We have the query builder in src/lib/clickhouse-qb/ for simple queries. I know it doesn't cover aggregate functions yet, but for a basic SELECT with WHERE and ORDER BY it works fine. Let's not add more raw SQL debt.\""
+    },
+    {
+      "id": "evt_024",
+      "timestamp": "2024-10-04T10:00:00Z",
+      "type": "pr_description",
+      "source": "github",
+      "content": "PR #492: Add user segmentation queries\n\nAdds new ClickHouse queries for user segmentation. Note: using raw SQL because the query builder doesn't support window functions or ARRAY JOIN which we need for cohort analysis.\n\nI know this adds to the SQL tech debt (TECH-DEBT-17) but the query builder would need significant work to support these operations. Added comments explaining each query."
+    },
+    {
+      "id": "evt_025",
+      "timestamp": "2024-10-04T11:00:00Z",
+      "type": "onboarding_note",
+      "source": "personal",
+      "content": "Onboarding note: Interesting tension in PR #492. The team has a query builder for ClickHouse but it's incomplete — doesn't support window functions, ARRAY JOIN, or aggregate functions. So complex queries are still raw SQL. The backend lead wants people to use the query builder where possible but the PR author had valid reasons not to. This is an active discussion, not just stale debt."
+    },
+    {
+      "id": "evt_026",
+      "timestamp": "2024-10-04T14:00:00Z",
+      "type": "architecture_doc",
+      "source": "confluence",
+      "content": "Testing Strategy:\n\n- Unit tests: Jest for all hooks, utilities, and services. Required for PR approval.\n- Integration tests: Limited — we have some for the GraphQL resolvers using a test ClickHouse instance.\n- E2E tests: None. This is a known gap (TECH-DEBT-31). We've attempted Playwright twice but the dashboard's real-time nature makes deterministic E2E tests difficult.\n\nFor now, we rely on unit tests + manual QA for releases. The CI pipeline runs unit tests and type checking only."
+    },
+    {
+      "id": "evt_027",
+      "timestamp": "2024-10-04T14:30:00Z",
+      "type": "onboarding_note",
+      "source": "personal",
+      "content": "Onboarding note: No E2E tests. They tried Playwright twice and gave up because of the real-time dashboard making tests flaky. Current strategy is unit tests + manual QA. CI only runs unit tests and tsc. This is concerning for a production analytics product — you'd want at least some smoke tests for critical paths."
+    },
+    {
+      "id": "evt_028",
+      "timestamp": "2024-10-05T09:00:00Z",
+      "type": "file_header",
+      "source": "codebase",
+      "content": "File: src/lib/feature-flags/index.ts\n\n/**\n * Feature flag utilities via LaunchDarkly.\n * All new dashboard widgets MUST be behind a feature flag.\n *\n * Usage: const enabled = useFeatureFlag('new-retention-widget')\n *\n * Flag naming convention: kebab-case, descriptive\n * e.g., 'retention-grid-v2', 'funnel-comparison-mode'\n *\n * Flags are evaluated client-side with LaunchDarkly React SDK.\n * Server-side flags use the Node SDK in src/api/flags.ts.\n */"
+    },
+    {
+      "id": "evt_029",
+      "timestamp": "2024-10-05T09:30:00Z",
+      "type": "code_review",
+      "source": "github",
+      "content": "Code review comment on PR #495 by @seniorlead:\n\"Don't forget to wrap this new widget in a feature flag. We gate all new dashboard UI behind LaunchDarkly flags so we can roll out gradually. Add `useFeatureFlag('segment-breakdown-widget')` and conditionally render.\""
+    },
+    {
+      "id": "evt_030",
+      "timestamp": "2024-10-05T10:00:00Z",
+      "type": "file_header",
+      "source": "codebase",
+      "content": "File: src/api/routes/events.ts\n\n/**\n * LEGACY REST endpoints for event ingestion.\n * These are the original endpoints used by v1 and v2 client SDKs.\n *\n * POST /api/events — batch event ingestion\n * POST /api/events/single — single event ingestion\n * GET /api/events/:id — get event by ID\n *\n * NOTE: New client SDKs (v3+) should use the GraphQL mutation.\n * These endpoints remain for backward compatibility only.\n * Do not add new functionality here.\n */"
+    },
+    {
+      "id": "evt_031",
+      "timestamp": "2024-10-05T10:30:00Z",
+      "type": "file_header",
+      "source": "codebase",
+      "content": "File: src/api/routes/users.ts\n\n/**\n * REST endpoints for user management.\n * Still on REST because the admin dashboard hasn't migrated to GraphQL yet.\n *\n * CRUD operations for users, teams, and permissions.\n * Uses Zod validation on all inputs.\n * Auth via JWT middleware (src/api/middleware/auth.ts).\n */"
+    },
+    {
+      "id": "evt_032",
+      "timestamp": "2024-10-05T11:00:00Z",
+      "type": "onboarding_note",
+      "source": "personal",
+      "content": "Onboarding note: REST vs GraphQL split is clear now. New analytics features use GraphQL, but event ingestion (for old SDKs) and user management are still REST. Makes sense — different migration timelines for different consumers. The REST event endpoints can't go away until all client SDKs upgrade to v3+."
+    },
+    {
+      "id": "evt_033",
+      "timestamp": "2024-10-07T09:00:00Z",
+      "type": "pr_description",
+      "source": "github",
+      "content": "PR #498: Migrate event ingestion to GraphQL\n\nAdds GraphQL mutation for event ingestion alongside the existing REST endpoint. The v3 client SDK will use this. REST endpoints remain for backward compat.\n\nChanges:\n- New mutation: `ingestEvents(events: [EventInput!]!): IngestResult!`\n- Zod validation schema for EventInput\n- Same underlying pipeline (Kafka producer)\n- Added unit tests for resolver and validation"
+    },
+    {
+      "id": "evt_034",
+      "timestamp": "2024-10-07T10:00:00Z",
+      "type": "code_review",
+      "source": "github",
+      "content": "Code review comment on PR #498 by @backend-lead:\n\"Good migration step. One concern: the REST endpoint currently accepts up to 1000 events per batch, but the GraphQL mutation doesn't have a limit. Add a max batch size check — we don't want someone sending 100k events in one mutation. Also, make sure the error response format matches what the v3 SDK expects.\""
+    },
+    {
+      "id": "evt_035",
+      "timestamp": "2024-10-07T11:00:00Z",
+      "type": "file_header",
+      "source": "codebase",
+      "content": "File: src/api/middleware/auth.ts\n\n/**\n * JWT authentication middleware.\n * Validates Bearer token from Authorization header.\n * Used by both REST routes and GraphQL context.\n *\n * Token payload: { userId, teamId, role, permissions[] }\n * Tokens expire after 24h, refresh via /api/auth/refresh.\n *\n * For API keys (used by client SDKs for event ingestion),\n * see src/api/middleware/apiKey.ts — different auth flow.\n */"
+    },
+    {
+      "id": "evt_036",
+      "timestamp": "2024-10-07T14:00:00Z",
+      "type": "architecture_doc",
+      "source": "confluence",
+      "content": "ClickHouse Data Model:\n\nPrimary tables:\n- events: All analytics events. Partitioned by month, ordered by (event_name, timestamp).\n- event_properties: Key-value properties for each event. Joined via event_id.\n- users: User profiles synced from the main DB.\n- sessions: Computed sessions (materialized view over events).\n\nImportant: ClickHouse does NOT support UPDATE or DELETE. To correct data, insert a new row with a version flag and filter to latest version at query time. This is by design for append-only analytics."
+    },
+    {
+      "id": "evt_037",
+      "timestamp": "2024-10-07T15:00:00Z",
+      "type": "onboarding_note",
+      "source": "personal",
+      "content": "Onboarding note: ClickHouse data model is append-only. No UPDATE/DELETE — you insert corrections as new rows with version flags. This is a fundamental constraint that affects how you think about the whole system. If we need to fix bad event data, we can't just update a row — we have to insert a correction and filter at query time. Every query needs to account for this."
+    },
+    {
+      "id": "evt_038",
+      "timestamp": "2024-10-08T09:00:00Z",
+      "type": "file_header",
+      "source": "codebase",
+      "content": "File: src/pipeline/event-processor/enrichment.ts\n\n/**\n * Event enrichment pipeline.\n * After validation, events are enriched with:\n * - Geo data: IP → country/city via MaxMind GeoIP\n * - Device data: User-Agent parsing via ua-parser-js\n * - Session assignment: based on 30-minute inactivity window\n *\n * Enrichment is synchronous and adds ~2ms per event.\n * If enrichment fails, the event is still inserted but with\n * null enrichment fields. We never drop events due to\n * enrichment failure.\n */"
+    },
+    {
+      "id": "evt_039",
+      "timestamp": "2024-10-08T10:00:00Z",
+      "type": "file_header",
+      "source": "codebase",
+      "content": "File: src/features/events/hooks/useEventStream.ts\n\n/**\n * useEventStream — real-time event feed via WebSocket.\n * Connects to the event-stream service which tails the\n * Kafka topic and broadcasts to connected clients.\n *\n * Uses React Query's queryClient.setQueryData() to merge\n * real-time events into the cached event list.\n * Auto-reconnects on disconnect with exponential backoff.\n */"
+    },
+    {
+      "id": "evt_040",
+      "timestamp": "2024-10-08T11:00:00Z",
+      "type": "pr_description",
+      "source": "github",
+      "content": "PR #501: Fix stale cache after event property changes\n\nBug: When event properties are updated (via correction insert), the Redis cache still serves old data because cache invalidation is manual.\n\nFix: Added cache invalidation call after correction inserts in the clickhouseService. This is a targeted fix — we still need a proper cache invalidation strategy (TECH-DEBT-42).\n\nNote: This only fixes the correction-insert path. Regular event inserts still rely on the 2-3 second eventual consistency window of ClickHouse, which is acceptable for dashboards."
+    },
+    {
+      "id": "evt_041",
+      "timestamp": "2024-10-08T14:00:00Z",
+      "type": "code_review",
+      "source": "github",
+      "content": "Code review comment on PR #501 by @seniorlead:\n\"This fix is fine for now but we really need to address TECH-DEBT-42. Manual cache invalidation is a ticking time bomb. Every new query path that touches ClickHouse needs to remember to invalidate Redis. Can we at least add a TTL as a safety net? Even 5 minutes would prevent infinitely stale data.\""
+    },
+    {
+      "id": "evt_042",
+      "timestamp": "2024-10-08T15:00:00Z",
+      "type": "onboarding_note",
+      "source": "personal",
+      "content": "Onboarding note: Cache invalidation is a recurring pain point. PR #501 shows the pattern — someone adds a new write path and forgets to invalidate Redis. The senior lead wants a TTL as a safety net. Current approach: manual invalidation via admin endpoint + ad-hoc invalidation in code. No TTL on dashboard cache keys means stale data can persist forever if you miss an invalidation."
+    },
+    {
+      "id": "evt_043",
+      "timestamp": "2024-10-09T09:00:00Z",
+      "type": "file_header",
+      "source": "codebase",
+      "content": "File: src/api/graphql/context.ts\n\n/**\n * GraphQL context factory.\n * Creates the context object available to all resolvers.\n *\n * Includes: authenticated user, team, permissions, dataloaders,\n * Redis client, ClickHouse client, feature flags.\n *\n * Dataloaders prevent N+1 queries for nested GraphQL fields.\n * Feature flags are loaded once per request from LaunchDarkly.\n */"
+    },
+    {
+      "id": "evt_044",
+      "timestamp": "2024-10-09T10:00:00Z",
+      "type": "file_header",
+      "source": "codebase",
+      "content": "File: docker-compose.yml (excerpt)\n\nservices:\n  api:\n    build: .\n    ports: ['3000:3000']\n    depends_on: [clickhouse, redis, kafka]\n  event-processor:\n    build: ./src/pipeline/event-processor\n    depends_on: [clickhouse, kafka]\n  clickhouse:\n    image: clickhouse/clickhouse-server:23.8\n    ports: ['8123:8123']\n  redis:\n    image: redis:7-alpine\n    ports: ['6379:6379']\n  kafka:\n    image: confluentinc/cp-kafka:7.5.0\n    ports: ['9092:9092']\n  zookeeper:\n    image: confluentinc/cp-zookeeper:7.5.0"
+    },
+    {
+      "id": "evt_045",
+      "timestamp": "2024-10-09T10:30:00Z",
+      "type": "architecture_doc",
+      "source": "confluence",
+      "content": "Deployment & Infrastructure:\n\n- Local: Docker Compose (api, event-processor, clickhouse, redis, kafka, zookeeper)\n- Staging/Prod: Kubernetes on AWS EKS\n- CI/CD: GitHub Actions → build → test (unit only) → deploy to staging → manual promote to prod\n- Feature flags: LaunchDarkly for gradual rollout of new features\n- Monitoring: Datadog for APM, PagerDuty for alerts\n- Secrets: AWS Secrets Manager, injected via K8s secrets"
+    },
+    {
+      "id": "evt_046",
+      "timestamp": "2024-10-09T11:00:00Z",
+      "type": "onboarding_note",
+      "source": "personal",
+      "content": "Onboarding note: Local dev is Docker Compose — api, event-processor, clickhouse, redis, kafka, zookeeper. Prod is Kubernetes on AWS. CI runs unit tests and tsc only (no integration or E2E). Feature flags via LaunchDarkly for rollout. Pretty standard modern stack. One thing I notice: the event-processor is a separate service, not part of the API. Makes sense for scaling independently."
+    },
+    {
+      "id": "evt_047",
+      "timestamp": "2024-10-10T09:00:00Z",
+      "type": "pr_description",
+      "source": "github",
+      "content": "PR #504: Add segment comparison dashboard widget\n\nNew dashboard widget to compare metrics across user segments. Behind feature flag 'segment-comparison-widget'.\n\nStructure follows feature-folder convention:\n- src/features/segments/components/SegmentComparison.tsx\n- src/features/segments/hooks/useSegmentComparison.ts\n- src/features/segments/api/segmentApi.ts\n- src/features/segments/types.ts\n- src/features/segments/index.ts\n\nAll data fetching via React Query + GraphQL. Zod validation on inputs. Unit tests included."
+    },
+    {
+      "id": "evt_048",
+      "timestamp": "2024-10-10T10:00:00Z",
+      "type": "code_review",
+      "source": "github",
+      "content": "Code review comment on PR #504 by @frontend-lead:\n\"Clean implementation. Love that you followed the feature-folder structure exactly. Two small things: (1) use named exports consistently — I see a default export on SegmentComparison. We use named exports everywhere. (2) The chart colors should come from the theme, not hardcoded hex values.\""
+    },
+    {
+      "id": "evt_049",
+      "timestamp": "2024-10-10T11:00:00Z",
+      "type": "file_header",
+      "source": "codebase",
+      "content": "File: .github/workflows/ci.yml (excerpt)\n\njobs:\n  check:\n    runs-on: ubuntu-latest\n    steps:\n      - uses: actions/checkout@v4\n      - uses: actions/setup-node@v4\n        with: { node-version: 20 }\n      - run: npm ci\n      - run: npm run typecheck  # npx tsc --noEmit\n      - run: npm test           # jest --ci\n      - run: npm run lint        # biome check"
+    },
+    {
+      "id": "evt_050",
+      "timestamp": "2024-10-10T14:00:00Z",
+      "type": "onboarding_note",
+      "source": "personal",
+      "content": "Onboarding note: CI pipeline is simple — typecheck, jest, biome lint. No integration tests in CI. PRs require squash merge to main with conventional commit messages. The team is consistent about code review — every PR I've seen has substantive review comments, not just approvals."
+    },
+    {
+      "id": "evt_051",
+      "timestamp": "2024-10-11T09:00:00Z",
+      "type": "file_header",
+      "source": "codebase",
+      "content": "File: src/lib/clickhouse-qb/index.ts\n\n/**\n * ClickHouse query builder — experimental.\n * Supports: SELECT, WHERE, ORDER BY, LIMIT, GROUP BY.\n * Does NOT support: JOINs, window functions, ARRAY JOIN,\n * subqueries, CTEs, or aggregate functions beyond COUNT/SUM.\n *\n * Usage:\n *   const query = new CHQuery('events')\n *     .select('event_name', 'count() as cnt')\n *     .where('timestamp', '>=', startDate)\n *     .groupBy('event_name')\n *     .orderBy('cnt', 'DESC')\n *     .limit(100)\n *     .build()\n *\n * This is intentionally limited. For complex queries,\n * use raw SQL in clickhouseService (and document it well).\n */"
+    },
+    {
+      "id": "evt_052",
+      "timestamp": "2024-10-11T10:00:00Z",
+      "type": "pr_description",
+      "source": "github",
+      "content": "PR #506: Standardize error handling across GraphQL resolvers\n\nCurrently each resolver handles errors differently. This PR adds:\n- Shared error types: NotFoundError, ValidationError, InternalError\n- Error middleware that maps these to proper GraphQL error extensions\n- Consistent logging via structured logger (pino)\n\nAll resolvers updated to throw typed errors instead of raw Error objects."
+    },
+    {
+      "id": "evt_053",
+      "timestamp": "2024-10-11T11:00:00Z",
+      "type": "code_review",
+      "source": "github",
+      "content": "Code review comment on PR #506 by @backend-lead:\n\"Great improvement. One suggestion: add a correlation ID to the error context. When a user reports 'my dashboard is broken', we need to trace from the GraphQL error back to the specific ClickHouse query that failed. Pino already supports child loggers with context.\""
+    },
+    {
+      "id": "evt_054",
+      "timestamp": "2024-10-11T14:00:00Z",
+      "type": "onboarding_note",
+      "source": "personal",
+      "content": "Onboarding note: The team is actively improving code quality — PR #506 standardizes error handling across resolvers. Before this, each resolver had its own error handling. The codebase isn't perfect but the team is aware of the gaps and working on them. Active tech debt items I've seen: TECH-DEBT-17 (raw SQL), TECH-DEBT-23 (no DLQ), TECH-DEBT-31 (no E2E tests), TECH-DEBT-42 (cache invalidation)."
+    },
+    {
+      "id": "evt_055",
+      "timestamp": "2024-10-14T09:00:00Z",
+      "type": "file_header",
+      "source": "codebase",
+      "content": "File: src/api/graphql/dataloaders/index.ts\n\n/**\n * Dataloaders for preventing N+1 queries in GraphQL resolvers.\n * Created per-request in the context factory.\n *\n * Available loaders:\n * - userLoader: batch-loads users by ID\n * - teamLoader: batch-loads teams by ID\n * - eventLoader: batch-loads events by ID from ClickHouse\n *\n * All loaders use DataLoader library with caching per request.\n * Cache is NOT shared across requests.\n */"
+    },
+    {
+      "id": "evt_056",
+      "timestamp": "2024-10-14T10:00:00Z",
+      "type": "file_header",
+      "source": "codebase",
+      "content": "File: src/features/dashboard/hooks/useDashboardFilters.ts\n\n/**\n * useDashboardFilters — manages global dashboard filter state.\n * Persists filters to URL search params for shareable links.\n * Filters: timeRange, granularity, segments[], eventNames[]\n *\n * When filters change, all useAnalytics queries with matching\n * cache keys are automatically refetched by React Query.\n */"
+    },
+    {
+      "id": "evt_057",
+      "timestamp": "2024-10-14T11:00:00Z",
+      "type": "pr_description",
+      "source": "github",
+      "content": "PR #510: Add dead letter queue for event processor\n\nAddresses TECH-DEBT-23. Failed events are now sent to a 'analytics-events-dlq' Kafka topic instead of being dropped.\n\nChanges:\n- New Kafka producer for DLQ topic in event-processor\n- Failed events include error reason and original payload\n- Admin endpoint to replay DLQ events: POST /admin/dlq/replay\n- Unit tests for failure scenarios\n\nNote: This doesn't retroactively recover previously lost events."
+    },
+    {
+      "id": "evt_058",
+      "timestamp": "2024-10-14T14:00:00Z",
+      "type": "code_review",
+      "source": "github",
+      "content": "Code review comment on PR #510 by @backend-lead:\n\"Finally! Great to see TECH-DEBT-23 addressed. The replay endpoint is a nice touch. Question: what happens if the replay also fails? Do we have infinite retry or does it go back to DLQ? I think we need a max retry count.\""
+    },
+    {
+      "id": "evt_059",
+      "timestamp": "2024-10-14T15:00:00Z",
+      "type": "onboarding_note",
+      "source": "personal",
+      "content": "Onboarding note: Good to see TECH-DEBT-23 (no DLQ) is being fixed in PR #510. The team is actively chipping away at tech debt. Remaining major items: TECH-DEBT-17 (raw SQL in ClickHouse service), TECH-DEBT-31 (no E2E tests), TECH-DEBT-42 (cache invalidation). The DLQ fix adds a 'analytics-events-dlq' Kafka topic and an admin replay endpoint."
+    },
+    {
+      "id": "evt_060",
+      "timestamp": "2024-10-15T09:00:00Z",
+      "type": "file_header",
+      "source": "codebase",
+      "content": "File: src/api/graphql/mutations/ingestEvents.ts\n\n/**\n * GraphQL mutation for event ingestion (new in v3 SDK).\n * Validates via Zod, produces to Kafka 'analytics-events' topic.\n * Max batch size: 1000 events (matching REST endpoint limit).\n *\n * Returns: { accepted: number, rejected: number, errors: [...] }\n * Rejected events include validation error details.\n */"
+    },
+    {
+      "id": "evt_061",
+      "timestamp": "2024-10-15T10:00:00Z",
+      "type": "architecture_doc",
+      "source": "confluence",
+      "content": "Commit & PR Conventions:\n\n- Conventional commits: feat:, fix:, refactor:, docs:, chore:\n- PR title = commit message (squash merge)\n- PR description must include: what changed, why, how to test\n- All PRs need at least one approval\n- CI must pass (typecheck + unit tests + lint)\n- Feature branches: feature/TICKET-description\n- Hotfix branches: hotfix/TICKET-description"
+    },
+    {
+      "id": "evt_062",
+      "timestamp": "2024-10-15T11:00:00Z",
+      "type": "onboarding_note",
+      "source": "personal",
+      "content": "Onboarding note: Conventions summary so far:\n- Feature folders with barrel exports (named exports only)\n- Zod for all input validation (client + server)\n- React Query for all data fetching (no raw fetch/axios)\n- GraphQL for new features, REST only for legacy\n- LaunchDarkly feature flags for all new dashboard widgets\n- Conventional commits, squash merge\n- CI: typecheck + jest + biome\n\nThis is a well-organized codebase with clear patterns. The tech debt is acknowledged and tracked."
+    },
+    {
+      "id": "evt_063",
+      "timestamp": "2024-10-16T09:00:00Z",
+      "type": "file_header",
+      "source": "codebase",
+      "content": "File: src/api/flags.ts\n\n/**\n * Server-side feature flags via LaunchDarkly Node SDK.\n * Used for: API-level feature gating, gradual rollout of\n * new resolvers/mutations, A/B testing query strategies.\n *\n * Usage: const isEnabled = await evaluateFlag('flag-name', userContext)\n *\n * Flags are cached for 30 seconds to reduce LaunchDarkly API calls.\n * In tests, use the mock flag provider from src/test/helpers/flags.ts\n */"
+    },
+    {
+      "id": "evt_064",
+      "timestamp": "2024-10-16T10:00:00Z",
+      "type": "pr_description",
+      "source": "github",
+      "content": "PR #513: Add cache TTL for dashboard queries\n\nPartially addresses TECH-DEBT-42. Dashboard cache keys now have a 5-minute TTL as a safety net. Manual invalidation still works and overrides the TTL.\n\nThis doesn't fully solve the cache invalidation problem but prevents infinitely stale data. The senior lead's suggestion from PR #501.\n\nChanges:\n- Redis SET now includes EX 300 for dashboard cache keys\n- Existing manual invalidation still works\n- Updated cache utility docs"
+    },
+    {
+      "id": "evt_065",
+      "timestamp": "2024-10-16T14:00:00Z",
+      "type": "onboarding_note",
+      "source": "personal",
+      "content": "Onboarding note: Two weeks in. Overall impression: this is a well-structured analytics dashboard with clear separation of concerns. The tech stack (React + GraphQL + Kafka + ClickHouse + Redis) is solid for the use case. Tech debt is real but acknowledged and being actively addressed (DLQ fix landed, cache TTL added). The biggest remaining concern is the lack of E2E tests (TECH-DEBT-31) — for a data product, you really want to verify the full pipeline works end-to-end. The ClickHouse append-only constraint and eventual consistency are fundamental to understand — they affect every part of the system from event ingestion to dashboard queries."
+    }
+  ]
+}

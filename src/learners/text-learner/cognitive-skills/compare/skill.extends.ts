@@ -1,2 +1,3 @@
 export const key = 'extends'
-export const meaning = 'This deepens something I partially knew'
+export const meaning =
+	'This deepens something I partially knew — what specific detail does it add?'

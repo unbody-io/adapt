@@ -42,7 +42,7 @@ async function main() {
 			understand: { thresholds: { maxObservations: 3, minImportance: 0.2 } },
 		},
 		internalLearners: {
-			globalInjectionUnderstanding: false,
+			globalUnderstanding: false,
 			globalQueryUnderstanding: false,
 			injectionGaps: true,
 			queryGaps: false,

@@ -3,8 +3,8 @@ import type { LearnerResponse } from '../types'
 /**
  * User prompt for brain synthesis
  *
- * Presents learner responses as anonymous knowledge sections
- * with relevance and confidence labels for weighting.
+ * Presents learner responses as anonymous knowledge sections.
+ * No lossy abstractions — raw knowledge, the model weighs it.
  */
 export function buildSynthesisUserPrompt(
 	query: string,
@@ -15,18 +15,11 @@ export function buildSynthesisUserPrompt(
 	let knowledgeText: string
 	if (relevant.length > 0) {
 		knowledgeText = relevant
-			.map(
-				(r) =>
-					`KNOWLEDGE (relevance: ${(r.relevance * 100).toFixed(0)}%, confidence: ${(r.confidence * 100).toFixed(0)}%):
-${r.insight}${r.gaps.length > 0 ? `\nGaps: ${r.gaps.join(', ')}` : ''}`,
-			)
+			.map((r, i) => `KNOWLEDGE ${i + 1}:\n${r.insight}${r.gaps.length > 0 ? `\nGaps: ${r.gaps.join(', ')}` : ''}`)
 			.join('\n\n')
 	} else {
 		knowledgeText = '(No relevant knowledge available)'
 	}
 
-	return `QUESTION:
-${query}
-
-${knowledgeText}`
+	return `${query}\n\n${knowledgeText}`
 }

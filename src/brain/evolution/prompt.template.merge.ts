@@ -13,7 +13,7 @@ import { stringifyUnderstanding } from './utils'
 export async function mergePromptTemplate(
 	guidance: string,
 	learners: BaseLearner<unknown>[],
-	brainPrompt: string,
+	purpose: string,
 ): Promise<string> {
 	const learnerSections = await Promise.all(
 		learners.map(async (learner, idx) => {
@@ -34,7 +34,7 @@ ${stringifyUnderstanding(understanding)}
 
 	return `# Brain Context
 
-**Purpose**: ${brainPrompt}
+**Purpose**: ${purpose}
 
 # Merge Guidance
 

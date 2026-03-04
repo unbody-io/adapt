@@ -268,6 +268,27 @@
     .learner-type-badge.text { background: #1a2a3f; color: #60a5fa; border: 1px solid #2a3a5f; }
     .learner-type-badge.list { background: #2a1a3f; color: #a78bfa; border: 1px solid #3a2a5f; }
 
+    .learner-origin-badge {
+      font-size: 8px;
+      font-weight: 600;
+      padding: 1px 5px;
+      border-radius: 3px;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+    .learner-origin-badge.prompt { background: #1a2a2a; color: #4ade80; border: 1px solid #2a3a3a; }
+    .learner-origin-badge.developer { background: #1a1a2a; color: #888; border: 1px solid #2a2a3a; }
+    .learner-origin-badge.emergent { background: #2a2a1a; color: #facc15; border: 1px solid #3a3a2a; }
+
+    .learner-health-badge {
+      font-size: 9px;
+      padding: 1px 5px;
+      border-radius: 3px;
+      font-family: monospace;
+    }
+    .learner-health-badge.active { color: #4ade80; background: #0a1a0a; }
+    .learner-health-badge.dormant { color: #666; background: #111; }
+
     .adjust-row {
       display: flex;
       gap: 4px;
@@ -2172,6 +2193,22 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
           <input type="number" id="signalThreshold" value="3" min="1" max="100">
         </div>
 
+        <div style="font-size:11px;color:#666;text-transform:uppercase;letter-spacing:0.5px;margin:10px 0 4px;">Coverage Gap Detection</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Relevance Threshold</label>
+            <input type="number" id="coverageGapRelevance" value="0.3" min="0" max="1" step="0.1">
+          </div>
+          <div class="form-group">
+            <label>Gap Count</label>
+            <input type="number" id="coverageGapCount" value="5" min="1" max="50">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Window Size</label>
+          <input type="number" id="coverageGapWindow" value="20" min="1" max="100">
+        </div>
+
         </div><!-- /section-evolution -->
 
         <!-- Evolution Actions -->
@@ -2205,6 +2242,40 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
           </div>
           <button id="mergeLearnersBtn" class="secondary" style="width:100%;" disabled>Merge Selected</button>
         </div><!-- /section-evo-actions -->
+
+        <!-- Internal Learners Config -->
+        <div class="section-title collapsible-toggle" data-target="section-internal-learners-config">Internal Learners <span class="section-chevron">&#9656;</span></div>
+        <div class="section-body collapsed" id="section-internal-learners-config">
+          <div class="form-group">
+            <label style="display:flex;align-items:center;gap:6px;">
+              <input type="checkbox" id="ilGlobalInjection" checked style="width:auto;">
+              Global Injection Understanding
+            </label>
+          </div>
+          <div class="form-group">
+            <label style="display:flex;align-items:center;gap:6px;">
+              <input type="checkbox" id="ilGlobalQuery" checked style="width:auto;">
+              Global Query Understanding
+            </label>
+          </div>
+          <div class="form-group">
+            <label style="display:flex;align-items:center;gap:6px;">
+              <input type="checkbox" id="ilInjectionGaps" checked style="width:auto;">
+              Injection Gaps
+            </label>
+          </div>
+          <div class="form-group">
+            <label style="display:flex;align-items:center;gap:6px;">
+              <input type="checkbox" id="ilQueryGaps" checked style="width:auto;">
+              Query Gaps
+            </label>
+          </div>
+          <hr style="border:none;border-top:1px solid #333;margin:10px 0;">
+          <div class="form-group">
+            <label>Dismissed Batch Buffer Max Size</label>
+            <input type="number" id="dismissedBatchMaxSize" value="100" min="1" max="1000">
+          </div>
+        </div><!-- /section-internal-learners-config -->
 
         <!-- Governance Config -->
         <div class="section-title collapsible-toggle" data-target="section-governance">Governance <span class="section-chevron">&#9662;</span></div>
@@ -2419,6 +2490,10 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
           <div class="dash-value" id="dashActiveLearners">0</div>
           <div class="dash-label">Active</div>
         </div>
+        <div class="dash-stat accent-red" style="cursor:pointer;" id="dashDismissedBatchesStat" title="Click to view dismissed batches">
+          <div class="dash-value" id="dashDismissedBatches">0</div>
+          <div class="dash-label">Dismissed Batches</div>
+        </div>
       </div>
 
       <div class="learners-grid" id="learnersGrid">
@@ -2428,12 +2503,38 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
         </div>
       </div>
 
+      <!-- Internal Learners Section -->
+      <div id="internalLearnersSection" style="display:none;">
+        <div class="panel-header" style="margin-top:16px;font-size:12px;color:#888;">
+          Internal Learners <span id="internalLearnerCount" style="color:#a78bfa;margin-left:8px;">0</span>
+        </div>
+        <div class="learners-grid" id="internalLearnersGrid" style="gap:8px;"></div>
+      </div>
+
+      <!-- Evolution Context -->
+      <div id="evolutionContextSection" style="display:none;margin-top:16px;">
+        <div class="panel-header" style="font-size:12px;color:#888;">
+          Evolution Context
+          <span style="font-size:10px;color:#666;margin-left:8px;">(auto-compiled from brain prompt)</span>
+        </div>
+        <pre id="evolutionContextContent" style="background:#111;border:1px solid #222;border-radius:6px;padding:10px;font-size:11px;color:#999;max-height:200px;overflow-y:auto;white-space:pre-wrap;word-wrap:break-word;margin:4px 0 0 0;"></pre>
+      </div>
+
     </div>
 
     <!-- Right Panel: Query -->
     <div class="panel qa-panel">
       <div class="panel-header">Query</div>
       <div class="qa-input-area">
+        <div style="display:flex;gap:0;margin-bottom:8px;">
+          <button id="queryModeAsk" style="flex:1;font-size:11px;padding:4px 8px;border:1px solid #333;border-radius:4px 0 0 4px;background:#2a2a2a;color:#e0e0e0;cursor:pointer;" class="query-mode-active">Ask</button>
+          <button id="queryModeConsult" style="flex:1;font-size:11px;padding:4px 8px;border:1px solid #333;border-left:none;border-radius:0 4px 4px 0;background:#111;color:#888;cursor:pointer;">Consult</button>
+        </div>
+        <div id="consultLearnerSelect" style="display:none;margin-bottom:6px;">
+          <select id="consultLearner" style="width:100%;font-size:12px;">
+            <option value="">All Internal Learners</option>
+          </select>
+        </div>
         <div class="qa-input-row">
           <input type="text" id="queryInput" placeholder="Ask the brain..." disabled>
           <button id="askBtn" disabled>Ask</button>
@@ -2517,6 +2618,22 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
           <div class="form-group">
             <label>Instructions</label>
             <textarea id="modalInstructions" rows="5" style="font-size:12px;"></textarea>
+          </div>
+          <div class="form-row" id="modalFocusRow" style="display:none;">
+            <div class="form-group">
+              <label>Focus</label>
+              <div id="modalFocus" style="font-size:11px;color:#999;background:#111;border:1px solid #222;border-radius:4px;padding:6px 8px;white-space:pre-wrap;"></div>
+            </div>
+          </div>
+          <div class="form-row" id="modalOriginRow" style="margin-top:4px;">
+            <div class="form-group" style="flex:0 0 auto;">
+              <label>Origin</label>
+              <span id="modalOrigin" class="learner-origin-badge" style="display:inline-block;"></span>
+            </div>
+            <div class="form-group" style="flex:0 0 auto;">
+              <label>Health</label>
+              <span id="modalHealth" class="learner-health-badge" style="display:inline-block;"></span>
+            </div>
           </div>
           <div style="display:flex;gap:8px;margin-top:8px;">
             <button id="saveOverviewBtn" class="secondary">Save Changes</button>
@@ -2700,6 +2817,21 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
           <input type="text" id="createLearnerDescription" placeholder="Brief description for query routing">
         </div>
         <button id="createLearnerSubmit">Create Learner</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dismissed Batches Modal -->
+  <div class="modal-overlay" id="dismissedBatchesModal" style="display:none;">
+    <div class="modal" style="max-width:640px;">
+      <div class="modal-header">
+        <h3 class="modal-title">Dismissed Batches</h3>
+        <button class="modal-close" id="dismissedBatchesClose">&times;</button>
+      </div>
+      <div style="padding:16px;max-height:500px;overflow-y:auto;">
+        <div id="dismissedBatchesList" style="display:flex;flex-direction:column;gap:8px;">
+          <div style="color:#666;font-size:12px;">Loading...</div>
+        </div>
       </div>
     </div>
   </div>
@@ -3492,6 +3624,9 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
         signalThreshold: signalThreshold.value,
         governanceStrategy: governanceStrategy.value,
         governanceMaxTokens: governanceMaxTokens.value,
+        coverageGapRelevance: document.getElementById('coverageGapRelevance').value,
+        coverageGapCount: document.getElementById('coverageGapCount').value,
+        coverageGapWindow: document.getElementById('coverageGapWindow').value,
       }
     }
 
@@ -3568,6 +3703,16 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
       }
       if (current.signalThreshold !== prev.signalThreshold) {
         evolution.evaluatorSignalThreshold = parseInt(current.signalThreshold)
+        hasChanges = true
+      }
+      if (current.coverageGapRelevance !== prev.coverageGapRelevance ||
+          current.coverageGapCount !== prev.coverageGapCount ||
+          current.coverageGapWindow !== prev.coverageGapWindow) {
+        evolution.coverageGap = {
+          relevanceThreshold: parseFloat(current.coverageGapRelevance),
+          gapCountThreshold: parseInt(current.coverageGapCount),
+          windowSize: parseInt(current.coverageGapWindow),
+        }
         hasChanges = true
       }
       if (Object.keys(evolution).length > 0) body.evolution = evolution
@@ -4819,7 +4964,10 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
         trackEvent(data.learnerId, 'dismissed')
         if (learnerStates[data.learnerId]) {
           learnerStates[data.learnerId].status = 'ready'
-          learnerStates[data.learnerId].action = 'Dismissed (irrelevant)'
+          const gaps = data.gaps || []
+          learnerStates[data.learnerId].action = gaps.length > 0
+            ? `Dismissed — gaps: ${gaps.slice(0, 2).join(', ')}${gaps.length > 2 ? '...' : ''}`
+            : 'Dismissed (irrelevant)'
         }
         updateLearnersUI()
       }
@@ -4932,7 +5080,21 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
               enabled: evolutionEnabled.checked,
               autoEvaluate: autoEvaluate.checked,
               evaluatorSignalThreshold: parseInt(signalThreshold.value),
-            }
+              coverageGap: {
+                relevanceThreshold: parseFloat(document.getElementById('coverageGapRelevance').value),
+                gapCountThreshold: parseInt(document.getElementById('coverageGapCount').value),
+                windowSize: parseInt(document.getElementById('coverageGapWindow').value),
+              },
+            },
+            internalLearners: {
+              globalInjectionUnderstanding: document.getElementById('ilGlobalInjection').checked,
+              globalQueryUnderstanding: document.getElementById('ilGlobalQuery').checked,
+              injectionGaps: document.getElementById('ilInjectionGaps').checked,
+              queryGaps: document.getElementById('ilQueryGaps').checked,
+            },
+            dismissedBatchBuffer: {
+              maxSize: parseInt(document.getElementById('dismissedBatchMaxSize').value),
+            },
           })
         })
 
@@ -5017,6 +5179,8 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
       }
     }
 
+    let queryMode = 'ask' // 'ask' or 'consult'
+
     async function askBrain() {
       const query = queryInput.value.trim()
       if (!query) return
@@ -5025,20 +5189,32 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
       askBtn.disabled = true
       askBtn.innerHTML = '<span class="spinner"></span>'
 
-      // Create Q&A card with loading state
-      const card = createQACard(query)
+      const isConsult = queryMode === 'consult'
 
-      // Build request with options
-      const requestBody = { query }
-      if (queryModelSelect.value) requestBody.model = queryModelSelect.value
-      requestBody.temperature = parseFloat(queryTempSlider.value)
+      // Create Q&A card with loading state
+      const card = createQACard((isConsult ? '[Consult] ' : '') + query)
 
       try {
-        const res = await fetch('/brain/ask', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(requestBody)
-        })
+        let res
+        if (isConsult) {
+          const consultBody = { query }
+          const selectedLearner = document.getElementById('consultLearner').value
+          if (selectedLearner) consultBody.learner = selectedLearner
+          res = await fetch('/brain/consult', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(consultBody)
+          })
+        } else {
+          const requestBody = { query }
+          if (queryModelSelect.value) requestBody.model = queryModelSelect.value
+          requestBody.temperature = parseFloat(queryTempSlider.value)
+          res = await fetch('/brain/ask', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(requestBody)
+          })
+        }
 
         const data = await res.json()
         if (res.ok) {
@@ -5050,7 +5226,7 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
         updateQACard(card, 'Error: ' + err.message, [])
       } finally {
         askBtn.disabled = false
-        askBtn.textContent = 'Ask'
+        askBtn.textContent = isConsult ? 'Consult' : 'Ask'
       }
     }
 
@@ -5172,6 +5348,12 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
           evolutionEnabled.checked = data.evolution.enabled !== false
           autoEvaluate.checked = data.evolution.autoEvaluate !== false
           if (data.evolution.evaluatorSignalThreshold) signalThreshold.value = data.evolution.evaluatorSignalThreshold
+          if (data.evolution.coverageGap) {
+            const cg = data.evolution.coverageGap
+            if (cg.relevanceThreshold !== undefined) document.getElementById('coverageGapRelevance').value = cg.relevanceThreshold
+            if (cg.gapCountThreshold !== undefined) document.getElementById('coverageGapCount').value = cg.gapCountThreshold
+            if (cg.windowSize !== undefined) document.getElementById('coverageGapWindow').value = cg.windowSize
+          }
           updateEvoGauge()
         }
 
@@ -5197,6 +5379,25 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
             m.understandingSizes.push({ t: Date.now(), size: l.understanding.length })
           }
         })
+
+        // Internal learners
+        updateInternalLearnersUI(data.internalLearners || [])
+
+        // Evolution context
+        const evoCtxSection = document.getElementById('evolutionContextSection')
+        const evoCtxContent = document.getElementById('evolutionContextContent')
+        if (data.evolutionContext) {
+          evoCtxSection.style.display = ''
+          evoCtxContent.textContent = data.evolutionContext
+        } else {
+          evoCtxSection.style.display = 'none'
+        }
+
+        // Dismissed batch count
+        document.getElementById('dashDismissedBatches').textContent = data.dismissedBatchCount || 0
+
+        // Populate consult learner dropdown
+        updateConsultLearnerDropdown(data.internalLearners || [])
 
         updateLearnersUI()
       } catch (err) {
@@ -5357,8 +5558,10 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
             <div style="display:flex;align-items:center;gap:6px;">
               <h3 title="${escapeHtml(id)}">${escapeHtml(displayName)}</h3>
               <span class="learner-type-badge ${getLearnerType(data)}">${getLearnerType(data).toUpperCase()}</span>
+              ${data.origin ? `<span class="learner-origin-badge ${data.origin}">${data.origin}</span>` : ''}
             </div>
             <div class="learner-header-right">
+              <span class="learner-health-badge ${data.health?.status || 'dormant'}" title="activation: ${(data.health?.activation ?? 0).toFixed(2)}">${data.health?.status || 'dormant'} ${(data.health?.activation ?? 0).toFixed(2)}</span>
               <span class="learner-stat-badge">${evolutionCount} updates</span>
               <span class="learner-status ${state.status}">${state.status}</span>
             </div>
@@ -5487,6 +5690,132 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
       }
     }
 
+    // --- Internal Learners UI ---
+    function updateInternalLearnersUI(internalLearners) {
+      const section = document.getElementById('internalLearnersSection')
+      const grid = document.getElementById('internalLearnersGrid')
+      const count = document.getElementById('internalLearnerCount')
+
+      if (!internalLearners || internalLearners.length === 0) {
+        section.style.display = 'none'
+        return
+      }
+
+      section.style.display = ''
+      count.textContent = internalLearners.length
+      grid.innerHTML = ''
+
+      // Store internal learner data for modal reuse
+      window._internalLearnerData = {}
+
+      internalLearners.forEach(l => {
+        window._internalLearnerData[l.id] = l
+
+        // Ensure learnerStates has data for modal
+        if (!learnerStates[l.id]) {
+          learnerStates[l.id] = { status: 'ready', action: 'Idle', internal: true }
+        }
+        learnerStates[l.id].data = l
+        learnerStates[l.id].internal = true
+
+        const displayName = l.name || l.id.replace('__internal_', '').replace(/_/g, ' ')
+        const rawUnderstanding = l.understanding
+        const hasUnderstanding = rawUnderstanding && (typeof rawUnderstanding === 'string' ? rawUnderstanding.length > 0 : Array.isArray(rawUnderstanding) && rawUnderstanding.length > 0)
+        const understandingPreview = hasUnderstanding
+          ? (typeof rawUnderstanding === 'string'
+            ? rawUnderstanding.slice(0, 120) + (rawUnderstanding.length > 120 ? '...' : '')
+            : JSON.stringify(rawUnderstanding).slice(0, 120) + '...')
+          : 'No understanding yet'
+
+        const metrics = l.metrics || {}
+        const bufferCount = l.buffer?.count || 0
+        const healthStatus = l.health?.status || 'dormant'
+        const activation = (l.health?.activation ?? 0).toFixed(2)
+        const card = document.createElement('div')
+        card.className = 'learner-card'
+        card.style.cssText = 'border-color:#333;background:#0f0f0f;cursor:pointer;'
+        card.innerHTML = `
+          <div class="learner-card-header" style="padding:8px 10px;">
+            <div style="display:flex;align-items:center;gap:6px;">
+              <h3 style="font-size:12px;" title="${escapeHtml(l.id)}">${escapeHtml(displayName)}</h3>
+              <span class="learner-type-badge ${l.type || 'text'}" style="font-size:9px;padding:1px 5px;">${(l.type || 'text').toUpperCase()}</span>
+              <span style="font-size:9px;padding:1px 5px;background:#2a1a2a;color:#a78bfa;border-radius:3px;">INTERNAL</span>
+            </div>
+            <span class="learner-health-badge ${healthStatus}" style="font-size:9px;">${healthStatus} ${activation}</span>
+          </div>
+          <div style="padding:6px 10px 10px;font-size:11px;color:#777;">
+            <div style="margin-bottom:6px;line-height:1.4;color:#999;">${escapeHtml(understandingPreview)}</div>
+            <div style="display:flex;gap:12px;color:#666;">
+              <span>${metrics.ingestion?.observationCount || 0} obs</span>
+              <span>${metrics.ingestion?.synthesisCount || 0} synth</span>
+              <span>${metrics.ingestion?.dismissalCount || 0} dismiss</span>
+              <span>${bufferCount} buffered</span>
+              <span>${hasUnderstanding ? (typeof rawUnderstanding === 'string' ? formatSize(rawUnderstanding.length) : rawUnderstanding.length + ' items') : '—'}</span>
+            </div>
+          </div>
+        `
+        card.addEventListener('click', () => openLearnerModal(l.id))
+        grid.appendChild(card)
+      })
+    }
+
+    function updateConsultLearnerDropdown(internalLearners) {
+      const select = document.getElementById('consultLearner')
+      select.innerHTML = '<option value="">All Internal Learners</option>'
+      if (!internalLearners) return
+      internalLearners.forEach(l => {
+        const name = l.name || l.id.replace('__internal_', '').replace(/_/g, ' ')
+        const opt = document.createElement('option')
+        opt.value = l.id
+        opt.textContent = name
+        select.appendChild(opt)
+      })
+    }
+
+    // --- Dismissed Batches Modal ---
+    async function showDismissedBatches() {
+      const modal = document.getElementById('dismissedBatchesModal')
+      const list = document.getElementById('dismissedBatchesList')
+      modal.style.display = 'flex'
+      list.innerHTML = '<div style="color:#666;font-size:12px;">Loading...</div>'
+
+      try {
+        const res = await fetch('/brain/dismissed-batches')
+        const batches = await res.json()
+
+        if (!batches || batches.length === 0) {
+          list.innerHTML = '<div style="color:#666;font-size:12px;">No dismissed batches</div>'
+          return
+        }
+
+        list.innerHTML = ''
+        batches.forEach(batch => {
+          const gaps = Array.isArray(batch.gaps) ? batch.gaps : (typeof batch.gaps === 'string' ? JSON.parse(batch.gaps || '[]') : [])
+          const el = document.createElement('div')
+          el.style.cssText = 'background:#111;border:1px solid #222;border-radius:6px;padding:10px;font-size:12px;'
+          el.innerHTML = `
+            <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
+              <span style="color:#e0e0e0;font-family:monospace;font-size:11px;">${escapeHtml(batch.id)}</span>
+              <span style="color:#666;font-size:10px;">${new Date(batch.timestamp).toLocaleString()}</span>
+            </div>
+            <div style="display:flex;gap:12px;margin-bottom:6px;color:#888;">
+              <span>Retries: <span style="color:${batch.retryCount > 0 ? '#f59e0b' : '#666'}">${batch.retryCount}</span></span>
+              <span>Status: <span style="color:${batch.status === 'retried' ? '#f59e0b' : '#4ade80'}">${batch.status}</span></span>
+            </div>
+            ${gaps.length > 0 ? `
+              <div style="margin-top:6px;">
+                <div style="color:#666;font-size:10px;text-transform:uppercase;margin-bottom:3px;">Gap Reasons</div>
+                ${gaps.map(g => `<div style="color:#999;font-size:11px;padding:2px 0;">- ${escapeHtml(g)}</div>`).join('')}
+              </div>
+            ` : ''}
+          `
+          list.appendChild(el)
+        })
+      } catch (err) {
+        list.innerHTML = `<div style="color:#f87171;font-size:12px;">Error: ${err.message}</div>`
+      }
+    }
+
     async function openLearnerModal(learnerId) {
       currentModalLearnerId = learnerId
       const state = learnerStates[learnerId]
@@ -5498,6 +5827,26 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
       document.getElementById('modalName').value = data.name || ''
       document.getElementById('modalDescription').value = data.description || ''
       document.getElementById('modalInstructions').value = data.instructions || ''
+
+      // Focus
+      const focusRow = document.getElementById('modalFocusRow')
+      const focusEl = document.getElementById('modalFocus')
+      if (data.focus) {
+        focusRow.style.display = ''
+        focusEl.textContent = data.focus
+      } else {
+        focusRow.style.display = 'none'
+      }
+
+      // Origin
+      const originEl = document.getElementById('modalOrigin')
+      originEl.textContent = data.origin || 'unknown'
+      originEl.className = `learner-origin-badge ${data.origin || ''}`
+
+      // Health
+      const healthEl = document.getElementById('modalHealth')
+      healthEl.textContent = `${data.health?.status || 'dormant'} ${(data.health?.activation ?? 0).toFixed(2)}`
+      healthEl.className = `learner-health-badge ${data.health?.status || 'dormant'}`
 
       document.getElementById('modalStatus').textContent = JSON.stringify(data.health || {}, null, 2)
 
@@ -5798,6 +6147,41 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
     })
     queryTempSlider.addEventListener('input', (e) => {
       tempValueDisplay.textContent = e.target.value
+    })
+
+    // --- Query Mode Toggle (Ask / Consult) ---
+    const queryModeAskBtn = document.getElementById('queryModeAsk')
+    const queryModeConsultBtn = document.getElementById('queryModeConsult')
+    const consultLearnerSelect = document.getElementById('consultLearnerSelect')
+
+    function setQueryMode(mode) {
+      queryMode = mode
+      if (mode === 'ask') {
+        queryModeAskBtn.style.background = '#2a2a2a'
+        queryModeAskBtn.style.color = '#e0e0e0'
+        queryModeConsultBtn.style.background = '#111'
+        queryModeConsultBtn.style.color = '#888'
+        consultLearnerSelect.style.display = 'none'
+        queryInput.placeholder = 'Ask the brain...'
+        askBtn.textContent = 'Ask'
+      } else {
+        queryModeConsultBtn.style.background = '#2a1a2a'
+        queryModeConsultBtn.style.color = '#a78bfa'
+        queryModeAskBtn.style.background = '#111'
+        queryModeAskBtn.style.color = '#888'
+        consultLearnerSelect.style.display = ''
+        queryInput.placeholder = 'Consult internal learners...'
+        askBtn.textContent = 'Consult'
+      }
+    }
+
+    queryModeAskBtn.addEventListener('click', () => setQueryMode('ask'))
+    queryModeConsultBtn.addEventListener('click', () => setQueryMode('consult'))
+
+    // --- Dismissed Batches ---
+    document.getElementById('dashDismissedBatchesStat').addEventListener('click', showDismissedBatches)
+    document.getElementById('dismissedBatchesClose').addEventListener('click', () => {
+      document.getElementById('dismissedBatchesModal').style.display = 'none'
     })
 
     // --- Collapsible Sidebar Sections ---

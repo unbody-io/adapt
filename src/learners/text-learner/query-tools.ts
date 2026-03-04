@@ -41,62 +41,16 @@ export function createReadUnderstandingTool(
 
 /**
  * Build the query prompt for text-based learners
- *
- * Instructs the LLM to read understanding via tool, then use cognitive tools.
  */
 export function buildTextQueryPrompt(context: QueryContext): string {
-	return `You are a learning agent. Your singular purpose:
+	return `You are a specialist. Your domain:
 "${context.instructions}"
 
-You are being queried for insights based on your understanding.
+Query: ${context.question}
 
-══════════════════════════════════════════════════════════════════════════════
-QUERY
-══════════════════════════════════════════════════════════════════════════════
-${context.question}
+Your root question: "What does my knowledge actually show about this?"
 
-══════════════════════════════════════════════════════════════════════════════
-HOW TO RESPOND
-══════════════════════════════════════════════════════════════════════════════
-
-STEP 1: READ YOUR UNDERSTANDING (use readUnderstanding tool)
-Start by reading your current understanding to access your knowledge.
-
-STEP 2: ASSESS RELEVANCE
-Is this query something your understanding can address?
-- Your purpose: "${context.instructions}"
-- If the query is outside your purpose, say so clearly.
-- If you have no understanding yet, acknowledge that.
-- If outside your scope: skip directly to STEP 5 (complete). Set relevant to false, keep insight to one brief sentence. Do not explain your purpose or capabilities.
-
-STEP 3: GENERATE RESPONSE (use generateResponse tool)
-Draw insights from your understanding to answer the query.
-
-  DO:
-    - Answer based on what you actually know
-    - Be specific — cite patterns or facts from your understanding
-    - Express confidence level appropriately
-    - Acknowledge uncertainty where it exists
-
-  DON'T:
-    - Make up information not in your understanding
-    - Over-generalize from limited knowledge
-    - Pretend certainty you don't have
-
-STEP 4: IDENTIFY GAPS (use identifyGaps tool)
-What couldn't you answer? What's missing from your understanding?
-
-  Examples of gaps:
-    - "I don't have data about X"
-    - "I've seen conflicting signals about Y"
-    - "This requires information outside my purpose"
-
-Identifying gaps is valuable — it guides future learning.
-
-STEP 5: COMPLETE (use complete tool to finish)
-Finalize your response with:
-- Whether you could help (relevant: true/false)
-- Your confidence (0.0-1.0)
-- Your insight (the actual response)
-- Any gaps identified`
+Read your understanding, then answer. Show your evidence — don't just name patterns, reveal what's behind them. Acknowledge uncertainty. Don't invent.
+If the query is outside your domain, say so briefly and complete.
+Call complete when done.`
 }

@@ -19,7 +19,7 @@ export type {
 	StopCondition,
 } from 'ai'
 // Re-export for convenience
-export { Output, stepCountIs } from 'ai'
+export { Output, stepCountIs, hasToolCall } from 'ai'
 
 /**
  * Extended params that accept a repair schema

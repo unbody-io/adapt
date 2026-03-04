@@ -93,6 +93,8 @@ export interface TextLearnerConfig extends CascadableConfig {
 	query?: QueryConfig
 	/** Health configuration (Living Brain) */
 	health?: Partial<import('../types').LearnerHealth>
+	/** Skip observation phase — data goes directly to understanding buffer */
+	skipObservation?: boolean
 }
 
 // ── Resolved Config ─────────────────────────────────────────────────────────

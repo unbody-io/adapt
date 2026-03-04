@@ -19,7 +19,6 @@ import type { LanguageModel } from 'ai'
 import { z } from 'zod'
 import { nanoid } from 'nanoid'
 import { TypedEmitter } from '../../types/events'
-import type { LearnerActivity } from '../../brain/evaluator/types'
 import type {
 	Learner,
 	LearnerHealth,
@@ -99,6 +98,7 @@ export abstract class BaseLearner<
 	protected store: Store
 	protected state: TState
 	protected queryMethod!: QueryMethod
+	protected directQueryMethod?: QueryMethod
 
 	// Lazy init promise (for ensureInit)
 	private initPromise: Promise<{ observeSystemPrompt: string; understandSystemPrompt: string }> | null = null
@@ -196,9 +196,17 @@ export abstract class BaseLearner<
 	): TUnderstanding | Promise<TUnderstanding>
 
 	/**
-	 * Create the query method for this learner type
+	 * Create the query method for this learner type (agentic, tool-based)
 	 */
 	protected abstract createQueryMethod(): QueryMethod
+
+	/**
+	 * Create the direct query method (single-shot, understanding in context).
+	 * Optional — falls back to tool-based if not implemented.
+	 */
+	protected createDirectQueryMethod(): QueryMethod | undefined {
+		return undefined
+	}
 
 	/**
 	 * Generate observation and understanding JSON Schemas.
@@ -268,12 +276,20 @@ export abstract class BaseLearner<
 			const restored = await this.loadState()
 
 			if (!restored) {
-				// Generate observe identity + prompt via LLM
-				const observeResult = await initObserve(
-					this.state.models.observer_blueprint,
-					this.state.instructions,
-					this.state.focus || undefined,
-				)
+				let observeArtifacts: Record<string, unknown> = {}
+
+				if (!this.state.skipObservation) {
+					// Generate observe identity + prompt via LLM
+					const observeResult = await initObserve(
+						this.state.models.observer_blueprint,
+						this.state.instructions,
+						this.state.focus || undefined,
+					)
+					observeArtifacts = {
+						observe_identity: observeResult.identity,
+						observe_prompt: observeResult.systemPrompt,
+					}
+				}
 
 				// Generate understand identity + prompt (type-specific)
 				await this.regenUnderstandPrompt(
@@ -289,15 +305,15 @@ export abstract class BaseLearner<
 
 				// Persist all generated artifacts to store
 				await this.setState({
-					observe_identity: observeResult.identity,
-					observe_prompt: observeResult.systemPrompt,
+					...observeArtifacts,
 					observation_schema: schemas.observationSchema,
 					understanding_schema: schemas.understandingSchema,
 				} as Partial<TState>)
 			}
 
-			// Create query method
+			// Create query methods
 			this.queryMethod = this.createQueryMethod()
+			this.directQueryMethod = this.createDirectQueryMethod()
 
 			this.emit('learner:init:completed', {
 				learnerId: this.id,
@@ -399,61 +415,75 @@ export abstract class BaseLearner<
 				}
 			}
 
-			// Phase 1: Observe
+			// Phase 1: Observe (or skip if skipObservation)
 			this.emit('learner:observe:started', {
 				learnerId: this.id,
 				itemCount: batch.length,
 			})
 
-			const observeResult = await observe(
-				this.state.models.observer,
-				this.state.observe_prompt!,
-				{ learnerId: this.id, instructions: this.state.instructions, data: batch },
-				this.state.observation_schema ?? undefined,
-				{
-					onThinking: (thoughts) => {
-						this.emit('learner:observe:thinking', {
-							learnerId: this.id,
-							thoughts,
-							usage: { inputTokens: 0, outputTokens: 0, totalTokens: 0 },
-						})
+			let observations: unknown[]
+			let importance: number
+			let observeUsage: { inputTokens?: number; outputTokens?: number; totalTokens?: number } | undefined
+
+			if (this.state.skipObservation) {
+				// Skip observe — store raw batch directly
+				observations = batch
+				importance = 1.0
+			} else {
+				const observeResult = await observe(
+					this.state.models.observer,
+					this.state.observe_prompt!,
+					{ learnerId: this.id, instructions: this.state.instructions, data: batch },
+					this.state.observation_schema ?? undefined,
+					{
+						onThinking: (thoughts) => {
+							this.emit('learner:observe:thinking', {
+								learnerId: this.id,
+								thoughts,
+								usage: { inputTokens: 0, outputTokens: 0, totalTokens: 0 },
+							})
+						},
 					},
-				},
-			)
+				)
 
-			if (observeResult.status === 'error') {
-				const result: LearnOutput = { status: 'observe:error', error: observeResult.error }
-				await this.handleLearnResult(result)
-				return result
-			}
-
-			if (observeResult.status === 'dismissed') {
-				const result: LearnOutput = {
-					status: 'observe:dismissed',
-					output: observeResult.output,
-					gaps: observeResult.gaps,
-					usage: observeResult.usage,
+				if (observeResult.status === 'error') {
+					const result: LearnOutput = { status: 'observe:error', error: observeResult.error }
+					await this.handleLearnResult(result)
+					return result
 				}
-				await this.handleLearnResult(result)
-				return result
-			}
 
-			// Filter by importance threshold
-			const minImportance = this.state.thresholds.minImportance
-			if (minImportance !== undefined && observeResult.importance < minImportance) {
-				const result: LearnOutput = {
-					status: 'observe:dismissed',
-					output: observeResult.output,
-					gaps: observeResult.gaps,
-					usage: observeResult.usage,
+				if (observeResult.status === 'dismissed') {
+					const result: LearnOutput = {
+						status: 'observe:dismissed',
+						output: observeResult.output,
+						gaps: observeResult.gaps,
+						usage: observeResult.usage,
+					}
+					await this.handleLearnResult(result)
+					return result
 				}
-				await this.handleLearnResult(result)
-				return result
+
+				// Filter by importance threshold
+				const minImportance = this.state.thresholds.minImportance
+				if (minImportance !== undefined && observeResult.importance < minImportance) {
+					const result: LearnOutput = {
+						status: 'observe:dismissed',
+						output: observeResult.output,
+						gaps: observeResult.gaps,
+						usage: observeResult.usage,
+					}
+					await this.handleLearnResult(result)
+					return result
+				}
+
+				observations = observeResult.output
+				importance = observeResult.importance
+				observeUsage = observeResult.usage
 			}
 
-			// Store observations as pending (with Layer 2 validation)
-			for (const item of observeResult.output) {
-				if (!this.validateObservationData(item)) {
+			// Store observations as pending
+			for (const item of observations) {
+				if (!this.state.skipObservation && !this.validateObservationData(item)) {
 					console.error(`[${this.id}] Skipping invalid observation:`, item)
 					continue
 				}
@@ -461,7 +491,7 @@ export abstract class BaseLearner<
 				await this.store.observations.add({
 					id: `obs_${nanoid()}`,
 					data: item,
-					metadata_importance: observeResult.importance,
+					metadata_importance: importance,
 					metadata_tokens: Math.ceil(serialized.length / 4),
 					metadata_status: 'pending',
 					metadata_created_at: new Date().toISOString(),
@@ -477,8 +507,8 @@ export abstract class BaseLearner<
 				const bufferState = await this.getBufferState()
 				const result: LearnOutput = {
 					status: 'observed',
-					output: observeResult.output,
-					usage: observeResult.usage,
+					output: observations,
+					usage: observeUsage,
 				}
 				await this.handleLearnResult(result, bufferState)
 				return result
@@ -632,7 +662,10 @@ export abstract class BaseLearner<
 		}
 
 		try {
-			const result = await this.queryMethod.query(
+			const method = options?.mode === 'direct' && this.directQueryMethod
+				? this.directQueryMethod
+				: this.queryMethod
+			const result = await method.query(
 				{
 					learnerId: this.id,
 					instructions: this.state.instructions,
@@ -985,13 +1018,6 @@ export abstract class BaseLearner<
 			instructions: this.state.instructions,
 			origin: this.state.origin,
 			health: this.getHealth(),
-		}
-	}
-
-	getActivity(): LearnerActivity {
-		return {
-			ingestion: { ...this.state.metrics.ingestion },
-			recentObservations: [],
 		}
 	}
 

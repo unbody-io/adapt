@@ -1,0 +1,301 @@
+{
+  "metadata": {
+    "name": "Feature Requests - SaaS Dashboard PM (TaskFlow)",
+    "description": "A product manager collecting feature requests from multiple channels for TaskFlow, a project management SaaS. Support tickets, sales calls, NPS surveys, Slack messages, and customer interviews.",
+    "eventCount": 55,
+    "groundTruth": {
+      "distinctFeatures": 12,
+      "features": {
+        "dark_mode": {
+          "sources": ["support_ticket", "nps_survey", "slack", "customer_interview", "support_ticket", "nps_survey"],
+          "count": 6,
+          "note": "Most requested. Spans all channels."
+        },
+        "api_webhooks": {
+          "sources": ["sales_call", "support_ticket", "customer_interview", "slack"],
+          "count": 4,
+          "note": "Enterprise-heavy. Blocks integrations."
+        },
+        "sso_saml": {
+          "sources": ["sales_call", "sales_call", "support_ticket", "customer_interview"],
+          "count": 4,
+          "wordings": ["SSO support", "SAML integration", "single sign-on", "enterprise SSO"],
+          "note": "Dedup test — 4 different wordings for the same feature. Should merge to 1 item."
+        },
+        "mobile_app": {
+          "sources": ["nps_survey", "support_ticket", "slack"],
+          "count": 3,
+          "note": "Mostly small teams, not enterprise."
+        },
+        "custom_fields": {
+          "sources": ["customer_interview", "sales_call", "support_ticket"],
+          "count": 3,
+          "note": "Enterprise need for workflow customization."
+        },
+        "gantt_chart": {
+          "sources": ["nps_survey", "support_ticket"],
+          "count": 2,
+          "note": "Timeline visualization. Moderate demand."
+        },
+        "time_tracking": {
+          "sources": ["customer_interview", "nps_survey"],
+          "count": 2,
+          "note": "Built-in time tracking without third-party tools."
+        },
+        "guest_access": {
+          "sources": ["sales_call", "support_ticket"],
+          "count": 2,
+          "note": "Allow external collaborators with limited access."
+        },
+        "bulk_import": {
+          "sources": ["support_ticket"],
+          "count": 1,
+          "note": "CSV/Excel import for migrating from other tools."
+        },
+        "recurring_tasks": {
+          "sources": ["slack"],
+          "count": 1,
+          "note": "Auto-create tasks on a schedule."
+        },
+        "crypto_payments": {
+          "sources": ["support_ticket"],
+          "count": 1,
+          "note": "Explicitly deprioritized by PM after review. Should have low confidence or removal signal."
+        },
+        "audit_log": {
+          "sources": ["sales_call", "customer_interview"],
+          "count": 2,
+          "note": "Enterprise compliance need."
+        }
+      },
+      "enterpriseFeatures": ["sso_saml", "api_webhooks", "custom_fields", "audit_log", "guest_access"],
+      "deprioritized": ["crypto_payments"]
+    }
+  },
+  "events": [
+    {
+      "id": "evt_001",
+      "timestamp": "2024-10-01T09:00:00Z",
+      "type": "support_ticket",
+      "source": "zendesk",
+      "content": "Ticket #4521 from Acme Corp (Enterprise, 200 seats): 'We need dark mode for the dashboard. Our developers work late and the white background causes eye strain. Several team members have asked about this. This is a quality-of-life issue that affects daily usage.'"
+    },
+    {
+      "id": "evt_002",
+      "timestamp": "2024-10-01T10:00:00Z",
+      "type": "sales_call",
+      "source": "gong",
+      "content": "Sales call with DataVault Inc (Enterprise prospect, 500 seats). Key blocker: 'We can't adopt TaskFlow without SAML integration. Our security policy requires SSO for all SaaS tools. This is a hard requirement, not a nice-to-have. We're evaluating Asana and Monday.com as alternatives that already have this.'"
+    },
+    {
+      "id": "evt_003",
+      "timestamp": "2024-10-01T14:00:00Z",
+      "type": "nps_survey",
+      "source": "delighted",
+      "content": "NPS response (score 7, Promoter) from user@startupxyz.com (Startup, 15 seats): 'Love the product overall. Would be amazing to have a mobile app. I often need to check task status on the go and the mobile browser experience is clunky. Also — dark mode please!'"
+    },
+    {
+      "id": "evt_004",
+      "timestamp": "2024-10-02T09:00:00Z",
+      "type": "support_ticket",
+      "source": "zendesk",
+      "content": "Ticket #4535 from SmallBiz Co (SMB, 8 seats): 'Is there a way to set up recurring tasks? We have weekly standup prep that someone has to manually create every Monday. Would save us time if tasks could auto-repeat on a schedule.'"
+    },
+    {
+      "id": "evt_005",
+      "timestamp": "2024-10-02T11:00:00Z",
+      "type": "slack",
+      "source": "slack-feedback",
+      "content": "#feature-requests channel — message from @sarah_pm: 'Just got off a call with a customer who really wants webhook support for their API. They're building a custom integration with their internal tools and our current API doesn't push events. They need to know when tasks change status without polling. +1 from me, I've heard this from at least 3 other accounts.'"
+    },
+    {
+      "id": "evt_006",
+      "timestamp": "2024-10-02T14:00:00Z",
+      "type": "customer_interview",
+      "source": "dovetail",
+      "content": "Interview with Chen Wei, Engineering Lead at TechGiant (Enterprise, 1000 seats): 'The biggest gap for us is custom fields. We have a very specific workflow — every task needs a priority tier, a cost center code, and an approval chain. Your default fields don't cover our needs. We've been using a workaround with tags but it's messy and error-prone. Custom fields would let us properly map our internal processes.'"
+    },
+    {
+      "id": "evt_007",
+      "timestamp": "2024-10-03T09:00:00Z",
+      "type": "sales_call",
+      "source": "gong",
+      "content": "Sales call with SecureHealth (Enterprise prospect, 300 seats, healthcare): 'Two things blocking our purchase: (1) We need single sign-on — our IT team won't approve any tool without it. (2) We need an audit log for compliance. HIPAA requires us to track who changed what and when. Both are non-negotiable for healthcare companies.'"
+    },
+    {
+      "id": "evt_008",
+      "timestamp": "2024-10-03T10:30:00Z",
+      "type": "support_ticket",
+      "source": "zendesk",
+      "content": "Ticket #4542 from DesignStudio (SMB, 25 seats): 'We'd love a Gantt chart view for our project timelines. We currently export to Excel to make Gantt charts which is tedious. Having it built into TaskFlow would save us hours every week.'"
+    },
+    {
+      "id": "evt_009",
+      "timestamp": "2024-10-03T14:00:00Z",
+      "type": "nps_survey",
+      "source": "delighted",
+      "content": "NPS response (score 5, Passive) from admin@freelancehub.io (Startup, 5 seats): 'The product is okay but lacks a dark mode which is surprising in 2024. Also wish there was a native mobile app instead of the responsive web version.'"
+    },
+    {
+      "id": "evt_010",
+      "timestamp": "2024-10-04T09:00:00Z",
+      "type": "support_ticket",
+      "source": "zendesk",
+      "content": "Ticket #4558 from CryptoDAO (Startup, 12 seats): 'Do you accept cryptocurrency payments? We'd prefer to pay our subscription in ETH or USDC. Several of our team members don't have traditional payment methods.'"
+    },
+    {
+      "id": "evt_011",
+      "timestamp": "2024-10-04T11:00:00Z",
+      "type": "customer_interview",
+      "source": "dovetail",
+      "content": "Interview with Maria Santos, Operations VP at LogiFlow (Enterprise, 450 seats): 'API webhooks are critical for us. We have an internal orchestration system that needs to react when tasks move between stages. Right now we poll your API every 5 minutes which is wasteful and slow. Real-time webhooks would transform how we use TaskFlow. Also — we'd love the ability to invite external contractors with limited access. Guest access with restricted permissions would be huge for our agency partnerships.'"
+    },
+    {
+      "id": "evt_012",
+      "timestamp": "2024-10-04T14:00:00Z",
+      "type": "slack",
+      "source": "slack-feedback",
+      "content": "#feature-requests channel — message from @dev_mike: 'Another dark mode request from a customer today (ticket #4560). That's the third one this week. Are we tracking these? Feels like it's becoming the most common ask.'"
+    },
+    {
+      "id": "evt_013",
+      "timestamp": "2024-10-07T09:00:00Z",
+      "type": "sales_call",
+      "source": "gong",
+      "content": "Sales call with FinanceFirst (Enterprise prospect, 750 seats): 'We're very interested in TaskFlow but need enterprise SSO before we can proceed. We use Okta for all our tools and IT requires SAML-based authentication. Also, custom fields would let us tag tasks with our internal project codes which would help with our billing reconciliation.'"
+    },
+    {
+      "id": "evt_014",
+      "timestamp": "2024-10-07T10:30:00Z",
+      "type": "support_ticket",
+      "source": "zendesk",
+      "content": "Ticket #4571 from WebAgency (SMB, 30 seats): 'We need to invite our clients to view project progress without giving them full access. Something like a guest or viewer role where they can see tasks and comments but not edit anything. This would replace the weekly status emails we send.'"
+    },
+    {
+      "id": "evt_015",
+      "timestamp": "2024-10-07T14:00:00Z",
+      "type": "nps_survey",
+      "source": "delighted",
+      "content": "NPS response (score 9, Promoter) from lead@devshop.io (SMB, 40 seats): 'Great product, use it daily. Two wishes: (1) Gantt chart for visualizing project timelines, (2) dark mode for late-night work sessions. Keep up the good work!'"
+    },
+    {
+      "id": "evt_016",
+      "timestamp": "2024-10-08T09:00:00Z",
+      "type": "support_ticket",
+      "source": "zendesk",
+      "content": "Ticket #4580 from MigratingTeam (SMB, 50 seats): 'We're moving from Trello and have 3 years of project data. Is there a way to bulk import tasks from a CSV or Excel file? Manually recreating 2000+ tasks isn't feasible. A bulk import tool would make the migration much easier.'"
+    },
+    {
+      "id": "evt_017",
+      "timestamp": "2024-10-08T11:00:00Z",
+      "type": "customer_interview",
+      "source": "dovetail",
+      "content": "Interview with James Park, CTO at BuildRight (Enterprise, 200 seats): 'We've been using TaskFlow for 6 months. Three things on our wishlist: (1) Dark mode — our engineering team works odd hours and it's the number one complaint in our internal survey. (2) Time tracking built into tasks — we currently use Toggl alongside TaskFlow which is redundant. (3) Enterprise SSO because our security team is pushing for centralized auth.'"
+    },
+    {
+      "id": "evt_018",
+      "timestamp": "2024-10-08T14:00:00Z",
+      "type": "pm_note",
+      "source": "notion",
+      "content": "PM Note: Reviewed the crypto payment request (ticket #4558). After discussing with finance and leadership, we're not going to pursue this. The addressable market is tiny, integration complexity with crypto payment processors is high, and it doesn't align with our enterprise focus. Marking this as deprioritized/won't do."
+    },
+    {
+      "id": "evt_019",
+      "timestamp": "2024-10-09T09:00:00Z",
+      "type": "support_ticket",
+      "source": "zendesk",
+      "content": "Ticket #4592 from NightOwl Studios (Startup, 18 seats): 'Please add dark mode! We're a game development studio and our entire team uses dark mode in every tool. TaskFlow's bright white UI is jarring when switching between our IDE, Figma, and your app.'"
+    },
+    {
+      "id": "evt_020",
+      "timestamp": "2024-10-09T10:00:00Z",
+      "type": "sales_call",
+      "source": "gong",
+      "content": "Sales call with GovTech Solutions (Enterprise prospect, 600 seats, government): 'Audit logging is essential for us. Government contracts require detailed activity logs — who created, modified, or deleted what, with timestamps. We also need SSO through our Azure AD setup. These are compliance requirements, not feature requests.'"
+    },
+    {
+      "id": "evt_021",
+      "timestamp": "2024-10-09T14:00:00Z",
+      "type": "support_ticket",
+      "source": "zendesk",
+      "content": "Ticket #4598 from IntegrationHub (SMB, 35 seats): 'We need webhook notifications from your API. When a task is completed or a comment is added, we want to trigger automations in our Zapier workflows. Currently we can't do this because your API is pull-only.'"
+    },
+    {
+      "id": "evt_022",
+      "timestamp": "2024-10-10T09:00:00Z",
+      "type": "customer_interview",
+      "source": "dovetail",
+      "content": "Interview with Lisa Chen, Product Lead at ScaleUp (Enterprise, 350 seats): 'API webhooks would unlock so much for us. We want to sync task status changes to our Salesforce CRM automatically. Also, your API docs mention rate limits but we keep hitting them with our current polling approach. Webhooks would solve both the real-time need and the rate limit problem.'"
+    },
+    {
+      "id": "evt_023",
+      "timestamp": "2024-10-10T11:00:00Z",
+      "type": "nps_survey",
+      "source": "delighted",
+      "content": "NPS response (score 6, Passive) from user@remoteteam.co (Startup, 10 seats): 'The web app is fine on desktop but I really wish there was a proper mobile app. Checking tasks on my phone browser is painful — text is too small, buttons are hard to tap. A native iOS/Android app would make a big difference for our remote team.'"
+    },
+    {
+      "id": "evt_024",
+      "timestamp": "2024-10-10T14:00:00Z",
+      "type": "slack",
+      "source": "slack-feedback",
+      "content": "#feature-requests channel — message from @alex_cs: 'Customer from Acme Corp (enterprise) just asked about dark mode again on their quarterly check-in call. They said it was their #1 wishlist item. Adding to the tally — this has got to be the most requested feature now.'"
+    },
+    {
+      "id": "evt_025",
+      "timestamp": "2024-10-11T09:00:00Z",
+      "type": "support_ticket",
+      "source": "zendesk",
+      "content": "Ticket #4610 from ConsultingGroup (Enterprise, 150 seats): 'We need custom fields on tasks. Specifically: (1) a 'billable hours' number field, (2) a 'client name' dropdown, and (3) a 'project phase' field. Our current workaround of putting this info in task descriptions is unreliable and unsearchable.'"
+    },
+    {
+      "id": "evt_026",
+      "timestamp": "2024-10-11T11:00:00Z",
+      "type": "nps_survey",
+      "source": "delighted",
+      "content": "NPS response (score 8, Promoter) from pm@agilecompany.com (SMB, 60 seats): 'Really like the Kanban view. Would love built-in time tracking so we can log hours directly on tasks instead of switching to another tool. Dark mode would also be great for our night-shift team.'"
+    },
+    {
+      "id": "evt_027",
+      "timestamp": "2024-10-11T14:00:00Z",
+      "type": "customer_interview",
+      "source": "dovetail",
+      "content": "Interview with Raj Patel, IT Director at MegaCorp (Enterprise, 2000 seats): 'We're evaluating TaskFlow for a company-wide rollout. The product is strong but we have hard requirements: enterprise SSO via SAML, audit logging for compliance, and custom fields for our internal tracking codes. Without these three, we can't proceed past the evaluation phase. Our security team will reject any tool without SSO.'"
+    },
+    {
+      "id": "evt_028",
+      "timestamp": "2024-10-14T09:00:00Z",
+      "type": "support_ticket",
+      "source": "zendesk",
+      "content": "Ticket #4625 from MobileFirst (Startup, 20 seats): 'Your mobile web experience needs work. The app doesn't load properly on slower connections and the UI doesn't adapt well to small screens. Have you considered building a native mobile app? Even a simple one that shows tasks and lets us update status would be better than the current mobile web.'"
+    },
+    {
+      "id": "evt_029",
+      "timestamp": "2024-10-14T11:00:00Z",
+      "type": "pm_note",
+      "source": "notion",
+      "content": "PM Note: Weekly feature request summary. Dark mode is clearly our #1 most requested feature — heard from at least 6 different sources across all channels. API webhooks and SSO/SAML are the top enterprise blockers. Custom fields also keeps coming up from larger accounts. Mobile app has demand but mostly from smaller teams. Need to prioritize for Q1 planning."
+    },
+    {
+      "id": "evt_030",
+      "timestamp": "2024-10-14T14:00:00Z",
+      "type": "sales_call",
+      "source": "gong",
+      "content": "Sales call with RetailOps (Enterprise prospect, 400 seats): 'Custom fields are the main thing we need. Our retail operations require tracking store location, department, and seasonal campaign for every task. Also interested in guest access — we work with seasonal contractors who need limited visibility into specific projects.'"
+    },
+    {
+      "id": "evt_031",
+      "timestamp": "2024-10-15T09:00:00Z",
+      "type": "support_ticket",
+      "source": "zendesk",
+      "content": "Ticket #4640 from DataTeam (SMB, 45 seats): 'We need API webhooks to integrate TaskFlow with our data pipeline. When tasks are marked complete, we want to automatically trigger a data validation workflow in Airflow. Push notifications from your API would make this possible.'"
+    },
+    {
+      "id": "evt_032",
+      "timestamp": "2024-10-15T14:00:00Z",
+      "type": "nps_survey",
+      "source": "delighted",
+      "content": "NPS response (score 4, Detractor) from cto@legacyco.com (Enterprise, 100 seats): 'Disappointed that there's still no SSO support. We signed up 6 months ago expecting it would be added. Our IT department is now questioning whether to renew. Every other enterprise tool we use supports SAML-based SSO. This feels like a basic enterprise requirement that's being ignored.'"
+    }
+  ]
+}

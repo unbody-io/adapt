@@ -1,0 +1,279 @@
+{
+	"id": "standup-2026-02-26",
+	"source": "standup-2026-02-26",
+	"description": "📝 Notes\nFeb 26, 2026\nR&D daily sprint\nInvited Amir Houieh Unbody io Noémi Biró Gabor Kerekes\nAttachments R&D daily sprint \nMeeting records Transcript \nSummary\nAmir Houieh provided updates on website development, confirming work completion and readiness for deployment, and also shared an updated TSV file with new session tracking metrics for Cibil with Noémi Biró. Participants discussed the need for immediate preparation for planning the entire month of March with Melissa, who has signed the contract, and addressed a major concern regarding potential architectural changes to Cibil if Melissa expresses uncertainty about the chat functionality. Amir Houieh and Noémi Biró agreed to an internal brainstorming session later today to explore the implications of potentially removing the chat feature from Cibil entirely.\nDetails\nPersonal Wellness and Scheduling Updates: Noémi Biró mentioned they have not been sleeping well, which their smart ring indicates, possibly due to a combination of their workouts and lack of sleep. Amir Houieh needed to leave the meeting at 12:00 PM for a dentist appointment and noted that Gabber was running 15 minutes late (00:00:00). They decided to conduct a quick update now and potentially catch up later (00:02:26).\nWebsite Development Status: Amir Houieh reported they completed their planned website work, and if Noémi Biró wants to work on it, they can clone the main branch and make adjustments on a new branch using tools like Cursor (00:00:00). Amir Houieh confirmed they sent the repository link after Noémi Biró requested it. They also worked on the Google search engine metadata, including images, so that the website is ready for deployment (00:07:33).\nUpcoming Planning with Melissa: Melissa has signed the contract, and Amir Houieh sent an email to establish a start date. They agreed that they need to be prepared by tomorrow to plan the whole month of March, including the topics they want to focus on (00:02:26).\nImplications of Potential Chat Changes in Cibil: The memory consistency of Cibil is a known issue, with some users reporting that Cibil forgets the current date or month. The main concern, however, stems from Melissa expressing uncertainty about the chat functionality, which would represent a fundamental change to the architecture and increase the workload beyond what was initially accommodated. They agreed this situation needs to be communicated transparently with Melissa (00:03:38).\nInternal Brainstorming Session for Cibil Architecture: Amir Houieh suggested a brainstorming session among the three participants to explore the implications of removing the chat feature entirely, which would likely create more design tasks than development work. Noémi Biró suggested setting aside an hour after tomorrow's daily check-in for an internal update on Cibil (00:04:44). They agreed to schedule a meeting for later today at 5:00 PM, or earlier if possible, to discuss this further (00:05:50).\nWebsite Repository and Tools: Noémi Biró confirmed they have the Cursor application and asked Amir Houieh to send the repository link, which they promptly did (00:07:33). Amir Houieh is available after 1:30 PM following their dentist appointment if anything else comes up .\nApp Duration Metrics Update: Amir Houieh provided Noémi Biró with an updated TSV file that includes three new columns for session tracking within Cibil. The new columns track the average duration, the longest duration, and the total time a user spent. Since Cibil lacks a natural session concept, a session is defined by a one-hour gap in user inactivity (00:07:33).\nSuggested next steps\nNoémi Biró will clone the main branch, make adjustments to the website using cursor or cloud, and create a new branch.\nAmir Houieh will send the repository to Noémi Biró.\nThe group will have an internal check-in, possibly today at 5 PM, to discuss Cibil and the implications of stopping the chat feature.\nYou should review Gemini's notes to make sure they're accurate. Get tips and learn how Gemini takes notes\nPlease provide feedback about using Gemini to take notes in a short survey.\n\n---\n\n📝 Notes\nFeb 26, 2026\nR&D daily sprint\nInvited Amir Houieh Unbody io Noémi Biró Gabor Kerekes\nAttachments R&D daily sprint \nMeeting records Transcript \nSummary\nThe meeting centered on the Mycelium system, described as the \"invisible kernel\" or back end for a personal OS that ingests a user's digital production to surface insights and organize information via emergent themes and generative UI capabilities. The discussion, featuring a demonstration by Gabor Kerekes, clarified that the displayed interface was a bookmarking app, one front end for the system, and emphasized the need for a ubiquitous, OS-level presence for Mycelium, with careful attention to data capture and privacy using technologies like ScreenPipe. Gabor Kerekes will create a repository for the hardcoded source code to allow others to build a use case on top of Nexus, recognizing the prototype's aesthetic and semantic analysis capabilities as a strong test scenario for the Nexus framework.\nDetails\nMycelium as a Centralized System: The mycelium system is described as a substrate that contains a representation of a user's interests and priorities, serving as a back end or the \"invisible kernel\" of a personal operating system. It ingests various forms of digital production, such as conversations, chat logs, bookmarks, and notes, and then surfaces insights (00:00:00) (00:05:02). The system operates in the cloud or on the user's machine, processing data in the background (00:05:02).\nThe Bookmarking Interface and Data Ingestion: The discussion clarifies that the displayed item is one interface to the mycelium—specifically, the bookmarking app—and not the mycelium itself, which is the back end (00:02:58) (00:05:02). The proposed data capture mechanism for bookmarking would be a native Mac OS widget, which can be triggered with a shortcut to take a screenshot of what the user is seeing, allowing capture outside of a browser (00:04:05).\nIntelligent Data Retrieval and Semantic Analysis: The bookmarking interface is designed to retrieve and process bookmarks intelligently, going beyond a simple database with semantic search (00:06:06). Gabor Kerekes demonstrated that the system is expected to digest data and surface insights, such as identifying patterns like a user's \"hoarding mode\" or the contradiction between massive ingestion and rare reflection (00:08:07). The system's observations, like linking a user's saving habits to a quote found in their notes, are valued as a \"mirror\" to the user's life (00:09:43).\nOrganization and Thematic Digestion: The system organizes bookmarks by identifying emergent themes, which are produced by cross-referencing bookmarks with conversations and journaling data to summarize what is \"at the top of [the] mind\". When a theme, or \"thread,\" is selected, the interface displays related notes, articles, conversations, tools, and tensions relevant to that topic, such as \"building a cognitive exoskeleton\" (00:11:21). The system offers a chat input for querying the data, allowing users to ask for specific information or connections between disparate topics (00:13:10).\nAdaptive and Generative User Interface (UI): The design vision includes a generative UI where users can communicate with the interface to request different viewing formats, such as asking it to organize a list of bookmarks as a mind map (00:11:21) (00:16:01). The concept involves the Nexus system and agents observing how users interact with the application to learn their preferences, such as defaulting to a mind map view for a specific topic if that is the user's usual choice (00:17:17). The preference for either a visual canvas or a simple list depends on the user and the topic, underscoring the need for personalization (00:19:50).\nMycelium as a Ubiquitous Personal Operating System: The system is envisioned to be embedded everywhere, such as within Google Calendar or during email composition, functioning as a \"fourth person\" in a conversation by listening and providing real-time, relevant context (00:21:09) (00:23:29). This approach aims for the system to live at the OS level, integrating with existing applications and having the ability to see the user's screen to know what they are doing (00:24:31). Screen-capture technologies like ScreenPipe, which uses local AI for privacy-respecting data capture, were noted as a potential component to log user activity and generate memory (00:26:04).\nData Capture and Privacy Considerations: Discussions covered the need for careful management of digital footprints, distinguishing between observed online activities and connected integrations like Google Drive. For user privacy, the proposed system should allow filtering or white-listing of content that is always observed, and users should be able to explicitly enable observation for other activities only when needed, such as when using a specific application like the terminal (00:27:04). The system should ideally be a native tool within the operating system, with context-sensitive utilities that change based on what the user is interacting with, such as an image or a text area (00:29:46).\nNexus Use Case and Development Focus: The aesthetic and semantic analysis capabilities shown by the prototype are considered a strong test scenario for the Nexus framework (00:18:45). It was identified that an interesting use case for the learners in Nexus would be capturing interaction patterns with the generative UI, such as always requesting a mind map for a specific topic (00:31:07). Gabor Kerekes will create a repository for the hardcoded source code to allow others to build a use case on top of Nexus (00:35:48).\nPrototype Development Tools: The current prototype and conceptual clarifications were developed using Claude for brainstorming and distilling first principles, while Gemini 3.1 Pro was used for the actual building of the code (00:37:14). The prototype is viewed as a good proof of concept because the insights were generated from real data by the same AI that is intended to live inside the app (00:35:48).\nSuggested next steps\nGabor Kerekes will refine the prototype to show the larger vision and a more complete picture of the mycelium system.\nGabor Kerekes will make a repo for the source code of the hardcoded mycelium prototype and send it to Amir Houieh.\nYou should review Gemini's notes to make sure they're accurate. Get tips and learn how Gemini takes notes\nPlease provide feedback about using Gemini to take notes in a short survey.",
+	"items": [
+		{
+			"id": "standup-2026-02-26-000000",
+			"label": "2026-02-26 [00:00:00]",
+			"data": {
+				"chunk": "Noémi Biró: Hello.Amir Houieh: Hey. Hello. How is it going?Noémi Biró: Uh, I don't know. I'm not sleeping so well, so something is straining my body for weird reasons. At least that's what the smart ring is tellingAmir Houieh: No.Noémi Biró: me.Amir Houieh: Do you have physicalNoémi Biró: Um, yeah,Amir Houieh: activities?Noémi Biró: I was doing workouts. So, it could be that or it could be the combination of not being able to sleep with the workout. I don't know.Amir Houieh: Okay.Noémi Biró: Uh, Gabber went to the studio, but I have no idea when heAmir Houieh: Okay.Noémi Biró: left.Amir Houieh: Okay. Because I also need to leave at 12. I need to go to dentist. Uh so yeah,Noémi Biró: Mhm.Amir Houieh: maybe we can do an update and then because yeah, I don't so from my end the website I did what I did what I was going to do.Noémi Biró: Yeah.Amir Houieh: So not good. If you want to work on it, you can basically clone the main branch and then do your adjustment.",
+				"date": "2026-02-26"
+			}
+		},
+		{
+			"id": "standup-2026-02-26-000226",
+			"label": "2026-02-26 [00:02:26]",
+			"data": {
+				"chunk": "Amir Houieh: I think you're using cursor or cloud, whatever.Noémi Biró: Yeah.Amir Houieh: And then make a yeah, create a new branch andNoémi Biró: Can you send me the repository,Amir Houieh: thenNoémi Biró: please? Dab said I'm running 15 minutes late. Okay. Well, then we can just do a quick update and then maybe we'll catch upAmir Houieh: Yeah. Uh yeah,Noémi Biró: later.Amir Houieh: that one I did I yeah Melissa signed the contract and uh then I also sent this email yesterday to see when exactly we want to start and so so maybe yeah tomorrow we need to she wants to start planning.Noémi Biró: Yeah.Amir Houieh: So we need to tomorrow basically we need to know enough that we can plan the whole march like what do we want to work on and stuff like that. I don't know like how is the situation there like with those type what do we know? Do we have a good enough understanding? Uh or maybe we should prepare some questions.Noémi Biró: I mean, I think it's also nice for us to take the lead on this.",
+				"date": "2026-02-26"
+			}
+		},
+		{
+			"id": "standup-2026-02-26-000338",
+			"label": "2026-02-26 [00:03:38]",
+			"data": {
+				"chunk": "Noémi Biró: We know that the memory isn't always consistent.Amir Houieh: Okay.Noémi Biró: like some users said they were having trouble with like uh for example Cibil would forget what month it is or what day it is. So that's something but yeah like in general she since she said this commentAmir Houieh: Mhm.Noémi Biró: that she's not sure about the chat.Amir Houieh: Yeah.Noémi Biró: Yeah,Amir Houieh: That's a fundamental change.Noémi Biró: I would start there because that changes everything.Amir Houieh: Yeah, that's a lot of different. Yeah, it's veryNoémi Biró: Yeah.Amir Houieh: different.Noémi Biró: And and I don't know if we if we if we stop with the chat then basically Yeah.Amir Houieh: What is CIA?Noémi Biró: But it's also it's going to be way more work than we accommodated forAmir Houieh: Yeah.Noémi Biró: it. So that's good.Amir Houieh: Yeah.Noémi Biró: That's good to be I think transparent about with Melissa.Amir Houieh: Yeah.Noémi Biró: I mean depend yeah it changes the whole thing and a lotAmir Houieh: Because this changes the whole thing.",
+				"date": "2026-02-26"
+			}
+		},
+		{
+			"id": "standup-2026-02-26-000444",
+			"label": "2026-02-26 [00:04:44]",
+			"data": {
+				"chunk": "Noémi Biró: of the architecture that we have thenAmir Houieh: So this is something maybe we three of us should brainstorm before like see and prepare see are the implications if we don't for example what happens if the chat is completelyNoémi Biró: Mhm.Amir Houieh: out but then that that is going to probably create a lot ofNoémi Biró: Yeah.Amir Houieh: basically design tasks rather than development and I don'tNoémi Biró: So maybe uh after tomorrow's daily we can just take an hour forAmir Houieh: Sure.Noémi Biró: like a civil up to date for like internalAmir Houieh: The only thing is that tomorrow I'm going to also have a root canal treatment which is going to be pretty hard.Noémi Biró: a what?Amir Houieh: Root canal like for my tooth.Noémi Biró: OhAmir Houieh: It's like a little surgery. It's going to be 8 in the morning but I think I can recover.Noémi Biró: s***.Amir Houieh: I don't know. Usually they said you might have pain, you might not. Let's see. But then I rather to take care of most of things today at least.",
+				"date": "2026-02-26"
+			}
+		},
+		{
+			"id": "standup-2026-02-26-000550",
+			"label": "2026-02-26 [00:05:50]",
+			"data": {
+				"chunk": "Amir Houieh: So just in case that if INoémi Biró: Uh, stop the coffee.Amir Houieh: cannotNoémi Biró: Sorry, it was boiling. Um, okay. Well, I put this in the schedule then as as aAmir Houieh: We can also do it end of today or I don't know if that makesNoémi Biró: Mhm. Yeah.Amir Houieh: sense and let's have a meeting togetherNoémi Biró: If it's uhAmir Houieh: all this afternoon at 5 5 or earlier I don't know because Now I also go to dentist at 12 andNoémi Biró: Let's do it for Let's do itAmir Houieh: Okay. What else?Noémi Biró: Okay,Amir Houieh: Uh so we do that and then is there anything else on yourNoémi Biró: now I think that will be done in the internalAmir Houieh: okayNoémi Biró: checkin. I think that's where I can share more.Amir Houieh: okay about C? Yeah.Noémi Biró: Mhm.Amir Houieh: Okay. Do you need any help with the website?Noémi Biró: Um let me see.Amir Houieh: Do you use cloud or cursor?",
+				"date": "2026-02-26"
+			}
+		},
+		{
+			"id": "standup-2026-02-26-000733",
+			"label": "2026-02-26 [00:07:33]",
+			"data": {
+				"chunk": "Noémi Biró: I have cursor. It should be fine.Amir Houieh: Okay.Noémi Biró: You send the repository, right?Amir Houieh: Yes.Noémi Biró: um on on GitHub orAmir Houieh: On. No, you have it. I didn't send it. Should I send it again?Noémi Biró: could youAmir Houieh: Yes.Noémi Biró: pleaseAmir Houieh: Here. Yesterday I worked on basically the Google search engine and stuff uh and how it's going to appear on when you share the link of you see this images and everything here. Yeah,Noémi Biró: Mhm.Amir Houieh: it works on this sort of thing. So it's ready for deployment.Noémi Biró: Okay.Amir Houieh: Anything else in termsNoémi Biró: And and the time spent in the app inAmir Houieh: of Yeah, that is also Oh yeah,Noémi Biró: CibilAmir Houieh: indeed I sent you the the updated uh TSV file. Uh so basically there are three new columns added. one is the average duration uh and that's basically the average session thatNoémi Biró: Mhm.Amir Houieh: a person spent throughout the whole all the sessions uh the longest duration and total time they spent and the thing is that we don't have a concept of sessions it's one continuous thing however we we measure it by calculating one hour gap so we say if the user is one hour not active that's considered to a newNoémi Biró: Yeah.Amir Houieh: sessionNoémi Biró: Okay. Cool. Thanks.Amir Houieh: and the script is also updated.Noémi Biró: Cool.Amir Houieh: Gab needs to merge it so we always haveNoémi Biró: Nice. Okay,Amir Houieh: it.Noémi Biró: then that's it, I think.  \nTranscription ended after 00:10:02\nThis editable transcript was computer generated and might contain errors. People can also change the text after it was created.",
+				"date": "2026-02-26"
+			}
+		},
+		{
+			"id": "standup-2026-02-26-000000",
+			"label": "2026-02-26 [00:00:00]",
+			"data": {
+				"chunk": "Amir Houieh: I'm hungry.Gabor Kerekes: Okay, let me see. I was designing the whole day but only coding for maybe half an hour but it's pretty okay. Where is I thinkAmir Houieh: ShowGabor Kerekes: it's it's show some some of yeahAmir Houieh: it.Gabor Kerekes: like the ideas kind of show through um well so like you can look at it not necessarily as like you have to I don't know I think the way to imagine it it's important to keep in mind that this is like one portal or one interface into a system that is this mycelium that's like the substrate that contains a representation of you uh and your interests and your priorities and basically like uh the mcelium is there are multiple um ways of getting data in and data out of the mcelium. So there's there's this kind of like ecology of uh nutrients going in and nutrients coming out. Um you are inputting conversations uh your cloud code chats, your cloud chats, your bookmarks, articles you read, notes you make um anything that you it can be anything that you digitally produce, images, whatever doesn't matter like uh anything can go in and then the mcelium digests that and surfaces insights.",
+				"date": "2026-02-26"
+			}
+		},
+		{
+			"id": "standup-2026-02-26-000258",
+			"label": "2026-02-26 [00:02:58]",
+			"data": {
+				"chunk": "Gabor Kerekes: And uh this is one interface to that which isAmir Houieh: Okay.Gabor Kerekes: bookmarking.Amir Houieh: Gab, could you also give a bit of context about like where is this happening? Do you imagine like this is a website or uh the app itself? Is it is this one what you're seeing?Gabor Kerekes: Uh yeah,Amir Houieh: Okay.Gabor Kerekes: like it can be a website or this could run for example on the daylight tablet or um on yourAmir Houieh: And what I see is the first thing I see like I land on my silium and this is what I seeGabor Kerekes: phone.Amir Houieh: orGabor Kerekes: This is the bookmarking interface to my selium. So this is the bookmarking app.Amir Houieh: oh so this is like a article I'm reading somewhere and I can bookmarkGabor Kerekes: Um yeah so for example um for example like my mind has this with I don't know with like my mind I don't know I go on hacker news and I open this article and then I find it's really cool so I save it",
+				"date": "2026-02-26"
+			}
+		},
+		{
+			"id": "standup-2026-02-26-000405",
+			"label": "2026-02-26 [00:04:05]",
+			"data": {
+				"chunk": "Amir Houieh: I'mGabor Kerekes: to my mind and so there would be some kind of a similar capture mechanism for this like IDFU um a browser extension but actually what I'm thinking is moreAmir Houieh: hard.Gabor Kerekes: it would be a native Mac OS widget that follows you everywhere and you can or you can trigger it with a shortcut and then it like takes a screenshot of what you are seeing.Amir Houieh: Nice.Gabor Kerekes: So you don't have to be necessarily in a browser. You can beAmir Houieh: Okay.Noémi Biró: And this is what you saved already.Gabor Kerekes: anywhere.Noémi Biró: So this is what you open within myelium of what you saved.Gabor Kerekes: This is the landing page of um of the bookmarking interface to the mycelium. So this is kind of likeAmir Houieh: Oh,Gabor Kerekes: theAmir Houieh: wait a second. So you differentiate between myelium and the bookmarking tool that is an entry point to mycelium.Gabor Kerekes: Yeah, exactly.Amir Houieh: Okay. So basically mycelium is this uh brain or whatever you want to call it.",
+				"date": "2026-02-26"
+			}
+		},
+		{
+			"id": "standup-2026-02-26-000502",
+			"label": "2026-02-26 [00:05:02]",
+			"data": {
+				"chunk": "Gabor Kerekes: It'sAmir Houieh: is living creature that has multiple entryGabor Kerekes: exactly. Yeah. The mycelium is the back end.Amir Houieh: points.Gabor Kerekes: It's not there is no uh by itself. It's underground like it's it's the in I don't know. It's like a Yeah,Noémi Biró: So it's the invisible kernel, right?Amir Houieh: It'sGabor Kerekes: exactly.Noémi Biró: Like what you wereGabor Kerekes: It's the kernel.Amir Houieh: headless.Gabor Kerekes: It's the kernel of your personal operating system that it's running in the cloud uh processing in the background like digesting everything that youAmir Houieh: or on yourGabor Kerekes: ingest or on your machine.Amir Houieh: machine.Gabor Kerekes: Yeah. And there are multiple kind of interfaces to that that giveAmir Houieh: Okay. Okay. Okay.Gabor Kerekes: you Yeah. like Yeah.Amir Houieh: This is one of the interfaces.Gabor Kerekes: So this is one of the interfaces which is bookmarking and even hereAmir Houieh: Mhm.Gabor Kerekes: umAmir Houieh: But Gab, sorry to interrupt again.Gabor Kerekes: likeAmir Houieh: Why then it bookmarking has an interface?",
+				"date": "2026-02-26"
+			}
+		},
+		{
+			"id": "standup-2026-02-26-000606",
+			"label": "2026-02-26 [00:06:06]",
+			"data": {
+				"chunk": "Amir Houieh: Why can't it be just integrated as you said? Like I go on hacker news and I select a piece of text and I say inest to my selium. So why do I need a bookmarking interface?Gabor Kerekes: because because you still want to like retrieve yourAmir Houieh: Oh,Gabor Kerekes: bookmarks.Amir Houieh: but then I think what about why not to just have a universal interface for everything you have in Okay.Gabor Kerekes: Yeah, I mean that could also be could expand there as well.Amir Houieh: Okay.Gabor Kerekes: Um,Amir Houieh: Okay.Gabor Kerekes: for now I'm I don't know like what's I need to focus onAmir Houieh: Okay. Yeah. No, I get it then.Gabor Kerekes: something and like this could be you know yeah anyway so the bookmarking interfaceAmir Houieh: Okay.Gabor Kerekes: um yeah it by itself also so bookmarking tools are like this my mind is a pretty pretty good one in that but basically it's just a database with semantic search. it doesn't treat the data in any kind of intelligent way like it doesn't know and is also not interested in why am I saving these um and it was kind of creepy um that uh for example cloud this this a mockup so all the data is just Um I just simulated the processing by um having a long conversation with cloud but like I don't know what's um",
+				"date": "2026-02-26"
+			}
+		},
+		{
+			"id": "standup-2026-02-26-000807",
+			"label": "2026-02-26 [00:08:07]",
+			"data": {
+				"chunk": "Gabor Kerekes: uh let's see claude Claude made these observations just by looking at only the bookmarking uh data and the metadata and I asked it to imagine if it was the myelium how would it digest this data and this these are super cool like it's not just about the content of what I saved it's saying I'm you're accelerating 137 saves in October 484 in February that's not a person who found the rhythm that's nervous system in hoarding mode. The mycelium's first job isn't to organize this. It's to notice the pattern and gently surface it not as a judgment as a mirror. Uh, and then it makes this inaccurate observation about notes uh that I'm I'm just like hoarding s*** tons of bookmarks where I have more than 100 uh like more than 1500 bookmarks but I have only I don't know a few notes. Uh that's actually let me just uh reopen this. But that's Yeah, it's just because I'm not using like my my mind is just not really good with quotes. But this is more about the demonstration of what I expect the system to do.",
+				"date": "2026-02-26"
+			}
+		},
+		{
+			"id": "standup-2026-02-26-000943",
+			"label": "2026-02-26 [00:09:43]",
+			"data": {
+				"chunk": "Gabor Kerekes: Uh even though it got the data wrong because it didn't have the the full picture, but I love this kind of observation like your notes are where you actually live. uh you have more than 1500 items but you have only 18 notes uh and then it deres this kind of observation that I'm ingesting massively and only reflecting rarely and then it finds this hessa quote in my notes you seek too much and as a result of your seeking you cannot find is sitting right there in the data And it's like so f******Amir Houieh: Nice.Gabor Kerekes: cool like wow this is exactly the kind of like mirror and also surfacing stuff that also is kind of I wouldn't make this kind of connection uh you knowAmir Houieh: Okay.Gabor Kerekes: uh and it surfaces insights that can sometimes also be uncomfortable like holding you a mirror like hey here's how you live your life and that's in contradiction with what you actually value. Um so uh these are theAmir Houieh: Flash.Gabor Kerekes: observations and so it it's digesting the bookmarks and um it kind of like identifies the themes around which bookmarks",
+				"date": "2026-02-26"
+			}
+		},
+		{
+			"id": "standup-2026-02-26-001121",
+			"label": "2026-02-26 [00:11:21]",
+			"data": {
+				"chunk": "Amir Houieh: Mhm.Gabor Kerekes: um organize themselves. So I don't know these are for example uh things that I'm working on. Um and these are these digests are produced by cross referencing what I'm bookmarking with um my conversations with claude and like journaling like yeah basically like what's what'sAmir Houieh: It's like a summary of in all aspects.Gabor Kerekes: at the top of my mind?Amir Houieh: Okay.Gabor Kerekes: what's going on in my life.Amir Houieh: MGabor Kerekes: And then if I click on this,Noémi Biró: Mhm.Gabor Kerekes: this is a thread uh which then I can open and yeah there's like some the UI is s*** but uh it like shows kind of related related notes like where's the origin but this isAmir Houieh: Great.Gabor Kerekes: not a set structure also like this is something that it comes up with it by itself and even the UI would be uh I think generative uh the andAmir Houieh: Yeah. Yeah.Gabor Kerekes: then so this is called building a cognitive uh cognitive exoskeleton shows me notes that is like under the header and then the problem space um shows me relevant articles that I bookmarked also relevant cloud conversations uh architecture like the technical aspect of building the cognitive exoskeleton related tools and like GitHub repositories.",
+				"date": "2026-02-26"
+			}
+		},
+		{
+			"id": "standup-2026-02-26-001310",
+			"label": "2026-02-26 [00:13:10]",
+			"data": {
+				"chunk": "Gabor Kerekes: Um and yeah, also related to that the tension there's not enough time for everything andAmir Houieh: nice. Cool. I can also imagine here you would see a graph of you know like variousGabor Kerekes: andAmir Houieh: topics that how they are emerging together.Gabor Kerekes: yeah that could also be or I could ask here like there's this chat uh input as well.Amir Houieh: Oh.Gabor Kerekes: So for example here uh also here like let's say um I don't care about all these insights. I really just want to find a tool that I bookmarked like find me give me all the cloud code tools because I remember I bookmarked something and then um it just gives me that which is also rendered in a different way or what connects the wedding to the daylightAmir Houieh: Nice.Gabor Kerekes: computer.Noémi Biró: Mhm.Gabor Kerekes: Yeah, this more like a digest of both the bookmarks but also the notes and what have I been avoiding. And then here it would also I don't know like show me relevant bookmarks.Amir Houieh: This is",
+				"date": "2026-02-26"
+			}
+		},
+		{
+			"id": "standup-2026-02-26-001430",
+			"label": "2026-02-26 [00:14:30]",
+			"data": {
+				"chunk": "Gabor Kerekes: But there's also Oh yeah,Amir Houieh: interesting.Gabor Kerekes: what was that? Um wait a sec there because the input is hardcoded. Let me just check. Oh yeah, got it. I think so.Amir Houieh: Nice.Gabor Kerekes: Um here I would so here is like this is how the widget would this is the capture widget. So imagine I am saving an article about ADHD and then it prompts me I can give a reason why I'm saving it like why is this important for me and this is like a suggestion uh for why it's important to to what what is currently going on in my life. uh because this article connects to these existing threads uh that it identified as being you knowAmir Houieh: What did you define asGabor Kerekes: like um likeAmir Houieh: threads.Gabor Kerekes: these what you see for example here that I'm building theseAmir Houieh: Oh, okay. Okay.Gabor Kerekes: are kind of the threads kind of yeah like topics that I'm busy with and thenAmir Houieh: Okay. Okay.",
+				"date": "2026-02-26"
+			}
+		},
+		{
+			"id": "standup-2026-02-26-001601",
+			"label": "2026-02-26 [00:16:01]",
+			"data": {
+				"chunk": "Amir Houieh: INoémi Biró: interesting because now that we've just looked at these uh more mindm map way of looking when we were planning for civil when you open these threads for me it would make a lot of senseGabor Kerekes: Yeah.Noémi Biró: for them to be grouped in that way like how you were showing yesterday that tool that you can basically zoom into it and then You see like how this one topic is actually likeGabor Kerekes: Yeah.Noémi Biró: these subtopics and you zoom out and you just see the topic nameGabor Kerekes: Yeah.Noémi Biró: again.Gabor Kerekes: But yeah, that's not in the prototype, but the vision is much bigger. Um, so this this is a chat interface and let's say I'm here or I don't know let's say I tell it give me all the bookmarks um related to energy regulation and then uh let's say then it shows me some kind of an interface where it just lists uh the bookmarks like this. Then I could say uh can you organizeNoémi Biró: Mhm.Gabor Kerekes: this as a mind map and then it would render it as a you know you can talk to the UI you can tell it like I want it I want to look at it",
+				"date": "2026-02-26"
+			}
+		},
+		{
+			"id": "standup-2026-02-26-001717",
+			"label": "2026-02-26 [00:17:17]",
+			"data": {
+				"chunk": "Noémi Biró: HAmir Houieh: Yeah.Gabor Kerekes: in a different way.Amir Houieh: What if what if we give also the options like by by by beginning there is not really no information like you choose the type of visual or yeah or you could we could explicitly have tabs like a moreGabor Kerekes: Yeah.Amir Houieh: visual and text base experience I don'tGabor Kerekes: Yeah. There can be different views or different I don'tAmir Houieh: know nice it it's much moreGabor Kerekes: know.Noémi Biró: I think yeah and also like imagine if like every time let's say I'm a new user and I keep tabbing like I want the visual view andAmir Houieh: Clear.Noémi Biró: then the system learns like hey this user probably always prefers the visual wheel.Gabor Kerekes: Exactly.Noémi Biró: ThatGabor Kerekes: And that would be that would be the where Amir's like the nexus or like this kind of learners there would be agents observingNoémi Biró: isGabor Kerekes: also how you interact with the application and they learn oh for this particular topic there seems to be like a correlation between I don't know when I open the wedding topic I always want the um the the mind map view and it will learn that and then it would kind of default to",
+				"date": "2026-02-26"
+			}
+		},
+		{
+			"id": "standup-2026-02-26-001845",
+			"label": "2026-02-26 [00:18:45]",
+			"data": {
+				"chunk": "Amir Houieh: No,Noémi Biró: Mhm.Gabor Kerekes: that.Amir Houieh: I I totally I think this is the best test scenario for that Nexus.Gabor Kerekes: Yeah.Amir Houieh: I mean it I'm pretty like for now I think I'm pretty sure like 60 to 70% of the use use it can handle but this also has had very interesting edges that IGabor Kerekes: Yeah.Amir Houieh: didn't really see it in Nexus for example the statical accumulation that hey you have like this sort of aesthetical analytics that you have 1500 of uh articles digested but only 18 is this so this sort of semantic analysis And uh yeah, these are very interesting. By the way, I found that uh guy, guys, look at this. It's a really interesting one. Can you open it?Gabor Kerekes: Oh yeah, this is what I also shared yesterday.Noémi Biró: Yeah. Cool.Gabor Kerekes: Exactly.Amir Houieh: Yeah. I don't know. This doesn't work for me because I'm not a visual. What G show is works better forGabor Kerekes: I like this also.",
+				"date": "2026-02-26"
+			}
+		},
+		{
+			"id": "standup-2026-02-26-001950",
+			"label": "2026-02-26 [00:19:50]",
+			"data": {
+				"chunk": "Amir Houieh: me.Gabor Kerekes: I I want to be I want to have both because for me it depends on the topic. But for example, for like brainstorming, I wish I could I wish cloud code had this interface because I often want to branch the conversation and then I want to switch between the branches and it would be amazing to have this kind of visual canvas but then other times I just want the list and that's it.Noémi Biró: But this is exactly the point ofGabor Kerekes: Yeah,Amir Houieh: Okay.Gabor Kerekes: exactly.Noémi Biró: personalization.Gabor Kerekes: And thenAmir Houieh: Can you check if they are they've made an progress? She she made a progress on this.Gabor Kerekes: Yeah, I couldn't find um I couldn't find where it's not even published, I think.Amir Houieh: I think it's a prototype.Gabor Kerekes: Yeah, it isAmir Houieh: It's definitely just a mockup.Gabor Kerekes: probably.Amir Houieh: Yeah, we can send her. Hey, we build it.Gabor Kerekes: Yeah,Amir Houieh: You'reGabor Kerekes: maybe. Yeah,Amir Houieh: welcome.Gabor Kerekes: I I think it's it's cool like um from a design engineering perspective and I also realize um sometimes I look at some really simple um kind",
+				"date": "2026-02-26"
+			}
+		},
+		{
+			"id": "standup-2026-02-26-002109",
+			"label": "2026-02-26 [00:21:09]",
+			"data": {
+				"chunk": "Amir Houieh: Oh. Oh, by the way, sorry, Gabbert here.Gabor Kerekes: ofAmir Houieh: No, this is a good example for that C bill. We said we need to make it more tell more info.Gabor Kerekes: Yeah. Yeah. The same exact Yeah.Amir Houieh: This is this is a goodNoémi Biró: Yeah,Amir Houieh: solution.Noémi Biró: I actually already I don't know if you saw it. It's in that visual canvas like a very static one similar toAmir Houieh: Oh okay.Noémi Biró: this.Amir Houieh: You know what I am imagining with my selium? I would love to build a module for it or a plug-in that is real time. So imagine you you have this thread and you have search, but imagine it has a live mode that you can turn it on and it listens to our conversation and as we go along it shows relevant context or it basically becomes the fourth person in the conversation.Gabor Kerekes: Yeah, that could also beNoémi Biró: That's something that we were talking about when we were working on this idea about",
+				"date": "2026-02-26"
+			}
+		},
+		{
+			"id": "standup-2026-02-26-002205",
+			"label": "2026-02-26 [00:22:05]",
+			"data": {
+				"chunk": "Gabor Kerekes: interesting.Noémi Biró: podcasting and transcription. Because when we listen to a podcast in a car, it's always like we together listen in the podcast and then we stop it and then we have aAmir Houieh: Yeah.Noémi Biró: conversation and at that point if we had like this third person who we could askAmir Houieh: Yeah.Noémi Biró: like hey I don't understand this word and it just listened the exact same thing that weAmir Houieh: Exactly.Noémi Biró: did.Amir Houieh: Nice. Okay. What's next? I really like I really want to makeGabor Kerekes: Yeah. Um I I don't know.Amir Houieh: thisGabor Kerekes: I think refining the prototype to to show like uh kind of the larger vision because um yeah just to just to give a more complete picture that it's not what you are seeing here. This is just like one kind of it's one manifestation but the the data it's about the data and it's about how how this AI system is everywhere that you can inter like this becomes also you can embed it like in your Google calendar you can embed it I don't know like this is",
+				"date": "2026-02-26"
+			}
+		},
+		{
+			"id": "standup-2026-02-26-002329",
+			"label": "2026-02-26 [00:23:29]",
+			"data": {
+				"chunk": "Amir Houieh: everywhere.Gabor Kerekes: that it it's something that learns about you like somethingAmir Houieh: Yeah. Yeah.Gabor Kerekes: thatAmir Houieh: But do when you say embedded in Google calendar, do you see it also the widget that can make you make you when you are for example interacting with Google calendar that exists and it can intervene or when you are writing an email you see the mycelium pops up and say hey do you want me to write this trap forGabor Kerekes: Yeah.Amir Houieh: you?Gabor Kerekes: Yeah.Amir Houieh: You know what I mean?Gabor Kerekes: Something like that. I don't know how to exactlyAmir Houieh: I think the guys in together AI were also working but they it was four years ago but yeah that's a very interesting conceptGabor Kerekes: that it's really like it's really this kind of I don't know.Amir Houieh: living creature.Gabor Kerekes: Yeah. Yeah. And um we built custom apps on top of it.Amir Houieh: Yeah. Yeah.Gabor Kerekes: But it's we are not only building the custom apps, not only bookmarking or whatever.",
+				"date": "2026-02-26"
+			}
+		},
+		{
+			"id": "standup-2026-02-26-002431",
+			"label": "2026-02-26 [00:24:31]",
+			"data": {
+				"chunk": "Gabor Kerekes: It's it's larger than that that it's really kind of like your personal operating system that you can that also integrates with existing applicationsAmir Houieh: Uh Gab, can you right click on your screen?Gabor Kerekes: andAmir Houieh: So when we talking about a living Mac or operation system widget or creature so we are thinking that it will basically also add something to your menu here right here.Gabor Kerekes: Yeah, like for example here orAmir Houieh: But also know for example imagine you are in your Gmail interface and you're writingGabor Kerekes: Yeah. And for example, it it could be like um like Raycast that you type this and then it'sAmir Houieh: something.Gabor Kerekes: it's there and it sees your screen and it knows what you're doing. Like that's also how I want to I don't want to build this uhNoémi Biró: Mhm.Amir Houieh: Yeah,Gabor Kerekes: stupid Yeah.Amir Houieh: it should it should it should leave on a higher level.Gabor Kerekes: Yeah. Yeah. It should live at the OS level that it can and wait but there's also f*** there's um there's a system that I want to look into uh let me find I think it should be here that it's it can it's it's it's this data capture system that has like really good uh privacy uh characteristics because it's using local AI and it's running completely locally on your machine.",
+				"date": "2026-02-26"
+			}
+		},
+		{
+			"id": "standup-2026-02-26-002604",
+			"label": "2026-02-26 [00:26:04]",
+			"data": {
+				"chunk": "Gabor Kerekes: Uh but basically you give it it can you run it and it sees everything that you're doing on the computer and generate logs of it. So it can remember like generate memory stuff from all yourAmir Houieh: Oh,Gabor Kerekes: activity like oh yeah screen pipe that's it.Amir Houieh: is isn't it a screen pie?Gabor Kerekes: Yeah.Amir Houieh: Uh I I had a conversation with the founder last year. Yeah. He's he he's a very strong person.Gabor Kerekes: Yeah.Amir Houieh: He survived the cancer and he's very focused. Yeah.Noémi Biró: What happens if you're doing banking or private stuff?Gabor Kerekes: Yeah.Noémi Biró: Like there needs to be a very easy way to go fromAmir Houieh: I think I think uh some of the apps can already n at least on the phone they can disable this behavior. For example, when I'm on my phone and opening img and then I want to take a screenshot, it doesn't allow me.Noémi Biró: Yeah. But I think for me like if there was like this uh thing following me",
+				"date": "2026-02-26"
+			}
+		},
+		{
+			"id": "standup-2026-02-26-002704",
+			"label": "2026-02-26 [00:27:04]",
+			"data": {
+				"chunk": "Gabor Kerekes: Yeah.Noémi Biró: around like say you had to uh press command space right to bring up spotlight and if there was always like this small spotlight andGabor Kerekes: Yeah.Noémi Biró: and maybe s I'm imagining it's similar to how you have this feedback from the camera you know when your camera is on that's also a safety feature.Gabor Kerekes: Yeah.Noémi Biró: So I would want to know like if I go to a web page like if I go to my signal chat for example I wouldn't know directly that this thing is off and it's not looking atGabor Kerekes: Yeah.Noémi Biró: my chats unless I explicitly said like hey for this chatGabor Kerekes: Yeah.Amir Houieh: Yeah, I think I think we needNoémi Biró: please take a look.Amir Houieh: to see where and how we create digital footprints. um some of them happening like like web websites that we go we visit hacker news then we go to social media and so on um I think these sort of things should be explicitly said or asked to be observed but we also have integrations let's say you connect my selium to your Google drive or you connect my selium to your Gmail and behind the scene it keeps listening every single email comes in every single email goes out it listens to it and basically observe right so there I think there should be two",
+				"date": "2026-02-26"
+			}
+		},
+		{
+			"id": "standup-2026-02-26-002830",
+			"label": "2026-02-26 [00:28:30]",
+			"data": {
+				"chunk": "Amir Houieh: different type of uh digital footprints uh in thatGabor Kerekes: Yeah, I I think would be ideally you couldAmir Houieh: senseGabor Kerekes: um like filter like you can just white list things that are always being observed and the rest never explicitly enable it when you need it for the things. So for example, if I could say uh to this I don't know if it's possible through screen type but to say like whenever I'm sure this is possible with like uh applications like the terminal I can say if the terminal is in the foreground then observe otherwise don't uh capture everything that happens within this app. I don't know about like browsers if it can if I can say always observe I don't know when I'm on GitHub or hacker news or whatever but don't observe.Amir Houieh: I I think you had a point when you said it has to live on OS level. So it should become a native tool within your operating system.Gabor Kerekes: Yeah.Amir Houieh: And of course for now we can limit it to only Mac OS for example that every right",
+				"date": "2026-02-26"
+			}
+		},
+		{
+			"id": "standup-2026-02-26-002946",
+			"label": "2026-02-26 [00:29:46]",
+			"data": {
+				"chunk": "Gabor Kerekes: Yeah. Yeah.Amir Houieh: click you do uh it it's there and the utilities also can change per context. For example, I don't know again this is like a high very like a rough idea but it should be different if you right click on an image where says when you right click on uh your a text area. Sorry this is my mom. OneGabor Kerekes: Yeah.Amir Houieh: sec. some times and I'm you know sorry um yeah okayNoémi Biró: It's a very coolGabor Kerekes: Yeah.Amir Houieh: yeah or if you if you keep working on finalizing the ideas in terms of UI then this also gives me a very good idea like IGabor Kerekes: Mhm.Amir Houieh: can start building a use case on top of the Nexus forGabor Kerekes: I think you already can whichAmir Houieh: Yeah. Yeah, that's what I mean.Gabor Kerekes: isAmir Houieh: So, but yeah, next is just a library. it doesn't.Gabor Kerekes: Yeah.Amir Houieh: So I'm going to just give it this use case and say create a like whatever number of learners is needed",
+				"date": "2026-02-26"
+			}
+		},
+		{
+			"id": "standup-2026-02-26-003107",
+			"label": "2026-02-26 [00:31:07]",
+			"data": {
+				"chunk": "Gabor Kerekes: Yeah. I think um I think what would be interesting to explore thereAmir Houieh: andGabor Kerekes: is how can we for example capture interaction patterns that for example if we have this generative UI and I always ask the UI to um for certain types of when when I I don't know when I'm whenAmir Houieh: pathGabor Kerekes: I'm when I enter this topic I always want the mind map to capture these kind of patterns.Amir Houieh: Oh, nice.Gabor Kerekes: Yeah,Amir Houieh: Okay.Gabor Kerekes: I I think that would be an interesting use case which I'm sure is not supported now. Like how can we how could we do that like technically as well? IAmir Houieh: I mean the learners can do that but yeah then I need to probably extractingGabor Kerekes: don'tAmir Houieh: the data is important likeGabor Kerekes: I mean yeah that's what I mean that then the application needs to emit certain types of data I guess.Amir Houieh: exactly okay yeah or also that numbers that accumulated over the time it needs to learn for example it needs to only be about a statical extraction or yeah Cool.",
+				"date": "2026-02-26"
+			}
+		},
+		{
+			"id": "standup-2026-02-26-003218",
+			"label": "2026-02-26 [00:32:18]",
+			"data": {
+				"chunk": "Amir Houieh: I think this is reallyNoémi Biró: It's really cool and it's also solving a lot of the problems that people have I think withGabor Kerekes: Yeah,Amir Houieh: cool.Noémi Biró: chats.Gabor Kerekes: withNoémi Biró: Yeah.Gabor Kerekes: chats.Noémi Biró: With like you're chatting with these chat bots and it just ends up being this list of like conversations and the grouping doesn't work well on neither of the platforms.Gabor Kerekes: Yeah.Amir Houieh: And I also like the idea of like a infinite canvas that is like fluid. It doesn't have aGabor Kerekes: Yeah. Uh what was it?Amir Houieh: shape.Gabor Kerekes: Rabbit rabbit hosti.Noémi Biró: Yeah.Gabor Kerekes: They do this kind of thing, but it's limited to just conversations.Amir Houieh: Yeah. Okay.Gabor Kerekes: But I think uh this TL draw library they already have a like a this area component library they already should have like like a component for exactly building that.Noémi Biró: rabbitGabor Kerekes: Yeah,Amir Houieh: H.Gabor Kerekes: exactly that. Like I was looking at they have multiplayer collaboration.Noémi Biró: hole.",
+				"date": "2026-02-26"
+			}
+		},
+		{
+			"id": "standup-2026-02-26-003334",
+			"label": "2026-02-26 [00:33:34]",
+			"data": {
+				"chunk": "Gabor Kerekes: I don't know recently they started making likeAmir Houieh: But we need to watch out guys that we are not making another Figma jam or you know Canva.Gabor Kerekes: aAmir Houieh: This is a STL knowledge uh tool.Noémi Biró: It's just the view.Amir Houieh: Yeah, it's just a view. So we should also watch out forGabor Kerekes: Yeah. I don't know.Amir Houieh: that.Gabor Kerekes: I'm not so afraid like I can't even um I realized yesterday when yesterday I also tried to work on the prototype and somehow I felt this kind of like resistance to it if I'm not working on because I try to kind of like I don't know satisfy you so that you see something that I made or I don't know what it was but if I don't work from, you know, like my own conviction, then I just can't do it. It has it has to come from so I can't even say I'm going to make a clone of XYZ just doesn't work.Noémi Biró: But what what helped you make itGabor Kerekes: like I that",
+				"date": "2026-02-26"
+			}
+		},
+		{
+			"id": "standup-2026-02-26-003444",
+			"label": "2026-02-26 [00:34:44]",
+			"data": {
+				"chunk": "Noémi Biró: today?Gabor Kerekes: I I basically started chatting with uh Claude and Gemini like around noon and I had like a 4-hour conversation about first principles and like what the f*** am I doing with this and why am I doing it and through that conversation this is what cameNoémi Biró: ComeGabor Kerekes: out and then I yeah like the the actual prototype was just coded in I don't know 20 minutes.Amir Houieh: Nice. Cool.Noémi Biró: on.Amir Houieh: Well, let's keep it going now.Gabor Kerekes: Yeah.Amir Houieh: Do you feel convict? Do you have the conviction?Gabor Kerekes: Yeah. I do. It's exciting.Amir Houieh: Okay,Gabor Kerekes: And this was also a really good challenge for me to Yeah.Amir Houieh: let's go.Gabor Kerekes: I like the challenge that Yeah.Amir Houieh: Okay, you you jumped into the water now. SoGabor Kerekes: that to build something you know that you can interact with and you can see it really helps aAmir Houieh: yeah, it always Yeah. Fake it to makeGabor Kerekes: lot.",
+				"date": "2026-02-26"
+			}
+		},
+		{
+			"id": "standup-2026-02-26-003548",
+			"label": "2026-02-26 [00:35:48]",
+			"data": {
+				"chunk": "Amir Houieh: it.Noémi Biró: What's the observation one slash3Gabor Kerekes: Oh,Amir Houieh: There are groups of observed threads.Gabor Kerekes: that's cool. I I didn't even see this.Amir Houieh: These are thematic.Noémi Biró: interventionGabor Kerekes: Oh yeah. Okay. Observation intervention.Amir Houieh: Could you Gabber send me whatever you have here or I don't know like is there a readmi file that that prompts be like or ju just the source code of this hardcoded?Gabor Kerekes: Yeah. Yeah. I have I I will make a repo.Amir Houieh: Okay, great. This is really giving me a lot of good ideas.Gabor Kerekes: This is cool. But you know what's cool? like this is not just a mockup because okay because it it was generated you know um this was generated from real data and this was generated uh by the same AI that is going to live inside the app. So this this is possible likeNoémi Biró: So, it's already a good proof ofGabor Kerekes: yeah it's only that you know um it's not",
+				"date": "2026-02-26"
+			}
+		},
+		{
+			"id": "standup-2026-02-26-003714",
+			"label": "2026-02-26 [00:37:14]",
+			"data": {
+				"chunk": "Amir Houieh: Well,Noémi Biró: concept.Amir Houieh: it's it's also we should also not forget this is cloud usGabor Kerekes: it'sAmir Houieh: 4.6. You need to see like Yeah. Let's see.Gabor Kerekes: Yeah.Amir Houieh: Cool.Noémi Biró: Okay.Amir Houieh: Nice. All right, guys. I got to go and make dinner. Wife is coming home soon.Gabor Kerekes: Awesome.Amir Houieh: Uh, what else? Good. Nice. Thanks, Gab. I really Yeah, this is this feels good. Let's keep it. Huh? Cool.Gabor Kerekes: Yeah.Amir Houieh: Awesome.Noémi Biró: Good job.Amir Houieh: Did you make it with the cloud orGabor Kerekes: Uh actually this was also a fun experienceAmir Houieh: Gemini?Gabor Kerekes: because I wanted to try Gemini 3.1 Pro which is like the newest and uh during the conversations I felt like it was not really a good thinking partner like in the creative sense and I went back to using Claude for the brainstorming and like the conceptual kind of clarifications and like going through the I don't know like distilling the first principles basically because cloud seems to do much better and then I had it built by Gemini like building wise I think Gemini is pretty goodAmir Houieh: Nice. What is that?Gabor Kerekes: but now it's just riseAmir Houieh: Top left. Right.Gabor Kerekes: on AllAmir Houieh: Okay. Awesome. All right. Take care, guys. See you tomorrow.Noémi Biró: Yeah, good luck with this littleAmir Houieh: Thank you. I don't know.Gabor Kerekes: right.Noémi Biró: surgery.Amir Houieh: They say it's a very challenging Well, let's see. They're going to charge me 1,000.Noémi Biró: No way.Amir Houieh: It's a toll operation. Apparently, two before them, two other dentists refuses. They said you need to take it out. But this one is apparently one of the top 10. And he said,Noémi Biró: Do you have insurance forAmir Houieh: \"No, you don't have insurance for dentists in Netherland.\"Noémi Biró: that? Yeah. Yeah. Yeah.  \nTranscription ended after 00:40:01\nThis editable transcript was computer generated and might contain errors. People can also change the text after it was created.",
+				"date": "2026-02-26"
+			}
+		}
+	]
+}

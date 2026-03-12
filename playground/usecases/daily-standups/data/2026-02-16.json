@@ -1,0 +1,423 @@
+{
+	"id": "standup-2026-02-16",
+	"source": "standup-2026-02-16",
+	"description": "📝 Notes\nFeb 16, 2026\nR&D daily sprint\nInvited Amir Houieh Unbody io Noémi Biró Gabor Kerekes\nAttachments R&D daily sprint \nMeeting records Transcript \nSummary\nAmir Houieh shared positive travel experiences to Munich, noting welcoming people and securing accommodation via an affordable Airbnb, while Noémi Biró updated the group on wedding planning, including a vendor awaiting a permit and establishing current pricing with a quote for services like catering and tent rentals. Gabor Kerekes introduced a new hardware/software project called \"Nexus,\" conceived as an anti-distraction \"meta OS\" for deep thinking, which Amir Houieh and Gabor Kerekes agreed should radically rethink technology's model, and Gabor Kerekes confirmed developing a local transcription pipeline for Nexus. Participants, including Noémi Biró, reviewed the scope for the next phase of development, which focuses on building an open beta for two specific modules, R&D on memory and proactivity, and ensuring safety and App Store readiness with an iOS wrapper, while Gabor Kerekes and Amir Houieh discussed long-term involvement, hiring a third engineer, and moving the R&D website online.\nDetails\nTravel Experience and Accommodation in Munich: Amir Houieh recounted that many people traveled by train to Munich, noting the overall experience was positive. They discussed accommodation, which was secured via an affordable, clean Airbnb located about an hour's drive from Munich (00:02:51). A humorous anecdote was shared about accidentally navigating to a completely different city due to a bug when using an iPhone link on an Android device after the demo (00:04:05).\nPerception of Munich and German Cliches: Amir Houieh shared positive impressions of Munich, noting that the people were welcoming and accommodating, actively trying to help even when they could not speak English. They mentioned that the negative cliches about Germans not wanting to speak German, which they frequently observe in Dusseldorf, were not evident in Munich (00:04:05). The shared effort among attendees at an event, described as \"a quarter of a million\" strong, was noted as a powerful experience (00:05:21).\nUpdate on Wedding Planning and Vendor Communication: Noémi Biró updated the group on their wedding planning, mentioning an administrative weekend focused on house matters. They explained that after having a call with the wedding planner on Friday about a vendor's lack of response, the planner intervened and reported that the vendor was awaiting a permit, which while not new information, provided a sense of relief due to outside involvement (00:05:21). They also received a quote from the planner for services such as catering and tent rentals, helping to establish an understanding of current prices (00:06:50).\nDiscussion on Wedding Venue and Delegation: The group discussed the possibility of the wedding planners setting up an event in a non-traditional location, such as a field, requiring them to build the entire infrastructure. Gabor Kerekes and Amir Houieh agreed that even with full delegation to a planner, there would still be significant work involved, emphasizing that delegating tasks is beneficial and saves \"brain cells\" (00:08:04). Gabor Kerekes shared that the aim for the wedding is a \"laidback\" and \"lowkey\" celebration that feels like a sophisticated garden party or barbecue, even if it cannot be entirely \"perfect\" (00:09:05).\nNew Project Obsession: Anti-Distraction Hardware and Software: Noémi Biró introduced a new obsession of Gabor Kerekes with e-ink hacking and hardware development for specialized devices. Gabor Kerekes was inspired by a device developed for people with ADHD and deep thinking, which led to the discussion of creating a specialized system, tentatively code-named \"untangle\" or \"Nexus\" (00:11:47) (00:15:13). This device uses an LCD screen that emulates the feel of e-ink but with a fast refresh rate, making it intentionally anti-addictive and anti-distracting (00:13:30).\nStrategy for Developing and Partnering for \"Nexus\": Gabor Kerekes expressed a desire to develop a prototype of \"untangle\" (now \"Nexus\") and potentially collaborate with the creators of the inspiration device, asking for a development unit to continue prototyping (00:15:13). They clarified that \"Nexus\" is envisioned as a \"meta OS\" or an \"ADHD OS,\" rather than an application, which could potentially be combined with the idea of a browser-based OS. It was noted that the target audience for \"Nexus\" aligns with those who value attention and use anti-distraction devices (00:19:09).\nRethinking the Model: From Treatment to OS Redesign: Amir Houieh suggested a more radical approach for \"Nexus,\" questioning the fundamental model of technology like the existence of apps, rather than just treating current problems (00:21:47). Gabor Kerekes agreed, suggesting that the \"medium is the message,\" and that a device with a slow display and lack of features like video consumption inherently conditions attention towards deep thought. They noted that using a stylus and handwriting to interact with AI could create a very different, less distracting user experience (00:23:08).\nUpdates on Project Work and Agreement Outline Review: Amir Houieh confirmed they finished the \"carefinder project\" and are now available for other work, having started on the \"Nexus\" project (00:24:32). They drafted a contract agreement outline, and Gabor Kerekes suggested specifying the two modules in more detail to prevent scope creep, while acknowledging the four-month timeline (00:25:46). The two main drivers for the next phase were identified as the modules for \"six weeks after pregnancy loss\" and \"trying to conceive again\" (00:29:02).\nScope of Work for the Next Phase of Development: The goal for the next phase is defined as building an open beta and maintaining high development velocity through an iterative process (00:29:02). The scope includes core research and development (R&D) on memory and proactivity, and the development of new modules, such as guided programs, which will include features like journaling (00:30:24). Noémi Biró clarified that journaling should be viewed as a tool within a broader program module, not a separate module itself, suggesting a reframing of the agreement language (00:33:01).\nSafety, Infrastructure, and Exclusions in the Agreement: The scope of work also includes UI/UX evolution (like improving articles display), safety and guardrail implementation, and creating a learning infrastructure with an analytical dashboard for the client (00:34:35). The plan includes monthly consultations with clinical advisors and developing an iOS wrapper (which enables push notifications) to facilitate App Store availability, instead of a full native iOS app (00:35:49). Items excluded from the scope were B2B/clinic readiness, local small language models, and infrastructure migration, though they agreed to budget for infra work to harden security and prepare for potential future handover (00:37:09).\nLong-Term Involvement and Hiring Strategy: Gabor Kerekes expressed being less convinced about long-term involvement in the current project, but they agreed to maintain open communication about future collaboration after the four-month period (00:42:35). They discussed returning to the R&D lab model and the need to hire a third engineer or assist the client in finding a CTO. Gabor Kerekes identified a potential US-based, full-stack design engineer who is aligned with the project's values, though they noted the cost implications and the need to work within the current budget (00:45:40).\nAnalytics and Feedback Organization: Gabor Kerekes confirmed that session length analytics, showing time spent talking, can be derived from conversations without breaching security protocols like Google Analytics, and they will follow up on this to send out last week's data (00:48:19). They have been organizing feedback into a structured document and plan to read a document about the distress tier framework for the project (00:49:31).\nR&D Website and Article Preparation: For the R&D website, the team confirmed they are moving forward with cherry-picking blog posts to include (00:49:31). Gabor Kerekes requested the latest article be moved to a Notion page to facilitate easier comment submission for review (00:51:38).\nFocus Areas for the Current Week: Amir Houieh's focus for the week includes advancing the \"Nexus\" project by creating one or two use cases, possibly by integrating local data or testing with a therapy app. A key objective is to get the R&D website online and announce the company's new focus on social media to redirect inquiries from investors who may be interested in the R&D direction (00:53:04). They discussed maintaining relations with design-oriented investors, such as those from Designer Fund, who understand the vision for generative UI and dissolving the concept of apps (00:54:55).\nDiscussion of Website Gradient and Visuals: Gabor Kerekes detailed an exploration into generating gradients and visual shaders for the website, initially stemming from the sub-optimal appearance of colors when optimizing loading (00:59:15). Gabor Kerekes showed interest in using strong visuals to catch attention, potentially using a platform to generate no-code shaders, but determined this visual experimentation required more work and should be wrapped up for now, suggesting they would return to it later (01:01:50). Amir Houieh and Gabor Kerekes agreed that the current subtle visual presets were sufficient for the present and that the visual elements should evolve over time (01:05:09).\nUpcoming Work and Time Off: Amir Houieh asked Gabor Kerekes about their plans for the week, learning that Gabor Kerekes plans to go to the countryside to celebrate their birthday and have some unstructured time. Gabor Kerekes intends to take their laptop but is aiming for a period of creative space and unstructured thinking, rather than production-focused work (01:07:36). Amir Houieh suggested that before leaving, Gabor Kerekes should connect the Nexus project with the idea of walking and recording, exploring potential applications (01:08:51).\nImplementation of Local Transcription Pipeline: Gabor Kerekes confirmed that they had already coded a local transcription pipeline using Whisper to transcribe conversations on the machine (01:08:51). The pipeline can take a directory of audio files, produce transcripts with speaker identification (diarization), and create text files that can be fed into the Nexus project. The participants agreed to formally name the project \"Nexus,\" and Amir Houieh will begin renaming it across all files (01:09:52).\nNext Steps for Nexus and Analytics: For immediate work, Gabor Kerekes needs to handle website changes related to a \"cu thing\" and then focus on the Nexus implementation, integrating it with the audio app. Amir Houieh will be focusing on the civil analytics and then plans to add persistent storage to Nexus using SQLite, which they identified as the easiest and lightest method for maintaining state in an application. The participants agreed to meet again at three (01:11:05).\nSuggested next steps\nNoémi Biró will rewrite the part of the agreement about the modules for clarity, specifying that the amount is to be defined as they go.\nGabor Kerekes will follow up with Amir Houieh after the meeting to get the analytics for the time spent in the app from last week.\nGabor Kerekes will read Kira's document to understand the implications of patterns for cibil and make a copy of the latest article to provide comments on notion.\nAmir Houieh will talk to a bookkeeper to determine if they need to continue using body as a company or if they can work freelance with the CBIL contract.\nGabor Kerekes will push his changes to the website today and then work on the Nexus implementation integration with the audio app.\nAmir Houieh will add a persistent storage using SQL light to Nexus.\nAmir Houieh will start renaming the project to Nexus everywhere.\nAmir Houieh will focus on the analytics from a civil perspective.\nYou should review Gemini's notes to make sure they're accurate. Get tips and learn how Gemini takes notes\nPlease provide feedback about using Gemini to take notes in a short survey.\n\n---\n\n📝 Notes\nFeb 16, 2026\nR&D daily sprint\nInvited Amir Houieh Unbody io Noémi Biró Gabor Kerekes\nAttachments R&D daily sprint \nMeeting records Transcript \nSummary\nNoémi Biró commended the quality of the project agreement and the effective inclusion of commitment and equity language. Amir Houieh cautioned Gabor Kerekes against rushing the engineer hiring process due to the risk of a single hire potentially replacing the current three-person team, although Gabor Kerekes doubted the project was a \"one person job.\" Ultimately, Gabor Kerekes agreed with the strategic feedback, and Amir Houieh decided to hold off on sending the offer to the candidate until \"Melissa\" asks about them.\nDetails\nReview of Agreement and Project Commitment Language: Noémi Biró commended the collaborative work on the project's language, specifically noting the effective inclusion of commitment to the project and a suitable mention of equity before stepping back. Noémi Biró also praised the quality of the agreement itself (00:00:00).\nConcern Regarding Rushing the Engineer Hiring Process: Amir Houieh advised Gabor Kerekes against rushing the engineer's hiring process, expressing concern that if the new hire is brought on too soon, there might not be a project left for them (00:00:00). Gabor Kerekes suggested that the project would still require them, but Amir Houieh argued that if the engineer offered a compelling deal, such as 5K and 20% equity, the company might consider replacing the current team (00:02:21).\nDiscussion on the Risk of Hiring a Single Developer: The participants debated the practical risk of a single new developer replacing the three-person team (00:01:12). Gabor Kerekes expressed doubt that the project, which is not a \"one person job,\" could be entirely managed by a single new hire, even if they were onboarded. Amir Houieh acknowledged that the risk was likely low but maintained that a small chance (10%) of replacement existed if the deal was favorable (00:02:21).\nResolution on Engineer Hiring Strategy: Gabor Kerekes agreed that strategic feedback regarding hiring decisions was necessary and thanked Amir Houieh for bringing up the concerns. Amir Houieh ultimately resolved to hold off on sending the offer to the candidate and wait to see if \"Melissa\" asks about them first (00:03:47).\nAmir Houieh's Work Schedule and Conversation Conclusion: Amir Houieh planned to finish work early due to fatigue after driving approximately 1,700 kilometers over two days. The group agreed that any remaining topics could be handled asynchronously on Discord, concluding that they had a productive day of conversation (00:03:47).\nSuggested next steps\nNo suggested next steps were found for this meeting.\nYou should review Gemini's notes to make sure they're accurate. Get tips and learn how Gemini takes notes\nPlease provide feedback about using Gemini to take notes in a short survey.",
+	"items": [
+		{
+			"id": "standup-2026-02-16-000251",
+			"label": "2026-02-16 [00:02:51]",
+			"data": {
+				"chunk": "Amir Houieh: A lot of people also came with train and stuff and it was Yeah, it's wasNoémi Biró: That's powerful.Amir Houieh: really good.Noémi Biró: And Munich,Amir Houieh: Yeah.Noémi Biró: did you uh figure out the accommodationAmir Houieh: Yeah. Yeah.Noémi Biró: stuff?Amir Houieh: We were staying at the Airbnb. Uh Hodat Booker place was like 1 hour drive to Munich. It was nice and very affordable. So but clean.Noémi Biró: Where was that?Amir Houieh: Sorry,Noémi Biró: Where wasAmir Houieh: I have no idea. 1 hour drive to Monik.Noémi Biró: that?Amir Houieh: That's all I know. It was a small town like town around around Monik. And it was funny the after the demo on the way back. So they sent me a link on on the group and I clicked on it and I set the navigation and took took off and then it was like 5 minutes to the destination. Hard was like dude where are you going? I said yeah we're going to the Airbnb.",
+				"date": "2026-02-16"
+			}
+		},
+		{
+			"id": "standup-2026-02-16-000405",
+			"label": "2026-02-16 [00:04:05]",
+			"data": {
+				"chunk": "Amir Houieh: And he said no we are 1 hour away from Airbnb. And anyway, so it turned out that apparently when I clicked on that link they sent from iPhone and in my Android there was a bug or something. I don't know how but yeah, I went to the completely different city so to drive again for another hour.Noémi Biró: Jesus.Amir Houieh: That'sNoémi Biró: My colleague Johannes lives in Fring whichAmir Houieh: crazy.Noémi Biró: is near Munich.Amir Houieh: Oh, nice. I liked Munich to be honest.Noémi Biró: Yeah,Amir Houieh: Yeah,Noémi Biró: it'sAmir Houieh: I think people were very like welcoming and accommodating. They were trying always to help. I mean, all those cliches you have about like Germany that people don't want to speak German and such. I didn't really see it there. I mean, I see it in Deldorf very frequently, but not in Munich. Even though they couldn't speak English, they tried like with signs and everything. They they would try. It was nice. But yeah, it was really cool.",
+				"date": "2026-02-16"
+			}
+		},
+		{
+			"id": "standup-2026-02-16-000521",
+			"label": "2026-02-16 [00:05:21]",
+			"data": {
+				"chunk": "Amir Houieh: Yeah, I felt really like you know when you see everyone on the same page like trying for the same goal it's was really powerful and it brought like yeah a quarter of a million. Nice. How are you guys? How did you how was the weekend?Noémi Biró: Uh, good. It was a bit like admin taking care of the house.Amir Houieh: Okay. How about the wedding? AnyNoémi Biró: Yeah.Amir Houieh: news?Noémi Biró: I'm I'm going to get the coffee. Okay. So we we had like a call with the wedding planner on Friday and as as and so we told them the situation that they are not responding and we're like unsure what to do and they suggested to wait till end of February but they also said they're going to call them. So, we gave them the phone number and then like in like two hours we received back an email like, \"Hey, we called them and apparently we also know each other and they're still waiting for a permit so you'll get it soon.\" which like it's not new information,",
+				"date": "2026-02-16"
+			}
+		},
+		{
+			"id": "standup-2026-02-16-000650",
+			"label": "2026-02-16 [00:06:50]",
+			"data": {
+				"chunk": "Noémi Biró: but the fact that somebody else got involved on our behalfAmir Houieh: And itNoémi Biró: made it feel really good like oh finally something's happening and maybeAmir Houieh: work.Noémi Biró: it's giving them a bit more push and also from this wedding planner we received a quote of like their own services. So if we did food with them or if you rented a tent with them.Amir Houieh: AllNoémi Biró: So that at least gives us some kind of like understanding of prices nowadays.Amir Houieh: right.Noémi Biró: You understand we have to make 5 million euros. Uh,Amir Houieh: Talk to me aboutNoémi Biró: sorry.Amir Houieh: that.Noémi Biró: $5 million. My bad.Amir Houieh: Sorry.Noémi Biró: $5Amir Houieh: What?Gabor Kerekes: Euros.Noémi Biró: million.Amir Houieh: Yeah. That's enough, I guess. Okay, good. Well, I think that's kind of aNoémi Biró: Yeah.Amir Houieh: relief.Noémi Biró: For now, it's uh better than it was before. Yeah.Amir Houieh: Okay. Okay. Yeah. And then you go with the planner and then for example, if the place like kind of rejected or didn't happen, then the planner will be in charge like irresponsible to take care of a new place or",
+				"date": "2026-02-16"
+			}
+		},
+		{
+			"id": "standup-2026-02-16-000804",
+			"label": "2026-02-16 [00:08:04]",
+			"data": {
+				"chunk": "Gabor Kerekes: Not yet.Noémi Biró: They're they're really cool as in like they can build up a wedding in the middle of nowhere. So if we find like a field and we say this is the perfect field, then we can also hire them to build up the infrastructure.Amir Houieh: But thenNoémi Biró: So that that's going to be much more complicated or that's the vibe thatAmir Houieh: becomeNoémi Biró: I got like she sheGabor Kerekes: listing all the things which I mean for sureNoémi Biró: started.Gabor Kerekes: imagine festival then weAmir Houieh: their price. They And but are they also theGabor Kerekes: you have to bringAmir Houieh: planner also charge extra right?Noémi Biró: Yeah. Yeah.Amir Houieh: Yeah. My experience is that to trust to go with the person who is in this field like doing everything yourself isNoémi Biró: Yeah. Yeah.Amir Houieh: risky.Noémi Biró: I meanGabor Kerekes: I I think even if we don't if we delegate everything we will still have so much to do.Amir Houieh: Yeah. Yeah.",
+				"date": "2026-02-16"
+			}
+		},
+		{
+			"id": "standup-2026-02-16-000905",
+			"label": "2026-02-16 [00:09:05]",
+			"data": {
+				"chunk": "Gabor Kerekes: SoAmir Houieh: And if you don't delegate it, you will spend the same amount of money if not more that you are going to payGabor Kerekes: yeah and much many more brain cells probably I'm also good with delegating it's justAmir Houieh: them.Gabor Kerekes: that we need to understand like what are we actuallyAmir Houieh: Yeah. Of course.Gabor Kerekes: yeahAmir Houieh: And there will be compromises. Huh.Gabor Kerekes: Yeah. No, there won't. There will be.Amir Houieh: Okay.Gabor Kerekes: No,Amir Houieh: Of course,Gabor Kerekes: it will be the best wedding ever.Amir Houieh: it will be the best, but it's going to be perfect.Gabor Kerekes: That's fine. Yeah. It cannot be perfect. Nothing can be.Amir Houieh: Yeah,Gabor Kerekes: I expect perfect.Amir Houieh: exactly.Gabor Kerekes: We're not perfect.Amir Houieh: Just don't beat up yourself when something happens. Just let it go.Gabor Kerekes: Open AI. Nice. There you go.Amir Houieh: Cool. No, for me was also like a bit of a hectic for us like there were a lot of things we wanted to go in right direction and it didn't and and we spent like a day we didn't have much time but still we still spent like a know a good portion of time just worrying about those or blaming or whatever but at the end of the day none of them matter",
+				"date": "2026-02-16"
+			}
+		},
+		{
+			"id": "standup-2026-02-16-001025",
+			"label": "2026-02-16 [00:10:25]",
+			"data": {
+				"chunk": "Noémi Biró: But we'reAmir Houieh: really.Noémi Biró: likeGabor Kerekes: I think we're aiming for something that's like it will be definitely a celebration and it will be fancy in some ways but at the same time kind of lowkey and like laidbackAmir Houieh: I'mGabor Kerekes: and I want I want to feel like I'm hosting aAmir Houieh: curious.Gabor Kerekes: garden party,Amir Houieh: Nice.Gabor Kerekes: like a barbecue in the garden.Amir Houieh: I likeGabor Kerekes: Yeah.Amir Houieh: that.Gabor Kerekes: While it still had this kind of, you know, like really special and elevated element as Yeah.Amir Houieh: Nice.Gabor Kerekes: like dimension, too. So, I don't know.Amir Houieh: That's going to be fun.Gabor Kerekes: Yeah.Noémi Biró: That's the goal. So it can be it doesn't have to be perfect. It has to be imper I mean except for the weather that hasAmir Houieh: Cool.Noémi Biró: and the music those two things the rest it's okay. Yeah.Amir Houieh: Nice.Noémi Biró: SoAmir Houieh: Uh, cool. Yeah. Let's see.",
+				"date": "2026-02-16"
+			}
+		},
+		{
+			"id": "standup-2026-02-16-001147",
+			"label": "2026-02-16 [00:11:47]",
+			"data": {
+				"chunk": "Noémi Biró: in terms of obsessions,Amir Houieh: UhNoémi Biró: Gabbor got obsessed with uh e in hacking.Amir Houieh: oh.Noémi Biró: Okay, let me show you.Amir Houieh: You have a newNoémi Biró: Um I have a new targetAmir Houieh: device.Noémi Biró: for what we could aim for. Um, this like I've already kindAmir Houieh: It's beautiful.Noémi Biró: of had this in my mind. I didn't know it existed, but uh I was envisioning a device like this. And also just like in my imagination when I thought about this sort of like ADHD or tools for deep thinking. Uh by the way we have this code name for it. Uh I don't know if we mentioned it but no and I have been calling this sort of like ADHD thinking tool uh memory system called we call it untangle.Amir Houieh: Nice.Noémi Biró: Uh so so when I when I think aboutAmir Houieh: I likeNoémi Biró: untangle uhGabor Kerekes: Um I don't know there was also kind of like a fantasy of uh having like specialized hardware to run it on and developing these kind of thinking tools for specialized like the sort of e in devices and then um I was actually what the f*** was I doing?",
+				"date": "2026-02-16"
+			}
+		},
+		{
+			"id": "standup-2026-02-16-001330",
+			"label": "2026-02-16 [00:13:30]",
+			"data": {
+				"chunk": "Gabor Kerekes: I don't know. I think I fell into a rabbit hole with like shaders. Uh, and this somehow fell out of it like Oh no, actually I was on X looking for design engineers. them somehow. This uh yeah also so so this guy uh uh the founder of this company has uh ADHD and uh that was one of his motivations to uh develop this company and this hardware. and he spent six years prototyping this uh display which is not e- in actually it's LCD but uh it feels like e in but the problem with e- in is it has like a super slow refresh rate and this has like the same kind of refresh rate as any other screen that we are used to so it refreshes real time and it's designed to be like anti- anti-addictive, anti-distracting, anti-exhausting. So, uh, basically, yeah, like it's it's a tablet um like the iPad with a specialized screen and uh yeah, you can do everything with it. It runs Android and yeah,Amir Houieh: Okay.Gabor Kerekes: I don't know like so I don't know.",
+				"date": "2026-02-16"
+			}
+		},
+		{
+			"id": "standup-2026-02-16-001513",
+			"label": "2026-02-16 [00:15:13]",
+			"data": {
+				"chunk": "Gabor Kerekes: I just really like this whole thing because uh I've had this I don't know for actually multiple years back in the days I was thinking about similar ideas and it's really cool to see that it exists and I was like the target would be to develop a prototype of untangle like really materialize it and maybe it could be built on top of uh the brain or I don't know what to call it like uh I don't know maybe we can call this memory system something else nexus.Amir Houieh: Okay.Gabor Kerekes: What do you think?Amir Houieh: Yeah, that's okay. I mean, yeah, I'm happy with any names.Gabor Kerekes: Let's go with Nexus for now and then we'll figure it out.Amir Houieh: Okay.Gabor Kerekes: I just keep getting this image of likeAmir Houieh: No, I think we should also like make it a kind of rule.Gabor Kerekes: me.Amir Houieh: I think the the person who come up with the or the products for example in this case you guys you should also suggest the name and unless there's a strong you know like I'm strongly against it and I say but otherwise yeah I think it's the best that the person who came up with the idea just also name it.",
+				"date": "2026-02-16"
+			}
+		},
+		{
+			"id": "standup-2026-02-16-001631",
+			"label": "2026-02-16 [00:16:31]",
+			"data": {
+				"chunk": "Gabor Kerekes: Mhm.Amir Houieh: So yeah, and as for the brain, I don't care really like it's a it's going to be a tool. So Nexus sounds goodGabor Kerekes: So yeah,Amir Houieh: too like it.Gabor Kerekes: I don't know likeAmir Houieh: But then how do you see this working?Gabor Kerekes: umAmir Houieh: Like do you see it as an application within this one or no? This is anGabor Kerekes: yeah, it's an inspiration.Amir Houieh: inspiration.Gabor Kerekes: But what what I would like to do is like get in touch with uh these guys, these people who are making it and if we have something that we are kind of proud of to show like here's how it would work. Here's a prototype.Amir Houieh: Nice.Gabor Kerekes: uh we feel like we are really aligned in our vision and ask for I I I would like to ask for like a a deAmir Houieh: Okay.Gabor Kerekes: development unit so we could continue prototyping on thisAmir Houieh: I think I also shared with you this guy um who made they are making also they're using these devices to make their experiments.",
+				"date": "2026-02-16"
+			}
+		},
+		{
+			"id": "standup-2026-02-16-001739",
+			"label": "2026-02-16 [00:17:39]",
+			"data": {
+				"chunk": "Amir Houieh: Let me see if I can find it. It's really cool. I think these devices but then oh here this guy I think he's also a designGabor Kerekes: ShareAmir Houieh: engineer actually.Gabor Kerekes: yourNoémi Biró: You need toAmir Houieh: I will send it to you.Gabor Kerekes: screen.Amir Houieh: Send the link. This guyGabor Kerekes: Yeah. Yeah. Yeah. Exactly. I've been looking also at these phones too.Amir Houieh: But this is a e-Gabor Kerekes: Yeah, it is.Amir Houieh: in device.Gabor Kerekes: AndAmir Houieh: I think these are more affordable to also experiment around. But so do you see so when you talk about what was the name again? Sorry, untangle.Gabor Kerekes: Untangle.Amir Houieh: When you think about untangle, you see it to be tied to a device. So it's not the device is not a feature, but it's part of the DNA. It's part of the offering.Gabor Kerekes: Um I mean not not super tightly I think. Um, I don't know how how much like I wouldn't kind of like lock it to a device because it should be able to run on any device, but um,",
+				"date": "2026-02-16"
+			}
+		},
+		{
+			"id": "standup-2026-02-16-001909",
+			"label": "2026-02-16 [00:19:09]",
+			"data": {
+				"chunk": "Amir Houieh: Then do you define it as so as an application or as a like a not an operating system but as a meta OS?Gabor Kerekes: it's a bit like a meta OS.Amir Houieh: No.Gabor Kerekes: Yeah, maybe like IAmir Houieh: Then we can combine it.Gabor Kerekes: thinkAmir Houieh: So I think we could combine it with that idea of uh browser like the OS I had but then we go and make it specifically forGabor Kerekes: Yeah, like an ADHD OS or something.Amir Houieh: ADHD.Gabor Kerekes: But um I don't know. I think it's this is a vision that I think should evolve like um I wouldn't start out with this vision of like maybe it could be an ecosystem of tools or like if let's say we are developing something like this we could be in partnership with like this daylight computer uh cuz you know like the people who whoAmir Houieh: H I'mGabor Kerekes: buy who the people who would buy That device is exactly also the audienceAmir Houieh: curious.Gabor Kerekes: for Untangle. Like if you're happy with your idea,",
+				"date": "2026-02-16"
+			}
+		},
+		{
+			"id": "standup-2026-02-16-002016",
+			"label": "2026-02-16 [00:20:16]",
+			"data": {
+				"chunk": "Amir Houieh: Yeah.Gabor Kerekes: you're not going to Yeah.Amir Houieh: Yeah.Gabor Kerekes: I don't know like self-conscious and people who value their attention because probably maybe they their attention doesn't work as well as other people's attention. I don't know. uh like I feel like um people who are trying to find interventions and like find uh healthier ways to relate the technology would gravitate towards these kind of devices. Um I don't know like there are many possibilities maybe we can you know like develop kind of like our own OS or our own device. Uh I had this idea of like back I don't know few years ago uh I had this idea of um like what what would it take? I never actually tried, but what would it take to customize Android in a way that you lock down what kind of apps you can install and maybe have like these kind of profiles when you go to a meditation retreat, you kind of like preschedu that your Android phone would turn into a dumb phone for that period and you cannot get out of it like it's just like totally locks down only",
+				"date": "2026-02-16"
+			}
+		},
+		{
+			"id": "standup-2026-02-16-002147",
+			"label": "2026-02-16 [00:21:47]",
+			"data": {
+				"chunk": "Amir Houieh: Okay. I think but I think the way I think we couldGabor Kerekes: you.Amir Houieh: we have a chance to be a bit more radical in a way to questionGabor Kerekes: Mhm.Amir Houieh: like every single atoms of for example because the way how you are saying it it's more like a treatment rather than rethinking the whole you know model. uh like we can also start thinking and examining that should it be about apps or should like that you know apps era and that's why if you startNoémi Biró: Yeah.Amir Houieh: thinking about it from a OS point of view then we might end up somewhere that our hypothesis becomes true that everything is fluid you know there is no app you have utilities maybe I don't know so I think this could also be an interestingGabor Kerekes: Yeah.Amir Houieh: direction. Uh let's let's uh let's keep the conversation going. I think it's very interesting and we should probably startGabor Kerekes: I don't know.Noémi Biró: I like you.Amir Houieh: brainstorming.Gabor Kerekes: Uh just imagine for example if you have like um a stylus here and you can talk to AI by handwriting like you are writing something by hand and then sending it and then the AI replies with",
+				"date": "2026-02-16"
+			}
+		},
+		{
+			"id": "standup-2026-02-16-002308",
+			"label": "2026-02-16 [00:23:08]",
+			"data": {
+				"chunk": "Amir Houieh: AllGabor Kerekes: text then you I don't know just like it's such different way and um that likeAmir Houieh: right.Gabor Kerekes: on the computer. And this is the the idea that the medium is the message. uh which I guess we also learned about in school that when you uh like the medium through which you consume information is part of the information that you consume because the information it alters the information like uh the channel through which information comes to you matters just as much as what is the content of the information tries to and that like onAmir Houieh: answer. Yeah.Gabor Kerekes: these devices because the display is so slow and because you can't for example watch YouTube videos on it. So you will not watch YouTube videos on it. You will not consume certain types of content because of that you will not use Instagram on it because like it makes zero sense. uh and that will condition your attention and what you pay attentionAmir Houieh: Oh, okay. IGabor Kerekes: to.",
+				"date": "2026-02-16"
+			}
+		},
+		{
+			"id": "standup-2026-02-16-002432",
+			"label": "2026-02-16 [00:24:32]",
+			"data": {
+				"chunk": "Gabor Kerekes: So it's really like much more conducive to like deep thought.Amir Houieh: see.Gabor Kerekes: Whereas like when you open your phone, I don't know if I have had this with my meditation timer. I set the timer and then I meditate. I have a great session. Then I get these notifications afterwards and then like f***. Um yeah anyway that's kindAmir Houieh: Yeah,Gabor Kerekes: ofAmir Houieh: I think there's a lot to Yeah, I think. Okay. Yeah, I like the idea.Gabor Kerekes: there is excitement in it that's for sureAmir Houieh: Let'sGabor Kerekes: and I think it's really cool but maybe also bringing it back to where you started which is like this gradientAmir Houieh: putGabor Kerekes: shaders like the reason you started playing with it was because you wanted to add something to the R&D website. Um, I mean that's a differentAmir Houieh: Yeah. Okay. Yeah.Gabor Kerekes: topic.Amir Houieh: Then let's start with the updates and then see I don't have much of updates. Uh but yeah, I wrap up the body the carefinder project.",
+				"date": "2026-02-16"
+			}
+		},
+		{
+			"id": "standup-2026-02-16-002546",
+			"label": "2026-02-16 [00:25:46]",
+			"data": {
+				"chunk": "Amir Houieh: So I'm this week I'm free again to work on other stuff.Gabor Kerekes: Okay.Amir Houieh: Uh then this morning I started working on uh yeah the brain again the nexus a bit more uh for today. Oh yeah, I also draft that uh contract the agreement outline. I think No, you you've read it. I don't know whatGabor Kerekes: Yeah, I just had one comment about if we should maybeAmir Houieh: youGabor Kerekes: specify in more detail about the two modules that we're going to be working on. I I still feel like there can be a lot of scope creep happening,Amir Houieh: Okay.Gabor Kerekes: but then we also have four months.Amir Houieh: Yeah. Let's see. Uh could you guys Yeah. Give me how was the weekend? How was the Friday meeting? What what happened? What did youGabor Kerekes: Uh yeah,Amir Houieh: discuss?Gabor Kerekes: one second. Um, we talked about the language and the framing of the app and how we have to stay very much within the line of companion without going into really giving assumptions about the user's patterns and there are these two documents one from Kira and one from Dina about uh Dina is about this distress tier framework.",
+				"date": "2026-02-16"
+			}
+		},
+		{
+			"id": "standup-2026-02-16-002735",
+			"label": "2026-02-16 [00:27:35]",
+			"data": {
+				"chunk": "Gabor Kerekes: So the request from Melissa was like if we could uh in each session identify if the user is from in one of the five tiers and if it's in tier four or five then to lock the app. So that's one of these feature requests that she's really thinking and building in. Um, so that means a few things that the app would lock itself and you wouldn't be able to send messages and then there's also these 1 hour limit for a session that you can chat. So we overcome users getting too attached. and Kira's analysis is uh I I still need to go through them a bit more in detail to understand what it'sAmir Houieh: No,Gabor Kerekes: about.Amir Houieh: I think for now what matters now maybe it's that is there anything that is going to affect the way how we are going to handle next phase in terms of the language or wording in the agreement because that's what we are going to discuss today with Melissa for example have like a 100% agreement onNoémi Biró: UhAmir Houieh: one particular module or",
+				"date": "2026-02-16"
+			}
+		},
+		{
+			"id": "standup-2026-02-16-002902",
+			"label": "2026-02-16 [00:29:02]",
+			"data": {
+				"chunk": "Gabor Kerekes: What?Noémi Biró: right now she's really talking about these two modules like the six weeks after pregnancy loss and trying to conceive again as the two main drivers of the next phase.Amir Houieh: Okay. Okay. Uh Jab, did you see the agreement?Noémi Biró: Uh the the new version. No.Amir Houieh: Yeah, it's it's Yeah, the other one was just more like a proposal, but this is like a agreement thatNoémi Biró: Okay. No. Shall we go throughAmir Houieh: sign. Yeah,Noémi Biró: it?Amir Houieh: sure. So basically uh these are all like from the previous proposal we agreed and then uh here phase two the the goal is defined as basically the open beta C bill. Uh these are all coming pretty much from the other one. Uh the approach basically is that what we also agree with ship early and often. So we try to have this iterational process uh and what we basically will be shaped by what we learn. Every feature is a hypothesis about what supports healing.",
+				"date": "2026-02-16"
+			}
+		},
+		{
+			"id": "standup-2026-02-16-003024",
+			"label": "2026-02-16 [00:30:24]",
+			"data": {
+				"chunk": "Amir Houieh: The goal is to build tight feedback loop maintain high velocity and stay in constant contact with user and clinicians. uh I can also zoom in a bit. Uh what is important here is the scope of the work. The main R&D parts are basically the memory and proactivity. Uh that's where what we also discussed uh last time. And then we have modules that are new because previously we only talked about journalings but now apparently this whole thing is supposed to become a bit more and that's just because we want to take civil a bit further than what just the chat experience and that will be yeah one one thing we know already journalingGabor Kerekes: Yeah.Amir Houieh: is one but there will be also guided program modules how many what I don't know this is all to be discussed uh or to be decided to be honest like as we go there is no number there might be none there might be two depending on it's I think we should just somehow say that this is a mutual un agreement or something and then no is saying that",
+				"date": "2026-02-16"
+			}
+		},
+		{
+			"id": "standup-2026-02-16-003139",
+			"label": "2026-02-16 [00:31:39]",
+			"data": {
+				"chunk": "Gabor Kerekes: Yeah.Amir Houieh: it's good to specify you know a particular modules like We couldGabor Kerekes: I mean the factAmir Houieh: let's come back.Noémi Biró: We're focusing on twoGabor Kerekes: thatAmir Houieh: Well, the the thing is that we don't know or do we like we know probably journaling is going to be one of them,Gabor Kerekes: journalingAmir Houieh: right?Noémi Biró: as a feature will be integrated within the module. So the module is kind of what you sign up for as a journey. So you understand that you are part of something that gives you daily recurring tasks. And one of those isAmir Houieh: Yeah. And even to be honest the journaling even journaling yeah it exists but we didn't do any any work onNoémi Biró: journaling.Amir Houieh: journaling. We didn't really do any R&D on it. We just had a hypothesis that it should be part of the chat but we really didn't also design it. So I think one of those whatever module is journaling will be one of them.",
+				"date": "2026-02-16"
+			}
+		},
+		{
+			"id": "standup-2026-02-16-003301",
+			"label": "2026-02-16 [00:33:01]",
+			"data": {
+				"chunk": "Amir Houieh: But yeah, if you want to add something we could definitely add or we could just keep it as it is. Just add one more sentence here for clarity that the amount of it is to be defined as we go or what type I don't know.Noémi Biró: I I I think um the way we say here that journaling is a module, guided program modules, additional modules, we need to reframe it a bit because everything beside the main chat that will be placed within the module.Amir Houieh: Yeah.Noémi Biró: So when we say guided program modules and then we specify okay we're going to focus on two modules then there is no room for additional modules.Amir Houieh: So by specifying so you want to but the problem is that we don't know what exactlyNoémi Biró: But we can say two guided program modules andAmir Houieh: right and thatNoémi Biró: thenAmir Houieh: is including journaling orNoémi Biró: journaling is one of the features one of theAmir Houieh: noNoémi Biró: tools within a module. So imagine if a module is like uh helping you integrate your loss six week after your loss.",
+				"date": "2026-02-16"
+			}
+		},
+		{
+			"id": "standup-2026-02-16-003435",
+			"label": "2026-02-16 [00:34:35]",
+			"data": {
+				"chunk": "Noémi Biró: One of the tools within that module is using journaling.Amir Houieh: Ah okay I see I see okay yeah I don't know how would you do you want to make a comment here I can later rejust it or feel free you re rewrite thisNoémi Biró: Mhm.Amir Houieh: part uh and then let's move on so have this in mind and then another part of the work is basically UIUX evolution that we knew that there will be like changes here. For example, the work on articles. We were talking how the articles are appearing and stuff like that. And then of course safety and guards that we yeah that we started or those documents and then we have the learning infrastructure as we called it lastNoémi Biró: Yep.Amir Houieh: time. And here I try to make it very clear that we are going to have an analytical dashboard for Melissa itself.Noémi Biró: Mhm.Amir Houieh: a dedicated tool that gives the client visibility didn't mention how we are going to do it probably I think the discussion we had with Gab as well we agreed that this should be more generative and more flexible but and there are plenty of tools that",
+				"date": "2026-02-16"
+			}
+		},
+		{
+			"id": "standup-2026-02-16-003549",
+			"label": "2026-02-16 [00:35:49]",
+			"data": {
+				"chunk": "Noémi Biró: Mhm.Amir Houieh: can deliver such a thing already so we will look into it um and then experiment framework and that is basically more analyticsGabor Kerekes: IAmir Houieh: that's I think it's more on Melissa show. Maybe this is not even needed. I don't know.Gabor Kerekes: think I think it's good to have that in there.Noémi Biró: That'sGabor Kerekes: Yeah.Amir Houieh: Okay.Gabor Kerekes: Because you Yeah,Amir Houieh: Yeah.Gabor Kerekes: it will take some time to to work on thatAmir Houieh: ButGabor Kerekes: too.Amir Houieh: okay. And then clinical input of course and that will be monthly consultations with clinical advisors. So every month we basically redefine things or we define things or we iterate on whatever we have done for last previous month. And then we have enabling an infrastructure which is the iOS router.Gabor Kerekes: So this means that it will be available from the app store, right? Yeah.Amir Houieh: Yes. I don't know. The language probably is not what she wants. I think Melissa is determined that she wants an",
+				"date": "2026-02-16"
+			}
+		},
+		{
+			"id": "standup-2026-02-16-003709",
+			"label": "2026-02-16 [00:37:09]",
+			"data": {
+				"chunk": "Gabor Kerekes: Yeah.Amir Houieh: iOS.Gabor Kerekes: And I think also from the feedback that I'm reading and the metrics that we see that people just use the app as a one off. Uh I think they really treat it as a web page versus an app you treatAmir Houieh: Yeah.Gabor Kerekes: differently.Amir Houieh: Okay. I don't know. Shall I remove this part?Gabor Kerekes: Um, I think you can leave the enables push notifications. Um,Amir Houieh: What is testing presents? That's a very slow. Oh, what you said N I think it's good to add it here about you know treating it as a not oneoff.Gabor Kerekes: Mhm.Amir Houieh: Yeah. Uh and then there are a couple of items that we don't really work on or we exclude them unless mutually we agreed on uh during the process. One is the B2B and clinic readiness that we know we are not going to do that. that requires also like I don't know very more it it brings a whole different complexity from security to the features you need to provide on on admin side and stuff like that.",
+				"date": "2026-02-16"
+			}
+		},
+		{
+			"id": "standup-2026-02-16-003853",
+			"label": "2026-02-16 [00:38:53]",
+			"data": {
+				"chunk": "Amir Houieh: Uh local first small language models we also drop it because we already decided to go for you know guided modules and stuff like that. Uh native iOS app it's not needed because an iOS wrapper can also deliver that with the minimum work. So we can instead focus on other parts payment system infrastructure migration that's something we need to discuss. Gabbor I don't know do you want to do you think this is something we should do this phase orGabor Kerekes: I think we should budget for infra work uh just in general. Um the migration itself uh I think that may not be itAmir Houieh: Yeah,Gabor Kerekes: but prepare like do prep work and justAmir Houieh: but I thinkGabor Kerekes: generally kind of um yeah do do yeah do do budget for it because like uh yeah just to just to have that in mind that that requires uhAmir Houieh: Infra and whatGabor Kerekes: timeAmir Houieh: deployments in front andGabor Kerekes: sorry yeah that's yeahAmir Houieh: Security.Gabor Kerekes: basically it's like any infra work would be uh the purpose would be twofold One is to harden security and the other one is to prepare for an eventual migration to um yeah to to hand it over.",
+				"date": "2026-02-16"
+			}
+		},
+		{
+			"id": "standup-2026-02-16-004049",
+			"label": "2026-02-16 [00:40:49]",
+			"data": {
+				"chunk": "Gabor Kerekes: But I think since we have s*** tons of GCP credits like why should Yeah, we can we can host it forAmir Houieh: Well, you were talking about uh what is it?Gabor Kerekes: this.Amir Houieh: You were talking about uh fly.io audio and the fact that it has allGabor Kerekes: Yeah.Amir Houieh: thoseGabor Kerekes: uh we can keep that in mind but I think we still don't have um a good complete enough understanding of what are the kind of long-term needs and if there are any limitations that we would run into with fly because on GCP you can do whatever you want on fly there might be certain things you you cannotAmir Houieh: Okay. Enhance. No. Is it okay this way orNoémi Biró: Yeah.Amir Houieh: and then we have the partner feature. Uh and then we also say the proide may shift based on user feedback and data. Any repres repization will be discussed and agreed upon by both parties.Noémi Biró: Heat.Amir Houieh: And then the rest is as usual as the same as before we agreed.",
+				"date": "2026-02-16"
+			}
+		},
+		{
+			"id": "standup-2026-02-16-004235",
+			"label": "2026-02-16 [00:42:35]",
+			"data": {
+				"chunk": "Amir Houieh: We already went through it all. Okay.Noémi Biró: Let'sAmir Houieh: Any more comments on this guys or all good? You can resolve.Gabor Kerekes: Yeah,Noémi Biró: see.Gabor Kerekes: for me it looksAmir Houieh: Okay.Gabor Kerekes: good.Amir Houieh: Nice. Okay. Uh you know me isNoémi Biró: Yeah,Amir Houieh: good.Noémi Biró: I just uh made some reshuffleling of the modulesAmir Houieh: Okay.Gabor Kerekes: Um,Noémi Biró: paragraph.Amir Houieh: Uh pop, what's up with the website? Did you manage to to the blogs?Gabor Kerekes: wait a sec. So, maybe we can uh like staying a little bit more on the topic of the agreement. Uh, I don't know. I'm I'm having kind of second thoughts about like where did we leaveAmir Houieh: Yeah.Gabor Kerekes: this conversation of last time that we were discussing our long-term involvement in civil and commitment and whatever. I'm less convinced I'm more pulled by these other ideas. Um yeah, likeAmir Houieh: But that's okay.Gabor Kerekes: basicallyAmir Houieh: We are not going to also we said that today we are just going to bring it up.",
+				"date": "2026-02-16"
+			}
+		},
+		{
+			"id": "standup-2026-02-16-004433",
+			"label": "2026-02-16 [00:44:33]",
+			"data": {
+				"chunk": "Amir Houieh: Just say hey expect this conversation to happen after 4 months.Gabor Kerekes: Yeah.Amir Houieh: It's we are not going to give any guarantee. That's why we whole we went for this whole idea of like you know just give us theGabor Kerekes: Yeah.Amir Houieh: cash but I think it's smartGabor Kerekes: Yeah. UmAmir Houieh: to also mention it that hey we think for long uh collaboration if it's needed then we would be offered yeah we are we are open to different possibilities I don't know but so you say that you're you are less convinced that we should be part of CPU right in long run.Gabor Kerekes: Yeah. Like Yeah.Amir Houieh: Okay.Gabor Kerekes: I don't know.Amir Houieh: No,Gabor Kerekes: I Yeah.Amir Houieh: I think IGabor Kerekes: What what I want to say is like uh just that I'm more pulled by these otherAmir Houieh: agree.Gabor Kerekes: ideas and Yeah.Amir Houieh: Well, that then we just do it that way.Gabor Kerekes: UmAmir Houieh: I mean we we should just go with our own original idea R&D lab and then whatever",
+				"date": "2026-02-16"
+			}
+		},
+		{
+			"id": "standup-2026-02-16-004540",
+			"label": "2026-02-16 [00:45:40]",
+			"data": {
+				"chunk": "Gabor Kerekes: Yeah.Amir Houieh: projects comes out of so we should make sure that CBIL is the part-time for you know in general or any other project for that sake. Let's get the website online and then we can also start looking for that third engineer or help Melissa to find a CTO.Gabor Kerekes: I found a guy yesterday from the US who uh is like I think he would be pretty good. He's full stack. Uh has yeah a lot of experience with React, TypeScript. uh front end, back end, DevOps.Amir Houieh: I don't think we can afford USGabor Kerekes: Uh I know, but like it's just I put him on a list.Amir Houieh: develop.Gabor Kerekes: So like if if it if civil really grows into you know like funded startup where they can afford bringing this guy this guy would be really good because he's he's working on like uh I found him through like I was reading reviews of this daylight computer and he's he he wrote one of the reviews um he's just aligned in terms ofAmir Houieh: Next,",
+				"date": "2026-02-16"
+			}
+		},
+		{
+			"id": "standup-2026-02-16-004705",
+			"label": "2026-02-16 [00:47:05]",
+			"data": {
+				"chunk": "Gabor Kerekes: the values use that's and also the skills.Amir Houieh: let'sGabor Kerekes: So that's cool.Amir Houieh: go.Gabor Kerekes: Yeah. Uh also contracting.Amir Houieh: Okay,Gabor Kerekes: SoAmir Houieh: let's see. I mean, we we have a budget, so we need to work with our own budget.Gabor Kerekes: yeah, I know.Amir Houieh: And then I will also need to talk to my uh bookkeeper and see if we need to do this through body as a company or for example we do it freelance and then like the contract withGabor Kerekes: Do what?Amir Houieh: CB.Gabor Kerekes: Oh,Amir Houieh: Yeah, because now also Yeah,Gabor Kerekes: okay.Amir Houieh: I think it's less complicated. Yeah, let let me talk to him because there's also the chance that we don't need body anymore. I don't know. We might need somebody because if if we start getting moreGabor Kerekes: Mhm.Amir Houieh: projects then probably a company would benefit more.Gabor Kerekes: And what? Yeah, that's another topic. We shouldn't go into it now,Amir Houieh: No, no.",
+				"date": "2026-02-16"
+			}
+		},
+		{
+			"id": "standup-2026-02-16-004819",
+			"label": "2026-02-16 [00:48:19]",
+			"data": {
+				"chunk": "Gabor Kerekes: but just throw theAmir Houieh: But since Yeah. Yeah. Let's let's let's discuss it later.Gabor Kerekes: US thing as well like Yeah.Amir Houieh: Oh, no. The US, you need to close it for sure. I'm going to send an email to Clark today to tell us what what needs to be done.Gabor Kerekes: Okay.Amir Houieh: It was on my list, actually. Uh, cool. What else do weGabor Kerekes: Um well,Amir Houieh: have?Gabor Kerekes: another thing we discussed is uh having the analytics for the time spent in the app, which you said it would be possible to get quite easily.Amir Houieh: We could install Google Analytics, but it's going to breach the entireGabor Kerekes: I mean can infer that from the conversationsAmir Houieh: secGabor Kerekes: like we can say as can get like session lengths like people spend this much time talking on this day. Yeah that's possible. Yeah that's what we would want. Yeah we can already have that. Yeah. Because we still need to send the analytics from last week.",
+				"date": "2026-02-16"
+			}
+		},
+		{
+			"id": "standup-2026-02-16-004931",
+			"label": "2026-02-16 [00:49:31]",
+			"data": {
+				"chunk": "Gabor Kerekes: Is this something we can include? Yeah. Okay. And is it a lot of work? Okay. Then I'll follow up with you about that after this meeting so I can send it andAmir Houieh: Okay.Gabor Kerekes: I've been mostly organizing theAmir Houieh: Okay.Gabor Kerekes: feedback and making a document that's it's structured on what I think based on the feedback are good strategies.Amir Houieh: Mhm.Gabor Kerekes: There will also be two user meetings this week and I plan to read this Kira's document to understand like uh yeah what are the implications of pattern so I think for cibil that's aAmir Houieh: Okay.Gabor Kerekes: it.Amir Houieh: Nice.Gabor Kerekes: And thenNoémi Biró: for R&D the website. So right now the blog posts have been cherrypicked. Um yeah yeah I have aGabor Kerekes: That'sNoémi Biró: analysisGabor Kerekes: what we can Yeah. What makes sense to include or we can also just Yeah, maybe include everything for now. But then the trouble of cherry picking.Amir Houieh: anything.",
+				"date": "2026-02-16"
+			}
+		},
+		{
+			"id": "standup-2026-02-16-005138",
+			"label": "2026-02-16 [00:51:38]",
+			"data": {
+				"chunk": "Gabor Kerekes: Yeah, we can. I don't know. We can do either. I think we decided that cherry picking will be more beneficial.Amir Houieh: But if it's also. Yeah, I can also cherry pick. But then if you also you were supposed to also share with me your feedback on the latest the lastNoémi Biró: Yeah, that wasGabor Kerekes: Um yeah,Amir Houieh: articleGabor Kerekes: I I don't have that much. Um,Amir Houieh: if you have it written somewhere. I don't know.Gabor Kerekes: do you have the article also as a notionAmir Houieh: I think so.Gabor Kerekes: page?Amir Houieh: Either that or on Google DocsGabor Kerekes: Okay. Uh,Amir Houieh: notion.Gabor Kerekes: then I can make a copy of it. So that can be an easier way to give comments on notion.Amir Houieh: Yeah. Yeah, it's here in my private. Where should I moveGabor Kerekes: Uh so in R&D there is this if you scroll down on the bodyAmir Houieh: it?Gabor Kerekes: R&D there is a an articles header",
+				"date": "2026-02-16"
+			}
+		},
+		{
+			"id": "standup-2026-02-16-005304",
+			"label": "2026-02-16 [00:53:04]",
+			"data": {
+				"chunk": "Amir Houieh: I bring it to body page or is it aGabor Kerekes: there in the UMD R&D if you scroll down there is articles there is a header coming topicsAmir Houieh: Okay, I moved it. Sorry. Here. Uh, articles,Gabor Kerekes: Okay,Amir Houieh: topics. Okay. And thenGabor Kerekes: wait. I'll make a new header. I see it.Amir Houieh: here.Gabor Kerekes: Yeah, that's perfect.Noémi Biró: Okay. So in terms of focus for the weekAmir Houieh: Uh I think so for me I want to get the nexus somewhere. like have a one or two use cases of it.Noémi Biró: Mhm.Amir Houieh: That could be connecting it with more local data or make a test with that therapy app. I don't know something like that. That would be one idea.Noémi Biró: Mhm.Amir Houieh: website of course needs to go up and then we can also announce the website and the whole new kind of pivot on socialNoémi Biró: Yeah. Announce it.Amir Houieh: media just say hey we have we have an update is spinning up we can work",
+				"date": "2026-02-16"
+			}
+		},
+		{
+			"id": "standup-2026-02-16-005455",
+			"label": "2026-02-16 [00:54:55]",
+			"data": {
+				"chunk": "Noémi Biró: Mhm.Amir Houieh: on the copy because I'm tired like also like I don'tNoémi Biró: Okay.Amir Houieh: know investors keeps still contacting for what we are not.Noémi Biró: Tell them to invest in theAmir Houieh: So no,Noémi Biró: R&D.Amir Houieh: I I think it's best to not I meanNoémi Biró: They missed the boat.Amir Houieh: we could still make there are still like plenty of interesting um investors. There is really like they are very only design oriented investors. There are different type ofNoémi Biró: Oh,Amir Houieh: investors.Noémi Biró: sorry. It's somehow it's not so good to hear you now. Or nowAmir Houieh: Oh, my hands were on this thing. Okay, one second.Noémi Biró: it'sAmir Houieh: I think I'm talking to this guy, Ben, and he's from designer Fund. Let me send you the website. Yeah, designerfund.com. So these are the type of like people you you want to work with if you want to invest like find investors.Noémi Biró: Okay.Gabor Kerekes: Yes,Noémi Biró: So he they",
+				"date": "2026-02-16"
+			}
+		},
+		{
+			"id": "standup-2026-02-16-005628",
+			"label": "2026-02-16 [00:56:28]",
+			"data": {
+				"chunk": "Gabor Kerekes: they got inAmir Houieh: Yeah.Gabor Kerekes: touch.Amir Houieh: uh because I wrote a comment on his one of his articles and that was the time I was thinking about that OS thing about the generative UI and the like dissolving the idea of apps and they had this like articles let me see if I can find it that they in there they talked about the vision they think the software is going to happen like it's going to be in 2026 and that always thing kind sound very appealing to them. The ideaGabor Kerekes: Yeah, they have very interesting portfolio actually.Amir Houieh: actually framer guys also the founder of framer they are also part ofNoémi Biró: This looksAmir Houieh: itGabor Kerekes: Yeah,Noémi Biró: great.Gabor Kerekes: this Yeah, like uh if there are VCs like this um Yeah.Amir Houieh: who who gets it. You know, it'sGabor Kerekes: Yeah. Yeah. Like this already.Amir Houieh: important.Gabor Kerekes: I just look at the content and the website and their portfolio. I'm like, okay, these are interesting to talk to like more more so than the ones that",
+				"date": "2026-02-16"
+			}
+		},
+		{
+			"id": "standup-2026-02-16-005737",
+			"label": "2026-02-16 [00:57:37]",
+			"data": {
+				"chunk": "Amir Houieh: Yeah, but it's good.Gabor Kerekes: we talk to. I don't knowAmir Houieh: Oh, yeah. We were a bit yeah it was a different kind of alsoGabor Kerekes: likeAmir Houieh: area but yeah let's see if the website then is online we can also you know reach out to this guy show a bit of projects here and there but it's good to also maintain a relation with these sort of funds you don't want to go and say hey I have a pitch for youNoémi Biró: Yeah.Amir Houieh: you know you want to have a kind of a relation that say hey by the way do you remember one month ago we talked about this look at this demo This is going to work muchNoémi Biró: Yeah. Yeah.Gabor Kerekes: focus more on just like uh relationship building rather than tryingAmir Houieh: better.Gabor Kerekes: to get something specific out of it for now. And then yeah, but then if we see some kind of alignment um then we canAmir Houieh: Yeah. Cool.Gabor Kerekes: Yeah.Amir Houieh: Yeah, that was so my focus for this week is going to be working a bit on more nexus get it to work on a couple of more realistic projects like V code one or two projects and I don't know if there is any other part like no I think for civil we are good at least this week again until new users yeah new user interviews are done Uh yeah, and the website I think would be great to put it online",
+				"date": "2026-02-16"
+			}
+		},
+		{
+			"id": "standup-2026-02-16-005915",
+			"label": "2026-02-16 [00:59:15]",
+			"data": {
+				"chunk": "Amir Houieh: today.Noémi Biró: Yeah.Gabor Kerekes: uh push my changes then. Did you want to share?Amir Houieh: Okay.Gabor Kerekes: Um yeah, I mean I can share. I think it's maybe premature or I don't know like I kind of fell into a rabbit hole which was good but um also not super important at the moment but um I just like wait let me try to share One second. But maybe explain why you think it was important. Well, like it came from I mean it was important because my brain decided that it's important but it came from this um like I tried to make the um the gradients or like the Yeah, when I optimized the the loading the sort of like the gradient uh or the colors weren't so apparent and then I um I don't know, I started experimenting with it and I wasn't happy with any of it and uh it just grew into this kind of Like wait, let me it grew into this experimentation where I had um I mean this is too much but yeah I had cloud build this sort of like um UI try to tweak things uh to experiment with different backgrounds.",
+				"date": "2026-02-16"
+			}
+		},
+		{
+			"id": "standup-2026-02-16-010150",
+			"label": "2026-02-16 [01:01:50]",
+			"data": {
+				"chunk": "Gabor Kerekes: Uh not only backgrounds but uh these are all kind of shaders uh to generate nice gradients and um one sec. Yeah, I mean of course we would go with something subtle like this. Um, but then I like eventually I found this really cool um website or it's like a platform to uh generate shaders with no code.Amir Houieh: Mhm.Gabor Kerekes: So you can um let me see I should have some projects like for example this one is I really like this one uh to I was thinking about um yeah There's this blog that I found by a guy. Actually, I found this platform through this guy. Uh, I didn't I don't really like this kind of thing, but I like the idea of having something when you land on the page, you see something that catches your attention,Amir Houieh: M.Gabor Kerekes: like gives you immediately you land and you're like, whoa, what the f***? This is really cool. That draws you in.Amir Houieh: Okay.Gabor Kerekes: Um, but I think that's too I think it requires more work.",
+				"date": "2026-02-16"
+			}
+		},
+		{
+			"id": "standup-2026-02-16-010353",
+			"label": "2026-02-16 [01:03:53]",
+			"data": {
+				"chunk": "Gabor Kerekes: So I would just like wrap it up now and maybe use like this gradient and explore that separately like later on. So go back to it and um and thenAmir Houieh: Okay.Gabor Kerekes: like come up with something like this. And this is a really cool prototyping tool to create these kind of shaders. So uh you have these like different layers. Um each layer is is a separate shader that like affects the layer that is beneath and uh they have like this huge library of stuff you can layer on top of each other and do all kinds of cool things. Um and then uh export it uh which you can embed on the website but then you can also reverse engineer and just like inline the shaders yourself. Uh so yeah anyway that's that's it but yeah I don't want to spend more time on it now like uh it's uh it's good enough as it is these presets and then weAmir Houieh: Yeah,Gabor Kerekes: can come back to it. I think something that you didn't mention which I think was really strong about why you thought this",
+				"date": "2026-02-16"
+			}
+		},
+		{
+			"id": "standup-2026-02-16-010509",
+			"label": "2026-02-16 [01:05:09]",
+			"data": {
+				"chunk": "Amir Houieh: cool.Gabor Kerekes: was worth to put so much attention and effort to is that we have we are trying to explain inAmir Houieh: VeryGabor Kerekes: words what we are with the manifesto and sometimes when you have these strong visuals it explains that concept by getting a feeling from it and that's also something thatAmir Houieh: good.Gabor Kerekes: I got with the civil uh that people don't necessarily understand what they can do within civil because we ex we explain like in the onboarding uh like here is how civil can help you. We have those sentences but it's not visually clear enough within the UI. So for me that was the strong pro that this couldAmir Houieh: Yeah.Gabor Kerekes: be.Amir Houieh: Yeah.Gabor Kerekes: Yeah. Yeah. I thinkAmir Houieh: I also see the importance of it and I agree it it's it's good to have it.Gabor Kerekes: so.Amir Houieh: Uh but I also agree that maybe this is enough.Gabor Kerekes: Mhm.Amir Houieh: I strongly think this is enough as we have and any of the shaders or whatever these sort of visuals you know this this should evolve over the time as we go.",
+				"date": "2026-02-16"
+			}
+		},
+		{
+			"id": "standup-2026-02-16-010637",
+			"label": "2026-02-16 [01:06:37]",
+			"data": {
+				"chunk": "Gabor Kerekes: Yeah. Yeah.Amir Houieh: uh but I don't think we should budget for it now. Uh we can roll grow roll as it is and then this is also a good practice for ourselves to learnGabor Kerekes: Yeah.Amir Houieh: that we can make things in a gradual you know iterational way and the website could also be one of that.Gabor Kerekes: Yeah. That'sAmir Houieh: I also had a moment when I was working on the blog section to I was very close you know a rag on top of it you know and make it genive but then I decided no let's not doGabor Kerekes: Yeah.Amir Houieh: it because it's not needed or it is it is needed but it's not it can also be launched now without this it forks but of course for example it yeah such a v and I thinkNoémi Biró: Yeah.Amir Houieh: this is the same here and it would be good that we each of us when it comes to this sort of experimentation we Is it needed now or not?Noémi Biró: Yeah.Amir Houieh: But it's good that you I mean uh now it's time to to basically just deliver it and then we can do it.",
+				"date": "2026-02-16"
+			}
+		},
+		{
+			"id": "standup-2026-02-16-010736",
+			"label": "2026-02-16 [01:07:36]",
+			"data": {
+				"chunk": "Amir Houieh: Uh but then what will you then be doing g for this week?Noémi Biró: Amen.Amir Houieh: What is your your mind? I have one suggest but up toNoémi Biró: Amen.Amir Houieh: you.Gabor Kerekes: go to the countryside and umAmir Houieh: Oh yeah, IGabor Kerekes: and yeah to celebrate my birthday which isAmir Houieh: thinkGabor Kerekes: on I don't know which day but soon Thursday Thursday and yeah, like have a bit of unstructured time. Uh it it's more about kind of yeah, just giving space that we didn't have during the holidays. Uh yeah,Amir Houieh: You want to take your laptop with you?Gabor Kerekes: I'm going to take the laptop, but I don't because it's also about I don't know,Amir Houieh: Why?Gabor Kerekes: we might build some tools or um I don't know, we're going to just like leave some space, I think, to for creative ideas to emerge. And um we might build some things and we'll be walking and talkingAmir Houieh: Okay.Gabor Kerekes: and thinking about what kind of life do we want to live and I don't know this kind of s***",
+				"date": "2026-02-16"
+			}
+		},
+		{
+			"id": "standup-2026-02-16-010851",
+			"label": "2026-02-16 [01:08:51]",
+			"data": {
+				"chunk": "Amir Houieh: Okay. And then till then like until Thursday you want to also you want to work onGabor Kerekes: andAmir Houieh: something.Gabor Kerekes: notAmir Houieh: I want to suggest you guys should connect this nexus to this idea you have thatGabor Kerekes: notAmir Houieh: you walk and you record and see what happens.Gabor Kerekes: Yeah. Yeah. Like that kind of things basically things that are not produced for any particular purpose. I don't know if I want to build anything like if I wantAmir Houieh: No, no, I'm not talking about while you are there.Gabor Kerekes: to Oh,Amir Houieh: I'm talking about before you leave.Gabor Kerekes: okay.Amir Houieh: I don't know like what is the plan or do you wantGabor Kerekes: Yeah. Actually,Amir Houieh: toGabor Kerekes: actually that could be interesting because yesterday I You have the transcript. That's what I coded. I like a pipeline to transcribe uh our conversations uh totally locally using whisper like it runs completely on the machine andAmir Houieh: Nice. Okay.",
+				"date": "2026-02-16"
+			}
+		},
+		{
+			"id": "standup-2026-02-16-010952",
+			"label": "2026-02-16 [01:09:52]",
+			"data": {
+				"chunk": "Gabor Kerekes: yeah I don't know could could be interesting to apply the brain to that I think so that's exactly what I wanted to do when we talked about the brain okay soAmir Houieh: But then you need to but because you can't it's not going to run on run on on a mobile willGabor Kerekes: No, but like after the mobile then you have it now on your laptop andAmir Houieh: it?Gabor Kerekes: you ran this local AI on your laptop. So you have all the transcripts. Mhm. So that should Yeah.Amir Houieh: Oh yeah that thatGabor Kerekes: So what I have is take take a directory of audio files turn them into transcripts withAmir Houieh: Okay,Gabor Kerekes: like speaker identification uh yeah like di it's called diorizationAmir Houieh: cool.Gabor Kerekes: where like the different speakers are identified and yeah produce text files out of that and that's what I have so I can give those files I guess to the brain that would be the nexus just toAmir Houieh: Nice.Gabor Kerekes: see.Amir Houieh: Okay, let's also then we agree on Nexus as a name.",
+				"date": "2026-02-16"
+			}
+		},
+		{
+			"id": "standup-2026-02-16-011105",
+			"label": "2026-02-16 [01:11:05]",
+			"data": {
+				"chunk": "Gabor Kerekes: Yeah.Amir Houieh: I will then start renaming itGabor Kerekes: I I So your focus goreAmir Houieh: everywhere.Gabor Kerekes: is uh from civil perspective the analytics. Yeah. Which is an easy task. And then just testing Nexus or no first uh pushing your changes from the website.Amir Houieh: Yeah, I think you should take care of website today that cu thing andGabor Kerekes: Mhm.Amir Houieh: then would be great if you could also do the nexus implementation integration with that audioNoémi Biró: Yeah, that'sAmir Houieh: app.Noémi Biró: Yeah,Amir Houieh: There is not much in that sense to be honest.Noémi Biró: I alsoGabor Kerekes: So I mean as part of building this pipeline I tried to run a local model uh from liquid AI. Unfortunately it doesn't work well with Hungarian but otherwise it works pretty well. It's just um I don't know there is proof that it's really easy actually to to build with local models as well. So that's a good thing to know. Mhm.Amir Houieh: Okay. Yeah. Today I'm going to add a persistent storage to Nexus so it can store stuff. Nice. Nice. Because yeah,Gabor Kerekes: Nice.Amir Houieh: any application you want to build with it, you need a persistent state otherwise it's useless.Noémi Biró: Yeah.Gabor Kerekes: And what storage is it going to be? Text files.Amir Houieh: No, it's going to be SQL light.Gabor Kerekes: Okay.Amir Houieh: I think that's the easiest and lightest way. All right.  \nTranscription ended after 01:13:39\nThis editable transcript was computer generated and might contain errors. People can also change the text after it was created.",
+				"date": "2026-02-16"
+			}
+		},
+		{
+			"id": "standup-2026-02-16-000000",
+			"label": "2026-02-16 [00:00:00]",
+			"data": {
+				"chunk": "Amir Houieh: Gemini is taking notes. Cool.Noémi Biró: Great.Amir Houieh: Yo,Gabor Kerekes: HelloNoémi Biró: A really good job with putting together the words that we had around staying committed toGabor Kerekes: you.Amir Houieh: good.Noémi Biró: the project and also mentioning a bit the equity but then leaving itAmir Houieh: Yeah.Noémi Biró: back. Really good job. Yeah.Amir Houieh: Now this was a nice niceNoémi Biró: also really good work on the agreement itself.Amir Houieh: work. Cool.Noémi Biró: Yeah.Amir Houieh: Amazing. Just one thing Gabbor I wouldn't rush the engineer.Noémi Biró: I mean, I just thought likeAmir Houieh: If if she ends up hire it but we don't have any project left.Noémi Biró: what?Amir Houieh: If she hires it now we are not going to have civil project anymore.Noémi Biró: I don't think he would. I I think we're still needed.Amir Houieh: What ifNoémi Biró: I don't know.Amir Houieh: sometimes you're too nice? No, I'm kidding. It's not going to happen.Noémi Biró: It's No,",
+				"date": "2026-02-16"
+			}
+		},
+		{
+			"id": "standup-2026-02-16-000112",
+			"label": "2026-02-16 [00:01:12]",
+			"data": {
+				"chunk": "Amir Houieh: Don't worry,Noémi Biró: no, no.Amir Houieh: it's not going toNoémi Biró: It's true. It's true.Amir Houieh: happen.Gabor Kerekes: It'sAmir Houieh: I was like,Gabor Kerekes: true.Amir Houieh: \"What the f***? Let her just sign a contract and then Hey, wait. You wait until we sign it. Huh? No, you have to send it now.Gabor Kerekes: It's not like he's going to she's goingAmir Houieh: How do you know?Gabor Kerekes: to Yeah.Amir Houieh: Maybe he's looking for a job.Gabor Kerekes: But like even if do you think that I mean there is no way it would be such a huge risk like to onboard a new developer and like his salary is probably you know like he will ask uh for just one month of uh his salary.Amir Houieh: the salary that we are asking 12K so she's going to do itGabor Kerekes: Yeah.Amir Houieh: then I mean theoretically she could no butGabor Kerekes: She doesn't have the code.Amir Houieh: we have to giveGabor Kerekes: Yeah. Yeah.",
+				"date": "2026-02-16"
+			}
+		},
+		{
+			"id": "standup-2026-02-16-000221",
+			"label": "2026-02-16 [00:02:21]",
+			"data": {
+				"chunk": "Gabor Kerekes: But wait, like you think that she would basically fire the three of us and hire one guy who she doesn't know? I don't think so.Amir Houieh: as a I don't know there is a chance not maybe 90% not but maybe 10% yes is if it's a good deal if he asked for okay give me 5k and 20% equity and I love cibil and he proves it I would have gone forGabor Kerekes: Okay. Yeah.Amir Houieh: cuz you never know.Gabor Kerekes: Wow. Okay. Well,Amir Houieh: Anyway,Gabor Kerekes: maybe send some other guy and then at a later moment you send the real guy.Amir Houieh: now it's okay.Gabor Kerekes: I don't think so.Amir Houieh: You were the one who told me, \"Let's wait on for this guy and not rush it.Gabor Kerekes: IAmir Houieh: Anyway, it's okay. Don't worry. Next time.Gabor Kerekes: Yeah, I don't know. I just didn't think it would be that risky,Amir Houieh: Cool.Gabor Kerekes: but maybe you're right. I don't know. Like it's just uh like I I I just don't see this this is not a one person job this project.",
+				"date": "2026-02-16"
+			}
+		},
+		{
+			"id": "standup-2026-02-16-000347",
+			"label": "2026-02-16 [00:03:47]",
+			"data": {
+				"chunk": "Gabor Kerekes: So like she can hire him but I don't think it's going to be like uh that he will able to manage he will be able to manage the whole thing. So even if she does hire she would hire him. I don't see how um that would affect our contract in theAmir Houieh: No, I mean It's just Yeah, I know. I I just brought it up. Yeah,Gabor Kerekes: US but but but it's alsoAmir Houieh: maybe it's not veryGabor Kerekes: fair like yeah I sometimes don't think about these kind of strategic things so you should definitely give me that kind of feedback.Amir Houieh: cool.Gabor Kerekes: Back.Amir Houieh: Nice. All right. No, I think at the end of the day she will consult me uh to hire him or not. So, I have a but anyway. Cool. I think I'm going to just work a bit more today, but then call it off early. I'm super tired. I was driving. I drove two times 11 hours in two days.Gabor Kerekes: That's notAmir Houieh: That's about 1,700 kilometers. So,Gabor Kerekes: That'sAmir Houieh: yeah. So, I think I'm going to rest a bit. But it was a good day. I think we had good conversation and the civil was also very good and yeah cool. Anything else we need toGabor Kerekes: No,Amir Houieh: talk?Gabor Kerekes: we can whatever else is there, we can just do it asynchronously. Yeah.Amir Houieh: Okay.Gabor Kerekes: On Discord.Amir Houieh: And regarding the this guy, don't send it. No. And let's wait for Melissa. See if she's going to ask.  \nTranscription ended after 00:05:52\nThis editable transcript was computer generated and might contain errors. People can also change the text after it was created.",
+				"date": "2026-02-16"
+			}
+		}
+	]
+}

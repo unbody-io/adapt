@@ -99,6 +99,16 @@ function extractJson(text: string): string {
 	if (start !== -1 && end > start) {
 		cleaned = cleaned.slice(start, end + 1)
 	}
+	// Replace JS expressions like Math.pow(2, 31) with their numeric value
+	cleaned = cleaned.replace(/Math\.pow\(([^)]+)\)/g, (_match, args) => {
+		const parts = args.split(',').map((s: string) => Number(s.trim()))
+		return parts.length === 2 && parts.every(Number.isFinite)
+			? String(Math.pow(parts[0], parts[1]))
+			: '0'
+	})
+	// Replace Number.MAX_SAFE_INTEGER and similar constants
+	cleaned = cleaned.replace(/Number\.MAX_SAFE_INTEGER/g, String(Number.MAX_SAFE_INTEGER))
+	cleaned = cleaned.replace(/Number\.MIN_SAFE_INTEGER/g, String(Number.MIN_SAFE_INTEGER))
 	return cleaned
 }
 

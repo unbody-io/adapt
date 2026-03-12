@@ -12,7 +12,8 @@
  */
 
 import { TypedEmitter } from '../../types/events'
-import { generate, stepCountIs } from '../../llm'
+import { generate, stepCountIs, streamText } from '../../llm'
+import type { StreamTextResult } from '../../llm'
 import { evaluatorSystemPrompt } from './prompt.system'
 import { evaluationPromptTemplate } from './prompt.template.evaluation'
 import {
@@ -123,7 +124,7 @@ export class Evaluator extends TypedEmitter<EvaluatorEventMap> {
 			// Call LLM with tools
 			const prompt = this.formatEvaluationPrompt(context)
 			const result = await generate({
-				model: this.brain.config.blueprintModel,
+				model: this.brain.config.evolution.model,
 				system: evaluatorSystemPrompt,
 				prompt,
 				tools,
@@ -155,10 +156,17 @@ export class Evaluator extends TypedEmitter<EvaluatorEventMap> {
 				decisions = params.decisions
 			}
 
+			// Collect reasoning text from all steps
+			const reasoning = result.steps
+				.map((step) => step.text)
+				.filter(Boolean)
+				.join('\n')
+
 			this.emit('evaluator:evaluation:completed', {
 				source,
 				decisionCount: decisions.length,
 				decisions,
+				reasoning,
 			})
 
 			// Record history (capped at 10)
@@ -195,6 +203,127 @@ export class Evaluator extends TypedEmitter<EvaluatorEventMap> {
 
 			throw new Error(`Evaluator evaluation failed: ${errorMessage}`)
 		}
+	}
+
+	/**
+	 * Streaming variant of evaluate().
+	 *
+	 * Returns the raw ai-sdk StreamTextResult so the consumer can iterate
+	 * fullStream for tool-call/tool-result events in real time, plus a
+	 * decisions promise that resolves after the stream finishes and
+	 * bookkeeping (history, store, signal splice) completes.
+	 */
+	async evaluateStream(
+		source: 'auto' | 'manual' = 'manual',
+	): Promise<{
+		stream: StreamTextResult<any, any>
+		decisions: Promise<EvolutionDecision[]>
+	}> {
+		if (this.signals.length === 0) {
+			return {
+				stream: null as any,
+				decisions: Promise.resolve([]),
+			}
+		}
+
+		const consumedCount = this.signals.length
+
+		this.emit('evaluator:evaluation:started', {
+			signalCount: consumedCount,
+		})
+
+		const context = await this.buildContext()
+
+		const tools = {
+			inspectSpecialist: createInspectSpecialistTool(this.brain),
+			querySpecialist: createQuerySpecialistTool(this.brain),
+			consultSystemKnowledge: createConsultSystemKnowledgeTool(this.brain),
+			reviewDismissedData: createReviewDismissedDataTool(this.brain),
+			reviewRecentDecisions: createReviewRecentDecisionsTool(this.history),
+			finalizeDecisions,
+		}
+
+		const prompt = this.formatEvaluationPrompt(context)
+
+		let resolveDecisions!: (d: EvolutionDecision[]) => void
+		let rejectDecisions!: (e: Error) => void
+		const decisionsPromise = new Promise<EvolutionDecision[]>((res, rej) => {
+			resolveDecisions = res
+			rejectDecisions = rej
+		})
+
+		const stream = streamText({
+			model: this.brain.config.evolution.model,
+			system: evaluatorSystemPrompt,
+			prompt,
+			tools,
+			toolChoice: 'auto',
+			stopWhen: stepCountIs(MAX_EVALUATION_STEPS),
+			onFinish: async (event) => {
+				try {
+					// Extract finalizeDecisions from last step or any step
+					let finalizeCall = event.toolCalls.find(
+						(c: any) => c.toolName === 'finalizeDecisions',
+					)
+					if (!finalizeCall) {
+						for (const step of event.steps) {
+							const call = step.toolCalls.find(
+								(c: any) => c.toolName === 'finalizeDecisions',
+							)
+							if (call) {
+								finalizeCall = call
+								break
+							}
+						}
+					}
+
+					let decisions: EvolutionDecision[] = []
+					if (finalizeCall && 'input' in finalizeCall) {
+						const params = finalizeCall.input as FinalizeDecisionsParams
+						decisions = params.decisions
+					}
+
+					const reasoning = event.steps
+						.map((step: any) => step.text)
+						.filter(Boolean)
+						.join('\n')
+
+					this.emit('evaluator:evaluation:completed', {
+						source,
+						decisionCount: decisions.length,
+						decisions,
+						reasoning,
+					})
+
+					const historyEntry: EvolutionHistoryEntry = {
+						timestamp: new Date(),
+						decisions: decisions.map((d) => ({
+							action: d.action,
+							targets: d.targets,
+							reasoning: d.reasoning,
+						})),
+					}
+					this.history.push(historyEntry)
+					if (this.history.length > 10) this.history.shift()
+
+					await this.brain.store.evolution.add({
+						id: `eval_${Date.now()}`,
+						decisions: historyEntry.decisions,
+						source,
+						created_at: historyEntry.timestamp.toISOString(),
+					})
+
+					this.signals.splice(0, consumedCount)
+					resolveDecisions(decisions)
+				} catch (error) {
+					const msg = error instanceof Error ? error.message : String(error)
+					this.emit('evaluator:evaluation:failed', { error: msg })
+					rejectDecisions(new Error(`Evaluator evaluation failed: ${msg}`))
+				}
+			},
+		})
+
+		return { stream, decisions: decisionsPromise }
 	}
 
 	/**

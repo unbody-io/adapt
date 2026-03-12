@@ -5406,7 +5406,7 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
     }
 
     function updateLearnersUI() {
-      const ids = Object.keys(learnerStates)
+      const ids = Object.keys(learnerStates).filter(id => !learnerStates[id].internal)
       learnerCount.textContent = ids.length
 
       if (ids.length === 0) {

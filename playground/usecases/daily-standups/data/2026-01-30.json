@@ -1,0 +1,95 @@
+{
+	"id": "standup-2026-01-30",
+	"source": "standup-2026-01-30",
+	"description": "📝 Notes\nJan 30, 2026\nR&D daily sprint\nInvited Amir Houieh Unbody io Noémi Biró Gabor Kerekes\nAttachments R&D daily sprint \nMeeting records Transcript \nSummary\nA summary wasn't produced for this meeting because there wasn't enough conversation in a supported language.If the meeting was transcribed, you can review the transcript linked in the meeting records section of this document.Visit the help center for troubleshooting information\nDetails\nDetails weren't produced for this meeting.\nSuggested next steps\nNo suggested next steps were found for this meeting.\nYou should review Gemini's notes to make sure they're accurate. Get tips and learn how Gemini takes notes\nPlease provide feedback about using Gemini to take notes in a short survey.\n\n---\n\n📝 Notes\nJan 30, 2026\nR&D daily sprint\nInvited Amir Houieh Unbody io Noémi Biró Gabor Kerekes\nAttachments R&D daily sprint \nMeeting records Transcript \nSummary\nAmir Houieh updated the team on their website, now a Next.js project with an integrated blog, and introduced an initial sketch of an attention-based memory layer hobby project. Amir Houieh and Gabor Kerekes discussed the significant business opportunity of this memory tool for therapists, estimating it could save them 1.5 hours per day and be highly valued, which prompted a discussion about local deployment and security concerns with Noémi Biró. The main talking points included the website update, the introduction of the attention-based memory layer, its potential as a business tool for therapists, and considerations for local deployment, security, and hardware for the tool.\nDetails\nWebsite and Hobby Project Updates Amir Houieh provided an update on the website, noting that it is now a proper Next.js project, not just a mockup, and includes an integrated blog generated from markdown files. Amir Houieh also introduced their hobby project, which is an initial sketch of an attention-based memory layer focused on topics that require attention, rather than storing all data, which Gabor Kerekes related to a conversation about therapists' challenges with attention splitting between listening and note-taking (00:01:41). They explained that this memory layer is \"very purpose driven,\" and could be told what to focus on, such as user anger or development principles in logs (00:03:05).\nBusiness Opportunity for Therapist Tool The conversation pivoted to the potential business value of the memory tool for therapists, as Amir Houieh stated that they confirmed with multiple therapists, including their own and a physiotherapist, that taking notes and writing reports after sessions takes about 15 minutes per one-hour session (00:04:25). Amir Houieh estimated that this system could save each therapist about 1.5 hours per day, which translates to a financial worth of several hundred Euros daily, suggesting they would easily pay for the service (00:05:24). Gabor Kerekes emphasized the high motivation from therapists, as they would even pay for such a system themself if their employer would not (00:04:25).\nSecurity and Deployment Considerations Amir Houieh and Gabor Kerekes discussed security and deployment for a therapist-focused tool, noting that making the system local could address many security and privacy concerns, a key factor for therapists according to Noémi Biró. They considered the complexity of running a language model locally, which would require strong enough laptops (00:05:24) (00:07:54). Gabor Kerekes suggested shipping the hardware with the software, but Amir Houieh and Noémi Biró expressed doubt about the financial and sustainability viability of such a model, given that clinics might be small or have recently invested in new IT equipment (00:09:03). Gabor Kerekes acknowledged that they were getting ahead of themself, and they should first better define the system's needs before focusing on implementation details (00:10:55).\nNext Steps for the Memory Layer Amir Houieh mentioned that they would have the initial version of the memory or \"brain\" ready by next week, and they want to set it up for the team to feed it with different data and jobs (00:06:44). Amir Houieh referenced Gabor Kerekes's idea of connecting it to cloud code to observe interactions over a week (00:07:54). Noémi Biró confirmed the plan for the following week to focus on setting up the memory layer on each other's devices (00:11:55). Amir Houieh also shared that both their therapist and Hoda have expressed willingness to try the system once it is ready (00:10:55).\nUpcoming Moderating Sessions Noémi Biró informed the team about their upcoming moderating work, which involves introductions and Q&A sessions with film directors after screenings. They mentioned having eight sessions in total until Tuesday (00:11:55).\nSuggested next steps\nAmir Houieh will have the initial version of the memory layer ready by next week.\nThe group will set up the memory layer on each other's devices next week to feed it with different data and assign different jobs.\nYou should review Gemini's notes to make sure they're accurate. Get tips and learn how Gemini takes notes\nPlease provide feedback about using Gemini to take notes in a short survey.",
+	"items": [
+		{
+			"id": "standup-2026-01-30-000000",
+			"label": "2026-01-30 [00:00:00]",
+			"data": {
+				"chunk": "Noémi Biró: Yeah.Amir Houieh: Hello.Noémi Biró: Hello.Gabor Kerekes: See?Amir Houieh: Nice. Okay, guys. Can we do this quickly? I mean, fast. I'm super tired. I don't knowNoémi Biró: Yeah.Amir Houieh: why.Noémi Biró: I mean, it's also not not that much. No.Amir Houieh: Uh on my side I worked on the website a bit further. Let me see if I have it somewhere open. Gab, did you work on it orGabor Kerekes: No,Amir Houieh: not?Gabor Kerekes: I I I I cloned it and I started uh messing with it, but then I I didn't do that much. So, I still need to get into theAmir Houieh: Yeah, I I also didn't work it after yesterday discussion,Gabor Kerekes: groove.Amir Houieh: but it's good to just show you what's the latest stage onbody website, I guess. Yes, npm dev. So that is what I was working on. Uh the website I worked a bit for last two days I guess. Boom. Share my screen.",
+				"date": "2026-01-30"
+			}
+		},
+		{
+			"id": "standup-2026-01-30-000141",
+			"label": "2026-01-30 [00:01:41]",
+			"data": {
+				"chunk": "Amir Houieh: So it looks like this now. Uh there were a couple of things to be done. Uh so now it's like a more proper next.js project not a mockup. I also integrated a blog. So the block comes from markdowns and like these sort of things gets generated upon every time you add a markdown file to it and then yeah each one it's like this super minimal kind of yeah like this um that's more or less it uh what else and in term yeah I also started uh working on my kind of hobby project like the internal project which I already talked about it with Gabbor. So N2 also you know as well it's like the first sketch of a memory layer that has that the focus is not on the storage and persistence data but it's more about uh basically the questions or the topics that it's very attention based. So it's about the things that we need to give attention along the way. So it doesn't store the entire data for example and the entire conversations but you can uh tell it what to focus on and what to observe.",
+				"date": "2026-01-30"
+			}
+		},
+		{
+			"id": "standup-2026-01-30-000305",
+			"label": "2026-01-30 [00:03:05]",
+			"data": {
+				"chunk": "Amir Houieh: So for example you can say hey keep looking at this incoming data and then just find out that if the user when user gets angry or keep at these logs that I have my interaction with cloud code and keep track of like my development principles so it's very purpose driven that's the initialNoémi Biró: H.B.Amir Houieh: sketch.Gabor Kerekes: And you had a conversation with a with your therapistAmir Houieh: OhGabor Kerekes: that was kind of like they shared that they they notAmir Houieh: yeah,Gabor Kerekes: only they but that uh therapists in general are kind of overwhelmed with uh how how to split their attention between listening and taking notes and uh to like if there was some basically it's so close to what we are doing with the like microphone and but but if it wasNoémi Biró: Mhm.Gabor Kerekes: running locally and totally privateNoémi Biró: Mhm.Gabor Kerekes: uhAmir Houieh: So yeah, that was one of the ideas based on that I started also thinking about this memory because pretty much all the ideas that we all talking about at the end of the day comes down to such a memory like a memory that basically is an observant and it takes Yeah.",
+				"date": "2026-01-30"
+			}
+		},
+		{
+			"id": "standup-2026-01-30-000425",
+			"label": "2026-01-30 [00:04:25]",
+			"data": {
+				"chunk": "Amir Houieh: It basically help you to follow the attention or give it Yeah.Gabor Kerekes: But it's like um it's not only I don't know to meAmir Houieh: Yeah.Gabor Kerekes: what you said about this conversation that it's not only an interesting idea creatively but that you said that your therapist said that like that they wouldAmir Houieh: No, no, no. Yeah, that's Yeah,Gabor Kerekes: pay for this kind of s***Amir Houieh: exactly.Gabor Kerekes: and like even if it's not being paid by their employer or the organization,Amir Houieh: They would do it.Gabor Kerekes: they would do it. But like if there's such motivation and if there's enough therapist and organizations would probably pay for it likeAmir Houieh: Exactly.Noémi Biró: No.Amir Houieh: So to give you an idea guys uh like this is a problem that all of them has and IGabor Kerekes: andAmir Houieh: have confirmed it talking to Huda but also talking to my own therapist and also talked to my physiootherapist like two months ago he had the same problem because at the end of the day it's all for them it's more about the intake but for the therapist it's every session.",
+				"date": "2026-01-30"
+			}
+		},
+		{
+			"id": "standup-2026-01-30-000524",
+			"label": "2026-01-30 [00:05:24]",
+			"data": {
+				"chunk": "Gabor Kerekes: Yeah,Amir Houieh: So the amount of work they need to do is like 15 minutes per session of one hour is basically taking for report taking notesGabor Kerekes: I'mAmir Houieh: report writings after and why. So and per per average they talk to six people per day six sessions that is one and a half hour of time that we can save per therapist per day. And just the rough idea a therapist charges in terms of value €100 an hour almost. So that is about like in terms of worth value it saves every therapist 500 sorry like couple of hundred euros a day. So easily they would pay for such a thing like for 200 a user. And uh also with Gabbor we talked about how we could also distinguish it evenGabor Kerekes: Yeah.Amir Houieh: further by making it local. So nothing goes off your laptop, nothing goes off the your therapy. And even we talked about Yeah.Noémi Biró: And that's key. That's key for them.Amir Houieh: And also we talked about what about we even ship the hardware like so we for each clinic we have one server or one I don't know computer that you ship it with as a package you know.",
+				"date": "2026-01-30"
+			}
+		},
+		{
+			"id": "standup-2026-01-30-000644",
+			"label": "2026-01-30 [00:06:44]",
+			"data": {
+				"chunk": "Amir Houieh: So yeah, I think it's a very interestingGabor Kerekes: Yeah. And I yeah that there are so many I don't know it canAmir Houieh: idea.Gabor Kerekes: be imagine if you would have for example a user application where not only the therapist but the patients also and they talk to each other like the the therapist system talks to the patients AI and I don't know it could feed into the conversations andAmir Houieh: You mean the therapist itself talk to the memory of the user?Gabor Kerekes: find That'sAmir Houieh: Yeah,Gabor Kerekes: Mhm.Amir Houieh: that that's that's part of it for sure. Yeah. And actually one of I I built I could have shown but anyway I already made an sketch. I will show you but without the memory. I just mock it up the other week and it's pretty cool like uh yeah we should we I think we can do something uh I think by next week I'm going to have this brain and like this the initial version of the memory ready and it would be great to set it up for each other and feed it with different data and ask it to do different jobs.",
+				"date": "2026-01-30"
+			}
+		},
+		{
+			"id": "standup-2026-01-30-000754",
+			"label": "2026-01-30 [00:07:54]",
+			"data": {
+				"chunk": "Amir Houieh: I don't know like Gabbor had an idea of connecting it to the cloud code and see over a week maybe what happens uh what it learns from our interaction uh and then we can of course improve it and at some point we can also make a prototype but I think that's therapy idea is really cool but we need to somehow also be sure that this is what we want to make because it it it has a lot of security and privacy things attached to it.Gabor Kerekes: Yeah,Amir Houieh: Um,Gabor Kerekes: but um a lot of security and privacy concerns go away when you when you're local and if you areAmir Houieh: local andGabor Kerekes: using encryption.Amir Houieh: especially if you but then the problem is that then a each therapist should run a system that can run a language model.Noémi Biró: I need to give them that. No.Amir Houieh: But no,Gabor Kerekes: Butch.Amir Houieh: but that that's another complexity. Then you need to take care of the security between your server and the peers in the clinic and that's a security job a lot of a lot.",
+				"date": "2026-01-30"
+			}
+		},
+		{
+			"id": "standup-2026-01-30-000903",
+			"label": "2026-01-30 [00:09:03]",
+			"data": {
+				"chunk": "Amir Houieh: So basically you need to create a secure network that is notGabor Kerekes: Yeah,Amir Houieh: hackable.Gabor Kerekes: I don't know like I I don't know what the application would be because so far what I imagine is that there's no networkAmir Houieh: No, no, no.Gabor Kerekes: involved.Amir Houieh: Exactly. So it should be running on the therapist laptop,Gabor Kerekes: Yeah.Amir Houieh: right?Gabor Kerekes: Yeah.Amir Houieh: Or computer. So we need to make sure that their laptop is strong enough that can run it.Gabor Kerekes: Yeah.Amir Houieh: For example, I don't know has a MacBook Air.Gabor Kerekes: I mean we would ship the hardware. We we would sell the we would sell the system together with theAmir Houieh: Huh.Gabor Kerekes: computer.Amir Houieh: Oh, so they need to buy a computer per therapist.Gabor Kerekes: They buy a computer from us, not the software.Amir Houieh: but her therapist.Gabor Kerekes: I mean,Amir Houieh: But that's a lot of money.Gabor Kerekes: yeah,Amir Houieh: I don't think they are going to invest this much.Gabor Kerekes: I don't know.",
+				"date": "2026-01-30"
+			}
+		},
+		{
+			"id": "standup-2026-01-30-000954",
+			"label": "2026-01-30 [00:09:54]",
+			"data": {
+				"chunk": "Gabor Kerekes: Uh I mean,Amir Houieh: That's what IGabor Kerekes: it's just an idea, butAmir Houieh: mean.Noémi Biró: But it's also a bit like it's strange also from a sustainability point of view. Let's say this company invested in buying all their employees new laptops last year. They're not going to do it again.Amir Houieh: Yeah. No, I don't think that's business like financially viable. I mean it could.Noémi Biró: Usually these big organizations have like their IT department.Amir Houieh: Yeah.Noémi Biró: So they'reAmir Houieh: Yeah. But there is not much of those big organization in terms of clinical therapy like I know for example like the this clinic I go they have about 10 to 15 people where Hoda isGabor Kerekes: IAmir Houieh: working they have only seven people. So they are pretty small in that sense.Noémi Biró: But it could have a prerequisite like we find an IT partner that would make their device ready. That could be a way. You know, like that's a prerequisite to usingGabor Kerekes: mean I feel like we are so far ahead of ourselves right",
+				"date": "2026-01-30"
+			}
+		},
+		{
+			"id": "standup-2026-01-30-001055",
+			"label": "2026-01-30 [00:10:55]",
+			"data": {
+				"chunk": "Amir Houieh: Yeah. Yeah. Let'sGabor Kerekes: now how to how to implement it like it was just aAmir Houieh: makeGabor Kerekes: conversation a casual conversation between air and his therapist which kind of hinted at there being a business opportunity there and I think like that's maybe something to discover a little bit better what exactly would the system need to be before We start thinking about how likeNoémi Biró: You're right.Amir Houieh: Yeah,Noémi Biró: You're right.Gabor Kerekes: what computer we should order.Noémi Biró: You're right.Amir Houieh: but but good money is motivation.Noémi Biró: But I think this is so cool.Amir Houieh: We need to make money is motivation.Gabor Kerekes: HAmir Houieh: We need to make sure this is going to make money. Then we think about But I'm I'm kidding.Gabor Kerekes: ofNoémi Biró: We It's a nice way.Amir Houieh: Um that's good.Gabor Kerekes: course.Noémi Biró: Yeah. I hope we're going to get similar drive from talking to the user because like if we're able to identify such a straightforward problemsAmir Houieh: She my therapist and Hoda both said that they would willingly to work like give it a try if it's ready.",
+				"date": "2026-01-30"
+			}
+		},
+		{
+			"id": "standup-2026-01-30-001155",
+			"label": "2026-01-30 [00:11:55]",
+			"data": {
+				"chunk": "Amir Houieh: But then maybe for example I could try it with my own therapy sessions.Noémi Biró: Let's stick with the plan for now that next week we're going to try to set it up on each other's and then we go from there.Amir Houieh: Yeah. Yeah.Noémi Biró: Okay.Amir Houieh: Okay.Noémi Biró: Nice. Cool.Amir Houieh: Awesome. Uh yeah, that was updates from my side, I think. I don't know.Gabor Kerekes: I don't have any thing toNoémi Biró: OhAmir Houieh: Okay.Gabor Kerekes: add.Noémi Biró: okay.Amir Houieh: Okay. Now, you go and focus on your session.Noémi Biró: Yeah.Amir Houieh: And is it a panel orNoémi Biró: Um so whenever there is like a film being screened and the director is present uh there is a moderating during an introduction of the film and then after the film has screened like there's a Q&A with the director and that's where I'm moderating.Amir Houieh: Nice. AllNoémi Biró: Yeah. And I have in total eight sessions till Tuesday.Amir Houieh: right. Okay.  \nTranscription ended after 00:13:33\nThis editable transcript was computer generated and might contain errors. People can also change the text after it was created.",
+				"date": "2026-01-30"
+			}
+		}
+	]
+}

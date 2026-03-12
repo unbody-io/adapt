@@ -1,0 +1,127 @@
+{
+	"id": "standup-2026-02-25",
+	"source": "standup-2026-02-25",
+	"description": "📝 Notes\nFeb 25, 2026\nR&D daily sprint\nInvited Amir Houieh Unbody io Noémi Biró Gabor Kerekes\nAttachments R&D daily sprint \nMeeting records Transcript \nSummary\nThe team discussed resolving a \"body\" system issue caused by a website page with 6.5 million characters that overwhelmed the system, leading to a discussion on system architecture where Amir Houieh and Gabor Kerekes emphasized the importance of isolated components over the current architecture, which requires everything to work together. Regarding deployment tasks, Amir Houieh needs to fix the website image deployment, review content, and look into alternative solutions to Versel, while Gabor Kerekes is defining the scope for the myelium project and needs to test analytics permissions with Amir Houieh due to an error. Noémi Biró followed up on the contract sent to Melissa, requested Amir Houieh to implement a feature to export user time spent in the app, and also plans to review the Kira document to assess potential scope increases, with the team also agreeing that Amir Houieh should create a simple non-code prototype for the OS project vision by Friday.\nDetails\nResolution of Body System Issue: The team discussed an issue with the \"body\" system where one of the websites being crawled by carefinder contained a page with 6.5 million characters that overwhelmed the process (00:00:00). This issue, which involved a spam repellent page, caused the system to fail and prevented \"viate\" from properly cleaning up the created shards. The problem was eventually isolated by rewriting the crawling part for stories, leading to a notice from the cloud service about the large character count (00:05:10).\nDiscussion on System Architecture and Isolation: The conversation shifted to principles of engineering, specifically the importance of building systems where components can work in isolation. Amir Houieh noted that the current architecture, attributed to \"Hussein,\" often requires everything to work together as a machine, which goes against their preference for having isolated components like functions (00:06:26). Gabor Kerekes supported this, citing that complex systems should evolve from simpler, testable parts, drawing a parallel to building with Legos (00:07:29).\nPhysical Training and Functional Patterns: Noémi Biró shared they are focused on functional patterns training, which involves exercises isolated initially and then integrated into overall movement. This approach was likened to the Lego analogy previously discussed. Gabor Kerekes mentioned knowing a physiotherapist in Rotterdam who specializes in functional patterns and fascia focus, which they offered to connect to Amir Houieh (00:08:40).\nWebsite Deployment and Review Tasks: Amir Houieh mentioned that Versel failed and they still need to fix the image on deployment for the website. The team established several tasks for the website launch, including reviewing and cutting out some blog posts, checking the deployed version on phones, and giving Noémi Biró time to add content to the landing page (00:10:59). Amir Houieh also plans to look into alternative deployment solutions to Versel, although Gabor Kerekes noted they already set up Cloudflare (00:12:23).\nProject Updates and Myelium Planning: Gabor Kerekes reported continuing work on defining the technical scope and a good \"slice\" for the myelium project (00:12:23). They also agreed to discuss the \"inhab project\" separately (00:13:50).\nAnalytics Permissions and Testing: The group noted that testing the analytics permissions for Amir Houieh still needed to be done with Gabor Kerekes, as Amir Houieh was receiving an error. Gabor Kerekes suggested that they should perform this testing separately (00:13:50).\nOS Project Brainstorming and Prototyping: The team decided that a brainstorming session on the OS project was premature, as more time was needed to process the ideas. They agreed that Amir Houieh should create a simple, non-code prototype using a tool like Gemini's AI studio to visually communicate their vision for the interface, comparing it to \"Photoshopping\" the concept (00:14:59). They scheduled this development session for Friday, reserving Fridays for mini-workshops or working sessions (00:16:15).\nTime Spent Tracking and Contract Follow-up: Noémi Biró asked Amir Houieh to update the time spent in the app and followed up on the contract sent to Melissa. Amir Houieh confirmed they sent the contract on Monday and planned to send a reminder today (00:17:23). Noémi Biró clarified that the task is to export the time a user spends in the app during one session, and Amir Houieh committed to implementing this (00:18:26).\nTask Management Tool Selection: Gabor Kerekes raised the need to agree on a single place for task management to ensure consistency (00:18:26). Noémi Biró stated a preference for Notion, noting they have kept it up to date during the current four-week period (00:19:39).\nFixing Permissions and Reviewing Kira Document: The meeting concluded with Gabor Kerekes instructing Amir Houieh to remain so they could fix the permission issues. Noémi Biró planned to read the Kira document that Melissa had sent to understand a conclusion that might increase the required scope of work (00:20:42).\nSuggested next steps\nNoémi Biró will add something to the landing page of the website.\nAmir Houieh will look into other solutions than Versel for the website deployment and send a reminder to Melissa regarding the contract.\nAmir Houieh will update the time spent of a user in one session in the app analytics.\nThe group will check the online version of the website on their phones, review the content, and flag any blog posts that should be removed.\nYou should review Gemini's notes to make sure they're accurate. Get tips and learn how Gemini takes notes\nPlease provide feedback about using Gemini to take notes in a short survey.",
+	"items": [
+		{
+			"id": "standup-2026-02-25-000000",
+			"label": "2026-02-25 [00:00:00]",
+			"data": {
+				"chunk": "Noémi Biró: Hello.Amir Houieh: Hello.Gabor Kerekes: GoodAmir Houieh: No,Gabor Kerekes: morning.Amir Houieh: you are in a cafe. And yeah, you are.Noémi Biró: Sorry, it's really busy.Amir Houieh: I'm going to walk I'm going to also I'm going to also go work from cafeNoémi Biró: I noticed.Amir Houieh: today later in afternoon. Cool. What's up? Sorry. Yesterday I couldn't work at all. Uh I mean I I was working but on a on bodyGabor Kerekes: What do withAmir Houieh: ter we couldn't figure it out at the end of the day but this morning IGabor Kerekes: that?Amir Houieh: figured it out.Gabor Kerekes: What was it? Was it the new implementation?Amir Houieh: Uh so carefinder carefinder sends this URLs to body to get enhanced. One of the properties that is supposed to get enhanced is via the URL. And so it was crawling and everything, but one of these websites out of thousands. One of them has like 25 pages and one of the pages has this hello world page that is apparently like has 6.5 million of characters.",
+				"date": "2026-02-25"
+			}
+		},
+		{
+			"id": "standup-2026-02-25-000510",
+			"label": "2026-02-25 [00:05:10]",
+			"data": {
+				"chunk": "Amir Houieh: It's a spam uh kind of repellent. uh and crawler was crawling it and somebody was trying to digest it and it basically overwhelmed theGabor Kerekes: Well, Oh, is it is it the new implementation or theAmir Houieh: whole no the old that was the problem like we we knew nothing has changed but why is this yeah and vivv wasGabor Kerekes: oldAmir Houieh: kind kind of and the only symptom was that viate couldn't clean after itself uh like when when it created the shardsGabor Kerekes: It's the worst bug ever. Like worst kind.Amir Houieh: Yeah. Yeah. It it was and and then so what how I did figure it out.Gabor Kerekes: That'sAmir Houieh: So yesterday we decided to just dump on body in that sense of crawling and directly rewrite the whole crawling part for for stories and what that's what I did just this morning and during that when I crawl it in isolation then uh cloud noticed it and says hey by the way yeah it went successful but it has 6.5 million characters.Gabor Kerekes: This why it's important to have a reproducible development local development environment where you can also run components in",
+				"date": "2026-02-25"
+			}
+		},
+		{
+			"id": "standup-2026-02-25-000626",
+			"label": "2026-02-25 [00:06:26]",
+			"data": {
+				"chunk": "Amir Houieh: isolation. Yeah, that's the problem.Gabor Kerekes: isolation.Amir Houieh: The way how Hussein writes or architect things, everything works together as a machine. I'm pretty sure he knows how to also isolate them, but it's not I guess first is it's not his firstGabor Kerekes: Yeah,Amir Houieh: principle.Gabor Kerekes: that's kind of like I don't know for me I can't write another wayAmir Houieh: Yeah. Me neither.Gabor Kerekes: because I I I write something small and then I test it and then I write something else put them everything works together but also inAmir Houieh: Exactly. Exactly.Gabor Kerekes: isolation.Amir Houieh: Everything has to work in isolation like a function. Input in output. That's it.Gabor Kerekes: Yeah.Amir Houieh: Period.Gabor Kerekes: Yeah,Amir Houieh: That's how I also wrote Nexus. So it's good.Gabor Kerekes: cool.Amir Houieh: But yeah, that's what itNoémi Biró: Is that one of those principles?Amir Houieh: is.Gabor Kerekes: That's go actuallyAmir Houieh: Yeah, it's you can't I I really don't know how howGabor Kerekes: like like uh everything every complex every functional",
+				"date": "2026-02-25"
+			}
+		},
+		{
+			"id": "standup-2026-02-25-000729",
+			"label": "2026-02-25 [00:07:29]",
+			"data": {
+				"chunk": "Amir Houieh: elseGabor Kerekes: complex system inevitably evolved from a simpler system. And the opposite is also true that complex systems cannot be made to work when you are already starting with that.Amir Houieh: I think this is also like I mean it's like Lego.Gabor Kerekes: Yeah.Amir Houieh: You can't have one one brake that is broken. If that is you can't you need to make that fix and then you connect it to another one they work then connect it toGabor Kerekes: Yeah.Amir Houieh: another one.Gabor Kerekes: Yeah. We should put this in our engineeringAmir Houieh: You are making Legos.Noémi Biró: That's what I mean.Gabor Kerekes: manifesto.Amir Houieh: Oh, there are new type of Legos. Have you seen them? They they are not from Lego company, but they are super tiny and it's so obsessive to As soon as you start building with them, you can't stop. Anyway,Gabor Kerekes: I don't need another obsession.Amir Houieh: oh uhNoémi Biró: This morning, my trainer called me obsessed because I've been going yesterday and I'm going to I went today and I'm going to go",
+				"date": "2026-02-25"
+			}
+		},
+		{
+			"id": "standup-2026-02-25-000840",
+			"label": "2026-02-25 [00:08:40]",
+			"data": {
+				"chunk": "Amir Houieh: soGabor Kerekes: ThereNoémi Biró: tomorrow. And she was like, \"Do you want to also come Friday?\"Gabor Kerekes: isAmir Houieh: nice. What do you do? weightliftingNoémi Biró: No,Amir Houieh: orNoémi Biró: it's functional patterns. So, it's a lot about like body posture and like doing exercises.Amir Houieh: Oh,Noémi Biró: It's a bit similar actually to this Lego idea because you do exercises isolated andAmir Houieh: nice,Gabor Kerekes: heat.Noémi Biró: then actually that becomes how you move throughout yourAmir Houieh: nice, nice. I went to this physiootherapy the a few months back when I had the back problem and he started talking about this type of particular exercises that are about fia and yeah and that'sNoémi Biró: That's exactly it. That's exactly it. Yeah.Amir Houieh: why I okayGabor Kerekes: actuallyNoémi Biró: So for the first month,Gabor Kerekes: theNoémi Biró: all I did was just like massaging my fascia with different like rollingAmir Houieh: Yeah.Gabor Kerekes: actually the the person who we um stayed in the house of uh in Rotterdam.",
+				"date": "2026-02-25"
+			}
+		},
+		{
+			"id": "standup-2026-02-25-000950",
+			"label": "2026-02-25 [00:09:50]",
+			"data": {
+				"chunk": "Gabor Kerekes: They are this kind of physiootherapist um functionalAmir Houieh: HGabor Kerekes: patterns fashia focused.Amir Houieh: nice.Gabor Kerekes: So if you want like it's literally 10 minutes of walk fromAmir Houieh: Yeah,Gabor Kerekes: space.Amir Houieh: they do it at their home.Gabor Kerekes: Yeah.Noémi Biró: Yeah.Amir Houieh: Okay. Okay.Gabor Kerekes: So if you want Yeah. You can can hook you up.Amir Houieh: Yeah. Do you have Do they have a website or something?Gabor Kerekes: Yeah.Amir Houieh: You can send it to me. Nice. Yeah. I mean the the the exercises are fun as well. Like the first thing that they were saying like just even if you're washing dishes move or I said just yeah that was the keyGabor Kerekes: Yeah,Amir Houieh: principle.Gabor Kerekes: that's why there also these like this chair that I'm sitting in. It's like it's really good because I can move andAmir Houieh: Yeah.Gabor Kerekes: yeah, it actually makes you move but I also have to I don't know because of ADHD restlessness and stuff.",
+				"date": "2026-02-25"
+			}
+		},
+		{
+			"id": "standup-2026-02-25-001059",
+			"label": "2026-02-25 [00:10:59]",
+			"data": {
+				"chunk": "Gabor Kerekes: Okay.Noémi Biró: I'm gonna send you where I'm going to send you on WhatsApp or signalAmir Houieh: Yeah.Noémi Biró: hereAmir Houieh: Yeah. Please.Noémi Biró: either.Amir Houieh: Doesn't I mean WhatsApp is more handy.Noémi Biró: Yeah.Amir Houieh: I use only signal for special occasion. Cool. Uh so yeah uh Versel failed. I need to still fix the image uh on deployment for the website. Apart from that I think we are good and then no I think I I can take care of the website today forGabor Kerekes: Okay. Um,Amir Houieh: sure.Gabor Kerekes: yeah, the maybe like some of the blog posts need to be cut out and there's yeah, basically just like a review see what blog posts we should remove. I think each of us should have an a pass also on phone. So I don't know if it's like deployed now to like the online if if the online version is is there but I think it's good if we all check it on our phones too and then yeah check the content um flag anything that should be removed then I think we're good and yeah like maybe no if you want to add something to the landing page to make",
+				"date": "2026-02-25"
+			}
+		},
+		{
+			"id": "standup-2026-02-25-001223",
+			"label": "2026-02-25 [00:12:23]",
+			"data": {
+				"chunk": "Amir Houieh: Okay,Gabor Kerekes: it You wantNoémi Biró: Yeah. So that I do after it's related It's raining atAmir Houieh: cool.Gabor Kerekes: it?Amir Houieh: Sure. I'm going to also look into other solution than Versel to see if we can again I don't want to make it a bottleneck but it's good that if you guys also haveGabor Kerekes: Yeah, I I already set up Cloudflare.Amir Houieh: accessGabor Kerekes: U I don't know. I need to look into how it works with like accounts, but Cloudflare is very easy uh to deploy.Amir Houieh: yeah okay but I think let's not make a task for now let's just have the website launch and then we canGabor Kerekes: No.Amir Houieh: figure it out. Great.Gabor Kerekes: Yeah.Amir Houieh: Uh yeah, I don't know anything else as anGabor Kerekes: No, I mean I am working on the umAmir Houieh: update.Gabor Kerekes: Yeah. like continuing with the um like specifying what to build for the myelium and I uh yeah like more in the technical sense like um trying to define the scope of what would be a good kind of slice and uh what what's needed for that um yeah so I I've made some progress",
+				"date": "2026-02-25"
+			}
+		},
+		{
+			"id": "standup-2026-02-25-001350",
+			"label": "2026-02-25 [00:13:50]",
+			"data": {
+				"chunk": "Amir Houieh: Okay,Gabor Kerekes: with that kind planning um and that's what I want to doAmir Houieh: nice.Gabor Kerekes: today as well. Uh I guess we should talk about I mean maybe we can do that separately but talk about the inhab projectAmir Houieh: Oh, yeah. Yeah, let's do that.Gabor Kerekes: andAmir Houieh: I think. Yeah, but anyway, I think I I don't It's not worth it. But yeah,Gabor Kerekes: okayAmir Houieh: let's discuss. Oh.Noémi Biró: Um,Amir Houieh: UhNoémi Biró: so the analytics now Amir has permissions right and I alsoAmir Houieh: uh that's something we need to still test uh with Gab because yesterday I couldn't there. I I was getting an error.Gabor Kerekes: Yeah. So, let's let's do that.Amir Houieh: Yeah.Gabor Kerekes: I mean, we shouldn't do it do it together because like it's uh I think we should do that separately.Amir Houieh: Okay. Uh do we want to do our brainstorming on uh the OS thing today as planned becauseGabor Kerekes: I don't have any new.",
+				"date": "2026-02-25"
+			}
+		},
+		{
+			"id": "standup-2026-02-25-001459",
+			"label": "2026-02-25 [00:14:59]",
+			"data": {
+				"chunk": "Amir Houieh: yeah I have the same feeling that it's a bit too early like we need a bit of time toGabor Kerekes: Yeah.Amir Houieh: process or do something and do I think Gabber you should you I thinkGabor Kerekes: Yeah. Yeah. Yeah. Yeah.Amir Houieh: you need to also like show what you have in mind or right do youGabor Kerekes: Yeah.Amir Houieh: think when will you have set like something to show. We could also do it other way around. We could also brainstorm like yesterday and see define itGabor Kerekes: I mean,Amir Houieh: together.Gabor Kerekes: I really want to build.Noémi Biró: Well then then take the time to build.Gabor Kerekes: So,Amir Houieh: Okay.Noémi Biró: But would it help for example to push this session for Friday and say like if if possible like we already look at some things some early prototype orAmir Houieh: You know what helps Gabber?Noémi Biró: is that too soon?Amir Houieh: I don't know uh if you really want to make it, but you could also just fake like a make a fake interface with AI studio of Gemini just to I because I want to see how you envision it, you know, like what is the visual because that helps also to understand because that helps everyone can help because you saw I saw for example that prototype I made in Gemini.",
+				"date": "2026-02-25"
+			}
+		},
+		{
+			"id": "standup-2026-02-25-001615",
+			"label": "2026-02-25 [00:16:15]",
+			"data": {
+				"chunk": "Amir Houieh: It shows exactly what I have inGabor Kerekes: That's a really good idea. Yeah,Amir Houieh: mind.Gabor Kerekes: I I like that approach. It's also um Yeah, I like that approach.Amir Houieh: So it's more like use like Photoshop it for now,Gabor Kerekes: Yeah. Yeah.Amir Houieh: you know. That's it.Gabor Kerekes: Yeah.Amir Houieh: NoGabor Kerekes: Yeah, that makesAmir Houieh: code.Noémi Biró: Okay. So with that then it makes sense maybeGabor Kerekes: sense.Noémi Biró: tomorrow or Friday.Amir Houieh: Friday is better than we can always block Fridays for likeGabor Kerekes: FridayAmir Houieh: working together sessions like mini workshops or hackathons whatever and then even so once you have that Gemini for example you can share it and every one of us could also make a different version or you know add to it or that's what actually shouldGabor Kerekes: Yeah. Okay. I like that.Amir Houieh: have Figma should have had such your future, you know, but they don't.Gabor Kerekes: Okay. Um, then yeah, that's it, I think.",
+				"date": "2026-02-25"
+			}
+		},
+		{
+			"id": "standup-2026-02-25-001723",
+			"label": "2026-02-25 [00:17:23]",
+			"data": {
+				"chunk": "Gabor Kerekes: Let's let's then uh fix your permissionAmir Houieh: Yes. Okay,Gabor Kerekes: stuff.Noémi Biró: And and can you then add the time spent in theAmir Houieh: cool. Oh,Noémi Biró: app?Amir Houieh: yeah. Sure.Gabor Kerekes: Yeah.Amir Houieh: Yeah. I think for civil I haven't spent any much of time. So, so far apart from the meetings that I joined,Noémi Biró: So,Amir Houieh: that's it.Noémi Biró: and what about the contract? That'sAmir Houieh: Yeah,Noémi Biró: theAmir Houieh: I sent it to Melissa on Monday. I should probably send her another reminder today.Noémi Biró: fine. So, okay. So, then air you will update the time spent in theAmir Houieh: Yeah.Noémi Biró: app.Amir Houieh: What's that?Noémi Biró: Time spent in theAmir Houieh: Oh, whatNoémi Biró: app.Amir Houieh: app?Gabor Kerekes: That's That's a new analytics.Noémi Biró: It's the new analytics that Melissa was asking.Amir Houieh: Oh,Gabor Kerekes: UhAmir Houieh: yeah. I didn't do we have a card for it or somewhere that is defined or",
+				"date": "2026-02-25"
+			}
+		},
+		{
+			"id": "standup-2026-02-25-001826",
+			"label": "2026-02-25 [00:18:26]",
+			"data": {
+				"chunk": "Noémi Biró: Uh well I've been asking about it for few times but like if it's not clear so basically it's just adding an extraAmir Houieh: can you just give me like write me a description of what needs to be done then I can just doNoémi Biró: export.Amir Houieh: it or is itNoémi Biró: Uh that description is export the time of the user spent in the app.Amir Houieh: Okay. No,Noémi Biró: I don't know I I don't know how to define it more technically because I don't yet understand how theAmir Houieh: it's okay. No, no, no. I That's good. I just need to remember it.Noémi Biró: other but uh you canAmir Houieh: Uh, so I'm just going to write it on Discord so IGabor Kerekes: ShouldNoémi Biró: soAmir Houieh: don't forget. Uh, okay.Gabor Kerekes: we like um now we are we are I guess using notion as for task management.Noémi Biró: classroom.Gabor Kerekes: We agree on like one place so that when we um when we need to, you know, like keep track of these kind of cards, we know exactly where it is.",
+				"date": "2026-02-25"
+			}
+		},
+		{
+			"id": "standup-2026-02-25-001939",
+			"label": "2026-02-25 [00:19:39]",
+			"data": {
+				"chunk": "Noémi Biró: I honestly for me notion works better and I've been doing this since the beginning of this four-week period and you can you can check you can check this because thisGabor Kerekes: Okay.Noémi Biró: is the one that's up to dateAmir Houieh: Uh so basically we want to know the time of that a user spent on uh on civil in one session or in total.Noémi Biró: in one session and then if we know like they had sessions. Then we will also know like internals.Amir Houieh: Good. That is kill. I will doGabor Kerekes: So, but what does that mean?Amir Houieh: that.Gabor Kerekes: Like how many sessions they had and what's the average of time spent in a sessionAmir Houieh: No,Gabor Kerekes: or likeAmir Houieh: I think weNoémi Biró: We already know how many sessions they had because that's already in the analytics.Amir Houieh: canNoémi Biró: We just missAmir Houieh: I what we could do? We could do per session. See the first message and the lastGabor Kerekes: But this is already so there's already uh this kind of",
+				"date": "2026-02-25"
+			}
+		},
+		{
+			"id": "standup-2026-02-25-002042",
+			"label": "2026-02-25 [00:20:42]",
+			"data": {
+				"chunk": "Amir Houieh: message.Gabor Kerekes: session count that this already there. I guess it's only about adding how long the sessionsAmir Houieh: Okay. Okay.Gabor Kerekes: were.Amir Houieh: So basically calculating it based on the data that you already have.Gabor Kerekes: Yeah.Noémi Biró: Yes. Yes.Gabor Kerekes: But um I will walk you through because uh let's fix your permissions and then uh I will show you what is there.Amir Houieh: Okay, cool.Gabor Kerekes: Okay.Amir Houieh: Nice. Okay, then me and Gabby, we can stay. You know what I mean? You canGabor Kerekes: Yeah.Amir Houieh: leave.Noémi Biró: Okay. Uh, I'm going to read this Kira document that Melissa sent because I'm curious like what why is this conclusion that it's better toGabor Kerekes: Yeah, it would beNoémi Biró: go that that's like allGabor Kerekes: fun.Noémi Biró: the work that we're now basing the work off it's gone. So that means we need to do a lot more than what we accounted for. to one.Amir Houieh: Okay, cool. Byebye. My cursor is not responding, dude. What can I do? Jesus. Never mind. Okay. Uh, what do I need to do? I need to go onGabor Kerekes: Can you show me uh the error that youAmir Houieh: Yes. One second.Gabor Kerekes: had?Amir Houieh: So, I need to go back. One second. It's loading. Why I can't share my screen? Uh okay. Uh let me try again. Do you see my screen?Gabor Kerekes: No.Amir Houieh: I don't know why I can't. Shall I call you on signal? Do you have it on desktop?Gabor Kerekes: Uh yeah, I do. But why?Amir Houieh: I can't share a screen here. It's weird.Gabor Kerekes: Restart the browser.Amir Houieh: Okay. So, I think I started getting the error here. Uh, can you see us? I can't I can share the screen.  \nTranscription ended after 00:25:52\nThis editable transcript was computer generated and might contain errors. People can also change the text after it was created.",
+				"date": "2026-02-25"
+			}
+		}
+	]
+}

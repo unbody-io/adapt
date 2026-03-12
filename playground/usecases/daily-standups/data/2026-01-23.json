@@ -1,0 +1,463 @@
+{
+	"id": "standup-2026-01-23",
+	"source": "standup-2026-01-23",
+	"description": "📝 Notes\nJan 23, 2026\nR&D daily sprint\nInvited Amir Houieh Unbody io Noémi Biró Gabor Kerekes\nAttachments R&D daily sprint \nMeeting records Transcript \nSummary\nGabor Kerekes and Amir Houieh discussed that the current app lacks a \"signature experience,\" suggesting a \"partner mode\" or proactive behavior from Cibil as unique features, while agreeing on the necessity of clinician input for feature prioritization. They also defined the process for determining the app's signatures, combining user demand and market gaps, and reviewed operational updates, including the Carefinder launch, the compensation for vetting a forward deployed engineer, and a plan for handling old project tickets by relying on commit messages and templates for decision documentation. Gabor Kerekes, Amir Houieh, and Noémi Biró worked on the Cibil manifesto, debating the core values of AI as an amplifier that incorporates friction and avoids becoming a \"comfort machine,\" with Gabor Kerekes emphasizing \"integration over fragmentation\" and Amir Houieh focusing on software as a utility and \"living creature.\"\nDetails\nSignature Experience and Essential Features Gabor Kerekes expressed that the current app features lack a signature experience, suggesting that a \"partner mode,\" which focuses on the social aspect of AI as a facilitator of relationships and extends app use to multiple people, could be a new and unique idea. Amir Houieh agreed that while current features are essential, they may not be \"signature,\" though wellbeing activities could be uniquely designed or enhanced by a strong memory layer (00:24:49).\nManifesto and Prioritization of Features Gabor Kerekes suggested that Cibil needs a manifesto or ground values to make a statement about its purpose, such as facilitating relationships between a person and themself, or between humans and AI (00:25:53). They raised the question of whether the product should prioritize relationships with others for healing, suggesting that this would require a decision on whether to prioritize that aspect over standard features. Both agreed that increased communication and information exchange between different parties within the project is crucial (00:27:29).\nClinician Input for Feature Prioritization Gabor Kerekes emphasized the necessity of incorporating dialogue with clinicians into the feature prioritization process, as their expertise can provide valuable input on what effectively helps people. They stressed the importance of not assuming guided modules are essential and being more sophisticated in forming assumptions and hypotheses by consulting clinicians (00:28:39). Noémi Biró agreed, suggesting that claiming close collaboration with clinicians would be a significant trust builder, provided it is genuine (00:35:02).\nProactive Behavior as a Signature Feature Amir Houieh suggested that proactive behavior from Cibil, such as checking on users or recalling past conversations and articles, is missing and could be a signature or essential feature. Gabor Kerekes agreed that proactive behavior, such as asking a user about a past session or actively reaching back into memory during a conversation, would differentiate the app from standard tools like ChatGPT (00:32:00). Amir Houieh proposed bringing the proactive behavior idea under the \"signature\" category (00:35:02).\nProcess for Defining Signatures and Future Development Amir Houieh outlined that defining the app's signatures should involve addressing two questions: what users demand, and what Cibil can offer or what is missing in the current market, including the clinician's perspective (00:35:02). Noémi Biró confirmed that they are working on translating the feature ideas into a \"how\" for a collaboration process with clinicians. Amir Houieh also noted that the \"local first small language model\" is fascinating but may be too early for next week's focus, suggesting it be treated as a discovery item (00:36:17).\nHiring and Compensation for Forward Deployed Engineer Amir Houieh provided an update on the operational agreement regarding a forward deployed engineer, stating that if they are hired, there will be a mutual agreement on whether to move them to Cibil, and if so, the team will be compensated for vetting them. They also clarified that a six-month duration mentioned previously would be removed from the agreement (00:37:16).\nCarefinder Launch and Functionality Amir Houieh announced the launch of Carefinder, an application that took one and a half years to develop, and showcased its features, including finding profiles based on user input, aggregating information generated from knowledge bases, and checking insurance coverage (00:38:41). They demonstrated how users can interact with the system using human language to find specific therapists, and that the next step is connecting the therapists' calendars for direct booking (00:41:28). The onboarding process for therapists is currently manual but will eventually open up for self-creation of profiles (00:43:10).\nManagement of Project Tickets and Documentation Noémi Biró mentioned reorganizing Notion and R\\&D, noting an issue with a backlog of old technical tasks in Linear (00:43:10). Noémi Biró and Gabor Kerekes discussed the time spent assessing ticket relevance, leading to a decision to wipe old tickets at the end of a cycle and recreate them if they become relevant (00:44:31). Noémi Biró raised concerns about the potential loss of valuable context and decision documentation when wiping tickets, especially for future teams taking over the codebase (00:46:34).\nDocumenting Decisions via Commit Messages Amir Houieh suggested relying on comments and commit messages to document decisions, risks, and future considerations related to code implementation (00:48:27). Gabor Kerekes agreed and suggested creating a commit template to ensure important context, like alternative solutions considered, is captured in the commit history, which can be easily accessed by tools like Claude (00:49:32). Noémi Biró included this approach in the organizational operational agreement (00:50:37).\nMeeting Schedule and Bug Fixes Noémi Biró confirmed a meeting with Melissa and Amir Houieh on Monday to kick off the next four weeks, gain clarity, and establish timelines for working with clinicians. Gabor Kerekes updated that they would push and deploy a fix for new conversations today (00:50:37). Amir Houieh confirmed they need to fix one bug today. Gabor Kerekes and Amir Houieh discussed an animation glitch on iOS, which Amir Houieh suggested might be fixed by removing backdrop filters (00:52:15). They aimed to deploy a version with major bug fixes tonight, keeping the work within the estimated 16 hours for bug fixing (00:53:32).\nHandling Analytics and Reporting Noémi Biró relayed a request from Melissa for the analytics (00:54:43). They discussed creating a more automated or structured process for sending the weekly analytics, with Gabor Kerekes mentioning a script they created to generate TSV files. Gabor Kerekes also mentioned conducting fast research on lightweight analytics tools that could be implemented in the future as part of the admin panel (01:10:50) (01:13:49).MANIFESTO DISCUSSION\nManifesto Discussion Preparation Gabor Kerekes and Noémi Biró agreed on a plan for the manifesto discussion where each person would present their main statements and points rather than reading their full draft. Gabor Kerekes confirmed they had written a sketch of the manifesto and needed to finalize some points (01:13:49).\nIterative Thinking and Manifesto Development Gabor Kerekes proposed using the iterative thinking prompt with Claude to generate questions and synthesize text based on the three individuals' threads of thinking. The goal is to identify commonalities and differences to facilitate a conceptual workshop, with the resulting synthesis contributing to a manifesto. Gabor Kerekes indicated that the existing manifesto drafts are located in the R\\&D lab's conceptual tab (01:16:35).\nAI Amplification and Collaboration Gabor Kerekes's initial manifesto draft centers on the idea of AI amplifying humans rather than replacing them. They articulated that AI should refine thinking and activity, fostering collaboration instead of replacement. They further explained that AI can manifest hidden patterns and unlock potential in humans, giving the example of using AI to rapidly realize a dreamt-up tool (01:18:17).\nIntegration Over Fragmentation Gabor Kerekes discussed the concept of \"integration over fragmentation,\" which stems from their experience working on Cibil, where various interests like mental health, design, software engineering, and system building converge (01:20:32). They explained that Cibil provides a means to integrate these diverse parts of their personality and interests, although they noted a need to develop this concept further. Amir Houieh appreciated the structure of Gabor Kerekes's manifesto for covering different aspects—AI positioning, general mentality, and personal motivation—and its potential overlap with their own ideas (01:22:26).\nManifesto Structure and Inspiration Amir Houieh suggested that the final manifesto should cover multiple topics and different perspectives, addressing pillars such as their positioning on AI, workflows, and the type of product they are working on. Gabor Kerekes mentioned the \"Thinking Machines\" manifesto as an inspiration for making concise statements that articulate a core mission (01:25:26).\nFriction and Personalization in Tool Design Gabor Kerekes emphasized designing tools that incorporate friction and are not built primarily for user engagement or traction, but rather to slow the user down and encourage reconnection with themself. The concept of personalization was defined as allowing the user's way of seeing and processing the world to shape the tool, rather than the user adapting to a tool designed for them (01:26:46). They gave an example of a system built with a memory of their mental state and goals that introduces friction by rejecting off-schedule requests to support their articulated life values and goals (01:30:17).\nSoftware Agency and User Authority Amir Houieh raised the crucial question of defining the agency of the software, specifically how much power AI should have in decision-making, such as determining what is beneficial for the user (01:35:24) (01:39:54). Gabor Kerekes asserted that the ultimate authority remains with the user, and the tool should function as an accountability partner that helps enforce user-defined values and goals, without prescribing a specific lifestyle (01:38:21). Amir Houieh pointed out that the software's response to a user pushing back against its suggestions is a key example of defining the software's agency in the manifesto (01:41:22).\nAutonomous AI and Value Alignment Gabor Kerekes described a form of software agency where the tool acts autonomously, such as conducting background research and synthesizing information, but always on the user's behalf and aligned with their defined interests. They clarified that the software should never make decisions about what is valuable to the user, but once the user defines their values, the software can help find more of that value, thus amplifying the user (01:42:55).\nAddressing Destructive Behaviors and AI Safety The speakers discussed the challenge of software amplifying destructive or addictive behaviors if the user's intentions are not positive (01:44:19). Gabor Kerekes argued that the software should amplify the user's intentions to overcome addictive patterns (01:45:31). They connected this risk to the concept of AI safety, where uncritical validation can lead to \"AI induced psychosis\" (01:46:58). Gabor Kerekes emphasized the importance of intentionally creating friction in the design to prevent the tool from becoming a \"comfort machine\" (01:48:28).\nThe Psychedelic Analogy for AI Gabor Kerekes drew an analogy between AI and psychedelics, noting that both can manifest latent tendencies in the mind (\"mind manifesting\") and carry similar risks if used improperly (01:48:28). They suggested that AI tools with a therapeutic element, like Cibil, should potentially be integrated into a holistic approach with professional guidance, depending on the case (01:50:03).\nThe Future of Software as a Utility and Living Creature Amir Houieh presented their manifesto, focusing on making future software act more like a utility and a \"living creature\" that is less artificial. They referenced Gabor Kerekes's idea of a \"ghost\" system that is embedded everywhere and replicates the person (01:51:45). Amir Houieh also proposed that their team define themself as a lab or a collective to allow outsiders to join and align with their vision (01:53:04).\nRejection of the Software Container Idea Amir Houieh advocates for rejecting the concept of software being delivered in pre-fixed \"containers\" (apps or websites) decided by a central authority (01:53:04). They argued that the current model was a temporary placeholder and that AI now makes it possible to shift focus to the completion of the task, enabling a more intention-oriented experience, similar to how the human brain works (01:54:22) (01:58:04).\nEmphasis on Building and Experimentation Amir Houieh stressed the importance of building, experimentation, and \"learning by doing\" over purely theoretical research (01:58:04). Gabor Kerekes agreed, stating that for them, research and building are the same, involving forming a hypothesis, building it, and testing it. They referenced the \"Thinking Machines\" lab, which also emphasizes immediately applying research to product design and vice versa (01:59:09).\nNext Steps: AI Synthesis and Break Gabor Kerekes proposed ending the current conversation to obtain the transcript and feed it, along with the three manifesto drafts, into Claude for analysis. The participants agreed to take a 15-minute break while Gabor Kerekes set up the next step (01:59:09).\nSuggested next steps\nGabor Kerekes will push and deploy the fix for the issue about new conversations being created today.\nAmir Houieh will fix the bug related to links today.\nNoémi Biró will translate the collaboration process with clinicians into the how.\nNoémi Biró will send the cibil analytics file to Melissa after the manifesto meeting.\nGabor Kerekes will publish the script that generates TSV files to main and update the schedule to remind the group to send analytics every week.\nNoémi Biró will reply to Melissa's email.\nAmir Houieh will reformulate the information about the forward deployed engineer.\nGabor Kerekes will set up the next step with Claude using the transcript after the conversation ends.\nYou should review Gemini's notes to make sure they're accurate. Get tips and learn how Gemini takes notes\nPlease provide feedback about using Gemini to take notes in a short survey.",
+	"items": [
+		{
+			"id": "standup-2026-01-23-000000",
+			"label": "2026-01-23 [00:00:00]",
+			"data": {
+				"chunk": "Noémi Biró: meeting you. Um, let's do this. Relax. No. Let's see what we do. Come on. Do me brain dump. Good example.  \nSession ended after 00:14:52",
+				"date": "2026-01-23"
+			}
+		},
+		{
+			"id": "standup-2026-01-23-002358",
+			"label": "2026-01-23 [00:23:58]",
+			"data": {
+				"chunk": "Gabor Kerekes: while you were not here. Okay. So, yeah, one comment. Um, I don't know, that's just my personal bias, but I feel like uh to create a signature experience, I don't see anything in there which is kind of signature. Um these are all like journaling of course like through the UI the UI itself and like how we design the UI that it's innovative just like I don't know forAmir Houieh: I think it it goes here.Gabor Kerekes: exampleAmir Houieh: I mean, again, these are the things that we could think of or she could think of, but of course, yeah,Gabor Kerekes: butAmir Houieh: but it's hard to it's hard to imagine it right now.Gabor Kerekes: IAmir Houieh: It's part of that process that we need to come up with those signatures.Gabor Kerekes: yeah Like for example, uh there's that partner mode.",
+				"date": "2026-01-23"
+			}
+		},
+		{
+			"id": "standup-2026-01-23-002449",
+			"label": "2026-01-23 [00:24:49]",
+			"data": {
+				"chunk": "Gabor Kerekes: I feel like that can be uh that's a new idea that I haven't seen much anywhere. this kind of social aspect of AI that it can sort of um act as a sort of it's designed to be a facilitator of relationships uh and that it extends the use of the app to multiple people where you can have maybe a shared conversation or I don't know something like that is I think that is really I I haven't seen it maybe it exists probably it exists. But I think that's kind of like a new idea which would give that kind of signature.Amir Houieh: Yeah.Gabor Kerekes: Uh I think the rest is like really standard sort of like wellness app. I don't know how you know like you're getting onAmir Houieh: No, that that I agree. But it's essential as well.Gabor Kerekes: theAmir Houieh: It's essential. It's also essential.Gabor Kerekes: Sorry.Amir Houieh: I mean, it's it's as important as the other. Yeah. Maybe you should you cannot call them signature.Gabor Kerekes: Yeah.",
+				"date": "2026-01-23"
+			}
+		},
+		{
+			"id": "standup-2026-01-23-002553",
+			"label": "2026-01-23 [00:25:53]",
+			"data": {
+				"chunk": "Amir Houieh: Although you could for example the even the wellbeing for example those activities that you see in wellbeing apps it could also be designed in a way that is unique orGabor Kerekes: It couldAmir Houieh: it or or just the fact that it's based on on top of a memory aGabor Kerekes: be.Amir Houieh: strong memory layer it could make it much richer you know so it's also in the content of thatGabor Kerekes: Yeah.Amir Houieh: feature it's not per se the feature itselfGabor Kerekes: Yeah. Yeah. I agree. Uh but on the other hand, you're saying it's essential, but essential to what? And I feel like the No,Amir Houieh: No, no.Gabor Kerekes: wait, wait. Let me finish with that. um like essential to and I think here I think CibilAmir Houieh: Yeah.Gabor Kerekes: also needs to have some kind of a manifesto or like lay lay down some sort of like ground values and make a statement about these kind of things because those things build more towards uh you know like facilitating the relationship between maybe the person's relationship to themselves to herself and the relationship between human and AI and um that's a statement that's like you know it's an implicitly we're saying like this is what AI can do and that's where healing happens healing happens in in in the tool or in a conversation with yourself but uh you could argue that healing doesn't happen there healing happens in the",
+				"date": "2026-01-23"
+			}
+		},
+		{
+			"id": "standup-2026-01-23-002729",
+			"label": "2026-01-23 [00:27:29]",
+			"data": {
+				"chunk": "Gabor Kerekes: relationships that you have with other And should civil maybe prioritize that instead of you know these are I don't know these are just some questions.Amir Houieh: No. Well, I mean it's I mean it's a valid question but I think it's very difficult.Gabor Kerekes: Mhm.Amir Houieh: I mean, cibil is not so the the thing is that maybe the destination of these two are a bit different or I don't see much of a problem in I also agree with you but we need to also consider that Melissa is looking for a product market fit and that basically that's her key drive. So she will listen to users and see what they need and we build it in. But of course there is also a point that okay what C bill wants to be and what what we think user canGabor Kerekes: Yes.Amir Houieh: benefit from right or C bill can and we can integrateGabor Kerekes: Yeah. And and like these are topics I feel like if we can umAmir Houieh: it.Gabor Kerekes: increase the communication or like yeah just the rate of information exchange between different parties within this who are part of this.",
+				"date": "2026-01-23"
+			}
+		},
+		{
+			"id": "standup-2026-01-23-002839",
+			"label": "2026-01-23 [00:28:39]",
+			"data": {
+				"chunk": "Gabor Kerekes: I think that's really key as well to talk to clinicians like for example uh how we prioritize features. I think the dialogue with clinicians should be part of that process because they they can also give us a clue like what they think is um they have a practice and they know I don't know they know much more about this like what is it that actually does help people they have a much much better intuition and like I feel like we can't really decide what's important without that kind of input or at least it will definitely make our hypothesis better. like do we hypothesize that at the end of the day these guided modules will help people more effectively or is it going to be the partner mode and um I don't know I mean this this just a brain dump and I guess it has to be distilled but yeah what I'm trying to say is like to not already assume that these guided guided modules are what what are essential like what is essential is to help people and to build something that will uh help them like effectively and maybe those are the guided modules that they need and maybe it's not and I think we need to um be more sophisticated in how we make those assumption and form those assumptions and hypothesis and um the the way we get there is to talk to the clinicians Mhm.",
+				"date": "2026-01-23"
+			}
+		},
+		{
+			"id": "standup-2026-01-23-003026",
+			"label": "2026-01-23 [00:30:26]",
+			"data": {
+				"chunk": "Gabor Kerekes: Yeah, that's that's my dumb veryAmir Houieh: Okay,Gabor Kerekes: short.Amir Houieh: you're smart. Gabbor is his smart mode.Gabor Kerekes: Very smart.Amir Houieh: Our signature isGabor Kerekes: It really it really helped to this comes from like writing the manifesto and just like getting it helps so much to lay down like what do you stand for? What are your ground values? Just makes gives you this framework that you can apply everywhere. It's cool.Amir Houieh: something like that. I will I will reformulate this better, but okay. Um, cool. Let me get to the end of this quickly. So these are like we again we don't know and um there could be but these are like what we know it's it's mandatory uh and also this could alsoGabor Kerekes: Yeah.Amir Houieh: be part of this actually right uh I mean like this andGabor Kerekes: Yeah.Amir Houieh: then this important basically is okay that's one think safer and smarter but we know and I think there is not much of proactivity behavior and again these are the things we don't know or do we like the proactive behaviors of",
+				"date": "2026-01-23"
+			}
+		},
+		{
+			"id": "standup-2026-01-23-003200",
+			"label": "2026-01-23 [00:32:00]",
+			"data": {
+				"chunk": "Gabor Kerekes: Watch things.Amir Houieh: civil that civil checks on you and stuff like that or it remembers like you had a very bad evening yesterday and ask how you doing now or recall something oh okay I remember actually discussed this topic week and I remember you read this article last week uh so do you want to revisit it again you know so it can go deeper and deeper uh but and I think this is missing here and I think it's very important to use it in what form I don't know but I think that's also could be one of the signatures or one of the essential things that we want to work on or knowGabor Kerekes: Yeah, I mean this would also um on the one hand like it would differentiate from like just using regular CH GPT or cloud or whatever who don't really do those kind of proactive behaviors and so it could be part of the signature and also I think it's helpful um yeah I don't know that's just my personal yeah there It's just a very little prompt that was done on that.",
+				"date": "2026-01-23"
+			}
+		},
+		{
+			"id": "standup-2026-01-23-003317",
+			"label": "2026-01-23 [00:33:17]",
+			"data": {
+				"chunk": "Gabor Kerekes: And I think this is also about like when a user ends a session and begins a new sessions that can also be part of this proactive behavior to kind of ask back the user like hey how did this go? Um, I've done some tests where it worked, but it was very unreliable. So, I'm curious to see from the user tests if I can see glimpses of that like if we are talking about I think there are different types of proactive behavior. one that we orchestrate ourselves that we kind of like just like the journaling work that's kind of like a productive behavior where the system autonomously pushes some content to you. Yeah. Uh but you're also talking about the proactive behavior which is like when you're in a conversation and that um the model seems to actively reach back into its memory and like try to understand what you're saying in that context. Yeah. and like and then checks up on I don't know I don't like it sees that I don't know yesterday you said you have a doctor's appointment and that it checks in with you and that kind of behavior also depends a lot on the model like for example collad does that already yeah so these are specifically timebased references or people based references This",
+				"date": "2026-01-23"
+			}
+		},
+		{
+			"id": "standup-2026-01-23-003502",
+			"label": "2026-01-23 [00:35:02]",
+			"data": {
+				"chunk": "Amir Houieh: All right. So I think this is good. So we bring that proactive also under the two signature as well. And then we will see at the end of the day what this what should be here. These are just hypothesis and just placeholders that we can think of. But then I think the whole process of defining those signatures should be in a process that where we starting asking or answering two questions like seeing the signatures from the users need what user demands and seeing it from like a more creative point of view what civil can offer or what is missing in the current market or the solutionGabor Kerekes: Even spect.Noémi Biró: Ive like the clinician'sAmir Houieh: that yeah that would be basicallyNoémi Biró: perspective.Amir Houieh: this one or yeah ofNoémi Biró: Yeah. Oh, so um if we can actually claim that we designed everything and developed everything in close collaboration with like clinicians, this is like a huge trust builder, too. But it has to be real. Like we shouldn't just say it, it has to be real.",
+				"date": "2026-01-23"
+			}
+		},
+		{
+			"id": "standup-2026-01-23-003617",
+			"label": "2026-01-23 [00:36:17]",
+			"data": {
+				"chunk": "Noémi Biró: So like figuring out what a good collaboration process looks like with clinicians. Uh IAmir Houieh: I think that's more like a dynamic.Noémi Biró: thinkAmir Houieh: It's not about the amount. So this this is particularly about what needs to be done not how to be done.Noémi Biró: Yeah. Yeah.Amir Houieh: Uh but I think that's an document that no is also you are working on at the end rightNoémi Biró: Okay.Amir Houieh: I saw it in your email that's one of the things you are going to also discuss with MelissaNoémi Biró: Yeah, that's kind of I want to translate maybe this into theAmir Houieh: onNoémi Biró: how. Mhm.Amir Houieh: yeah uh okay cool and also this local first small language model is super fascinating but I am afraid that for next week Is it going to be still too early? Especially given the fact that we are going to have an iOS.Gabor Kerekes: Yeah.Amir Houieh: So maybe this could be just a discovery. So I just put a discovery word there and I also explain it to Melissa.",
+				"date": "2026-01-23"
+			}
+		},
+		{
+			"id": "standup-2026-01-23-003716",
+			"label": "2026-01-23 [00:37:16]",
+			"data": {
+				"chunk": "Amir Houieh: Uh so this is something also to have to keep in mind. Uh okay.Noémi Biró: Oh,Amir Houieh: Uh this yeah this this forward deployed engineer is a more like a technical part and operational but uh so we agreed on a like a it will be a mutual agreement if we hire such a person and if that person at the end of the day by end of the process we decide to move it to the C bill or not and if that happen then we get also compensated for that because we are basically vetting that engineer along the way. uh this six months will be removed because she added at the beginning but we have to remove it and I need to reformulate this as well. Uh, anything else or this is clear.Gabor Kerekes: Um, yeah, I think it's good. I'll have another pass.Amir Houieh: Okay, that was my update. Uh, I don't I haven't worked on anything else because Oh, yeah. I wanted to work on the branches but um I couldn't figure out because I guess the branches are not all up to date in a way like it's I didn't know which branch is the latest version and I",
+				"date": "2026-01-23"
+			}
+		},
+		{
+			"id": "standup-2026-01-23-003841",
+			"label": "2026-01-23 [00:38:41]",
+			"data": {
+				"chunk": "Gabor Kerekes: Oh, now it's main. Just main.Amir Houieh: could worry no and also IGabor Kerekes: Yeah.Amir Houieh: didn't have time because yesterday I was oh by the way Carefinder is launched maybe I should showGabor Kerekes: Okay.Amir Houieh: you uh yesterday me and Hoda went to the party of the at their opening and it was really cool to see. Also, it took one and a half year for them to develop it and it was very s*****Gabor Kerekes: Nice.Amir Houieh: that Hussein was not there. I mean, he I guess he's the architect behind the whole s***. But, uh, let me show you guys. Oh, no. Let me show you just one window. Maybe that's better. finder.Gabor Kerekes: Wish we could work with Hussein. He's theAmir Houieh: It's really smart.Gabor Kerekes: best.Amir Houieh: Yeah, he he yeah, he he does have his own like he he tends to make things complicated, but that's the only Okay, so yeah,Gabor Kerekes: Oh, it looks nice.Amir Houieh: the design is like they they they work too much on the and this is again this is an app for one and a half year development and no users feedback.",
+				"date": "2026-01-23"
+			}
+		},
+		{
+			"id": "standup-2026-01-23-004010",
+			"label": "2026-01-23 [00:40:10]",
+			"data": {
+				"chunk": "Amir Houieh: So it's crazy. Uh, all right. So it can be in Dutch or English. I could start typing English and it switch the language automatically. Or I could just do it like this. And here you can say various of things. For example, I don't know what should I talk to. I feel exhausted at work. Who should I talk to? Uh, it shows you 14 profiles. uh based on the matches and again the magical part is that all this information are aggregated and built by somebody. So they didn't do any curation. Then you can go to each person and then each person has a video and all this information gets generated right on the fly based on the knowledge base. These are all extracted again from their profiles by somebody for who specialization. It can also check with your insurance. So I can say hey I have for example menses and it also aggregate the plans for menes what subscription you have. I have then continue you see this UI issues are there but then no coverage found uh what else?",
+				"date": "2026-01-23"
+			}
+		},
+		{
+			"id": "standup-2026-01-23-004128",
+			"label": "2026-01-23 [00:41:28]",
+			"data": {
+				"chunk": "Amir Houieh: Um you can also chat with the profile itself. So for example I don't know uh what is the approach you have something like that and then it basically based on the all the information all the interviews that she has the blog post and everything which are all again in body it can answer uh the next step is that they also going to connect the calendar of these people. So you can with an agent you can just book an appointment or intro call whatever. Uh you could also go and give it a more complex scenarios that um can you find me uh someone uh I don't know a female um uh therapist who uh around Amsterdam who is who speaks English for anxiety. And then so any anything you can interact with it completely with human language. Uh and there you go. Or you say I have I don't know eating uh disorder uh who is there anyone in anyone who can help me online phone profiles. Yeah. So this is how it's going to go.",
+				"date": "2026-01-23"
+			}
+		},
+		{
+			"id": "standup-2026-01-23-004310",
+			"label": "2026-01-23 [00:43:10]",
+			"data": {
+				"chunk": "Amir Houieh: And also for now they just like doing a manual on boarding process but at some stage they're going to start opening it up and everyone every therapist can go and create a profile. All you need to have is just the more data you have the better.Gabor Kerekes: Cool.Amir Houieh: But yeah,Noémi Biró: No.Amir Houieh: really cool.Noémi Biró: Amazing.Gabor Kerekes: Cool.Amir Houieh: Yeah. Cool. Now things. Yeah.Gabor Kerekes: UhAmir Houieh: So that's that's the update from my site.Noémi Biró: I've uh reorganized the notion for cibil and the R&D. So, we started the clean state. I looked at linear, but there are a lot of technical tasks that I don't actually know if they're still relevant orAmir Houieh: I think we cleaned up and moved everything to backlog.Noémi Biró: not.Amir Houieh: So maybe we should delete them all. I don't know. And start fresh.Noémi Biró: Uh yeah, that was actually the approach we like for a longGabor Kerekes: time in DVD. We kept everything because like we put effort in",
+				"date": "2026-01-23"
+			}
+		},
+		{
+			"id": "standup-2026-01-23-004431",
+			"label": "2026-01-23 [00:44:31]",
+			"data": {
+				"chunk": "Noémi Biró: to make him card and then we kept them around forever and then every cycle we had like one or two days just to go through all the cards. Is this still relevant? Is this not still relevant? And then what we started Yiannis was like f*** this s***. Spent so much time on like deciding what's relevant or not. Whereas relevance is like an emergent process that just like happens while you work. like if it's important if it's going to come up again and then you just create a card and we justAmir Houieh: We create a ticketNoémi Biró: wipe everything like end of cycle whatever we didn't do done likeAmir Houieh: forNoémi Biró: okay lock it just delete it and then whatever issues arrive arose again umAmir Houieh: I think uh the problem I mean it it's good we definitely need to do that but also we need to that means we need to be a bit more restricted in terms of creation. of those cards or tickets and I think a lot of cases we used AI to create them and that because it was easy then it just created tons of it.",
+				"date": "2026-01-23"
+			}
+		},
+		{
+			"id": "standup-2026-01-23-004535",
+			"label": "2026-01-23 [00:45:35]",
+			"data": {
+				"chunk": "Amir Houieh: Uh but maybe it's good to be more selective and do it every cycle with with really like only create the essential ones and as you said based on each cycle and at the end we justGabor Kerekes: Yeah.Amir Houieh: delete them all and we recreate them again if it's needed.Gabor Kerekes: Yeah. Okay. So, for example,Noémi Biró: ideas or features that are now there.Amir Houieh: There is nothing that we it's not going to come up again.Noémi Biró: Maybe I could.Amir Houieh: If it if if it becomes relevant then we have to discuss it again based on the newNoémi Biró: Yeah. Okay. True. Okay.Amir Houieh: parameters.Noémi Biró: Then I'll wipe it out. I wonder if it makes sense to like still back them up in some way likeAmir Houieh: you're not going to lose anything. I mean I mean you did some research on security for example they are valuable but I don't think they you only keep them in linear or there wereGabor Kerekes: Yeah,Noémi Biró: like so so one thing is I don't know when some issue is",
+				"date": "2026-01-23"
+			}
+		},
+		{
+			"id": "standup-2026-01-23-004634",
+			"label": "2026-01-23 [00:46:34]",
+			"data": {
+				"chunk": "Amir Houieh: someNoémi Biró: fixed maybe there's additional context for it um that might be valuable later um because because like let's sayAmir Houieh: I don't thinkNoémi Biró: I don't know um like for example we I don't this this just another uh it's more about the mechanism not necessarily about the reality but this code base might be handed over or will be handed over to another team and then um maybe we take some corner somewhere and um do things in a in a way that it's like they look at it and they go like why did they do it like this? And um we will even forget. Uh and like one way of doing that is to uh document decisions about these kind of decisions in um commit messages uh so that it lives in theAmir Houieh: Yeah.Noémi Biró: history.Amir Houieh: Yeah.Noémi Biró: like that's that's probably the best way but for some things maybe they it becomesAmir Houieh: Yeah.Noémi Biró: documentation in the issue I don't know so that's the only so to to keep some kind of and and this is a process we can probably improve there are some like uh posts that I saw how to kind of like document your decisions and this in like long-term software projects this does come up I remember having to make like a really important change in Divid's code base and I was looking at the code and I'm like why the f***",
+				"date": "2026-01-23"
+			}
+		},
+		{
+			"id": "standup-2026-01-23-004827",
+			"label": "2026-01-23 [00:48:27]",
+			"data": {
+				"chunk": "Noémi Biró: is it like this? Maybe it has a good reason for it and like doing this kind of archaeology work of how that code evolved and like why uh the person who introduced it or who made it that way whether he left any kind of breadcrumbs for me to understand. So yeah,Amir Houieh: Okay. No.Noémi Biró: it can save a lot of pain later on if we keep some kind of a good record.Amir Houieh: AndNoémi Biró: So that's the only reason why I I'm wondering whether to maybe keep an archive of these somewhere like revive everything but maybe like export them to fileAmir Houieh: I would rely on commentsNoémi Biró: and push it to another repo or I don't know some something is easy or move it toAmir Houieh: I think the best is to yeah the best would be to keep them in the comments actually that's what I also try to do that whenever when you implement a feature and you make a comet you explain why you did it uh what are the risks what are the future",
+				"date": "2026-01-23"
+			}
+		},
+		{
+			"id": "standup-2026-01-23-004932",
+			"label": "2026-01-23 [00:49:32]",
+			"data": {
+				"chunk": "Noémi Biró: Yeah.Amir Houieh: considerations.Noémi Biró: What?Amir Houieh: So, and that that would be great because also cloud has access to all those comets and can readGabor Kerekes: Exactly. Yeah.Amir Houieh: it.Gabor Kerekes: Yeah.Amir Houieh: So, I don't think we should bring that onGabor Kerekes: Maybe like No, no,Amir Houieh: linear.Gabor Kerekes: no, no. I agree. I think we could have a kind of commit template where we have exactly this kindAmir Houieh: Yeah, exactly.Gabor Kerekes: and because I'm actually letting Claude write the commit messages. Anyway, I just review that also like I read everything. I don't let anything out that I don't read. Uh but I let it generate the commit message and then make some adjustments. And if we have that kind of template like what kind ofNoémi Biró: what other solutions did we consider or you know like what were the kind of decisions that were made so that um in the future we don't have to again deliberate about those decisions um if we have like a trace yeah okay so",
+				"date": "2026-01-23"
+			}
+		},
+		{
+			"id": "standup-2026-01-23-005037",
+			"label": "2026-01-23 [00:50:37]",
+			"data": {
+				"chunk": "Amir Houieh: Okay.Noémi Biró: this I wrote into your organizational operational agreement Hold on.Amir Houieh: Nice.Noémi Biró: Okay. So yeah, we're going to meet with Melissa and Amir on Monday to kind of kick off these four weeks and yeah, just get some more clarity about how we're going to achieve certain things,Amir Houieh: Cool.Noémi Biró: how to work with the clinicians, what are practically like the timelines for that.Gabor Kerekes: Yeah, that's it.Amir Houieh: Uh, did you work on manifestation or manifesto? Okay.Gabor Kerekes: Yeah.Amir Houieh: Nice. How about you,Noémi Biró: I brokeGabor Kerekes: On a couple of issues.Noémi Biró: down.Amir Houieh: Gab?Gabor Kerekes: Uh the issue is with the Sorry, the issue about the new conversations being uh created. I will push it today, deploy it today.Amir Houieh: Okay. Oh yeah, the session. Nice.Gabor Kerekes: Yeah.Amir Houieh: Okay.Gabor Kerekes: Okay.Amir Houieh: Okay.Gabor Kerekes: Are there other bugs that still need to be fixed or No, all the bugs areAmir Houieh: There is one bug on my side I need to fix.",
+				"date": "2026-01-23"
+			}
+		},
+		{
+			"id": "standup-2026-01-23-005215",
+			"label": "2026-01-23 [00:52:15]",
+			"data": {
+				"chunk": "Amir Houieh: I will do it today for sure. And you g you also had anotherGabor Kerekes: There is one that I couldn't figure out which is thisAmir Houieh: book.Gabor Kerekes: um animation like why that happens but I also didn't spend a lot of time that's a UI issueAmir Houieh: Okay.Gabor Kerekes: it's a only happening on iOSAmir Houieh: I think No,Gabor Kerekes: Yes.Amir Houieh: on Android. Oh, no.Gabor Kerekes: No,Amir Houieh: Sorry. On iOS. Sorry.Gabor Kerekes: it's it's an animation glitch.Amir Houieh: Yes. Yes. Yes.Gabor Kerekes: Honestly, I don'tAmir Houieh: I think we should remove the we should remove the backdrop filters if there isGabor Kerekes: know.Amir Houieh: any and that probably will fix it.Gabor Kerekes: Okay.Amir Houieh: That's my kind gut feelings.Gabor Kerekes: Okay. And at the beginning of the week, we kind of said there's going to be like 16 hours to fix the bugs. How are we with that?Amir Houieh: I yeah I don't know I need one hour and I will I think that will be enough for me but the Gab is doing the most of the box",
+				"date": "2026-01-23"
+			}
+		},
+		{
+			"id": "standup-2026-01-23-005332",
+			"label": "2026-01-23 [00:53:32]",
+			"data": {
+				"chunk": "Gabor Kerekes: We are I think 16 is fine. You're still within that. Mhm.Amir Houieh: and you are still within this Gabbor or it's not going to be finished. So, can we have a deployed version tonightGabor Kerekes: Yeah. There will be I don't know if all of them will be fixed but uh atAmir Houieh: orGabor Kerekes: least the major one.Amir Houieh: Well, there are only three. One of them I'm going to fix the links.Gabor Kerekes: Yeah.Amir Houieh: You fix the new conversation and if you can just manage that glitching I would just make a shallow comment for now and remove the backdrop and we will ask we will test it.Gabor Kerekes: Okay.Amir Houieh: Cool. Would be great to put it close to it this week. So on Monday we can start fresh but it's ongoing process.Gabor Kerekes: Yeah.Amir Houieh: Awesome. Do you want to take a break before we go to manifesto orGabor Kerekes: Yeah. I'll make a T.Amir Houieh: Okay, see you inGabor Kerekes: Five.",
+				"date": "2026-01-23"
+			}
+		},
+		{
+			"id": "standup-2026-01-23-005443",
+			"label": "2026-01-23 [00:54:43]",
+			"data": {
+				"chunk": "Gabor Kerekes: Five is fine.Amir Houieh: five.Gabor Kerekes: 10. I don't know.Amir Houieh: Okay,Gabor Kerekes: Whatever you prefer.Amir Houieh: no, five is good. See you around 1. No, sorry, 12:30. Around.Gabor Kerekes: Yeah. Yeah.Amir Houieh: Okay.Gabor Kerekes: See you.Amir Houieh: I'm back.Gabor Kerekes: Hello. Hey, let me bring someNoémi Biró: Hey, sorry I went into the other meeting, the manifest one. Um, in the meantime, Melissa was asking about the analytics if it could be sent to her. I already updated it for this week. Um, do you send her an email then? I thought she would get a notification cuz it's shared. She sent it one hour ago. Oh, okay. Can you reply to her email? And then next week we can Oh, air, you're muted.Amir Houieh: I think Ni you should do it. I think this is also but from non we should also have a more automated work. not automated but more.Noémi Biró: from next week,",
+				"date": "2026-01-23"
+			}
+		},
+		{
+			"id": "standup-2026-01-23-011050",
+			"label": "2026-01-23 [01:10:50]",
+			"data": {
+				"chunk": "Amir Houieh: So maybe so we need to probably like have a like a task for it every week andNoémi Biró: right?Amir Houieh: then me or Gab do it and then we'll let youGabor Kerekes: Yeah.Amir Houieh: know.Gabor Kerekes: Or it's something that because there is that in the scope for the next phase is to um have this kind of admin panel. And one thing that could be done is to there are these basically open- source tools except for this kind of stuff where you save a SQL query and it generates like analytics dashboard out of it. Okay. So if I understand correctly this would be something after the four weeksAmir Houieh: Yeah. But until then we we will keep sending manual.Gabor Kerekes: only every week.Amir Houieh: Yeah. So maybe Yeah.Gabor Kerekes: Okay.Amir Houieh: If you can just remind me or because we both I don't know. Can I also doGabor Kerekes: Um,Amir Houieh: it?Gabor Kerekes: yeah, I added to the schedule, so I'll know to remind Yeah, I have a I have a commit.",
+				"date": "2026-01-23"
+			}
+		},
+		{
+			"id": "standup-2026-01-23-011203",
+			"label": "2026-01-23 [01:12:03]",
+			"data": {
+				"chunk": "Gabor Kerekes: I don't think I published it to main yet, but I will. But I added a script that generates like TSV files.Noémi Biró: afterGabor Kerekes: they still have to be copied into like manually. Okay. So if youNoémi Biró: the manifesto meeting if you share with me the file I'll send it to Melissa. Um it's the sameGabor Kerekes: as always like sheNoémi Biró: fileGabor Kerekes: said thisNoémi Biró: civil analytics January 12. Oh okay. Um Oh yeah. Okay then. uh go to users. Yeah. If you go to drive the same place where this is basicallyGabor Kerekes: data. All right. So, I just sent got aNoémi Biró: There it is. Yeah. Okay, cool. Um I thought you wouldGabor Kerekes: notification because I there was like a popup share withNoémi Biró: getGabor Kerekes: X and Y. He's an editor, but maybe she just didn't get Yeah, it's just maybe something that you could mention in the email that we already made it uh two days ago or three days ago, but we thought she would get a notification.",
+				"date": "2026-01-23"
+			}
+		},
+		{
+			"id": "standup-2026-01-23-011349",
+			"label": "2026-01-23 [01:13:49]",
+			"data": {
+				"chunk": "Gabor Kerekes: We should have checked in. Mhm. But then yeah, but when I after I did this, I did like a fast research on analytics tools. Um, and yeah, there are a couple of good ones that are lightweight and that could be uh we could we canNoémi Biró: SouthGabor Kerekes: umNoémi Biró: Coast.Gabor Kerekes: Yeah.Noémi Biró: So,Gabor Kerekes: regarding the manifesto. Um, yeah, I also wrote a sketch. I still need to go over like there are a couple of points that I need to um yeah think about it more uh carefully but I found some some good starting points and what I was thinking is like this already I don'tAmir Houieh: Mhm.Gabor Kerekes: know no deal did you also write something or I did okay what I was thinking is like maybe each of us can uh give an introduction to like basically walk each other through uh what are the main statements and points. Do we read do like you read yourNoémi Biró: I no I wouldn't like read because maybe it's like too long to read but just to kind of like each of us highlight something and we we don't read it to each other but we present it to each other and we can like okay maybe highlight some text or whatever.",
+				"date": "2026-01-23"
+			}
+		},
+		{
+			"id": "standup-2026-01-23-011635",
+			"label": "2026-01-23 [01:16:35]",
+			"data": {
+				"chunk": "Noémi Biró: Um and thenGabor Kerekes: What I was thinking to try is to um use claude the prompt which is about this kind of iterative thinking that we used a couple of times to think through technical problems. Um I can tell Claude to um use that as a basis but instead of thinking through technical problems give us questions uh to answer so we can kind of join these three threads of thinking I don't know identify differences identify commonalities and like yeah basically just use it as a thinking workshop or thinking tool. Um it will give us questions that we will have to answer the three of us together and then at the end it will synthesize some text which is from all the three something likeAmir Houieh: Sure.Gabor Kerekes: that. Yeah. Does that sound good? Yeah. Okay. wants to start.Amir Houieh: I don't know.Gabor Kerekes: So all of those are in the body R&D like there's a conceptual tab and there you have like R&D lab gabard's manifesto air's name is manifesto under each other's",
+				"date": "2026-01-23"
+			}
+		},
+		{
+			"id": "standup-2026-01-23-011817",
+			"label": "2026-01-23 [01:18:17]",
+			"data": {
+				"chunk": "Amir Houieh: Okay.Gabor Kerekes: the first one So let me start live. Okay. Yeah.Noémi Biró: Um,Gabor Kerekes: So AI thatAmir Houieh: Oops.Gabor Kerekes: amplifies this is about like what um what I think for me is the relationship or how I kind of conceptualize the relationship to AI like there's this common narrative of AI replacing humans and this goes a bit against that um that um that it's it's not about replacing you, but about amplifying you. And it's also not aboutNoémi Biró: SharingGabor Kerekes: um like a tool that thinks for you or replaces your thinking, but something that refineses your thinking uh and refineses your activity. So it's more of a collaboration between AI and human rather than one replacing the other. And also that it's like when you apply that to mental health. Um I think AI is not something that will give you fixes or that it will give you answers. It's something that can manifest uh hidden patterns or like hidden things um both in your mind and um it unlocks potential.",
+				"date": "2026-01-23"
+			}
+		},
+		{
+			"id": "standup-2026-01-23-012032",
+			"label": "2026-01-23 [01:20:32]",
+			"data": {
+				"chunk": "Gabor Kerekes: Like for example, you have the way you used couple days ago AI to create this tool. you have the potential to to build such a tool. You don't have the speed and the technical capabilities to realize it. Yeah. But you have the potential to dream it up and to uh Yeah. And then AI enables you to realize that. So AI is something that can unlock hidden potential in humans. um and in your mind.Amir Houieh: CouldGabor Kerekes: So yeah, that's that's what first thing is about. No, you're no longerAmir Houieh: you also talk about the integration over fragmentation a bit?Noémi Biró: your screen.Gabor Kerekes: sharing.Amir Houieh: I I kind of like find it really interesting.Gabor Kerekes: Yeah, that's something that I need to spend more time on, but it's um this came from um like the question of like what is it that I find interesting in uh for example in working on Cibil that it uh civil in civil there are all these areas and I don't know just like topics or kind of disciplines that I ventured into or like areas that I ventured into throughout my life and they all seemed like I didn't know how to connect them.",
+				"date": "2026-01-23"
+			}
+		},
+		{
+			"id": "standup-2026-01-23-012226",
+			"label": "2026-01-23 [01:22:26]",
+			"data": {
+				"chunk": "Gabor Kerekes: my interest in mental health. Uh I mean it's not only an interest, it's just something that uh I have to actively engage with. Um and the interest in design like visual design but also design as a way of thinking. Uh and the reasons why I went to Kabika and then um softwareAmir Houieh: Okay.Gabor Kerekes: engineering and like building systems and building tools and like all of these things come together uh in civil.Amir Houieh: Okay.Gabor Kerekes: So it's a way for me to integrate all these uh parts of my personality and interests and like what I'm curious about. Uh, so that's that's what the integration is. But yeah, that's that's where it came from. But I haven't Yeah, I need to think about it a bit more.Amir Houieh: nice okay okay what I like about what the structure that you have is that it's not only AIdriven or technologydriven uh so for example if the first part is about the positioning US R&D lab taking like about AI. The next one is more about basically like general mentality behind what tools that you use or how you use them.",
+				"date": "2026-01-23"
+			}
+		},
+		{
+			"id": "standup-2026-01-23-012407",
+			"label": "2026-01-23 [01:24:07]",
+			"data": {
+				"chunk": "Amir Houieh: And then the third one is more about what's the personal reason that you do what you do. And the last one is so it's all different aspects and that that I really like and I I don't have anything against it.Gabor Kerekes: Yeah.Amir Houieh: I think it's really cool and good sounds and the AI thatGabor Kerekes: Yeah,Amir Houieh: amplifies I think it does have also overlap with some of my ideas forGabor Kerekes: I'm Yeah, I'm curious like all of these things are somethingAmir Houieh: sure.Gabor Kerekes: that I could like each of them could be their own manifesto about some aspect.Amir Houieh: No,Gabor Kerekes: Mhm.Amir Houieh: but I think it's importantGabor Kerekes: So just like dumping my brain and like um putting all of that uh but uh yeah like I still want to I don't know I'm curious how all of them will come together. Um cuz there's a lot more I guess I could say also about like what you wrote about adaptation like personalized software and that kind of stuff. But um I just wanted to paint a big picture uh first and",
+				"date": "2026-01-23"
+			}
+		},
+		{
+			"id": "standup-2026-01-23-012526",
+			"label": "2026-01-23 [01:25:26]",
+			"data": {
+				"chunk": "Amir Houieh: No, definitely.Gabor Kerekes: yeahAmir Houieh: I think uh it is really cool. Okay. No, I think if we are writing the manifesto we are going to write it should be almostGabor Kerekes: crap.Amir Houieh: this this the same size as this one and also the same likeGabor Kerekes: Yeah.Amir Houieh: four or the same like having cover multiple topics and different perspective you know like what is our positioning basically again about AI about workflows about the type of product we are working on and how we are going to do it so it should have it should cover all these pillars in aGabor Kerekes: Yeah, I kind of uh I mean I I didn'tAmir Houieh: Okay.Gabor Kerekes: um use this as a reference, but this one has Whenever I think of money, I always think of this thinking machines uh that it's it makesAmir Houieh: That's a goodGabor Kerekes: these kind of statements and it's very concise and yeah just articulates the core mission of this thing like uh thinking machines. This is the um the new company of the like ex CTO of Open AI.",
+				"date": "2026-01-23"
+			}
+		},
+		{
+			"id": "standup-2026-01-23-012646",
+			"label": "2026-01-23 [01:26:46]",
+			"data": {
+				"chunk": "Amir Houieh: It's a good one.Gabor Kerekes: UmAmir Houieh: Nice. Okay, Naomi, you want to go next orGabor Kerekes: yeah. Okay. So I was thinking more about what I would like the tool to do, how it would like how I would like it to affect people. And for me, it's a lot about stepping away or like the tool helping you understand things about yourself and then stepping back into the real world to process it. And so yeah, I I think it's interesting to think about like building tools that you're that they're not built for traction and there's like friction in the design. And it's not about like all the engagement that you can get, but it's about like how it can slow you down and help you to reconnect with yourself and like stop being on autopilot and kind of bring you back to your own judgment. And I'm also curious about like building high quality and then really testing it out and trying to reduce noise and then accepting like a slower growth. And then coming down to like personalized tools and actually I think this would be like a core sentence here like personalization the means the way you see and process the world is allowed to shape the tool.",
+				"date": "2026-01-23"
+			}
+		},
+		{
+			"id": "standup-2026-01-23-012900",
+			"label": "2026-01-23 [01:29:00]",
+			"data": {
+				"chunk": "Gabor Kerekes: So how you actually act in this world, it can be a way for the tool to serve you and not you just having a tool that's been thought out for you that you kind of have to adapt to, but it's actually the tool that is adapting to your needs and therefore giving you more authority about how you use it.Amir Houieh: That's that's a bit okay.Gabor Kerekes: Um,Amir Houieh: That's that part I didn't quite follow the the part that youGabor Kerekes: whichAmir Houieh: just highlighted.Gabor Kerekes: part?Amir Houieh: Personal vision for us means the way you seeGabor Kerekes: So it's about how a lot of these tools that we use have been shaped for us and they've been shaped for us to you know using our weaknesses to keep us locked into the tool in a way and it's not actually in our own benefit and for me personalization means that I make use of what I need like for example with this tool that I built for myself I recognized I need to see something visually in order to understand time uh references to each other otherwise I just don't understand it.",
+				"date": "2026-01-23"
+			}
+		},
+		{
+			"id": "standup-2026-01-23-013017",
+			"label": "2026-01-23 [01:30:17]",
+			"data": {
+				"chunk": "Gabor Kerekes: So this tool actually helps me and it's based on my own needs and notAmir Houieh: Mhm.Gabor Kerekes: somebody else thought my need should be and like I think it also has to do with friction that it that the tool decides to like for example this I built this so far it's like a simple primitive system it's just really the first uh brick but um I built this kind of system with cloud code that it um it gets context not only about what I'm working on but just my general mental state and what has happened in the last few weeks. uh it keeps a memory of it and also gets like um the current time. So for example when I ask it to like let's say I have a hyperfocus something that I want to do or work on some coding s*** which doesn't really uh it's not the right time to do it. Um let's say at midnight I ask it to I don't know ask about some technical topic. it will say this is it's midnight now so I'm not going to help you with this like I don't know it it took a few iterations but to get to get to get it to even just flat out reject my request like it's just it just says I'm not gonna do it and it took a while to like make the prompt like that but Um yeah and and it starts collecting I don't",
+				"date": "2026-01-23"
+			}
+		},
+		{
+			"id": "standup-2026-01-23-013217",
+			"label": "2026-01-23 [01:32:17]",
+			"data": {
+				"chunk": "Gabor Kerekes: know for example like patterns of how I rationalize what I do and to see through all those things and then it reflects them back to me saying like well this is not what you said you wanted to do with your life. Yeah. um and says like I think like based on the values or based on how you articulated your goals you should be going to sleep now if you want to support those goals and not work on this thing and it's like enough friction to you know yeah like make make so it's yeah it it works exactly the opposite way whereas like entropics or like uh I don't know if you're um provider of this tool uh you're it's in your interest for the user to be addicted and like use it as much as possible. Yeah. So something that I don't know somewhere here I wrote about the fact that it's not about how long the user is using the tool but it's about like coming back because it's actually good and maybe you use it for five seconds but it actually improves your life and it's about this moment when the tool actually gives you the necessary like there's a necessary input and then it just leaves you to process it because there needs to be like ups and downs.",
+				"date": "2026-01-23"
+			}
+		},
+		{
+			"id": "standup-2026-01-23-013348",
+			"label": "2026-01-23 [01:33:48]",
+			"data": {
+				"chunk": "Gabor Kerekes: in that engagement and that can actually help someone step out of their own patterns that they usually do and yeah see their own mind more clearly. Yeah. Um I don't know maybe this is going in a direction which is I don't know like off topic but uh like I sort of envision some kind of a system that uh learns about you but it it doesn't have a form specific form like what we've talked about earlier that it's it's some kind of a systemAmir Houieh: IGabor Kerekes: that knows you And that can be integrated into cloud code. It can be integrated into I don't know your browser. It can be integrated into whatever like all these different places or your WhatsApp. It doesn't it's not one app. It's like some kind of a ghost that lives everywhere. Mhm.Amir Houieh: like the idea. Uh I think no I like it as well like the whole manifesto and I think it this one also has a lot of overlaps with what I was thinking. The only like concern or something that we need to also define for ourel or answer the question that we don't become starting sound like what is the word uh um omniscient you know when do you know the word um yeah",
+				"date": "2026-01-23"
+			}
+		},
+		{
+			"id": "standup-2026-01-23-013524",
+			"label": "2026-01-23 [01:35:24]",
+			"data": {
+				"chunk": "Gabor Kerekes: Mhm.Amir Houieh: yeah that we don't claim that we know better than what user wants orGabor Kerekes: Everything.Amir Houieh: we know that for example what is good or what is bad because on the other because on in other words we start working against what we are claiming a few lines earlier you know that we want an app that doesn't shape our tool or tools that doesn't shape us in a way or gets shaped by us. So if we start thinking or putting oursel in a position that what we think is good and what is not good then we are also kind of working against that. So it's very important to make sure that we don't get into that trap. Uh because for example again and the the the I think the solution to this would be indeed uh the how basically the software can learn from us or how in general it can get adapt to us. That's what what I always meant by adaptation. Cool. Nice. Yeah. Yeah. So in general if you want to like summarize your manifesto as it is you talk you start from a more the relation between human and software and you see the software as a tool uh that shape that can help us throughout whatever",
+				"date": "2026-01-23"
+			}
+		},
+		{
+			"id": "standup-2026-01-23-013647",
+			"label": "2026-01-23 [01:36:47]",
+			"data": {
+				"chunk": "Gabor Kerekes: Mhm.Amir Houieh: activities and throughout the life and you want to make the role of it less apparent in a way that it kind of get us out of enjoying life in a way or livingGabor Kerekes: Yeah.Noémi Biró: actually asking like if this tool is useful and it's helpful, what can you gain from it and you gain back time and then you're free to do with that time something else in your life. So it it just gives you back someAmir Houieh: Okay.Noémi Biró: authorship.Amir Houieh: Okay. Nice.Noémi Biró: But I think also um that's forAmir Houieh: Cool.Noémi Biró: me focused on efficiency like how can you I don't know make more efficient use of your time to save you time to free up time.Gabor Kerekes: Uh, but I think it also should help you figure out what to do with that time like to help you find the direction to kind of like um I don't know. It's a good point.Amir Houieh: Uh I I see Gabbor what she mean but again for me it's very also dangerous area that as soon as we it seems like we're trying to define a good software like like we're trying to define what is a helpful software And and that to me we shouldn't do that.",
+				"date": "2026-01-23"
+			}
+		},
+		{
+			"id": "standup-2026-01-23-013821",
+			"label": "2026-01-23 [01:38:21]",
+			"data": {
+				"chunk": "Gabor Kerekes: But we don't we we don'tAmir Houieh: That that's myGabor Kerekes: Yeah, I wouldn't likeAmir Houieh: feeling.Gabor Kerekes: um I agree with that completely. It should be it's more about kind of sort of like an account like let's say it can be one way it can work is some kind of an accountability partner. Um we as the tools authors we are not going to define what you should be what the tool should hold you accountable for. That's something for you to define like what do you value? The tool is only helping you to enforce those values and to not deviate from them to remind you when you are doing something other than what you said you would do. It's more about that.Amir Houieh: Okay.Gabor Kerekes: And so we're not going to prescribe like I don't know any specific things like you should live your life this way. That's that's for you to decide and everyone is different and for some people Yeah.Amir Houieh: And what about so let's actually this is interesting maybe we should talk about it now how do we think about the agency of these tools or a the agency of the software in general",
+				"date": "2026-01-23"
+			}
+		},
+		{
+			"id": "standup-2026-01-23-013954",
+			"label": "2026-01-23 [01:39:54]",
+			"data": {
+				"chunk": "Gabor Kerekes: What do you mean by agency?Amir Houieh: the agency I mean the fact that how much power an AI has in decision making like to determine what is good what is not good you know like how to adapt to you how to learn from you for example you say it could help me to have more sleep and less for example anxiety right and this is a case for a person who has this scenario but is this up to the tool or the software to decide is that going to the bed is good for you or not or no this is something that you you need to dictate it.Gabor Kerekes: I think it's always your responsibility to tell the tool what you would like helpAmir Houieh: So in that sense we are taking out the agency of the software inGabor Kerekes: withAmir Houieh: general.Gabor Kerekes: in one way. Yeah. Like I think the ultimate agent and the ultimate authority is you is the user and AI there's always there should be a kind of hierarchy between cuz I think these these things they can just kind of like reflect back and amplify what you are already and reflect back to you and not decide for you what you should be or how you should do things.",
+				"date": "2026-01-23"
+			}
+		},
+		{
+			"id": "standup-2026-01-23-014122",
+			"label": "2026-01-23 [01:41:22]",
+			"data": {
+				"chunk": "Gabor Kerekes: I think for me this agency is connected to what we are discussing with proactive features with civil and then thinking about some proactive features that you for yourself said for example like hey I want to go to sleep from now on every day at 11 please don't help me after 11 with my questions uh butAmir Houieh: But I'm wondering what should happen when gabber say the software says hey I cannot do that because it's past midnight and you said you are not going to do that and what if then but then gabber starts pushing back what should be the software responseGabor Kerekes: I mean, it should remain critical. It's just like it's still just about reflecting it back. And if you um come up with a good enough reasonAmir Houieh: OfGabor Kerekes: to bypass the rules, then that's what you do. I don't know likeAmir Houieh: course we I mean this is a very like a very detailed question but in general I think this is a good example thatGabor Kerekes: Perfect.Amir Houieh: shows how we are going to basically think about the agency of the software in general and how do we define it and I think this is one of the most one of the important elements we need to probably address in the manifesto that either directly or indirectly like how much of agency we count for software in general but anyway because when we talk",
+				"date": "2026-01-23"
+			}
+		},
+		{
+			"id": "standup-2026-01-23-014255",
+			"label": "2026-01-23 [01:42:55]",
+			"data": {
+				"chunk": "Gabor Kerekes: Um,Amir Houieh: about personalization I think that's importantGabor Kerekes: I feel like it's um if I'm thinking about another use case like let's say I'm thinking about this uh bookmarking tool or I don't know maybe research tool where uh I'm exploring some topic and collecting bookmarks and articles and stuff like that around that um there is agency of the software where I don't explicitly ask it to do something that during the night let's say it um uh synthesizes some information in the background and then in the morning I see some new like I'm interested in some topic and then uh it can go out and do research autonomously and then give me like a digest of that and I didn't ask it. It's like it's acting autonomously but it's still on my behalf. Uh I kind of ask it to be that way and it's determined by what I'm interested in. It's not just gonna do some random s***.Amir Houieh: So it'sGabor Kerekes: So it's it never makes it never makes decisions about what is valuable to you.Amir Houieh: essentially",
+				"date": "2026-01-23"
+			}
+		},
+		{
+			"id": "standup-2026-01-23-014419",
+			"label": "2026-01-23 [01:44:19]",
+			"data": {
+				"chunk": "Gabor Kerekes: But once uh you've defined what is valuable to you, it can help you with like finding more of that value. You know what I mean?Amir Houieh: no I think this is the line this is the amplifying of yourself that you were talkingGabor Kerekes: Yeah.Amir Houieh: about is indeed like it just does what if you were there would have done. Uh the only problem with that is that what happens when the person doesn'tGabor Kerekes: Yeah.Amir Houieh: have good intentions uh or knowingly or otherwise you know what I mean like in that sense then we need to define the helpful software that for example a person who is addicted right that person has a pattern or tendency towards particular drug or particular excessive behavior.Gabor Kerekes: Yeah.Amir Houieh: So does the software should repeat that in again this we are talking veryGabor Kerekes: No.Amir Houieh: abstract but uh so in that sense yeah it it would be very safeGabor Kerekes: Yeah.Amir Houieh: or it feels very good that we say okay it's just going to amplify us and learn from our",
+				"date": "2026-01-23"
+			}
+		},
+		{
+			"id": "standup-2026-01-23-014531",
+			"label": "2026-01-23 [01:45:31]",
+			"data": {
+				"chunk": "Gabor Kerekes: Yeah.Amir Houieh: behaviors and patterns and repeat them but then where do we draw the lines when it comes toGabor Kerekes: Yeah.Amir Houieh: you know destructive behaviorsGabor Kerekes: I mean, I think it's also so if you're addicted, um, you might be addicted and have the intention to not be addicted and to not do those patterns. So, the the software should help you uh amplify those intentions um and like help you with those patterns that you yourself want to get rid of. I'mAmir Houieh: That is interesting because this is also now touch upon what NoiGabor Kerekes: notAmir Houieh: said. Imagine let's let's take a social media. Let's take Instagram as a case study. Instagram is designed to basically not only kind of make you addictive but also like uh so from the beginning it tries to build upon what makes you addictive like it works with your what is it rewarding system right and then at some point it's the Instagram who takes over and for example ifGabor Kerekes: Thanks.Amir Houieh: you and expose you to only one particular narrative the same as X like if you start just liking and interacting with particular set of mindset or ideology or politic views.",
+				"date": "2026-01-23"
+			}
+		},
+		{
+			"id": "standup-2026-01-23-014658",
+			"label": "2026-01-23 [01:46:58]",
+			"data": {
+				"chunk": "Amir Houieh: From then on, you're just being exposed to that and it just amplify you and amplify you to an extent. Not amplifying you, but it just keeps going until the part that you find yourself at the end of the threshold like at the extreme uh you know part and that's where you basically become addicted as well and then you just want to come back because you want to just hear the same people repeating your ideas.Gabor Kerekes: Yeah. Yeah. I think this is what uh AI safety is about. Uh it's like a whole topic and a whole field of research. At the core of it, this is exactly the AI safety uh topic where these kind of AI induced psychosis uh cases they also it's the same mechanism where someone digs into has a has a has some kind of a somewhat crazy idea or whatever and then it finds validation from uh chat GPT saying like yeah this is a very interesting idea blah blah blah and Then it just the dialogue just spirals out of control until they lose they get convinced about some that they discovered a new branch of mathematics or some crazy s***.",
+				"date": "2026-01-23"
+			}
+		},
+		{
+			"id": "standup-2026-01-23-014828",
+			"label": "2026-01-23 [01:48:28]",
+			"data": {
+				"chunk": "Gabor Kerekes: Yeah. So that's why I kind of thought like yeah if we think about personalization then one of the biggest risks is like it's becoming this comfort zone comfort machine. Like it's always like this nice fuzzy place you want to return to. So therefore creating friction intentionally with the design.Amir Houieh: Yeah.Gabor Kerekes: I think that's very key and and um I don'tAmir Houieh: Yeah. Yeah.Gabor Kerekes: know I wrote something about that in the manifesto that uh this parallel with psychedelics that AI can manifest latent tendencies and like can manifest what's in your mind. Uh that's what psychedelics that's what the word psychedelic actually means that it's mind manifesting like if you look at the um ethmology of it and just like psychedelics I think AI has uh similar risks where like if someone who was predisposed to I don't know schizophrenia takes psychedelics it's like it's going UhAmir Houieh: Yeah, poison. It's like poison.Gabor Kerekes: h yeah yeah I mean it it can ruin someone. I was um listening to a podcast about a software engineer who for whom it took like 30 years to overcome the effects of a bad trip.",
+				"date": "2026-01-23"
+			}
+		},
+		{
+			"id": "standup-2026-01-23-015003",
+			"label": "2026-01-23 [01:50:03]",
+			"data": {
+				"chunk": "Gabor Kerekes: Uh and so yeah I I don't know I just find that analogy interesting because like psychedelics can bringAmir Houieh: Nice.Gabor Kerekes: about a lot of healing and uh if the right person gets uh through a psychedelic experience under the right guidance and under the right circumstances it can help tremendously but it can also destroy someone. So I don't know I think AI also is like this double-edged. So when when you mention the right guidance and right circumstances how would you translate that to an AI tool? Um I I think also it it depends like if the if the tool is like for example civil where it has uh an explicit sort of therapeutic element where you're trying to help like work through some mental issues. I think there the tool should be used under the guidance of like it should it should be integrated into a more holistic um approach to to healing where um I don't know maybe under the guidance of professionals or some kind of an oversight like that but it also depends on the case I think.",
+				"date": "2026-01-23"
+			}
+		},
+		{
+			"id": "standup-2026-01-23-015145",
+			"label": "2026-01-23 [01:51:45]",
+			"data": {
+				"chunk": "Amir Houieh: Uh yeah, and that's why I love building tools because with those you don't care what how it's being used. But anyway, cool. Shall I also walk through the my version?Gabor Kerekes: Yes, please.Amir Houieh: It's Yeah, I wrote it long time ago, but I think I know it pretty good. Let's see. Do you see myGabor Kerekes: Yeah.Amir Houieh: screen?Gabor Kerekes: Yeah.Amir Houieh: Uh it's not as flattened as you guys. But for me, I start my manifestation around the idea of like whatever this idea of software or the future software we we want to have. uh it's basically around one key question that how this software start acting like a utility and instead acts as more like a living creature in a way and that I think the example Gabber you said something that is come embedded with everywhere that kind of replicates me as a person and knows everything about me and can can be used and thenGabor Kerekes: Yeah, the ghost.Amir Houieh: sorry Yeah.Gabor Kerekes: Yeah, he was mentioning it.",
+				"date": "2026-01-23"
+			}
+		},
+		{
+			"id": "standup-2026-01-23-015304",
+			"label": "2026-01-23 [01:53:04]",
+			"data": {
+				"chunk": "Amir Houieh: Yeah.Gabor Kerekes: GhostAmir Houieh: Yeah. Uh so for me it's more like making it a bit more organ or um ergonomic a bit less official artificial. So when we talk about artificial intelligence for me uh it's not about the intelligence but my main concern is how we can make it less artificial or feels less artificial in a way and uh then I also would like to talk about the composition of our team or like how we define oursel that do we define oursel as a lab or as a collective of people who running a lab and leave the room open for others outsiders. there to also join and you know so it's more like not a movement but like a I'm pretty sure there are many more people out there that who are aligned with us and would probably like to join or work with us then uh so when then I elaborate on the end of the container idea this is basically a continuation of my thesis proposal at kabeka that I think it's touch upon like also what nume is talking about in terms of personalization that the software that we as we use it is basically a set of containers that are coming from top to bottom.",
+				"date": "2026-01-23"
+			}
+		},
+		{
+			"id": "standup-2026-01-23-015422",
+			"label": "2026-01-23 [01:54:22]",
+			"data": {
+				"chunk": "Amir Houieh: They are decided by the server. They are designed and decided and manufactured by particular central point of decision making which is a company a SAS company or you know Apple or Apple store whatever it is and it's decided for us and shipped with a prefixated shape and comes to us with prefixated ideas and agenda u and I would like to reject this entirely because I believe this whole contain contain containerizing app or software was just a placeholder a temporary basically idea that we had to come up with otherwise we couldn't deliver software otherwise software couldn't work but now with the raise of AI and the power of AI this is possible to get rid of this container idea and the whole idea behind it is because for example you don't so why do you use Gmail or why do we use Google meet or why do we use calendar we open Gmail to send an email or or read an email. We open I don't know discord to communicate with each other. So each of these softwares yes they have a name and a shape and a container but they at the end of the day they are about doing a particular job and that particular job.",
+				"date": "2026-01-23"
+			}
+		},
+		{
+			"id": "standup-2026-01-23-015539",
+			"label": "2026-01-23 [01:55:39]",
+			"data": {
+				"chunk": "Amir Houieh: So it's it's it's about doing the job or get the task done rather than shape or being have to go into a particular software or shape and get adapt to what it wants. So we should bring that task kind of to the user. Uh so in that's one part. The other part is one second I need to read because these titles I'm not really sure about your adapt your schedule nervous system is feed opposite we believe this memory and reasoning. Yeah, I think this is kind of a like overlapping with Gabor said as self like a amplification idea that software should be a continuation or an extension of us instead of you know deciding things for us or you know uh that ideas uh what else are success metrics is not the time spent it's the time return I think this is a part of I try to bring new initial ideas into the manif manifestation. So I'm going to just uh skip over it because you explained it better. And also from a tool to companion that's another one.",
+				"date": "2026-01-23"
+			}
+		},
+		{
+			"id": "standup-2026-01-23-015656",
+			"label": "2026-01-23 [01:56:56]",
+			"data": {
+				"chunk": "Amir Houieh: And then I talk about domestic area. That's where basically the software can become part of us embed to our life knows everything about every single aspects of the life and can help us in a much better sense instead of that we wait for our commands and tell it what to do. It can predict. It can be a step ahead of the game. It can be proactive stuff like that. And the and then to me these are all basically summarized into one one word and I call it adaptation. That's the software that can adapt to us. That's how I see it and that is based on for example the cibil that the we worked on but also that context OS that I showed you guys that that's the whole idea that we don't ship the software or there is no app there is no website there is no there these are each of them these are isolated uh containers that they don't even talk to each other but when you are sending an email you are basically taking your conversation from Slack as well with you in your head and the idea and this is not how our brain works.",
+				"date": "2026-01-23"
+			}
+		},
+		{
+			"id": "standup-2026-01-23-015804",
+			"label": "2026-01-23 [01:58:04]",
+			"data": {
+				"chunk": "Amir Houieh: We don't have different rooms in our brain that say okay this is for sending email. This is for how to communicate with your team. This is how to I don't know chat. This is how to uh I don't know open YouTube and do stuff.Gabor Kerekes: IAmir Houieh: This is not how our brain works. Our brain is more intention oriented. We have an intent and we want to do it and we do it. These are like isolated tools. and we have to forcefully make them connected to each other. But this is more about that idea. Uh and then of course I also like talk to talk about like more emphasizing on building rather than researching and talking and that's another thing I would like to kind of reflect in the manifestation that I think it's more about building trial and error. I'm not rejecting the research part that's valid but I don't think that's what we are good at and what we should be. I think what we are good at is more this mentality of you know learning by doing and experimentation and rather than just purely going and doing research and these sort of things.",
+				"date": "2026-01-23"
+			}
+		},
+		{
+			"id": "standup-2026-01-23-015909",
+			"label": "2026-01-23 [01:59:09]",
+			"data": {
+				"chunk": "Amir Houieh: This is like again what I had in mind inGabor Kerekes: mean I don't necessarily make a differenceAmir Houieh: general.Gabor Kerekes: between um yeah research and building for me those two things are the same like that's research you build things you make you form a hypothesis you build it and then you test it that'sAmir Houieh: Mhm.Gabor Kerekes: research but yeah I agree like I guessAmir Houieh: Okay.Gabor Kerekes: um research that it it's like it all remainsAmir Houieh: I just don't want toGabor Kerekes: theoretical and that there is no practical application. That's actually something. Oh, interesting. Yeah. Um the thinking machines lab also has um a section titled learning by doing and that um research and product uh that they are researching but they immediately apply whatever comes through research to product design and then that informs research. But those are like hardcore like scientists and researchers. Mhm. They have the same mentality that there's theory, but there's practice. And um yeah, I like that. I think practice without theory, if you don't think carefully about what you're doing, that's not good. But also, if you're only thinking and not doing anything, that's also not good. Yeah. SoAmir Houieh: Yes.Gabor Kerekes: yeah.Amir Houieh: So I I'm thinking maybe we should give this three to AI to cloud and see do an analysis. What do youGabor Kerekes: Yeah, that's what I I I wanted to set that up,Amir Houieh: think?Gabor Kerekes: but I was thinking if we can end this conversation and then get the transcript to get that in there as well.Amir Houieh: Sorry.Gabor Kerekes: Uh to end this conversation so we can get the transcript.Amir Houieh: Oh, we don't have a transcript. We do. Oh, yeah. Yeah. Of course, of course. I Okay. Okay. Sure. Sure.  \nTranscription ended after 02:02:09\nThis editable transcript was computer generated and might contain errors. People can also change the text after it was created.",
+				"date": "2026-01-23"
+			}
+		}
+	]
+}

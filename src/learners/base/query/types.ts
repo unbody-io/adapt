@@ -6,6 +6,7 @@
  */
 
 import type { LanguageModel } from 'ai'
+import type { StreamTextResult } from '../../../llm'
 import type { TokenUsage } from '../../types'
 
 /**
@@ -84,6 +85,12 @@ export interface QueryMethod {
 		options?: QueryOptions,
 		callbacks?: QueryCallbacks,
 	): Promise<QueryResult>
+
+	/** Stream a query — returns raw ai-sdk StreamTextResult */
+	queryStream?(
+		context: QueryContext,
+		options?: QueryOptions,
+	): Promise<StreamTextResult<any, any>>
 
 	/** Update the method's config (e.g. swap model) */
 	update(config: QueryMethodUpdateConfig): void

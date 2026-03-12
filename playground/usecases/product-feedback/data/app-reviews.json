@@ -1,0 +1,79 @@
+{
+	"id": "app-reviews",
+	"source": "app-store",
+	"description": "App store reviews from iOS and Android",
+	"items": [
+		{
+			"id": "ar-001",
+			"label": "★★★★★ Great analytics, needs dark mode",
+			"data": {
+				"type": "app-review",
+				"platform": "iOS",
+				"rating": 5,
+				"title": "Best PM tool I've used",
+				"body": "Incredible analytics and the AI suggestions are actually useful. Docked nothing because it's that good, but PLEASE add dark mode. My only wish.",
+				"date": "2025-01-17"
+			}
+		},
+		{
+			"id": "ar-002",
+			"label": "★★☆☆☆ Crashes constantly on Android",
+			"data": {
+				"type": "app-review",
+				"platform": "Android",
+				"rating": 2,
+				"title": "Crashes every time I switch projects",
+				"body": "Was a 5-star app until the last update. Now it crashes every time I try to switch between projects. Lost work multiple times. Using the web version until this is fixed. Samsung Galaxy S24, Android 14.",
+				"date": "2025-01-18"
+			}
+		},
+		{
+			"id": "ar-003",
+			"label": "★★★☆☆ Powerful but steep learning curve",
+			"data": {
+				"type": "app-review",
+				"platform": "iOS",
+				"rating": 3,
+				"title": "Took me a week to figure out",
+				"body": "The product is powerful once you understand it but the setup process assumes you already know what you're doing. Spent a week watching YouTube tutorials before I could actually use it productively. Documentation could be much better for beginners.",
+				"date": "2025-01-19"
+			}
+		},
+		{
+			"id": "ar-004",
+			"label": "★★★★☆ Love it, export is broken though",
+			"data": {
+				"type": "app-review",
+				"platform": "Android",
+				"rating": 4,
+				"title": "Almost perfect",
+				"body": "Beautiful UI, great features, responsive team. But the CSV export hasn't worked properly for the past month. I need to generate reports for clients and have been manually copying data. Please fix this!",
+				"date": "2025-01-20"
+			}
+		},
+		{
+			"id": "ar-005",
+			"label": "★★★★★ Exactly what our team needed",
+			"data": {
+				"type": "app-review",
+				"platform": "iOS",
+				"rating": 5,
+				"title": "Game changer for remote teams",
+				"body": "We switched from Competitor and the difference is night and day. The real-time collaboration features are years ahead. Our team productivity jumped noticeably in the first week. Worth every penny.",
+				"date": "2025-01-21"
+			}
+		},
+		{
+			"id": "ar-006",
+			"label": "★★☆☆☆ Enterprise features lacking",
+			"data": {
+				"type": "app-review",
+				"platform": "Android",
+				"rating": 2,
+				"title": "Not ready for enterprise",
+				"body": "Great product for small teams but our 200-person org is struggling. No SSO that actually works, no SCIM, rate-limited API, can't bulk manage users. We're paying enterprise prices for startup-level admin tools.",
+				"date": "2025-01-22"
+			}
+		}
+	]
+}

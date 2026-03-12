@@ -1,0 +1,135 @@
+{
+	"id": "standup-2026-02-02",
+	"source": "standup-2026-02-02",
+	"description": "📝 Notes\nFeb 2, 2026\nR&D daily sprint\nInvited Amir Houieh Unbody io Noémi Biró Gabor Kerekes\nAttachments R&D daily sprint \nMeeting records Transcript \nSummary\nThe meeting was rescheduled due to a participant oversleeping, as communicated by Noémi Biró. Noémi Biró and Amir Houieh agreed to meet promptly at 12:00.\nDetails\nMeeting Rescheduling The meeting was proposed to be delayed due to a participant overslept, as informed by Noémi Biró. After discussing potential new times, Noémi Biró suggested meeting quickly at 12:00, to which Amir Houieh agreed.\nSuggested next steps\nAmir Houieh will work on the content of the website.\nYou should review Gemini's notes to make sure they're accurate. Get tips and learn how Gemini takes notes\nPlease provide feedback about using Gemini to take notes in a short survey.\n\n---\n\n📝 Notes\nFeb 2, 2026\nR&D daily sprint\nInvited Amir Houieh Unbody io Noémi Biró Gabor Kerekes\nAttachments R&D daily sprint Notes by Gemini \nMeeting records Transcript \nSummary\nNoémi Biró initiated the meeting to discuss weekly goals, the cleanup of the Notion linear, and a request from Melissa for deliverables. Amir Houieh was assigned to export a raw data chat dump by Wednesday morning after coordinating access with Gabor Kerekes, while Gabor Kerekes is responsible for creating a list of \"first category\" metrics by Friday to share with Melissa for confirmation. Amir Houieh and Gabor Kerekes also clarified the distinction between the chat dump and metric analytics, agreeing that Gabor Kerekes's immediate task is to identify extractable data points, and Amir Houieh raised the need for focused content production for the lab and website in a scheduled meeting tomorrow.\nDetails\nWeekly Goals and Deliverables Noémi Biró initiated the meeting to discuss weekly goals, the desired achievements, and a request from Melissa for deliverables. Noémi Biró also noted that they cleaned up the Notion linear, and the team can now use it to track their work (00:00:00).\nChat Dump Export Melissa requested a chat dump by Wednesday morning to analyze for team insights (00:00:00). Amir Houieh was assigned to export the chat dump after coordinating with Gabor Kerekes to ensure they have the necessary access and reliable tooling (00:04:05). Gabor Kerekes estimated the export process with redaction using Claude might take about 20 minutes once access is confirmed. The dump is to be exported as raw data in an MD file, zipped with a password, placed on Google Drive, and the password shared via Signal (00:05:09).\nLow-Hanging Fruit Metrics and Data Delivery The team discussed identifying low-hanging fruits from the metric lists, with a particular interest in data related to how people use journaling for phase two insights (00:05:09). Gabor Kerekes agreed to focus on creating a list of these metrics by Friday (00:06:40). There was a discussion to clarify that the current focus is on the \"first category\" of metrics—those for which data can be quickly obtained with existing queries—and that the data should be available by Friday (00:08:02).\nDistinction Between Chat Dump and Analytics Amir Houieh and Gabor Kerekes clarified that the chat dump and the metric analytics are two separate data sets (00:09:02). Gabor Kerekes emphasized the need to stick to precise, unambiguous queries for metrics, such as the number of messages sent in a journaling thread, rather than fuzzy metrics like requesting journaling through chat. Noémi Biró suggested that a metric on how many times journaling has been opened is possible and would provide insight into usage (00:11:07).\nScope of Metric Analysis Task The team agreed that Gabor Kerekes's immediate task is a \"design task\" to go through the metric list and determine what data is possible to extract, rather than immediately implementing the queries (00:13:33) (00:15:23). This list will be shared with Melissa for confirmation before the implementation stage, which Amir Houieh can also assist with (00:14:23). Gabor Kerekes plans to complete the design list today (00:15:23).\nFriday Agenda and Actionable Items Noémi Biró outlined the Friday agenda, including a discussion of Dina and Civil's first draft of tired safety protocol ideas, a brainstorm on guided models, journaling, and a follow-up on moving forward with GitHub Pro for privacy (00:16:24).\nWebsite Content and Lab Discussion Amir Houieh raised the need for content production for the lab and website, which they noted is minimal (00:16:24). A focused meeting to discuss the time frame for the next couple of weeks, the lab announcement, and who will write content was scheduled for tomorrow afternoon, after 2:20 PM (00:17:55).\nMemory Tool and Invoice Amir Houieh mentioned having a memory tool ready to share today in a private repository with instructions, noting that it analyzes chat sessions but lacks persistent memory, as Claude stores everything locally (00:17:55). Amir Houieh also informed Gabor Kerekes that they will get back to them today regarding the invoice after meeting with Alex (00:19:25).\nSuggested next steps\nGabor Kerekes will go through the metric list, identify the low-hanging fruits that are possible to deliver, and create a list today.\nAmir Houieh will send a link for a focused discussion tomorrow afternoon with Gabor Kerekes and Noémi Biró to talk about the content production for the lab, the website, and side projects.\nAmir Houieh will get back to the group today on the invoice after the meeting with Alex.\nAmir Houieh will send a private repo with instructions for running the memory thingy.\nAmir Houieh and Gabor Kerekes will work together to ensure Amir Houieh has reliable access to export the chat dump by Wednesday morning as an MD file, zip it with a password, put it on Google Drive, and share the password on Signal.\nYou should review Gemini's notes to make sure they're accurate. Get tips and learn how Gemini takes notes\nPlease provide feedback about using Gemini to take notes in a short survey.",
+	"items": [
+		{
+			"id": "standup-2026-02-02-000534",
+			"label": "2026-02-02 [00:05:34]",
+			"data": {
+				"chunk": "Amir Houieh: to also work on the website bit more uh probably but the website doesn't need much maybe I'm going to actually work on the content of the I'mNoémi Biró: Oh, one second. He's calling me back. Let'sAmir Houieh: sorry.Noémi Biró: Um, he overslept. Does it work for you, Amir, to pick it up in half an hour the meeting?Amir Houieh: Uh I have one meeting at 12:30 but yeah ifNoémi Biró: Mhm.Amir Houieh: that works half an hour means 12 maybe we can doNoémi Biró: Okay.Amir Houieh: it half past 1 I don't know how is your schedule or we can do it quickly yeah in half anNoémi Biró: Quickly at 12. Yeah. Does that work at 12? So then he has like 20 minutes. I'm here.Amir Houieh: Yeah.Noémi Biró: So at 12, does it work? And then we do.Amir Houieh: Yeah. Sure.Noémi Biró: Yeah.  \nTranscription ended after 00:07:44\nThis editable transcript was computer generated and might contain errors. People can also change the text after it was created.",
+				"date": "2026-02-02"
+			}
+		},
+		{
+			"id": "standup-2026-02-02-000000",
+			"label": "2026-02-02 [00:00:00]",
+			"data": {
+				"chunk": "Gabor Kerekes: Hello.Noémi Biró: yellow.Gabor Kerekes: Yeah.Noémi Biró: Check outGabor Kerekes: You must Look atNoémi Biró: Gerling. No.Gabor Kerekes: Let'sNoémi Biró: Then you That may have saidGabor Kerekes: checkNoémi Biró: youGabor Kerekes: how did anxiety.Noémi Biró: China. How doGabor Kerekes: me.Amir Houieh: Hello.Noémi Biró: Hello. Hey.Gabor Kerekes: Okay.Amir Houieh: Hey.Noémi Biró: Um, so let's quick keep it quick because air has another meeting atGabor Kerekes: Yeah.Noémi Biró: 12:30 and yeah so I wanted to discuss a bit um sort of the goals of the week and what we would want to achieve and also Melissa sent an email this morning asking about delivering some stuff so that's what I would like to focus on. Uh I I cleaned up the notion uh the linear so we can start using it to track uh stuff there.Gabor Kerekes: ThankAmir Houieh: Okay.Gabor Kerekes: you.Noémi Biró: Um yeah so basically I would start with the chat dump uh that we were mentioning in the meeting. She asked if we think we could share a chat dump by Wednesday morning to give her enough time to walk look through it and work with it till Friday to give some insights on teams.",
+				"date": "2026-02-02"
+			}
+		},
+		{
+			"id": "standup-2026-02-02-000405",
+			"label": "2026-02-02 [00:04:05]",
+			"data": {
+				"chunk": "Amir Houieh: Okay.Noémi Biró: Uh so the question is who would be able to export this chat dump and if it's doable by Wednesday morning.Gabor Kerekes: Yeah,Amir Houieh: Sure.Gabor Kerekes: it's doable and I think it would be best if air you did it so you would yeah just get hands- on with the tooling around like accessing databases etc.Amir Houieh: Yeah. I need uh I need to make sure that they have access and then I can do it.Gabor Kerekes: Yeah. Um,Noémi Biró: I'm going toGabor Kerekes: like because of like permissions,Noémi Biró: doGabor Kerekes: I don't know how it's, you know, it depends on a lot of different things. Maybe we can do it together.Amir Houieh: Sure.Gabor Kerekes: Make sure that you have good access. Uh, work out like the last wrinkles around this so it works reliably.Noémi Biró: Okay. So, if I understand correctly, it's a two-step process.Amir Houieh: Okay.Noémi Biró: First, you work together in the axis and then on here you export it.Gabor Kerekes: I mean already work or um I will just be",
+				"date": "2026-02-02"
+			}
+		},
+		{
+			"id": "standup-2026-02-02-000509",
+			"label": "2026-02-02 [00:05:09]",
+			"data": {
+				"chunk": "Noémi Biró: Okay.Gabor Kerekes: we will just do it together. Uh the export itself shouldn't take that long. I think maybe 20 minutes back and forth with Claude to kind of like uh redact whatever information we want to redact and to like export it in a format that makes sense.Amir Houieh: No, it's easy. That'sGabor Kerekes: It be really easy.Noémi Biró: Okay.Amir Houieh: fine.Gabor Kerekes: It's more about just making sure that air has reliableNoémi Biró: Okay.Gabor Kerekes: access.Noémi Biró: Cool. And yeah, so we discussed that it would be exported as raw data as MD file and then zipped with a password and put on Google Drive and shared the password on Signal. Okay, cool. Um then the second thing was uh identifying these lowhanging fruits from the metric lists. And she said she'd be very interested in how people for example using journaling because that can have a big impact on the phase two. So, if it would be possible to focus on like this lowhanging fruits and have some kind of list on Friday and yeah,",
+				"date": "2026-02-02"
+			}
+		},
+		{
+			"id": "standup-2026-02-02-000640",
+			"label": "2026-02-02 [00:06:40]",
+			"data": {
+				"chunk": "Gabor Kerekes: Yeah.Noémi Biró: this was already something for Gabbor. Is this still okay to I mean, it's still it's still the same thing, but the question is would you be able to then do it by Friday?Gabor Kerekes: Yeah, I can do it.Noémi Biró: Okay. And how long does it take, do you think?Gabor Kerekes: Uh, I don't know. I I don't know.Noémi Biró: Okay. Well, previously we set two hours. Maybe just see if that still captures it.Amir Houieh: I don't think you need to cover the investigated just say your gut feeling like what she's saying it's easy and you have no doubt that it's possible we go with that andGabor Kerekes: Oh,Amir Houieh: thenGabor Kerekes: so it's about it it's not it's not about writing the queries is it it's just like it's not about producing the data. It's just um deciding what isNoémi Biró: No, I think it is getting already some kind of a data forGabor Kerekes: possible.Amir Houieh: Well, I think there are two categories,Noémi Biró: Friday.Amir Houieh: three categories.",
+				"date": "2026-02-02"
+			}
+		},
+		{
+			"id": "standup-2026-02-02-000802",
+			"label": "2026-02-02 [00:08:02]",
+			"data": {
+				"chunk": "Amir Houieh: One, one are basically is possible we can write a query and we have the data for it. That's one category. The other category are the ones that we do have the data for it but it needs a bit more work of implementation or adjusting the code to get that data out. Or the second the third category is that no we haveNoémi Biró: Yeah.Amir Houieh: nothing.Noémi Biró: So I think right now the focus of this week is the first category and then tryGabor Kerekes: Yeah.Noémi Biró: to have all everything that's in the first category give us the data for Friday.Gabor Kerekes: Yeah. It's just like it seems, you know, easy to do, but then once you do it, you you realize, oh, I don't know, there's more to it. Like it has to be specified than um like who who's going to okay,Noémi Biró: Yeah,Gabor Kerekes: maybe not who, but like where do we store this data and how do we share it and you knowNoémi Biró: sorry.Gabor Kerekes: like all these kind of things.",
+				"date": "2026-02-02"
+			}
+		},
+		{
+			"id": "standup-2026-02-02-000902",
+			"label": "2026-02-02 [00:09:02]",
+			"data": {
+				"chunk": "Amir Houieh: But we said that we are going to do it all local and we share it in a markdown file over s over a zip file on Google drive withGabor Kerekes: But this is about analytics,Amir Houieh: password.Gabor Kerekes: not uh it's not about the chatAmir Houieh: No, it was about the chat.Noémi Biró: No,Gabor Kerekes: dump.Noémi Biró: it was about the analytics about the metrics from this umAmir Houieh: No, but I'm pretty sure well I mean Melissa doesn't differentiate these two. She has and that's what we discussed last time when she was when I asked also okayGabor Kerekes: ThoseAmir Houieh: we we can produce either the route data of the chats or we can run an AI on top of it and extract and make a report out of it.Gabor Kerekes: two things are completely separate. This is about exporting numbers about how people use I don't know the journalingAmir Houieh: I know,Gabor Kerekes: likeAmir Houieh: I know, I know. But I'm pretty sure she expects also the chat down B asGabor Kerekes: But it doesn't matter what she expects.",
+				"date": "2026-02-02"
+			}
+		},
+		{
+			"id": "standup-2026-02-02-000959",
+			"label": "2026-02-02 [00:09:59]",
+			"data": {
+				"chunk": "Amir Houieh: well.Gabor Kerekes: Like we have to you know like if if in her head this is mashed up then we have to separate it because it is separate.Amir Houieh: How come?Gabor Kerekes: Um it's just a separate thing like the data isAmir Houieh: But okay. Yeah. It's okay I understand but two different data sets she needs themGabor Kerekes: completely different.Amir Houieh: how and we need to deliver it and we said it's doable so canNoémi Biró: Mhm.Amir Houieh: we so let regarding the analytics you just deliver what is possibleGabor Kerekes: Yeah.Amir Houieh: uh the same over the same as before so basically run a query CSV Google docs share it with her that's what we have beenGabor Kerekes: So we we don't change that workflow.Amir Houieh: doingNoémi Biró: ConsiderGabor Kerekes: We just add more data.Amir Houieh: Yeah,Gabor Kerekes: Okay.Noémi Biró: this question. If and how people are using journaling and whatAmir Houieh: thatNoémi Biró: helps us to get more insight into this. On one hand, of course, we're going to have the the raw data, the dump from the chat.",
+				"date": "2026-02-02"
+			}
+		},
+		{
+			"id": "standup-2026-02-02-001107",
+			"label": "2026-02-02 [00:11:07]",
+			"data": {
+				"chunk": "Noémi Biró: That's one thing, right? And then on the other hand, we could maybe have a look like how many times did people use the journaling? Have they requested it through the chat? And I think that would be more in theGabor Kerekes: We don't know.Noémi Biró: metrics.Gabor Kerekes: We we cannot know that like have requested it through the chat because that's like um how do you determine if a message is asking for journaling prompt? That's like a really fuzzy. We have to stick to, you know, really precise queries that are not there's no ambiguity. Like for example, how many I don't know messages do people know onNoémi Biró: Okay.Gabor Kerekes: average send in a journaling thread or something like that? You know, like really justNoémi Biró: Okay.Gabor Kerekes: numbersNoémi Biró: But I can ask like how many times has journaling been opened?Gabor Kerekes: for example.Noémi Biró: That's that gives the number and that also gives us if people are usingGabor Kerekes: Yeah.Noémi Biró: journaling.Gabor Kerekes: for example.Noémi Biró: Okay.",
+				"date": "2026-02-02"
+			}
+		},
+		{
+			"id": "standup-2026-02-02-001221",
+			"label": "2026-02-02 [00:12:21]",
+			"data": {
+				"chunk": "Gabor Kerekes: Yeah.Noémi Biró: And that's possible. That's within like the first category.Gabor Kerekes: Um it's not really possible. All we have is we don't what does it mean for journaling to be open you know like is the I don't know like in the UI we don't track is kind of like UI navigation things all we have is what people send uh just the messages and the threads that's it and everything has to be derived like we have theAmir Houieh: But we do Gab, we do know when journaling was triggered. Journaling is is one message journaling prompt. the same way we are rendering it in the UI. So we keep it somewhere that it understand okay this is a journaling this is not a normal assistantGabor Kerekes: Yeah, but that's when like when was the journaling thread generated,Amir Houieh: messageGabor Kerekes: but it has nothing to do with if it was open orAmir Houieh: well you know if it was open if the user basically we don't care about being open we if theGabor Kerekes: not.",
+				"date": "2026-02-02"
+			}
+		},
+		{
+			"id": "standup-2026-02-02-001333",
+			"label": "2026-02-02 [00:13:33]",
+			"data": {
+				"chunk": "Amir Houieh: user wrote a journal then that that's it so I think don'tGabor Kerekes: Yeah. Yeah. Yeah.Amir Houieh: I I I think as you said we shouldn't take too serious like too too harsh on like words what wording she use. Let's try to give what we have and that we think she talks about journaling. Let's give her what what we think about journaling isGabor Kerekes: Yeah. I mean what I'm saying is like just this conversation already illustrates that it's not such aAmir Houieh: possible.Gabor Kerekes: trivial topic because there's confusion about what you know we can do and we cannot do and it takes a bit of time to like think through that.Amir Houieh: Okay. No, I understand. But then that means your task if if you do it is to go through that list and see what is possible giveGabor Kerekes: Yeah.Amir Houieh: a meaning out of it and then give back to know or Melissa that hey this is what we have and we can deliver now and thenGabor Kerekes: Okay.",
+				"date": "2026-02-02"
+			}
+		},
+		{
+			"id": "standup-2026-02-02-001423",
+			"label": "2026-02-02 [00:14:23]",
+			"data": {
+				"chunk": "Gabor Kerekes: And my question was like I understand that part of the task but my questionAmir Houieh: makeGabor Kerekes: was if that's the scope of the task to just like make that list or is it also about actually implementing the queries that will export that data and decide about howAmir Houieh: That's a that's a second stage of it.Gabor Kerekes: we are going to deliver it.Amir Houieh: So I would I suggest that first you come up with your list and say hey this is what we want. Which one of these is helpful to you? As soon as it's confirmed then we write the script for it.Gabor Kerekes: Okay.Amir Houieh: So I think most important for now is to make sure that uh we quickly communicated that she also know what is possible and then she might come back and say oh actually this is possible but can we also have thisGabor Kerekes: Yeah.Amir Houieh: then that means we go and see if it's possible but let's not let's let's let's take aGabor Kerekes: Yeah.Amir Houieh: bit of also ownership and just push it",
+				"date": "2026-02-02"
+			}
+		},
+		{
+			"id": "standup-2026-02-02-001523",
+			"label": "2026-02-02 [00:15:23]",
+			"data": {
+				"chunk": "Gabor Kerekes: Okay. Yeah. So, it's more of a design task rather than implement.Amir Houieh: implementation. Yeah, because as soon as we have the design,Gabor Kerekes: Yeah.Amir Houieh: I can also help with theGabor Kerekes: Yeah.Amir Houieh: implementation and would beGabor Kerekes: Okay. Makes sense.Amir Houieh: great. I don't know. Do do you think it's a one day job like like you can do itGabor Kerekes: Yeah.Amir Houieh: today?Gabor Kerekes: A couple of hours maybe like or maybe even le. Yeah. Um, yeah. I don't know. Like an It could also be one hour, twoAmir Houieh: Okay, give it a try today and let's finish it today.Gabor Kerekes: hours.Amir Houieh: So, she has it by today and then we can make a we have time enough by end of the week toNoémi Biró: Yeah. So then that's clear.Amir Houieh: implement.Gabor Kerekes: Okay.Amir Houieh: Mhm. Is civil done?Noémi Biró: Sorry.Amir Houieh: Done withNoémi Biró: No. So she will start the first draft of",
+				"date": "2026-02-02"
+			}
+		},
+		{
+			"id": "standup-2026-02-02-001624",
+			"label": "2026-02-02 [00:16:24]",
+			"data": {
+				"chunk": "Amir Houieh: civil.Noémi Biró: ideas of a tired safety protocol with Dina and she would want to discuss this on Friday and then also she's hoping that onAmir Houieh: Sure.Noémi Biró: Friday we could brainstorm a bit about the guided models how they might look like and journaling and uh just follow up on the discussion with Josh and just to confirm that we're going to move with GitHub Pro for the privacy issue. So that's just for Friday. So we have a little agenda, but these were the actionableAmir Houieh: Okay.Noémi Biró: items.Amir Houieh: Okay. Cool. Yeah, I think some of it is is part of next phase. So, but yeah, we might be able to tackle it sooner.Noémi Biró: Yeah.Amir Houieh: Uh, cool. Uh, yeah, I wanted to also discuss with you guys um the other part, the other things like u the content production for the lab, the website because the website to me looks almost ready. I mean it's very minimal it's very thing but it doesn't have much of content. So I wanted to maybe we should have another session al together to discuss this truly but I think I would like to have is a time frame for next couple of weeks that how we are going to do what we are going to do with lab when we are going to announce it when we are going to start writing",
+				"date": "2026-02-02"
+			}
+		},
+		{
+			"id": "standup-2026-02-02-001755",
+			"label": "2026-02-02 [00:17:55]",
+			"data": {
+				"chunk": "Amir Houieh: content and who is able to write content uh and as such do you want to have a session for that somewhere I don't know today or tomorrow.Noémi Biró: Uh, tomorrow I could in the afternoon.Amir Houieh: Okay. How about you, Gav?Gabor Kerekes: Yeah, that works for meAmir Houieh: Okay, I will send a link for tomorrow so we can have a more concrete,Gabor Kerekes: tomorrow.Amir Houieh: more focused discussion about that. Cool. And then we can also talk about the side projects if you want to tackle what to do.Noémi Biró: Tomorrow I can do afterGabor Kerekes: Yeah.Amir Houieh: Okay,Noémi Biró: 220.Amir Houieh: I'm I'm flexible. 220. Let's say three would work.Noémi Biró: Yeah.Gabor Kerekes: Okay.Amir Houieh: Okay, I will send them a time for them. Cool. Cool. Okay, cool. I have that memory thingy ready. So I think today I will send you guys like a repo, private repo with some instructions. So you can also run it. I found a way that apparently cloud stores everything locally.",
+				"date": "2026-02-02"
+			}
+		},
+		{
+			"id": "standup-2026-02-02-001925",
+			"label": "2026-02-02 [00:19:25]",
+			"data": {
+				"chunk": "Amir Houieh: So for now I kept it very minimal. So you just basically dump your entire like whatever sessions chat you have and it just analyze it in one go. It doesn't have any persistent memory anything. So if it if you kill it, it forgets everything. Uh yeah, I think that would be nice to also see how it works with your cloud chat. Cool.Gabor Kerekes: Yeah.Noémi Biró: And it's only with claude or cursor as well.Amir Houieh: But do you use cloud in cursor?Noémi Biró: No, but I guess I couldAmir Houieh: Uh do you have much of chat history in general?Noémi Biró: What does that mean?Amir Houieh: No, it's okay. Um we can we can look into it together. I'm pretty sure cursor also stores this somewhere so we can read it. Cool. Anything else? Okay. Okay.Gabor Kerekes: No.Amir Houieh: Cool.Noémi Biró: Okay, good.Amir Houieh: Oh, I got I will get back to you on the invoice today. Uh yeah,Gabor Kerekes: Thanks.Amir Houieh: sorry. I'm waiting. I've been waiting for Alex. I'm going to have a meeting with him in 10 minutes. So,Gabor Kerekes: Okay,Amir Houieh: cool.Gabor Kerekes: perfect.Amir Houieh: And yeah,Noémi Biró: Okay.Amir Houieh: let's see.Gabor Kerekes: Yeah, I will uh Yeah, that's what uh I don't know.  \nTranscription ended after 00:21:24\nThis editable transcript was computer generated and might contain errors. People can also change the text after it was created.",
+				"date": "2026-02-02"
+			}
+		}
+	]
+}

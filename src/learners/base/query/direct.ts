@@ -7,7 +7,7 @@
 
 import type { LanguageModel } from 'ai'
 import { z } from 'zod'
-import { generate, Output } from '../../../llm'
+import { generate, Output, streamText, type StreamTextResult } from '../../../llm'
 import type { TokenUsage } from '../../types'
 import type {
 	QueryContext,
@@ -89,5 +89,21 @@ export class DirectMethod implements QueryMethod {
 			gaps: output.gaps.join('\n'),
 			usage,
 		}
+	}
+
+	async queryStream(
+		context: QueryContext,
+		options?: QueryOptions,
+	): Promise<StreamTextResult<any, any>> {
+		const understanding = await this.config.getUnderstanding()
+		const { model: modelOverride, ...generateOptions } = options ?? {}
+		const system = this.config.buildPrompt(context, understanding)
+
+		return streamText({
+			model: modelOverride ?? this.model,
+			system,
+			prompt: context.question,
+			...generateOptions,
+		})
 	}
 }

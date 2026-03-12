@@ -96,6 +96,7 @@ export interface EvaluatorEventMap {
 		source: 'auto' | 'manual'
 		decisionCount: number
 		decisions: EvolutionDecision[]
+		reasoning: string
 	}
 	'evaluator:evaluation:failed': {
 		error: string

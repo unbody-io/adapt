@@ -1,5 +1,5 @@
 import { generateText, NoObjectGeneratedError } from 'ai'
-import type { ZodSchema } from 'zod'
+import { z, type ZodSchema } from 'zod'
 
 /**
  * Thin wrapper over ai-sdk's generateText
@@ -17,9 +17,11 @@ export type {
 	LanguageModel,
 	LanguageModelUsage,
 	StopCondition,
+	StreamTextResult,
+	TextStreamPart,
 } from 'ai'
 // Re-export for convenience
-export { Output, stepCountIs, hasToolCall } from 'ai'
+export { Output, stepCountIs, hasToolCall, streamText } from 'ai'
 
 /**
  * Extended params that accept a repair schema
@@ -63,7 +65,8 @@ export async function generate(
 
 			try {
 				const parsed = JSON.parse(repaired)
-				const validated = repairSchema.parse(parsed)
+				const clamped = clampNumericFields(parsed, repairSchema)
+				const validated = repairSchema.parse(clamped)
 
 				// Return a minimal result with repaired output
 				return {
@@ -109,6 +112,60 @@ export async function generate(
 
 		throw error
 	}
+}
+
+// ============================================================================
+// Numeric Clamping (for providers that don't enforce min/max)
+// ============================================================================
+
+/**
+ * Walk a parsed object and clamp numbers to match Zod schema min/max constraints.
+ * Uses JSON Schema representation (stable across Zod versions) to extract constraints.
+ * Handles Ollama and other providers that ignore numeric range constraints.
+ */
+function clampNumericFields(obj: unknown, schema: ZodSchema): unknown {
+	if (obj == null) return obj
+
+	let jsonSchema: Record<string, unknown>
+	try {
+		jsonSchema = z.toJSONSchema(schema) as Record<string, unknown>
+	} catch {
+		return obj
+	}
+
+	return clampWithJsonSchema(obj, jsonSchema)
+}
+
+function clampWithJsonSchema(obj: unknown, schema: Record<string, unknown>): unknown {
+	if (obj == null) return obj
+
+	// Clamp numbers
+	if (typeof obj === 'number' && schema.type === 'number') {
+		let value = obj
+		if (typeof schema.minimum === 'number' && value < schema.minimum) value = schema.minimum
+		if (typeof schema.maximum === 'number' && value > schema.maximum) value = schema.maximum
+		return value
+	}
+
+	// Recurse into objects
+	if (typeof obj === 'object' && !Array.isArray(obj) && schema.properties) {
+		const props = schema.properties as Record<string, Record<string, unknown>>
+		const result: Record<string, unknown> = { ...(obj as Record<string, unknown>) }
+		for (const [key, fieldSchema] of Object.entries(props)) {
+			if (key in result) {
+				result[key] = clampWithJsonSchema(result[key], fieldSchema)
+			}
+		}
+		return result
+	}
+
+	// Recurse into arrays
+	if (Array.isArray(obj) && schema.items) {
+		const itemSchema = schema.items as Record<string, unknown>
+		return obj.map((item) => clampWithJsonSchema(item, itemSchema))
+	}
+
+	return obj
 }
 
 // ============================================================================

@@ -265,12 +265,66 @@ result.sources    // [{ learnerId, relevance, confidence, insight }]
 result.gaps       // Knowledge gaps across all learners
 ```
 
-All learners are queried in parallel. The synthesis LLM sees every learner's response and produces a unified answer. Internal learners are available as consult tools during synthesis.
+Two query modes:
 
-Override the synthesis model per-call:
+- **`direct`** (default) — All learners queried in parallel (single LLM call each), then one synthesis call. Fast: typically 3–5s per query.
+- **`deep`** — Agentic synthesis where the LLM decides which specialists to consult, what to ask, and when it has enough. Slower but can do follow-up queries. Internal learners available as consult tools.
 
 ```typescript
+// Default — fast, parallel
+const result = await brain.ask('What patterns do you see?')
+
+// Agentic — multi-step, selective
+const deep = await brain.ask('What patterns do you see?', { mode: 'deep' })
+
+// Override model per-call
 const result = await brain.ask('...', { model: openai('gpt-4o') })
+```
+
+### Streaming
+
+All query and evaluation methods have streaming variants that return raw ai-sdk `StreamTextResult` objects. Use `textStream` for incremental text or `fullStream` for all events (text, tool calls, tool results, etc.).
+
+```typescript
+// Stream a brain query
+const stream = await brain.askStream('What patterns do you see?')
+
+for await (const chunk of stream.textStream) {
+  process.stdout.write(chunk) // incremental text
+}
+
+// Or iterate all events (tool calls visible in deep mode)
+const stream = await brain.askStream('What patterns?', { mode: 'deep' })
+
+for await (const part of stream.fullStream) {
+  if (part.type === 'text-delta') process.stdout.write(part.text)
+  if (part.type === 'tool-call') console.log(`Tool: ${part.toolName}`)
+  if (part.type === 'tool-result') console.log(`Result: ${part.output}`)
+}
+
+// Resolved promises available after stream completes
+const text = await stream.text
+const usage = await stream.usage
+```
+
+```typescript
+// Stream a standalone learner query
+const stream = await learner.queryStream('What do you know about pour-over?')
+
+for await (const chunk of stream.textStream) {
+  process.stdout.write(chunk)
+}
+```
+
+```typescript
+// Stream evolution evaluation
+const { stream, decisions } = await brain.evaluateEvolutionStream({ dryRun: true })
+
+for await (const part of stream.fullStream) {
+  // See evaluator tool calls: inspectSpecialist, querySpecialist, finalizeDecisions, etc.
+}
+
+const { decisions: d, results } = await decisions // resolves after stream completes
 ```
 
 ### Consulting Internal Learners
@@ -1106,6 +1160,7 @@ await brain2.ask('What do you know?') // Has full knowledge from session 1
 |---|---|---|
 | `inject(data, options?)` | `Promise<BrainInjectResult>` | Route data to all learners |
 | `ask(query, options?)` | `Promise<BrainAskResult>` | Query all learners, synthesize response |
+| `askStream(query, options?)` | `Promise<StreamTextResult>` | Streaming variant of `ask()` |
 | `consult(query, options?)` | `Promise<ConsultResult>` | Query internal learners |
 
 **Learner Management:**
@@ -1128,6 +1183,7 @@ await brain2.ask('What do you know?') // Has full knowledge from session 1
 | `splitLearner(id, guidance)` | `Promise<BaseLearner[]>` | Split learner into multiple |
 | `updateLearner(id, guidance)` | `Promise<BaseLearner>` | LLM-driven config update |
 | `evaluateEvolution(options?)` | `Promise<{ decisions, results }>` | Trigger evolution evaluation |
+| `evaluateEvolutionStream(options?)` | `Promise<{ stream, decisions }>` | Streaming variant of `evaluateEvolution()` |
 
 **Signals & Config:**
 
@@ -1154,6 +1210,7 @@ await brain2.ask('What do you know?') // Has full knowledge from session 1
 |---|---|---|
 | `learn(batch, options?)` | `Promise<LearnOutput>` | Process data (observe → understand) |
 | `query(question, options?)` | `Promise<QueryResult>` | Query learner knowledge |
+| `queryStream(question, options?)` | `Promise<StreamTextResult>` | Streaming variant of `query()` |
 | `getBufferState()` | `Promise<{ count, tokens }>` | Pending observations |
 
 **Understanding:**

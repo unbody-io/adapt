@@ -1,0 +1,127 @@
+{
+	"id": "standup-2026-01-26",
+	"source": "standup-2026-01-26",
+	"description": "📝 Notes\nJan 26, 2026\nR&D daily sprint\nInvited Amir Houieh Unbody io Noémi Biró Gabor Kerekes\nAttachments R&D daily sprint Copy of Sibyl Phase 2: Strategic Proposal Sibyl: Internal Strategic Positioning Memo \nMeeting records Transcript \nSummary\nA summary wasn't produced for this meeting because there wasn't enough conversation in a supported language.If the meeting was transcribed, you can review the transcript linked in the meeting records section of this document.Visit the help center for troubleshooting information\nDetails\nDetails weren't produced for this meeting.\nSuggested next steps\nNo suggested next steps were found for this meeting.\nYou should review Gemini's notes to make sure they're accurate. Get tips and learn how Gemini takes notes\nPlease provide feedback about using Gemini to take notes in a short survey.",
+	"items": [
+		{
+			"id": "standup-2026-01-26-000258",
+			"label": "2026-01-26 [00:02:58]",
+			"data": {
+				"chunk": "Amir Houieh: Okay, I'm going to start a transcription. Oh,Noémi Biró: Oh,Amir Houieh: there's also not taking or I don't know what's the difference.Noémi Biró: okay.Amir Houieh: AnNoémi Biró: I found um before we go into the updates,Amir Houieh: enemy.Noémi Biró: I don't know. I just thought I would bring it up that I found this uh interesting hacker news discussion on like estimating uh kind of like giving time estimates um and yeah I don't know I I linked it in discord there's an article which I haven't read I only read the discussion uh found some interesting dialogues but I'm just throwing it out there as something that I think is like in our kind of culture building sessions. I think this is a topic uh which would be nice to cover because um it's a really tricky subject and yeah just to have like some kind of a idea of how we can develop a good practice of doing it and also a realistic view of like what's possible and what's not possible. Um, yeah, that'sAmir Houieh: Okay.",
+				"date": "2026-01-26"
+			}
+		},
+		{
+			"id": "standup-2026-01-26-000424",
+			"label": "2026-01-26 [00:04:24]",
+			"data": {
+				"chunk": "Noémi Biró: all.Amir Houieh: Yeah. Nice. Yeah. Let's let's talk about it.Noémi Biró: Thanks.Amir Houieh: Cool. Uh updates.Noémi Biró: SoAmir Houieh: I did not manage unfortunately to finish the to to work on the task. I had forcibil I will do it right away after my meeting with cow that's that shouldn't take more than half an hour and what elseNoémi Biró: okayingAmir Houieh: no yeah that's then we are having yeah I will haveNoémi Biró: the proposal from Melissa that happened right that's fine.Amir Houieh: it ready by the time I need to first confirm it with her during our meeting and then I will finalize itGabor Kerekes: When are you meeting? Oh,Amir Houieh: free.Gabor Kerekes: okay. Is that something we will discuss in our meeting? Like I don't know.Amir Houieh: What do you mean?Gabor Kerekes: I just wanted to also just have a have aAmir Houieh: It's more It's more like getting No, Amy on board so she can take over and get in sync and just prepare for the planning with no with",
+				"date": "2026-01-26"
+			}
+		},
+		{
+			"id": "standup-2026-01-26-000523",
+			"label": "2026-01-26 [00:05:23]",
+			"data": {
+				"chunk": "Gabor Kerekes: look.Amir Houieh: Melissa. What is it to be discussed?Noémi Biró: Um,Gabor Kerekes: Okay. Yeah, I was just like it was about the proposal that I just wanted to see if if any input is needed or like review it or whatever cuz like the agreement that we basically have for theAmir Houieh: ButGabor Kerekes: next uh four months somethingAmir Houieh: oh, but we discussed that last Friday,Gabor Kerekes: orAmir Houieh: right? We went through it and we made changes. So today I'm going to present the changes to her.Gabor Kerekes: Yeah.Amir Houieh: So I don't think she's going to disagree and if she agrees then we finalize everything and then of course then we will discuss it together and then send it for her to sign orGabor Kerekes: Yeah. Cool. Do you mean you have new changes to that?Amir Houieh: whatever.Gabor Kerekes: No, no, no. It's just that I feel I just have this feeling that I didn't give it any attention other than like the meeting the bit that uh during the meeting and like uh if",
+				"date": "2026-01-26"
+			}
+		},
+		{
+			"id": "standup-2026-01-26-000634",
+			"label": "2026-01-26 [00:06:34]",
+			"data": {
+				"chunk": "Amir Houieh: But is there anything? Do you wanna Do you want to go through it againGabor Kerekes: No, it's just like if this is kind of like what we are basing our next fourAmir Houieh: orGabor Kerekes: months on. I feel like it's important for me to like give it a better just give it more attention. That's all. Would it work to say after this daily check in spending like maybe half an hour to read it thoroughly if there's anything at comments because then there's still time to bring that into the discussion in the afternoon. Yeah. And then we're all up to date with it. Yeah. It's just like um uhAmir Houieh: Sure.Gabor Kerekes: Yeah. I don't want to run the risk of like agreeing to something which I didn't really understand what I agreed to and then my like our four months it's basically like definedAmir Houieh: Oh, sure. We can cool.Gabor Kerekes: agreement or something I don't know that's that's all okay it'sAmir Houieh: Oh, cool.",
+				"date": "2026-01-26"
+			}
+		},
+		{
+			"id": "standup-2026-01-26-000736",
+			"label": "2026-01-26 [00:07:36]",
+			"data": {
+				"chunk": "Amir Houieh: Yeah, I know. I I thought we we already did that,Gabor Kerekes: notAmir Houieh: but yeah, if you need a double check, we can do it for sure.Gabor Kerekes: I it's more about like my own side like from my point of view I I don't I I only gave my input during the last meeting and that's it.Amir Houieh: Well, nothing has changed.Gabor Kerekes: And I uh I I think it'sAmir Houieh: That's that's my point. So, but yeah, let's let's let's do itGabor Kerekes: a good way to start this four four weeks with like rereading itAmir Houieh: again.Gabor Kerekes: if that's what you need and then you have the possibility.Amir Houieh: Sounds good. Okay, cool.Gabor Kerekes: Um okay. So like the other bug fixes with like opening account and logging to a new browser. Yeah, I just open the pull request and marked air as a reviewer. Uh but like that's um it's more of a testing task I guess like you don't need to I mean you can ask cloud to review or whatever if you want to",
+				"date": "2026-01-26"
+			}
+		},
+		{
+			"id": "standup-2026-01-26-000846",
+			"label": "2026-01-26 [00:08:46]",
+			"data": {
+				"chunk": "Amir Houieh: It'sGabor Kerekes: uh some of the code is temporary because umAmir Houieh: working.Gabor Kerekes: yeah there's a document as well where I included an analysis Because um there are some consequences to the fix because um like on production there are some users who who already ran into this bug and like they created multiple threads and um we have to find a way to like yeah resolve that that they should really only have one thread, one conversation. thread, but they already have multiple because of this bug and they some of them used um both threads. Mhm. And like how to resolve that but it shouldn't be too difficult. It's just that like there's a bit of extra consideration. Um and it's not as easy as saying like here this was testing. We're going to delete like this. I mean that's that would be the best because and that depends on what Melissa thinks we should do what to fix this. There are less drastic fixes like uh there's a way to identify like which thread has the most recent activity or like most user messages and then we just say that's your canonical thread because maybe they I don't know created their account on the computer that created the thread then they downloaded the app uh that created another thread and that's what they ended up using.",
+				"date": "2026-01-26"
+			}
+		},
+		{
+			"id": "standup-2026-01-26-001037",
+			"label": "2026-01-26 [00:10:37]",
+			"data": {
+				"chunk": "Gabor Kerekes: Mhm. So the one that was created on their laptop for example, it had maybe three messages. It's obvious then like which thread is there economical thread. It's just that we have to take a look at the data. Um but it's not it's not super complicated. So just requires a little bit of care that we don't like first of all we don't delete someone's conversation when they're like really into it. Okay. And you need input on this on the decision? Mhm. Not not now. Okay. So this I I just mentioned this because in relation to the code because the code now uh has some workarounds which are temporary. So uh once we clean up the data those temporary workarounds from the code can also be re uh uh removed and that's just relevant from code review. Okay, that's it.Amir Houieh: Uh but in general I would like to also know like about the responsibilities. Is it that every one of us do a bit of everything or for example me doing reviews for example does it make sense or not?",
+				"date": "2026-01-26"
+			}
+		},
+		{
+			"id": "standup-2026-01-26-001212",
+			"label": "2026-01-26 [00:12:12]",
+			"data": {
+				"chunk": "Amir Houieh: And in general, like we need to see, I'm happy to do it, but it's just we need to see if it's efficient or not.Gabor Kerekes: A review is like maybe think of it more like you you don't need to read the code and understand everything but uh I think the testing component that's also part of the review making sure that things work as expected like actually going through steps and um you know like seeing if if the issue is gone that's it confirming that because I I also do thatAmir Houieh: Okay.Gabor Kerekes: but um maybe I didn't think of something or maybe your browser works differently I don't know it needs a bit of you knowAmir Houieh: Okay. Okay. I see. All right.Gabor Kerekes: um the more people tested the the more we can.Amir Houieh: Cool.Gabor Kerekes: It's it's a quality controlAmir Houieh: Okay. Nice.Gabor Kerekes: thing.Amir Houieh: And do we need how do we hand should we handle that? Because for example, I know you you are going to we are going to update each others during the sprint daily, but would it be that?",
+				"date": "2026-01-26"
+			}
+		},
+		{
+			"id": "standup-2026-01-26-001323",
+			"label": "2026-01-26 [00:13:23]",
+			"data": {
+				"chunk": "Amir Houieh: So for example, when it goes to review, we have a different assigne. How? Because I could also just review it right after you assign me to the reviewer. You know what I mean? Like how do we notify each other?Gabor Kerekes: Um, you leave a comment on GitHub and I will see a notification.Amir Houieh: Well, that's the problem. I don't see it. The GitHubGabor Kerekes: You should see Can you share yourAmir Houieh: suck.Gabor Kerekes: screen? Aren't you guys having a meeting after this meeting?Amir Houieh: Yeah, we can we can do it there.Gabor Kerekes: Yeah,Amir Houieh: It's okay.Gabor Kerekes: we can do it.Amir Houieh: Okay. Sorry.Gabor Kerekes: Okay.Amir Houieh: Go ahead.Gabor Kerekes: So, good. So, there were theNoémi Biró: wiggle animations bugs. Yeah, I haven't fixed those yet. Okay, it's to be done. Uh, good. Then the tasks that remained from last week were like cleaning up the linear and just organizing the drive of Cibil, which I didn't get to.",
+				"date": "2026-01-26"
+			}
+		},
+		{
+			"id": "standup-2026-01-26-001442",
+			"label": "2026-01-26 [00:14:42]",
+			"data": {
+				"chunk": "Noémi Biró: And then so for this week we should think about what are our priorities. So we have of course like this kickoff with Melissa later to try to get even more understanding on what it means to bring the clinicians on board. When can we expect like feedback? When can we join conversation with the clinicians? And I think like the start of the week is really also about understanding all the info that we have available. So that includes also this proposal for the next four months in this week. And we talked about on Friday about laying down a manifesto for civil specifically. So understanding better like where do we think the healing happens in the app or in the relationship with people and then just to have that kind of discussion. So I think the civil manifesto is something that I would like to bring up with Melissa today. And no, more like she writes a manifesto about Cibil.Amir Houieh: Sorry, I don't know what happened. Uh there was this document she wrote uh a",
+				"date": "2026-01-26"
+			}
+		},
+		{
+			"id": "standup-2026-01-26-001609",
+			"label": "2026-01-26 [00:16:09]",
+			"data": {
+				"chunk": "Noémi Biró: Sorry.Amir Houieh: strategic uh one second on by not owned by me. Signal closed bet here. Internal positioning memo.Noémi Biró: Where did you send it?Amir Houieh: I share it here. So basically in this uh Melissa laid out the whole idea behind civil, what civil should be now, what is it now and what it will be in two three years time. Uh so in this particular case and with any external project we do need to adapt and follow the lead of the owner the client in that sense it's a bitNoémi Biró: Yeah.Amir Houieh: difficult and we shouldn't write really manifesto in thatNoémi Biró: No, it's um I don't think we should write the manifestoAmir Houieh: sense.Noémi Biró: but um I think like because we are sort of like um we are guiding Melissa through a process of launching this and it's not like we are uh the ultimate experts on this topic of um but I think Um like one thing is that without laying down those basic and and making those uh exp uh those core beliefs and core assumptions explicit.",
+				"date": "2026-01-26"
+			}
+		},
+		{
+			"id": "standup-2026-01-26-001827",
+			"label": "2026-01-26 [00:18:27]",
+			"data": {
+				"chunk": "Noémi Biró: um those make uh like without that it's much more difficult to make product decisions and to prioritize what features to develop and it has a large impact on like everything else and it's more to kind of like look at what Melissa um produced what kind of output what kind of documents she produced related to this topic uh and then critique that and um yeah as part of the guidance. But it could be that this document already contains all of it. It could be. Yeah. And if it does then um being like evaluating kind of like the product road map based on like does it actually match the um the values and the kind of like hypotheses that are being laid out in this document? Like are they aligned? because maybe the documents says one thing but then the product road map is based on some other thought process. Okay, let's couple like understanding this document with adding comments to the product road map. Mhm. So that's then these two sort of tasks before we go into this meeting in the afternoon.",
+				"date": "2026-01-26"
+			}
+		},
+		{
+			"id": "standup-2026-01-26-002006",
+			"label": "2026-01-26 [00:20:06]",
+			"data": {
+				"chunk": "Noémi Biró: Mhm.Amir Houieh: Just mind you guys,Noémi Biró: Um,Amir Houieh: we need to stay on the practical side of things with Cibil and we don't we shouldn't expect Melissa to be open to however deep you want to get into statements or money or philosophy behind civil. She her main drives is more practicality and KPI she has on the business side. So we need to not also show her the signal that oh we are again we are not so because that's a sign of not taking things into a more practice and production and fastpace delivering I understand but we need to also watch out for our language that how we frame this that we are not we just want to understand the product better.Gabor Kerekes: Yeah, that's what IAmir Houieh: So like I know but yeah we should watchGabor Kerekes: did.Amir Houieh: out like for the just wordings for example don't use the word manifesto because there doesn't make sense for products.Gabor Kerekes: Okay.Amir Houieh: Wow.Gabor Kerekes: Okay. Um,Amir Houieh: Okay, cool. Uh then yeah, shall we?",
+				"date": "2026-01-26"
+			}
+		},
+		{
+			"id": "standup-2026-01-26-002138",
+			"label": "2026-01-26 [00:21:38]",
+			"data": {
+				"chunk": "Amir Houieh: So no now me and G were supposed to have this meeting right after this in 10 minutes but what we can do we can I think it's better to go through that proposal theGabor Kerekes: Mhm.Amir Houieh: draft proposal we wrote uh and then after that I can have the meeting with Gab about the developerNoémi Biró: Okay.Gabor Kerekes: UhNoémi Biró: I actually thought I would just take some time myself to read it to processAmir Houieh: but Gab said he wants to also read it again.Noémi Biró: it.Amir Houieh: Double check,Noémi Biró: Oh, you wanted to read it like with the group?Amir Houieh: right?Noémi Biró: Not with the group. I Yeah, just on my own. Okay.Amir Houieh: Okay. It's a very short document. So, shall we go and read it now? How do you want to do it?Noémi Biró: But um so we're talking about the copy of civil phase 2 strategicAmir Houieh: Yes.Noémi Biró: document.Amir Houieh: So the thing is that one second let me share it anyway here.",
+				"date": "2026-01-26"
+			}
+		},
+		{
+			"id": "standup-2026-01-26-002249",
+			"label": "2026-01-26 [00:22:49]",
+			"data": {
+				"chunk": "Amir Houieh: This is a new feature. Uh so we have this proposal that Melissa basically it's a communication between us and Melissa that what will happen in the next four months in the next phase not these four weeks and then the four months of development that comes in and this is where we basically the thing is that we don't know a lot of things and we know a bit of other things so it's just that we need to get on the same page that hey just to define and the scope of next next phase of the project. Uh that that's that's what it is. And based on this we are going to basically draft a contract that both partiesGabor Kerekes: Okay.Amir Houieh: signs.Gabor Kerekes: Yeah, that's what I meant. I wanted to just uh read this on my own.Amir Houieh: Okay then.Gabor Kerekes: I to the group justAmir Houieh: Okay.Gabor Kerekes: uhAmir Houieh: But then uh so basically you need to read it and then we need to again together three of us discuss it because at three we need to present this to Melissa as the final draft or if you have any particular question or clarification questionGabor Kerekes: Okay. Okay.Amir Houieh: we can also ask her.Gabor Kerekes: AllAmir Houieh: So when shall we meet each other before that three beforeGabor Kerekes: right.Amir Houieh: threeGabor Kerekes: I don't know. 2:30 or two.Amir Houieh: I have a meeting at two.Gabor Kerekes: then and then okay um maybe we can have our own meeting after Melissa's meeting and or I don't knowAmir Houieh: No,Gabor Kerekes: what'sAmir Houieh: but we need to be sync before talking to Melissa.Gabor Kerekes: Yeah. Okay. Okay. So 1:30. Yeah.  \nTranscription ended after 00:25:13\nThis editable transcript was computer generated and might contain errors. People can also change the text after it was created.",
+				"date": "2026-01-26"
+			}
+		}
+	]
+}

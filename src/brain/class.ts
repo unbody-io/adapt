@@ -1,5 +1,5 @@
 import { tool } from 'ai'
-import type { CallSettings } from 'ai'
+import type { CallSettings, StreamTextResult } from 'ai'
 import { z } from 'zod'
 import { nanoid } from 'nanoid'
 import {
@@ -15,7 +15,7 @@ import {
 } from '../learners'
 import { generate, Output } from '../llm'
 import { TypedEmitter } from '../types/events'
-import { synthesize, synthesizeDirect, type SpecialistDef } from './agent'
+import { synthesize, synthesizeDirect, synthesizeStream, synthesizeDirectStream, type SpecialistDef } from './agent'
 import { BRAIN_DEFAULTS } from './config.defaults'
 import { Evaluator } from './evaluator/class'
 import { EVOLUTION_ACTIONS, type EvolutionDecision } from './evaluator/types'
@@ -35,6 +35,7 @@ import type {
 	ConsultOptions,
 	ConsultResult,
 	LearnerBatchResult,
+	LearningConfig,
 	ResolvedBrainConfig,
 } from './types'
 import {
@@ -82,6 +83,7 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 
 	// Constructor config (not persisted, used during init only)
 	private readonly learnerStoreFactory: (learnerId: string) => Store
+	private readonly learningConfig?: LearningConfig
 	private readonly autoSetup: boolean
 	private readonly configLearners?: GeneratedLearnerConfig[]
 	private readonly internalLearnersConfig: BrainConfig['internalLearners']
@@ -101,6 +103,7 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 			blueprintModel,
 			initModel: rawConfig.init?.model ?? blueprintModel,
 			queryModel: rawConfig.query?.model ?? model,
+			evolutionModel: rawConfig.evolution?.model ?? model,
 			batchSize: rawConfig.ingest?.batchSize ?? BRAIN_DEFAULTS.ingest.batchSize,
 			evolution: {
 				enabled: rawConfig.evolution?.enabled ?? BRAIN_DEFAULTS.evolution.enabled,
@@ -118,6 +121,7 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 		})
 		this.store = rawConfig.store ?? new MemoryBrainStore()
 		this.learnerStoreFactory = rawConfig.learning?.store ?? (() => new MemoryStore())
+		this.learningConfig = rawConfig.learning
 		this.autoSetup = rawConfig.autoSetup ?? true
 		this.configLearners = rawConfig.learners
 		this.internalLearnersConfig = rawConfig.internalLearners
@@ -157,7 +161,10 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 			init: { model: this.state.models.init },
 			query: { model: this.state.models.query },
 			ingest: this.state.ingest,
-			evolution: this.state.evolution,
+			evolution: {
+				...this.state.evolution,
+				model: this.state.models.evolution,
+			},
 		}
 	}
 
@@ -579,6 +586,7 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 					maxObservations: BRAIN_DEFAULTS.learning.understand.thresholds.maxObservations,
 					maxTokens: BRAIN_DEFAULTS.learning.understand.thresholds.maxTokens,
 					minImportance: BRAIN_DEFAULTS.learning.understand.thresholds.minImportance,
+					...this.learningConfig?.understand?.thresholds,
 					...config.thresholds,
 				},
 			},
@@ -842,22 +850,187 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 	}
 
 	/**
-	 * Direct ask — query all learners in parallel (single LLM each), then one synthesis call
+	 * Stream an answer from the Brain — returns raw ai-sdk StreamTextResult.
+	 *
+	 * Direct mode: queries learners non-streaming, then streams synthesis.
+	 * Deep mode: streams agentic synthesis (learner queries visible as tool events in fullStream).
+	 */
+	async askStream(
+		query: string,
+		options?: CallSettings & { model?: import('ai').LanguageModel; mode?: 'direct' | 'deep' },
+	): Promise<StreamTextResult<any, any>> {
+		await this.ensureInitialized()
+
+		const mode = options?.mode ?? 'direct'
+		const queryId = `query_${nanoid()}`
+		this.emit('brain:ask:started', { queryId, query })
+
+		const { model: modelOverride, mode: _mode, ...generateOptions } = options ?? {}
+		const synthesisModel = modelOverride ?? this.state.models.query
+
+		if (mode === 'direct') {
+			return this.askDirectStream(query, synthesisModel, generateOptions)
+		}
+		return this.askDeepStream(query, synthesisModel, generateOptions)
+	}
+
+	/**
+	 * Direct ask stream — query all learners in parallel, then stream synthesis
+	 */
+	private async askDirectStream(
+		query: string,
+		model: import('ai').LanguageModel,
+		generateOptions: CallSettings,
+	): Promise<StreamTextResult<any, any>> {
+		const allLearners = this.getLearners()
+
+		// Filter to learners that have knowledge
+		const learnersWithKnowledge = (await Promise.all(
+			allLearners.map(async (learner) => {
+				const [understanding, buffer] = await Promise.all([
+					learner.getUnderstanding(),
+					learner.getBufferState(),
+				])
+				return (understanding || buffer.count > 0) ? learner : null
+			}),
+		)).filter((l): l is BaseLearner<unknown> => l !== null)
+
+		// Pre-select relevant learners via LLM
+		const relevantLearners = await this.selectRelevantLearners(
+			query, learnersWithKnowledge, model, generateOptions,
+		)
+
+		const learnerQueries = await Promise.all(
+			relevantLearners.map(async (learner) => {
+				const result = await learner.query(query, { mode: 'direct', ...generateOptions })
+				return { id: learner.id, ...result }
+			}),
+		)
+
+		const specialistResults = learnerQueries
+			.filter((r): r is NonNullable<typeof r> => r !== null && r.relevant)
+			.map((r) => ({ id: r.id, relevance: r.relevance, confidence: r.confidence, insight: r.insight, gaps: r.gaps }))
+
+		const globalLearner = this.internalLearners.get('__internal_global_understanding')
+		const globalUnderstanding = globalLearner
+			? await globalLearner.getUnderstanding() as string
+			: undefined
+
+		return synthesizeDirectStream(model, {
+			synthesisDirective: this.state.promptContext?.synthesisDirective ?? undefined,
+			query,
+			specialistResults,
+			globalUnderstanding: globalUnderstanding || undefined,
+			...generateOptions,
+		})
+	}
+
+	/**
+	 * Deep ask stream — stream agentic synthesis, learner queries happen as tool calls
+	 */
+	private async askDeepStream(
+		query: string,
+		model: import('ai').LanguageModel,
+		generateOptions: CallSettings,
+	): Promise<StreamTextResult<any, any>> {
+		const learnerArray = this.getLearners()
+
+		const specialists: SpecialistDef[] = []
+		for (const learner of learnerArray) {
+			const [understanding, buffer] = await Promise.all([
+				learner.getUnderstanding(),
+				learner.getBufferState(),
+			])
+			if (!understanding && buffer.count === 0) continue
+			specialists.push({
+				id: learner.id,
+				name: this.learnerNames.get(learner.id) ?? learner.id,
+				description: learner.description || this.learnerNames.get(learner.id) || learner.id,
+				query: (question, queryOptions) => learner.query(question, { ...generateOptions, ...queryOptions }),
+			})
+		}
+
+		const consultTools = await this.buildConsultTools()
+		return synthesizeStream(model, {
+			synthesisDirective: this.state.promptContext?.synthesisDirective ?? undefined,
+			query,
+			specialists,
+			consultTools,
+			...generateOptions,
+		})
+	}
+
+	/**
+	 * Pre-filter learners by relevance to a query using a fast LLM call.
+	 * Returns only the learners the LLM considers relevant based on name and description.
+	 */
+	private async selectRelevantLearners(
+		query: string,
+		learners: BaseLearner<unknown>[],
+		model: import('ai').LanguageModel,
+		generateOptions: CallSettings,
+	): Promise<BaseLearner<unknown>[]> {
+		if (learners.length <= 1) return learners
+
+		const learnerMenu = learners.map((l) => ({
+			id: l.id,
+			name: this.learnerNames.get(l.id) ?? l.id,
+			description: l.description || '',
+		}))
+
+		const selectionSchema = z.object({
+			ids: z.array(z.string()).describe('IDs of learners relevant to the query'),
+		})
+
+		const result = await generate({
+			model,
+			system: `You select which specialist learners are relevant to a user query.
+
+Given a list of specialists (each with an id, name, and description), return the ids of those whose domain is relevant to answering the query. Be inclusive — if a specialist might have useful context, include it. Only exclude specialists that are clearly unrelated.`,
+			prompt: `Query: ${query}
+
+Specialists:
+${learnerMenu.map((l) => `- ${l.id}: ${l.name} — ${l.description}`).join('\n')}`,
+			output: Output.object({ schema: selectionSchema }),
+			repairSchema: selectionSchema,
+			...generateOptions,
+		})
+
+		const selectedIds = new Set((result.output as z.infer<typeof selectionSchema>).ids)
+		const selected = learners.filter((l) => selectedIds.has(l.id))
+
+		// Fallback: if LLM selected nothing, query all (don't silently drop everything)
+		return selected.length > 0 ? selected : learners
+	}
+
+	/**
+	 * Direct ask — select relevant learners, query in parallel, then one synthesis call
 	 */
 	private async askDirect(
 		query: string,
 		model: import('ai').LanguageModel,
 		generateOptions: CallSettings,
 	) {
-		const learnerArray = this.getLearners()
+		const allLearners = this.getLearners()
 
-		const learnerQueries = await Promise.all(
-			learnerArray.map(async (learner) => {
+		// Filter to learners that have knowledge
+		const learnersWithKnowledge = (await Promise.all(
+			allLearners.map(async (learner) => {
 				const [understanding, buffer] = await Promise.all([
 					learner.getUnderstanding(),
 					learner.getBufferState(),
 				])
-				if (!understanding && buffer.count === 0) return null
+				return (understanding || buffer.count > 0) ? learner : null
+			}),
+		)).filter((l): l is BaseLearner<unknown> => l !== null)
+
+		// Pre-select relevant learners via LLM
+		const relevantLearners = await this.selectRelevantLearners(
+			query, learnersWithKnowledge, model, generateOptions,
+		)
+
+		const learnerQueries = await Promise.all(
+			relevantLearners.map(async (learner) => {
 				const result = await learner.query(query, { mode: 'direct', ...generateOptions })
 				return { id: learner.id, ...result }
 			}),
@@ -1365,6 +1538,43 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 	}
 
 	/**
+	 * Streaming variant of evaluateEvolution().
+	 *
+	 * Returns the raw ai-sdk stream so the consumer can iterate fullStream
+	 * for evaluator tool events in real time, plus a decisions promise that
+	 * resolves after the stream finishes and decisions are optionally executed.
+	 */
+	async evaluateEvolutionStream(options?: { dryRun?: boolean }): Promise<{
+		stream: StreamTextResult<any, any>
+		decisions: Promise<{
+			decisions: EvolutionDecision[]
+			results: AggregatedEvolutionResult
+		}>
+	}> {
+		if (!this.evaluator) {
+			throw new Error(
+				'Evolution is not enabled. Set config.evolution.enabled = true',
+			)
+		}
+
+		const { stream, decisions: rawDecisions } =
+			await this.evaluator.evaluateStream('manual')
+
+		const decisions = rawDecisions.then(async (decisions) => {
+			if (options?.dryRun || decisions.length === 0) {
+				return {
+					decisions,
+					results: { created: [], updated: [], deleted: [], merged: [], split: [] } as AggregatedEvolutionResult,
+				}
+			}
+			const results = await this.executeEvolutionDecisions(decisions)
+			return { decisions, results }
+		})
+
+		return { stream, decisions }
+	}
+
+	/**
 	 * Execute evolution decisions (private helper)
 	 */
 	private async executeEvolutionDecisions(
@@ -1644,6 +1854,11 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 			newModels.blueprint = updates.blueprintModel
 			modelsChanged = true
 			changedFields.push('blueprintModel')
+		}
+		if (updates.evolution?.model !== undefined) {
+			newModels.evolution = updates.evolution.model
+			modelsChanged = true
+			changedFields.push('evolution.model')
 		}
 		if (modelsChanged) {
 			stateChanges.models = newModels

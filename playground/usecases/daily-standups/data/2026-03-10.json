@@ -1,0 +1,207 @@
+{
+	"id": "standup-2026-03-10",
+	"source": "standup-2026-03-10",
+	"description": "📝 Notes\nMar 10, 2026\nR&D daily sprint\nInvited Amir Houieh Unbody io Noémi Biró Gabor Kerekes\nAttachments R&D daily sprint \nMeeting records Transcript \nSummary\nA summary wasn't produced for this meeting because there wasn't enough conversation in a supported language.If the meeting was transcribed, you can review the transcript linked in the meeting records section of this document.Visit the help center for troubleshooting information\nDetails\nDetails weren't produced for this meeting.\nSuggested next steps\nNo suggested next steps were found for this meeting.\nYou should review Gemini's notes to make sure they're accurate. Get tips and learn how Gemini takes notes\nPlease provide feedback about using Gemini to take notes in a short survey.\n\n---\n\n📝 Notes\nMar 10, 2026\nR&D daily sprint\nInvited Amir Houieh Unbody io Noémi Biró Gabor Kerekes\nAttachments R&D daily sprint Notes by Gemini \nMeeting records Transcript \nSummary\nModule design sketches were reviewed, and a Mycelium prototype demonstrated, with a unified goal needed for concrete development.Safety Document Review PostponedThe discussion of safety regulations was postponed until Friday to allow for more time to review the recently received final safety requirements document. The current Wednesday meeting will now focus exclusively on modules, and a Friday 2 PM safety meeting will be scheduled.Module Sketch Review and FeedbackLatest module sketches presented two organization approaches: a chat-accessible text-heavy option and a journey-based 'maps' view. Participants suggested using the 'Open' app for design inspiration to ensure the content organization reflects the interrelation between concepts.Mycelium Prototype and GoalA Mycelium prototype was demonstrated, which aims to save bookmarks and cluster knowledge using a 'brain' initialized with a specific prompt. The team agreed on the necessity of defining a singular, unified, and small goal for Mycelium to create a complete end-to-end pipeline.\nDetails\nSchedule and Safety Document Review: The participants agreed to postpone the discussion of safety regulations to a meeting on Friday to allow more time for review, as the final safety requirements document was recently sent by Melissa (00:00:00) (00:04:28). The Wednesday meeting will now focus exclusively on modules (00:02:52). Amir Houieh committed to having their sketches ready around 5 or 6 and also committed to reviewing the safety documents before Friday (00:00:00).\nUpcoming Safety Meeting Logistics: Noémi Biró volunteered to schedule the separate safety meeting with Melissa for Friday, proposing it around 2 PM, which Gabor Kerekes and Amir Houieh indicated would provide enough time to read and digest the safety documents (00:02:52) (00:05:40). The goal for this meeting is to provide input on the best way to tackle the safety requirements and outline actionable points (00:04:28).\nModule Sketching and Design Concepts: Noémi Biró shared their latest module sketches, which explored two distinct ways of organizing content: a text-heavy approach accessible via a chat option, and a thematic 'maps' view based on the user's journey, such as \"six weeks after loss\" (00:05:40). The journey-based view allows the user's path to grow incrementally and provides access to relevant sessions and suggestions for daily focus (00:07:38).\nFeedback on Module Organization and Design: Gabor Kerekes suggested reviewing the design of the \"Open\" app for inspiration, specifically focusing on its interface and content organization patterns, as they have good design and structure their content into modules (00:10:25). Gabor Kerekes also expressed a preference for the design to reflect the interrelation and overlap between concepts like mind and body, to avoid boxing things in too cleanly (00:13:14).\nDemonstration of Mycelium Prototype and Brain Initialization: Amir Houieh shared a quick test of a Mycelium prototype that attempted to save bookmarks and connect them to a 'brain' for processing and knowledge clustering (00:16:51). This brain is initialized with a specific prompt and uses both a cloud model for prompt decomposition and a smaller model for the rest of the process, though the demo encountered an error due to running out of credit (00:20:24).\nSearch for Concrete Scenarios for Mycelium Development: Amir Houieh expressed the need for a more concrete scenario or real data to truly test the Mycelium prototype, suggesting they need more direction rather than exploring abstract problems (00:24:19) (00:29:55). Gabor Kerekes suggested using Amir Houieh's personal friction point—the daily context switching between apps—as a natural angle for development, prioritizing building something functional that meets daily workflow needs (00:26:03) (00:32:20).\nEstablishing a Unified Goal for Mycelium: The participants discussed the importance of defining a singular, unified, and tiny goal to aim for to avoid wasting time on generalized exploration (00:29:55). They suggested focusing on making Mycelium more concrete, even if it has limited features, to create a complete end-to-end pipeline (00:33:24). Noémi Biró argued that Mycelium should not have only one use case to avoid being perceived as only a bookmarking tool. Gabor Kerekes committed to providing concrete scenarios in the next daily meeting to help narrow the focus of the project (00:34:35).\nPersonal Well-being and Administrative Tasks: Amir Houieh mentioned feeling close to a mental breakdown and affirmed they should watch out for their well-being, though they noted that work can sometimes help. Before concluding the meeting, Amir Houieh also noted the need to work on the proposal for the minutes/administrative tasks and committed to creating a proposal (00:36:01).\nSuggested next steps\nAmir Houieh will have the sketches ready around five or six.\nAmir Houieh will read the safety documents before Friday.\nNoémi Biró will send an invite to Melissa for a meeting on Friday to discuss the safety regulations.\nNoémi Biró will sketch out what happens when going inside one of the modules and different exercises like a body check or five senses.\nAmir Houieh will sketch the type of exercise or activity that can be done using only voice or without a phone in hand.\nGabor Kerekes will look at the interface of the Open app for breathwork and meditation.\nAmir Houieh will work on the minutes and make a proposal to review it together.\nThe group will read through the safety documents from Melissa before the Friday meeting.\nYou should review Gemini's notes to make sure they're accurate. Get tips and learn how Gemini takes notes\nPlease provide feedback about using Gemini to take notes in a short survey.",
+	"items": [
+		{
+			"id": "standup-2026-03-10-000000",
+			"label": "2026-03-10 [00:00:00]",
+			"data": {
+				"chunk": "Amir Houieh: Hey me joinNoémi Biró: Hey,Amir Houieh: me.Noémi Biró: he's at theAmir Houieh: Okay.Noémi Biró: studio.Amir Houieh: Sorry I yeah I had this therapy. Uh I think I will have my sketches as we discussed around five sixNoémi Biró: Mhm.Amir Houieh: And what else? I haven't looked at those safety documents. I will make sure to happen before Friday. Um, and then I also made one. Yeah, I basically tried to my selium some of the feature using the brain. It's it's nice. I wanted to show.Noémi Biró: Oh, cool.Amir Houieh: Yeah.Noémi Biró: So I'm not sure if now the expectation of Melissa is to also discuss safety onAmir Houieh: So,Noémi Biró: Wednesday or not. Uh so I'm not sure about that.Amir Houieh: okay.Noémi Biró: But yeah, I mean if we say that we need more time to go through this document because she just sent yesterday and she I think she needs quite some input on it.Amir Houieh: Yes.Noémi Biró: Then we can propose to do",
+				"date": "2026-03-10"
+			}
+		},
+		{
+			"id": "standup-2026-03-10-000124",
+			"label": "2026-03-10 [00:01:24]",
+			"data": {
+				"chunk": "Amir Houieh: I thought she she sent it way before.Noémi Biró: sorry.Amir Houieh: She she sent it yesterday, you say?Noémi Biró: Yeah.Amir Houieh: But she already sent a lot of other things as well previously,Noémi Biró: Yeah.Amir Houieh: right?Noémi Biró: This is like the final document from Dina and based on it she had has now a safety requirements product road mapap document. Um, does this work better for you? Now, I tried something new to like here we had the safety regulations and I linked here theAmir Houieh: Okay. Yeah,Noémi Biró: document.Amir Houieh: sounds good again. Yeah, but if you can Yeah, this works. As long as you have them all in one place, I think Yeah, definitely works better for me. because also yeah some of them might also need gabor'sNoémi Biró: Yeah, I think for this whole perspective it would be nice toAmir Houieh: input.Noémi Biró: have both of your input actually. And I also gathered here like the questions that we want to be able to answer and like ultimately we want to answer what are the offtheshelf products.",
+				"date": "2026-03-10"
+			}
+		},
+		{
+			"id": "standup-2026-03-10-000252",
+			"label": "2026-03-10 [00:02:52]",
+			"data": {
+				"chunk": "Noémi Biró: Um okay. So then I think my feeling is that it would be nicer to just leave tomorrow's meeting about the modules and Friday discuss theAmir Houieh: Yeah. Yeah. Yeah.Noémi Biró: safetyAmir Houieh: Definitely no safety should be just something else.Noémi Biró: and then I'll send an invite to Melissa for Friday where we can discuss the safety and that gives us a bit more time to really dive deep intoAmir Houieh: Okay. Yeah, we can do that. And then yeah, today I can also send you my sketches if you are thinking yeah to put them in Figma jam or something. I don't know.Noémi Biró: But you will have them in the evening,Amir Houieh: Uh yeah, I will I after this I'm going to work onNoémi Biró: right?Amir Houieh: those.Noémi Biró: What's this?Amir Houieh: Who is joining?Noémi Biró: I don't know.Amir Houieh: I think Hey,Noémi Biró: Oh,Gabor Kerekes: Hey,Amir Houieh: what'sNoémi Biró: hello.Amir Houieh: upGabor Kerekes: I'm just getting back from lunch. What's up?",
+				"date": "2026-03-10"
+			}
+		},
+		{
+			"id": "standup-2026-03-10-000428",
+			"label": "2026-03-10 [00:04:28]",
+			"data": {
+				"chunk": "Noémi Biró: You're very quiet. Oh, now it's better. Yeah.Gabor Kerekes: Sorry.Noémi Biró: Um I was just saying that uh so tomorrow we're going to have this discussion with Melissa and I think it's good to focus tomorrow on the on theGabor Kerekes: Uh-huh.Noémi Biró: modules and then propose another meeting for Friday to tackle the safety regulations because now we already got quite some documents from her and she sent the last one like this safety requirements product roadGabor Kerekes: Mhm. Mhm.Noémi Biró: map yesterday and I think we need some time to go through them. Uh I gathered like here is now the document she sent yesterday but I'll link also the other ones here.Gabor Kerekes: Mhm.Noémi Biró: I think it would be nice if all of us go through it and see if we can uh answer somehow these.Gabor Kerekes: Mhm.Noémi Biró: I I feel like she really needs our input on what we think would be best way to tackle this and what are like um like actionableGabor Kerekes: Mhm.Noémi Biró: points. So if we propose Friday a meeting with her,",
+				"date": "2026-03-10"
+			}
+		},
+		{
+			"id": "standup-2026-03-10-000540",
+			"label": "2026-03-10 [00:05:40]",
+			"data": {
+				"chunk": "Gabor Kerekes: Yeah.Noémi Biró: let's say around two, would that be enough time for you guys to also read through these documents and digest them a bit?Gabor Kerekes: Yeah.Noémi Biró: Okay. So I'll set up that meeting with her and uh other than that, I've been sketching a lot of the modules. Also, Amir is gonna do some sketches and um so we'll have quite a lot I think for tomorrow around that.Gabor Kerekes: Mhm.Noémi Biró: And the analytics dashboard we said we wait till the end of theGabor Kerekes: Yeah.Noémi Biró: week.Gabor Kerekes: Okay. Maybe we can hopefully I'll have something by Friday.Noémi Biró: Okay.Amir Houieh: Okay.Noémi Biró: So that's on the civil front. Uh doAmir Houieh: All right.Gabor Kerekes: Do you need any input on sketchingNoémi Biró: youGabor Kerekes: or Mhm.Noémi Biró: on the civil module?Gabor Kerekes: the modules?Noémi Biró: I can share a bit like where I'm at. So far I think there are two distinct ways with the modules that I figured and sketched. One would be like from like this chat you have the option to enter into the module and then inside the module you kind of have a lot of text.",
+				"date": "2026-03-10"
+			}
+		},
+		{
+			"id": "standup-2026-03-10-000738",
+			"label": "2026-03-10 [00:07:38]",
+			"data": {
+				"chunk": "Noémi Biró: So this is also what we discussed with air that yeah it makes it visible like what are the tools inside the module and some of the tools are also available as like outside of the module like for example appointment preparation uh only inside the module it just gives a bit more focus and then an alternative version of this is uh thinking more in this kind of maps so in thematic ways and then I alsoGabor Kerekes: I like it.Noémi Biró: went back to this because it always thought like there's something there and I figured like if we think about the journey through these themes and this becomes your journey so this can become how you are experiencing it after the six week loss. You just are in this finding ground six weeks after your loss and like some of the sessions that you have access are connected to like the six weeks after and you can get like the suggestions like where you can maybe focus today and these would be some exercises that are surfaced from these bubbles. But of course if you feel like no today I just want to do something with the mind you just click on the mind and then you get all those eight sessions inside the mind.",
+				"date": "2026-03-10"
+			}
+		},
+		{
+			"id": "standup-2026-03-10-000918",
+			"label": "2026-03-10 [00:09:18]",
+			"data": {
+				"chunk": "Noémi Biró: Uh you could also get like this daily digest. So you see a bit of like a timeline and like say like you have an upcoming appointment inGabor Kerekes: Mhm.Noémi Biró: 4 days and then then you have a bit of both. you have both this mind map view and the view of a linear time frame without making the linear time something that you have to absolutely achieve. And I think this is what I like about your journey is that it can really grow from where you are. I thought this is also an interesting way to think about like how you just like incrementally like maybe like grow this path based on your interest based on what you want to explore. But going back here like what you can notice here like let's say you're inside the six weeks after loss module and you have this appointment prep um which would be let's say this questionnaire to get the information to help you. But you would also be able to access the appointment prep even if this didn't show up. And there are some of these exercises that are just one click away.",
+				"date": "2026-03-10"
+			}
+		},
+		{
+			"id": "standup-2026-03-10-001025",
+			"label": "2026-03-10 [00:10:25]",
+			"data": {
+				"chunk": "Gabor Kerekes: Mhm.Noémi Biró: So you don't have to go like body and then inside. Yeah, these these were a bit the latest sketches. And then today I wanted to sketch out also some other it's like what happens when you go inside one of these and a different kind of exercise like what does a body check in mean or what does a five senses mean.Gabor Kerekes: I think uh do you know this um app called open?Noémi Biró: What?Gabor Kerekes: Open open. Open is theNoémi Biró: Open.Gabor Kerekes: app just uh yeah open breath work and meditation.Noémi Biró: Oh, yeah.Gabor Kerekes: It could be interesting to look at their interface as well becauseNoémi Biró: Mhm.Gabor Kerekes: they have really good design. Um, yeah, I'm just following.Noémi Biró: The mind part or the mindfulnessGabor Kerekes: Sorry.Noémi Biró: part.Gabor Kerekes: I mean, it's just like they just have a good design.Noémi Biró: Yeah. I mean, this is not really the design visually. It's more like the design of organizing the content.",
+				"date": "2026-03-10"
+			}
+		},
+		{
+			"id": "standup-2026-03-10-001200",
+			"label": "2026-03-10 [00:12:00]",
+			"data": {
+				"chunk": "Gabor Kerekes: Yeah,Amir Houieh: Interesting.Gabor Kerekes: but that's also what I mean that like uh there can be some maybe patterns that canNoémi Biró: Yeah.Gabor Kerekes: be useful because they also have these modules basically and taking a look at how they organize them.Noémi Biró: Mhm.Gabor Kerekes: I'm not saying it's the the colors and the fonts and stuff like that.Noémi Biró: Yeah. Right.Gabor Kerekes: More the patterns and how youNoémi Biró: Cool. Mhm.Gabor Kerekes: navigate.Noémi Biró: Yeah. Is this clear like what this means?Gabor Kerekes: ButAmir Houieh: Yeah. But yeah,Gabor Kerekes: yeah.Amir Houieh: definitely this from the UI point as we discussed yesterday there is work to be done but it's that we are exploring.Noémi Biró: Mhm.Amir Houieh: You want to also maybe show quickly those inspirations? Um maybe Gab also get some idea.Noémi Biró: Mhm.Amir Houieh: Yeah.Noémi Biró: So, one was like these cards like when you have a journaling and then you can input your things on a card and resurfacing it in thisGabor Kerekes: Yeah,",
+				"date": "2026-03-10"
+			}
+		},
+		{
+			"id": "standup-2026-03-10-001314",
+			"label": "2026-03-10 [00:13:14]",
+			"data": {
+				"chunk": "Noémi Biró: way.Gabor Kerekes: I like that.Noémi Biró: Having a more calendar view. Uh this yeah I already got inspired by this for this version that I showed where there was alsoGabor Kerekes: Yeah.Noémi Biró: about what's today and what's upcoming.Amir Houieh: And then there was also the idea that how we can like reduce even the UI role in a way that you can interact with civil or do some of exercise without having to have your phone in hand and talked also about you know like the you can also interactNoémi Biró: Yeah.Amir Houieh: with civil like you can do the some of the exercises by just you know voice or something like that I don't know or civil reads it out something forGabor Kerekes: Mhm.Amir Houieh: you but what type of exercise or activity that can be I don't know weGabor Kerekes: Mhm.Noémi Biró: Yeah.Amir Houieh: that's something I'm going to sketch today problem at the very at the explorationGabor Kerekes: Oh yeah,Amir Houieh: phase.Gabor Kerekes: that's that's pretty nice also that somehow expressing like I don't know how to say it but like um something I have this kind of uh I don't know, some kind of reservation around splitting things into like very clean modules that here's your mind, here's your body, everything is like in boxes where all these things kind of like interrelate and overlap in like they're in feedback loops.",
+				"date": "2026-03-10"
+			}
+		},
+		{
+			"id": "standup-2026-03-10-001509",
+			"label": "2026-03-10 [00:15:09]",
+			"data": {
+				"chunk": "Gabor Kerekes: And I think um yeah, it's just uh I think because we do need those boxes because you do need kind of entry points into an exercise and you have to just like your attention. For example, if you're meditating, you're looking at the mind, but sometimes you're looking at the body and then you're holding both of them in awareness at the same time. But sometimes you're just like really looking you know like what's the sensation in my fingertip.Noémi Biró: Mhm.Gabor Kerekes: So you are focused on that but it's not so clear like where does the mind start and where does the body start and I think that somehow reflecting that in the design and how you navigate these modules as well. I think so like to have that kind of holistic vision to not kind of box things in. I would find that important. But yeah, this just like at a really abstract level. I don't know. It's maybe not very useful this feedback.Amir Houieh: Cool.Gabor Kerekes: I guess it's more philosophical.Noémi Biró: Mhm. I mean I agree like probably exercises would be tagged not from just one place but they would be belonging to multiple ones.",
+				"date": "2026-03-10"
+			}
+		},
+		{
+			"id": "standup-2026-03-10-001651",
+			"label": "2026-03-10 [00:16:51]",
+			"data": {
+				"chunk": "Amir Houieh: Nice.Noémi Biró: Okay.Amir Houieh: Uh on my end, I try to make a kind of first prototype of like what you had in my the myelium I had was the very first version that you had in mobile. Then I tried to just somehow make the whole bookmark saving and connect it to brain and I have some interface. Uh, let me see. Okay, let me share my screen. It's It's not um quiet there and it's very generic and I'm not sure about the data, but that's the start. Do you see my screen?Noémi Biró: Yeah.Amir Houieh: Okay, let me restore the brain. Okay, this is like what this is. These are the feeds that you practically want to save for example like a web page or whatever it is. I try to generate this data based on the mycelium prototype you had. I'm not sure accurate they are. And when you save it basically uh it gets processed as doesn't matter how many one or multiple and basically it's first it does those clustering against its existing knowledge base.",
+				"date": "2026-03-10"
+			}
+		},
+		{
+			"id": "standup-2026-03-10-001839",
+			"label": "2026-03-10 [00:18:39]",
+			"data": {
+				"chunk": "Amir Houieh: So which one is belonging to what what thread basically I think can be labeled to or processed and then injected into the brain and what happens basically uh yeah behind the scene there are these learners working and you have threads and you can ask questions for example I don't know uh what can I ask let me a couple of questions I could ask for example I don't know uh I think these are the items that so far I have uh injected for example what tools and concepts have I been exploring so again I don't know like if this is based on your real data or something has missed during the transformation um what else Or you can ask these are very low cheap models. This is very small models behind the scene. It's not big one. Um and then as soon as you just keep saving everything gets just over the time it gets you know evoluted and uh yeah grow over the time. So these three items are basically done. Let's go to the thread and you see so these are the threads that so far has been created and detected.",
+				"date": "2026-03-10"
+			}
+		},
+		{
+			"id": "standup-2026-03-10-002024",
+			"label": "2026-03-10 [00:20:24]",
+			"data": {
+				"chunk": "Amir Houieh: Uh again these are all just based on one simple prompt. Let me destroy the whole thing. Uh page let meGabor Kerekes: Yeah.Amir Houieh: also destroy the data so we can run it again. kill server. Or maybe this also helps that if I show the how initialized how initialize the brain So here this is how you so basically this is the entire the prompt I gave to the brain that you are a memory behind my selia which is my personal attention tracker. I think this creates a lot of bad decision because it's not only attention tracker personal I don't knowGabor Kerekes: I mean, it's okay.Amir Houieh: memory uh I have I save things from everywhere bookmarks article notes uh product imagine code repositories I wanted to understand etc etc so you just describe what it is it could be of course way more proper and Then I give it a p few settings and I also define one learner like a handmade learner like a custom learner and that's because we want to have those threads and this will basically create and its job is basically observe different threads and create threads based on the knowledge base and that is it.",
+				"date": "2026-03-10"
+			}
+		},
+		{
+			"id": "standup-2026-03-10-002252",
+			"label": "2026-03-10 [00:22:52]",
+			"data": {
+				"chunk": "Amir Houieh: So then we just initialize this. Uh so if you go back again to the code to the this thing and then initialize it. So for initializing and draft decomposing that prompt into learners uh we are using a cloud which is a good model but for the rest we using a cheap model Gemini. So at the moment this is decomp decomposing all those like the prompt intoGabor Kerekes: Yeah.Amir Houieh: particular learners that it's supposed to learn from and of course the system keeps evaluating based on different signals that it receives based on the data that it can grow these learners split them merge them stuff like that. What happened? We have an error somewhere. Oh no. Oh yeah, I'm out of credit. Uh but okay, you get the idea. So I think that's but yeah,Gabor Kerekes: Nice.Amir Houieh: this is this is just a quick test. I don't know likeGabor Kerekes: Where where do you see you want to go with it further?Amir Houieh: I don't I would like to see it really like based on a more concrete scenario like if I have real data that I can put it really into the test that would be really nice.",
+				"date": "2026-03-10"
+			}
+		},
+		{
+			"id": "standup-2026-03-10-002419",
+			"label": "2026-03-10 [00:24:19]",
+			"data": {
+				"chunk": "Gabor Kerekes: What kind of realAmir Houieh: I don't know something that's I don't know if you have real data that would beGabor Kerekes: data?Amir Houieh: great or if you already take care of those uh like processing the save items. So you already have that utilities. So we could also I could also use that and just keep saving things and see how it process them. I don't know or it could be historic data then in that case probably I can use my his like browser or I can use my chat with cloud which is aGabor Kerekes: IAmir Houieh: bit difficult to get but yeah we can something like that I don'tGabor Kerekes: mean, are there any interesting questions that you might want to ask the Myelium about yourself or your browsing habits or I don't know like what would you how would you what kind of data would you give it?Amir Houieh: I don't know. Yeah, I don't have anything in mind at the moment. I don't know.Gabor Kerekes: or what kind of use case um don't know like do you ever I don't know have some kind of um because for me these kind of use cases emerge from moments during my day when I feel like I want to do this and there's no such tool that does this for me and that's kind of like where like I'm using for example my mind which is this bookmarking",
+				"date": "2026-03-10"
+			}
+		},
+		{
+			"id": "standup-2026-03-10-002603",
+			"label": "2026-03-10 [00:26:03]",
+			"data": {
+				"chunk": "Gabor Kerekes: thing and I try to you know like I use it but then there are all these paper cuts and I'm like f*** this s*** I I don't like it and then I think I I have all these ideas. So it's like these kind of friction points during the day uh is where it's coming from. Do you have anything like that?Amir Houieh: I mean the only friction I usually have every day is this context switching between this app and that app and I have to copy paste things around.Gabor Kerekes: Mhm. Then I think if if if that's something that's repeatedly coming up,Amir Houieh: That'sGabor Kerekes: I feel like maybe that's like the most natural angle for you to uh I don't know like how can you approach it from that angle because that's it. It it comes from like from from you like from within. you're not trying to like looking for some abstract use case or imagining how is this going to be useful for other people. I think uh the bestAmir Houieh: No, indeed.Gabor Kerekes: outcome is going to be when it comes from you from like your own",
+				"date": "2026-03-10"
+			}
+		},
+		{
+			"id": "standup-2026-03-10-002724",
+			"label": "2026-03-10 [00:27:24]",
+			"data": {
+				"chunk": "Amir Houieh: That's the that's a problem I I I I have in general and I think I should probably think about it that I am I'm not very keen in particular problems. I am keen on solution and that's why probably I'm here where I am. Uh that I never also built from problems. I built from the idea or solution that I think it's cool, youGabor Kerekes: But that kind of I mean that can also be like for exampleAmir Houieh: know.Gabor Kerekes: there it's like two ways to approach a like for example I don't know if I think back on Kabika the best projects when were when those things kind of like met. So on the one hand, I was just doing cool s*** just because because I smoked some weed and then I sit down and just f*** around in Photoshop with some I don't know. I just sat down. I had no idea what I was going to do. I just did some random s*** sketching really just formal, you know, what looks cool. I don't care what this means.",
+				"date": "2026-03-10"
+			}
+		},
+		{
+			"id": "standup-2026-03-10-002838",
+			"label": "2026-03-10 [00:28:38]",
+			"data": {
+				"chunk": "Gabor Kerekes: Zero thought. And then on the other hand, we had like Susanna's assignments which were like much more conceptual and then sometimes they connected and that's where it came because you need that kind of randomness where it's just like you know discovering things thatAmir Houieh: Yeah.Gabor Kerekes: you is not edited by your rational mind and then the other thread which is uh thinking a bit more linearly and rationally. uh and then those two things can intersect at some point. So I think it's yeah both are valid but um yeah I don't know like what I'm trying to get at is I'm I'm actually just like I'm not I don't want to yeah it's not some kind of advice or whatever.Amir Houieh: Yeah.Gabor Kerekes: It's just I'm I what work what is working for me or how how it works for me is that I have just things that I wish existed and they don't exist and that's where like that's what I want to build solve my own problemsAmir Houieh: Yeah.Gabor Kerekes: andAmir Houieh: Yeah. No, indeed.",
+				"date": "2026-03-10"
+			}
+		},
+		{
+			"id": "standup-2026-03-10-002955",
+			"label": "2026-03-10 [00:29:55]",
+			"data": {
+				"chunk": "Gabor Kerekes: umAmir Houieh: For me I am I think mentally I am at this stage that I can't really think of problem in that case I need a bit of more direction uh like thatGabor Kerekes: Yeah.Amir Houieh: like hey do this or try that you know but I think generally I think also weGabor Kerekes: Yeah. Okay.Amir Houieh: should start for bringing our things together and work towards the same goalGabor Kerekes: Mhm. Yeah.Amir Houieh: uh otherwise yeah we can keep exploring uh but it's good to aim for one particular idea of one particular use case and see if and within that we can already explore for example but I think it's good to and important to define that tiny goal that we are all unified on and then we just make it and then we see what happens uh like then we go next uh but what is that and how is that I was kind of expecting come from you since you you started like that the idea is you you know it better or at least you started from your problem.",
+				"date": "2026-03-10"
+			}
+		},
+		{
+			"id": "standup-2026-03-10-003059",
+			"label": "2026-03-10 [00:30:59]",
+			"data": {
+				"chunk": "Amir Houieh: But yeah, because if it was to me,Gabor Kerekes: Mhm.Amir Houieh: I would for example randomly go and build that uh you know uh therapy sessionGabor Kerekes: Yeah.Amir Houieh: recording you know or or that but again I don't want to just do randomGabor Kerekes: Yeah.Amir Houieh: stuff.Gabor Kerekes: Okay. Um yeah,Amir Houieh: You don't have to answer now but it's I wanted to bring it up. So I I I think it's better to have some sort ofGabor Kerekes: yeah. Okay.Amir Houieh: direction or merging our efforts together,Gabor Kerekes: Yeah.Amir Houieh: youGabor Kerekes: Yeah.Amir Houieh: know.Gabor Kerekes: Okay. I will give it some thought. Uh yeah, I do have like I do have ideas actually.Amir Houieh: Cool.Gabor Kerekes: I just need to write them down. Like I can make I can really cut like very specific things that I I would have I would explore.Amir Houieh: Okay.Gabor Kerekes: Uh because like for me the priority became something like I want to get something even if it's duck and tape just get something working that works uh in the browser like I can save articles and just like something that I can start using and maybe also if we do some kind of research collect them into a space be able to send each other links uh so that it really becomes something",
+				"date": "2026-03-10"
+			}
+		},
+		{
+			"id": "standup-2026-03-10-003220",
+			"label": "2026-03-10 [00:32:20]",
+			"data": {
+				"chunk": "Amir Houieh: Mhm.Gabor Kerekes: living that um that meets us in during our daily workflows and lives because that's where it meets reality otherwise itAmir Houieh: Yeah,Gabor Kerekes: stays much more abstract and I do have a bunch of ideas in that direction.Amir Houieh: I mean yeah it would be nice to define some sort of a common ground thatGabor Kerekes: Yeah.Amir Houieh: we don't just waste time on exploring you know because for example if you sayGabor Kerekes: Yeah.Amir Houieh: if we all agree that this is going to be a OS level app the way how you also have built it then it doesn't make much sense to go and build the browser extension you know instead someone can just focus on how using that foundation of that uh OS level app how we can read data from browser you know or how you can bookmark things from browser that would be much better effort than going and write a browser extension you know what I mean so this way we we would have weGabor Kerekes: Yeah. Yeah.Amir Houieh: would be more constructive or for",
+				"date": "2026-03-10"
+			}
+		},
+		{
+			"id": "standup-2026-03-10-003324",
+			"label": "2026-03-10 [00:33:24]",
+			"data": {
+				"chunk": "Gabor Kerekes: Yeah. Okay.Amir Houieh: example I don't someone just focuses on how to read data from third parties like from Gmail and you know other things for example I don't know uh something like that or maybe is it needed or not we don't know or how we how or one of us justGabor Kerekes: Yeah, maybe.Amir Houieh: focus on how to read a real time conversation how we can extract a transcription from it you know so as longGabor Kerekes: Mhm.Noémi Biró: But that would that could already connect to what we're doing and also to this idea of the therapy.Gabor Kerekes: Yeah.Amir Houieh: Yeah. Yeah. But again, the therapy is different. I I I'd like to focus on myelium and just make myelium aNoémi Biró: Mhm.Amir Houieh: bit more concrete in a way and then have one version that gives us an idea even very small very tiny piece but we can say myelium is this you know it can beGabor Kerekes: Yeah.Amir Houieh: very limited in features but to have a end end to end complete pipeline",
+				"date": "2026-03-10"
+			}
+		},
+		{
+			"id": "standup-2026-03-10-003435",
+			"label": "2026-03-10 [00:34:35]",
+			"data": {
+				"chunk": "Noémi Biró: Yeah, I think in order to really show what myelium is,Gabor Kerekes: What aboutNoémi Biró: it's important to not have only one use case Because the association will be like oh my sim is just a bookmarking tool.Gabor Kerekes: Yeah. To show that it works across, for example, this kind of like thing that um is tracking your attention and then interrupts you and shows the breathing exercise. um and it works across then another interface or portal to it is like this bookmarking then I don't know there can be a third one as well um but yeah I can definitely think about yeah there are lots of like really small tasks that can be cut out from this that uh would be really interesting to exploreAmir Houieh: Okay.Gabor Kerekes: to to not not not explore but like build.Amir Houieh: And let's Yeah.Gabor Kerekes: UmNoémi Biró: How how about we agree that maybe in tomorrow's daily you show us some concrete scenarios so we can narrow it a bit.Gabor Kerekes: Yeah.Amir Houieh: Yeah, I think overall we going good. It's just that I wanted to yeah have a bit of a more direction better to I think",
+				"date": "2026-03-10"
+			}
+		},
+		{
+			"id": "standup-2026-03-10-003601",
+			"label": "2026-03-10 [00:36:01]",
+			"data": {
+				"chunk": "Gabor Kerekes: Yeah. Yeah.Amir Houieh: it's time.Gabor Kerekes: Sure.Amir Houieh: Awesome. Uh I have another call out in two minutes.Gabor Kerekes: All right.Amir Houieh: Um but yeah,Gabor Kerekes: Yeah.Amir Houieh: I will talk to you know me this afternoon hopefully or or I just send my sketches. Yeah, I need to also watch out for I think I'm going again a bit.Noémi Biró: Yep.Amir Houieh: I'm on the edge of mental breakdown. I should really watch out.Gabor Kerekes: Then take it easy.Noémi Biró: Take some uhGabor Kerekes: Don't pushAmir Houieh: No,Gabor Kerekes: yourself.Amir Houieh: I think work also helps anyway to not go down the s*** hole. But okay. Yeah, don't worry guys. It's going to be all right. It's just that I might not be at the top 100% energy.Gabor Kerekes: That'sAmir Houieh: Okay. All right. Thanks.Gabor Kerekes: okay.Amir Houieh: Talk to you later. Oh, by the way, I need to send the invoice for uh not invoice. I need to work on the min as well.Gabor Kerekes: Mhm.  \nTranscription ended after 00:37:29\nThis editable transcript was computer generated and might contain errors. People can also change the text after it was created.",
+				"date": "2026-03-10"
+			}
+		}
+	]
+}

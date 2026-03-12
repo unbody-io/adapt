@@ -8,7 +8,7 @@
 import type { LanguageModel, Tool } from 'ai'
 import { tool } from 'ai'
 import { z } from 'zod'
-import { generate, stepCountIs } from '../../../llm'
+import { generate, stepCountIs, streamText, type StreamTextResult } from '../../../llm'
 import type { TokenUsage } from '../../types'
 import type {
 	QueryCallbacks,
@@ -214,5 +214,24 @@ export class ToolBasedMethod implements QueryMethod {
 			gaps: 'Query processing did not complete',
 			usage: totalUsage,
 		}
+	}
+
+	async queryStream(
+		context: QueryContext,
+		options?: QueryOptions,
+	): Promise<StreamTextResult<any, any>> {
+		const system = this.config.buildPrompt(context)
+		const allTools = { ...this.config.tools, ...cognitiveTools }
+		const { model: modelOverride, ...generateOptions } = options ?? {}
+
+		return streamText({
+			model: modelOverride ?? this.model,
+			system,
+			prompt: 'Answer the query based on your understanding.',
+			tools: allTools,
+			toolChoice: 'required',
+			stopWhen: stepCountIs(MAX_STEPS),
+			...generateOptions,
+		})
 	}
 }

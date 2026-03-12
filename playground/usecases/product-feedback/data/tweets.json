@@ -1,0 +1,79 @@
+{
+	"id": "tweets",
+	"source": "social-media",
+	"description": "Tweets and social media mentions",
+	"items": [
+		{
+			"id": "tw-001",
+			"label": "@devjane: love it but dark mode pls",
+			"data": {
+				"type": "tweet",
+				"author": "@devjane",
+				"text": "Just switched to @YourProduct for project management and WOW the analytics are incredible. But please, for the love of my retinas, add dark mode 🙏 #UX",
+				"likes": 142,
+				"retweets": 23,
+				"date": "2025-01-16"
+			}
+		},
+		{
+			"id": "tw-002",
+			"label": "@startup_mike: export is unusable",
+			"data": {
+				"type": "tweet",
+				"author": "@startup_mike",
+				"text": "Anyone else having issues with @YourProduct exports? Tried to pull a report for investors and it just... never finishes. CSV export has been broken for a week now.",
+				"likes": 87,
+				"retweets": 15,
+				"date": "2025-01-17"
+			}
+		},
+		{
+			"id": "tw-003",
+			"label": "@pm_sarah: competitor comparison",
+			"data": {
+				"type": "tweet",
+				"author": "@pm_sarah",
+				"text": "Compared @YourProduct vs @Competitor for our team. YourProduct wins on features but the onboarding is painful. Took us 3 days to get set up vs 30 min with Competitor. Once you're past that though, no contest.",
+				"likes": 256,
+				"retweets": 41,
+				"date": "2025-01-18"
+			}
+		},
+		{
+			"id": "tw-004",
+			"label": "@enterprise_cto: scaling concerns",
+			"data": {
+				"type": "tweet",
+				"author": "@enterprise_cto",
+				"text": "Love @YourProduct for small teams but hitting walls at enterprise scale. Rate limits, no SCIM, manual user management. The product itself is brilliant — the enterprise wrapper needs work.",
+				"likes": 312,
+				"retweets": 67,
+				"date": "2025-01-19"
+			}
+		},
+		{
+			"id": "tw-005",
+			"label": "@design_lead: praise + mobile complaint",
+			"data": {
+				"type": "tweet",
+				"author": "@design_lead",
+				"text": "The new @YourProduct dashboard redesign is 🔥 but the mobile app is a different story. Crashed 3 times during a client meeting today. Android issues are real.",
+				"likes": 95,
+				"retweets": 12,
+				"date": "2025-01-20"
+			}
+		},
+		{
+			"id": "tw-006",
+			"label": "@analyst_raj: API love",
+			"data": {
+				"type": "tweet",
+				"author": "@analyst_raj",
+				"text": "Built a full data pipeline with @YourProduct API in a weekend. Clean docs, predictable responses. Only gripe: rate limits are aggressive for production use. 100 req/min won't cut it.",
+				"likes": 178,
+				"retweets": 29,
+				"date": "2025-01-21"
+			}
+		}
+	]
+}

@@ -100,6 +100,8 @@ export interface IngestConfig {
 export interface EvolutionConfig {
 	/** Whether evolution is enabled */
 	enabled?: boolean
+	/** Model used for evolution evaluation (runtime, recurring). Falls back to default model. */
+	model?: LanguageModel
 	/** Number of signals before auto-evaluation */
 	evaluatorSignalThreshold?: number
 	/** Whether to auto-evaluate when threshold reached */
@@ -190,6 +192,7 @@ export interface ResolvedBrainConfig extends ResolvedCascadableConfig {
 	ingest: { batchSize: number }
 	evolution: {
 		enabled: boolean
+		model: LanguageModel
 		evaluatorSignalThreshold: number
 		autoEvaluate: boolean
 		coverageGap: {
@@ -394,6 +397,7 @@ export interface BrainOwnEventMap {
 			guidance: string
 			targets: string[]
 		}>
+		reasoning: string
 	}
 	'evaluator:evaluation:failed': {
 		error: string

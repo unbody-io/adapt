@@ -15,7 +15,7 @@
  * - createQueryMethod, applyTypeSpecificUpdates
  */
 
-import type { LanguageModel } from 'ai'
+import type { LanguageModel, StreamTextResult } from 'ai'
 import { z } from 'zod'
 import { nanoid } from 'nanoid'
 import { TypedEmitter } from '../../types/events'
@@ -303,8 +303,13 @@ export abstract class BaseLearner<
 					this.state.instructions,
 				)
 
-				// Persist all generated artifacts to store
+				// Persist all generated artifacts + identity fields to store
 				await this.setState({
+					name: this.state.name,
+					description: this.state.description,
+					instructions: this.state.instructions,
+					focus: this.state.focus,
+					origin: this.state.origin,
 					...observeArtifacts,
 					observation_schema: schemas.observationSchema,
 					understanding_schema: schemas.understandingSchema,
@@ -706,6 +711,39 @@ export abstract class BaseLearner<
 			})
 			throw error
 		}
+	}
+
+	// ── Query Stream (returns raw ai-sdk StreamTextResult) ───────────────
+
+	async queryStream(
+		question: string,
+		options?: QueryOptions,
+	): Promise<StreamTextResult<any, any>> {
+		await this.ensureInit()
+		this.state.health.lastAccessed = new Date()
+		this.state.metrics.query.count++
+
+		this.emit('learner:query:started', {
+			learnerId: this.id,
+			query: question,
+		})
+
+		const method = options?.mode === 'direct' && this.directQueryMethod
+			? this.directQueryMethod
+			: this.queryMethod
+
+		if (!method.queryStream) {
+			throw new Error(`Query method "${method.name}" does not support streaming`)
+		}
+
+		return method.queryStream(
+			{
+				learnerId: this.id,
+				instructions: this.state.instructions,
+				question,
+			},
+			options,
+		)
 	}
 
 	// ── Update ──────────────────────────────────────────────────────────────

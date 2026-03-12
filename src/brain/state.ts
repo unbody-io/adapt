@@ -44,6 +44,7 @@ export interface BrainModelSlots {
 	blueprint: LanguageModel
 	init: LanguageModel
 	query: LanguageModel
+	evolution: LanguageModel
 }
 
 // ── State types ─────────────────────────────────────────────────────────────
@@ -131,6 +132,7 @@ export function createInitialBrainState(config: {
 	blueprintModel: LanguageModel
 	initModel: LanguageModel
 	queryModel: LanguageModel
+	evolutionModel: LanguageModel
 	batchSize: number
 	evolution: BrainState['evolution']
 }): BrainState {
@@ -142,6 +144,7 @@ export function createInitialBrainState(config: {
 			blueprint: config.blueprintModel,
 			init: config.initModel,
 			query: config.queryModel,
+			evolution: config.evolutionModel,
 		},
 		ingest: {
 			batchSize: config.batchSize,

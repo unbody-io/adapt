@@ -1,8 +1,8 @@
-import type { CallSettings, LanguageModel, Tool } from 'ai'
+import type { CallSettings, LanguageModel, StreamTextResult, Tool } from 'ai'
 import { tool } from 'ai'
 import { z } from 'zod'
 import type { TokenUsage } from '../learners/types'
-import { generate, hasToolCall, Output, stepCountIs } from '../llm'
+import { generate, hasToolCall, Output, stepCountIs, streamText } from '../llm'
 import { buildSynthesisSystemPrompt } from './prompts/prompt.synthesis.system'
 import type { BrainAskResult } from './types'
 
@@ -287,4 +287,113 @@ ${specialistSections}${globalSection}`
 		})),
 		usage,
 	}
+}
+
+// ── Streaming synthesis (deep mode) ─────────────────────────────────────
+
+/**
+ * Stream an agentic synthesis — same tools as synthesize(), returns raw StreamTextResult.
+ * Consumer sees querySpecialist tool-call/tool-result events in fullStream.
+ */
+export function synthesizeStream(
+	model: LanguageModel,
+	options: SynthesisOptions,
+): StreamTextResult<any, any> {
+	const { synthesisDirective, query, specialists, consultTools, ...generateOptions } = options
+
+	const specialistMenu = specialists
+		.map((s) => `- ${s.id}: ${s.description || s.name}`)
+		.join('\n')
+
+	const specialistIds = new Set(specialists.map((s) => s.id))
+	const specialistMap = new Map(specialists.map((s) => [s.id, s]))
+
+	const querySpecialist = tool({
+		description: `Query a specialist. Each sees one dimension of the knowledge.\n\n${specialistMenu}`,
+		inputSchema: z.object({
+			id: z.string().describe('Specialist ID to query'),
+			question: z.string().describe('What to ask this specialist'),
+		}),
+		execute: async ({ id, question }) => {
+			if (!specialistIds.has(id)) {
+				return { error: `Unknown specialist: ${id}. Available: ${[...specialistIds].join(', ')}` }
+			}
+			const specialist = specialistMap.get(id)!
+			const result = await specialist.query(question, generateOptions)
+			return {
+				relevant: result.relevant,
+				insight: result.insight,
+				gaps: result.gaps || undefined,
+			}
+		},
+	})
+
+	const hasConsultTools = consultTools && Object.keys(consultTools).length > 0
+	const system = buildSynthesisSystemPrompt(hasConsultTools, synthesisDirective)
+
+	const answer = tool({
+		description: 'Deliver your final answer and signal completion.',
+		inputSchema: answerSchema,
+		execute: async (params) => params,
+	})
+
+	const allTools: Record<string, Tool> = {
+		querySpecialist,
+		answer,
+		...(hasConsultTools ? consultTools : {}),
+	}
+
+	return streamText({
+		model,
+		system,
+		prompt: query,
+		tools: allTools,
+		toolChoice: 'required',
+		stopWhen: [hasToolCall('answer'), stepCountIs(12)],
+		...generateOptions,
+	})
+}
+
+// ── Streaming synthesis (direct/shallow mode) ───────────────────────────
+
+/**
+ * Stream a single-shot synthesis — all specialist results already collected.
+ * Plain text output (no structured JSON) so textStream gives the consumer raw answer text.
+ */
+export function synthesizeDirectStream(
+	model: LanguageModel,
+	options: DirectSynthesisOptions,
+): StreamTextResult<any, any> {
+	const { synthesisDirective, query, specialistResults, globalUnderstanding, ...generateOptions } = options
+
+	const relevant = specialistResults.filter((s) => s.relevance > 0.1)
+
+	const specialistSections = relevant
+		.map((s) => `## ${s.id} (relevance: ${s.relevance}, confidence: ${s.confidence})\n${s.insight}${s.gaps ? `\n\nGaps: ${s.gaps}` : ''}`)
+		.join('\n\n')
+
+	const globalSection = globalUnderstanding
+		? `\n\n## Global Context\n${globalUnderstanding}`
+		: ''
+
+	const directiveSection = synthesisDirective
+		? `\n\n${synthesisDirective}`
+		: ''
+
+	const system = `You have specialist knowledge below. Synthesize an answer.
+
+Speak from the evidence. If a specialist says "3 times in January," say that — don't smooth it into "frequently." Where specialists conflict, show both sides. Where they're silent, say so.
+
+Never reference your internal structure, sources, confidence scores, or how you arrived at the answer.${directiveSection}
+
+# Specialist Knowledge
+
+${specialistSections}${globalSection}`
+
+	return streamText({
+		model,
+		system,
+		prompt: query,
+		...generateOptions,
+	})
 }

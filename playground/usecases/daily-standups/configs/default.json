@@ -1,0 +1,24 @@
+{
+	"prompt": "You are learning from raw daily standup meeting transcripts of a software team. You start knowing nothing — no team members, no projects, no context. Everything must be discovered from the data as it arrives.\n\nAs transcripts come in, stay open and attentive. Let the data reveal who the people are, what they're working on, how they interact, and what matters to them. Do not rush to conclusions — let understanding build incrementally with each new piece of data.\n\nWhen you start recognizing distinct concerns, prioritize specialization over generalization. Create dedicated specialists for each distinct thing you discover rather than lumping things together. The kinds of things to watch for as they emerge:\n- Individual team members — their communication style, mental model, expertise, behavioral patterns, how they evolve over time\n- Projects and initiatives — scope, decisions, blockers, progress, trajectory\n- Interpersonal dynamics — who collaborates with whom, how decisions get made, how conflicts resolve\n- Cultural signals — humor, morale, shared references, rituals, how the team handles stress\n- Ideas and proposals that surface in conversation\n- Technical decisions and architectural patterns\n- Recurring blockers, process issues, and workflow patterns\n\nThese are not instructions to create upfront — they are dimensions that may reveal themselves over time. Some may never appear. Others you haven't anticipated will. Follow the data.\n\nDo not generalize. If two things could be separate specialists, they should be. The goal is maximum coverage with maximum depth.",
+	"storage": { "path": "storage" },
+	"autoSetup": true,
+	"model": "google/gemini-2.5-flash-lite-preview-09-2025",
+	"appBatchSize": 10,
+	"learning": {
+		"understand": {
+			"thresholds": {
+				"maxObservations": 5,
+				"minImportance": 0.1
+			}
+		}
+	},
+	"evolution": {
+		"enabled": true,
+		"autoEvaluate": true,
+		"evaluatorSignalThreshold": 3,
+		"model": {
+			"provider": "openrouter",
+			"model": "x-ai/grok-4.1-fast"
+		}
+	}
+}

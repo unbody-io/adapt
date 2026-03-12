@@ -1,0 +1,311 @@
+{
+	"id": "standup-2026-03-05",
+	"source": "standup-2026-03-05",
+	"description": "📝 Notes\nMar 5, 2026\nR&D daily sprint\nInvited Amir Houieh Unbody io Noémi Biró Gabor Kerekes\nAttachments R&D daily sprint \nMeeting records Transcript \nSummary\nAmir Houieh provided updates on the analytics strategy for data segregation, confirmed the website is online with social media preview features in development, and presented an AI Studio prototype demonstrating Notion integration and content composition capabilities for writing blog posts. Noémi Biró shared a detailed prototype of Mycelium's attention recovery system, which includes scenarios for distraction intervention using box breathing and hyperfocus management by prompting necessary breaks. Gabor Kerekes reported an access issue with the AI Studio app, discussed the concept of attention as the central theme and economics of time, and described the stages of Mycelium's digestion of captured information using a new Mac OS capture tool, which aligns with Amir Houieh's implemented \"learners.\"\nDetails\nDiscord Communication Concerns: Amir Houieh initiated the meeting by asking Noémi Biró about their use of Discord for receiving messages, as it is utilized as the team's shared workspace. Noémi Biró explained that they typically need to check Discord manually to see messages because they do not have the sound notifications turned on, and mentioned that they were in \"focus mode\" the previous day and did not check. Amir Houieh requested that Noémi Biró check Discord more regularly because it is where the team connects for work (00:00:00).\nAI Studio App Access Issue: Gabor Kerekes reported an issue trying to access the AI Studio app, noting that it showed a \"page not found\" error despite attempting to log in with their correct account (00:00:00). They mentioned that they switched accounts, but the change did not seem to persist, which Amir Houieh found strange (00:02:15).\nAnalytics Strategy and Data Segregation: Amir Houieh presented an update on the analytics strategy, specifically detailing a new table designed to segregate data responsibilities between a Posthog integration and the internal database (DB). To minimize dependency and address privacy concerns, the suggestion is to primarily use the DB for calculating metrics whenever possible, reserving Posthog mainly for tracking user behaviors and user experience (00:03:32).\nWebsite Updates and Social Media Previews: Amir Houieh confirmed that the website is now online and mentioned working on a social media preview feature that generates a thumbnail when a link is shared. The generated image includes elements like the domain type, which changes based on the shared content (e.g., 'blog' on 'body.io') (00:05:32).\nAI Studio Prototyping - Notion Integration: Amir Houieh described an AI Studio prototype assuming integration with Notion, where Mycelium operates at the OS level and is accessible via a right-click menu (00:07:43). They showed a use case for writing a blog post, where Mycelium surfaces relevant content fragments and suggests potential topics and outlines (00:09:24).\nContent Composition and Outline Generation: The Mycelium prototype demonstrated the capability to compose articles either by dragging and dropping content fragments into a Notion document or by generating and presenting three complete article outlines (00:09:24). Amir Houieh explained that the outlines show source connections, and users can insert the composed content directly into Notion if they are satisfied (00:10:35).\nAttention Interruption Use Case Scenario: Noémi Biró shared a scenario prototype focused on attention recovery, particularly relevant for people with ADHD (00:13:43). The system, Mycelium, pulls the user's daily plan from Notion and displays a morning pop-up with the daily goal, timing, and focus mode status (00:14:54).\nScenario 1: Distraction and Intervention: Noémi Biró elaborated on a distraction scenario where the system detects the user getting sidetracked by unrelated content, such as a sewing tutorial. The intervention proposed is an OS-level overlay that initiates a 32-second box breathing exercise to help the user recover their focus (00:16:14).\nScenario 2: Hyperfocus and Break Management: A second scenario was mapped out for hyperfocus, where the system monitors time tracking data (like t-metric) and detects continuous work exceeding typical focus cycles (e.g., 3 hours and 41 minutes). The system intervenes to prompt a break, noting that cognitive performance tends to decline after three hours (00:17:19).\nRemaining Attention Scenarios: Noémi Biró outlined two additional scenarios: one for when a person is \"super scattered\" (frequent context switching), and another for the end of a long day, where Mycelium uses data (like from an Aura ring) to determine low readiness and urges the person to wrap up their work. The discussion confirmed that Noémi Biró's focus was on activity logs, attention span, and the content context (00:18:40).\nMycelium as a Utility Layer/Ecosystem: The group discussed the potential for Mycelium to function as a core system supporting a utility layer or ecosystem, similar to Raycast, where users could develop their own utilities or plugins (00:19:50). The idea aligns with the metaphor of Mycelium as the underlying system, with use cases (the \"mushrooms\") popping up to the surface (00:21:53).\nThe Central Theme of Attention and Economics of Time: Gabor Kerekes identified attention as the central theme, focusing on developing a system that guides, stewards, and protects attention (00:23:14). They introduced the concept of framing one's life in terms of economics, where scarce resources like attention and time are considered a limited budget for investment (00:25:01).\nPrototype Experimentation and User Interviews: Noémi Biró intends to make their attention scenario function using the t-metric API and test it for a few days (00:17:19) (00:33:15). Amir Houieh suggested involving a person they know with severe ADHD for interviews to gather user feedback. The group agreed that speaking to users and the audience is beneficial (00:31:10).\nDefining Core Scenario Pillars: Amir Houieh identified two concrete foundational pillars based on the prototypes: \"context isolation\" or \"context overwhelming,\" and \"time tax\" or \"attention tax\". They suggested continuing to build more use cases until the following week (00:34:23).\nMac OS Capture Tool and Mycelium Digestion: Gabor Kerekes reported building a capture tool that lives at the Mac OS level and is currently allowing Mycelium to digest captured information (00:35:57). Gabor Kerekes outlined the conceptual stages of this digestion process: accretion (floating information), nucleation (crystallization into threads from density), and absorption (threads exerting gravity) (00:38:15).\nOverlap in Learning Mechanisms: Amir Houieh noted that the concepts of Mycelium thread formation (ingestion, observation, synthesizing) described by Gabor Kerekes align closely with how their implemented \"learners\" function, indicating a shared foundational logic (00:42:15). Gabor Kerekes expressed interest in experimenting with the \"brain\" component and connecting it to their work (00:43:17).\nNew Mac OS Sandbox Setup: Gabor Kerekes presented an update on a new sandboxing solution for the virtual machine, which uses a simplified script and leverages Mac OS's built-in virtualization support for better integration and optimization (00:44:23). The new setup is expected to speed up development by requiring less \"babysitting\" (00:47:17).\nFocus for the Remainder of the Week: Amir Houieh confirmed that they will focus on Mycelium and the brain component for the rest of the day, with plans for a meeting with Noémi Biró for Civil the following day. Gabor Kerekes expressed a desire to try using the new sandbox to set up analytics repositories using agents as an exploration effort (00:48:37).\nSuggested next steps\nAmir Houieh will focus on Mycelium and Brain today to continue building, specifically by making a scenario with brain relevant to mycelium with some UI to evaluate it.\nNoémi Biró will make the attention interrupt use case prototype function with the T-metric application and work on the second scenario related to the cycle.\nGabor Kerekes will figure out access for the song capture tool for capturing raising dots and share the script for the virtualization setup that uses the Mac OS built-in support for virtualization.\nYou should review Gemini's notes to make sure they're accurate. Get tips and learn how Gemini takes notes\nPlease provide feedback about using Gemini to take notes in a short survey.",
+	"items": [
+		{
+			"id": "standup-2026-03-05-000000",
+			"label": "2026-03-05 [00:00:00]",
+			"data": {
+				"chunk": "Amir Houieh: Hey.Noémi Biró: Hello.Amir Houieh: Hello. Uh, how is it going?Noémi Biró: Good. I was really I think he's at the studio.Amir Houieh: Okay. Um, do you get messages on Discord?Noémi Biró: Um, no. If I check Discord, then I see it.Amir Houieh: But what do you mean if uh butNoémi Biró: I don't have the sound on.Amir Houieh: could you then check it more regularly because that's where we connect it's our workNoémi Biró: But but was there something IAmir Houieh: space. Yeah, I sent you a direct message.Noémi Biró: didn'tAmir Houieh: I don't know if youNoémi Biró: well I mean yesterday I was in a focus mode so I wasn't I didn't checkAmir Houieh: Hey. Hello.Gabor Kerekes: Hello.Amir Houieh: What's up?Gabor Kerekes: Good.Amir Houieh: Good. What's news?Gabor Kerekes: I was trying to look at your AI Studio app,Amir Houieh: Oh,Gabor Kerekes: but yeah,Amir Houieh: we can do it also together.Gabor Kerekes: somehow. Yeah, I don't know why it's not like says page not found.",
+				"date": "2026-03-05"
+			}
+		},
+		{
+			"id": "standup-2026-03-05-000215",
+			"label": "2026-03-05 [00:02:15]",
+			"data": {
+				"chunk": "Amir Houieh: Uh are you logging with your are you trying with your bodyGabor Kerekes: Yeah,Amir Houieh: account?Gabor Kerekes: I switched account but somehow it doesn't persist.Amir Houieh: Okay.Gabor Kerekes: It'sAmir Houieh: Strange.Gabor Kerekes: weird.Amir Houieh: Yeah.Noémi Biró: Do you want to share your screen and show it?Amir Houieh: Yeah. Let's but let's do a round of updates then. Shall I start? Okay, cool. Let me see what did I do so far yesterday. Uh, let me share my screen. So, one of the things I have Where's my screen? Okay, do you see it? Uh, so I take took care of this task that I had. I went through uh basicallyNoémi Biró: Wait. I see your skin screen really small. Do you have the same labboard orAmir Houieh: right there.Noémi Biró: No, but is it only my problem or do you see it? Well,Gabor Kerekes: There's like a big rectangle and like tiny screenNoémi Biró: GabAmir Houieh: Huh.Gabor Kerekes: uh in the corner.",
+				"date": "2026-03-05"
+			}
+		},
+		{
+			"id": "standup-2026-03-05-000332",
+			"label": "2026-03-05 [00:03:32]",
+			"data": {
+				"chunk": "Amir Houieh: Huh. Okay.Amir Houieh: Okay. Hopefully this is going to work now. Yay. Okay.Noémi Biró: Nice.Amir Houieh: Uh so one of the things uh was this task to go through this uh table that we previously had uh where is it the original one? This one. and see like what goes where and how we do it because we have defined two basically areas for the analytics. One is the dashboard, the other one is basically using a integration system like a post talk and there are also a couple of these items that they are just very subjective and we can't really unless we define them much more in details. So based on those I created this table uh that has like a post hog t uh column and then it has a db. Uh the thing is that in some of these cases there are overlaps between cap capabilities. For example, post can basically measure that analytics but also our DB can also calculate those and in order to reduce the dependency but also uh for privacy concerns uh yeah that you can see for example this one days active days it can be measured with both of them but then I suggest to basically go with the DB as much as possible and keep the basically uh what is post mainly for the uh user behaviors and user experience.",
+				"date": "2026-03-05"
+			}
+		},
+		{
+			"id": "standup-2026-03-05-000532",
+			"label": "2026-03-05 [00:05:32]",
+			"data": {
+				"chunk": "Amir Houieh: But anyway, so this is this task. Uh I guess Gabbor you can have a look later next week if you want to start taking aGabor Kerekes: AllAmir Houieh: look and yeah know if there is anything you want to discuss it with Melissa before execution that's up to you. I don't know. Uh maybe it's good to also explain this to Melissa. I don't know. Uh that was one thing. Uh the other thing is indeed website so it's online.Gabor Kerekes: right.Amir Houieh: Um uh one thing that I also before in like last week I worked on was in the this social media preview. So when when you search when you share a link for example uh that there is this like thumbnail shown um this isNoémi Biró: That looks prettyAmir Houieh: generated. Yeah. I don't know if you guys have a different I just made a quick sketch.Noémi Biró: thick.Amir Houieh: So if you want to change it and I didn't have the font that we are using so that's why it's a different font than you see but I don't think it's important at the moment.",
+				"date": "2026-03-05"
+			}
+		},
+		{
+			"id": "standup-2026-03-05-000636",
+			"label": "2026-03-05 [00:06:36]",
+			"data": {
+				"chunk": "Amir Houieh: Uh this is how basically it's being visualized but this is not really accurate. One second let me find another one. Social URL preview. Let's see what there are. Oh yeah, this is good. No, this is also cutting it off. That's weird. Yeah.Noémi Biró: But you shared it in the Discord andAmir Houieh: Yeah. Yeah. So you see on this code you see this lab.Noémi Biró: thenAmir Houieh: So basically the domain of the type of page goes here and it's generated in a way. So for example, if you go and try I don't know a blog post uh we are going to see a different basically image in general and uh then this going to become blog and on body.io So this is also generated aski and it change uh again this is just a placeholder and if you have images this will be replaced by that image of the page. Uh huh.Gabor Kerekes: It looksAmir Houieh: Yeah I like it. It looks cool.",
+				"date": "2026-03-05"
+			}
+		},
+		{
+			"id": "standup-2026-03-05-000743",
+			"label": "2026-03-05 [00:07:43]",
+			"data": {
+				"chunk": "Gabor Kerekes: great.Amir Houieh: Uh what else?Noémi Biró: Mhm.Amir Houieh: Uh so yeah this one and then AI studio. I made one sketch here. Uh, I first made one. Was it? What is this? It doesn't show. Oh, preparing system resource. What a bad UI. You shouldn't show this.Gabor Kerekes: Yeah, I don't know. It doesn't really communicate what it's doing. What kind of resources? Like I guess it's spawning a virtualAmir Houieh: Hey,Gabor Kerekes: machine.Amir Houieh: all I need is just a big loader loading app.Gabor Kerekes: Yeah.Amir Houieh: Okay, let let's not waste time on this and let's go directly to the final. No, not this one. Go back. No, I think it's this one. Yeah. So, basically this assumes that I am on in notion. Uh so, and then my selium is basically working on a meta level uh OS level. And then if I right click on it, I have natively access to my selium.",
+				"date": "2026-03-05"
+			}
+		},
+		{
+			"id": "standup-2026-03-05-000924",
+			"label": "2026-03-05 [00:09:24]",
+			"data": {
+				"chunk": "Amir Houieh: And this is a blank page. So when I say this opens up the way how finder for example opens up for you and then you can say hey uh I want to write a blog post about I don't know about generative UI for example and then then my selium gets to work and then it tries to basically find you know like all the relevant topics that I have been True. And these are all fragments of uh fragments of content. And based on that, it also kind of gives me okay possible scenarios and possible topics you can write about.Gabor Kerekes: And it could it could even uh know how you write.Amir Houieh: Yeah, exactly.Gabor Kerekes: Uh,Amir Houieh: No th those are those has to be default like those definitely.Gabor Kerekes: it could happen.Amir Houieh: Yeah, I agree. And then here I can either compose by for example drag and drop these things into ourGabor Kerekes: Yeah.Amir Houieh: notion uh like this and then say hey compile a article out of this or it already compiled three scenarios for me like three outlines.",
+				"date": "2026-03-05"
+			}
+		},
+		{
+			"id": "standup-2026-03-05-001035",
+			"label": "2026-03-05 [00:10:35]",
+			"data": {
+				"chunk": "Amir Houieh: These are the outlines. So if I go in each I can also see for example how for example this is generated from three sources here and there and there the introduction the evolution and stuff like that and then if I'm happy or not then you start writing and then it inserts it for you into the notion basically. So this is how I saw it uh like in one of the use cases that it's living there everywhere and I don't know if I for example go to let's say here on like a GitHub and I want to make a readmi file here or a repo and I go here and I say myelium it fills it in or you know it always also has this recent context into it but yeah that was one of the use cases I thought it might be helpful. Oh, yeah. Of course, it goes away. There was another version as well, but it doesn't work. Uh, which one was it? Oh, yeah.Noémi Biró: Cool.Amir Houieh: So, this is again the same thing.",
+				"date": "2026-03-05"
+			}
+		},
+		{
+			"id": "standup-2026-03-05-001143",
+			"label": "2026-03-05 [00:11:43]",
+			"data": {
+				"chunk": "Amir Houieh: And you say, uh, blah, blah, blah, write me an article. And it does it. And then, yeah, the same scenario. It's just that the difference is that this this shows those kind of the outline in a better visual way. Uh that's uh the outline is okay. This is like these two are related and here and there. Yeah. Again the idea I think is clear here.Noémi Biró: Did it show you any interesting connections while you were like prototyping? Because I guess you use the AI within Google Studio.Amir Houieh: Yeah, it's it's just fake. All fake. Uh what I did,Noémi Biró: Mhm.Amir Houieh: I basically um where are we? I opened the project that Yabbor made in cloud and asked cloud that hey I have this idea which is I and I want to build a completely different UI and UX on top of it. Help me to come up with the scenario and the prompt for the UI generator. And it did.Noémi Biró: Mhm.",
+				"date": "2026-03-05"
+			}
+		},
+		{
+			"id": "standup-2026-03-05-001244",
+			"label": "2026-03-05 [00:12:44]",
+			"data": {
+				"chunk": "Noémi Biró: I also have a scenario that I worked on that I canAmir Houieh: Okay. Nice. Yeah. So that was the update from my end.Noémi Biró: share.Gabor Kerekes: Yeah.Amir Houieh: I think yesterday I also worked a bit on the brain as well.Gabor Kerekes: Awesome.Amir Houieh: ButGabor Kerekes: I think we're actually pretty close to being able to build this.Amir Houieh: yeah. Yeah. You thinkGabor Kerekes: Yeah.Amir Houieh: so?Gabor Kerekes: Like I worked on relevant things and uh I think this could be oneshotted from where I am now.Amir Houieh: Okay.Gabor Kerekes: Yeah, I Yeah, maybe that's something we could prototype together as well if you want.Amir Houieh: Sure. Yeah.Gabor Kerekes: Would be reallyAmir Houieh: Yeah. Yeah.Gabor Kerekes: cool.Amir Houieh: Cool. I have more ideas. I I think I want to prototype them too because I think these are a lotGabor Kerekes: Oh, okay. That's also fine.Amir Houieh: of different different things on surface but on the at the essence they are all the same like it's just we need",
+				"date": "2026-03-05"
+			}
+		},
+		{
+			"id": "standup-2026-03-05-001343",
+			"label": "2026-03-05 [00:13:43]",
+			"data": {
+				"chunk": "Gabor Kerekes: Uhhuh. But but that's also like maybe it's good to get thoseAmir Houieh: toGabor Kerekes: ideas out of your head um so that they become visible and I could take your prototype and make it like hook it up to actually be able to use it because thatAmir Houieh: Yeah. Yeah.Gabor Kerekes: gives like another perspective when it actually starts you know like when you actuallyAmir Houieh: Yeah.Gabor Kerekes: start using it uh you know it spawns new ideas and yeah like I'm I'm reallyAmir Houieh: Yeah. Yeah.Gabor Kerekes: close to I mean I have everything almost to or like a lot of the theAmir Houieh: Nice.Gabor Kerekes: important things to uh to do this. So yeah,Amir Houieh: Cool. Yeah, let's do it.Gabor Kerekes: it looks awesome.Amir Houieh: Nice.Gabor Kerekes: But let's see knowing his stuff. It's really good.Noémi Biró: Well, let's see. Okay. So, you see my screen.Amir Houieh: Mhm.Noémi Biró: So, I was working with the scenario of um taking your attention back especially like or maybe at least more connected to how like with ADHD sometimes that becomes difficult.",
+				"date": "2026-03-05"
+			}
+		},
+		{
+			"id": "standup-2026-03-05-001454",
+			"label": "2026-03-05 [00:14:54]",
+			"data": {
+				"chunk": "Noémi Biró: So the scenario is it's in the morning and you kind of in notion you gathered all your to-dos in Morgan you planned your day. So um and that context is already fed to myelium. So after that when you enter I don't know like let's say you start reading something there this popup shows up from mycelium just wishing you a good morning and based of all the context it distills what it thinks the goal for you today is so today's goal design and prototype the attention interrupt use case for my celium and it says okay this is focus mode it knows based on my calendar that I've had meetings and I was free and I probably have time from 3 from 1 till 5 to work on this and I can confirm or I can change this and then I just um this is then me doing my workday and I sketched out four scenarios. So let's say in scenario one, even though I set this very clear goal, I go to YouTube and I click from one video to the next and all of the sudden I end up on a video that has completely nothing to do with my goal.",
+				"date": "2026-03-05"
+			}
+		},
+		{
+			"id": "standup-2026-03-05-001614",
+			"label": "2026-03-05 [00:16:14]",
+			"data": {
+				"chunk": "Noémi Biró: So system initiates and it pops up and says like, \"Hey, noticed that you're caught up in a radical. You've been in a sewing tutorial for four weeks and before that you were in for 58 minutes in a session. You did only one context switch and this is this popped up because it detected sewing content and it says like hey three out of three times um it helped when you did this breeding exercise. So this is the actual intervention that you see now on the screen which is like this overlay on top of everything on OS level and it's a box breathing exercise which has been proven to actually like um decrease cortisol levels and actually physically change like your physiology. So it gives you a bit more clarity if you do like these four cycles which is just 32 seconds. So the idea is that you follow this with your breath. You hold, you breathe in, and let's say I don't want to do all of these, but it just clarifies like, hey, you got sidetracked. Did this help you recover your focus?",
+				"date": "2026-03-05"
+			}
+		},
+		{
+			"id": "standup-2026-03-05-001719",
+			"label": "2026-03-05 [00:17:19]",
+			"data": {
+				"chunk": "Noémi Biró: I say, not really, but that's fine. So this is one use case.Amir Houieh: Nothing.Noémi Biró: And then it zooms you back in. And then other scenarios basically work the same mechanic but with different um different uh interventions needed for different scenarios. So for example like I've been hyperfocusing for like 3 hours and 41 minutes straight. It has access to my t-metric which is like the app that I use to track my time. And I actually checked this yesterday and I have the API key so I can probably make this actually work. And so it knows when was my last break. It knows when I was active. And it also notes that my cognitive performance tends to follow like 90 minutes cycles like everybody else. And it knows from like my own personal history that usually after three hours my focus is not as good. So it breaks it. And then it's the same kind of interface.Amir Houieh: Night.Noémi Biró: And yeah, um the other two scenarios that I mapped out with text, but basically the same design is uh when you're super scattered, so you're context switching a lot.",
+				"date": "2026-03-05"
+			}
+		},
+		{
+			"id": "standup-2026-03-05-001840",
+			"label": "2026-03-05 [00:18:40]",
+			"data": {
+				"chunk": "Noémi Biró: And um for example, you can also argue your case like hey I am context switching but I say like yeah it's connected to my research and then it will think about it if it's actually and then it says like ah I think that's a stretch based on like your own goals that you set for yourself. And the last scenario is like after a long day, let's say it's also connected to my aura and it has my uh it knows that my readiness today was quite low and then it would urge me to finish the day faster because it knows that I've been like context switching in the last hour a lot. I wasn't being that productive. So, it just like uh urges me to kind of wrap up for the day. So, that's the last scenario.Amir Houieh: Nice. It's it's more so your focus was on activity your activityNoémi Biró: Yep.Amir Houieh: logs in a way and the attention span.Noémi Biró: Yeah. So, the focus wasAmir Houieh: So the knowledge the knowledge here is indeed your activity logs right not",
+				"date": "2026-03-05"
+			}
+		},
+		{
+			"id": "standup-2026-03-05-001950",
+			"label": "2026-03-05 [00:19:50]",
+			"data": {
+				"chunk": "Noémi Biró: on.Amir Houieh: the content that you are working with or the type of work you're doing.Noémi Biró: It's both because like the first example is the type of contact that I'mGabor Kerekes: Oops.Noémi Biró: working with. So if I'm if I'm focused on building this prototype and all of the sudden I'm on a sewing machine video, then then I'm not anymore in the kind of context that I wanted to beAmir Houieh: Yeah. No, indeed. Indeed. But the purpose of your prototype,Noémi Biró: in.Amir Houieh: you focus on that aspect of uh myelium that because if Yeah.Noémi Biró: Yeah.Amir Houieh: By the way, how I see it now, my selium could also be sort of like a living memory or whatever that that can have like a not application but utility layer on top of it that people can develop their own utilities on top of it.Gabor Kerekes: Yeah,Amir Houieh: For example,Gabor Kerekes: it'sAmir Houieh: you you want to track your activity logs and you know how much distracted you get etc etc. So you should be able to, you know, spin up a new type",
+				"date": "2026-03-05"
+			}
+		},
+		{
+			"id": "standup-2026-03-05-002056",
+			"label": "2026-03-05 [00:20:56]",
+			"data": {
+				"chunk": "Gabor Kerekes: Yeah,Amir Houieh: ofGabor Kerekes: like this is where I see for example the brain or nexus or whatAmir Houieh: the learner.Gabor Kerekes: that through natural language you can spawn agents who start tracking I don't know how you are using the computer or whatever and start observing patterns in that andAmir Houieh: Yeah.Gabor Kerekes: keep surfacingAmir Houieh: Yeah. Yeah.Noémi Biró: Yeah.Amir Houieh: Yeah.Noémi Biró: Yeah.Gabor Kerekes: Okay.Noémi Biró: Ideally those scenarios the four ones would be like personalized per person.Amir Houieh: Yeah,Noémi Biró: So youAmir Houieh: but the only challenge the only challenge then is the UI because we know the backNoémi Biró: saidGabor Kerekes: Yeah.Amir Houieh: end is easy. We can spin up agents, different learners, et a lot of value proposition in your prototype comes from how you design it, the UI, right?Gabor Kerekes: Yeah.Amir Houieh: And that we need to think about for example it could be an idea for marketplace or if it's open source people can develop plugins in a way I don't know we we release a few foundations and like a default utilities I",
+				"date": "2026-03-05"
+			}
+		},
+		{
+			"id": "standup-2026-03-05-002153",
+			"label": "2026-03-05 [00:21:53]",
+			"data": {
+				"chunk": "Gabor Kerekes: Yeah,Amir Houieh: don'tGabor Kerekes: like I imagine it as something like because right now we are all building kind of our own apps on the same idea, but It's like it's like one system that could it's like raycast. Raycast is an application coming with a lot of built-in functionality but you can extend it and there's a marketplace of plugins. Some of which some of it you need to buy some of it you like it's for free. It integrates with notion comes with like uh a UI kit that you know like you get basic like um UI elements and you can build but ours would be a much more rich kind ofAmir Houieh: Yeah. Yeah.Noémi Biró: Yeah. Yeah.Gabor Kerekes: ecosystem.Noémi Biró: Going back to this metaphor of the mycelium, I feel like all of these different use cases are just the mushrooms that pop up from it from the to the surface, but underneath it, it's the same system. It's the same mycelium having all that context.Gabor Kerekes: Yeah, it's like there's this engine that is building an understanding of you and how you work, how basically like how your attention works.",
+				"date": "2026-03-05"
+			}
+		},
+		{
+			"id": "standup-2026-03-05-002314",
+			"label": "2026-03-05 [00:23:14]",
+			"data": {
+				"chunk": "Gabor Kerekes: I really feel like attention is kind of like the central theme. How how can we develop a system that guides your attention, stewards your attention and protects it and guides your attention to bring you into more alignment with yourself and with your values instead of like less alignment instead of like hijacking your attention. It should like keep nudging it back to what you what your higher self finds important. And um like in now I thought about other uh I mean now I'm going into a bit more into the feedback or just more ideas that I had for like these interruption models what I would find convincing and this is something that I built into my early experiments with like when I started introducing kind of like um friction into cloud code so that when it when cloud code notices that it's very late like midnight or past midnight it starts telling me um if you keep working this is what will happen like this is these are the consequences like it makes you know just like things that this sort of like um dopamine hungry more primitive ive part of my brain isn't doesn't want to see uh like the longer term consequences of what is happening right now.",
+				"date": "2026-03-05"
+			}
+		},
+		{
+			"id": "standup-2026-03-05-002501",
+			"label": "2026-03-05 [00:25:01]",
+			"data": {
+				"chunk": "Gabor Kerekes: um that I don't know I will sleep uh I will sleep poorly and then the next day it's going to um create recreate the same pattern and then it's just like the whole system becomes destabilized and like surfacing this information at the right time would really convince me but that's just me or what we talked about aboutAmir Houieh: Yeah.Gabor Kerekes: this sort of like uh I mean um or at le conversation with no Amy but we've been talking about um like framing one's life in terms of economics that it's like we have all these um scarce resources like attention and time and I don't know mood and motivation and we only have like a limited budget to spend and what are we going to spend it on and like how can we think about this in like economic terms, where do you invest those things? uh how can you make smart investments that like um you invest into the right thing at the right time so that it kind of like gives you the the best return and um it's like a really subtle topic and uh I think this could also be very interesting to even visualize like if you keep investing your energy into this here's a forecast of where you will be where your mood It's going to be I mean",
+				"date": "2026-03-05"
+			}
+		},
+		{
+			"id": "standup-2026-03-05-002634",
+			"label": "2026-03-05 [00:26:34]",
+			"data": {
+				"chunk": "Noémi Biró: I can imagine that as an extension of this like if for me that's actually helpful.Gabor Kerekes: maybeNoémi Biró: I also made a reference that when I was doing this uh ADHD um trajectory I had the psychologist who actually drew drew it out on like this whiteboard and that's the only thing I remember from like the whole 10 weeks. the fact that she drew like a curve and she was like, \"Look, if this is your curve here, you use too much energy and therefore afterwards there's going to be like less energy for the things you want to do. So, you have to like take breaks and even out and yeah, it's simple, but it it just if it's not happening, the recognition of that if it's not happening in the moment, then it's just an insight later that is sitting nowhere. But yeah, I I'm curious how you see for example this from aAmir Houieh: Yeah.Noémi Biró: nonADHD brain. Like can you think of scenarios when something like this would be helpful for you or you don't have this kind of struggles?",
+				"date": "2026-03-05"
+			}
+		},
+		{
+			"id": "standup-2026-03-05-002745",
+			"label": "2026-03-05 [00:27:45]",
+			"data": {
+				"chunk": "Amir Houieh: No, I don't. My brain is like the way how it works is like a has this clock that every minute it process all the tasksGabor Kerekes: ThatAmir Houieh: that I have to do and make sure that I am doing it or not and if I don't I don'tGabor Kerekes: isAmir Houieh: lose the focus. So I just put it back into the queue. So every minute is just get yeah that I noticed that as when when we yeah as comparison myself to Oda who has ADHD that for example she goes and put on the tea and then she forgot to take then she goes to her phone and then and then I even watchGabor Kerekes: whereAmir Houieh: I I but I know that she put on the tea or for example I know for example I get I tell hey set the timer for 5 minutes and then at the minute 4 50 seconds. I tell her, \"Is it finished?\" I don't know. My my brain just knows it.Noémi Biró: H.Amir Houieh: So, yeah, I don't have that.",
+				"date": "2026-03-05"
+			}
+		},
+		{
+			"id": "standup-2026-03-05-002848",
+			"label": "2026-03-05 [00:28:48]",
+			"data": {
+				"chunk": "Amir Houieh: But I have other problemsGabor Kerekes: Yeah,Amir Houieh: withGabor Kerekes: for me it's like maybe the biggest issue is like uh starting and stopping these two things. I have really difficulty with starting things uh especially if I'm not interested even though as soon as I start it starts rolling and I can just like get sucked into it but then that is the then the problem that I get so sucked in then it becomes insanely difficult to even stop and get out of it. So it's like for me this kind of like context switching and um task switching and like this kind of like state transitioning from one state to the next uh those boundaries once I'm in a state it's like I'm in thereAmir Houieh: It's different 100%.Gabor Kerekes: and yeah but to switch is like suchAmir Houieh: Yeah,Gabor Kerekes: a f******Amir Houieh: I think it's kind of a matter of time,Gabor Kerekes: Yeah.Amir Houieh: conception of time in a way or how how you perceive time asGabor Kerekes: SoAmir Houieh: well as context in a way.",
+				"date": "2026-03-05"
+			}
+		},
+		{
+			"id": "standup-2026-03-05-003005",
+			"label": "2026-03-05 [00:30:05]",
+			"data": {
+				"chunk": "Amir Houieh: I don't know. I'm pretty sure there are a lot of psychological analysts onGabor Kerekes: yeah, time perception is another part of it. Um or it's definely related like being blind toAmir Houieh: this.Gabor Kerekes: time.Noémi Biró: I mean, for example, what helped me yesterday was that we each of us said like what we're going to be focusing on and kind of like actually like saying it out loud and then I really committed to then doing that afterwards and that really worked for meAmir Houieh: Wait to me.Noémi Biró: having this clear goal. That's also why I started this prototype with the idea of like hey my selium helps you like put that goal into words that you actually have to agree on.Amir Houieh: Okay. So you for you clarity helps andNoémi Biró: Yeah. I mean like imagine like I also have like 100 to-dos in my head and then I'm like oh I should do this I should do that and then in between that this um the energy is gone it's wasted on thisAmir Houieh: Do you also have do you also have the all or nothing uh logic",
+				"date": "2026-03-05"
+			}
+		},
+		{
+			"id": "standup-2026-03-05-003110",
+			"label": "2026-03-05 [00:31:10]",
+			"data": {
+				"chunk": "Noémi Biró: side.Amir Houieh: like because that usually happens in correlation that when you have an enormous amount of task you get overwhelmed and you do not none of themNoémi Biró: Mhm.Amir Houieh: that yeah I think at this point you can definitely also bring in psychologist you can talk to Hoda and her friends or network. But actually I was at this we were at the party the other evening with with our friends and one of them this guy is also very interested in AI and he's also doing for himself like pro he's not technical but he's enthusiastic and he has severe ADHD like he and when I started talking about all of these and he was like dude I have been trying to make these sort of things and that and this and he was really willing to also like to talk to us or if you have question or interview him, he's open to it.Gabor Kerekes: Yeah, that would be awesome,Amir Houieh: Yeah.Gabor Kerekes: right? Uh I think Yeah.Amir Houieh: Okay.Gabor Kerekes: Um, I think talking to users and talking to our audience, there's there isn't an like too early of a time to do that.",
+				"date": "2026-03-05"
+			}
+		},
+		{
+			"id": "standup-2026-03-05-003227",
+			"label": "2026-03-05 [00:32:27]",
+			"data": {
+				"chunk": "Amir Houieh: Okay.Gabor Kerekes: And IAmir Houieh: I mean,Noémi Biró: I mean with this it's already a lot that you can talkAmir Houieh: we have Yeah,Gabor Kerekes: Yeah.Amir Houieh: we have a lot of them around us.Noémi Biró: about.Amir Houieh: I mean all Hoda's siblings they're all ADHD at best like at max. Uh we know a lot.Gabor Kerekes: Yeah.Amir Houieh: So and I think but then I think we should also look at it not only fromNoémi Biró: My intention. out.Amir Houieh: ADHD point of view but the whole uh spectrum of neurode divergence for example like the autism like people with autism might have other type of problems youNoémi Biró: Oh.Amir Houieh: know. So we need to also look into like what are because there are also sometimes overlaps inGabor Kerekes: Yeah,Amir Houieh: needNoémi Biró: Mhm.Gabor Kerekes: autism and ADHD are on some kind of a spectrum, but they are also different.Amir Houieh: very different. Yeah.Gabor Kerekes: And yeah, I don't know. For me like we we can probably expand and think about",
+				"date": "2026-03-05"
+			}
+		},
+		{
+			"id": "standup-2026-03-05-003315",
+			"label": "2026-03-05 [00:33:15]",
+			"data": {
+				"chunk": "Amir Houieh: Yeah.Gabor Kerekes: it a little bit but I think for me just like my daily experience is that's what I can build from and that's why it becomes authentic because really likeAmir Houieh: Exactly.Gabor Kerekes: if I can solve this f****** problem for myself like it might help other people too and that would be amazing and that's exactly how like This theAmir Houieh: Exactly.Gabor Kerekes: daylight computer came about like exactly the same way. This guy was like super depressed and he's like, I got to solve this. Like I can't live like this.Amir Houieh: Yeah. No,Gabor Kerekes: MadeAmir Houieh: indeed. Okay. No, I agree.Gabor Kerekes: it.Amir Houieh: Cool.Noémi Biró: So my intention is to actually make this function with my Tmettric and just see what happens. Use it a fewAmir Houieh: Okay.Gabor Kerekes: AllAmir Houieh: I think so far we have two part of like foundation or pillars.Noémi Biró: days.Amir Houieh: One is indeed the context isolation and context overwhelming or context tax the way how I call it.",
+				"date": "2026-03-05"
+			}
+		},
+		{
+			"id": "standup-2026-03-05-003423",
+			"label": "2026-03-05 [00:34:23]",
+			"data": {
+				"chunk": "Amir Houieh: That's one thing and the other one is basically time tax in a way or attentionNoémi Biró: Come.Amir Houieh: t tax tax I I would say these are the two at least concrete scenarios that comes out of allGabor Kerekes: right.Amir Houieh: of these prototypes so far is that the right wrap up for it I don't know and I think it's good to keep building a bit more use cases uh and then yeah until maybe next week and let's see what happens.Noémi Biró: Yeah.Amir Houieh: Gabbor,Gabor Kerekes: Yeah, just need toAmir Houieh: youGabor Kerekes: start.Noémi Biró: Yeah. So, the second scenario I wanted to uh No,Amir Houieh: Oh, sorry.Noémi Biró: no, I didn't get to it. I just wanted to add to the fact that the second one I want to still do with the cycle. I just got more excited about this firstAmir Houieh: Nice. Okay. Well,Noémi Biró: idea.Amir Houieh: todayGabor Kerekes: Okay. So, I worked on two things. regarding the mycelium. Um, I built this capture so I can",
+				"date": "2026-03-05"
+			}
+		},
+		{
+			"id": "standup-2026-03-05-003557",
+			"label": "2026-03-05 [00:35:57]",
+			"data": {
+				"chunk": "Amir Houieh: Is it my OOS app?Gabor Kerekes: see. Huh?Amir Houieh: It's an iOS app. It's a Mac OS app.Gabor Kerekes: Yeah.Amir Houieh: Wow,Gabor Kerekes: Yeah.Amir Houieh: that's crazy.Gabor Kerekes: Uh, so this lives at the Mac OS level. Um, it like it's also supposed to look at your current active tabs uh and also shortcuts, but I I couldn't figure out like the accessibility thing. Uh, but yeah, I also I don't know. Uh, but anyway, so I don't know. Today I want to figure out excess for the song capture tool for capturing raising dots. So yeah, now the mcelium is digesting it. Um, and yeah, I I laid out also like conceptually what is thisNoémi Biró: Nice.Gabor Kerekes: digestion? So there are multiple stages of it like how do these so when you look at the structure of myelium uh they yeah yesterday uh there I had like claude um g put it into like really nice words or he drew an analogy between attention and mycelium like how does mycelium form it start it grows towards nutrient gradients like where nutrient is rich in the soil it starts growing there and uh making these structures and wherever there's enough nutrients uh wherever the gradient is thick enough uh the mcelium itself also thickens around that area and Um it's the same with attention.",
+				"date": "2026-03-05"
+			}
+		},
+		{
+			"id": "standup-2026-03-05-003815",
+			"label": "2026-03-05 [00:38:15]",
+			"data": {
+				"chunk": "Gabor Kerekes: So there is uh let meAmir Houieh: s***. Wow. Oh, I thought it's running agents.Gabor Kerekes: Oh no creation.Amir Houieh: Uh guys,Gabor Kerekes: UhAmir Houieh: I I just looked mycelium.app is for sale, but they are going to sell it for a lot of money, I guess.Gabor Kerekes: yeah, but I Oh, I found a really good website for this actually.Amir Houieh: f***.Gabor Kerekes: I will I will show you guys. Oh, yeah. I think it must be in. So this is how threads form. There is uh accretion which is just like information just drops somewhere but it's not connected to anything. It's like just floating. It's I don't know it's unrelated. And then uh and this is like analogous to how um the mcelium structure forms as well. there's nucleation where uh these threads crystallize from density. So in the case of bookmarks for example but this is any kind of information any kind of thought um like as soon as I don't know let's say you are saving uh like five bookmarks about local first software then it starts forming a thread now you're thinking about local first uh or that has become a thread in your life or like in your professional life and then absorption which is that these threads start exerting gravity.",
+				"date": "2026-03-05"
+			}
+		},
+		{
+			"id": "standup-2026-03-05-004016",
+			"label": "2026-03-05 [00:40:16]",
+			"data": {
+				"chunk": "Gabor Kerekes: So whenever there's something new coming in, it's more likely that they will land in one of these threads uh because they have already some kind of like an attraction like yeah they have they they exert some kind of gravity and then there's like a a life cycle forming active dormant merging and dying and drifting. Um yeah I haven't thought about but yeah it's just more kind of like thinking about this as a living kind of creature how it grows what is its life cycle and um yeah that's kind of like what I implemented it's not very visible uh but that that's kind of like the mechanism so when I added this thought now it went through that kind of like myium like an analogous kind of like processing uh to uh to create these kind of threads and all that.Amir Houieh: Yeah.Gabor Kerekes: So uh this is something that can it needs you know like time and that's why I'm I I want to build this because these kind of questions you can only only think about when you start using it and like how how how is it alive like how does it become alive you need to be interacting so I what I set for myself as a goal is to make something that's like primitive like simple but usable that I can you know now if I figure out how to do this shortcut now I can use this as my bookmarking tool instead of my mind and then I I'm on another level where I can think about you know like over a longer per longer span of time uh",
+				"date": "2026-03-05"
+			}
+		},
+		{
+			"id": "standup-2026-03-05-004215",
+			"label": "2026-03-05 [00:42:15]",
+			"data": {
+				"chunk": "Gabor Kerekes: yeah so that'sAmir Houieh: Nice.Gabor Kerekes: itNoémi Biró: So this saving the note actually works now with the back end.Gabor Kerekes: Yeah.Noémi Biró: That's cool for me.Gabor Kerekes: Yeah. And it's and it's uh it'sNoémi Biró: It also helps to think about these kind of ecological metaphors.Gabor Kerekes: it'sNoémi Biró: Like also for this app, I came up with the name radical which is kind of like the first time a little thread emerges from a seed. So the moment it starts to like grow into the soil and also like thinking about like how a weed would in the beginning just be like this tiny seed and if you like uproot it at that point your attention can still be salvaged versus if you wait and you get the right for a super long time.Amir Houieh: Nice. Cool. That is actually when you were explaining the steps of a thread. Uh that is exactly how I also how how I implemented the learners how how they how they learn. I think it's just you had a different naming but I didn't know about this but yeah",
+				"date": "2026-03-05"
+			}
+		},
+		{
+			"id": "standup-2026-03-05-004317",
+			"label": "2026-03-05 [00:43:17]",
+			"data": {
+				"chunk": "Gabor Kerekes: Nice.Amir Houieh: learners basically it starts by ingestion and accumulating of facts coming in and then when there is a threshold match then they start observing them I call themGabor Kerekes: Yeah.Amir Houieh: observation that is where basically the facts the relevant facts gets extractedGabor Kerekes: Yeah.Amir Houieh: and then the next step is is synthesizing that I call it or understandingGabor Kerekes: Yeah.Amir Houieh: gets formed So based on those observation in the stars making sense put them together around that particularGabor Kerekes: Yeah.Amir Houieh: topic.Gabor Kerekes: I wanted to play around with the brain actually because asAmir Houieh: I think you should it.Gabor Kerekes: Yeah.Amir Houieh: You should it.Gabor Kerekes: And like try to connect it because now it starts overlapping and I think itAmir Houieh: Yeah.Gabor Kerekes: Yeah.Amir Houieh: And today I wanted to focus a bit on like make something with brain or make one scenario of that is relevant to my selium on top of brain to just evaluate it but with some UI. I think having a UI on top of it helps a lot.",
+				"date": "2026-03-05"
+			}
+		},
+		{
+			"id": "standup-2026-03-05-004423",
+			"label": "2026-03-05 [00:44:23]",
+			"data": {
+				"chunk": "Amir Houieh: Uh I will do that. So yeah, I think tomorrow I will show you thatGabor Kerekes: So another thing which I did and this is why sandboxing is so f******Amir Houieh: then.Gabor Kerekes: cool. So this was done in parallel but with like I had a lot of issues with the I don't know have you been using the sandbox thing setup.Amir Houieh: I used it a couple of and yesterday I wanted to use it but then I got this error. I toldGabor Kerekes: Yeah. Anyway, I got a lot of other issues with it but I yeahAmir Houieh: youGabor Kerekes: now I have something which is just like a script. So you say AVM cloud um and yeah now now you're in a virtual machine and um it's like it works really seamlessly. So there's not so much setup needed like in the previous one. Uh and also I had some issues that I couldn't debug like at some point. Um, it created I don't know something at the at like a really low level with the how the virtual machine interacted with Mac OS.",
+				"date": "2026-03-05"
+			}
+		},
+		{
+			"id": "standup-2026-03-05-004545",
+			"label": "2026-03-05 [00:45:45]",
+			"data": {
+				"chunk": "Gabor Kerekes: something got f***** up and like my computer froze and I don't know there's a lot of issues but this oneAmir Houieh: Perfect.Gabor Kerekes: is uh working with like um um Mac OS has built-in support for virtualization and this is like built on tooling that makes use of that so it's much more integrated and like Mac OS optimized uh so yeah thisAmir Houieh: Okay.Gabor Kerekes: is like I'm using a sandboxing thing now which is um I don't need any kind of like virtualization or like a virtual machine. It's working at the OS level but it needs all these complicated policies of like what files do you give it access to uh and then it gets so complex you have to think about and reason about should I give access to this file what's the implication of that and then I don't want to think about it like I just want the machine it can do whatever the f*** it wants and it does it but like so far I've been working in parallel on this mycelium and this inside like this OS level sandbox which is already pretty good but it's crazy how much when you don't need to babysit you just give it a task and it like you come back in half an hour and maybe it got stuck but a lot of the times it's just done and it's like you",
+				"date": "2026-03-05"
+			}
+		},
+		{
+			"id": "standup-2026-03-05-004717",
+			"label": "2026-03-05 [00:47:17]",
+			"data": {
+				"chunk": "Amir Houieh: Nice. Is it is it uh the same repo or aGabor Kerekes: can no this I haven'tAmir Houieh: different Okay,Gabor Kerekes: made a repo of this. Uh,Amir Houieh: so it has nothing to do with that VM agent.Gabor Kerekes: no, no, no, no. But, um, yeah,Amir Houieh: Okay.Gabor Kerekes: I will I will share this as well. And this is this is hopefully going to speed things up even more because now it's going to need even less babysitting. And yeah,Amir Houieh: Okay.Gabor Kerekes: it's like at the same time reinventing how how software is built because like it's it has really shifted now and um but but I yeah I think this isAmir Houieh: Yeah.Gabor Kerekes: important also for for the other projects like civil. I think it feels like years have passed since we worked on civil in terms of like what happened in the like agentic engineering space. Like I think what we built on civil can be now built in like five days. Yeah, it's crazy.Amir Houieh: Okay,",
+				"date": "2026-03-05"
+			}
+		},
+		{
+			"id": "standup-2026-03-05-004837",
+			"label": "2026-03-05 [00:48:37]",
+			"data": {
+				"chunk": "Gabor Kerekes: Okay,Amir Houieh: cool.Gabor Kerekes: that's what that's it.Amir Houieh: Nice. Uh, yeah. So, for today I think I'm I I don't know like me and you know Amy has have a meeting tomorrow for Cibil. Do you think uh Yeah.Noémi Biró: Yeah,Amir Houieh: So then I would rather focus today also on myium and brainNoémi Biró: sure.Amir Houieh: continue building. Is there anything else on and then we can do civil tomorrow since you also don't have the meeting?Noémi Biró: Yeah, I think it'sGabor Kerekes: There's no meeting with N tomorrow.Amir Houieh: No, it will be on WednesdayNoémi Biró: good.Gabor Kerekes: Okay, cool.Amir Houieh: instead.Gabor Kerekes: That's something that I want to like I don't want to spend any time on civilAmir Houieh: No,Gabor Kerekes: this week but what like one yeahAmir Houieh: no, you are not supposed to. We said we already agreed.Gabor Kerekes: just one thing that I wanted to try also just if I have the sandbox for the agents to give these um analytics repos and just let them set them up and try it like um yeah as a way",
+				"date": "2026-03-05"
+			}
+		},
+		{
+			"id": "standup-2026-03-05-004941",
+			"label": "2026-03-05 [00:49:41]",
+			"data": {
+				"chunk": "Amir Houieh: It seems like you you don't care about the code quality anymore.Gabor Kerekes: It's not about code quality. This is I do care about code quality.Amir Houieh: I'm kidding, man.Gabor Kerekes: This is just exploring and if it canAmir Houieh: I know.Gabor Kerekes: like complicate it.Amir Houieh: No, I know.Gabor Kerekes: It's like exploring multiple directions at the sameAmir Houieh: No worries.Gabor Kerekes: time.Amir Houieh: Okay, cool. Nice. Okay, then. I don't know. All good. See you tomorrow.Gabor Kerekes: AllNoémi Biró: Uh, I just read your direct message now.Amir Houieh: So, you you you see I just wanted to show make sure that you get it.Noémi Biró: I didn't I saw it now,Gabor Kerekes: right.Amir Houieh: You receive it. Okay.Noémi Biró: but I hate this interface. I'm sorry. It's just Discord. It I cannot see the f****** incoming things.Amir Houieh: No,Noémi Biró: Like once I'm in like once I'mAmir Houieh: there's a tiny tiny red circle with a number appears next to theNoémi Biró: in Yeah.Amir Houieh: name.Noémi Biró: It's just that it's so messy.Amir Houieh: Anyway, uh let me know if you when you have time.Noémi Biró: Maybe is it okay to do it tomorrow,Amir Houieh: That's okay. Yeah, sure.Noémi Biró: for example? Okay.Gabor Kerekes: All right. See you guys.  \nTranscription ended after 00:51:12\nThis editable transcript was computer generated and might contain errors. People can also change the text after it was created.",
+				"date": "2026-03-05"
+			}
+		}
+	]
+}

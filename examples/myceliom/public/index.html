@@ -1,0 +1,1033 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Myceliom</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    background: #fafafa;
+    color: #1a1a1a;
+    line-height: 1.5;
+    height: 100vh;
+    display: grid;
+    grid-template-columns: 380px 1fr;
+    grid-template-rows: auto 1fr;
+  }
+
+  header {
+    grid-column: 1 / -1;
+    padding: 16px 24px;
+    border-bottom: 1px solid #e5e5e5;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  header h1 {
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-size: 18px;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+  }
+  header .status {
+    font-size: 12px;
+    color: #888;
+  }
+
+  /* Left panel — data pool */
+  .panel-left {
+    border-right: 1px solid #e5e5e5;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .panel-header {
+    padding: 12px 16px;
+    border-bottom: 1px solid #e5e5e5;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+  }
+  .panel-header h2 {
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #666;
+  }
+  .pool-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+  .pool-count {
+    font-size: 11px;
+    color: #999;
+  }
+
+  .pool-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 8px;
+  }
+  .pool-item {
+    display: flex;
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.15s;
+    align-items: flex-start;
+  }
+  .pool-item:hover { background: #f0f0f0; }
+  .pool-item.fed { opacity: 0.4; pointer-events: none; }
+  .pool-item.selected { background: #e8f0fe; }
+  .pool-item input[type="checkbox"] { margin-top: 3px; flex-shrink: 0; }
+  .pool-item-content { flex: 1; min-width: 0; }
+  .pool-item-type {
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #888;
+  }
+  .pool-item-title {
+    font-size: 13px;
+    font-weight: 500;
+    margin-top: 2px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .pool-item-context {
+    font-size: 11px;
+    color: #888;
+    margin-top: 2px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .pool-item-date {
+    font-size: 10px;
+    color: #aaa;
+    flex-shrink: 0;
+    margin-top: 3px;
+  }
+
+  /* Right panel — main view */
+  .panel-right {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  /* Tabs */
+  .tabs {
+    display: flex;
+    border-bottom: 1px solid #e5e5e5;
+    flex-shrink: 0;
+  }
+  .tab {
+    padding: 10px 20px;
+    font-size: 13px;
+    font-weight: 500;
+    color: #888;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all 0.15s;
+  }
+  .tab:hover { color: #333; }
+  .tab.active { color: #1a1a1a; border-bottom-color: #1a1a1a; }
+
+  /* Tab content */
+  .tab-content { display: none; flex: 1; overflow-y: auto; padding: 20px 24px; }
+  .tab-content.active { display: block; }
+
+  /* Threads view */
+  .threads-empty {
+    text-align: center;
+    padding: 60px 20px;
+    color: #999;
+    font-size: 14px;
+  }
+  .thread-card {
+    padding: 16px;
+    border: 1px solid #e5e5e5;
+    border-radius: 10px;
+    margin-bottom: 12px;
+  }
+  .thread-name {
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-size: 15px;
+    font-weight: 500;
+  }
+  .thread-meta {
+    font-size: 12px;
+    color: #888;
+    margin-top: 4px;
+  }
+  .thread-summary {
+    font-size: 13px;
+    margin-top: 8px;
+    color: #444;
+  }
+  .thread-card.thread-notable { border-left: 3px solid #ff9500; }
+  .thread-card.thread-critical { border-left: 3px solid #ff3b30; }
+
+  /* Ask view */
+  .ask-form {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+  }
+  .ask-form input {
+    flex: 1;
+    padding: 10px 14px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  .ask-form input:focus { border-color: #999; }
+  .ask-response {
+    padding: 16px;
+    background: #f5f5f5;
+    border-radius: 10px;
+    font-size: 14px;
+    line-height: 1.6;
+    white-space: pre-wrap;
+  }
+  .ask-sources {
+    margin-top: 12px;
+    font-size: 12px;
+    color: #888;
+  }
+
+  /* Correct view */
+  .correct-form {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+  }
+  .correct-form input {
+    flex: 1;
+    padding: 10px 14px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 14px;
+    outline: none;
+  }
+  .correct-form input:focus { border-color: #999; }
+  .correct-hint {
+    font-size: 12px;
+    color: #999;
+    margin-bottom: 16px;
+  }
+  .correct-log {
+    font-size: 13px;
+    color: #666;
+  }
+
+  /* Events view */
+  .event-log {
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-size: 11px;
+    line-height: 1.6;
+  }
+  .event-entry {
+    padding: 4px 0;
+    border-bottom: 1px solid #f0f0f0;
+    color: #666;
+  }
+  .event-entry .event-type {
+    color: #333;
+    font-weight: 500;
+  }
+
+  /* Buttons */
+  button {
+    padding: 8px 16px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    background: #fff;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  button:hover { background: #f5f5f5; border-color: #ccc; }
+  button:disabled { opacity: 0.5; cursor: not-allowed; }
+  button.primary {
+    background: #1a1a1a;
+    color: #fff;
+    border-color: #1a1a1a;
+  }
+  button.primary:hover { background: #333; }
+
+  /* Save progress bar — fixed at top */
+  .save-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    background: #1a1a1a;
+    color: #fff;
+    font-size: 12px;
+    transform: translateY(-100%);
+    transition: transform 0.25s ease;
+    max-height: 50vh;
+    overflow-y: auto;
+  }
+  .save-bar.visible { transform: translateY(0); }
+  .save-bar-inner { padding: 10px 20px; }
+  .save-bar-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 6px;
+  }
+  .save-bar-header h3 {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: #aaa;
+  }
+  .save-bar-close {
+    background: none;
+    border: none;
+    color: #666;
+    cursor: pointer;
+    font-size: 16px;
+    padding: 0 4px;
+    line-height: 1;
+  }
+  .save-bar-close:hover { color: #fff; }
+  .save-bar-item {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    padding: 4px 0;
+    border-bottom: 1px solid #333;
+  }
+  .save-bar-item:last-child { border-bottom: none; }
+  .save-bar-title {
+    font-weight: 500;
+    color: #eee;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 250px;
+    flex-shrink: 0;
+  }
+  .save-bar-status {
+    color: #888;
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .save-bar-status.done { color: #34c759; }
+  .save-bar-status.working { color: #ff9f0a; }
+
+  .loading { color: #999; font-style: italic; }
+
+  /* Brain control bar */
+  .brain-controls {
+    padding: 12px 16px;
+    border-bottom: 1px solid #e5e5e5;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+    background: #f8f8f8;
+  }
+  .brain-controls .dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: #ccc;
+    flex-shrink: 0;
+  }
+  .brain-controls .dot.active { background: #34c759; }
+  .brain-controls .brain-label {
+    font-size: 12px;
+    color: #666;
+    flex: 1;
+  }
+
+  /* Disabled overlay */
+  .disabled-overlay {
+    pointer-events: none;
+    opacity: 0.4;
+  }
+
+  /* Learners tab */
+  .learner-group-label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #999;
+    margin: 16px 0 8px;
+  }
+  .learner-group-label:first-child { margin-top: 0; }
+  .learner-card {
+    padding: 12px 14px;
+    border: 1px solid #e5e5e5;
+    border-radius: 8px;
+    margin-bottom: 8px;
+    font-size: 13px;
+    transition: border-color 0.2s;
+  }
+  .learner-card.active { border-left: 3px solid #34c759; }
+  .learner-card.idle { border-left: 3px solid #ccc; }
+  .learner-card-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .learner-card-name {
+    font-weight: 600;
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-size: 12px;
+  }
+  .learner-card-type {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #888;
+    background: #f0f0f0;
+    padding: 1px 6px;
+    border-radius: 3px;
+  }
+  .learner-card-id {
+    font-size: 10px;
+    color: #bbb;
+    margin-left: auto;
+    font-family: 'SF Mono', 'Fira Code', monospace;
+  }
+  .learner-card-desc {
+    font-size: 12px;
+    color: #444;
+    margin-top: 6px;
+  }
+  .learner-card-instructions {
+    font-size: 11px;
+    color: #888;
+    margin-top: 4px;
+    white-space: pre-line;
+    line-height: 1.5;
+  }
+  .learner-card-metrics {
+    display: flex;
+    gap: 12px;
+    margin-top: 6px;
+    font-size: 11px;
+    color: #999;
+  }
+  .learner-card-metrics span { white-space: nowrap; }
+  .learner-card-activity {
+    margin-top: 6px;
+    font-size: 11px;
+    color: #888;
+    font-style: italic;
+  }
+</style>
+</head>
+<body>
+
+<div class="save-bar" id="save-bar">
+  <div class="save-bar-inner">
+    <div class="save-bar-header">
+      <h3 id="save-bar-title">Saving...</h3>
+      <button class="save-bar-close" id="save-bar-close">&times;</button>
+    </div>
+    <div id="save-bar-items"></div>
+  </div>
+</div>
+
+<header>
+  <h1>myceliom</h1>
+  <span class="status" id="status">connecting...</span>
+</header>
+
+<div class="panel-left">
+  <div class="brain-controls">
+    <div class="dot" id="brain-dot"></div>
+    <span class="brain-label" id="brain-label">Brain not initialized</span>
+    <button id="brain-init-btn">Init</button>
+    <button id="brain-restore-btn" style="display:none">Restore</button>
+    <button id="brain-destroy-btn" style="display:none">Destroy</button>
+  </div>
+  <div class="panel-header">
+    <h2>Data Pool</h2>
+    <div class="pool-actions">
+      <span class="pool-count" id="pool-count"></span>
+      <button class="primary" id="save-btn" disabled>Save selected</button>
+    </div>
+  </div>
+  <div class="pool-list" id="pool-list"></div>
+</div>
+
+<div class="panel-right">
+  <div class="tabs">
+    <div class="tab active" data-tab="threads">Threads</div>
+    <div class="tab" data-tab="ask">Ask</div>
+    <div class="tab" data-tab="correct">Correct</div>
+    <div class="tab" data-tab="learners">Learners</div>
+    <div class="tab" data-tab="events">Events</div>
+  </div>
+
+  <div class="tab-content active" id="tab-threads">
+    <div class="threads-empty" id="threads-empty">Initialize Brain to get started.</div>
+    <div id="threads-list"></div>
+  </div>
+
+  <div class="tab-content" id="tab-ask">
+    <div class="ask-form">
+      <input type="text" id="ask-input" placeholder="What have I been avoiding?">
+      <button class="primary" id="ask-btn">Ask</button>
+    </div>
+    <div id="ask-response"></div>
+  </div>
+
+  <div class="tab-content" id="tab-correct">
+    <div class="correct-hint">Tell the system to merge, split, or stop tracking threads. Example: "Tools for thought and cognitive exoskeletons are the same thread."</div>
+    <div class="correct-form">
+      <input type="text" id="correct-input" placeholder="Merge X and Y — those are the same thing">
+      <button class="primary" id="correct-btn">Send</button>
+    </div>
+    <div class="correct-log" id="correct-log"></div>
+  </div>
+
+  <div class="tab-content" id="tab-learners">
+    <div id="learners-empty" class="threads-empty">Initialize Brain to see learners.</div>
+    <div id="learners-external"></div>
+    <div id="learners-internal"></div>
+  </div>
+
+  <div class="tab-content" id="tab-events">
+    <div class="event-log" id="event-log"></div>
+  </div>
+</div>
+
+<script>
+const API = '';
+let selectedIds = new Set();
+let brainReady = false;
+
+// -- UI state --
+function setBrainState(initialized, canRestore, learnerCount) {
+  brainReady = initialized;
+  const dot = document.getElementById('brain-dot');
+  const label = document.getElementById('brain-label');
+  const initBtn = document.getElementById('brain-init-btn');
+  const restoreBtn = document.getElementById('brain-restore-btn');
+  const destroyBtn = document.getElementById('brain-destroy-btn');
+
+  dot.classList.toggle('active', initialized);
+
+  if (initialized) {
+    label.textContent = `Brain active — ${learnerCount} learners`;
+    initBtn.style.display = 'none';
+    restoreBtn.style.display = 'none';
+    destroyBtn.style.display = '';
+  } else {
+    label.textContent = canRestore ? 'Brain not running (data exists)' : 'Brain not initialized';
+    initBtn.style.display = '';
+    restoreBtn.style.display = canRestore ? '' : 'none';
+    destroyBtn.style.display = 'none';
+  }
+
+  // Disable/enable main UI
+  document.getElementById('save-btn').disabled = !initialized || selectedIds.size === 0;
+  document.getElementById('ask-btn').disabled = !initialized;
+  document.getElementById('correct-btn').disabled = !initialized;
+}
+
+// -- Brain controls --
+document.getElementById('brain-init-btn').addEventListener('click', async () => {
+  const btn = document.getElementById('brain-init-btn');
+  btn.disabled = true;
+  btn.textContent = 'Initializing...';
+  try {
+    const res = await fetch(API + '/api/brain/init', { method: 'POST' });
+    const data = await res.json();
+    if (data.initialized) {
+      setBrainState(true, false, data.learnerCount);
+      seedLearners(data.learners);
+      loadThreads();
+    }
+  } catch (e) {
+    console.error(e);
+  }
+  btn.disabled = false;
+  btn.textContent = 'Init';
+});
+
+document.getElementById('brain-restore-btn').addEventListener('click', async () => {
+  const btn = document.getElementById('brain-restore-btn');
+  btn.disabled = true;
+  btn.textContent = 'Restoring...';
+  try {
+    const res = await fetch(API + '/api/brain/restore', { method: 'POST' });
+    const data = await res.json();
+    if (data.initialized) {
+      setBrainState(true, false, data.learnerCount);
+      seedLearners(data.learners);
+      loadThreads();
+    }
+  } catch (e) {
+    console.error(e);
+  }
+  btn.disabled = false;
+  btn.textContent = 'Restore';
+});
+
+document.getElementById('brain-destroy-btn').addEventListener('click', async () => {
+  const btn = document.getElementById('brain-destroy-btn');
+  btn.disabled = true;
+  try {
+    await fetch(API + '/api/brain/destroy', { method: 'POST' });
+    setBrainState(false, true, 0);
+    document.getElementById('threads-list').innerHTML = '';
+    document.getElementById('threads-empty').style.display = 'block';
+    document.getElementById('threads-empty').textContent = 'Brain destroyed. Init or restore to continue.';
+    learners.clear();
+    renderLearners();
+  } catch (e) {
+    console.error(e);
+  }
+  btn.disabled = false;
+});
+
+// -- Tabs --
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById('tab-' + tab.dataset.tab).classList.add('active');
+  });
+});
+
+// -- Pool --
+async function loadPool() {
+  const res = await fetch(API + '/api/pool');
+  const { items } = await res.json();
+  const list = document.getElementById('pool-list');
+  list.innerHTML = '';
+
+  let unfed = 0;
+  items.forEach(item => {
+    if (!item.fed) unfed++;
+    const div = document.createElement('div');
+    div.className = 'pool-item' + (item.fed ? ' fed' : '') + (selectedIds.has(item.id) ? ' selected' : '');
+    div.innerHTML = `
+      <input type="checkbox" ${item.fed ? 'disabled' : ''} ${selectedIds.has(item.id) ? 'checked' : ''}>
+      <div class="pool-item-content">
+        <div class="pool-item-type">${item.type}</div>
+        <div class="pool-item-title">${item.title}</div>
+        <div class="pool-item-context">${item.context}</div>
+      </div>
+      <div class="pool-item-date">${item.savedAt}</div>
+    `;
+    if (!item.fed) {
+      div.addEventListener('click', (e) => {
+        if (e.target.tagName === 'INPUT') return;
+        const cb = div.querySelector('input');
+        cb.checked = !cb.checked;
+        toggleItem(item.id, cb.checked, div);
+      });
+      div.querySelector('input').addEventListener('change', (e) => {
+        toggleItem(item.id, e.target.checked, div);
+      });
+    }
+    list.appendChild(div);
+  });
+
+  document.getElementById('pool-count').textContent = `${unfed} unfed`;
+}
+
+function toggleItem(id, checked, div) {
+  if (checked) {
+    selectedIds.add(id);
+    div.classList.add('selected');
+  } else {
+    selectedIds.delete(id);
+    div.classList.remove('selected');
+  }
+  document.getElementById('save-btn').disabled = !brainReady || selectedIds.size === 0;
+}
+
+// -- Save --
+document.getElementById('save-btn').addEventListener('click', async () => {
+  if (!brainReady) return;
+  const btn = document.getElementById('save-btn');
+  btn.disabled = true;
+  btn.textContent = 'Saving...';
+
+  // Show save bar
+  const bar = document.getElementById('save-bar');
+  document.getElementById('save-bar-title').textContent = 'Saving...';
+  document.getElementById('save-bar-items').innerHTML = '';
+  bar.classList.add('visible');
+
+  await fetch(API + '/api/save', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ ids: [...selectedIds] }),
+  });
+
+  selectedIds.clear();
+  btn.textContent = 'Save selected';
+  loadPool();
+});
+
+document.getElementById('save-bar-close').addEventListener('click', () => {
+  document.getElementById('save-bar').classList.remove('visible');
+});
+
+function updateSaveProgress(type, data) {
+  const container = document.getElementById('save-bar-items');
+  if (!container) return;
+
+  let itemEl = container.querySelector(`[data-save-id="${data.id}"]`);
+  if (!itemEl && data.id) {
+    itemEl = document.createElement('div');
+    itemEl.className = 'save-bar-item';
+    itemEl.setAttribute('data-save-id', data.id);
+    itemEl.innerHTML = `<span class="save-bar-title">${data.title}</span><span class="save-bar-status working">waiting</span>`;
+    container.appendChild(itemEl);
+  }
+
+  const statusEl = itemEl?.querySelector('.save-bar-status');
+  if (!statusEl) return;
+
+  if (type === 'save:item:started') {
+    statusEl.textContent = 'starting...';
+    statusEl.className = 'save-bar-status working';
+  } else if (type === 'save:item:contextualizing') {
+    statusEl.textContent = 'contextualizing...';
+    statusEl.className = 'save-bar-status working';
+  } else if (type === 'save:item:contextualized') {
+    statusEl.textContent = data.insight ? 'contextualized' : 'no prior context';
+    statusEl.className = 'save-bar-status working';
+  } else if (type === 'save:item:injecting') {
+    statusEl.textContent = 'injecting...';
+    statusEl.className = 'save-bar-status working';
+  } else if (type === 'save:item:done') {
+    statusEl.textContent = 'done';
+    statusEl.className = 'save-bar-status done';
+  } else if (type === 'save:batch:done') {
+    document.getElementById('save-bar-title').textContent = `Saved ${data.count} items`;
+  }
+}
+
+// -- Threads --
+async function loadThreads() {
+  if (!brainReady) return;
+  try {
+    const res = await fetch(API + '/api/threads');
+    const { threads } = await res.json();
+    const list = document.getElementById('threads-list');
+    const empty = document.getElementById('threads-empty');
+
+    if (!threads || threads.length === 0) {
+      empty.style.display = 'block';
+      empty.textContent = 'No threads discovered yet. Save some items to get started.';
+      list.innerHTML = '';
+      return;
+    }
+
+    empty.style.display = 'none';
+    renderThreadsList(threads);
+  } catch { /* brain not ready */ }
+}
+
+function renderThreadsFromData(threads, significance) {
+  const list = document.getElementById('threads-list');
+  const empty = document.getElementById('threads-empty');
+
+  if (!threads || threads.length === 0) return;
+
+  empty.style.display = 'none';
+  renderThreadsList(threads, significance);
+}
+
+function renderThreadsList(threads, significance) {
+  const list = document.getElementById('threads-list');
+  list.innerHTML = threads.map(t => {
+    const data = t.data || t;
+    const name = data.name || data.topic || data.title || data.topic_name || 'Unnamed';
+    const summary = data.summary || data.description || '';
+    const status = data.status || data.activity || data.trend || '';
+    const meta = [];
+    if (data.firstSeen || data.first_seen) meta.push('First: ' + (data.firstSeen || data.first_seen));
+    if (data.lastSeen || data.last_seen) meta.push('Last: ' + (data.lastSeen || data.last_seen));
+    if (status) meta.push(status);
+    if (t.metadata?.confidence) meta.push('Confidence: ' + (t.metadata.confidence * 100).toFixed(0) + '%');
+
+    return `<div class="thread-card${significance === 'critical' ? ' thread-critical' : significance === 'notable' ? ' thread-notable' : ''}">
+      <div class="thread-name">${name}</div>
+      ${meta.length ? `<div class="thread-meta">${meta.join(' · ')}</div>` : ''}
+      ${summary ? `<div class="thread-summary">${summary}</div>` : ''}
+    </div>`;
+  }).join('');
+}
+
+// -- Ask --
+document.getElementById('ask-btn').addEventListener('click', async () => {
+  if (!brainReady) return;
+  const input = document.getElementById('ask-input');
+  const question = input.value.trim();
+  if (!question) return;
+
+  const btn = document.getElementById('ask-btn');
+  btn.disabled = true;
+  document.getElementById('ask-response').innerHTML = '<div class="loading">Thinking...</div>';
+
+  const res = await fetch(API + '/api/ask', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ question }),
+  });
+  const data = await res.json();
+
+  let html = `<div class="ask-response">${data.insight || 'No insight available.'}</div>`;
+  if (data.sources && data.sources.length > 0) {
+    html += '<div class="ask-sources">Sources: ' +
+      data.sources.map(s => `${s.learnerId} (relevance: ${(s.relevance * 100).toFixed(0)}%)`).join(', ') +
+      '</div>';
+  }
+  document.getElementById('ask-response').innerHTML = html;
+  btn.disabled = false;
+});
+
+document.getElementById('ask-input').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') document.getElementById('ask-btn').click();
+});
+
+// -- Correct --
+document.getElementById('correct-btn').addEventListener('click', async () => {
+  if (!brainReady) return;
+  const input = document.getElementById('correct-input');
+  const feedback = input.value.trim();
+  if (!feedback) return;
+
+  await fetch(API + '/api/correct', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ feedback }),
+  });
+
+  const log = document.getElementById('correct-log');
+  const entry = document.createElement('div');
+  entry.textContent = '\u2192 ' + feedback;
+  entry.style.marginBottom = '8px';
+  log.prepend(entry);
+  input.value = '';
+});
+
+document.getElementById('correct-input').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') document.getElementById('correct-btn').click();
+});
+
+// -- Learners --
+const learners = new Map();
+
+function seedLearners(list) {
+  if (!list) return;
+  for (const l of list) {
+    if (!learners.has(l.id)) {
+      learners.set(l.id, {
+        id: l.id,
+        name: l.name || l.id,
+        type: l.type || '',
+        description: l.description || '',
+        status: 'idle',
+      });
+    }
+  }
+  renderLearners();
+}
+
+function renderLearners() {
+  const empty = document.getElementById('learners-empty');
+  const extContainer = document.getElementById('learners-external');
+  const intContainer = document.getElementById('learners-internal');
+
+  if (learners.size === 0) {
+    empty.style.display = 'block';
+    extContainer.innerHTML = '';
+    intContainer.innerHTML = '';
+    return;
+  }
+  empty.style.display = 'none';
+
+  const external = [];
+  const internal = [];
+  for (const [id, l] of learners) {
+    if (id.startsWith('__internal_')) internal.push(l);
+    else external.push(l);
+  }
+
+  extContainer.innerHTML = external.length
+    ? `<div class="learner-group-label">External Learners</div>` + external.map(renderLearnerCard).join('')
+    : '';
+  intContainer.innerHTML = internal.length
+    ? `<div class="learner-group-label">Internal Learners</div>` + internal.map(renderLearnerCard).join('')
+    : '';
+}
+
+function renderLearnerCard(l) {
+  const statusClass = l.status === 'active' ? 'active' : 'idle';
+  const metrics = [];
+  if (l.activation != null) metrics.push(`activation: ${(l.activation * 100).toFixed(0)}%`);
+  if (l.status) metrics.push(l.status);
+  if (l.bufferCount != null) metrics.push(`buffer: ${l.bufferCount}`);
+  if (l.significance) metrics.push(`sig: ${l.significance}`);
+
+  return `<div class="learner-card ${statusClass}">
+    <div class="learner-card-header">
+      <span class="learner-card-name">${l.name || l.id}</span>
+      ${l.type ? `<span class="learner-card-type">${l.type}</span>` : ''}
+      <span class="learner-card-id">${l.id}</span>
+    </div>
+    ${l.description ? `<div class="learner-card-desc">${l.description}</div>` : ''}
+    ${metrics.length ? `<div class="learner-card-metrics">${metrics.map(m => `<span>${m}</span>`).join('')}</div>` : ''}
+    ${l.lastActivity ? `<div class="learner-card-activity">${l.lastActivity}</div>` : ''}
+  </div>`;
+}
+
+function updateLearnerFromEvent(type, data) {
+  if (type === 'brain:learner:added') {
+    learners.set(data.learnerId, {
+      id: data.learnerId,
+      name: data.name || data.learnerId,
+      type: data.learnerType || '',
+      description: data.description || '',
+      instructions: data.instructions || '',
+      status: 'idle',
+      lastActivity: 'Just added',
+    });
+    renderLearners();
+  } else if (type === 'brain:learner:removed') {
+    learners.delete(data.learnerId);
+    renderLearners();
+  } else if (type === 'brain:init:completed') {
+    // Don't overwrite — brain:learner:added events already populated with full details
+    renderLearners();
+  } else if (type === 'learner:observed') {
+    const l = learners.get(data.learnerId);
+    if (l) {
+      l.bufferCount = data.bufferCount;
+      l.lastActivity = `Observed — importance: ${data.importance}, buffer: ${data.bufferCount}`;
+      renderLearners();
+    }
+  } else if (type === 'learner:synthesized') {
+    const l = learners.get(data.learnerId);
+    if (l) {
+      l.significance = data.significance;
+      l.lastActivity = `Synthesized — ${data.significance}`;
+      renderLearners();
+    }
+  } else if (type === 'learner:health:updated') {
+    const l = learners.get(data.learnerId);
+    if (l) {
+      l.activation = data.activation;
+      l.status = data.status;
+      l.lastActivity = `Health: ${data.status} (${(data.activation * 100).toFixed(0)}%)`;
+      renderLearners();
+    }
+  } else if (type === 'learner:signal') {
+    const l = learners.get(data.learnerId);
+    if (l) {
+      l.lastActivity = `Signal received`;
+      renderLearners();
+    }
+  }
+}
+
+// -- SSE --
+function connectSSE() {
+  const es = new EventSource(API + '/api/events');
+  const log = document.getElementById('event-log');
+
+  es.onopen = () => {
+    document.getElementById('status').textContent = 'connected';
+  };
+  es.onerror = () => {
+    document.getElementById('status').textContent = 'disconnected';
+  };
+
+  const events = [
+    'learner:synthesized', 'learner:observed', 'learner:observe:dismissed',
+    'brain:inject:started', 'brain:inject:completed',
+    'brain:ask:started', 'brain:ask:completed',
+    'evolution:action:executed', 'evaluator:evaluation:completed',
+    'brain:init:completed', 'brain:learner:added', 'brain:learner:removed',
+    'learner:signal', 'learner:health:updated',
+    'save:item:started', 'save:item:contextualizing', 'save:item:contextualized',
+    'save:item:injecting', 'save:item:done', 'save:batch:done',
+  ];
+  events.forEach(evt => {
+    es.addEventListener(evt, (e) => handleEvent(evt, e.data));
+  });
+
+  function handleEvent(type, rawData) {
+    if (type === 'ping') return;
+    const entry = document.createElement('div');
+    entry.className = 'event-entry';
+    const time = new Date().toLocaleTimeString();
+    entry.innerHTML = `<span style="color:#aaa">${time}</span> <span class="event-type">${type}</span>`;
+    log.prepend(entry);
+
+    let parsed = {};
+    try { parsed = JSON.parse(rawData); } catch {}
+
+    // Update learner state from SSE events
+    updateLearnerFromEvent(type, parsed);
+
+    // Save progress
+    if (type.startsWith('save:')) {
+      updateSaveProgress(type, parsed);
+    }
+
+    // Thread updates — use inline data when available
+    if (type === 'learner:synthesized' && parsed.learnerId === 'topic-tracker' && parsed.newUnderstanding) {
+      renderThreadsFromData(parsed.newUnderstanding, parsed.significance);
+    } else if (type === 'learner:synthesized') {
+      loadThreads();
+    }
+  }
+}
+
+// -- Init --
+async function init() {
+  try {
+    const res = await fetch(API + '/api/status');
+    const status = await res.json();
+    setBrainState(status.initialized, status.canRestore, status.learnerCount || 0);
+    if (status.initialized) {
+      seedLearners(status.learners);
+      loadThreads();
+    }
+  } catch {
+    setBrainState(false, false, 0);
+  }
+
+  loadPool();
+  connectSSE();
+}
+
+init();
+</script>
+</body>
+</html>

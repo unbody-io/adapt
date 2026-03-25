@@ -3,6 +3,7 @@ import type { CallSettings, StreamTextResult } from 'ai'
 import { z } from 'zod'
 import { nanoid } from 'nanoid'
 import {
+	type AdjustResult,
 	BaseLearner,
 	type GeneratedLearnerConfig,
 	type LearnerHealth,
@@ -16,6 +17,7 @@ import {
 import { generate, Output } from '../llm'
 import { TypedEmitter } from '../types/events'
 import { synthesize, synthesizeDirect, synthesizeStream, synthesizeDirectStream, type SpecialistDef } from './agent'
+import { inspect as runInspect, type InspectResult } from './inspect'
 import { BRAIN_DEFAULTS } from './config.defaults'
 import { Evaluator } from './evaluator/class'
 import { EVOLUTION_ACTIONS, type EvolutionDecision } from './evaluator/types'
@@ -607,6 +609,8 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 			store: this.learnerStoreFactory(config.id),
 			governance,
 			skipObservation: config.skipObservation,
+			observationSchema: config.observationSchema,
+			understandingSchema: config.understandingSchema,
 		})
 
 		// Forward all learner events through Brain
@@ -678,18 +682,18 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 	}
 
 	/**
-	 * Adjust a learner's behavior (basic tier — no evolution required)
+	 * Adjust a learner's behavior and/or understanding (basic tier — no evolution required)
 	 *
-	 * Pass-through to learner.adjust(directive). Incrementally evolves
-	 * the learner's instructions, prompts, and schemas.
+	 * Pass-through to learner.adjust(directive). A classification step determines
+	 * whether to adjust config, understanding content, or both.
 	 */
-	async adjustLearner(id: string, directive: string): Promise<BaseLearner<unknown>> {
+	async adjustLearner(id: string, directive: string): Promise<{ learner: BaseLearner<unknown>; result: AdjustResult }> {
 		const learner = this.learners.get(id)
 		if (!learner) {
 			throw new Error(`Learner ${id} not found`)
 		}
-		await learner.adjust(directive)
-		return learner
+		const result = await learner.adjust(directive)
+		return { learner, result }
 	}
 
 	/**
@@ -1163,6 +1167,23 @@ ${learnerMenu.map((l) => `- ${l.id}: ${l.name} — ${l.description}`).join('\n')
 			sources: result.sources,
 			gaps: result.gaps,
 		}
+	}
+
+	/**
+	 * Inspect the brain — agentic read-only introspection.
+	 *
+	 * An LLM agent browses learner metadata, reads understanding summaries,
+	 * and consults internal learners to answer questions about what the brain
+	 * is set up to track and what it currently knows.
+	 */
+	async inspect(
+		query: string,
+		options?: CallSettings & { model?: import('ai').LanguageModel },
+	): Promise<InspectResult> {
+		await this.ensureInitialized()
+		const { model: modelOverride, ...generateOptions } = options ?? {}
+		const model = modelOverride ?? this.state.models.query
+		return runInspect(model, this, query, generateOptions)
 	}
 
 	/**

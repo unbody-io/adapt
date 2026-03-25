@@ -95,6 +95,10 @@ export interface TextLearnerConfig extends CascadableConfig {
 	health?: Partial<import('../types').LearnerHealth>
 	/** Skip observation phase — data goes directly to understanding buffer */
 	skipObservation?: boolean
+	/** Custom observation schema — skips LLM generation when provided */
+	observationSchema?: Record<string, unknown>
+	/** Custom understanding schema — skips LLM generation when provided */
+	understandingSchema?: Record<string, unknown>
 }
 
 // ── Resolved Config ─────────────────────────────────────────────────────────

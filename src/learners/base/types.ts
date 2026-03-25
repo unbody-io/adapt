@@ -200,4 +200,10 @@ export interface SharedLearnerEventMap {
 		learnerId: string
 		understanding: unknown
 	}
+	'learner:understanding:adjusted': {
+		learnerId: string
+		directive: string
+		evolution: string
+		significance: Significance
+	}
 }

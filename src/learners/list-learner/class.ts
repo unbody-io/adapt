@@ -6,7 +6,8 @@ import { DirectMethod, ToolBasedMethod } from '../base/query'
 import type { QueryMethod } from '../base/query'
 import { resolveListLearnerConfig } from './config.resolver'
 import { applyListGovernance } from './governance'
-import { adjustUnderstand, initUnderstand, understand } from './understand'
+import type { Significance } from '../types'
+import { adjustUnderstand, adjustUnderstandingContent, initUnderstand, understand } from './understand'
 import { buildListQueryPrompt, createListQueryTools } from './query-tools'
 import { generateObservationSchema } from './schema'
 import type {
@@ -49,8 +50,8 @@ export class ListLearner extends BaseLearner<ListItem[], ListLearnerState> {
 			observe_prompt: null,
 			understand_prompt: null,
 			understand_identity: null,
-			observation_schema: null,
-			understanding_schema: null,
+			observation_schema: rawConfig.observationSchema ?? null,
+			understanding_schema: rawConfig.understandingSchema ?? null,
 			thresholds: {
 				maxObservations: config.understand.thresholds.maxObservations,
 				maxTokens: config.understand.thresholds.maxTokens,
@@ -159,6 +160,30 @@ export class ListLearner extends BaseLearner<ListItem[], ListLearnerState> {
 			understand_identity: result.identity,
 			understand_prompt: '(list-understand: identity adjusted)',
 		} as Partial<ListLearnerState>)
+	}
+
+	protected async adjustUnderstanding(
+		model: LanguageModel,
+		directive: string,
+	): Promise<{ evolution: string; significance: Significance }> {
+		const result = await adjustUnderstandingContent(
+			model,
+			this.state.understand_identity!,
+			directive,
+			this.store.understanding,
+			this.state.understanding_schema ?? undefined,
+		)
+
+		if (result.status === 'synthesized') {
+			const processed = this.postProcessUnderstanding(result.newItems)
+			await this.setUnderstanding(processed)
+			return { evolution: result.evolution, significance: result.significance }
+		}
+
+		const evolution = result.status === 'dismissed'
+			? result.output
+			: 'No changes needed'
+		return { evolution, significance: 'routine' }
 	}
 
 	protected async callUnderstand(

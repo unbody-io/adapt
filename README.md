@@ -363,6 +363,21 @@ const brain = new Brain({
 })
 ```
 
+### Inspecting the Brain
+
+`inspect()` is an agentic read-only method that answers questions about the brain's structure and knowledge. An LLM agent browses learner metadata, reads understanding summaries, and consults internal learners to build its answer.
+
+```typescript
+// What is the brain set up to track? (works even before any data is injected)
+const result = await brain.inspect('What are you learning and tracking?')
+console.log(result.insight)
+
+// Deeper questions about accumulated knowledge
+const health = await brain.inspect('Which learners have the most gaps?')
+```
+
+Unlike `ask()` (which queries learner knowledge) or `consult()` (which queries internal self-knowledge), `inspect()` can reason across both — and works on a fresh brain by falling back to learner configs when no understanding exists yet.
+
 ### Managing Learners
 
 **Basic management** — works without evolution:
@@ -525,6 +540,35 @@ const items = await learner.getUnderstanding() // ListItem[]
 The LLM generates the data schema from your instructions. For "track restaurants with cuisine, location, price range, and rating," it produces fields like `name`, `cuisine`, `location`, `priceRange`, `rating`. During synthesis, the LLM agent uses CRUD tools (`addItem`, `updateItem`, `removeItem`, `listItems`, `searchItems`, `getItem`) to manage the collection.
 
 **Schema generation depends on your instructions.** The fields in the schema come directly from what you describe. If your instructions say "track whether it's been rejected by the PM," the schema will have a rejection field. If you don't mention it, it won't exist — and that data will be lost even if it appears in observations. See [Writing Instructions](#writing-instructions) for guidance.
+
+**Custom schemas:** You can bypass LLM schema generation entirely by providing `observationSchema` and/or `understandingSchema` in the learner config:
+
+```typescript
+const brain = new Brain({
+  prompt: 'Track therapy sessions.',
+  model: openai('gpt-4o'),
+  autoSetup: false,
+  learners: [{
+    id: 'window-of-tolerance',
+    type: 'list',
+    name: 'Window of Tolerance',
+    description: 'Tracks nervous system regulation per session',
+    instructions: 'Track zone states, triggers, and recovery patterns.',
+    observationSchema: {
+      zone_state: { type: 'string', enum: ['hyper', 'within', 'hypo'] },
+      trigger: { type: 'string' },
+      somatic_cue: { type: 'string' },
+    },
+    understandingSchema: {
+      dominant_zone: { type: 'string' },
+      zone_shifts: { type: 'array', items: { type: 'object' } },
+      overall_trend: { type: 'string', enum: ['contracting', 'stable', 'expanding'] },
+    },
+  }],
+})
+```
+
+When provided, schemas are used as-is — no LLM call, fully deterministic. This works for both `TextLearner` and `ListLearner`, and for both standalone learners and Brain-managed explicit learners.
 
 **Item structure:**
 
@@ -1162,6 +1206,7 @@ await brain2.ask('What do you know?') // Has full knowledge from session 1
 | `ask(query, options?)` | `Promise<BrainAskResult>` | Query all learners, synthesize response |
 | `askStream(query, options?)` | `Promise<StreamTextResult>` | Streaming variant of `ask()` |
 | `consult(query, options?)` | `Promise<ConsultResult>` | Query internal learners |
+| `inspect(query, options?)` | `Promise<InspectResult>` | Agentic read-only introspection of brain structure and knowledge |
 
 **Learner Management:**
 
@@ -1169,7 +1214,7 @@ await brain2.ask('What do you know?') // Has full knowledge from session 1
 |---|---|---|
 | `addLearner(config)` | `Promise<BaseLearner>` | Add learner with explicit config |
 | `removeLearner(id)` | `Promise<void>` | Remove learner and dispose store |
-| `adjustLearner(id, directive)` | `Promise<BaseLearner>` | Natural language steering (preserves knowledge) |
+| `adjustLearner(id, directive)` | `Promise<{ learner, result: AdjustResult }>` | Natural language steering (preserves knowledge) |
 | `getLearner(id)` | `BaseLearner \| undefined` | Get learner by ID |
 | `getLearners()` | `BaseLearner[]` | Get all external learners |
 

@@ -1,6 +1,7 @@
 // Base
 export { BaseLearner } from './base'
 export type {
+	AdjustResult,
 	LearnCallbacks,
 	LearnOptions,
 	LearnOutput,
@@ -37,7 +38,7 @@ export type {
 	EvolutionRecord,
 	StateRecord,
 } from './stores'
-export { MemoryStore, MemoryCollection } from './stores'
+export { MemoryStore, MemoryCollection, SQLiteStore } from './stores'
 
 // TextLearner
 export { TextLearner } from './text-learner'

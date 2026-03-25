@@ -44,4 +44,8 @@ Track answers to:
 export type GeneratedLearnerConfig = z.infer<typeof learnerConfigSchema> & {
 	governance?: Record<string, unknown>
 	skipObservation?: boolean
+	/** Custom observation schema — skips LLM generation when provided */
+	observationSchema?: Record<string, unknown>
+	/** Custom understanding schema — skips LLM generation when provided */
+	understandingSchema?: Record<string, unknown>
 }

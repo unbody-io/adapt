@@ -1,5 +1,6 @@
 export { BaseLearner } from './class'
 export type {
+	AdjustResult,
 	LearnCallbacks,
 	LearnOptions,
 	LearnOutput,

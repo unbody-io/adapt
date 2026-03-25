@@ -367,6 +367,101 @@ export async function adjustUnderstand(
 	return { identity, systemPrompt: '' }
 }
 
+/**
+ * Adjust existing understanding content via a directive using existing CRUD tools.
+ * The model senses its collection, reasons about what to change, and uses tools
+ * to make the requested modifications.
+ */
+export async function adjustUnderstandingContent(
+	model: LanguageModel,
+	identity: UnderstandIdentity,
+	directive: string,
+	collection: Collection<UnderstandingRecord>,
+	understandingSchema?: Record<string, unknown>,
+): Promise<UnderstandOutput> {
+	try {
+		const changes: ChangeRecord[] = []
+		const tools = createUnderstandTools(collection, understandingSchema, changes)
+
+		const system = systemPrompt(identity)
+		const prompt = `Adjustment directive: "${directive}"
+
+Sense your collection, then make the requested changes.
+Preserve items the directive doesn't address.`
+
+		interface CompleteResult {
+			evolution: string
+			significance: string
+			reasoning?: string
+		}
+		let completeResult: CompleteResult | null = null
+
+		const result = await generate({
+			model,
+			system,
+			prompt,
+			tools,
+			toolChoice: 'required' as const,
+			stopWhen: stepCountIs(MAX_STEPS),
+			onStepFinish: ({ toolCalls }) => {
+				if (toolCalls) {
+					for (const tc of toolCalls) {
+						if (tc.toolName === 'complete') {
+							completeResult = tc.input as CompleteResult
+						}
+					}
+				}
+			},
+		})
+
+		// Check final step for complete tool call
+		const completeCall = result.toolCalls.find((c) => c.toolName === 'complete')
+		if (completeCall && 'input' in completeCall) {
+			completeResult = completeCall.input as CompleteResult
+		}
+
+		// No changes made
+		if (changes.length === 0) {
+			return {
+				status: 'dismissed',
+				output: completeResult?.evolution || 'No changes needed',
+				usage: result.usage,
+			}
+		}
+
+		// Normalize confidence: relative to max touchCount across collection
+		const records = await collection.list()
+		const allItems = records.map((r) => ({ record: r, item: r.data as ListItem }))
+		const maxTouches = Math.max(1, ...allItems.map((x) => x.item.metadata.touchCount ?? 1))
+
+		for (const { record, item } of allItems) {
+			const newConfidence = (item.metadata.touchCount ?? 1) / maxTouches
+			if (Math.abs(newConfidence - item.metadata.confidence) > 0.001) {
+				item.metadata.confidence = newConfidence
+				await collection.update(record.id, {
+					data: item as unknown,
+					metadata_confidence: newConfidence,
+				})
+			}
+		}
+
+		// Read final state from store
+		const finalRecords = await collection.list()
+		const newItems: ListItem[] = finalRecords.map((r) => r.data as ListItem)
+
+		return {
+			status: 'synthesized',
+			newItems,
+			significance: (completeResult?.significance as Significance) ?? 'routine',
+			evolution: completeResult?.evolution ?? `${changes.length} operations applied`,
+			reasoning: completeResult?.reasoning,
+			usage: result.usage,
+		}
+	} catch (error) {
+		return { status: 'error', error }
+	}
+}
+
 export async function understand(
 	model: LanguageModel,
 	identity: UnderstandIdentity,

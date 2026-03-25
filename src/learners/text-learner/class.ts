@@ -1,12 +1,13 @@
 import type { LanguageModel } from 'ai'
 import type { ParentModels } from '../../types/config'
+import type { Significance } from '../types'
 import { BaseLearner } from '../base/class'
 import type { UnderstandCallResult } from '../base/class'
 import { DirectMethod, ToolBasedMethod } from '../base/query'
 import type { QueryMethod } from '../base/query'
 import { resolveTextLearnerConfig } from './config.resolver'
 import { applyStrategy } from './strategies'
-import { adjustUnderstand, initUnderstand, understand } from './understand'
+import { adjustUnderstand, adjustUnderstandingContent, initUnderstand, understand } from './understand'
 import { buildTextQueryPrompt, createReadUnderstandingTool } from './query-tools'
 import type {
 	TextLearnerConfig,
@@ -47,8 +48,8 @@ export class TextLearner extends BaseLearner<string, TextLearnerState> {
 			observe_prompt: null,
 			understand_prompt: null,
 			understand_identity: null,
-			observation_schema: null,
-			understanding_schema: null,
+			observation_schema: rawConfig.observationSchema ?? null,
+			understanding_schema: rawConfig.understandingSchema ?? null,
 			thresholds: {
 				maxObservations: config.understand.thresholds.maxObservations,
 				maxTokens: config.understand.thresholds.maxTokens,
@@ -162,6 +163,27 @@ export class TextLearner extends BaseLearner<string, TextLearnerState> {
 			understand_identity: result.identity,
 			understand_prompt: result.systemPrompt,
 		} as Partial<TextLearnerState>)
+	}
+
+	protected async adjustUnderstanding(
+		model: LanguageModel,
+		directive: string,
+	): Promise<{ evolution: string; significance: Significance }> {
+		const currentUnderstanding = await this.getUnderstanding()
+		const result = await adjustUnderstandingContent(
+			model,
+			directive,
+			currentUnderstanding,
+			this.state.instructions,
+		)
+
+		if (result.status === 'synthesized') {
+			const processed = await this.postProcessUnderstanding(result.newUnderstanding)
+			await this.setUnderstanding(processed)
+			return { evolution: result.evolution, significance: result.significance }
+		}
+
+		return { evolution: result.evolution, significance: 'routine' }
 	}
 
 	protected async callUnderstand(

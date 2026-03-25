@@ -1009,12 +1009,14 @@ app.post('/brain/learners/:id/adjust', async (c) => {
 	}
 
 	try {
-		const learner = await brain.adjustLearner(learnerId, body.directive)
-		broadcast('server:learner:adjusted', { learnerId, directive: body.directive })
+		const { learner, result } = await brain.adjustLearner(learnerId, body.directive)
+		broadcast('server:learner:adjusted', { learnerId, directive: body.directive, ...result })
 		return c.json({
 			ok: true,
 			learnerId: learner.id,
 			instructions: learner.instructions,
+			adjustedConfig: result.adjustedConfig,
+			adjustedUnderstanding: result.adjustedUnderstanding,
 		})
 	} catch (error) {
 		const message = extractErrorMessage(error)

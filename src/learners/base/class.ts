@@ -18,6 +18,7 @@
 import type { LanguageModel, StreamTextResult } from 'ai'
 import { z } from 'zod'
 import { nanoid } from 'nanoid'
+import { generate, Output } from '../../llm'
 import { TypedEmitter } from '../../types/events'
 import type {
 	Learner,
@@ -86,6 +87,32 @@ export type UnderstandCallResult =
 	  }
 	| { status: 'dismissed'; output: string; usage?: { inputTokens?: number; outputTokens?: number; totalTokens?: number } }
 	| { status: 'error'; error: unknown }
+
+/**
+ * Classification schema for adjust() routing
+ */
+const adjustClassificationSchema = z.object({
+	adjustConfig: z
+		.boolean()
+		.describe(
+			'Whether the directive changes how the node perceives and processes (behavior, focus, criteria, prompts)',
+		),
+	adjustUnderstanding: z
+		.boolean()
+		.describe(
+			'Whether the directive changes, corrects, or removes something in the node\'s accumulated knowledge',
+		),
+	reasoning: z.string().describe('Brief explanation of the classification'),
+})
+
+/**
+ * Result from adjust() — indicates what was adjusted
+ */
+export interface AdjustResult {
+	changedFields: string[]
+	adjustedConfig: boolean
+	adjustedUnderstanding: boolean
+}
 
 export abstract class BaseLearner<
 	TUnderstanding,
@@ -177,6 +204,16 @@ export abstract class BaseLearner<
 		directive: string,
 		newInstructions: string,
 	): Promise<void>
+
+	/**
+	 * Adjust understanding content from a directive (type-specific).
+	 * Unlike callUnderstand (which integrates new observations),
+	 * this modifies existing understanding based on a natural language directive.
+	 */
+	protected abstract adjustUnderstanding(
+		model: LanguageModel,
+		directive: string,
+	): Promise<{ evolution: string; significance: Significance }>
 
 	/**
 	 * Execute the understand phase (type-specific)
@@ -297,11 +334,20 @@ export abstract class BaseLearner<
 					this.state.instructions,
 				)
 
-				// Generate schemas (type-specific)
-				const schemas = await this.generateSchemas(
-					this.state.models.blueprint,
-					this.state.instructions,
-				)
+				// Generate schemas only if not already provided via config
+				const schemaUpdates: Record<string, unknown> = {}
+				if (this.state.observation_schema === null || this.state.understanding_schema === null) {
+					const schemas = await this.generateSchemas(
+						this.state.models.blueprint,
+						this.state.instructions,
+					)
+					if (this.state.observation_schema === null) {
+						schemaUpdates.observation_schema = schemas.observationSchema
+					}
+					if (this.state.understanding_schema === null) {
+						schemaUpdates.understanding_schema = schemas.understandingSchema
+					}
+				}
 
 				// Persist all generated artifacts + identity fields to store
 				await this.setState({
@@ -311,8 +357,7 @@ export abstract class BaseLearner<
 					focus: this.state.focus,
 					origin: this.state.origin,
 					...observeArtifacts,
-					observation_schema: schemas.observationSchema,
-					understanding_schema: schemas.understandingSchema,
+					...schemaUpdates,
 				} as Partial<TState>)
 			}
 
@@ -967,65 +1012,104 @@ export abstract class BaseLearner<
 	 *
 	 * Does NOT touch persisted data (observations, understandings, evolution records).
 	 */
-	async adjust(directive: string): Promise<{ changedFields: string[] }> {
+	async adjust(directive: string): Promise<AdjustResult> {
 		await this.ensureInit()
 
-		// 1. Adjust observe (shared) — resolves new instructions + new observe identity
-		const observeResult = await adjustObserve(
-			this.state.models.observer_blueprint,
-			directive,
-			this.state.instructions,
-			this.state.observe_identity!,
-			this.state.focus || undefined,
-		)
+		// 1. Classify what the directive touches
+		const { output: classification } = await generate({
+			model: this.state.models.blueprint,
+			prompt: `You sense what a directive is asking to change about a learning node.
 
-		// 2. Persist new instructions + observe artifacts
-		await this.setState({
-			instructions: observeResult.newInstructions,
-			observe_identity: observeResult.identity,
-			observe_prompt: observeResult.systemPrompt,
-		} as Partial<TState>)
+Root question: Does this directive reshape how the node perceives and processes, what the node currently knows, or both?
 
-		// 3. Adjust understand (type-specific)
-		await this.adjustUnderstandPrompt(
-			this.state.models.understand_blueprint,
-			directive,
-			observeResult.newInstructions,
-		)
+The node's purpose: "${this.state.instructions}"
+The directive: "${directive}"
 
-		// 4. Regenerate schemas from new instructions (stateless is fine for schemas)
-		const schemas = await this.generateSchemas(
-			this.state.models.blueprint,
-			observeResult.newInstructions,
-		)
-		await this.setState({
-			observation_schema: schemas.observationSchema,
-			understanding_schema: schemas.understandingSchema,
-		} as Partial<TState>)
+- adjustConfig → the directive changes perception, focus, criteria, or processing behavior
+- adjustUnderstanding → the directive changes, corrects, or removes something in the node's accumulated knowledge
+- Both can be true
 
-		const changedFields = [
-			'instructions',
-			'observe_identity',
-			'observe_prompt',
-			'understand_identity',
-			'understand_prompt',
-			'observation_schema',
-			'understanding_schema',
-		]
-
-		this.emit('learner:prompts:regenerated', {
-			learnerId: this.id,
-			observePrompt: this.state.observe_prompt!,
-			understandPrompt: this.state.understand_prompt ?? '',
+What does this directive touch?`,
+			output: Output.object({ schema: adjustClassificationSchema }),
+			repairSchema: adjustClassificationSchema,
 		})
 
-		this.emit('learner:config:updated', {
-			learnerId: this.id,
-			changedFields,
-			config: { ...this.state },
-		})
+		const changedFields: string[] = []
+		let adjustedConfig = false
+		let adjustedUnderstanding = false
 
-		return { changedFields }
+		// 2. Config adjustment (existing logic)
+		if (classification.adjustConfig) {
+			const observeResult = await adjustObserve(
+				this.state.models.observer_blueprint,
+				directive,
+				this.state.instructions,
+				this.state.observe_identity!,
+				this.state.focus || undefined,
+			)
+
+			await this.setState({
+				instructions: observeResult.newInstructions,
+				observe_identity: observeResult.identity,
+				observe_prompt: observeResult.systemPrompt,
+			} as Partial<TState>)
+
+			await this.adjustUnderstandPrompt(
+				this.state.models.understand_blueprint,
+				directive,
+				observeResult.newInstructions,
+			)
+
+			const schemas = await this.generateSchemas(
+				this.state.models.blueprint,
+				observeResult.newInstructions,
+			)
+			await this.setState({
+				observation_schema: schemas.observationSchema,
+				understanding_schema: schemas.understandingSchema,
+			} as Partial<TState>)
+
+			changedFields.push(
+				'instructions',
+				'observe_identity',
+				'observe_prompt',
+				'understand_identity',
+				'understand_prompt',
+				'observation_schema',
+				'understanding_schema',
+			)
+			adjustedConfig = true
+
+			this.emit('learner:prompts:regenerated', {
+				learnerId: this.id,
+				observePrompt: this.state.observe_prompt!,
+				understandPrompt: this.state.understand_prompt ?? '',
+			})
+
+			this.emit('learner:config:updated', {
+				learnerId: this.id,
+				changedFields,
+				config: { ...this.state },
+			})
+		}
+
+		// 3. Understanding adjustment (new)
+		if (classification.adjustUnderstanding) {
+			const result = await this.adjustUnderstanding(
+				this.state.models.understand,
+				directive,
+			)
+			adjustedUnderstanding = true
+
+			this.emit('learner:understanding:adjusted', {
+				learnerId: this.id,
+				directive,
+				evolution: result.evolution,
+				significance: result.significance,
+			})
+		}
+
+		return { changedFields, adjustedConfig, adjustedUnderstanding }
 	}
 
 	// ── Accessors ───────────────────────────────────────────────────────────

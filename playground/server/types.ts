@@ -22,7 +22,7 @@ export interface UseCaseInfo {
 export interface BrainConfig {
 	prompt: string
 	autoSetup?: boolean
-	learners?: Array<{
+	neurons?: Array<{
 		id: string
 		name: string
 		type: "text" | "list"

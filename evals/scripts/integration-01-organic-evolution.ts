@@ -1,6 +1,6 @@
 /**
  * Eval: Organic Evolution
- * Tests complete end-to-end evolution flow: learner signal → buffering → evaluation → action execution
+ * Tests complete end-to-end evolution flow: neuron signal → buffering → evaluation → action execution
  */
 
 import { Brain } from '../../src/brain/class'
@@ -43,9 +43,9 @@ async function main() {
 		logger.logEvent({ type: event.type, payload: event.payload })
 	})
 
-	// Also subscribe to learner events
-	for (const learner of brain.learners.values()) {
-		learner.on((event) => {
+	// Also subscribe to neuron events
+	for (const neuron of brain.neurons.values()) {
+		neuron.on((event) => {
 			events.push({ type: event.type, payload: event.payload })
 			logger.logEvent({ type: event.type, payload: event.payload })
 		})
@@ -53,10 +53,10 @@ async function main() {
 
 	logger.logSection('Before State')
 
-	const beforeLearnerCount = brain.learners.size
+	const beforeNeuronCount = brain.neurons.size
 
 	logger.logState('Brain Initial State', {
-		learnersCount: beforeLearnerCount,
+		neuronsCount: beforeNeuronCount,
 		evolutionEnabled: brain.config.evolution?.enabled,
 		signalThreshold: brain.config.evolution?.evaluatorSignalThreshold,
 	})
@@ -64,20 +64,20 @@ async function main() {
 	logger.logSection('Action: Trigger Organic Evolution via Signals')
 
 	// Send manual signals to trigger evolution
-	// (In reality, these would come from learner metrics)
+	// (In reality, these would come from neuron metrics)
 	brain.signal({
 		source: 'test-signal-1',
-		description: 'We need better coverage of Python best practices. Current learners focus too much on JavaScript.',
+		description: 'We need better coverage of Python best practices. Current neurons focus too much on JavaScript.',
 	})
 
 	brain.signal({
 		source: 'test-signal-2',
-		description: 'Database learner is getting low confidence queries. It might be too broad.',
+		description: 'Database neuron is getting low confidence queries. It might be too broad.',
 	})
 
 	brain.signal({
 		source: 'test-signal-3',
-		description: 'API design learner has high dismissal rate. Scope might be too narrow.',
+		description: 'API design neuron has high dismissal rate. Scope might be too narrow.',
 	})
 
 	logger.logState('Signals Sent', { count: 3, threshold: 3 })
@@ -87,14 +87,14 @@ async function main() {
 
 	logger.logSection('After Evolution')
 
-	const afterLearnerCount = brain.learners.size
+	const afterNeuronCount = brain.neurons.size
 
 	logger.logState('Brain After Evolution', {
-		learnersCount: afterLearnerCount,
-		learnerCountChanged: afterLearnerCount !== beforeLearnerCount,
+		neuronsCount: afterNeuronCount,
+		neuronCountChanged: afterNeuronCount !== beforeNeuronCount,
 	})
 
-	logger.logMetric('Learners', beforeLearnerCount, afterLearnerCount)
+	logger.logMetric('Neurons', beforeNeuronCount, afterNeuronCount)
 
 	// Collect evolution events
 	const signalReceivedEvents = events.filter((e) => e.type === 'brain:signal:received')

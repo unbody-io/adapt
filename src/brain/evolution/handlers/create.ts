@@ -1,5 +1,5 @@
 /**
- * Create action handler - generates new learners from guidance
+ * Create action handler - generates new neurons from guidance
  */
 
 import { Output } from 'ai'
@@ -7,14 +7,14 @@ import { EvolutionActionHandler } from '../base-handler'
 import type { EvolutionDecision } from '../../evaluator/types'
 import type { CreateActionResult } from '../types'
 import { generate } from '../../../llm'
-import { learnerConfigsSchema } from '../../schemas/schema.learner-configs'
+import { neuronConfigsSchema } from '../../schemas/schema.neuron-configs'
 import { createPromptTemplate } from '../prompt.template.create'
 
 /**
  * Handler for 'create' evolution action
  *
  * Joins guidance from all create decisions into a single LLM call,
- * then creates learners from the generated configs.
+ * then creates neurons from the generated configs.
  */
 export class CreateHandler extends EvolutionActionHandler<CreateActionResult> {
 	async execute(decisions: EvolutionDecision[]): Promise<CreateActionResult> {
@@ -27,18 +27,18 @@ export class CreateHandler extends EvolutionActionHandler<CreateActionResult> {
 
 			const result = await generate({
 				model: this.brain.config.model,
-				prompt: createPromptTemplate(guidance, this.brain.promptContext?.purpose ?? this.brain.prompt, Array.from(this.brain.learnerTypes.values())),
-				output: Output.object({ schema: learnerConfigsSchema }),
-				repairSchema: learnerConfigsSchema,
+				prompt: createPromptTemplate(guidance, this.brain.promptContext?.purpose ?? this.brain.prompt, Array.from(this.brain.neuronTypes.values())),
+				output: Output.object({ schema: neuronConfigsSchema }),
+				repairSchema: neuronConfigsSchema,
 			})
 
-			const newLearnerIds: string[] = []
-			for (const config of result.output.learners) {
-				const learner = await this.brain.createLearnerFromConfig(config)
-				newLearnerIds.push(learner.id)
+			const newNeuronIds: string[] = []
+			for (const config of result.output.neurons) {
+				const neuron = await this.brain.createNeuronFromConfig(config)
+				newNeuronIds.push(neuron.id)
 			}
 
-			const actionResult: CreateActionResult = { newLearnerIds }
+			const actionResult: CreateActionResult = { newNeuronIds }
 
 			for (const decision of decisions) {
 				this.emitActionExecuted(decision, actionResult)
@@ -50,7 +50,7 @@ export class CreateHandler extends EvolutionActionHandler<CreateActionResult> {
 			for (const decision of decisions) {
 				this.emitActionFailed(decision, err)
 			}
-			return { newLearnerIds: [] }
+			return { newNeuronIds: [] }
 		}
 	}
 }

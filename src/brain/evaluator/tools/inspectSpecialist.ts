@@ -7,7 +7,7 @@ import { z } from 'zod'
 import type { Brain } from '../../class'
 
 const inspectSpecialistParams = z.object({
-	id: z.string().describe('The specialist (learner) ID to inspect'),
+	id: z.string().describe('The specialist (neuron) ID to inspect'),
 })
 
 /**
@@ -22,17 +22,17 @@ export function createInspectSpecialistTool(brain: Brain) {
 			'Look closely at a specialist — its knowledge summary, health, metrics, and evolution history.',
 		inputSchema: inspectSpecialistParams,
 		execute: async ({ id }) => {
-			const learner = brain.learners.get(id)
-			if (!learner) {
+			const neuron = brain.neurons.get(id)
+			if (!neuron) {
 				throw new Error(`Specialist "${id}" not found`)
 			}
 
 			const [summary, evolution] = await Promise.all([
-				learner.getSummary(),
-				learner.getEvolution(),
+				neuron.getSummary(),
+				neuron.getEvolution(),
 			])
-			const health = learner.getHealth()
-			const metrics = learner.getMetrics()
+			const health = neuron.getHealth()
+			const metrics = neuron.getMetrics()
 
 			return {
 				summary,

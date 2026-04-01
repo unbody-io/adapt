@@ -1,21 +1,21 @@
 /**
  * Eval: Personal Behavioral Intelligence — Brain Level
  *
- * Tests the Brain orchestrator (not a single learner) on the same behavioral
- * dataset used in usecase-behavior-learner.ts. The brain receives a high-level
- * prompt and must decompose it into appropriate learners, route data, and
- * synthesize cross-learner insights.
+ * Tests the Brain orchestrator (not a single neuron) on the same behavioral
+ * dataset used in usecase-behavior-neuron.ts. The brain receives a high-level
+ * prompt and must decompose it into appropriate neurons, route data, and
+ * synthesize cross-neuron insights.
  *
  * Objectives:
  *   1. Decomposition quality — Does the brain create well-scoped, non-redundant
- *      learners from the prompt? Expected: behavioral patterns, emotional states,
+ *      neurons from the prompt? Expected: behavioral patterns, emotional states,
  *      browsing habits, avoidance detection — or similar reasonable decomposition.
- *   2. Cross-learner synthesis — Does brain.ask() produce richer answers than any
- *      single learner could? Queries that span multiple concern areas should
- *      integrate insights from relevant learners.
- *   3. Learner coverage — After ingestion, do multiple learners have understanding?
- *      No learner should be starved (0 observations) if the data is diverse enough.
- *   4. Internal learner awareness — Does the brain's global understanding capture
+ *   2. Cross-neuron synthesis — Does brain.ask() produce richer answers than any
+ *      single neuron could? Queries that span multiple concern areas should
+ *      integrate insights from relevant neurons.
+ *   3. Neuron coverage — After ingestion, do multiple neurons have understanding?
+ *      No neuron should be starved (0 observations) if the data is diverse enough.
+ *   4. Internal neuron awareness — Does the brain's global understanding capture
  *      cross-cutting themes (e.g., career anxiety shows in both conversations and
  *      browsing)?
  *
@@ -37,8 +37,8 @@
  */
 
 import { Brain } from '../../src/brain'
-import { SQLiteBrainStore } from '../../src/brain/stores'
-import { SQLiteStore } from '../../src/learners/stores'
+import { SQLiteBrainStore } from '../../src/stores/sqlite'
+import { SQLiteNeuronStore } from '../../src/stores/sqlite/neuron'
 import { createOpenRouter } from '@openrouter/ai-sdk-provider'
 import { readFileSync, mkdirSync } from 'node:fs'
 import { join, dirname } from 'node:path'
@@ -76,7 +76,7 @@ function printAskResult(result: import('../../src/brain/types').BrainAskResult |
 	console.log(`\nSynthesized insight:\n${result.insight}`)
 	console.log(`\nSources:`)
 	for (const s of result.sources) {
-		console.log(`  ${s.learnerId}: relevance=${s.relevance} confidence=${s.confidence}`)
+		console.log(`  ${s.neuronId}: relevance=${s.relevance} confidence=${s.confidence}`)
 		console.log(`    ${s.insight.slice(0, 200)}...`)
 	}
 	console.log(`\nGaps: ${result.gaps.length ? result.gaps.join('; ') : '(none)'}`)
@@ -115,7 +115,7 @@ async function main() {
 		model,
 		store: new SQLiteBrainStore(BRAIN_DB),
 		learning: {
-			store: (learnerId: string) => new SQLiteStore(join(dbDir, `behavior-brain-${learnerId}.db`)),
+			store: (neuronId: string) => new SQLiteNeuronStore(join(dbDir, `behavior-brain-${neuronId}.db`)),
 			governance: { strategy: 'continuous' },
 			understand: {
 				thresholds: {
@@ -136,7 +136,7 @@ async function main() {
 		switch (event.type) {
 			case 'brain:init:config:generated': {
 				const p = event.payload as { configs: Array<{ id: string; name: string; description: string; type: string }> }
-				console.log(`  [${elapsed()}s] Decomposition generated ${p.configs.length} learners:`)
+				console.log(`  [${elapsed()}s] Decomposition generated ${p.configs.length} neurons:`)
 				for (const c of p.configs) {
 					console.log(`    - ${c.id} (${c.type}): ${c.name}`)
 					console.log(`      ${c.description}`)
@@ -144,13 +144,13 @@ async function main() {
 				break
 			}
 			case 'brain:init:completed': {
-				const p = event.payload as { learnerIds: string[] }
-				console.log(`  [${elapsed()}s] Init completed — ${p.learnerIds.length} learners`)
+				const p = event.payload as { neuronIds: string[] }
+				console.log(`  [${elapsed()}s] Init completed — ${p.neuronIds.length} neurons`)
 				break
 			}
 			case 'brain:inject:batch:completed': {
-				const p = event.payload as { batchIndex: number; results: Array<{ learnerId: string; result: { status: string } }> }
-				const statuses = p.results.map((r) => `${r.learnerId}:${r.result.status}`).join(', ')
+				const p = event.payload as { batchIndex: number; results: Array<{ neuronId: string; result: { status: string } }> }
+				const statuses = p.results.map((r) => `${r.neuronId}:${r.result.status}`).join(', ')
 				console.log(`  [${elapsed()}s] Batch ${p.batchIndex} — ${statuses}`)
 				break
 			}
@@ -168,10 +168,10 @@ async function main() {
 				break
 			}
 			case 'evolution:action:executed': {
-				const p = event.payload as { action: string; targets: string[]; result: { newLearnerIds?: string[]; deletedLearnerIds?: string[] } }
+				const p = event.payload as { action: string; targets: string[]; result: { newNeuronIds?: string[]; deletedNeuronIds?: string[] } }
 				console.log(`  [${elapsed()}s] Evolution executed: ${p.action} [${p.targets.join(', ')}]`)
-				if (p.result.newLearnerIds?.length) console.log(`    Created: ${p.result.newLearnerIds.join(', ')}`)
-				if (p.result.deletedLearnerIds?.length) console.log(`    Deleted: ${p.result.deletedLearnerIds.join(', ')}`)
+				if (p.result.newNeuronIds?.length) console.log(`    Created: ${p.result.newNeuronIds.join(', ')}`)
+				if (p.result.deletedNeuronIds?.length) console.log(`    Deleted: ${p.result.deletedNeuronIds.join(', ')}`)
 				break
 			}
 		}
@@ -184,12 +184,12 @@ async function main() {
 
 	console.log('\n━━━ 2. Decomposition details ━━━')
 
-	const learners = brain.getLearners()
-	console.log(`\nLearner count: ${learners.length}`)
+	const neurons = brain.getNeurons()
+	console.log(`\nNeuron count: ${neurons.length}`)
 
-	for (const l of learners) {
+	for (const l of neurons) {
 		const meta = l.getMetadata()
-		console.log(`\n  Learner: ${l.id}`)
+		console.log(`\n  Neuron: ${l.id}`)
 		console.log(`  Instructions: ${meta.instructions}`)
 		console.log(`  Origin: ${meta.origin}`)
 	}
@@ -214,11 +214,11 @@ async function main() {
 		const result = await brain.inject(formatted)
 		console.log(`  [${elapsed()}s] Inject completed — ${result.batches.length} batches`)
 
-		// ── 4. Per-learner state after ingestion ────────────────────────────
+		// ── 4. Per-neuron state after ingestion ────────────────────────────
 
-		console.log('\n━━━ 4. Per-learner state after ingestion ━━━')
+		console.log('\n━━━ 4. Per-neuron state after ingestion ━━━')
 
-		for (const l of brain.getLearners()) {
+		for (const l of brain.getNeurons()) {
 			const metrics = l.getMetrics()
 			const understanding = await l.getUnderstanding()
 			const health = l.getHealth()
@@ -233,11 +233,11 @@ async function main() {
 		}
 	}
 
-	// ── 5. Internal learner state ───────────────────────────────────────────
+	// ── 5. Internal neuron state ───────────────────────────────────────────
 
-	console.log('\n━━━ 5. Internal learners ━━━')
+	console.log('\n━━━ 5. Internal neurons ━━━')
 
-	for (const [id, l] of brain.internalLearners) {
+	for (const [id, l] of brain.internalNeurons) {
 		const understanding = await l.getUnderstanding()
 		const hasKnowledge = await l.hasKnowledge()
 		console.log(`\n  ── ${id} ──`)
@@ -246,7 +246,7 @@ async function main() {
 		console.log(understanding || '  (empty)')
 	}
 
-	// ── 6. Cross-learner queries ────────────────────────────────────────────
+	// ── 6. Cross-neuron queries ────────────────────────────────────────────
 
 	console.log('\n━━━ 6. Query: "What have I been avoiding the most?" ━━━')
 	printAskResult(await askSafe(brain, 'What have I been avoiding the most?'))

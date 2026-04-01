@@ -1,11 +1,11 @@
 # brain-05-manual-split
 
-**Purpose:** Tests `brain.splitLearner()` for dividing a broad learner into multiple focused learners.
+**Purpose:** Tests `brain.splitNeuron()` for dividing a broad neuron into multiple focused neurons.
 
 **Evaluates:**
-- A broad learner splits into focused sub-learners
-- Original learner is deleted after split
-- Understanding from the original is distributed to new learners
+- A broad neuron splits into focused sub-neurons
+- Original neuron is deleted after split
+- Understanding from the original is distributed to new neurons
 
 **Parameters:**
 - Model: configurable via `MODEL` env var

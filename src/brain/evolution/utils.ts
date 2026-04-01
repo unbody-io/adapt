@@ -3,10 +3,10 @@
  */
 
 import { nanoid } from 'nanoid'
-import type { GeneratedLearnerConfig } from '../../learners'
+import type { GeneratedNeuronConfig } from '../../neurons'
 
 /**
- * Create a complete GeneratedLearnerConfig from partial config
+ * Create a complete GeneratedNeuronConfig from partial config
  *
  * Handlers only generate name, description, and instructions.
  * This fills in the required fields (id, type, governance).
@@ -16,7 +16,7 @@ export function createCompleteConfig(partial: {
 	description: string
 	instructions: string
 	type?: 'text' | 'list'
-}): GeneratedLearnerConfig {
+}): GeneratedNeuronConfig {
 	if (partial.type === 'list') {
 		return {
 			id: nanoid(),

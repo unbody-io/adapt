@@ -1,5 +1,5 @@
 /**
- * Delete action handler - removes learner from Brain
+ * Delete action handler - removes neuron from Brain
  */
 
 import { EvolutionActionHandler } from '../base-handler'
@@ -21,25 +21,25 @@ export class DeleteHandler extends EvolutionActionHandler<DeleteActionResult> {
 			try {
 				const deletedIds: string[] = []
 
-				for (const learnerId of decision.targets) {
-					const learner = this.brain.learners.get(learnerId)
+				for (const neuronId of decision.targets) {
+					const neuron = this.brain.neurons.get(neuronId)
 
-					if (!learner) {
+					if (!neuron) {
 						console.warn(
-							`Delete: Learner ${learnerId} not found, skipping`,
+							`Delete: Neuron ${neuronId} not found, skipping`,
 						)
 						continue
 					}
 
-					await this.brain.__removeLearner(learnerId)
+					await this.brain.__removeNeuron(neuronId)
 
-					deletedIds.push(learnerId)
+					deletedIds.push(neuronId)
 				}
 
 				allDeletedIds.push(...deletedIds)
 
 				const actionResult: DeleteActionResult = {
-					deletedLearnerIds: deletedIds,
+					deletedNeuronIds: deletedIds,
 				}
 
 				this.emitActionExecuted(decision, actionResult)
@@ -50,6 +50,6 @@ export class DeleteHandler extends EvolutionActionHandler<DeleteActionResult> {
 			}
 		}
 
-		return { deletedLearnerIds: allDeletedIds }
+		return { deletedNeuronIds: allDeletedIds }
 	}
 }

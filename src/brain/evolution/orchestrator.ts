@@ -5,7 +5,7 @@
 import type { Brain } from '../class'
 import type { EvolutionDecision } from '../evaluator/types'
 import { EVOLUTION_ACTIONS } from '../evaluator/types'
-import { isInternalLearnerId } from '../internal-learners'
+import { isInternalNeuronId } from '../internal-neurons'
 import { CreateHandler } from './handlers/create'
 import { MergeHandler } from './handlers/merge'
 import { SplitHandler } from './handlers/split'
@@ -39,9 +39,9 @@ export class EvolutionOrchestrator {
 	 * @returns Aggregated results from all handlers
 	 */
 	async executeDecisions(decisions: EvolutionDecision[]): Promise<AggregatedEvolutionResult> {
-		// Filter out decisions targeting internal learners (protected from evolution)
+		// Filter out decisions targeting internal neurons (protected from evolution)
 		const filtered = decisions.filter(
-			(d) => !d.targets.some(isInternalLearnerId),
+			(d) => !d.targets.some(isInternalNeuronId),
 		)
 
 		const aggregated: AggregatedEvolutionResult = {
@@ -82,9 +82,9 @@ export class EvolutionOrchestrator {
 	 * @returns Result of the action execution
 	 */
 	async executeSingleDecision(decision: EvolutionDecision): Promise<any> {
-		// Protect internal learners from evolution
-		if (decision.targets.some(isInternalLearnerId)) {
-			throw new Error('Cannot evolve internal learners')
+		// Protect internal neurons from evolution
+		if (decision.targets.some(isInternalNeuronId)) {
+			throw new Error('Cannot evolve internal neurons')
 		}
 
 		const handler = this.handlers.get(decision.action)
@@ -101,20 +101,20 @@ export class EvolutionOrchestrator {
 		action: string,
 		result: EvolutionActionResult,
 	): void {
-		if ('newLearnerIds' in result) {
+		if ('newNeuronIds' in result) {
 			if (action === EVOLUTION_ACTIONS.create) {
-				aggregated.created.push(...result.newLearnerIds)
+				aggregated.created.push(...result.newNeuronIds)
 			} else if (action === EVOLUTION_ACTIONS.merge) {
-				aggregated.merged.push(...result.newLearnerIds)
+				aggregated.merged.push(...result.newNeuronIds)
 			} else if (action === EVOLUTION_ACTIONS.split) {
-				aggregated.split.push(...result.newLearnerIds)
+				aggregated.split.push(...result.newNeuronIds)
 			}
 		}
-		if ('updatedLearnerIds' in result) {
-			aggregated.updated.push(...result.updatedLearnerIds)
+		if ('updatedNeuronIds' in result) {
+			aggregated.updated.push(...result.updatedNeuronIds)
 		}
-		if ('deletedLearnerIds' in result) {
-			aggregated.deleted.push(...result.deletedLearnerIds)
+		if ('deletedNeuronIds' in result) {
+			aggregated.deleted.push(...result.deletedNeuronIds)
 		}
 	}
 }

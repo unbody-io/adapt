@@ -6,7 +6,7 @@
  *
  * Strategy:
  *   1. Init brain + inject minimal foundation (1 chunk)
- *   2. Create problematic learners + inject just enough to synthesize
+ *   2. Create problematic neurons + inject just enough to synthesize
  *   3. Send freeform signals → evaluate → verify DELETE, MERGE, SPLIT
  *   4. brain.update() with new scope → verify CREATE/UPDATE via auto-evaluation
  *
@@ -61,10 +61,10 @@ async function startSSEMonitor(): Promise<void> {
 		'evaluator:',
 		'evolution:',
 		'brain:signal',
-		'learner:signal',
+		'neuron:signal',
 		'server:brain:updated',
-		'server:learner:created',
-		'server:learner:updated',
+		'server:neuron:created',
+		'server:neuron:updated',
 		'server:evaluate:',
 	]
 
@@ -105,7 +105,7 @@ async function startSSEMonitor(): Promise<void> {
 								console.log(`    Decisions: ${data.decisionCount ?? data.decisions?.length ?? '?'}`)
 								if (data.decisions) {
 									for (const d of data.decisions) {
-										console.log(`      → ${d.action}: ${JSON.stringify(d.targets || d.targetLearnerId || d.learnerIds || 'new').slice(0, 120)}`)
+										console.log(`      → ${d.action}: ${JSON.stringify(d.targets || d.targetNeuronId || d.neuronIds || 'new').slice(0, 120)}`)
 									}
 								}
 							} else if (currentEvent.startsWith('evolution:action:')) {
@@ -114,7 +114,7 @@ async function startSSEMonitor(): Promise<void> {
 								if (data.error) console.log(`    Error: ${data.error}`)
 							} else if (currentEvent.includes('signal')) {
 								// compact — just log signal source
-								const src = data.source || data.learnerId || '?'
+								const src = data.source || data.neuronId || '?'
 								console.log(`  [SSE ${entry.time}] signal from ${src}: ${(data.description || '').slice(0, 100)}`)
 							}
 						}
@@ -147,8 +147,8 @@ async function getStatus(): Promise<any> {
 
 async function printStatus(label?: string) {
 	const status = await getStatus()
-	console.log(`\n-- ${label || 'Status'}: ${status.learners.length} learners --`)
-	for (const l of status.learners) {
+	console.log(`\n-- ${label || 'Status'}: ${status.neurons.length} neurons --`)
+	for (const l of status.neurons) {
 		const buf = l.buffer?.count ?? 0
 		const und = l.understanding ? `${l.understanding.length}ch` : 'none'
 		console.log(`  ${l.id}: buffer=${buf} understanding=${und}`)
@@ -163,15 +163,15 @@ async function inject(items: unknown[]) {
 	})
 }
 
-async function createLearner(name: string, instructions: string, description?: string): Promise<string> {
+async function createNeuron(name: string, instructions: string, description?: string): Promise<string> {
 	const body: Record<string, string> = { name, instructions }
 	if (description) body.description = description
-	const result = await fetchJSON('/brain/learners/create', {
+	const result = await fetchJSON('/brain/neurons/create', {
 		method: 'POST',
 		body: JSON.stringify(body),
 	})
-	console.log(`  Created: ${(result as any).learnerId} (${name})`)
-	return (result as any).learnerId
+	console.log(`  Created: ${(result as any).neuronId} (${name})`)
+	return (result as any).neuronId
 }
 
 async function sendSignal(source: string, description: string) {
@@ -188,7 +188,7 @@ async function evaluate(): Promise<any> {
 	console.log(`  [${ts()}] Evaluation: ${r.decisions?.length ?? 0} decisions`)
 	if (r.decisions?.length > 0) {
 		for (const d of r.decisions) {
-			console.log(`    → ${d.action}: ${JSON.stringify(d.targets || d.targetLearnerId || d.learnerIds || 'new').slice(0, 120)}`)
+			console.log(`    → ${d.action}: ${JSON.stringify(d.targets || d.targetNeuronId || d.neuronIds || 'new').slice(0, 120)}`)
 			console.log(`      ${(d.reasoning || '').slice(0, 150)}`)
 		}
 	}
@@ -218,7 +218,7 @@ async function brainUpdate(body: Record<string, any>): Promise<any> {
 		console.log(`  Evolution: ${er.decisions?.length ?? 0} decisions`)
 		if (er.decisions?.length > 0) {
 			for (const d of er.decisions) {
-				console.log(`    → ${d.action}: ${JSON.stringify(d.targets || d.targetLearnerId || d.learnerIds || 'new').slice(0, 120)}`)
+				console.log(`    → ${d.action}: ${JSON.stringify(d.targets || d.targetNeuronId || d.neuronIds || 'new').slice(0, 120)}`)
 				console.log(`      ${(d.reasoning || '').slice(0, 150)}`)
 			}
 		}
@@ -267,11 +267,11 @@ async function main() {
 				},
 			}),
 		}) as any
-		console.log(`  Initialized: ${initResult.learners?.length} learners`)
+		console.log(`  Initialized: ${initResult.neurons?.length} neurons`)
 		await sleep(1000)
 	}
 
-	// Inject ONE chunk of foundation data so learners have something to work with
+	// Inject ONE chunk of foundation data so neurons have something to work with
 	const foundationData = [
 		'Code reviews require 2 approvals. One from domain expert, one from senior. No self-merging.',
 		'TypeScript strict mode everywhere. No `any` types allowed. Prefer interfaces over type aliases for object shapes.',
@@ -299,7 +299,7 @@ async function main() {
 	const injectResult = await inject(foundationData)
 	const batch = (injectResult as any).batches?.[0]
 	if (batch) {
-		const statuses = batch.results.map((r: any) => `${r.learnerId.slice(0, 15)}: ${r.result.status}`)
+		const statuses = batch.results.map((r: any) => `${r.neuronId.slice(0, 15)}: ${r.result.status}`)
 		console.log(`  ${statuses.join(' | ')}`)
 	}
 	await sleep(2000)
@@ -307,32 +307,32 @@ async function main() {
 	const initial = await printStatus('After Foundation')
 
 	// ──────────────────────────────────────────────────────────────
-	// PHASE 2: Create problematic learners + give them understanding
+	// PHASE 2: Create problematic neurons + give them understanding
 	// ──────────────────────────────────────────────────────────────
-	hr('PHASE 2: Problematic Learners')
+	hr('PHASE 2: Problematic Neurons')
 
-	// Overlap learner — overlaps with coding-practices/review topics
-	const overlapId = await createLearner(
+	// Overlap neuron — overlaps with coding-practices/review topics
+	const overlapId = await createNeuron(
 		'Code Review Practices',
 		'Track code review best practices, PR review workflows, review quality metrics, and team review culture.',
 	)
 	await sleep(1000)
 
-	// Irrelevant learner
-	const irrelevantId = await createLearner(
+	// Irrelevant neuron
+	const irrelevantId = await createNeuron(
 		'Culinary Techniques',
 		'Learn about cooking techniques, recipes, food preparation, and culinary traditions.',
 	)
 	await sleep(1000)
 
-	// Overly broad learner
-	const broadId = await createLearner(
+	// Overly broad neuron
+	const broadId = await createNeuron(
 		'Professional Growth and Life Systems',
 		'Track professional development, personal productivity, technical infrastructure, life habits, exercise, financial planning, and career growth.',
 	)
 	await sleep(1000)
 
-	// Inject targeted content so problematic learners build understanding
+	// Inject targeted content so problematic neurons build understanding
 	const reviewContent = [
 		'PR review turnaround: first feedback within 4 hours. PRs over 300 lines get rubber-stamped — enforce size limit.',
 		'Conventional comments: prefix with suggestion:, nitpick:, question:, or blocking: to clarify severity.',
@@ -387,14 +387,14 @@ async function main() {
 	await inject(broadContent)
 	await sleep(2000)
 
-	const afterProblematic = await printStatus('After Problematic Learners')
+	const afterProblematic = await printStatus('After Problematic Neurons')
 
 	// Verify understanding was built
-	const findLearner = (id: string) => afterProblematic.learners.find((l: any) => l.id === id)
+	const findNeuron = (id: string) => afterProblematic.neurons.find((l: any) => l.id === id)
 	console.log(`\n  Understanding check:`)
-	console.log(`    ${overlapId}: ${findLearner(overlapId)?.understanding?.length ?? 0} chars`)
-	console.log(`    ${irrelevantId}: ${findLearner(irrelevantId)?.understanding?.length ?? 0} chars`)
-	console.log(`    ${broadId}: ${findLearner(broadId)?.understanding?.length ?? 0} chars`)
+	console.log(`    ${overlapId}: ${findNeuron(overlapId)?.understanding?.length ?? 0} chars`)
+	console.log(`    ${irrelevantId}: ${findNeuron(irrelevantId)?.understanding?.length ?? 0} chars`)
+	console.log(`    ${broadId}: ${findNeuron(broadId)?.understanding?.length ?? 0} chars`)
 
 	// ──────────────────────────────────────────────────────────────
 	// PHASE 3: Signal-driven evaluation → DELETE + MERGE + SPLIT
@@ -405,17 +405,17 @@ async function main() {
 
 	await sendSignal(
 		'governance-monitor',
-		`Learner "${irrelevantId}" tracks cooking techniques and culinary traditions. Fundamentally misaligned with a software engineering brain. Zero relevance on all queries. Should be deleted.`,
+		`Neuron "${irrelevantId}" tracks cooking techniques and culinary traditions. Fundamentally misaligned with a software engineering brain. Zero relevance on all queries. Should be deleted.`,
 	)
 
 	await sendSignal(
 		'governance-monitor',
-		`Learner "${overlapId}" has significant overlap with existing coding-practices learner. Both cover code reviews, PR workflows, review quality. Their understanding should be consolidated via merge.`,
+		`Neuron "${overlapId}" has significant overlap with existing coding-practices neuron. Both cover code reviews, PR workflows, review quality. Their understanding should be consolidated via merge.`,
 	)
 
 	await sendSignal(
 		'governance-monitor',
-		`Learner "${broadId}" covers wildly disparate domains: personal habits (exercise, sleep, meditation), financial planning, AND technical infrastructure (Kubernetes, CQRS, microservices). Should be split — technical content belongs in existing learners, personal content is out of scope.`,
+		`Neuron "${broadId}" covers wildly disparate domains: personal habits (exercise, sleep, meditation), financial planning, AND technical infrastructure (Kubernetes, CQRS, microservices). Should be split — technical content belongs in existing neurons, personal content is out of scope.`,
 	)
 
 	await sleep(500)
@@ -434,12 +434,12 @@ async function main() {
 
 	await sendSignal(
 		'coverage-monitor',
-		'Persistent coverage gap: security topics (SAST/DAST, secrets management, authentication, container security, RBAC, WAF) are not well-covered by any learner. The brain needs a dedicated security practices learner.',
+		'Persistent coverage gap: security topics (SAST/DAST, secrets management, authentication, container security, RBAC, WAF) are not well-covered by any neuron. The brain needs a dedicated security practices neuron.',
 	)
 
 	await sendSignal(
 		'coverage-monitor',
-		'The coding-practices learner absorbs security-related patterns (input validation, parameterized queries) alongside general practices. Its scope should be refined to focus on coding conventions, deferring deep security to a dedicated learner.',
+		'The coding-practices neuron absorbs security-related patterns (input validation, parameterized queries) alongside general practices. Its scope should be refined to focus on coding conventions, deferring deep security to a dedicated neuron.',
 	)
 
 	await sleep(500)
@@ -470,15 +470,15 @@ async function main() {
 
 	const finalStatus = await printStatus('Final')
 
-	const initialIds = initial.learners.map((l: any) => l.id as string)
-	const finalIds = finalStatus.learners.map((l: any) => l.id as string)
+	const initialIds = initial.neurons.map((l: any) => l.id as string)
+	const finalIds = finalStatus.neurons.map((l: any) => l.id as string)
 	const problematicIds = [overlapId, irrelevantId, broadId]
 	const created = finalIds.filter((id: string) => !initialIds.includes(id) && !problematicIds.includes(id))
 	const deleted = problematicIds.filter((id: string) => !finalIds.includes(id))
 
-	console.log(`\nInitial: ${initial.learners.length} learners`)
+	console.log(`\nInitial: ${initial.neurons.length} neurons`)
 	console.log(`Added: 3 problematic (${overlapId}, ${irrelevantId}, ${broadId})`)
-	console.log(`Final: ${finalStatus.learners.length} learners`)
+	console.log(`Final: ${finalStatus.neurons.length} neurons`)
 	console.log(`\nNew: ${created.length > 0 ? created.join(', ') : 'none'}`)
 	console.log(`Deleted: ${deleted.length > 0 ? deleted.join(', ') : 'none'}`)
 

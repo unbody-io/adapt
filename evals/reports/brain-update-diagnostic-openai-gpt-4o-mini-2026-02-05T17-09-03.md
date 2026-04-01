@@ -30,9 +30,9 @@
 }
 ```
 
-### Generated Learners
+### Generated Neurons
 
-#### Learner: Therapist Approach (therapist-approach)
+#### Neuron: Therapist Approach (therapist-approach)
 
 **State:**
 ```json
@@ -72,7 +72,7 @@
 }
 ```
 
-#### Learner: Therapist Specializations (specializations)
+#### Neuron: Therapist Specializations (specializations)
 
 **State:**
 ```json
@@ -112,7 +112,7 @@
 }
 ```
 
-#### Learner: Therapist Uniqueness (therapist-uniqueness)
+#### Neuron: Therapist Uniqueness (therapist-uniqueness)
 
 **State:**
 ```json
@@ -152,7 +152,7 @@
 }
 ```
 
-#### Learner: Client Feedback (client-feedback)
+#### Neuron: Client Feedback (client-feedback)
 
 **State:**
 ```json
@@ -192,7 +192,7 @@
 }
 ```
 
-#### Learner: Online Presence (online-presence)
+#### Neuron: Online Presence (online-presence)
 
 **State:**
 ```json
@@ -251,7 +251,7 @@
 }
 ```
 
-| Turn | Events | Types | Learner Results |
+| Turn | Events | Types | Neuron Results |
 | --- | --- | --- | --- |
 | Turn 1 | evt_001–evt_010 | profile_bio×2, blog_post×3, video_transcript×1, testimonial×2, social_media_post×1, podcast_appearance×1 | therapist-approach:synthesized, specializations:synthesized, therapist-uniqueness:synthesized, client-feedback:synthesized, online-presence:synthesized |
 | Turn 2 | evt_011–evt_020 | profile_service×2, blog_post×2, video_transcript×1, testimonial×2, social_media_post×1, podcast_appearance×1, profile_faq×1 | therapist-approach:synthesized, specializations:synthesized, therapist-uniqueness:synthesized, client-feedback:synthesized, online-presence:synthesized |
@@ -275,7 +275,7 @@
 }
 ```
 
-**Learner Count:** 5
+**Neuron Count:** 5
 
 #### Therapist Approach (therapist-approach)
 
@@ -373,7 +373,7 @@ You are a therapist's online presence observer. You watch for signals about thei
 
 **Insight:** Dr. Sarah Chen's therapeutic approach is characterized by the integration of evidence-based methods, including Cognitive Behavioral Therapy (CBT), Acceptance and Commitment Therapy (ACT), and mindfulness interventions, particularly tailored for high-achieving professionals in the Asian-American community. She emphasizes cultural sensitivity, which is crucial in addressing issues like identity, anxiety, perfectionism, and the stigma surrounding mental health in these communities. Dr. Chen provides a collaborative and safe environment that facilitates open communication, allowing clients to explore their backgrounds without the necessity of providing cultural explanations. Her methodology includes holistic strategies that consider anxiety as a natural physiological response, employing techniques such as diaphragmatic breathing, progressive muscle relaxation, and grounding exercises. Additionally, she views adult ADHD not as a flaw but as a neurological difference, focusing on emotional regulation, executive functioning, and leveraging clients' strengths. Her proactive approach is akin to personal training for the mind, promoting a partnership in therapy where progress is regularly evaluated and tailored to the client's unique challenges and life transitions.
 **Source Count:** 5
-| Learner | Confidence | Insight Preview |
+| Neuron | Confidence | Insight Preview |
 | --- | --- | --- |
 | therapist-approach | 0.90 | Dr. Chen's therapeutic approach integrates evidence-based methods such as CBT, ACT, and mindfulness interventions, ta... |
 | specializations | 0.90 | Dr. Sarah Chen's therapeutic approach is characterized by the utilization of evidence-based methods, particularly Cog... |
@@ -387,7 +387,7 @@ You are a therapist's online presence observer. You watch for signals about thei
 
 **Insight:** Dr. Sarah Chen's uniqueness as a therapist stems from her specialized focus on high-achieving professionals, particularly within the Asian-American community, and her integration of cultural sensitivity with evidence-based therapeutic methods like Cognitive Behavioral Therapy (CBT) and Acceptance and Commitment Therapy (ACT). Unlike many therapists, she views anxiety as a natural physiological response, offers practical techniques for managing symptoms, and reframes ADHD as a neurological difference rather than a flaw, which resonates deeply with her clients. Her personalized, collaborative approach likens therapy to 'personal training for the mind', facilitating significant improvements in clients' mental health and interpersonal relationships. Moreover, her commitment to de-stigmatizing mental health issues in Asian cultures and addressing perfectionism and imposter syndrome sets her apart in her practice, fostering a safe and understanding environment for those navigating bicultural experiences.
 **Source Count:** 5
-| Learner | Confidence | Insight Preview |
+| Neuron | Confidence | Insight Preview |
 | --- | --- | --- |
 | therapist-approach | 0.95 | Dr. Sarah Chen stands out among other therapists due to her unique combination of evidence-based therapeutic methods ... |
 | specializations | 0.90 | Dr. Sarah Chen stands out compared to other therapists primarily due to her specialized focus on high-achieving profe... |
@@ -429,7 +429,7 @@ You are a therapist's online presence observer. You watch for signals about thei
 }
 ```
 
-**Learner Summary:**
+**Neuron Summary:**
 ```json
 [
   {
@@ -497,7 +497,7 @@ You are a therapist's online presence observer. You watch for signals about thei
 
 ### After
 
-**ERROR:** Error: Split action failed: Split requires exactly 1 learner
+**ERROR:** Error: Split action failed: Split requires exactly 1 neuron
 
 _(Update threw — prompt/config may be partially applied, evolution may have failed)_
 
@@ -518,7 +518,7 @@ _(Update threw — prompt/config may be partially applied, evolution may have fa
 }
 ```
 
-**Learner Summary:**
+**Neuron Summary:**
 ```json
 [
   {
@@ -606,7 +606,7 @@ Previous purpose: You help build a comprehensive profile of a therapist by analy
 
 ## Signal Checkpoint: After Phase 3 Ingestion + Queries
 
-### Learner Governance States
+### Neuron Governance States
 
 #### Therapist Approach (therapist-approach)
 
@@ -809,7 +809,7 @@ _No governance signals emitted yet._
 }
 ```
 
-**Learner Summary:**
+**Neuron Summary:**
 ```json
 [
   {
@@ -883,37 +883,37 @@ _No governance signals emitted yet._
   "changedFields": [
     "model"
   ],
-  "learnerResults": [
+  "neuronResults": [
     {
-      "learnerId": "therapist-approach",
+      "neuronId": "therapist-approach",
       "changedFields": [
         "model",
         "synthesize.thresholds.minImportance"
       ]
     },
     {
-      "learnerId": "specializations",
+      "neuronId": "specializations",
       "changedFields": [
         "model",
         "synthesize.thresholds.minImportance"
       ]
     },
     {
-      "learnerId": "therapist-uniqueness",
+      "neuronId": "therapist-uniqueness",
       "changedFields": [
         "model",
         "synthesize.thresholds.minImportance"
       ]
     },
     {
-      "learnerId": "client-feedback",
+      "neuronId": "client-feedback",
       "changedFields": [
         "model",
         "synthesize.thresholds.minImportance"
       ]
     },
     {
-      "learnerId": "online-presence",
+      "neuronId": "online-presence",
       "changedFields": [
         "model",
         "synthesize.thresholds.minImportance"
@@ -941,7 +941,7 @@ _No governance signals emitted yet._
 }
 ```
 
-**Learner Summary:**
+**Neuron Summary:**
 ```json
 [
   {
@@ -1012,7 +1012,7 @@ _No governance signals emitted yet._
 **Event Type Counts:**
 ```json
 {
-  "learner:config:updated": 5,
+  "neuron:config:updated": 5,
   "brain:config:updated": 1
 }
 ```
@@ -1021,7 +1021,7 @@ _No governance signals emitted yet._
 
 ## Signal Checkpoint: After Phase 5
 
-### Learner Governance States
+### Neuron Governance States
 
 #### Therapist Approach (therapist-approach)
 
@@ -1220,7 +1220,7 @@ _No governance signals emitted yet._
 }
 ```
 
-**Learner Summary:**
+**Neuron Summary:**
 ```json
 [
   {
@@ -1295,7 +1295,7 @@ _No governance signals emitted yet._
     "evolution.evaluatorSignalThreshold",
     "evolution.autoEvaluate"
   ],
-  "learnerResults": [],
+  "neuronResults": [],
   "hasEvolutionResults": false
 }
 ```
@@ -1317,7 +1317,7 @@ _No governance signals emitted yet._
 }
 ```
 
-**Learner Summary:**
+**Neuron Summary:**
 ```json
 [
   {
@@ -1399,24 +1399,24 @@ _No governance signals emitted yet._
 **Total Duration:** 125.4s
 **Total Events Ingested:** 20
 **Total Brain Events Collected:** 107
-**Final Learner Count:** 5
+**Final Neuron Count:** 5
 
 **All Brain Events by Type:**
 ```json
 {
   "brain:inject:started": 2,
   "brain:inject:batch:started": 2,
-  "learner:observe:started": 10,
-  "learner:observe:thinking": 10,
-  "learner:synthesize:started": 10,
-  "learner:synthesize:thinking": 10,
-  "learner:synthesized": 10,
-  "learner:governance:updated": 10,
+  "neuron:observe:started": 10,
+  "neuron:observe:thinking": 10,
+  "neuron:synthesize:started": 10,
+  "neuron:synthesize:thinking": 10,
+  "neuron:synthesized": 10,
+  "neuron:governance:updated": 10,
   "brain:inject:batch:completed": 2,
   "brain:inject:completed": 2,
   "brain:ask:started": 2,
-  "learner:query:started": 10,
-  "learner:query:completed": 10,
+  "neuron:query:started": 10,
+  "neuron:query:completed": 10,
   "brain:ask:synthesis:started": 2,
   "brain:ask:completed": 2,
   "brain:signal:received": 1,
@@ -1424,21 +1424,21 @@ _No governance signals emitted yet._
   "evaluator:evaluation:completed": 1,
   "evolution:action:started": 1,
   "evolution:action:failed": 1,
-  "learner:config:updated": 5,
+  "neuron:config:updated": 5,
   "brain:config:updated": 2
 }
 ```
 
 ### Signal Recap
 
-**Total Governance Signals (from learners):** 0
+**Total Governance Signals (from neurons):** 0
 **Total System Signals (from brain):** 1
 #### All System Signals
 
 - SYSTEM DIRECTIVE: Brain purpose has been updated by the user.
 Previous purpose: You help build a comprehensive profile of a therapist by analyzing their blog posts, client testimonials, social media, podcast appearances, and professional content to understand their approach, specializations, and ...
 
-### Final Learner States
+### Final Neuron States
 
 #### Therapist Approach (therapist-approach)
 

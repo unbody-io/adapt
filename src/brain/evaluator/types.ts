@@ -20,7 +20,7 @@ export type EvolutionAction =
 	(typeof EVOLUTION_ACTIONS)[keyof typeof EVOLUTION_ACTIONS]
 
 /**
- * Signal from a learner or external source
+ * Signal from a neuron or external source
  */
 export interface Signal {
 	source: string
@@ -40,9 +40,9 @@ export interface EvolutionDecision {
 }
 
 /**
- * Learner context for evaluation
+ * Neuron context for evaluation
  */
-export interface LearnerContext {
+export interface NeuronContext {
 	id: string
 	name: string
 	type: string
@@ -60,15 +60,15 @@ export interface LearnerContext {
 }
 
 /**
- * Full evaluation context (brain + learners)
+ * Full evaluation context (brain + neurons)
  */
 export interface EvaluationContext {
 	brain: {
 		prompt: string
 		evolutionContext: string | null
-		learnerCount: number
+		neuronCount: number
 	}
-	learners: LearnerContext[]
+	neurons: NeuronContext[]
 	dismissedBatchCount: number
 }
 

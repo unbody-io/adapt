@@ -1,7 +1,7 @@
 /**
- * Split action handler - divides one learner into multiple focused learners
+ * Split action handler - divides one neuron into multiple focused neurons
  *
- * Type-aware: preserves source learner type in split results,
+ * Type-aware: preserves source neuron type in split results,
  * uses descriptor's splitUnderstandingSchema for LLM output.
  */
 
@@ -17,44 +17,44 @@ import { createCompleteConfig } from '../utils'
 
 export class SplitHandler extends EvolutionActionHandler<SplitActionResult> {
 	async execute(decisions: EvolutionDecision[]): Promise<SplitActionResult> {
-		const allNewLearnerIds: string[] = []
-		const allDeletedLearnerIds: string[] = []
+		const allNewNeuronIds: string[] = []
+		const allDeletedNeuronIds: string[] = []
 
 		for (const decision of decisions) {
 			this.emitActionStarted(decision)
 
 			try {
 				if (decision.targets.length !== 1) {
-					throw new Error('Split requires exactly 1 learner')
+					throw new Error('Split requires exactly 1 neuron')
 				}
 
-				const learnerId = decision.targets[0]
-				const learner = this.brain.learners.get(learnerId)
+				const neuronId = decision.targets[0]
+				const neuron = this.brain.neurons.get(neuronId)
 
-				if (!learner) {
-					throw new Error(`Learner ${learnerId} not found`)
+				if (!neuron) {
+					throw new Error(`Neuron ${neuronId} not found`)
 				}
 
 				// Get type descriptor for understanding schema
-				const learnerType = learner.type
-				const descriptor = this.brain.learnerTypes.get(learnerType)
+				const neuronType = neuron.type
+				const descriptor = this.brain.neuronTypes.get(neuronType)
 				if (!descriptor) {
-					throw new Error(`Unknown learner type: ${learnerType}`)
+					throw new Error(`Unknown neuron type: ${neuronType}`)
 				}
 
 				// Build dynamic schema with type-specific understanding
 				const splitSchema = z.object({
-					learners: z
+					neurons: z
 						.array(
 							z.object({
-								name: z.string().describe('Name for the split learner'),
-								description: z.string().describe('Description of this split learner purpose'),
+								name: z.string().describe('Name for the split neuron'),
+								description: z.string().describe('Description of this split neuron purpose'),
 								instructions: z.string().describe('Focused instructions defining scope and responsibilities'),
 								understanding: descriptor.splitUnderstandingSchema,
 							}),
 						)
 						.min(2)
-						.describe('Array of 2 or more focused learners'),
+						.describe('Array of 2 or more focused neurons'),
 				})
 
 				const result = await generate({
@@ -62,40 +62,40 @@ export class SplitHandler extends EvolutionActionHandler<SplitActionResult> {
 					system: splitSystemPrompt,
 					prompt: await splitPromptTemplate(
 						decision.guidance,
-						learner,
+						neuron,
 						this.brain.promptContext?.purpose ?? this.brain.prompt,
 					),
 					output: Output.object({ schema: splitSchema }),
 					repairSchema: splitSchema,
 				})
 
-				const { learners: splitConfigs } = result.output
+				const { neurons: splitConfigs } = result.output
 
-				const newLearnerIds: string[] = []
+				const newNeuronIds: string[] = []
 
 				for (const config of splitConfigs) {
 					const completeConfig = createCompleteConfig({
 						name: config.name,
 						description: config.description,
 						instructions: config.instructions,
-						type: learnerType as 'text' | 'list',
+						type: neuronType as 'text' | 'list',
 					})
-					const newLearner =
-						await this.brain.createLearnerFromConfig(completeConfig)
+					const newNeuron =
+						await this.brain.createNeuronFromConfig(completeConfig)
 
-					await newLearner.setUnderstanding(config.understanding)
+					await newNeuron.setUnderstanding(config.understanding)
 
-					newLearnerIds.push(newLearner.id)
+					newNeuronIds.push(newNeuron.id)
 				}
 
-				await this.brain.__removeLearner(learnerId)
+				await this.brain.__removeNeuron(neuronId)
 
-				allNewLearnerIds.push(...newLearnerIds)
-				allDeletedLearnerIds.push(learnerId)
+				allNewNeuronIds.push(...newNeuronIds)
+				allDeletedNeuronIds.push(neuronId)
 
 				const actionResult: SplitActionResult = {
-					newLearnerIds,
-					deletedLearnerIds: [learnerId],
+					newNeuronIds,
+					deletedNeuronIds: [neuronId],
 				}
 
 				this.emitActionExecuted(decision, actionResult)
@@ -107,8 +107,8 @@ export class SplitHandler extends EvolutionActionHandler<SplitActionResult> {
 		}
 
 		return {
-			newLearnerIds: allNewLearnerIds,
-			deletedLearnerIds: allDeletedLearnerIds,
+			newNeuronIds: allNewNeuronIds,
+			deletedNeuronIds: allDeletedNeuronIds,
 		}
 	}
 }

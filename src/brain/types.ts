@@ -1,20 +1,20 @@
 import type { LanguageModel } from 'ai'
-import type { GeneratedLearnerConfig } from '../learners/schema.config'
-import type { Strategy } from '../learners/text-learner/strategies'
-import type { SharedLearnerEventMap } from '../learners/base/types'
-import type { Store } from '../learners/stores'
-import type { TokenUsage } from '../learners/types'
-import type { LearnOutput } from '../learners/base/class'
+import type { GeneratedNeuronConfig } from '../neurons/schema.config'
+import type { Strategy } from '../neurons/text/strategies'
+import type { SharedNeuronEventMap } from '../neurons/base/types'
+import type { NeuronStore } from '../stores'
+import type { TokenUsage } from '../neurons/types'
+import type { LearnOutput } from '../neurons/base/class'
 import type {
 	CascadableConfig,
 	ResolvedCascadableConfig,
 } from '../types/config'
 import type { EventsFromMap } from '../types/events'
 import type { EvolutionDecision } from './evaluator/types'
-import type { BrainStore } from './stores'
+import type { BrainStore } from '../stores'
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Learning Config (passed to learners)
+// Learning Config (passed to neurons)
 // ─────────────────────────────────────────────────────────────────────────────
 
 /**
@@ -41,7 +41,7 @@ export interface QueryPhaseConfig {
 }
 
 /**
- * Governance configuration (text learner understanding management)
+ * Governance configuration (text neuron understanding management)
  */
 export interface GovernanceConfig {
 	strategy?: Strategy
@@ -49,24 +49,24 @@ export interface GovernanceConfig {
 }
 
 /**
- * Learning config - applied to all auto-generated learners
+ * Learning config - applied to all auto-generated neurons
  *
  * Semantic fields (instructions, name, description) go through the evaluator
- * when used in brain.update(). Mechanical fields cascade directly to learners.
+ * when used in brain.update(). Mechanical fields cascade directly to neurons.
  */
 export interface LearningConfig extends CascadableConfig {
-	/** Learner instructions (semantic — goes through evaluator) */
+	/** Neuron instructions (semantic — goes through evaluator) */
 	instructions?: string
-	/** Learner name (semantic — goes through evaluator) */
+	/** Neuron name (semantic — goes through evaluator) */
 	name?: string
-	/** Learner description (semantic — goes through evaluator) */
+	/** Neuron description (semantic — goes through evaluator) */
 	description?: string
 	observer?: ObserverPhaseConfig
 	understand?: UnderstandPhaseConfig
 	query?: QueryPhaseConfig
 	governance?: GovernanceConfig
-	/** Factory for creating per-learner stores. Receives learnerId for restore routing. */
-	store?: (learnerId: string) => Store
+	/** Factory for creating per-neuron stores. Receives neuronId for restore routing. */
+	store?: (neuronId: string) => NeuronStore
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -118,18 +118,18 @@ export interface EvolutionConfig {
 }
 
 /**
- * Per-internal-learner config: true = enabled with defaults, object = enabled with overrides, false = disabled
+ * Per-internal-neuron config: true = enabled with defaults, object = enabled with overrides, false = disabled
  */
-export type InternalLearnerToggle = boolean | Partial<LearningConfig>
+export type InternalNeuronToggle = boolean | Partial<LearningConfig>
 
 /**
- * Configuration for Brain's internal learners
+ * Configuration for Brain's internal neurons
  */
-export interface InternalLearnersConfig {
-	globalUnderstanding?: InternalLearnerToggle
-	globalQueryUnderstanding?: InternalLearnerToggle
-	injectionGaps?: InternalLearnerToggle
-	queryGaps?: InternalLearnerToggle
+export interface InternalNeuronsConfig {
+	globalUnderstanding?: InternalNeuronToggle
+	globalQueryUnderstanding?: InternalNeuronToggle
+	injectionGaps?: InternalNeuronToggle
+	queryGaps?: InternalNeuronToggle
 }
 
 /**
@@ -154,22 +154,22 @@ export interface BrainConfig extends CascadableConfig {
 	query?: BrainQueryConfig
 	/** Ingest config */
 	ingest?: IngestConfig
-	/** Learning config (applied to all learners) */
+	/** Learning config (applied to all neurons) */
 	learning?: LearningConfig
 	/** Evolution config (Living Brain) */
 	evolution?: EvolutionConfig
 	/** Brain's own persistence store. Defaults to MemoryBrainStore. */
 	store?: BrainStore
-	/** Explicit learner definitions (uses existing text/list types). Created on init. */
-	learners?: GeneratedLearnerConfig[]
+	/** Explicit neuron definitions (uses existing text/list types). Created on init. */
+	neurons?: GeneratedNeuronConfig[]
 	/**
-	 * When true (default), Brain auto-generates learners from the prompt via LLM.
-	 * When false, only explicit `learners` are used — no LLM decomposition.
-	 * Both `prompt` and `learners` can coexist regardless of this flag.
+	 * When true (default), Brain auto-generates neurons from the prompt via LLM.
+	 * When false, only explicit `neurons` are used — no LLM decomposition.
+	 * Both `prompt` and `neurons` can coexist regardless of this flag.
 	 */
 	autoSetup?: boolean
-	/** Internal learners config (all enabled by default) */
-	internalLearners?: InternalLearnersConfig
+	/** Internal neurons config (all enabled by default) */
+	internalNeurons?: InternalNeuronsConfig
 	/** Dismissed batch buffer config */
 	dismissedBatchBuffer?: DismissedBatchBufferConfig
 }
@@ -212,10 +212,10 @@ export interface BrainInjectOptions {
 }
 
 /**
- * Result from a single learner within a batch
+ * Result from a single neuron within a batch
  */
-export interface LearnerBatchResult {
-	learnerId: string
+export interface NeuronBatchResult {
+	neuronId: string
 	result: LearnOutput
 }
 
@@ -227,8 +227,8 @@ export interface BatchResult {
 	id: string
 	/** 0-indexed position within the inject operation */
 	index: number
-	/** Results from each learner for this batch */
-	results: LearnerBatchResult[]
+	/** Results from each neuron for this batch */
+	results: NeuronBatchResult[]
 }
 
 /**
@@ -245,26 +245,26 @@ export interface BrainInjectResult {
  * Result from asking the Brain a question
  */
 export interface BrainAskResult {
-	/** Synthesized answer integrating all learner insights */
+	/** Synthesized answer integrating all neuron insights */
 	insight: string
-	/** Individual learner responses */
+	/** Individual neuron responses */
 	sources: Array<{
-		learnerId: string
+		neuronId: string
 		relevance: number
 		confidence: number
 		insight: string
 	}>
-	/** Aggregated gaps from all learners */
+	/** Aggregated gaps from all neurons */
 	gaps: string[]
 }
 
 /**
- * Result from brain.consult() — querying internal learners
+ * Result from brain.consult() — querying internal neurons
  */
 export interface ConsultResult {
 	insight: string
 	sources: Array<{
-		learnerId: string
+		neuronId: string
 		relevance: number
 		confidence: number
 		insight: string
@@ -276,8 +276,8 @@ export interface ConsultResult {
  * Options for brain.consult()
  */
 export interface ConsultOptions {
-	/** Query a specific internal learner by ID */
-	learner?: string
+	/** Query a specific internal neuron by ID */
+	neuron?: string
 }
 
 /**
@@ -288,9 +288,9 @@ export interface BrainUpdateResult {
 	changedFields: string[]
 	/** Current resolved brain config after update */
 	config: ResolvedBrainConfig
-	/** Per-learner summary of what changed (from learner.update() calls) */
-	learnerResults: Array<{
-		learnerId: string
+	/** Per-neuron summary of what changed (from neuron.update() calls) */
+	neuronResults: Array<{
+		neuronId: string
 		changedFields: string[]
 	}>
 	/** Present only when signal-driven evaluation was triggered */
@@ -305,10 +305,10 @@ export interface BrainUpdateResult {
 }
 
 /**
- * Learner response for ask synthesis
+ * Neuron response for ask synthesis
  */
-export interface LearnerResponse {
-	learnerId: string
+export interface NeuronResponse {
+	neuronId: string
 	name: string
 	relevant: boolean
 	relevance: number
@@ -318,17 +318,17 @@ export interface LearnerResponse {
 }
 
 /**
- * Brain's own events (not forwarded from learners)
+ * Brain's own events (not forwarded from neurons)
  */
 export interface BrainOwnEventMap {
 	// Init
 	'brain:init:started': Record<string, never>
 	'brain:init:config:generating': Record<string, never>
 	'brain:init:config:generated': {
-		configs: GeneratedLearnerConfig[]
+		configs: GeneratedNeuronConfig[]
 		usage: TokenUsage
 	}
-	'brain:init:completed': { learnerIds: string[] }
+	'brain:init:completed': { neuronIds: string[] }
 	'brain:init:failed': { error: string }
 
 	// Inject
@@ -347,7 +347,7 @@ export interface BrainOwnEventMap {
 		injectId: string
 		batchId: string
 		batchIndex: number
-		results: LearnerBatchResult[]
+		results: NeuronBatchResult[]
 	}
 	'brain:inject:completed': { injectId: string; batches: BatchResult[] }
 	'brain:inject:failed': { injectId: string; error: string }
@@ -367,14 +367,14 @@ export interface BrainOwnEventMap {
 	}
 	'brain:ask:failed': { queryId: string; error: string }
 
-	// Learner management
-	'brain:learner:added': {
-		learnerId: string
+	// Neuron management
+	'brain:neuron:added': {
+		neuronId: string
 		name: string
 		instructions: string
 	}
-	'brain:learner:removed': {
-		learnerId: string
+	'brain:neuron:removed': {
+		neuronId: string
 	}
 
 	// Signal events (Living Brain)
@@ -416,9 +416,9 @@ export interface BrainOwnEventMap {
 		targets: string[]
 		timestamp: Date
 		result: {
-			newLearnerIds?: string[]
-			deletedLearnerIds?: string[]
-			updatedLearnerIds?: string[]
+			newNeuronIds?: string[]
+			deletedNeuronIds?: string[]
+			updatedNeuronIds?: string[]
 		}
 	}
 	'evolution:action:failed': {
@@ -436,9 +436,9 @@ export interface BrainOwnEventMap {
 }
 
 /**
- * Combined Brain event map (Brain's own events + forwarded learner events)
+ * Combined Brain event map (Brain's own events + forwarded neuron events)
  */
-export type BrainEventMap = BrainOwnEventMap & SharedLearnerEventMap
+export type BrainEventMap = BrainOwnEventMap & SharedNeuronEventMap
 
 /**
  * Union type of all Brain events

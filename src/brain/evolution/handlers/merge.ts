@@ -1,7 +1,7 @@
 /**
- * Merge action handler - combines multiple learners into one
+ * Merge action handler - combines multiple neurons into one
  *
- * Type-aware: validates all source learners are same type,
+ * Type-aware: validates all source neurons are same type,
  * uses descriptor's mergeUnderstandingSchema for LLM output.
  */
 
@@ -10,7 +10,7 @@ import { z } from 'zod'
 import { EvolutionActionHandler } from '../base-handler'
 import type { EvolutionDecision } from '../../evaluator/types'
 import type { MergeActionResult } from '../types'
-import type { BaseLearner } from '../../../learners/base/class'
+import type { BaseNeuron } from '../../../neurons/base/class'
 import { generate } from '../../../llm'
 import { mergeSystemPrompt } from '../prompt.system.merge'
 import { mergePromptTemplate } from '../prompt.template.merge'
@@ -18,45 +18,45 @@ import { createCompleteConfig } from '../utils'
 
 export class MergeHandler extends EvolutionActionHandler<MergeActionResult> {
 	async execute(decisions: EvolutionDecision[]): Promise<MergeActionResult> {
-		const allNewLearnerIds: string[] = []
-		const allDeletedLearnerIds: string[] = []
+		const allNewNeuronIds: string[] = []
+		const allDeletedNeuronIds: string[] = []
 
 		for (const decision of decisions) {
 			this.emitActionStarted(decision)
 
 			try {
 				if (decision.targets.length < 2) {
-					throw new Error('Merge requires at least 2 learners')
+					throw new Error('Merge requires at least 2 neurons')
 				}
 
-				const learners: BaseLearner<unknown>[] = []
-				for (const learnerId of decision.targets) {
-					const learner = this.brain.learners.get(learnerId)
-					if (!learner) {
-						throw new Error(`Learner ${learnerId} not found`)
+				const neurons: BaseNeuron<unknown>[] = []
+				for (const neuronId of decision.targets) {
+					const neuron = this.brain.neurons.get(neuronId)
+					if (!neuron) {
+						throw new Error(`Neuron ${neuronId} not found`)
 					}
-					learners.push(learner)
+					neurons.push(neuron)
 				}
 
-				// All source learners must be the same type
-				const learnerType = learners[0].type
-				if (!learners.every((l) => l.type === learnerType)) {
+				// All source neurons must be the same type
+				const neuronType = neurons[0].type
+				if (!neurons.every((l) => l.type === neuronType)) {
 					throw new Error(
-						'Cross-type merge is not supported. All source learners must be the same type.',
+						'Cross-type merge is not supported. All source neurons must be the same type.',
 					)
 				}
 
 				// Get type descriptor for understanding schema
-				const descriptor = this.brain.learnerTypes.get(learnerType)
+				const descriptor = this.brain.neuronTypes.get(neuronType)
 				if (!descriptor) {
-					throw new Error(`Unknown learner type: ${learnerType}`)
+					throw new Error(`Unknown neuron type: ${neuronType}`)
 				}
 
 				// Build dynamic schema with type-specific understanding
 				const mergeSchema = z.object({
 					config: z.object({
-						name: z.string().describe('Name for the merged learner'),
-						description: z.string().describe('Description of the merged learner purpose'),
+						name: z.string().describe('Name for the merged neuron'),
+						description: z.string().describe('Description of the merged neuron purpose'),
 						instructions: z.string().describe('Combined instructions defining scope and responsibilities'),
 					}),
 					understanding: descriptor.mergeUnderstandingSchema,
@@ -67,7 +67,7 @@ export class MergeHandler extends EvolutionActionHandler<MergeActionResult> {
 					system: mergeSystemPrompt,
 					prompt: await mergePromptTemplate(
 						decision.guidance,
-						learners,
+						neurons,
 						this.brain.promptContext?.purpose ?? this.brain.prompt,
 					),
 					output: Output.object({ schema: mergeSchema }),
@@ -78,23 +78,23 @@ export class MergeHandler extends EvolutionActionHandler<MergeActionResult> {
 
 				const completeConfig = createCompleteConfig({
 					...config,
-					type: learnerType as 'text' | 'list',
+					type: neuronType as 'text' | 'list',
 				})
-				const newLearner =
-					await this.brain.createLearnerFromConfig(completeConfig)
+				const newNeuron =
+					await this.brain.createNeuronFromConfig(completeConfig)
 
-				await newLearner.setUnderstanding(understanding)
+				await newNeuron.setUnderstanding(understanding)
 
-				for (const learnerId of decision.targets) {
-					await this.brain.__removeLearner(learnerId)
+				for (const neuronId of decision.targets) {
+					await this.brain.__removeNeuron(neuronId)
 				}
 
-				allNewLearnerIds.push(newLearner.id)
-				allDeletedLearnerIds.push(...decision.targets)
+				allNewNeuronIds.push(newNeuron.id)
+				allDeletedNeuronIds.push(...decision.targets)
 
 				const actionResult: MergeActionResult = {
-					newLearnerIds: [newLearner.id],
-					deletedLearnerIds: decision.targets,
+					newNeuronIds: [newNeuron.id],
+					deletedNeuronIds: decision.targets,
 				}
 
 				this.emitActionExecuted(decision, actionResult)
@@ -106,8 +106,8 @@ export class MergeHandler extends EvolutionActionHandler<MergeActionResult> {
 		}
 
 		return {
-			newLearnerIds: allNewLearnerIds,
-			deletedLearnerIds: allDeletedLearnerIds,
+			newNeuronIds: allNewNeuronIds,
+			deletedNeuronIds: allDeletedNeuronIds,
 		}
 	}
 }

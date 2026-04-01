@@ -8,12 +8,12 @@
 
 export const MAX_BLOBS = 32
 
-/** Special ID for the nucleus blob that appears before any learners */
+/** Special ID for the nucleus blob that appears before any neurons */
 const NUCLEUS_ID = "__nucleus__"
 
 export interface BlobState {
-	/** Learner ID this blob represents (or NUCLEUS_ID) */
-	learnerId: string
+	/** Neuron ID this blob represents (or NUCLEUS_ID) */
+	neuronId: string
 	/** Display name for label */
 	name: string
 	/** Center position in UV space (-1 to 1 range) */
@@ -25,7 +25,7 @@ export interface BlobState {
 	life: number
 	/** 0 = idle, 1 = just fired. Decays over time. Event-triggered. */
 	pulse: number
-	/** 0-1 from learner health activation */
+	/** 0-1 from neuron health activation */
 	activation: number
 	/** 0-1 outer membrane size, driven by gaps/dismissal metrics */
 	membrane: number
@@ -89,13 +89,13 @@ function clamp(v: number, min: number, max: number): number {
 export class BlobManager {
 	blobs: BlobState[] = []
 	private animations: PendingAnimation[] = []
-	/** Tracks how many real learners have been added (starts at 1 so all drift outward from center) */
-	private learnerIndex = 1
-	/** How many learners the nucleus will split into (set when config is generated) */
-	private expectedLearnerCount = 0
-	/** How many learners have been born from the nucleus so far */
+	/** Tracks how many real neurons have been added (starts at 1 so all drift outward from center) */
+	private neuronIndex = 1
+	/** How many neurons the nucleus will split into (set when config is generated) */
+	private expectedNeuronCount = 0
+	/** How many neurons have been born from the nucleus so far */
 	private spawnedFromNucleus = 0
-	/** Full radius of the nucleus (set based on expected learner count) */
+	/** Full radius of the nucleus (set based on expected neuron count) */
 	private nucleusFullRadius = 0.035
 
 	/** Global injection pulse — decays over time, shader uses for edge ripple */
@@ -115,10 +115,10 @@ export class BlobManager {
 
 	/** Brain init started — spawn a small nucleus seed at center */
 	onInitStarted(): void {
-		if (this.blobs.some((b) => b.learnerId === NUCLEUS_ID)) return
+		if (this.blobs.some((b) => b.neuronId === NUCLEUS_ID)) return
 
 		const blob: BlobState = {
-			learnerId: NUCLEUS_ID,
+			neuronId: NUCLEUS_ID,
 			name: "",
 			x: 0,
 			y: 0,
@@ -147,25 +147,25 @@ export class BlobManager {
 		})
 	}
 
-	/** Learner configs generated — we now know how many learners will split from nucleus.
+	/** Neuron configs generated — we now know how many neurons will split from nucleus.
 	 *  Grow the nucleus to a size proportional to the count. */
-	onConfigGenerated(learnerCount: number): void {
-		const nucleus = this.blobs.find((b) => b.learnerId === NUCLEUS_ID)
+	onConfigGenerated(neuronCount: number): void {
+		const nucleus = this.blobs.find((b) => b.neuronId === NUCLEUS_ID)
 		if (!nucleus) return
 
-		this.expectedLearnerCount = learnerCount
+		this.expectedNeuronCount = neuronCount
 		this.spawnedFromNucleus = 0
 
-		// Nucleus radius scales with how many learners it contains
-		// sqrt so it represents area — 3 learners ≈ 0.14, 6 ≈ 0.18, 10 ≈ 0.22
-		this.nucleusFullRadius = 0.08 + 0.045 * Math.sqrt(learnerCount)
+		// Nucleus radius scales with how many neurons it contains
+		// sqrt so it represents area — 3 neurons ≈ 0.14, 6 ≈ 0.18, 10 ≈ 0.22
+		this.nucleusFullRadius = 0.08 + 0.045 * Math.sqrt(neuronCount)
 		nucleus.radius = this.nucleusFullRadius
 		nucleus.pulse = 0.6
 	}
 
-	/** Dissolve the nucleus — called when init completes and learners have emerged */
+	/** Dissolve the nucleus — called when init completes and neurons have emerged */
 	dissolveNucleus(): void {
-		const idx = this.blobs.findIndex((b) => b.learnerId === NUCLEUS_ID)
+		const idx = this.blobs.findIndex((b) => b.neuronId === NUCLEUS_ID)
 		if (idx < 0) return
 
 		this.animations.push({
@@ -176,26 +176,26 @@ export class BlobManager {
 		})
 	}
 
-	// ─── Learner lifecycle ──────────────────────────────────────────
+	// ─── Neuron lifecycle ──────────────────────────────────────────
 
-	/** A new learner was created — emerges from the nucleus (center) */
-	addLearner(learnerId: string, name: string, spawnX = 0, spawnY = 0): void {
+	/** A new neuron was created — emerges from the nucleus (center) */
+	addNeuron(neuronId: string, name: string, spawnX = 0, spawnY = 0): void {
 		if (this.blobs.length >= MAX_BLOBS) return
-		if (this.blobs.some((b) => b.learnerId === learnerId)) return
+		if (this.blobs.some((b) => b.neuronId === neuronId)) return
 
 		// Spawn at nucleus position — metaball field merges overlapping blobs,
 		// so the new blob starts fused with the nucleus and pinches off as it drifts
-		const nucleus = this.blobs.find((b) => b.learnerId === NUCLEUS_ID)
+		const nucleus = this.blobs.find((b) => b.neuronId === NUCLEUS_ID)
 		if (nucleus) {
 			spawnX = nucleus.x
 			spawnY = nucleus.y
 		}
 
-		const home = homePosition(this.learnerIndex)
-		this.learnerIndex++
+		const home = homePosition(this.neuronIndex)
+		this.neuronIndex++
 
 		const blob: BlobState = {
-			learnerId,
+			neuronId,
 			name,
 			x: spawnX,
 			y: spawnY,
@@ -223,14 +223,14 @@ export class BlobManager {
 			duration: this.birthDuration,
 		})
 
-		// Nucleus reacts: pulse + shrink as each learner splits off
-		if (nucleus && this.expectedLearnerCount > 0) {
+		// Nucleus reacts: pulse + shrink as each neuron splits off
+		if (nucleus && this.expectedNeuronCount > 0) {
 			this.spawnedFromNucleus++
 			nucleus.pulse = Math.min(nucleus.pulse + 0.5, 1.0)
 			nucleus._radiusScale = 1.12
 
 			// Shrink nucleus — each split removes a "portion" of its mass
-			const remaining = Math.max(0, 1 - this.spawnedFromNucleus / this.expectedLearnerCount)
+			const remaining = Math.max(0, 1 - this.spawnedFromNucleus / this.expectedNeuronCount)
 			// Don't let it vanish completely — dissolveNucleus handles the final fade
 			nucleus.radius = this.nucleusFullRadius * Math.max(remaining, 0.15)
 		} else if (nucleus) {
@@ -239,9 +239,9 @@ export class BlobManager {
 		}
 	}
 
-	/** A learner was removed — death animation */
-	removeLearner(learnerId: string): void {
-		const idx = this.blobs.findIndex((b) => b.learnerId === learnerId)
+	/** A neuron was removed — death animation */
+	removeNeuron(neuronId: string): void {
+		const idx = this.blobs.findIndex((b) => b.neuronId === neuronId)
 		if (idx < 0) return
 
 		this.animations.push({
@@ -259,9 +259,9 @@ export class BlobManager {
 		this.injectionPulse = 1.0
 	}
 
-	/** Learner observed data — small pulse + track metric */
-	onObserved(learnerId: string): void {
-		const blob = this.findBlob(learnerId)
+	/** Neuron observed data — small pulse + track metric */
+	onObserved(neuronId: string): void {
+		const blob = this.findBlob(neuronId)
 		if (!blob) return
 		blob.pulse = Math.min(blob.pulse + 0.4, 1.0)
 		blob._observeCount++
@@ -269,18 +269,18 @@ export class BlobManager {
 		this.recomputeMembrane(blob)
 	}
 
-	/** Learner dismissed data — brief contraction + track metric */
-	onDismissed(learnerId: string): void {
-		const blob = this.findBlob(learnerId)
+	/** Neuron dismissed data — brief contraction + track metric */
+	onDismissed(neuronId: string): void {
+		const blob = this.findBlob(neuronId)
 		if (!blob) return
 		blob.pulse = Math.min(blob.pulse + 0.15, 1.0)
 		blob._dismissCount++
 		this.recomputeMembrane(blob)
 	}
 
-	/** Learner synthesized understanding — heartbeat animation (contract → expand → settle) */
-	onSynthesized(learnerId: string, significance?: number, gaps?: string[]): void {
-		const blob = this.findBlob(learnerId)
+	/** Neuron synthesized understanding — heartbeat animation (contract → expand → settle) */
+	onSynthesized(neuronId: string, significance?: number, gaps?: string[]): void {
+		const blob = this.findBlob(neuronId)
 		if (!blob) return
 		blob.pulse = Math.min(0.6 + (significance ?? 0.5) * 0.4, 1.0)
 		blob.synthesisCount++
@@ -303,8 +303,8 @@ export class BlobManager {
 	}
 
 	/** Update blob radius from understanding size (string length or item count) */
-	updateUnderstandingSize(learnerId: string, size: number): void {
-		const blob = this.findBlob(learnerId)
+	updateUnderstandingSize(neuronId: string, size: number): void {
+		const blob = this.findBlob(neuronId)
 		if (!blob) return
 		// Map understanding size to radius: min 0.065, max 0.14
 		// Use log scale so early growth is visible, later growth tapers
@@ -312,13 +312,13 @@ export class BlobManager {
 		blob.radius = 0.065 + Math.min(normalized, 1.0) * 0.075
 	}
 
-	/** Update learner health metrics */
+	/** Update neuron health metrics */
 	updateHealth(
-		learnerId: string,
+		neuronId: string,
 		activation: number,
 		_status: string,
 	): void {
-		const blob = this.findBlob(learnerId)
+		const blob = this.findBlob(neuronId)
 		if (blob) {
 			blob.activation = activation
 		}
@@ -339,10 +339,10 @@ export class BlobManager {
 
 	// ─── Evolution animations ───────────────────────────────────────
 
-	/** Two learners merge — drift toward each other, then birth new at centroid */
+	/** Two neurons merge — drift toward each other, then birth new at centroid */
 	onMerge(
 		deletedIds: string[],
-		newLearnerId: string,
+		newNeuronId: string,
 	): void {
 		// Compute centroid of merging blobs
 		const merging = deletedIds
@@ -369,31 +369,31 @@ export class BlobManager {
 		// Delayed death — let them converge first
 		setTimeout(() => {
 			for (const id of deletedIds) {
-				this.removeLearner(id)
+				this.removeNeuron(id)
 			}
 
 			// Birth new blob at centroid after death animation
 			setTimeout(() => {
-				this.addLearner(newLearnerId, "", cx, cy)
+				this.addNeuron(newNeuronId, "", cx, cy)
 			}, this.deathDuration * 600)
 		}, 400) // 400ms to drift together
 	}
 
-	/** One learner splits — death at position, daughters spawn from parent position */
+	/** One neuron splits — death at position, daughters spawn from parent position */
 	onSplit(
 		deletedId: string,
-		newLearnerIds: string[],
+		newNeuronIds: string[],
 	): void {
 		const parent = this.findBlob(deletedId)
 		const parentX = parent?.x ?? 0
 		const parentY = parent?.y ?? 0
 
-		this.removeLearner(deletedId)
+		this.removeNeuron(deletedId)
 
 		// Stagger births from the parent's position
-		for (let i = 0; i < newLearnerIds.length; i++) {
+		for (let i = 0; i < newNeuronIds.length; i++) {
 			setTimeout(() => {
-				this.addLearner(newLearnerIds[i], "", parentX, parentY)
+				this.addNeuron(newNeuronIds[i], "", parentX, parentY)
 			}, this.deathDuration * 500 + i * 200)
 		}
 	}
@@ -551,15 +551,15 @@ export class BlobManager {
 	// ─── Activity + hit testing ─────────────────────────────────────
 
 	/** Update the activity state of a blob (for label display) */
-	updateActivity(learnerId: string, activity: "idle" | "observing" | "synthesizing"): void {
-		const blob = this.findBlob(learnerId)
+	updateActivity(neuronId: string, activity: "idle" | "observing" | "synthesizing"): void {
+		const blob = this.findBlob(neuronId)
 		if (blob) blob.activity = activity
 	}
 
 	/** Find which blob (if any) was clicked, given canvas pixel coordinates */
 	hitTest(canvasX: number, canvasY: number, canvasW: number, canvasH: number): string | null {
 		for (const blob of this.blobs) {
-			if (blob.learnerId === "__nucleus__" || blob.life < 0.3) continue
+			if (blob.neuronId === "__nucleus__" || blob.life < 0.3) continue
 			const px = (blob.x * 0.5 + 0.5) * canvasW
 			const py = (1.0 - (blob.y * 0.5 + 0.5)) * canvasH
 			const blobRadiusPx = blob.radius * blob._radiusScale * Math.min(canvasW, canvasH) * 0.5
@@ -567,15 +567,15 @@ export class BlobManager {
 			const dx = canvasX - px
 			const dy = canvasY - py
 			if (dx * dx + dy * dy <= hitRadius * hitRadius) {
-				return blob.learnerId
+				return blob.neuronId
 			}
 		}
 		return null
 	}
 
 	/** Get the screen position of a blob for overlay positioning */
-	getBlobScreenPos(learnerId: string, canvasW: number, canvasH: number): { x: number; y: number; radius: number } | null {
-		const blob = this.findBlob(learnerId)
+	getBlobScreenPos(neuronId: string, canvasW: number, canvasH: number): { x: number; y: number; radius: number } | null {
+		const blob = this.findBlob(neuronId)
 		if (!blob || blob.life < 0.3) return null
 		return {
 			x: (blob.x * 0.5 + 0.5) * canvasW,
@@ -586,8 +586,8 @@ export class BlobManager {
 
 	// ─── Helpers ────────────────────────────────────────────────────
 
-	private findBlob(learnerId: string): BlobState | undefined {
-		return this.blobs.find((b) => b.learnerId === learnerId)
+	private findBlob(neuronId: string): BlobState | undefined {
+		return this.blobs.find((b) => b.neuronId === neuronId)
 	}
 }
 

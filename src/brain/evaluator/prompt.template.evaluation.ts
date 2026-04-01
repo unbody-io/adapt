@@ -23,12 +23,12 @@ export function evaluationPromptTemplate(
 
 	sections.push(`# Context
 ${contextLine}
-**Active Specialists**: ${context.brain.learnerCount}
+**Active Specialists**: ${context.brain.neuronCount}
 **Dismissed Data Waiting**: ${context.dismissedBatchCount} batches
 
 ## Specialists
 
-${context.learners
+${context.neurons
 	.map(
 		(l) => `### ${l.id}
 - **Name**: ${l.name}

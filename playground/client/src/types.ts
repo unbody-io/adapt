@@ -8,7 +8,7 @@ export interface ModelRef {
 export interface BrainConfig {
 	prompt: string
 	autoSetup?: boolean
-	learners?: Array<{
+	neurons?: Array<{
 		id: string
 		name: string
 		type: "text" | "list"
@@ -68,7 +68,7 @@ export interface UseCaseDetail extends UseCase {
 	prompt: string
 	version: string
 	autoSetup?: boolean
-	learners?: Array<{
+	neurons?: Array<{
 		id: string
 		name: string
 		type: "text" | "list"
@@ -91,7 +91,7 @@ export interface DataItem {
 	data: Record<string, unknown>
 }
 
-export interface LearnerMetrics {
+export interface NeuronMetrics {
 	observations: number
 	dismissals: number
 	syntheses: number
@@ -100,24 +100,24 @@ export interface LearnerMetrics {
 	lastSynthesisEvolution: string | null
 }
 
-export interface LearnerHealth {
+export interface NeuronHealth {
 	activation: number
 	status: string
 }
 
-export interface Learner {
+export interface Neuron {
 	id: string
 	name: string
 	type: string
 	description: string
 	/** Size of understanding — string length for text, item count for list */
 	understandingSize: number
-	/** Current activity: what this learner is doing right now */
+	/** Current activity: what this neuron is doing right now */
 	activity: "idle" | "observing" | "synthesizing"
 	/** Real-time metrics tracked from SSE events */
-	metrics: LearnerMetrics
+	metrics: NeuronMetrics
 	/** Health status from the brain */
-	health: LearnerHealth
+	health: NeuronHealth
 }
 
 export interface InjectionProgress {
@@ -131,7 +131,7 @@ export interface SessionState {
 	sessionId: string | null
 	status: "idle" | "pending" | "initializing" | "ready" | "error"
 	activity: string
-	learners: Learner[]
+	neurons: Neuron[]
 	commentary: string
 	events: BrainEvent[]
 	injectedIds: Set<string>

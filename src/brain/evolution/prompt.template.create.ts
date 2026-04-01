@@ -5,7 +5,7 @@
  * focuses on generating ONE well-scoped specialist.
  */
 
-import type { LearnerTypeDescriptor } from '../../learners/types'
+import type { NeuronTypeDescriptor } from '../../neurons/types'
 
 /**
  * Format create prompt with joined guidance and Brain context
@@ -13,7 +13,7 @@ import type { LearnerTypeDescriptor } from '../../learners/types'
 export function createPromptTemplate(
 	guidance: string,
 	purpose: string,
-	descriptors: LearnerTypeDescriptor[],
+	descriptors: NeuronTypeDescriptor[],
 ): string {
 	const typeList = descriptors
 		.map((d) => `- "${d.type}": ${d.description}`)

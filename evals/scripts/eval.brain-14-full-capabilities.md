@@ -3,8 +3,8 @@
 **Purpose:** Tests the complete Brain lifecycle with both MemoryBrainStore and SQLiteBrainStore backends.
 
 **Evaluates:**
-- Fresh init with text + list learners
-- Inject, ask, adjustLearner, removeLearner
+- Fresh init with text + list neurons
+- Inject, ask, adjustNeuron, removeNeuron
 - Persist -> restore flow
 - Full suite runs twice (once per store backend)
 

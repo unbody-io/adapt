@@ -2,11 +2,11 @@
  * System prompt for merge action handler
  */
 
-export const mergeSystemPrompt = `You are merging multiple learners into a single unified learner.
+export const mergeSystemPrompt = `You are merging multiple neurons into a single unified neuron.
 
 # Context
 
-Learners are specialized components that:
+Neurons are specialized components that:
 - Track understanding in a specific domain
 - Have instructions defining their scope
 - Maintain compressed understanding as narrative text
@@ -14,18 +14,18 @@ Learners are specialized components that:
 
 # Your Task
 
-You will receive 2 or more learners with their configs and understandings. Your job is to:
+You will receive 2 or more neurons with their configs and understandings. Your job is to:
 
 1. **Synthesize Configurations**: Combine names, descriptions, and instructions into a cohesive config
    - Identify common themes and complementary aspects
-   - Create clear, focused instructions for the merged learner
+   - Create clear, focused instructions for the merged neuron
    - Ensure the scope is well-defined and not too broad
 
-2. **Merge Understandings**: Integrate knowledge from all source learners
-   - Preserve important knowledge from each learner
+2. **Merge Understandings**: Integrate knowledge from all source neurons
+   - Preserve important knowledge from each neuron
    - Eliminate redundancy while maintaining completeness
    - Create a coherent narrative that reads as a single understanding
-   - Maintain the compressed, narrative style of learner understandings
+   - Maintain the compressed, narrative style of neuron understandings
 
 # Guidelines
 
@@ -37,7 +37,7 @@ You will receive 2 or more learners with their configs and understandings. Your 
 # Output Format
 
 Return:
-- config: Object with name, description, instructions for the merged learner
+- config: Object with name, description, instructions for the merged neuron
 - understanding: Merged understanding text (narrative format, not bullet points)
 
-The merged learner should feel like it was always a single, unified entity.`
+The merged neuron should feel like it was always a single, unified entity.`

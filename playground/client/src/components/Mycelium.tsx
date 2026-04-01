@@ -1,17 +1,17 @@
 import { useEffect, useRef, useCallback, useImperativeHandle, forwardRef } from "react"
-import type { Learner, BrainEvent } from "../types"
+import type { Neuron, BrainEvent } from "../types"
 import { BlobManager, MAX_BLOBS } from "./mycelium/blob-manager"
 import { VERTEX_SHADER, FRAGMENT_SHADER } from "./mycelium/shader"
 
 export interface MyceliumHandle {
-	getBlobScreenPos: (learnerId: string) => { x: number; y: number; radius: number } | null
+	getBlobScreenPos: (neuronId: string) => { x: number; y: number; radius: number } | null
 }
 
 interface Props {
-	learners: Learner[]
+	neurons: Neuron[]
 	events: BrainEvent[]
-	onSelectLearner?: (learnerId: string | null) => void
-	selectedLearnerId?: string | null
+	onSelectNeuron?: (neuronId: string | null) => void
+	selectedNeuronId?: string | null
 }
 
 function createShader(
@@ -55,15 +55,15 @@ const ACTIVITY_LABELS: Record<string, string> = {
 	idle: "",
 }
 
-export const Mycelium = forwardRef<MyceliumHandle, Props>(function Mycelium({ learners, events, onSelectLearner, selectedLearnerId }, ref) {
+export const Mycelium = forwardRef<MyceliumHandle, Props>(function Mycelium({ neurons, events, onSelectNeuron, selectedNeuronId }, ref) {
 	const canvasRef = useRef<HTMLCanvasElement>(null)
 	const managerRef = useRef(new BlobManager())
 
 	useImperativeHandle(ref, () => ({
-		getBlobScreenPos: (learnerId: string) => {
+		getBlobScreenPos: (neuronId: string) => {
 			const canvas = canvasRef.current
 			if (!canvas) return null
-			const pos = managerRef.current.getBlobScreenPos(learnerId, canvas.width, canvas.height)
+			const pos = managerRef.current.getBlobScreenPos(neuronId, canvas.width, canvas.height)
 			if (!pos) return null
 			const rect = canvas.getBoundingClientRect()
 			const scaleX = rect.width / canvas.width
@@ -91,42 +91,42 @@ export const Mycelium = forwardRef<MyceliumHandle, Props>(function Mycelium({ le
 	const rafRef = useRef(0)
 	const startTimeRef = useRef(performance.now() / 1000)
 	const prevTimeRef = useRef(performance.now() / 1000)
-	const prevLearnersRef = useRef<string[]>([])
+	const prevNeuronsRef = useRef<string[]>([])
 	const processedEventsRef = useRef(new Set<string>())
 
-	// ─── Sync learners with blob manager ────────────────────────────
+	// ─── Sync neurons with blob manager ────────────────────────────
 
 	useEffect(() => {
 		const manager = managerRef.current
-		const currentIds = learners.map((l) => l.id)
-		const prevIds = prevLearnersRef.current
+		const currentIds = neurons.map((l) => l.id)
+		const prevIds = prevNeuronsRef.current
 
-		for (const learner of learners) {
-			if (!prevIds.includes(learner.id)) {
-				manager.addLearner(learner.id, learner.name)
+		for (const neuron of neurons) {
+			if (!prevIds.includes(neuron.id)) {
+				manager.addNeuron(neuron.id, neuron.name)
 			}
 		}
 
 		for (const prevId of prevIds) {
 			if (!currentIds.includes(prevId)) {
-				manager.removeLearner(prevId)
+				manager.removeNeuron(prevId)
 			}
 		}
 
-		for (const learner of learners) {
-			manager.updateUnderstandingSize(learner.id, learner.understandingSize)
-			manager.updateActivity(learner.id, learner.activity)
-			const blob = manager.blobs.find((b) => b.learnerId === learner.id)
+		for (const neuron of neurons) {
+			manager.updateUnderstandingSize(neuron.id, neuron.understandingSize)
+			manager.updateActivity(neuron.id, neuron.activity)
+			const blob = manager.blobs.find((b) => b.neuronId === neuron.id)
 			if (blob) {
-				if (!blob.name) blob.name = learner.name
+				if (!blob.name) blob.name = neuron.name
 				// Sync metrics from state to blob for label rendering
-				blob.observationCount = learner.metrics.observations
-				blob.synthesisCount = learner.metrics.syntheses
+				blob.observationCount = neuron.metrics.observations
+				blob.synthesisCount = neuron.metrics.syntheses
 			}
 		}
 
-		prevLearnersRef.current = currentIds
-	}, [learners])
+		prevNeuronsRef.current = currentIds
+	}, [neurons])
 
 	// ─── Process events → blob reactions ────────────────────────────
 
@@ -139,7 +139,7 @@ export const Mycelium = forwardRef<MyceliumHandle, Props>(function Mycelium({ le
 			processed.add(event.id)
 
 			const payload = event.payload as Record<string, unknown>
-			const learnerId = payload.learnerId as string | undefined
+			const neuronId = payload.neuronId as string | undefined
 
 			switch (event.type) {
 				case "brain:init:started":
@@ -158,23 +158,23 @@ export const Mycelium = forwardRef<MyceliumHandle, Props>(function Mycelium({ le
 				case "inject:started":
 					manager.onInjection()
 					break
-				case "learner:observed":
-					if (learnerId) manager.onObserved(learnerId)
+				case "neuron:observed":
+					if (neuronId) manager.onObserved(neuronId)
 					break
-				case "learner:observe:dismissed":
-					if (learnerId) manager.onDismissed(learnerId)
+				case "neuron:observe:dismissed":
+					if (neuronId) manager.onDismissed(neuronId)
 					break
-				case "learner:synthesized":
-					if (learnerId) {
+				case "neuron:synthesized":
+					if (neuronId) {
 						const sig = (payload.significance as number) ?? 0.5
 						const gaps = payload.gaps as string[] | undefined
-						manager.onSynthesized(learnerId, sig, gaps)
+						manager.onSynthesized(neuronId, sig, gaps)
 					}
 					break
-				case "learner:health:updated":
-					if (learnerId) {
+				case "neuron:health:updated":
+					if (neuronId) {
 						manager.updateHealth(
-							learnerId,
+							neuronId,
 							(payload.activation as number) ?? 0.5,
 							(payload.status as string) ?? "active",
 						)
@@ -185,12 +185,12 @@ export const Mycelium = forwardRef<MyceliumHandle, Props>(function Mycelium({ le
 					const result = payload.result as Record<string, unknown> | undefined
 					const targets = payload.targets as string[] | undefined
 					if (action === "merge" && result && targets) {
-						const newIds = (result.newLearnerIds ?? result.created) as string[] | undefined
+						const newIds = (result.newNeuronIds ?? result.created) as string[] | undefined
 						if (newIds?.[0]) {
 							manager.onMerge(targets, newIds[0])
 						}
 					} else if (action === "split" && result && targets?.[0]) {
-						const newIds = (result.newLearnerIds ?? result.created) as string[] | undefined
+						const newIds = (result.newNeuronIds ?? result.created) as string[] | undefined
 						if (newIds?.length) {
 							manager.onSplit(targets[0], newIds)
 						}
@@ -212,7 +212,7 @@ export const Mycelium = forwardRef<MyceliumHandle, Props>(function Mycelium({ le
 
 	const handleCanvasClick = useCallback(
 		(e: React.MouseEvent<HTMLCanvasElement>) => {
-			if (!onSelectLearner) return
+			if (!onSelectNeuron) return
 			const canvas = canvasRef.current
 			if (!canvas) return
 			const rect = canvas.getBoundingClientRect()
@@ -222,9 +222,9 @@ export const Mycelium = forwardRef<MyceliumHandle, Props>(function Mycelium({ le
 			const x = (e.clientX - rect.left) * scaleX
 			const y = (e.clientY - rect.top) * scaleY
 			const hit = managerRef.current.hitTest(x, y, canvas.width, canvas.height)
-			onSelectLearner(hit)
+			onSelectNeuron(hit)
 		},
-		[onSelectLearner],
+		[onSelectNeuron],
 	)
 
 	// ─── Setup offscreen WebGL ──────────────────────────────────────
@@ -379,7 +379,7 @@ export const Mycelium = forwardRef<MyceliumHandle, Props>(function Mycelium({ le
 			className="mycelium"
 			width={800}
 			height={600}
-			style={{ width: 800, height: 600, cursor: onSelectLearner ? "pointer" : "default" }}
+			style={{ width: 800, height: 600, cursor: onSelectNeuron ? "pointer" : "default" }}
 			onClick={handleCanvasClick}
 		/>
 	)

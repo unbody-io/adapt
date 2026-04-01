@@ -13,8 +13,8 @@ import type { LanguageModel } from 'ai'
 import { appendFileSync, mkdirSync, existsSync } from 'node:fs'
 import { join } from 'node:path'
 import { Brain } from '../src'
-import { SQLiteStore } from '../src/learners/stores/sqlite'
-import { SQLiteBrainStore } from '../src/brain/stores/sqlite'
+import { SQLiteNeuronStore } from '../src/stores/sqlite/neuron'
+import { SQLiteBrainStore } from '../src/stores/sqlite/brain'
 import { parseClaudeSessions, listClaudeProjects, listClaudeSessions } from './lib/claude-parser'
 import type { BrainConfig } from '../src/brain/types'
 
@@ -60,20 +60,20 @@ function logEvent(event: string, data: unknown) {
 	// Log interesting events with details
 	if (event === 'brain:init:config:generated') {
 		const d = data as { configs: Array<{ id: string; instructions: string }> }
-		appendToLog(`[${timestamp}] LEARNERS GENERATED:`)
+		appendToLog(`[${timestamp}] NEURONS GENERATED:`)
 		d.configs.forEach(c => {
 			appendToLog(`  - ${c.id}: ${c.instructions.slice(0, 100)}...`)
 		})
-	} else if (event === 'learner:observed') {
-		const d = data as { learnerId: string; output: string; importance: number; bufferCount: number }
-		appendToLog(`[${timestamp}] OBSERVED [${d.learnerId}] importance=${d.importance.toFixed(2)} buffer=${d.bufferCount}`)
+	} else if (event === 'neuron:observed') {
+		const d = data as { neuronId: string; output: string; importance: number; bufferCount: number }
+		appendToLog(`[${timestamp}] OBSERVED [${d.neuronId}] importance=${d.importance.toFixed(2)} buffer=${d.bufferCount}`)
 		appendToLog(`  ${d.output.slice(0, 200)}${d.output.length > 200 ? '...' : ''}`)
-	} else if (event === 'learner:observe:dismissed') {
-		const d = data as { learnerId: string }
-		appendToLog(`[${timestamp}] DISMISSED [${d.learnerId}]`)
-	} else if (event === 'learner:synthesized') {
-		const d = data as { learnerId: string; significance: string; evolution: string; newUnderstanding: unknown }
-		appendToLog(`[${timestamp}] SYNTHESIZED [${d.learnerId}] significance=${d.significance}`)
+	} else if (event === 'neuron:observe:dismissed') {
+		const d = data as { neuronId: string }
+		appendToLog(`[${timestamp}] DISMISSED [${d.neuronId}]`)
+	} else if (event === 'neuron:synthesized') {
+		const d = data as { neuronId: string; significance: string; evolution: string; newUnderstanding: unknown }
+		appendToLog(`[${timestamp}] SYNTHESIZED [${d.neuronId}] significance=${d.significance}`)
 		appendToLog(`  Evolution: ${d.evolution}`)
 		const preview = typeof d.newUnderstanding === 'string'
 			? d.newUnderstanding
@@ -101,12 +101,12 @@ function getModelId(model: LanguageModel | undefined): string {
 
 function getBrainConfigSnapshot(b: Brain) {
 	const c = b.config
-	// Read learner-level config from first learner (representative sample)
-	const firstLearner = b.getLearners()[0]
-	const learnerConfig = firstLearner ? {
-		thresholds: firstLearner.getUnderstandThresholds(),
-		queryMethod: firstLearner.getQueryMethodName(),
-		governance: firstLearner.getGovernance(),
+	// Read neuron-level config from first neuron (representative sample)
+	const firstNeuron = b.getNeurons()[0]
+	const neuronConfig = firstNeuron ? {
+		thresholds: firstNeuron.getUnderstandThresholds(),
+		queryMethod: firstNeuron.getQueryMethodName(),
+		governance: firstNeuron.getGovernance(),
 	} : null
 	return {
 		prompt: b.prompt.slice(0, 120) + (b.prompt.length > 120 ? '...' : ''),
@@ -117,7 +117,7 @@ function getBrainConfigSnapshot(b: Brain) {
 			query: getModelId(c.query.model),
 		},
 		evolution: c.evolution,
-		learnerConfig,
+		neuronConfig,
 	}
 }
 
@@ -205,10 +205,10 @@ interface InitRequest {
 	governanceMaxTokens?: number
 	brainStore?: StoreType
 	brainStorePath?: string
-	learnerStore?: StoreType
-	learnerStorePath?: string
+	neuronStore?: StoreType
+	neuronStorePath?: string
 	autoSetup?: boolean
-	learners?: Array<{
+	neurons?: Array<{
 		id: string
 		name: string
 		instructions: string
@@ -226,7 +226,7 @@ interface InitRequest {
 			windowSize?: number
 		}
 	}
-	internalLearners?: {
+	internalNeurons?: {
 		globalInjectionUnderstanding?: boolean
 		globalQueryUnderstanding?: boolean
 		injectionGaps?: boolean
@@ -256,8 +256,8 @@ interface AskRequest {
 let brain: Brain | null = null
 let brainStoreInfo: {
 	brain: { type: StoreType; path?: string }
-	learner: { type: StoreType; path?: string }
-} = { brain: { type: 'memory' }, learner: { type: 'memory' } }
+	neuron: { type: StoreType; path?: string }
+} = { brain: { type: 'memory' }, neuron: { type: 'memory' } }
 let sseClients: Set<(event: string, data: unknown) => void> = new Set()
 
 // --- Store Helpers ---
@@ -276,15 +276,15 @@ function buildBrainStore(type: StoreType, path?: string): { store: import('../sr
 	}
 }
 
-function buildLearnerStoreFactory(type: StoreType, path?: string): { factory: ((id: string) => import('../src/learners/stores/types').Store) | undefined; info: { type: StoreType; path?: string } } {
+function buildNeuronStoreFactory(type: StoreType, path?: string): { factory: ((id: string) => import('../src/neurons/stores/types').Store) | undefined; info: { type: StoreType; path?: string } } {
 	switch (type) {
 		case 'sqlite': {
 			const dbDir = join(process.cwd(), path || 'server/data/default')
 			mkdirSync(dbDir, { recursive: true })
-			return { factory: (id: string) => new SQLiteStore(join(dbDir, `learner-${id}.db`)), info: { type, path: path || 'server/data/default' } }
+			return { factory: (id: string) => new SQLiteNeuronStore(join(dbDir, `neuron-${id}.db`)), info: { type, path: path || 'server/data/default' } }
 		}
 		case 'sqlite-memory':
-			return { factory: (_id: string) => new SQLiteStore(':memory:'), info: { type } }
+			return { factory: (_id: string) => new SQLiteNeuronStore(':memory:'), info: { type } }
 		default:
 			return { factory: undefined, info: { type: 'memory' } }
 	}
@@ -347,15 +347,15 @@ function broadcast(event: string, data: unknown) {
 
 	// Log which model is configured for phase-related events
 	if (brain && (
-		event === 'learner:observe:started' ||
-		event === 'learner:synthesize:started' ||
-		event === 'learner:query:started'
+		event === 'neuron:observe:started' ||
+		event === 'neuron:synthesize:started' ||
+		event === 'neuron:query:started'
 	)) {
 		const c = brain.config
 		const phase = event.includes('observe') ? 'observe' : event.includes('synthesize') ? 'synthesize' : 'query'
-		const d = data as { learnerId?: string }
-		console.log(`  >> [MODEL] ${phase} for ${d.learnerId || '?'} (brain default: ${getModelId(c.model)})`)
-		appendToLog(`  >> [MODEL] ${phase} for ${d.learnerId || '?'} (brain default: ${getModelId(c.model)})`)
+		const d = data as { neuronId?: string }
+		console.log(`  >> [MODEL] ${phase} for ${d.neuronId || '?'} (brain default: ${getModelId(c.model)})`)
+		appendToLog(`  >> [MODEL] ${phase} for ${d.neuronId || '?'} (brain default: ${getModelId(c.model)})`)
 	}
 
 	// Log config update events
@@ -399,17 +399,17 @@ app.post('/brain/init', async (c) => {
 	const understandModel = body.understandModel ? openrouter(body.understandModel) : undefined
 	const understandBlueprintModel = body.understandBlueprintModel ? openrouter(body.understandBlueprintModel) : undefined
 
-	// Build stores independently for brain and learner levels
+	// Build stores independently for brain and neuron levels
 	const brainStoreResult = buildBrainStore(body.brainStore || 'memory', body.brainStorePath)
-	const learnerStoreResult = buildLearnerStoreFactory(body.learnerStore || 'memory', body.learnerStorePath)
-	brainStoreInfo = { brain: brainStoreResult.info, learner: learnerStoreResult.info }
+	const neuronStoreResult = buildNeuronStoreFactory(body.neuronStore || 'memory', body.neuronStorePath)
+	brainStoreInfo = { brain: brainStoreResult.info, neuron: neuronStoreResult.info }
 
 	const config: BrainConfig = {
 		prompt: body.prompt,
 		model: primaryModel,
 		blueprintModel,
 		autoSetup: body.autoSetup ?? true,
-		...(body.learners ? { learners: body.learners } : {}),
+		...(body.neurons ? { neurons: body.neurons } : {}),
 		ingest: {
 			batchSize: body.batchSize || 20,
 		},
@@ -430,11 +430,11 @@ app.post('/brain/init', async (c) => {
 				strategy: body.strategy,
 				...(body.governanceMaxTokens ? { maxTokens: body.governanceMaxTokens } : {}),
 			},
-			...(learnerStoreResult.factory ? { store: learnerStoreResult.factory } : {}),
+			...(neuronStoreResult.factory ? { store: neuronStoreResult.factory } : {}),
 		},
 		...(brainStoreResult.store ? { store: brainStoreResult.store } : {}),
 		...(body.evolution ? { evolution: body.evolution } : {}),
-		...(body.internalLearners ? { internalLearners: body.internalLearners } : {}),
+		...(body.internalNeurons ? { internalNeurons: body.internalNeurons } : {}),
 		...(body.dismissedBatchBuffer ? { dismissedBatchBuffer: body.dismissedBatchBuffer } : {}),
 	}
 
@@ -455,16 +455,16 @@ app.post('/brain/init', async (c) => {
 		await brain.initialize()
 		logBrainConfig('BRAIN INITIALIZED', brain)
 
-		const learners = brain.getLearners().map((l) => ({
+		const neurons = brain.getNeurons().map((l) => ({
 			id: l.id,
 			instructions: l.instructions,
 		}))
 
-		broadcast('server:brain:ready', { learners })
+		broadcast('server:brain:ready', { neurons })
 
 		return c.json({
 			status: 'initialized',
-			learners,
+			neurons,
 		})
 	} catch (error) {
 		const message = extractErrorMessage(error)
@@ -482,7 +482,7 @@ app.post('/brain/destroy', async (c) => {
 	try {
 		await brain.dispose()
 		brain = null
-		brainStoreInfo = { brain: { type: 'memory' }, learner: { type: 'memory' } }
+		brainStoreInfo = { brain: { type: 'memory' }, neuron: { type: 'memory' } }
 		broadcast('server:brain:destroyed', {})
 		return c.json({ ok: true })
 	} catch (error) {
@@ -572,16 +572,16 @@ app.post('/brain/consult', async (c) => {
 		return c.json({ error: 'Brain not initialized. Call /brain/init first.' }, 400)
 	}
 
-	const body = await c.req.json<{ query: string; learner?: string }>()
+	const body = await c.req.json<{ query: string; neuron?: string }>()
 
 	if (!body.query) {
 		return c.json({ error: 'query is required' }, 400)
 	}
 
-	broadcast('server:consult:started', { query: body.query, learner: body.learner })
+	broadcast('server:consult:started', { query: body.query, neuron: body.neuron })
 
 	try {
-		const result = await brain.consult(body.query, body.learner ? { learner: body.learner } : undefined)
+		const result = await brain.consult(body.query, body.neuron ? { neuron: body.neuron } : undefined)
 		broadcast('server:consult:completed', { result })
 		return c.json(result)
 	} catch (error) {
@@ -607,7 +607,7 @@ app.get('/brain/dismissed-batches', async (c) => {
 	}
 })
 
-async function serializeLearner(l: ReturnType<Brain['getLearners']>[number]) {
+async function serializeNeuron(l: ReturnType<Brain['getNeurons']>[number]) {
 	return {
 		id: l.id,
 		type: l.type,
@@ -637,9 +637,9 @@ app.get('/brain/status', async (c) => {
 		return c.json({ status: 'not_initialized' })
 	}
 
-	const learners = await Promise.all(brain.getLearners().map(serializeLearner))
-	const internalLearners = await Promise.all(
-		Array.from(brain.internalLearners.values()).map(serializeLearner)
+	const neurons = await Promise.all(brain.getNeurons().map(serializeNeuron))
+	const internalNeurons = await Promise.all(
+		Array.from(brain.internalNeurons.values()).map(serializeNeuron)
 	)
 
 	const dismissedBatches = await brain.store.dismissedBatches.list()
@@ -651,8 +651,8 @@ app.get('/brain/status', async (c) => {
 		evolution: brain.config.evolution,
 		evolutionContext: brain.evolutionContext,
 		store: brainStoreInfo,
-		learners,
-		internalLearners,
+		neurons,
+		internalNeurons,
 		dismissedBatchCount: dismissedBatches.length,
 	})
 })
@@ -751,17 +751,17 @@ app.post('/brain/update', async (c) => {
 	}
 })
 
-// --- Per-Learner Update Endpoint ---
+// --- Per-Neuron Update Endpoint ---
 
-app.post('/brain/learners/:id/update', async (c) => {
+app.post('/brain/neurons/:id/update', async (c) => {
 	if (!brain) {
 		return c.json({ error: 'Brain not initialized. Call /brain/init first.' }, 400)
 	}
 
-	const learnerId = c.req.param('id')
-	const learner = brain.getLearner(learnerId)
-	if (!learner) {
-		return c.json({ error: `Learner ${learnerId} not found` }, 404)
+	const neuronId = c.req.param('id')
+	const neuron = brain.getNeuron(neuronId)
+	if (!neuron) {
+		return c.json({ error: `Neuron ${neuronId} not found` }, 404)
 	}
 
 	const body = await c.req.json<{
@@ -795,12 +795,12 @@ app.post('/brain/learners/:id/update', async (c) => {
 	if (body.health) updates.health = body.health
 
 	try {
-		const result = await learner.update(updates)
-		broadcast('server:learner:updated', { learnerId, changedFields: result.changedFields })
+		const result = await neuron.update(updates)
+		broadcast('server:neuron:updated', { neuronId, changedFields: result.changedFields })
 		return c.json({ changedFields: result.changedFields })
 	} catch (error) {
 		const message = extractErrorMessage(error)
-		console.error('[Learner Update Error]', error)
+		console.error('[Neuron Update Error]', error)
 		return c.json({ error: message }, 500)
 	}
 })
@@ -840,7 +840,7 @@ app.post('/brain/evaluate', async (c) => {
 	}
 })
 
-app.post('/brain/learners/create', async (c) => {
+app.post('/brain/neurons/create', async (c) => {
 	if (!brain) {
 		return c.json({ error: 'Brain not initialized. Call /brain/init first.' }, 400)
 	}
@@ -859,7 +859,7 @@ app.post('/brain/learners/create', async (c) => {
 
 	try {
 		const id = body.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
-		const learner = await brain.createLearnerFromConfig({
+		const neuron = await brain.createNeuronFromConfig({
 			id,
 			name: body.name,
 			instructions: body.instructions,
@@ -867,11 +867,11 @@ app.post('/brain/learners/create', async (c) => {
 			type: body.type ?? 'text',
 			governance: body.governance,
 		})
-		broadcast('server:learner:created', { learnerId: learner.id, name: body.name })
-		return c.json({ learnerId: learner.id })
+		broadcast('server:neuron:created', { neuronId: neuron.id, name: body.name })
+		return c.json({ neuronId: neuron.id })
 	} catch (error) {
 		const message = extractErrorMessage(error)
-		console.error('[Learner Create Error]', error)
+		console.error('[Neuron Create Error]', error)
 		return c.json({ error: message }, 500)
 	}
 })
@@ -887,8 +887,8 @@ app.post('/brain/evolve/create', async (c) => {
 	}
 
 	try {
-		const learner = await brain.createLearner(body.guidance)
-		return c.json({ learnerId: learner.id })
+		const neuron = await brain.createNeuron(body.guidance)
+		return c.json({ neuronId: neuron.id })
 	} catch (error) {
 		const message = extractErrorMessage(error)
 		console.error('[Brain Create Error]', error)
@@ -901,14 +901,14 @@ app.post('/brain/evolve/merge', async (c) => {
 		return c.json({ error: 'Brain not initialized. Call /brain/init first.' }, 400)
 	}
 
-	const body = await c.req.json<{ learnerIds: string[]; guidance: string }>()
-	if (!body.learnerIds?.length || !body.guidance) {
-		return c.json({ error: 'learnerIds and guidance are required' }, 400)
+	const body = await c.req.json<{ neuronIds: string[]; guidance: string }>()
+	if (!body.neuronIds?.length || !body.guidance) {
+		return c.json({ error: 'neuronIds and guidance are required' }, 400)
 	}
 
 	try {
-		const learner = await brain.mergeLearners(body.learnerIds, body.guidance)
-		return c.json({ learnerId: learner.id })
+		const neuron = await brain.mergeNeurons(body.neuronIds, body.guidance)
+		return c.json({ neuronId: neuron.id })
 	} catch (error) {
 		const message = extractErrorMessage(error)
 		console.error('[Brain Merge Error]', error)
@@ -921,14 +921,14 @@ app.post('/brain/evolve/split', async (c) => {
 		return c.json({ error: 'Brain not initialized. Call /brain/init first.' }, 400)
 	}
 
-	const body = await c.req.json<{ learnerId: string; guidance: string }>()
-	if (!body.learnerId || !body.guidance) {
-		return c.json({ error: 'learnerId and guidance are required' }, 400)
+	const body = await c.req.json<{ neuronId: string; guidance: string }>()
+	if (!body.neuronId || !body.guidance) {
+		return c.json({ error: 'neuronId and guidance are required' }, 400)
 	}
 
 	try {
-		const learners = await brain.splitLearner(body.learnerId, body.guidance)
-		return c.json({ learnerIds: learners.map(l => l.id) })
+		const neurons = await brain.splitNeuron(body.neuronId, body.guidance)
+		return c.json({ neuronIds: neurons.map(l => l.id) })
 	} catch (error) {
 		const message = extractErrorMessage(error)
 		console.error('[Brain Split Error]', error)
@@ -941,14 +941,14 @@ app.post('/brain/evolve/update', async (c) => {
 		return c.json({ error: 'Brain not initialized. Call /brain/init first.' }, 400)
 	}
 
-	const body = await c.req.json<{ learnerId: string; guidance: string }>()
-	if (!body.learnerId || !body.guidance) {
-		return c.json({ error: 'learnerId and guidance are required' }, 400)
+	const body = await c.req.json<{ neuronId: string; guidance: string }>()
+	if (!body.neuronId || !body.guidance) {
+		return c.json({ error: 'neuronId and guidance are required' }, 400)
 	}
 
 	try {
-		const learner = await brain.updateLearner(body.learnerId, body.guidance)
-		return c.json({ learnerId: learner.id })
+		const neuron = await brain.updateNeuron(body.neuronId, body.guidance)
+		return c.json({ neuronId: neuron.id })
 	} catch (error) {
 		const message = extractErrorMessage(error)
 		console.error('[Brain Update Error]', error)
@@ -961,13 +961,13 @@ app.post('/brain/evolve/delete', async (c) => {
 		return c.json({ error: 'Brain not initialized. Call /brain/init first.' }, 400)
 	}
 
-	const body = await c.req.json<{ learnerId: string }>()
-	if (!body.learnerId) {
-		return c.json({ error: 'learnerId is required' }, 400)
+	const body = await c.req.json<{ neuronId: string }>()
+	if (!body.neuronId) {
+		return c.json({ error: 'neuronId is required' }, 400)
 	}
 
 	try {
-		await brain.deleteLearner(body.learnerId)
+		await brain.deleteNeuron(body.neuronId)
 		return c.json({ ok: true })
 	} catch (error) {
 		const message = extractErrorMessage(error)
@@ -976,32 +976,32 @@ app.post('/brain/evolve/delete', async (c) => {
 	}
 })
 
-// --- Learner Lifecycle Endpoints (no evolution required) ---
+// --- Neuron Lifecycle Endpoints (no evolution required) ---
 
-app.post('/brain/learners/:id/remove', async (c) => {
+app.post('/brain/neurons/:id/remove', async (c) => {
 	if (!brain) {
 		return c.json({ error: 'Brain not initialized. Call /brain/init first.' }, 400)
 	}
 
-	const learnerId = c.req.param('id')
+	const neuronId = c.req.param('id')
 
 	try {
-		await brain.removeLearner(learnerId)
-		broadcast('server:learner:removed', { learnerId })
+		await brain.removeNeuron(neuronId)
+		broadcast('server:neuron:removed', { neuronId })
 		return c.json({ ok: true })
 	} catch (error) {
 		const message = extractErrorMessage(error)
-		console.error('[Learner Remove Error]', error)
+		console.error('[Neuron Remove Error]', error)
 		return c.json({ error: message }, 500)
 	}
 })
 
-app.post('/brain/learners/:id/adjust', async (c) => {
+app.post('/brain/neurons/:id/adjust', async (c) => {
 	if (!brain) {
 		return c.json({ error: 'Brain not initialized. Call /brain/init first.' }, 400)
 	}
 
-	const learnerId = c.req.param('id')
+	const neuronId = c.req.param('id')
 	const body = await c.req.json<{ directive: string }>()
 
 	if (!body.directive) {
@@ -1009,37 +1009,37 @@ app.post('/brain/learners/:id/adjust', async (c) => {
 	}
 
 	try {
-		const { learner, result } = await brain.adjustLearner(learnerId, body.directive)
-		broadcast('server:learner:adjusted', { learnerId, directive: body.directive, ...result })
+		const { neuron, result } = await brain.adjustNeuron(neuronId, body.directive)
+		broadcast('server:neuron:adjusted', { neuronId, directive: body.directive, ...result })
 		return c.json({
 			ok: true,
-			learnerId: learner.id,
-			instructions: learner.instructions,
+			neuronId: neuron.id,
+			instructions: neuron.instructions,
 			adjustedConfig: result.adjustedConfig,
 			adjustedUnderstanding: result.adjustedUnderstanding,
 		})
 	} catch (error) {
 		const message = extractErrorMessage(error)
-		console.error('[Learner Adjust Error]', error)
+		console.error('[Neuron Adjust Error]', error)
 		return c.json({ error: message }, 500)
 	}
 })
 
-// --- Learner Action Endpoints ---
+// --- Neuron Action Endpoints ---
 
-app.post('/brain/learners/:id/synthesize', async (c) => {
+app.post('/brain/neurons/:id/synthesize', async (c) => {
 	if (!brain) {
 		return c.json({ error: 'Brain not initialized. Call /brain/init first.' }, 400)
 	}
 
-	const learnerId = c.req.param('id')
-	const learner = brain.getLearner(learnerId)
-	if (!learner) {
-		return c.json({ error: `Learner ${learnerId} not found` }, 404)
+	const neuronId = c.req.param('id')
+	const neuron = brain.getNeuron(neuronId)
+	if (!neuron) {
+		return c.json({ error: `Neuron ${neuronId} not found` }, 404)
 	}
 
 	try {
-		const result = await learner.learn([], { forceSynthesize: true })
+		const result = await neuron.learn([], { forceSynthesize: true })
 		return c.json({ ok: true, result })
 	} catch (error) {
 		const message = extractErrorMessage(error)
@@ -1048,15 +1048,15 @@ app.post('/brain/learners/:id/synthesize', async (c) => {
 	}
 })
 
-app.post('/brain/learners/:id/query', async (c) => {
+app.post('/brain/neurons/:id/query', async (c) => {
 	if (!brain) {
 		return c.json({ error: 'Brain not initialized. Call /brain/init first.' }, 400)
 	}
 
-	const learnerId = c.req.param('id')
-	const learner = brain.getLearner(learnerId)
-	if (!learner) {
-		return c.json({ error: `Learner ${learnerId} not found` }, 404)
+	const neuronId = c.req.param('id')
+	const neuron = brain.getNeuron(neuronId)
+	if (!neuron) {
+		return c.json({ error: `Neuron ${neuronId} not found` }, 404)
 	}
 
 	const body = await c.req.json<{ query: string }>()
@@ -1065,11 +1065,11 @@ app.post('/brain/learners/:id/query', async (c) => {
 	}
 
 	try {
-		const result = await learner.query(body.query)
+		const result = await neuron.query(body.query)
 		return c.json(result)
 	} catch (error) {
 		const message = extractErrorMessage(error)
-		console.error('[Learner Query Error]', error)
+		console.error('[Neuron Query Error]', error)
 		return c.json({ error: message }, 500)
 	}
 })

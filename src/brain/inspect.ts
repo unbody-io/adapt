@@ -1,15 +1,15 @@
 /**
  * brain.inspect() — agentic read-only introspection
  *
- * An LLM agent with tools to browse learner metadata, read understanding,
- * and consult internal learners. Works whether the brain is fresh (configs only)
+ * An LLM agent with tools to browse neuron metadata, read understanding,
+ * and consult internal neurons. Works whether the brain is fresh (configs only)
  * or mature (has accumulated knowledge).
  */
 
 import type { CallSettings, LanguageModel, Tool } from 'ai'
 import { tool } from 'ai'
 import { z } from 'zod'
-import type { TokenUsage } from '../learners/types'
+import type { TokenUsage } from '../neurons/types'
 import { generate, hasToolCall, stepCountIs } from '../llm'
 import type { Brain } from './class'
 
@@ -25,13 +25,13 @@ export interface InspectResult {
 // ── Tools ───────────────────────────────────────────────────────────────────
 
 function createInspectTools(brain: Brain) {
-	const listLearners = tool({
+	const listNeurons = tool({
 		description:
-			'List all learners with their name, type, description, instructions, and health status.',
+			'List all neurons with their name, type, description, instructions, and health status.',
 		inputSchema: z.object({}),
 		execute: async () => {
-			const learners = brain.getLearners()
-			return learners.map((l) => ({
+			const neurons = brain.getNeurons()
+			return neurons.map((l) => ({
 				id: l.id,
 				name: l.name,
 				type: l.type,
@@ -42,25 +42,25 @@ function createInspectTools(brain: Brain) {
 		},
 	})
 
-	const inspectLearner = tool({
+	const inspectNeuron = tool({
 		description:
-			'Deep-inspect a specific learner — its understanding summary, health, metrics, and evolution history.',
+			'Deep-inspect a specific neuron — its understanding summary, health, metrics, and evolution history.',
 		inputSchema: z.object({
-			id: z.string().describe('Learner ID to inspect'),
+			id: z.string().describe('Neuron ID to inspect'),
 		}),
 		execute: async ({ id }) => {
-			const learner = brain.getLearner(id)
-			if (!learner) {
-				return { error: `Learner "${id}" not found` }
+			const neuron = brain.getNeuron(id)
+			if (!neuron) {
+				return { error: `Neuron "${id}" not found` }
 			}
 
 			const [summary, evolution, hasKnowledge] = await Promise.all([
-				learner.getSummary(),
-				learner.getEvolution(),
-				learner.hasKnowledge(),
+				neuron.getSummary(),
+				neuron.getEvolution(),
+				neuron.hasKnowledge(),
 			])
-			const health = learner.getHealth()
-			const metrics = learner.getMetrics()
+			const health = neuron.getHealth()
+			const metrics = neuron.getMetrics()
 
 			return {
 				summary,
@@ -101,14 +101,14 @@ function createInspectTools(brain: Brain) {
 
 	const getBrainConfig = tool({
 		description:
-			'Get the brain-level configuration: prompt, learner count, evolution status.',
+			'Get the brain-level configuration: prompt, neuron count, evolution status.',
 		inputSchema: z.object({}),
 		execute: async () => {
 			const config = brain.config
 			return {
 				prompt: config.prompt,
-				learnerCount: brain.getLearners().length,
-				internalLearnerCount: brain.internalLearners.size,
+				neuronCount: brain.getNeurons().length,
+				internalNeuronCount: brain.internalNeurons.size,
 				evolution: {
 					enabled: config.evolution.enabled,
 				},
@@ -126,22 +126,22 @@ function createInspectTools(brain: Brain) {
 		execute: async (params) => params,
 	})
 
-	return { listLearners, inspectLearner, consultInternal, getBrainConfig, answer }
+	return { listNeurons, inspectNeuron, consultInternal, getBrainConfig, answer }
 }
 
 // ── System prompt ───────────────────────────────────────────────────────────
 
-const SYSTEM_PROMPT = `You are an inspector for a learning brain — a system made of specialized learners that build understanding from data over time.
+const SYSTEM_PROMPT = `You are an inspector for a learning brain — a system made of specialized neurons that build understanding from data over time.
 
 Your job is to answer questions about the brain's structure, what it tracks, what it knows, and its health. You have read-only access.
 
 Strategy:
-1. Start with listLearners to see the landscape.
-2. Use inspectLearner for deeper looks at specific learners.
+1. Start with listNeurons to see the landscape.
+2. Use inspectNeuron for deeper looks at specific neurons.
 3. Use consultInternal only when asking about accumulated knowledge (skip if the brain is fresh).
 4. Use getBrainConfig for brain-level info.
 
-Speak plainly and directly. When the brain is new and has no data yet, describe what it's *set up* to track based on learner configs. When it has knowledge, describe what it actually knows.
+Speak plainly and directly. When the brain is new and has no data yet, describe what it's *set up* to track based on neuron configs. When it has knowledge, describe what it actually knows.
 
 Never reference tool names, internal IDs, or your reasoning process in your answer.`
 

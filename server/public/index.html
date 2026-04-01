@@ -197,15 +197,15 @@
 
     .section-title:first-child { margin-top: 0; }
 
-    /* Learner Cards */
-    .learners-grid {
+    /* Neuron Cards */
+    .neurons-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
       gap: 14px;
       padding: 16px;
     }
 
-    .learner-card {
+    .neuron-card {
       background: #1a1a1a;
       border-radius: 8px;
       border: 1px solid #333;
@@ -214,10 +214,10 @@
       transition: border-color 0.2s;
     }
 
-    .learner-card:hover { border-color: #4a9eff; }
-    .learner-card.active { border-color: #4ade80; }
+    .neuron-card:hover { border-color: #4a9eff; }
+    .neuron-card.active { border-color: #4ade80; }
 
-    .learner-card-header {
+    .neuron-card-header {
       padding: 12px;
       border-bottom: 1px solid #222;
       display: flex;
@@ -225,19 +225,19 @@
       justify-content: space-between;
     }
 
-    .learner-card-header h3 {
+    .neuron-card-header h3 {
       font-size: 14px;
       font-weight: 600;
       color: #4ade80;
     }
 
-    .learner-header-right {
+    .neuron-header-right {
       display: flex;
       align-items: center;
       gap: 8px;
     }
 
-    .learner-stat-badge {
+    .neuron-stat-badge {
       font-size: 10px;
       padding: 2px 6px;
       border-radius: 4px;
@@ -245,7 +245,7 @@
       color: #666;
     }
 
-    .learner-status {
+    .neuron-status {
       font-size: 11px;
       padding: 3px 8px;
       border-radius: 10px;
@@ -253,11 +253,11 @@
       color: #888;
     }
 
-    .learner-status.observing { background: #1e3a5f; color: #4a9eff; }
-    .learner-status.synthesizing { background: #3f2f1a; color: #facc15; }
-    .learner-status.ready { background: #1a3f1a; color: #4ade80; }
+    .neuron-status.observing { background: #1e3a5f; color: #4a9eff; }
+    .neuron-status.synthesizing { background: #3f2f1a; color: #facc15; }
+    .neuron-status.ready { background: #1a3f1a; color: #4ade80; }
 
-    .learner-type-badge {
+    .neuron-type-badge {
       font-size: 9px;
       font-weight: 700;
       padding: 2px 6px;
@@ -265,10 +265,10 @@
       text-transform: uppercase;
       letter-spacing: 0.5px;
     }
-    .learner-type-badge.text { background: #1a2a3f; color: #60a5fa; border: 1px solid #2a3a5f; }
-    .learner-type-badge.list { background: #2a1a3f; color: #a78bfa; border: 1px solid #3a2a5f; }
+    .neuron-type-badge.text { background: #1a2a3f; color: #60a5fa; border: 1px solid #2a3a5f; }
+    .neuron-type-badge.list { background: #2a1a3f; color: #a78bfa; border: 1px solid #3a2a5f; }
 
-    .learner-origin-badge {
+    .neuron-origin-badge {
       font-size: 8px;
       font-weight: 600;
       padding: 1px 5px;
@@ -276,18 +276,18 @@
       text-transform: uppercase;
       letter-spacing: 0.3px;
     }
-    .learner-origin-badge.prompt { background: #1a2a2a; color: #4ade80; border: 1px solid #2a3a3a; }
-    .learner-origin-badge.developer { background: #1a1a2a; color: #888; border: 1px solid #2a2a3a; }
-    .learner-origin-badge.emergent { background: #2a2a1a; color: #facc15; border: 1px solid #3a3a2a; }
+    .neuron-origin-badge.prompt { background: #1a2a2a; color: #4ade80; border: 1px solid #2a3a3a; }
+    .neuron-origin-badge.developer { background: #1a1a2a; color: #888; border: 1px solid #2a2a3a; }
+    .neuron-origin-badge.emergent { background: #2a2a1a; color: #facc15; border: 1px solid #3a3a2a; }
 
-    .learner-health-badge {
+    .neuron-health-badge {
       font-size: 9px;
       padding: 1px 5px;
       border-radius: 3px;
       font-family: monospace;
     }
-    .learner-health-badge.active { color: #4ade80; background: #0a1a0a; }
-    .learner-health-badge.dormant { color: #666; background: #111; }
+    .neuron-health-badge.active { color: #4ade80; background: #0a1a0a; }
+    .neuron-health-badge.dormant { color: #666; background: #111; }
 
     .adjust-row {
       display: flex;
@@ -310,11 +310,11 @@
       white-space: nowrap;
     }
 
-    .learner-card-body {
+    .neuron-card-body {
       padding: 12px;
     }
 
-    .learner-instructions {
+    .neuron-instructions {
       font-size: 12px;
       color: #aaa;
       line-height: 1.5;
@@ -324,11 +324,11 @@
     }
 
     /* Observations - Primary content on card */
-    .learner-observations {
+    .neuron-observations {
       margin-bottom: 10px;
     }
 
-    .learner-observations .label {
+    .neuron-observations .label {
       font-size: 11px;
       color: #4a9eff;
       font-weight: 500;
@@ -336,7 +336,7 @@
       margin-bottom: 6px;
     }
 
-    .learner-observations .content {
+    .neuron-observations .content {
       background: #111;
       border: 1px solid #222;
       border-radius: 6px;
@@ -345,12 +345,12 @@
       overflow-y: auto;
     }
 
-    .learner-observations.empty .content {
+    .neuron-observations.empty .content {
       background: transparent;
       border: 1px dashed #333;
     }
 
-    .learner-observations .empty-text {
+    .neuron-observations .empty-text {
       color: #444;
       font-size: 11px;
       font-style: italic;
@@ -358,7 +358,7 @@
       padding: 8px;
     }
 
-    .learner-observations .observation {
+    .neuron-observations .observation {
       font-size: 11px;
       color: #aaa;
       line-height: 1.4;
@@ -366,16 +366,16 @@
       border-bottom: 1px solid #222;
     }
 
-    .learner-observations .observation:last-child {
+    .neuron-observations .observation:last-child {
       border-bottom: none;
       padding-bottom: 0;
     }
 
-    .learner-observations .observation:first-child {
+    .neuron-observations .observation:first-child {
       padding-top: 0;
     }
 
-    .learner-observations .importance {
+    .neuron-observations .importance {
       color: #f5a623;
       font-size: 10px;
       font-weight: 500;
@@ -383,7 +383,7 @@
     }
 
     /* Understanding preview - Secondary content */
-    .learner-understanding-preview {
+    .neuron-understanding-preview {
       font-size: 11px;
       color: #555;
       line-height: 1.4;
@@ -391,23 +391,23 @@
       border-top: 1px solid #222;
     }
 
-    .learner-understanding-preview .label {
+    .neuron-understanding-preview .label {
       color: #666;
       margin-right: 4px;
     }
 
-    .learner-understanding-preview .preview-text {
+    .neuron-understanding-preview .preview-text {
       color: #888;
     }
 
-    .learner-card-actions {
+    .neuron-card-actions {
       display: flex;
       gap: 6px;
       padding-top: 8px;
       border-top: 1px solid #222;
     }
 
-    .learner-card-actions button {
+    .neuron-card-actions button {
       font-size: 10px;
       padding: 3px 8px;
       background: #1a1a1a;
@@ -418,9 +418,9 @@
       width: auto;
     }
 
-    .learner-card-actions button:hover { color: #fff; border-color: #555; }
-    .learner-card-actions button.danger { color: #f87171; }
-    .learner-card-actions button.danger:hover { border-color: #f87171; }
+    .neuron-card-actions button:hover { color: #fff; border-color: #555; }
+    .neuron-card-actions button.danger { color: #f87171; }
+    .neuron-card-actions button.danger:hover { border-color: #f87171; }
 
     /* Aggregate dashboard bar */
     .brain-dashboard {
@@ -684,7 +684,7 @@
     }
     .signal-counts span { font-variant-numeric: tabular-nums; }
 
-    .learner-last-synthesis {
+    .neuron-last-synthesis {
       font-size: 11px;
       padding: 6px 8px;
       background: #1a2a1a;
@@ -695,7 +695,7 @@
       gap: 8px;
     }
 
-    .learner-last-synthesis .significance {
+    .neuron-last-synthesis .significance {
       font-size: 9px;
       padding: 2px 6px;
       border-radius: 3px;
@@ -704,35 +704,35 @@
       flex-shrink: 0;
     }
 
-    .learner-last-synthesis .significance.routine {
+    .neuron-last-synthesis .significance.routine {
       background: #333;
       color: #888;
     }
 
-    .learner-last-synthesis .significance.notable {
+    .neuron-last-synthesis .significance.notable {
       background: #3f2f1a;
       color: #facc15;
     }
 
-    .learner-last-synthesis .significance.critical {
+    .neuron-last-synthesis .significance.critical {
       background: #3f1a1a;
       color: #f87171;
     }
 
-    .learner-last-synthesis .evolution-text {
+    .neuron-last-synthesis .evolution-text {
       color: #6b8;
       line-height: 1.3;
     }
 
     /* Legacy styles kept for modal */
-    .learner-understanding {
+    .neuron-understanding {
       font-size: 12px;
       color: #666;
       line-height: 1.4;
       margin-bottom: 8px;
     }
 
-    .learner-understanding .label {
+    .neuron-understanding .label {
       color: #4a9eff;
       font-weight: 500;
       margin-right: 4px;
@@ -740,7 +740,7 @@
       margin-bottom: 4px;
     }
 
-    .learner-understanding .content {
+    .neuron-understanding .content {
       white-space: pre-wrap;
       display: block;
       max-height: 80px;
@@ -752,14 +752,14 @@
       font-size: 11px;
     }
 
-    .learner-buffer {
+    .neuron-buffer {
       font-size: 12px;
       color: #666;
       line-height: 1.4;
       margin-bottom: 8px;
     }
 
-    .learner-buffer .label {
+    .neuron-buffer .label {
       color: #f5a623;
       font-weight: 500;
       margin-right: 4px;
@@ -767,7 +767,7 @@
       margin-bottom: 4px;
     }
 
-    .learner-buffer .content {
+    .neuron-buffer .content {
       white-space: pre-wrap;
       display: block;
       max-height: 80px;
@@ -779,41 +779,41 @@
       font-size: 11px;
     }
 
-    .learner-buffer .observation {
+    .neuron-buffer .observation {
       padding: 4px 0;
       border-bottom: 1px dashed #333;
     }
 
-    .learner-buffer .observation:last-child {
+    .neuron-buffer .observation:last-child {
       border-bottom: none;
     }
 
-    .learner-buffer .importance {
+    .neuron-buffer .importance {
       color: #888;
       font-size: 10px;
     }
 
-    .learner-card-body p {
+    .neuron-card-body p {
       font-size: 12px;
       color: #888;
       line-height: 1.5;
       margin-bottom: 8px;
     }
 
-    .learner-stats {
+    .neuron-stats {
       display: flex;
       gap: 12px;
       font-size: 12px;
       color: #666;
     }
 
-    .learner-stats span {
+    .neuron-stats span {
       display: flex;
       align-items: center;
       gap: 4px;
     }
 
-    /* Learner Detail Modal */
+    /* Neuron Detail Modal */
     .modal-overlay {
       position: fixed;
       inset: 0;
@@ -1355,7 +1355,7 @@
     .toast.observed .toast-type { color: #4a9eff; }
     .toast.synthesized .toast-type { color: #facc15; }
 
-    .toast-learner {
+    .toast-neuron {
       font-size: 10px;
       color: #666;
     }
@@ -1375,21 +1375,21 @@
     }
 
     /* Activity indicator on cards */
-    .learner-activity {
+    .neuron-activity {
       margin-top: 8px;
       padding-top: 8px;
       border-top: 1px solid #222;
       font-size: 10px;
     }
 
-    .learner-activity-label {
+    .neuron-activity-label {
       color: #4a9eff;
       text-transform: uppercase;
       letter-spacing: 0.5px;
       margin-bottom: 4px;
     }
 
-    .learner-activity-text {
+    .neuron-activity-text {
       color: #888;
       line-height: 1.4;
     }
@@ -1408,34 +1408,34 @@
     .significance.notable { background: #3f2f1a; color: #facc15; }
     .significance.critical { background: #3f1a1a; color: #f87171; }
 
-    /* Learner Models Display */
-    .learner-models {
+    /* Neuron Models Display */
+    .neuron-models {
       margin-top: 8px;
       padding-top: 8px;
       border-top: 1px solid #222;
       font-size: 11px;
     }
 
-    .learner-models-label {
+    .neuron-models-label {
       color: #666;
       text-transform: uppercase;
       letter-spacing: 0.5px;
       margin-bottom: 4px;
     }
 
-    .learner-model-row {
+    .neuron-model-row {
       display: flex;
       gap: 4px;
       margin-bottom: 2px;
       color: #555;
     }
 
-    .learner-model-row .phase {
+    .neuron-model-row .phase {
       color: #666;
       min-width: 55px;
     }
 
-    .learner-model-row .model-name {
+    .neuron-model-row .model-name {
       color: #4a9eff;
       word-break: break-all;
     }
@@ -1614,7 +1614,7 @@
       border-radius: 4px; background: #0a0a0a;
     }
 
-    /* Learner topology canvas */
+    /* Neuron topology canvas */
     .evo-topo-canvas {
       width: 100%; flex: 1; min-height: 100px; display: block;
       border-radius: 4px; background: #0a0a0a;
@@ -1722,8 +1722,8 @@
     .evo-tl-entry.action-start::before { background: #a78bfa; }
     .evo-tl-entry.action-done::before { background: #4ade80; }
     .evo-tl-entry.action-fail::before { background: #f87171; }
-    .evo-tl-entry.learner-add::before { background: #4ade80; }
-    .evo-tl-entry.learner-remove::before { background: #f87171; }
+    .evo-tl-entry.neuron-add::before { background: #4ade80; }
+    .evo-tl-entry.neuron-remove::before { background: #f87171; }
 
     .evo-tl-row {
       display: flex; align-items: center; gap: 6px;
@@ -1819,8 +1819,8 @@
     .usage-summary-row .value.input { color: #4ade80; }
     .usage-summary-row .value.output { color: #facc15; }
 
-    /* Learner Usage */
-    .learner-usage-list {
+    /* Neuron Usage */
+    .neuron-usage-list {
       display: flex;
       flex-direction: column;
       gap: 6px;
@@ -1828,28 +1828,28 @@
       overflow-y: auto;
     }
 
-    .learner-usage-item {
+    .neuron-usage-item {
       display: flex;
       justify-content: space-between;
       align-items: center;
       font-size: 12px;
     }
 
-    .learner-usage-item .name {
+    .neuron-usage-item .name {
       color: #4ade80;
       font-weight: 500;
     }
 
-    .learner-usage-item .tokens {
+    .neuron-usage-item .tokens {
       color: #888;
     }
 
-    .learner-usage-item .tokens span {
+    .neuron-usage-item .tokens span {
       margin-left: 6px;
     }
 
-    .learner-usage-item .tokens .in { color: #4ade80; }
-    .learner-usage-item .tokens .out { color: #facc15; }
+    .neuron-usage-item .tokens .in { color: #4ade80; }
+    .neuron-usage-item .tokens .out { color: #facc15; }
   </style>
 </head>
 <body>
@@ -2143,18 +2143,18 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
             <label>Path</label>
             <input type="text" id="brainStorePath" placeholder="server/data/default" value="server/data/default">
           </div>
-          <div style="font-size:10px;color:#a78bfa;text-transform:uppercase;letter-spacing:0.5px;margin:12px 0 6px;">Learner Store</div>
+          <div style="font-size:10px;color:#a78bfa;text-transform:uppercase;letter-spacing:0.5px;margin:12px 0 6px;">Neuron Store</div>
           <div class="form-group">
             <label>Type</label>
-            <select id="learnerStoreType">
+            <select id="neuronStoreType">
               <option value="memory">Memory (ephemeral)</option>
               <option value="sqlite-memory">SQLite In-Memory (ephemeral)</option>
               <option value="sqlite">SQLite File (persistent)</option>
             </select>
           </div>
-          <div class="form-group" id="learnerStorePathGroup" style="display:none;">
+          <div class="form-group" id="neuronStorePathGroup" style="display:none;">
             <label>Path</label>
-            <input type="text" id="learnerStorePath" placeholder="server/data/default" value="server/data/default">
+            <input type="text" id="neuronStorePath" placeholder="server/data/default" value="server/data/default">
             <div style="font-size:10px;color:#666;margin-top:2px;">Relative to project root. Reuse a path to restore a previous brain.</div>
           </div>
         </div><!-- /section-storage -->
@@ -2167,7 +2167,7 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
               <input type="checkbox" id="autoSetup" checked style="width:auto;">
               Auto Setup (LLM decomposition)
             </label>
-            <div style="font-size:10px;color:#666;margin-top:2px;">When off, only explicit learners are created — no LLM call.</div>
+            <div style="font-size:10px;color:#666;margin-top:2px;">When off, only explicit neurons are created — no LLM call.</div>
           </div>
         </div><!-- /section-init-opts -->
 
@@ -2227,25 +2227,25 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
 
           <hr style="border:none;border-top:1px solid #333;margin:10px 0;">
 
-          <div style="font-size:11px;color:#666;text-transform:uppercase;letter-spacing:0.5px;margin:8px 0 4px;">Create Learner (Guidance)</div>
+          <div style="font-size:11px;color:#666;text-transform:uppercase;letter-spacing:0.5px;margin:8px 0 4px;">Create Neuron (Guidance)</div>
           <div class="form-group">
-            <textarea id="createGuidance" rows="2" placeholder="Describe what this learner should track..." style="font-size:12px;"></textarea>
+            <textarea id="createGuidance" rows="2" placeholder="Describe what this neuron should track..." style="font-size:12px;"></textarea>
           </div>
           <button id="createViaGuidanceBtn" class="secondary" style="width:100%;margin-bottom:8px;" disabled>Create via Guidance</button>
 
-          <div style="font-size:11px;color:#666;text-transform:uppercase;letter-spacing:0.5px;margin:8px 0 4px;">Merge Learners</div>
-          <div id="mergeLearnerList" style="max-height:120px;overflow-y:auto;margin-bottom:4px;font-size:12px;">
+          <div style="font-size:11px;color:#666;text-transform:uppercase;letter-spacing:0.5px;margin:8px 0 4px;">Merge Neurons</div>
+          <div id="mergeNeuronList" style="max-height:120px;overflow-y:auto;margin-bottom:4px;font-size:12px;">
             <span style="color:#666;">Initialize brain first</span>
           </div>
           <div class="form-group">
             <textarea id="mergeGuidance" rows="2" placeholder="Guidance for merging..." style="font-size:12px;"></textarea>
           </div>
-          <button id="mergeLearnersBtn" class="secondary" style="width:100%;" disabled>Merge Selected</button>
+          <button id="mergeNeuronsBtn" class="secondary" style="width:100%;" disabled>Merge Selected</button>
         </div><!-- /section-evo-actions -->
 
-        <!-- Internal Learners Config -->
-        <div class="section-title collapsible-toggle" data-target="section-internal-learners-config">Internal Learners <span class="section-chevron">&#9656;</span></div>
-        <div class="section-body collapsed" id="section-internal-learners-config">
+        <!-- Internal Neurons Config -->
+        <div class="section-title collapsible-toggle" data-target="section-internal-neurons-config">Internal Neurons <span class="section-chevron">&#9656;</span></div>
+        <div class="section-body collapsed" id="section-internal-neurons-config">
           <div class="form-group">
             <label style="display:flex;align-items:center;gap:6px;">
               <input type="checkbox" id="ilGlobalInjection" checked style="width:auto;">
@@ -2275,7 +2275,7 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
             <label>Dismissed Batch Buffer Max Size</label>
             <input type="number" id="dismissedBatchMaxSize" value="100" min="1" max="1000">
           </div>
-        </div><!-- /section-internal-learners-config -->
+        </div><!-- /section-internal-neurons-config -->
 
         <!-- Governance Config -->
         <div class="section-title collapsible-toggle" data-target="section-governance">Governance <span class="section-chevron">&#9662;</span></div>
@@ -2373,7 +2373,7 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
       </div>
     </div>
 
-    <!-- Main Panel: Learners -->
+    <!-- Main Panel: Neurons -->
     <div class="panel main-panel">
       <!-- Brain Monitor -->
       <div class="brain-monitor" id="brainMonitor">
@@ -2408,10 +2408,10 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
             </div>
           </div>
 
-          <!-- Per-Learner Usage -->
+          <!-- Per-Neuron Usage -->
           <div class="monitor-card">
-            <div class="monitor-card-title">By Learner</div>
-            <div class="learner-usage-list" id="learnerUsagePanel">
+            <div class="monitor-card-title">By Neuron</div>
+            <div class="neuron-usage-list" id="neuronUsagePanel">
               <div class="inject-idle">No data yet</div>
             </div>
           </div>
@@ -2461,8 +2461,8 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
       </div>
 
       <div class="panel-header">
-        Learners <span id="learnerCount" style="color:#4ade80;margin-left:8px;">0</span>
-        <button id="addLearnerBtn" class="secondary" style="font-size:11px;padding:3px 10px;display:none;">+ Add Learner</button>
+        Neurons <span id="neuronCount" style="color:#4ade80;margin-left:8px;">0</span>
+        <button id="addNeuronBtn" class="secondary" style="font-size:11px;padding:3px 10px;display:none;">+ Add Neuron</button>
       </div>
 
       <div class="brain-dashboard" id="brainDashboard" style="display:none;">
@@ -2487,7 +2487,7 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
           <div class="dash-label">Dismissal Rate</div>
         </div>
         <div class="dash-stat accent-green">
-          <div class="dash-value" id="dashActiveLearners">0</div>
+          <div class="dash-value" id="dashActiveNeurons">0</div>
           <div class="dash-label">Active</div>
         </div>
         <div class="dash-stat accent-red" style="cursor:pointer;" id="dashDismissedBatchesStat" title="Click to view dismissed batches">
@@ -2496,19 +2496,19 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
         </div>
       </div>
 
-      <div class="learners-grid" id="learnersGrid">
+      <div class="neurons-grid" id="neuronsGrid">
         <div class="empty-state">
-          <h3>No learners yet</h3>
-          <p>Initialize the brain to create learners</p>
+          <h3>No neurons yet</h3>
+          <p>Initialize the brain to create neurons</p>
         </div>
       </div>
 
-      <!-- Internal Learners Section -->
-      <div id="internalLearnersSection" style="display:none;">
+      <!-- Internal Neurons Section -->
+      <div id="internalNeuronsSection" style="display:none;">
         <div class="panel-header" style="margin-top:16px;font-size:12px;color:#888;">
-          Internal Learners <span id="internalLearnerCount" style="color:#a78bfa;margin-left:8px;">0</span>
+          Internal Neurons <span id="internalNeuronCount" style="color:#a78bfa;margin-left:8px;">0</span>
         </div>
-        <div class="learners-grid" id="internalLearnersGrid" style="gap:8px;"></div>
+        <div class="neurons-grid" id="internalNeuronsGrid" style="gap:8px;"></div>
       </div>
 
       <!-- Evolution Context -->
@@ -2530,9 +2530,9 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
           <button id="queryModeAsk" style="flex:1;font-size:11px;padding:4px 8px;border:1px solid #333;border-radius:4px 0 0 4px;background:#2a2a2a;color:#e0e0e0;cursor:pointer;" class="query-mode-active">Ask</button>
           <button id="queryModeConsult" style="flex:1;font-size:11px;padding:4px 8px;border:1px solid #333;border-left:none;border-radius:0 4px 4px 0;background:#111;color:#888;cursor:pointer;">Consult</button>
         </div>
-        <div id="consultLearnerSelect" style="display:none;margin-bottom:6px;">
-          <select id="consultLearner" style="width:100%;font-size:12px;">
-            <option value="">All Internal Learners</option>
+        <div id="consultNeuronSelect" style="display:none;margin-bottom:6px;">
+          <select id="consultNeuron" style="width:100%;font-size:12px;">
+            <option value="">All Internal Neurons</option>
           </select>
         </div>
         <div class="qa-input-row">
@@ -2582,11 +2582,11 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
     </div>
   </div>
 
-  <!-- Learner Detail Modal -->
-  <div class="modal-overlay" id="learnerModal">
+  <!-- Neuron Detail Modal -->
+  <div class="modal-overlay" id="neuronModal">
     <div class="modal">
       <div class="modal-header">
-        <h2 id="modalTitle">Learner Details</h2>
+        <h2 id="modalTitle">Neuron Details</h2>
         <div class="modal-header-actions">
           <button class="modal-delete-btn" id="modalDeleteBtn" onclick="deleteFromModal()">Delete</button>
           <button class="modal-close" onclick="closeModal()">&times;</button>
@@ -2608,7 +2608,7 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
           <div class="form-row">
             <div class="form-group">
               <label>Name</label>
-              <input type="text" id="modalName" placeholder="Learner name">
+              <input type="text" id="modalName" placeholder="Neuron name">
             </div>
             <div class="form-group">
               <label>Description</label>
@@ -2628,11 +2628,11 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
           <div class="form-row" id="modalOriginRow" style="margin-top:4px;">
             <div class="form-group" style="flex:0 0 auto;">
               <label>Origin</label>
-              <span id="modalOrigin" class="learner-origin-badge" style="display:inline-block;"></span>
+              <span id="modalOrigin" class="neuron-origin-badge" style="display:inline-block;"></span>
             </div>
             <div class="form-group" style="flex:0 0 auto;">
               <label>Health</label>
-              <span id="modalHealth" class="learner-health-badge" style="display:inline-block;"></span>
+              <span id="modalHealth" class="neuron-health-badge" style="display:inline-block;"></span>
             </div>
           </div>
           <div style="display:flex;gap:8px;margin-top:8px;">
@@ -2702,7 +2702,7 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
           <div class="form-row" style="margin-top:12px;">
             <div style="grid-column:1/-1;font-size:11px;color:#666;text-transform:uppercase;letter-spacing:0.5px;">General</div>
           </div>
-          <!-- Text learner governance -->
+          <!-- Text neuron governance -->
           <div class="form-row" id="modalGovText">
             <div class="form-group">
               <label>Governance Strategy</label>
@@ -2720,7 +2720,7 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
               </select>
             </div>
           </div>
-          <!-- List learner governance -->
+          <!-- List neuron governance -->
           <div class="form-row" id="modalGovList" style="display:none;">
             <div class="form-group">
               <label>Deduplication</label>
@@ -2777,7 +2777,7 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
 
         <div class="modal-tab-content" id="modal-query">
           <div class="form-group">
-            <label>Ask this learner a question</label>
+            <label>Ask this neuron a question</label>
             <div style="display:flex;gap:8px;">
               <input type="text" id="modalQueryInput" placeholder="e.g. What do you know about...">
               <button id="modalQueryBtn" class="secondary" style="white-space:nowrap;">Ask</button>
@@ -2789,34 +2789,34 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
     </div>
   </div>
 
-  <!-- Create Learner Modal -->
-  <div class="modal-overlay" id="createLearnerModal" style="display:none;">
+  <!-- Create Neuron Modal -->
+  <div class="modal-overlay" id="createNeuronModal" style="display:none;">
     <div class="modal" style="max-width:480px;">
       <div class="modal-header">
-        <h3 class="modal-title">Create Learner</h3>
-        <button class="modal-close" id="createLearnerClose">&times;</button>
+        <h3 class="modal-title">Create Neuron</h3>
+        <button class="modal-close" id="createNeuronClose">&times;</button>
       </div>
       <div style="padding:16px;display:flex;flex-direction:column;gap:12px;">
         <div class="form-group">
           <label>Name</label>
-          <input type="text" id="createLearnerName" placeholder="e.g. Tech Preferences">
+          <input type="text" id="createNeuronName" placeholder="e.g. Tech Preferences">
         </div>
         <div class="form-group">
           <label>Type</label>
-          <select id="createLearnerType">
+          <select id="createNeuronType">
             <option value="text">Text (narrative prose understanding)</option>
             <option value="list">List (structured item collection)</option>
           </select>
         </div>
         <div class="form-group">
           <label>Instructions</label>
-          <textarea id="createLearnerInstructions" rows="4" placeholder="What should this learner observe and track?"></textarea>
+          <textarea id="createNeuronInstructions" rows="4" placeholder="What should this neuron observe and track?"></textarea>
         </div>
         <div class="form-group">
           <label>Description <span style="color:#666;font-weight:normal;">(optional)</span></label>
-          <input type="text" id="createLearnerDescription" placeholder="Brief description for query routing">
+          <input type="text" id="createNeuronDescription" placeholder="Brief description for query routing">
         </div>
-        <button id="createLearnerSubmit">Create Learner</button>
+        <button id="createNeuronSubmit">Create Neuron</button>
       </div>
     </div>
   </div>
@@ -2841,22 +2841,22 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
     let selectedSessions = new Set()
     let currentProject = null
     let brainInitialized = false
-    let learnerStates = {} // Track per-learner status
+    let neuronStates = {} // Track per-neuron status
     let injectProgress = null // Track injection progress
     let eventSource = null
     const toastContainer = document.getElementById('toastContainer')
 
     // Usage tracking state
     let usageByModel = {} // { model: { inputTokens, outputTokens, phases: Set, requestCount } }
-    let usageByLearner = {} // { learnerId: { inputTokens, outputTokens, requestCount } }
+    let usageByNeuron = {} // { neuronId: { inputTokens, outputTokens, requestCount } }
     let totalUsage = { inputTokens: 0, outputTokens: 0, totalTokens: 0, requestCount: 0 }
     let configuredModels = {} // Store model config: { primary, blueprint, observe, synthesize }
     let lastBrainConfig = null // Snapshot of config at last init/update for diffing
-    let currentModalLearnerId = null // Currently open learner in modal
+    let currentModalNeuronId = null // Currently open neuron in modal
     let updateHistory = [] // Client-side update history
-    // Signal metrics — accumulated client-side from SSE events per learner
-    // Mirrors the private counters in TextLearner (observationCount, dismissalCount, etc.)
-    let learnerMetrics = {} // { [learnerId]: { observations, dismissals, syntheses, lastSynthesisObs, queryConfidences } }
+    // Signal metrics — accumulated client-side from SSE events per neuron
+    // Mirrors the private counters in TextNeuron (observationCount, dismissalCount, etc.)
+    let neuronMetrics = {} // { [neuronId]: { observations, dismissals, syntheses, lastSynthesisObs, queryConfidences } }
 
     // --- Configuration Panel Toggle ---
     const container = document.querySelector('.container')
@@ -2874,16 +2874,16 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
     })
 
     // --- Utility Functions ---
-    function ensureLearnerMetrics(learnerId) {
-      if (!learnerMetrics[learnerId]) {
-        learnerMetrics[learnerId] = { observations: 0, dismissals: 0, syntheses: 0, lastSynthesisObs: 0, queryConfidences: [], events: [], understandingSizes: [] }
+    function ensureNeuronMetrics(neuronId) {
+      if (!neuronMetrics[neuronId]) {
+        neuronMetrics[neuronId] = { observations: 0, dismissals: 0, syntheses: 0, lastSynthesisObs: 0, queryConfidences: [], events: [], understandingSizes: [] }
       }
-      return learnerMetrics[learnerId]
+      return neuronMetrics[neuronId]
     }
 
     // Track a timestamped event for sparklines (keep last 60)
-    function trackEvent(learnerId, type) {
-      const m = ensureLearnerMetrics(learnerId)
+    function trackEvent(neuronId, type) {
+      const m = ensureNeuronMetrics(neuronId)
       m.events.push({ t: Date.now(), type })
       if (m.events.length > 60) m.events.shift()
     }
@@ -3156,17 +3156,17 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
 
     // --- Dashboard Update ---
     function updateDashboard() {
-      let totalObs = 0, totalDis = 0, totalSynth = 0, totalQueries = 0, activeLearners = 0
-      Object.keys(learnerMetrics).forEach(id => {
-        const m = learnerMetrics[id]
+      let totalObs = 0, totalDis = 0, totalSynth = 0, totalQueries = 0, activeNeurons = 0
+      Object.keys(neuronMetrics).forEach(id => {
+        const m = neuronMetrics[id]
         totalObs += m.observations
         totalDis += m.dismissals
         totalSynth += m.syntheses
         totalQueries += m.queryConfidences.length
       })
-      Object.keys(learnerStates).forEach(id => {
-        const gov = learnerStates[id]?.data?.health
-        if (gov && gov.status === 'active') activeLearners++
+      Object.keys(neuronStates).forEach(id => {
+        const gov = neuronStates[id]?.data?.health
+        if (gov && gov.status === 'active') activeNeurons++
       })
       const rate = totalObs > 0 ? ((totalDis / totalObs) * 100).toFixed(0) : '0'
       document.getElementById('dashObserved').textContent = totalObs
@@ -3174,7 +3174,7 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
       document.getElementById('dashSyntheses').textContent = totalSynth
       document.getElementById('dashQueries').textContent = totalQueries
       document.getElementById('dashDismissalRate').textContent = rate + '%'
-      document.getElementById('dashActiveLearners').textContent = activeLearners
+      document.getElementById('dashActiveNeurons').textContent = activeNeurons
     }
 
     function formatSize(chars) {
@@ -3190,7 +3190,7 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
     }
 
     // --- Toast Notifications ---
-    function showToast(type, learnerId, content, meta = {}) {
+    function showToast(type, neuronId, content, meta = {}) {
       const toast = document.createElement('div')
       toast.className = `toast ${type}`
 
@@ -3214,7 +3214,7 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
       toast.innerHTML = `
         <div class="toast-header">
           <span class="toast-type">${typeLabels[type] || type}</span>
-          <span class="toast-learner">${learnerId}</span>
+          <span class="toast-neuron">${neuronId}</span>
         </div>
         <div class="toast-content">${content}</div>
         ${metaHtml ? `<div class="toast-meta">${metaHtml}</div>` : ''}
@@ -3235,7 +3235,7 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
     }
 
     // --- Usage Tracking ---
-    function trackUsage(model, phase, usage, learnerId) {
+    function trackUsage(model, phase, usage, neuronId) {
       if (!usage) return
       const inputTokens = usage.inputTokens || 0
       const outputTokens = usage.outputTokens || 0
@@ -3259,14 +3259,14 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
         usageByModel[model].requestCount++
       }
 
-      // Update per-learner usage
-      if (learnerId) {
-        if (!usageByLearner[learnerId]) {
-          usageByLearner[learnerId] = { inputTokens: 0, outputTokens: 0, requestCount: 0 }
+      // Update per-neuron usage
+      if (neuronId) {
+        if (!usageByNeuron[neuronId]) {
+          usageByNeuron[neuronId] = { inputTokens: 0, outputTokens: 0, requestCount: 0 }
         }
-        usageByLearner[learnerId].inputTokens += inputTokens
-        usageByLearner[learnerId].outputTokens += outputTokens
-        usageByLearner[learnerId].requestCount++
+        usageByNeuron[neuronId].inputTokens += inputTokens
+        usageByNeuron[neuronId].outputTokens += outputTokens
+        usageByNeuron[neuronId].requestCount++
       }
 
       updateBrainMonitor()
@@ -3274,7 +3274,7 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
 
     function updateBrainMonitor() {
       updateUsageSummary()
-      updateLearnerUsage()
+      updateNeuronUsage()
     }
 
     function updateUsageSummary() {
@@ -3295,26 +3295,26 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
       `
     }
 
-    function updateLearnerUsage() {
-      const panel = document.getElementById('learnerUsagePanel')
-      const learners = Object.keys(usageByLearner)
+    function updateNeuronUsage() {
+      const panel = document.getElementById('neuronUsagePanel')
+      const neurons = Object.keys(usageByNeuron)
 
-      if (learners.length === 0) {
+      if (neurons.length === 0) {
         panel.innerHTML = '<div class="inject-idle">No data yet</div>'
         return
       }
 
       // Sort by total tokens (highest first)
-      learners.sort((a, b) => {
-        const aTotal = usageByLearner[a].inputTokens + usageByLearner[a].outputTokens
-        const bTotal = usageByLearner[b].inputTokens + usageByLearner[b].outputTokens
+      neurons.sort((a, b) => {
+        const aTotal = usageByNeuron[a].inputTokens + usageByNeuron[a].outputTokens
+        const bTotal = usageByNeuron[b].inputTokens + usageByNeuron[b].outputTokens
         return bTotal - aTotal
       })
 
-      panel.innerHTML = learners.map(id => {
-        const u = usageByLearner[id]
+      panel.innerHTML = neurons.map(id => {
+        const u = usageByNeuron[id]
         return `
-          <div class="learner-usage-item">
+          <div class="neuron-usage-item">
             <span class="name">${id}</span>
             <span class="tokens">
               <span class="in">↓${formatTokens(u.inputTokens)}</span>
@@ -3351,8 +3351,8 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
       return n.toString()
     }
 
-    /** Get learner type from status response */
-    function getLearnerType(data) {
+    /** Get neuron type from status response */
+    function getNeuronType(data) {
       return data.type || 'text'
     }
 
@@ -3360,7 +3360,7 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
     function governanceSummary(data) {
       const g = data.governance
       if (!g) return '—'
-      if (getLearnerType(data) === 'list') {
+      if (getNeuronType(data) === 'list') {
         return `dedup: ${g.deduplication || '—'}, max: ${g.maxItems ?? '—'}`
       }
       return g.strategy || '—'
@@ -3384,9 +3384,9 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
     const brainStoreType = document.getElementById('brainStoreType')
     const brainStorePath = document.getElementById('brainStorePath')
     const brainStorePathGroup = document.getElementById('brainStorePathGroup')
-    const learnerStoreType = document.getElementById('learnerStoreType')
-    const learnerStorePath = document.getElementById('learnerStorePath')
-    const learnerStorePathGroup = document.getElementById('learnerStorePathGroup')
+    const neuronStoreType = document.getElementById('neuronStoreType')
+    const neuronStorePath = document.getElementById('neuronStorePath')
+    const neuronStorePathGroup = document.getElementById('neuronStorePathGroup')
     const autoSetupCheckbox = document.getElementById('autoSetup')
     const initBtn = document.getElementById('initBtn')
 
@@ -3394,22 +3394,22 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
     brainStoreType.addEventListener('change', () => {
       brainStorePathGroup.style.display = brainStoreType.value === 'sqlite' ? '' : 'none'
     })
-    learnerStoreType.addEventListener('change', () => {
-      learnerStorePathGroup.style.display = learnerStoreType.value === 'sqlite' ? '' : 'none'
+    neuronStoreType.addEventListener('change', () => {
+      neuronStorePathGroup.style.display = neuronStoreType.value === 'sqlite' ? '' : 'none'
     })
     const projectSelect = document.getElementById('projectSelect')
     const sessionList = document.getElementById('sessionList')
     const userMessagesOnly = document.getElementById('userMessagesOnly')
     const injectBtn = document.getElementById('injectBtn')
-    const learnersGrid = document.getElementById('learnersGrid')
-    const learnerCount = document.getElementById('learnerCount')
+    const neuronsGrid = document.getElementById('neuronsGrid')
+    const neuronCount = document.getElementById('neuronCount')
     const qaList = document.getElementById('qaList')
     const queryInput = document.getElementById('queryInput')
     const queryModelSelect = document.getElementById('queryModel')
     const queryTempSlider = document.getElementById('queryTemp')
     const tempValueDisplay = document.getElementById('tempValue')
     const askBtn = document.getElementById('askBtn')
-    const learnerModal = document.getElementById('learnerModal')
+    const neuronModal = document.getElementById('neuronModal')
     const updateBrainBtn = document.getElementById('updateBrainBtn')
     const destroyBrainBtn = document.getElementById('destroyBrainBtn')
     const evolutionEnabled = document.getElementById('evolutionEnabled')
@@ -3431,115 +3431,115 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
     })
 
     function closeModal() {
-      learnerModal.classList.remove('open')
-      currentModalLearnerId = null
+      neuronModal.classList.remove('open')
+      currentModalNeuronId = null
     }
 
-    learnerModal.addEventListener('click', (e) => {
-      if (e.target === learnerModal) closeModal()
+    neuronModal.addEventListener('click', (e) => {
+      if (e.target === neuronModal) closeModal()
     })
 
-    // --- Learner Lifecycle Actions ---
+    // --- Neuron Lifecycle Actions ---
 
-    async function deleteLearnerFromCard(learnerId) {
-      if (!confirm(`Delete learner "${learnerId}"? This will destroy all accumulated knowledge.`)) return
+    async function deleteNeuronFromCard(neuronId) {
+      if (!confirm(`Delete neuron "${neuronId}"? This will destroy all accumulated knowledge.`)) return
       try {
         const res = await fetch('/brain/evolve/delete', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ learnerId })
+          body: JSON.stringify({ neuronId })
         })
         if (!res.ok) throw new Error((await res.json()).error)
-        showToast(`Deleted learner: ${learnerId}`, 'success')
-        await updateLearners()
+        showToast(`Deleted neuron: ${neuronId}`, 'success')
+        await updateNeurons()
       } catch (err) {
         showToast(`Delete failed: ${err.message}`, 'error')
       }
     }
 
-    async function splitLearnerFromCard(learnerId) {
-      const guidance = prompt('Describe how to split this learner (guidance):')
+    async function splitNeuronFromCard(neuronId) {
+      const guidance = prompt('Describe how to split this neuron (guidance):')
       if (!guidance) return
       try {
         const res = await fetch('/brain/evolve/split', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ learnerId, guidance })
+          body: JSON.stringify({ neuronId, guidance })
         })
         if (!res.ok) throw new Error((await res.json()).error)
-        showToast(`Split initiated for: ${learnerId}`, 'success')
-        await updateLearners()
+        showToast(`Split initiated for: ${neuronId}`, 'success')
+        await updateNeurons()
       } catch (err) {
         showToast(`Split failed: ${err.message}`, 'error')
       }
     }
 
-    async function removeLearnerFromCard(learnerId) {
-      if (!confirm(`Remove learner "${learnerId}"? This is a simple removal (no evolution).`)) return
+    async function removeNeuronFromCard(neuronId) {
+      if (!confirm(`Remove neuron "${neuronId}"? This is a simple removal (no evolution).`)) return
       try {
-        const res = await fetch(`/brain/learners/${learnerId}/remove`, {
+        const res = await fetch(`/brain/neurons/${neuronId}/remove`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
         })
         if (!res.ok) throw new Error((await res.json()).error)
-        showToast(`Removed learner: ${learnerId}`, 'success')
-        await updateLearners()
+        showToast(`Removed neuron: ${neuronId}`, 'success')
+        await updateNeurons()
       } catch (err) {
         showToast(`Remove failed: ${err.message}`, 'error')
       }
     }
 
-    async function adjustLearnerFromCard(learnerId) {
-      const input = document.getElementById(`adjust-${learnerId}`)
+    async function adjustNeuronFromCard(neuronId) {
+      const input = document.getElementById(`adjust-${neuronId}`)
       const directive = input?.value?.trim()
       if (!directive) return
       try {
-        const res = await fetch(`/brain/learners/${learnerId}/adjust`, {
+        const res = await fetch(`/brain/neurons/${neuronId}/adjust`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ directive })
         })
         if (!res.ok) throw new Error((await res.json()).error)
         input.value = ''
-        showToast(`Adjusted learner: ${learnerId}`, 'success')
-        await updateLearners()
+        showToast(`Adjusted neuron: ${neuronId}`, 'success')
+        await updateNeurons()
       } catch (err) {
         showToast(`Adjust failed: ${err.message}`, 'error')
       }
     }
 
     async function deleteFromModal() {
-      if (!currentModalLearnerId) return
-      if (!confirm(`Delete learner "${currentModalLearnerId}"? This will destroy all accumulated knowledge.`)) return
+      if (!currentModalNeuronId) return
+      if (!confirm(`Delete neuron "${currentModalNeuronId}"? This will destroy all accumulated knowledge.`)) return
       try {
         const res = await fetch('/brain/evolve/delete', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ learnerId: currentModalLearnerId })
+          body: JSON.stringify({ neuronId: currentModalNeuronId })
         })
         if (!res.ok) throw new Error((await res.json()).error)
-        showToast(`Deleted learner: ${currentModalLearnerId}`, 'success')
+        showToast(`Deleted neuron: ${currentModalNeuronId}`, 'success')
         closeModal()
-        await updateLearners()
+        await updateNeurons()
       } catch (err) {
         showToast(`Delete failed: ${err.message}`, 'error')
       }
     }
 
     document.getElementById('forceSynthBtn').addEventListener('click', async () => {
-      if (!currentModalLearnerId) return
+      if (!currentModalNeuronId) return
       const btn = document.getElementById('forceSynthBtn')
       btn.disabled = true
       btn.textContent = 'Synthesizing...'
       try {
-        const res = await fetch(`/brain/learners/${currentModalLearnerId}/synthesize`, {
+        const res = await fetch(`/brain/neurons/${currentModalNeuronId}/synthesize`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' }
         })
         if (!res.ok) throw new Error((await res.json()).error)
-        showToast(`Force synthesis completed for: ${currentModalLearnerId}`, 'success')
-        await updateLearners()
-        openLearnerModal(currentModalLearnerId) // Refresh modal
+        showToast(`Force synthesis completed for: ${currentModalNeuronId}`, 'success')
+        await updateNeurons()
+        openNeuronModal(currentModalNeuronId) // Refresh modal
       } catch (err) {
         showToast(`Synthesis failed: ${err.message}`, 'error')
       } finally {
@@ -3552,7 +3552,7 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
       const input = document.getElementById('modalQueryInput')
       const resultEl = document.getElementById('modalQueryResult')
       const query = input.value.trim()
-      if (!query || !currentModalLearnerId) return
+      if (!query || !currentModalNeuronId) return
 
       const btn = document.getElementById('modalQueryBtn')
       btn.disabled = true
@@ -3561,7 +3561,7 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
       resultEl.textContent = 'Loading...'
 
       try {
-        const res = await fetch(`/brain/learners/${currentModalLearnerId}/query`, {
+        const res = await fetch(`/brain/neurons/${currentModalNeuronId}/query`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ query })
@@ -3744,7 +3744,7 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
         if (res.ok) {
           lastBrainConfig = snapshotBrainConfig()
           showToast('synthesized', 'brain', `Updated: ${data.changedFields?.join(', ') || 'done'}`)
-          updateLearners()
+          updateNeurons()
         } else {
           showToast('critical', 'brain', 'Update failed: ' + data.error)
         }
@@ -3756,11 +3756,11 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
       }
     }
 
-    // --- Learner Update Functions ---
-    async function saveLearnerOverview() {
-      if (!currentModalLearnerId) return
+    // --- Neuron Update Functions ---
+    async function saveNeuronOverview() {
+      if (!currentModalNeuronId) return
       const body = {}
-      const state = learnerStates[currentModalLearnerId]
+      const state = neuronStates[currentModalNeuronId]
       const data = state?.data || {}
 
       const newName = document.getElementById('modalName').value.trim()
@@ -3772,13 +3772,13 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
       if (newInstructions && newInstructions !== (data.instructions || '')) body.instructions = newInstructions
 
       if (Object.keys(body).length === 0) {
-        showToast('observed', currentModalLearnerId, 'No changes detected')
+        showToast('observed', currentModalNeuronId, 'No changes detected')
         return
       }
 
       updateHistory.unshift({
         timestamp: new Date().toISOString(),
-        target: currentModalLearnerId,
+        target: currentModalNeuronId,
         changedFields: Object.keys(body),
         previousValues: { name: data.name, description: data.description, instructions: data.instructions },
       })
@@ -3788,37 +3788,37 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
       saveOverviewBtn.innerHTML = '<span class="spinner"></span>Saving...'
 
       try {
-        const res = await fetch(`/brain/learners/${encodeURIComponent(currentModalLearnerId)}/update`, {
+        const res = await fetch(`/brain/neurons/${encodeURIComponent(currentModalNeuronId)}/update`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(body),
         })
         const result = await res.json()
         if (res.ok) {
-          showToast('synthesized', currentModalLearnerId, `Updated: ${result.changedFields?.join(', ') || 'done'}`)
-          updateLearners()
+          showToast('synthesized', currentModalNeuronId, `Updated: ${result.changedFields?.join(', ') || 'done'}`)
+          updateNeurons()
         } else {
-          showToast('critical', currentModalLearnerId, 'Update failed: ' + result.error)
+          showToast('critical', currentModalNeuronId, 'Update failed: ' + result.error)
         }
       } catch (err) {
-        showToast('critical', currentModalLearnerId, 'Error: ' + err.message)
+        showToast('critical', currentModalNeuronId, 'Error: ' + err.message)
       } finally {
         saveOverviewBtn.disabled = false
         saveOverviewBtn.textContent = 'Save Changes'
       }
     }
 
-    async function saveLearnerSettings() {
-      if (!currentModalLearnerId) return
+    async function saveNeuronSettings() {
+      if (!currentModalNeuronId) return
       const body = {}
-      const state = learnerStates[currentModalLearnerId]
+      const state = neuronStates[currentModalNeuronId]
       const data = state?.data || {}
 
       const obsModel = document.getElementById('modalObserveModel').value
       const synModel = document.getElementById('modalSynthesizeModel').value
       const maxObs = parseInt(document.getElementById('modalMaxObservations').value)
       const minImp = parseFloat(document.getElementById('modalMinImportance').value)
-      const lType = getLearnerType(data)
+      const lType = getNeuronType(data)
 
       if (obsModel) body.observer = { model: obsModel }
       if (synModel) body.understand = { ...(body.understand || {}), model: synModel }
@@ -3867,13 +3867,13 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
       }
 
       if (Object.keys(body).length === 0) {
-        showToast('observed', currentModalLearnerId, 'No changes detected')
+        showToast('observed', currentModalNeuronId, 'No changes detected')
         return
       }
 
       updateHistory.unshift({
         timestamp: new Date().toISOString(),
-        target: currentModalLearnerId,
+        target: currentModalNeuronId,
         changedFields: Object.keys(body),
         previousValues: { understandThresholds: currentThresholds, governance: currentGovr, queryMethod: data.queryMethod },
       })
@@ -3883,79 +3883,79 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
       saveSettingsBtn.innerHTML = '<span class="spinner"></span>Saving...'
 
       try {
-        const res = await fetch(`/brain/learners/${encodeURIComponent(currentModalLearnerId)}/update`, {
+        const res = await fetch(`/brain/neurons/${encodeURIComponent(currentModalNeuronId)}/update`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(body),
         })
         const result = await res.json()
         if (res.ok) {
-          showToast('synthesized', currentModalLearnerId, `Updated: ${result.changedFields?.join(', ') || 'done'}`)
-          updateLearners()
+          showToast('synthesized', currentModalNeuronId, `Updated: ${result.changedFields?.join(', ') || 'done'}`)
+          updateNeurons()
         } else {
-          showToast('critical', currentModalLearnerId, 'Update failed: ' + result.error)
+          showToast('critical', currentModalNeuronId, 'Update failed: ' + result.error)
         }
       } catch (err) {
-        showToast('critical', currentModalLearnerId, 'Error: ' + err.message)
+        showToast('critical', currentModalNeuronId, 'Error: ' + err.message)
       } finally {
         saveSettingsBtn.disabled = false
         saveSettingsBtn.textContent = 'Save Settings'
       }
     }
 
-    // --- Add Learner (modal) ---
-    const addLearnerBtn = document.getElementById('addLearnerBtn')
-    const createLearnerModal = document.getElementById('createLearnerModal')
-    const createLearnerClose = document.getElementById('createLearnerClose')
-    const createLearnerSubmit = document.getElementById('createLearnerSubmit')
+    // --- Add Neuron (modal) ---
+    const addNeuronBtn = document.getElementById('addNeuronBtn')
+    const createNeuronModal = document.getElementById('createNeuronModal')
+    const createNeuronClose = document.getElementById('createNeuronClose')
+    const createNeuronSubmit = document.getElementById('createNeuronSubmit')
 
-    addLearnerBtn.addEventListener('click', () => {
-      document.getElementById('createLearnerName').value = ''
-      document.getElementById('createLearnerType').value = 'text'
-      document.getElementById('createLearnerInstructions').value = ''
-      document.getElementById('createLearnerDescription').value = ''
-      createLearnerModal.style.display = 'flex'
+    addNeuronBtn.addEventListener('click', () => {
+      document.getElementById('createNeuronName').value = ''
+      document.getElementById('createNeuronType').value = 'text'
+      document.getElementById('createNeuronInstructions').value = ''
+      document.getElementById('createNeuronDescription').value = ''
+      createNeuronModal.style.display = 'flex'
     })
 
-    createLearnerClose.addEventListener('click', () => {
-      createLearnerModal.style.display = 'none'
+    createNeuronClose.addEventListener('click', () => {
+      createNeuronModal.style.display = 'none'
     })
 
-    createLearnerModal.addEventListener('click', (e) => {
-      if (e.target === createLearnerModal) createLearnerModal.style.display = 'none'
+    createNeuronModal.addEventListener('click', (e) => {
+      if (e.target === createNeuronModal) createNeuronModal.style.display = 'none'
     })
 
-    createLearnerSubmit.addEventListener('click', async () => {
-      const name = document.getElementById('createLearnerName').value.trim()
-      const type = document.getElementById('createLearnerType').value
-      const instructions = document.getElementById('createLearnerInstructions').value.trim()
-      const description = document.getElementById('createLearnerDescription').value.trim()
+    createNeuronSubmit.addEventListener('click', async () => {
+      const name = document.getElementById('createNeuronName').value.trim()
+      const type = document.getElementById('createNeuronType').value
+      const instructions = document.getElementById('createNeuronInstructions').value.trim()
+      const description = document.getElementById('createNeuronDescription').value.trim()
 
       if (!name) return alert('Name is required')
       if (!instructions) return alert('Instructions are required')
 
-      createLearnerSubmit.disabled = true
-      createLearnerSubmit.innerHTML = '<span class="spinner"></span>Creating...'
+      createNeuronSubmit.disabled = true
+      createNeuronSubmit.innerHTML = '<span class="spinner"></span>Creating...'
 
       try {
-        const res = await fetch('/brain/learners/create', {
+        const res = await fetch('/brain/neurons/create', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ name, type, instructions, ...(description ? { description } : {}) }),
         })
         const result = await res.json()
         if (res.ok) {
-          showToast('synthesized', result.learnerId, 'New learner created: ' + name)
-          createLearnerModal.style.display = 'none'
-          updateLearners()
+          showToast('synthesized', result.neuronId, 'New neuron created: ' + name)
+          createNeuronModal.style.display = 'none'
+          updateNeurons()
         } else {
           showToast('critical', 'brain', 'Create failed: ' + result.error)
         }
       } catch (err) {
         showToast('critical', 'brain', 'Error: ' + err.message)
       } finally {
-        createLearnerSubmit.disabled = false
-        createLearnerSubmit.textContent = 'Create Learner'
+        createNeuronSubmit.disabled = false
+        createNeuronSubmit.textContent = 'Create Neuron'
       }
     })
 
@@ -3963,7 +3963,7 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
     const evaluateNowBtn = document.getElementById('evaluateNowBtn')
     const sendSignalBtn = document.getElementById('sendSignalBtn')
     const createViaGuidanceBtn = document.getElementById('createViaGuidanceBtn')
-    const mergeLearnersBtn = document.getElementById('mergeLearnersBtn')
+    const mergeNeuronsBtn = document.getElementById('mergeNeuronsBtn')
 
     evaluateNowBtn.addEventListener('click', async () => {
       evaluateNowBtn.disabled = true
@@ -4025,9 +4025,9 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
         })
         const data = await res.json()
         if (res.ok) {
-          showToast('synthesized', data.learnerId || 'evolve', 'Learner created via guidance')
+          showToast('synthesized', data.neuronId || 'evolve', 'Neuron created via guidance')
           document.getElementById('createGuidance').value = ''
-          updateLearners()
+          updateNeurons()
         } else {
           showToast('critical', 'evolve', 'Failed: ' + data.error)
         }
@@ -4039,46 +4039,46 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
       }
     })
 
-    mergeLearnersBtn.addEventListener('click', async () => {
-      const checked = document.querySelectorAll('#mergeLearnerList input[type="checkbox"]:checked')
-      const learnerIds = Array.from(checked).map(cb => cb.value)
+    mergeNeuronsBtn.addEventListener('click', async () => {
+      const checked = document.querySelectorAll('#mergeNeuronList input[type="checkbox"]:checked')
+      const neuronIds = Array.from(checked).map(cb => cb.value)
       const guidance = document.getElementById('mergeGuidance').value.trim()
-      if (learnerIds.length < 2) { showToast('critical', 'evolve', 'Select at least 2 learners'); return }
+      if (neuronIds.length < 2) { showToast('critical', 'evolve', 'Select at least 2 neurons'); return }
       if (!guidance) { showToast('critical', 'evolve', 'Guidance is required'); return }
-      mergeLearnersBtn.disabled = true
-      mergeLearnersBtn.innerHTML = '<span class="spinner"></span> Merging...'
+      mergeNeuronsBtn.disabled = true
+      mergeNeuronsBtn.innerHTML = '<span class="spinner"></span> Merging...'
       try {
         const res = await fetch('/brain/evolve/merge', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ learnerIds, guidance }),
+          body: JSON.stringify({ neuronIds, guidance }),
         })
         const data = await res.json()
         if (res.ok) {
-          showToast('synthesized', 'evolve', 'Learners merged')
+          showToast('synthesized', 'evolve', 'Neurons merged')
           document.getElementById('mergeGuidance').value = ''
-          updateLearners()
+          updateNeurons()
         } else {
           showToast('critical', 'evolve', 'Failed: ' + data.error)
         }
       } catch (err) {
         showToast('critical', 'evolve', 'Error: ' + err.message)
       } finally {
-        mergeLearnersBtn.disabled = false
-        mergeLearnersBtn.textContent = 'Merge Selected'
+        mergeNeuronsBtn.disabled = false
+        mergeNeuronsBtn.textContent = 'Merge Selected'
       }
     })
 
-    function updateMergeLearnerList() {
-      const container = document.getElementById('mergeLearnerList')
+    function updateMergeNeuronList() {
+      const container = document.getElementById('mergeNeuronList')
       if (!container) return
-      const learners = Object.keys(learnerStates).filter(id => learnerStates[id].data)
-      if (learners.length === 0) {
-        container.innerHTML = '<span style="color:#666;">No learners available</span>'
+      const neurons = Object.keys(neuronStates).filter(id => neuronStates[id].data)
+      if (neurons.length === 0) {
+        container.innerHTML = '<span style="color:#666;">No neurons available</span>'
         return
       }
-      container.innerHTML = learners.map(id => {
-        const name = learnerStates[id].data?.name || id
+      container.innerHTML = neurons.map(id => {
+        const name = neuronStates[id].data?.name || id
         return `<label style="display:flex;align-items:center;gap:4px;padding:2px 0;cursor:pointer;">
           <input type="checkbox" value="${escapeHtml(id)}" style="width:auto;">
           <span style="color:#ccc;">${escapeHtml(name)}</span>
@@ -4090,7 +4090,7 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
       evaluateNowBtn.disabled = false
       sendSignalBtn.disabled = false
       createViaGuidanceBtn.disabled = false
-      mergeLearnersBtn.disabled = false
+      mergeNeuronsBtn.disabled = false
     }
 
     // --- Update History ---
@@ -4106,7 +4106,7 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
         const fields = entry.changedFields.join(', ')
         return `<div class="history-entry">
           <span class="event-time">${time}</span>
-          <span class="toast-learner">${entry.target}</span>
+          <span class="toast-neuron">${entry.target}</span>
           <span class="event-data">${fields}</span>
           <button class="history-restore" onclick="restoreSnapshot(${i})" title="Restore">&#x21A9;</button>
         </div>`
@@ -4137,14 +4137,14 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
         if (prev.governanceMaxTokens !== undefined) governanceMaxTokens.value = prev.governanceMaxTokens
         showToast('observed', 'brain', 'Snapshot restored — click Update Brain to apply')
       } else {
-        // Learner snapshot — open modal and fill fields
-        const learnerId = entry.target
-        openLearnerModal(learnerId)
+        // Neuron snapshot — open modal and fill fields
+        const neuronId = entry.target
+        openNeuronModal(neuronId)
         const prev = entry.previousValues
         if (prev.name !== undefined) document.getElementById('modalName').value = prev.name || ''
         if (prev.description !== undefined) document.getElementById('modalDescription').value = prev.description || ''
         if (prev.instructions !== undefined) document.getElementById('modalInstructions').value = prev.instructions || ''
-        showToast('observed', learnerId, 'Snapshot restored — click Save to apply')
+        showToast('observed', neuronId, 'Snapshot restored — click Save to apply')
       }
     }
     window.restoreSnapshot = restoreSnapshot
@@ -4240,10 +4240,10 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
 
     let handleEvoEvent = function(type, data) {
       // Signals
-      if (type === 'brain:signal:received' || type === 'learner:signal') {
+      if (type === 'brain:signal:received' || type === 'neuron:signal') {
         evoSignalCount++
         updateEvoGauge()
-        const source = data.source || data.learnerId || '?'
+        const source = data.source || data.neuronId || '?'
         const desc = data.description || ''
         addTlEntry('signal',
           `<strong>${escapeHtml(source)}</strong> signal`,
@@ -4298,14 +4298,14 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
         }
         const result = data.result || {}
         const parts = []
-        if (result.newLearnerIds?.length) parts.push(`created: ${result.newLearnerIds.join(', ')}`)
-        if (result.deletedLearnerIds?.length) parts.push(`deleted: ${result.deletedLearnerIds.join(', ')}`)
-        if (result.updatedLearnerIds?.length) parts.push(`updated: ${result.updatedLearnerIds.join(', ')}`)
+        if (result.newNeuronIds?.length) parts.push(`created: ${result.newNeuronIds.join(', ')}`)
+        if (result.deletedNeuronIds?.length) parts.push(`deleted: ${result.deletedNeuronIds.join(', ')}`)
+        if (result.updatedNeuronIds?.length) parts.push(`updated: ${result.updatedNeuronIds.join(', ')}`)
         addTlEntry('action-done',
           `<span class="evo-action-badge ${data.action}">${data.action}</span> done`,
           parts.join(' | ') || escapeHtml(data.reasoning?.slice(0, 120) || 'Executed'),
           data.action)
-        updateLearners()
+        updateNeurons()
       }
       if (type === 'evolution:action:failed') {
         setEvoStatus('idle', 'Idle')
@@ -4315,16 +4315,16 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
           data.action)
       }
 
-      // Learner added/removed
-      if (type === 'brain:learner:added') {
-        addTlEntry('learner-add',
-          `<span class="evo-action-badge create">added</span> ${escapeHtml(data.learnerId || '')}`,
+      // Neuron added/removed
+      if (type === 'brain:neuron:added') {
+        addTlEntry('neuron-add',
+          `<span class="evo-action-badge create">added</span> ${escapeHtml(data.neuronId || '')}`,
           escapeHtml(data.name || data.instructions?.slice(0, 80) || ''),
           'create')
       }
-      if (type === 'brain:learner:removed') {
-        addTlEntry('learner-remove',
-          `<span class="evo-action-badge delete">removed</span> ${escapeHtml(data.learnerId || '')}`,
+      if (type === 'brain:neuron:removed') {
+        addTlEntry('neuron-remove',
+          `<span class="evo-action-badge delete">removed</span> ${escapeHtml(data.neuronId || '')}`,
           null,
           'delete')
       }
@@ -4346,8 +4346,8 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
       'action-start': '#a78bfa',
       'action-done': '#4ade80',
       'action-fail': '#f87171',
-      'learner-add': '#4ade80',
-      'learner-remove': '#f87171',
+      'neuron-add': '#4ade80',
+      'neuron-remove': '#f87171',
       'observe': '#06b6d4',
       'observe-dismiss': '#334155',
       'synthesize': '#f59e0b',
@@ -4441,7 +4441,7 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
       pulseAnimId = requestAnimationFrame(drawPulse)
     }
 
-    // --- Learner Topology Canvas ---
+    // --- Neuron Topology Canvas ---
     const topoCanvas = document.getElementById('evoTopoCanvas')
     const topoCtx = topoCanvas ? topoCanvas.getContext('2d') : null
     let topoNodes = [] // { id, label, x, y, r, color, alpha, glow, glowColor, glowDecay }
@@ -4460,7 +4460,7 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
       const w = rect.width
       const h = rect.height
 
-      const ids = Object.keys(learnerStates).filter(id => learnerStates[id].data)
+      const ids = Object.keys(neuronStates).filter(id => neuronStates[id].data)
       const count = ids.length
       if (count === 0) {
         topoNodes = []
@@ -4477,7 +4477,7 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
         const angle = (i / count) * Math.PI * 2 - Math.PI / 2
         const x = cx + Math.cos(angle) * radiusOrbit
         const y = cy + Math.sin(angle) * radiusOrbit
-        const data = learnerStates[id].data
+        const data = neuronStates[id].data
         const label = (data?.name || id).slice(0, 8)
         // Existing node? Preserve animation state
         const existing = topoNodes.find(n => n.id === id)
@@ -4496,8 +4496,8 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
       topoNeedsRedraw = true
     }
 
-    function triggerTopoGlow(learnerId, color) {
-      const node = topoNodes.find(n => n.id === learnerId)
+    function triggerTopoGlow(neuronId, color) {
+      const node = topoNodes.find(n => n.id === neuronId)
       if (node) {
         node.glow = 1.0
         node.glowColor = color
@@ -4531,7 +4531,7 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
         ctx.fillStyle = '#333'
         ctx.font = `${11 * dpr}px monospace`
         ctx.textAlign = 'center'
-        ctx.fillText('No learners', w / 2, h / 2)
+        ctx.fillText('No neurons', w / 2, h / 2)
         return
       }
 
@@ -4608,15 +4608,15 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
       origHandleEvoEvent(type, data)
 
       // Inject pulse
-      if (type === 'brain:signal:received' || type === 'learner:signal') injectPulse('signal')
+      if (type === 'brain:signal:received' || type === 'neuron:signal') injectPulse('signal')
       if (type === 'evaluator:evaluation:started') injectPulse('eval-start')
       if (type === 'evaluator:evaluation:completed') injectPulse('eval-done')
       if (type === 'evaluator:evaluation:failed') injectPulse('eval-fail')
       if (type === 'evolution:action:started') injectPulse('action-start')
       if (type === 'evolution:action:executed') injectPulse('action-done')
       if (type === 'evolution:action:failed') injectPulse('action-fail')
-      if (type === 'brain:learner:added') injectPulse('learner-add')
-      if (type === 'brain:learner:removed') injectPulse('learner-remove')
+      if (type === 'brain:neuron:added') injectPulse('neuron-add')
+      if (type === 'brain:neuron:removed') injectPulse('neuron-remove')
 
       // Topology effects
       if (type === 'evaluator:evaluation:started') {
@@ -4644,35 +4644,35 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
         // Rebuild topology after structural changes
         setTimeout(() => { buildTopoNodes(); drawTopo() }, 500)
       }
-      if (type === 'brain:learner:added' || type === 'brain:learner:removed') {
+      if (type === 'brain:neuron:added' || type === 'brain:neuron:removed') {
         setTimeout(() => { buildTopoNodes(); drawTopo() }, 300)
       }
-      if (type === 'learner:signal') {
-        triggerTopoGlow(data.learnerId, '#3b82f6')
+      if (type === 'neuron:signal') {
+        triggerTopoGlow(data.neuronId, '#3b82f6')
       }
 
       // Ingestion events — pulse + topology
-      if (type === 'learner:observed') {
+      if (type === 'neuron:observed') {
         injectPulse('observe')
-        triggerTopoGlow(data.learnerId, '#06b6d4')
+        triggerTopoGlow(data.neuronId, '#06b6d4')
       }
-      if (type === 'learner:observe:dismissed') {
+      if (type === 'neuron:observe:dismissed') {
         injectPulse('observe-dismiss')
       }
-      if (type === 'learner:synthesize:started') {
+      if (type === 'neuron:synthesize:started') {
         injectPulse('synthesize')
-        triggerTopoGlow(data.learnerId, '#f59e0b')
+        triggerTopoGlow(data.neuronId, '#f59e0b')
       }
-      if (type === 'learner:synthesized') {
+      if (type === 'neuron:synthesized') {
         injectPulse('synthesized')
-        triggerTopoGlow(data.learnerId, '#4ade80')
+        triggerTopoGlow(data.neuronId, '#4ade80')
       }
-      if (type === 'learner:query:started' || type === 'learner:ask:started') {
+      if (type === 'neuron:query:started' || type === 'neuron:ask:started') {
         injectPulse('query')
       }
-      if (type === 'learner:query:completed' || type === 'learner:ask:completed') {
+      if (type === 'neuron:query:completed' || type === 'neuron:ask:completed') {
         injectPulse('query')
-        if (data.learnerId) triggerTopoGlow(data.learnerId, '#ec4899')
+        if (data.neuronId) triggerTopoGlow(data.neuronId, '#ec4899')
       }
     }
 
@@ -4703,23 +4703,23 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
 
       const eventTypes = [
         'brain:init:started', 'brain:init:config:generating', 'brain:init:config:generated',
-        'brain:init:completed', 'brain:init:failed', 'brain:learner:added',
+        'brain:init:completed', 'brain:init:failed', 'brain:neuron:added',
         'brain:inject:started', 'brain:inject:batch:started', 'brain:inject:batch:completed',
         'brain:inject:completed', 'brain:inject:failed',
         'brain:ask:started', 'brain:ask:synthesis:started', 'brain:ask:completed', 'brain:ask:failed',
-        'learner:init:started', 'learner:init:completed', 'learner:init:failed',
-        'learner:observe:started', 'learner:observed', 'learner:observe:dismissed', 'learner:observe:error',
-        'learner:synthesize:started', 'learner:synthesized', 'learner:synthesize:dismissed', 'learner:synthesize:error',
-        'learner:understanding:updated', 'learner:health:updated',
-        'learner:ingest:thinking', 'learner:ask:started', 'learner:ask:thinking',
-        'learner:ask:completed', 'learner:ask:failed',
-        'learner:query:started', 'learner:query:completed', 'learner:query:failed',
-        'brain:config:updated', 'brain:signal:received', 'brain:learner:removed',
-        'learner:config:updated', 'learner:prompts:regenerated', 'learner:signal',
+        'neuron:init:started', 'neuron:init:completed', 'neuron:init:failed',
+        'neuron:observe:started', 'neuron:observed', 'neuron:observe:dismissed', 'neuron:observe:error',
+        'neuron:synthesize:started', 'neuron:synthesized', 'neuron:synthesize:dismissed', 'neuron:synthesize:error',
+        'neuron:understanding:updated', 'neuron:health:updated',
+        'neuron:ingest:thinking', 'neuron:ask:started', 'neuron:ask:thinking',
+        'neuron:ask:completed', 'neuron:ask:failed',
+        'neuron:query:started', 'neuron:query:completed', 'neuron:query:failed',
+        'brain:config:updated', 'brain:signal:received', 'brain:neuron:removed',
+        'neuron:config:updated', 'neuron:prompts:regenerated', 'neuron:signal',
         'evaluator:evaluation:started', 'evaluator:evaluation:completed', 'evaluator:evaluation:failed',
         'evolution:action:started', 'evolution:action:executed', 'evolution:action:failed',
         'server:brain:creating', 'server:brain:ready', 'server:brain:error',
-        'server:brain:updated', 'server:learner:updated',
+        'server:brain:updated', 'server:neuron:updated',
         'server:parsing:started', 'server:parsing:completed',
         'server:inject:started', 'server:inject:completed', 'server:inject:error',
         'server:ask:started', 'server:ask:completed', 'server:ask:error'
@@ -4765,7 +4765,7 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
       }
 
       // Update init button
-      if (type.startsWith('brain:init:') || type.startsWith('learner:init:')) {
+      if (type.startsWith('brain:init:') || type.startsWith('neuron:init:')) {
         if (initBtn.disabled && !type.includes('completed') && !type.includes('failed')) {
           initBtn.innerHTML = '<span class="spinner"></span>' + (statusMap[type] || 'Initializing...')
         }
@@ -4783,7 +4783,7 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
         destroyBrainBtn.style.display = ''
         enableEvoActions()
         document.getElementById('brainDashboard').style.display = ''
-        updateLearners()
+        updateNeurons()
 
         // Snapshot config and store for diffing
         lastBrainConfig = snapshotBrainConfig()
@@ -4804,17 +4804,17 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
         const fields = data.changedFields || []
         showToast('synthesized', 'brain', `Brain updated: ${fields.join(', ')}`)
         lastBrainConfig = snapshotBrainConfig()
-        updateLearners()
+        updateNeurons()
       }
 
-      // Learner updated via server
-      if (type === 'server:learner:updated') {
+      // Neuron updated via server
+      if (type === 'server:neuron:updated') {
         const fields = data.changedFields || []
-        showToast('synthesized', data.learnerId, `Learner updated: ${fields.join(', ')}`)
-        updateLearners()
-        // Refresh modal if it's open for this learner
-        if (currentModalLearnerId === data.learnerId) {
-          setTimeout(() => openLearnerModal(data.learnerId), 500)
+        showToast('synthesized', data.neuronId, `Neuron updated: ${fields.join(', ')}`)
+        updateNeurons()
+        // Refresh modal if it's open for this neuron
+        if (currentModalNeuronId === data.neuronId) {
+          setTimeout(() => openNeuronModal(data.neuronId), 500)
         }
       }
 
@@ -4825,7 +4825,7 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
           const summary = decisions.map(d => `${d.action}: ${d.targetName || d.targetId || ''}`).join('; ')
           showToast('critical', 'evolution', summary)
         }
-        updateLearners()
+        updateNeurons()
       }
 
       // Injection progress tracking
@@ -4869,167 +4869,167 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
         updateInjectStatus()
       }
 
-      // Configs generated - show all learners immediately
+      // Configs generated - show all neurons immediately
       if (type === 'brain:init:config:generated') {
         data.configs.forEach(config => {
-          learnerStates[config.id] = {
+          neuronStates[config.id] = {
             status: 'initializing',
             action: 'Setting up...',
             data: { instructions: config.instructions }
           }
         })
-        updateLearnersUI()
+        updateNeuronsUI()
       }
 
-      // Learner added - update with full data (instructions already shown from configs)
-      if (type === 'brain:learner:added') {
-        if (!learnerStates[data.learnerId]) {
-          learnerStates[data.learnerId] = { status: 'initializing', action: 'Setting up...' }
+      // Neuron added - update with full data (instructions already shown from configs)
+      if (type === 'brain:neuron:added') {
+        if (!neuronStates[data.neuronId]) {
+          neuronStates[data.neuronId] = { status: 'initializing', action: 'Setting up...' }
         }
-        learnerStates[data.learnerId].data = {
-          ...learnerStates[data.learnerId].data,
+        neuronStates[data.neuronId].data = {
+          ...neuronStates[data.neuronId].data,
           instructions: data.instructions
         }
-        updateLearnersUI()
+        updateNeuronsUI()
       }
 
-      // Learner init complete
-      if (type === 'learner:init:completed') {
-        learnerStates[data.learnerId] = { status: 'ready', action: 'Idle' }
-        updateLearnersUI()
+      // Neuron init complete
+      if (type === 'neuron:init:completed') {
+        neuronStates[data.neuronId] = { status: 'ready', action: 'Idle' }
+        updateNeuronsUI()
 
         // Track usage for init (uses blueprint model)
         if (data.usage) {
-          trackUsage(configuredModels.blueprint || configuredModels.primary, 'init', data.usage, data.learnerId)
+          trackUsage(configuredModels.blueprint || configuredModels.primary, 'init', data.usage, data.neuronId)
         }
       }
 
-      // Learner observe started
-      if (type === 'learner:observe:started') {
-        if (learnerStates[data.learnerId]) {
-          learnerStates[data.learnerId].status = 'observing'
-          learnerStates[data.learnerId].action = `Observing ${data.itemCount} items...`
+      // Neuron observe started
+      if (type === 'neuron:observe:started') {
+        if (neuronStates[data.neuronId]) {
+          neuronStates[data.neuronId].status = 'observing'
+          neuronStates[data.neuronId].action = `Observing ${data.itemCount} items...`
         }
-        updateLearnersUI()
+        updateNeuronsUI()
       }
 
-      // Learner observed (completed - data buffered)
-      if (type === 'learner:observed') {
-        ensureLearnerMetrics(data.learnerId).observations++
-        trackEvent(data.learnerId, 'observed')
-        if (learnerStates[data.learnerId]) {
-          learnerStates[data.learnerId].status = 'ready'
-          learnerStates[data.learnerId].action = `Buffered (${data.bufferCount} obs)`
+      // Neuron observed (completed - data buffered)
+      if (type === 'neuron:observed') {
+        ensureNeuronMetrics(data.neuronId).observations++
+        trackEvent(data.neuronId, 'observed')
+        if (neuronStates[data.neuronId]) {
+          neuronStates[data.neuronId].status = 'ready'
+          neuronStates[data.neuronId].action = `Buffered (${data.bufferCount} obs)`
           // Track recent observations (keep last 10, newest first)
-          if (!learnerStates[data.learnerId].recentObservations) {
-            learnerStates[data.learnerId].recentObservations = []
+          if (!neuronStates[data.neuronId].recentObservations) {
+            neuronStates[data.neuronId].recentObservations = []
           }
-          learnerStates[data.learnerId].recentObservations.unshift({
+          neuronStates[data.neuronId].recentObservations.unshift({
             text: data.output,
             importance: data.importance,
             timestamp: Date.now()
           })
-          learnerStates[data.learnerId].recentObservations =
-            learnerStates[data.learnerId].recentObservations.slice(0, 10)
-          learnerStates[data.learnerId].lastObservation = {
+          neuronStates[data.neuronId].recentObservations =
+            neuronStates[data.neuronId].recentObservations.slice(0, 10)
+          neuronStates[data.neuronId].lastObservation = {
             text: data.output,
             importance: data.importance,
             bufferCount: data.bufferCount,
             time: new Date()
           }
           // Keep buffer stats in sync from SSE events so synth stats are live
-          if (learnerStates[data.learnerId].data) {
-            if (!learnerStates[data.learnerId].data.buffer) learnerStates[data.learnerId].data.buffer = {}
-            learnerStates[data.learnerId].data.buffer.count = data.bufferCount
-            learnerStates[data.learnerId].data.buffer.avgImportance = data.importance
+          if (neuronStates[data.neuronId].data) {
+            if (!neuronStates[data.neuronId].data.buffer) neuronStates[data.neuronId].data.buffer = {}
+            neuronStates[data.neuronId].data.buffer.count = data.bufferCount
+            neuronStates[data.neuronId].data.buffer.avgImportance = data.importance
           }
         }
         // Show toast for observations
         const preview = data.output?.slice(0, 120) + (data.output?.length > 120 ? '...' : '')
-        showToast('observed', data.learnerId, preview || 'New observation', {
+        showToast('observed', data.neuronId, preview || 'New observation', {
           importance: data.importance,
           bufferCount: data.bufferCount
         })
         // Track usage for observe phase
         if (data.usage) {
-          trackUsage(configuredModels.observe || configuredModels.primary, 'observe', data.usage, data.learnerId)
+          trackUsage(configuredModels.observe || configuredModels.primary, 'observe', data.usage, data.neuronId)
         }
-        updateLearnersUI()
+        updateNeuronsUI()
       }
 
-      if (type === 'learner:observe:dismissed') {
-        const m = ensureLearnerMetrics(data.learnerId)
+      if (type === 'neuron:observe:dismissed') {
+        const m = ensureNeuronMetrics(data.neuronId)
         m.observations++
         m.dismissals++
-        trackEvent(data.learnerId, 'dismissed')
-        if (learnerStates[data.learnerId]) {
-          learnerStates[data.learnerId].status = 'ready'
+        trackEvent(data.neuronId, 'dismissed')
+        if (neuronStates[data.neuronId]) {
+          neuronStates[data.neuronId].status = 'ready'
           const gaps = data.gaps || []
-          learnerStates[data.learnerId].action = gaps.length > 0
+          neuronStates[data.neuronId].action = gaps.length > 0
             ? `Dismissed — gaps: ${gaps.slice(0, 2).join(', ')}${gaps.length > 2 ? '...' : ''}`
             : 'Dismissed (irrelevant)'
         }
-        updateLearnersUI()
+        updateNeuronsUI()
       }
 
-      // Learner synthesize started
-      if (type === 'learner:synthesize:started') {
-        if (learnerStates[data.learnerId]) {
-          learnerStates[data.learnerId].status = 'synthesizing'
-          learnerStates[data.learnerId].action = `Synthesizing ${data.observationCount} observations...`
+      // Neuron synthesize started
+      if (type === 'neuron:synthesize:started') {
+        if (neuronStates[data.neuronId]) {
+          neuronStates[data.neuronId].status = 'synthesizing'
+          neuronStates[data.neuronId].action = `Synthesizing ${data.observationCount} observations...`
         }
-        updateLearnersUI()
+        updateNeuronsUI()
       }
 
-      // Learner synthesized (completed)
-      if (type === 'learner:synthesized') {
-        { const m = ensureLearnerMetrics(data.learnerId); m.observations++; m.syntheses++; m.lastSynthesisObs = m.observations; trackEvent(data.learnerId, 'synthesized'); if (data.newUnderstanding) { const u = data.newUnderstanding; m.understandingSizes.push({ t: Date.now(), size: typeof u === 'string' ? u.length : Array.isArray(u) ? u.length : 0 }) } }
-        if (learnerStates[data.learnerId]) {
-          learnerStates[data.learnerId].status = 'ready'
-          learnerStates[data.learnerId].action = 'Understanding updated'
-          learnerStates[data.learnerId].lastSynthesis = {
+      // Neuron synthesized (completed)
+      if (type === 'neuron:synthesized') {
+        { const m = ensureNeuronMetrics(data.neuronId); m.observations++; m.syntheses++; m.lastSynthesisObs = m.observations; trackEvent(data.neuronId, 'synthesized'); if (data.newUnderstanding) { const u = data.newUnderstanding; m.understandingSizes.push({ t: Date.now(), size: typeof u === 'string' ? u.length : Array.isArray(u) ? u.length : 0 }) } }
+        if (neuronStates[data.neuronId]) {
+          neuronStates[data.neuronId].status = 'ready'
+          neuronStates[data.neuronId].action = 'Understanding updated'
+          neuronStates[data.neuronId].lastSynthesis = {
             evolution: data.evolution,
             significance: data.significance,
             time: new Date()
           }
           // Buffer clears after synthesis — update immediately
-          if (learnerStates[data.learnerId].data) {
-            learnerStates[data.learnerId].data.buffer = { count: 0, avgImportance: 0, totalTokens: 0 }
-            learnerStates[data.learnerId].data.understanding = data.newUnderstanding
+          if (neuronStates[data.neuronId].data) {
+            neuronStates[data.neuronId].data.buffer = { count: 0, avgImportance: 0, totalTokens: 0 }
+            neuronStates[data.neuronId].data.understanding = data.newUnderstanding
           }
         }
         // Show toast for synthesis
         const toastType = data.significance === 'critical' ? 'critical' : 'synthesized'
-        showToast(toastType, data.learnerId, data.evolution || 'Understanding updated', {
+        showToast(toastType, data.neuronId, data.evolution || 'Understanding updated', {
           significance: data.significance
         })
         // Track usage for understand phase
         if (data.usage) {
-          trackUsage(configuredModels.understand || configuredModels.primary, 'understand', data.usage, data.learnerId)
+          trackUsage(configuredModels.understand || configuredModels.primary, 'understand', data.usage, data.neuronId)
         }
-        updateLearnersUI()
-        updateLearners()
+        updateNeuronsUI()
+        updateNeurons()
       }
 
-      // Injection complete - reset learner states and fetch fresh status
+      // Injection complete - reset neuron states and fetch fresh status
       if (type === 'brain:inject:completed') {
-        Object.keys(learnerStates).forEach(id => {
-          learnerStates[id].status = 'ready'
-          learnerStates[id].action = 'Idle'
+        Object.keys(neuronStates).forEach(id => {
+          neuronStates[id].status = 'ready'
+          neuronStates[id].action = 'Idle'
         })
-        updateLearners() // Full status refresh to sync buffer/understanding
+        updateNeurons() // Full status refresh to sync buffer/understanding
       }
 
-      // Learner query completed - track usage
-      if (type === 'learner:ask:completed' || type === 'learner:query:completed') {
+      // Neuron query completed - track usage
+      if (type === 'neuron:ask:completed' || type === 'neuron:query:completed') {
         if (data.usage) {
-          trackUsage(configuredModels.primary, 'query', data.usage, data.learnerId)
+          trackUsage(configuredModels.primary, 'query', data.usage, data.neuronId)
         }
-        if (data.learnerId && data.confidence !== undefined) {
-          const m = ensureLearnerMetrics(data.learnerId)
+        if (data.neuronId && data.confidence !== undefined) {
+          const m = ensureNeuronMetrics(data.neuronId)
           m.queryConfidences.push(data.confidence)
           if (m.queryConfidences.length > 10) m.queryConfidences.shift()
-          trackEvent(data.learnerId, 'query')
+          trackEvent(data.neuronId, 'query')
         }
         updateDashboard()
       }
@@ -5050,8 +5050,8 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
     async function initBrain() {
       initBtn.disabled = true
       initBtn.innerHTML = '<span class="spinner"></span>Initializing...'
-      learnerStates = {}
-      learnerMetrics = {}
+      neuronStates = {}
+      neuronMetrics = {}
 
       try {
         const res = await fetch('/brain/init', {
@@ -5073,8 +5073,8 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
             governanceMaxTokens: parseInt(governanceMaxTokens.value),
             brainStore: brainStoreType.value,
             ...(brainStoreType.value === 'sqlite' ? { brainStorePath: brainStorePath.value || 'server/data/default' } : {}),
-            learnerStore: learnerStoreType.value,
-            ...(learnerStoreType.value === 'sqlite' ? { learnerStorePath: learnerStorePath.value || 'server/data/default' } : {}),
+            neuronStore: neuronStoreType.value,
+            ...(neuronStoreType.value === 'sqlite' ? { neuronStorePath: neuronStorePath.value || 'server/data/default' } : {}),
             autoSetup: autoSetupCheckbox.checked,
             evolution: {
               enabled: evolutionEnabled.checked,
@@ -5086,7 +5086,7 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
                 windowSize: parseInt(document.getElementById('coverageGapWindow').value),
               },
             },
-            internalLearners: {
+            internalNeurons: {
               globalInjectionUnderstanding: document.getElementById('ilGlobalInjection').checked,
               globalQueryUnderstanding: document.getElementById('ilGlobalQuery').checked,
               injectionGaps: document.getElementById('ilInjectionGaps').checked,
@@ -5198,8 +5198,8 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
         let res
         if (isConsult) {
           const consultBody = { query }
-          const selectedLearner = document.getElementById('consultLearner').value
-          if (selectedLearner) consultBody.learner = selectedLearner
+          const selectedNeuron = document.getElementById('consultNeuron').value
+          if (selectedNeuron) consultBody.neuron = selectedNeuron
           res = await fetch('/brain/consult', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -5254,12 +5254,12 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
         srcEl.className = 'qa-sources'
 
         const summaryText = sources.map(s =>
-          `${s.learnerId} (${(s.relevance ?? 0).toFixed(2)})`
+          `${s.neuronId} (${(s.relevance ?? 0).toFixed(2)})`
         ).join(', ')
 
         const detailItems = sources.map(s => `
           <div class="qa-source-item">
-            <span class="source-id">${escapeHtml(s.learnerId)}</span>
+            <span class="source-id">${escapeHtml(s.neuronId)}</span>
             <span class="source-scores">— relevance: ${(s.relevance ?? 0).toFixed(2)}, confidence: ${(s.confidence ?? 0).toFixed(2)}</span>
             ${s.insight ? `<span class="source-insight">${escapeHtml(s.insight.slice(0, 120))}${s.insight.length > 120 ? '...' : ''}</span>` : ''}
           </div>
@@ -5288,8 +5288,8 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
       }
     }
 
-    // --- Learners UI ---
-    async function updateLearners() {
+    // --- Neurons UI ---
+    async function updateNeurons() {
       try {
         const res = await fetch('/brain/status')
         const data = await res.json()
@@ -5303,9 +5303,9 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
         initBtn.classList.add('secondary')
         updateBrainBtn.style.display = ''
         destroyBrainBtn.style.display = ''
-        addLearnerBtn.style.display = ''
+        addNeuronBtn.style.display = ''
 
-        // Update store badge (shows both brain + learner store)
+        // Update store badge (shows both brain + neuron store)
         const storeBadge = document.getElementById('storeBadge')
         if (data.store) {
           storeBadge.style.display = ''
@@ -5316,9 +5316,9 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
             return 'Memory'
           }
           const bLabel = storeLabel(data.store.brain)
-          const lLabel = storeLabel(data.store.learner)
+          const lLabel = storeLabel(data.store.neuron)
           storeBadge.innerHTML = `<span style="margin-right:6px;">B: ${bLabel}</span><span>L: ${lLabel}</span>`
-          const hasFile = data.store.brain?.type === 'sqlite' || data.store.learner?.type === 'sqlite'
+          const hasFile = data.store.brain?.type === 'sqlite' || data.store.neuron?.type === 'sqlite'
           storeBadge.style.background = hasFile ? '#1a2a1a' : '#2a2a1a'
           storeBadge.style.color = hasFile ? '#4ade80' : '#facc15'
         }
@@ -5333,16 +5333,16 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
         }
         if (data.store) {
           const bsEl = document.getElementById('brainStoreType')
-          const lsEl = document.getElementById('learnerStoreType')
+          const lsEl = document.getElementById('neuronStoreType')
           const bpEl = document.getElementById('brainStorePath')
-          const lpEl = document.getElementById('learnerStorePath')
+          const lpEl = document.getElementById('neuronStorePath')
           if (bsEl) bsEl.value = data.store.brain?.type || 'memory'
-          if (lsEl) lsEl.value = data.store.learner?.type || 'memory'
+          if (lsEl) lsEl.value = data.store.neuron?.type || 'memory'
           if (bpEl && data.store.brain?.path) bpEl.value = data.store.brain.path
-          if (lpEl && data.store.learner?.path) lpEl.value = data.store.learner.path
+          if (lpEl && data.store.neuron?.path) lpEl.value = data.store.neuron.path
           // Toggle path input visibility
           if (bpEl) bpEl.parentElement.style.display = data.store.brain?.type === 'sqlite' ? '' : 'none'
-          if (lpEl) lpEl.parentElement.style.display = data.store.learner?.type === 'sqlite' ? '' : 'none'
+          if (lpEl) lpEl.parentElement.style.display = data.store.neuron?.type === 'sqlite' ? '' : 'none'
         }
         if (data.evolution) {
           evolutionEnabled.checked = data.evolution.enabled !== false
@@ -5360,28 +5360,28 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
         // Snapshot if not already done
         if (!lastBrainConfig) lastBrainConfig = snapshotBrainConfig()
 
-        learnerCount.textContent = data.learners.length
+        neuronCount.textContent = data.neurons.length
 
-        // Remove learners no longer present (after evolution deletes)
-        const currentIds = new Set(data.learners.map(l => l.id))
-        Object.keys(learnerStates).forEach(id => {
-          if (!currentIds.has(id)) delete learnerStates[id]
+        // Remove neurons no longer present (after evolution deletes)
+        const currentIds = new Set(data.neurons.map(l => l.id))
+        Object.keys(neuronStates).forEach(id => {
+          if (!currentIds.has(id)) delete neuronStates[id]
         })
 
-        data.learners.forEach(l => {
-          if (!learnerStates[l.id]) {
-            learnerStates[l.id] = { status: 'ready', action: 'Idle' }
+        data.neurons.forEach(l => {
+          if (!neuronStates[l.id]) {
+            neuronStates[l.id] = { status: 'ready', action: 'Idle' }
           }
-          learnerStates[l.id].data = l
+          neuronStates[l.id].data = l
           // Seed initial understanding size for growth chart (once)
-          const m = ensureLearnerMetrics(l.id)
+          const m = ensureNeuronMetrics(l.id)
           if (m.understandingSizes.length === 0 && l.understanding && l.understanding.length > 0) {
             m.understandingSizes.push({ t: Date.now(), size: l.understanding.length })
           }
         })
 
-        // Internal learners
-        updateInternalLearnersUI(data.internalLearners || [])
+        // Internal neurons
+        updateInternalNeuronsUI(data.internalNeurons || [])
 
         // Evolution context
         const evoCtxSection = document.getElementById('evolutionContextSection')
@@ -5396,32 +5396,32 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
         // Dismissed batch count
         document.getElementById('dashDismissedBatches').textContent = data.dismissedBatchCount || 0
 
-        // Populate consult learner dropdown
-        updateConsultLearnerDropdown(data.internalLearners || [])
+        // Populate consult neuron dropdown
+        updateConsultNeuronDropdown(data.internalNeurons || [])
 
-        updateLearnersUI()
+        updateNeuronsUI()
       } catch (err) {
-        console.error('Failed to update learners:', err)
+        console.error('Failed to update neurons:', err)
       }
     }
 
-    function updateLearnersUI() {
-      const ids = Object.keys(learnerStates).filter(id => !learnerStates[id].internal)
-      learnerCount.textContent = ids.length
+    function updateNeuronsUI() {
+      const ids = Object.keys(neuronStates).filter(id => !neuronStates[id].internal)
+      neuronCount.textContent = ids.length
 
       if (ids.length === 0) {
-        learnersGrid.innerHTML = '<div class="empty-state"><h3>No learners yet</h3><p>Initialize the brain</p></div>'
+        neuronsGrid.innerHTML = '<div class="empty-state"><h3>No neurons yet</h3><p>Initialize the brain</p></div>'
         return
       }
 
-      learnersGrid.innerHTML = ''
+      neuronsGrid.innerHTML = ''
 
       ids.forEach(id => {
-        const state = learnerStates[id]
+        const state = neuronStates[id]
         const data = state.data || {}
 
         const card = document.createElement('div')
-        card.className = 'learner-card'
+        card.className = 'neuron-card'
         if (state.status === 'observing' || state.status === 'synthesizing') {
           card.classList.add('active')
         }
@@ -5482,12 +5482,12 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
             <div class="synth-meta-row">
               <span>min importance: ${minImp}</span>
               <span>avg: ${avgImp.toFixed(2)}</span>
-              <span>${getLearnerType(data) === 'list' ? 'governance' : 'strategy'}: ${governanceSummary(data)}</span>
+              <span>${getNeuronType(data) === 'list' ? 'governance' : 'strategy'}: ${governanceSummary(data)}</span>
             </div>
           </div>`
 
         // Signal metrics — computed client-side from SSE events
-        const metrics = learnerMetrics[id] || { observations: 0, dismissals: 0, syntheses: 0, lastSynthesisObs: 0, queryConfidences: [] }
+        const metrics = neuronMetrics[id] || { observations: 0, dismissals: 0, syntheses: 0, lastSynthesisObs: 0, queryConfidences: [] }
         const sigThresholds = data.health?.signalThresholds || { maxDismissalRate: 0.8, minConfidence: 0.3, maxObservationsWithoutSynthesis: 100 }
         const dismissalRate = metrics.observations > 0 ? metrics.dismissals / metrics.observations : 0
         const obsSinceSynth = metrics.observations - metrics.lastSynthesisObs
@@ -5544,7 +5544,7 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
         if (state.lastSynthesis) {
           const sig = state.lastSynthesis.significance
           synthesisHtml = `
-            <div class="learner-last-synthesis">
+            <div class="neuron-last-synthesis">
               <span class="significance ${sig}">${sig}</span>
               <span class="evolution-text">${state.lastSynthesis.evolution?.slice(0, 60) || 'Updated'}${state.lastSynthesis.evolution?.length > 60 ? '...' : ''}</span>
             </div>
@@ -5554,35 +5554,35 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
         const displayName = data.name || id
 
         card.innerHTML = `
-          <div class="learner-card-header">
+          <div class="neuron-card-header">
             <div style="display:flex;align-items:center;gap:6px;">
               <h3 title="${escapeHtml(id)}">${escapeHtml(displayName)}</h3>
-              <span class="learner-type-badge ${getLearnerType(data)}">${getLearnerType(data).toUpperCase()}</span>
-              ${data.origin ? `<span class="learner-origin-badge ${data.origin}">${data.origin}</span>` : ''}
+              <span class="neuron-type-badge ${getNeuronType(data)}">${getNeuronType(data).toUpperCase()}</span>
+              ${data.origin ? `<span class="neuron-origin-badge ${data.origin}">${data.origin}</span>` : ''}
             </div>
-            <div class="learner-header-right">
-              <span class="learner-health-badge ${data.health?.status || 'dormant'}" title="activation: ${(data.health?.activation ?? 0).toFixed(2)}">${data.health?.status || 'dormant'} ${(data.health?.activation ?? 0).toFixed(2)}</span>
-              <span class="learner-stat-badge">${evolutionCount} updates</span>
-              <span class="learner-status ${state.status}">${state.status}</span>
+            <div class="neuron-header-right">
+              <span class="neuron-health-badge ${data.health?.status || 'dormant'}" title="activation: ${(data.health?.activation ?? 0).toFixed(2)}">${data.health?.status || 'dormant'} ${(data.health?.activation ?? 0).toFixed(2)}</span>
+              <span class="neuron-stat-badge">${evolutionCount} updates</span>
+              <span class="neuron-status ${state.status}">${state.status}</span>
             </div>
           </div>
-          <div class="learner-card-body">
+          <div class="neuron-card-body">
             <div class="card-gauges">
               <div class="gauge-item">
-                <canvas class="gauge-ring" data-learner="${id}"></canvas>
+                <canvas class="gauge-ring" data-neuron="${id}"></canvas>
                 <span class="gauge-label">Obs til Synth</span>
               </div>
               <div class="gauge-item">
-                <canvas class="gauge-arc-dismiss" data-learner="${id}"></canvas>
+                <canvas class="gauge-arc-dismiss" data-neuron="${id}"></canvas>
                 <span class="gauge-label">Ingest Reject %</span>
               </div>
               <div class="gauge-item">
-                <canvas class="gauge-arc-conf" data-learner="${id}"></canvas>
+                <canvas class="gauge-arc-conf" data-neuron="${id}"></canvas>
                 <span class="gauge-label">Query Confidence</span>
               </div>
             </div>
             <div class="card-activity">
-              <canvas class="activity-chart" data-learner="${id}" style="width:100%;"></canvas>
+              <canvas class="activity-chart" data-neuron="${id}" style="width:100%;"></canvas>
               <div class="activity-legend">
                 <span class="legend-item"><span class="legend-dot" style="background:#4ade80;"></span>obs</span>
                 <span class="legend-item"><span class="legend-dot" style="background:#f59e0b;"></span>dismiss</span>
@@ -5619,30 +5619,30 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
                 </span>
                 <span class="understanding-strategy">${governanceSummary(data)}</span>
               </div>
-              <canvas class="understanding-growth-canvas" data-learner="${id}" style="width:100%;"></canvas>
+              <canvas class="understanding-growth-canvas" data-neuron="${id}" style="width:100%;"></canvas>
             </div>
-            <div class="learner-card-actions">
-              <button onclick="event.stopPropagation(); splitLearnerFromCard('${id}')">Split</button>
-              <button onclick="event.stopPropagation(); removeLearnerFromCard('${id}')">Remove</button>
-              <button class="danger" onclick="event.stopPropagation(); deleteLearnerFromCard('${id}')">Delete (Evolve)</button>
+            <div class="neuron-card-actions">
+              <button onclick="event.stopPropagation(); splitNeuronFromCard('${id}')">Split</button>
+              <button onclick="event.stopPropagation(); removeNeuronFromCard('${id}')">Remove</button>
+              <button class="danger" onclick="event.stopPropagation(); deleteNeuronFromCard('${id}')">Delete (Evolve)</button>
             </div>
             <div class="adjust-row" onclick="event.stopPropagation();">
               <input type="text" id="adjust-${id}" placeholder="Adjust directive..." />
-              <button onclick="event.stopPropagation(); adjustLearnerFromCard('${id}')">Adjust</button>
+              <button onclick="event.stopPropagation(); adjustNeuronFromCard('${id}')">Adjust</button>
             </div>
           </div>
         `
 
-        card.addEventListener('click', () => openLearnerModal(id))
-        learnersGrid.appendChild(card)
+        card.addEventListener('click', () => openNeuronModal(id))
+        neuronsGrid.appendChild(card)
       })
 
-      updateMergeLearnerList()
+      updateMergeNeuronList()
 
       // Draw canvas gauges after cards are in the DOM
       document.querySelectorAll('.gauge-ring').forEach(canvas => {
-        const id = canvas.dataset.learner
-        const data = learnerStates[id]?.data || {}
+        const id = canvas.dataset.neuron
+        const data = neuronStates[id]?.data || {}
         const bufferCount = data.buffer?.count || 0
         const maxObs = (data.understandThresholds || {}).maxObservations || 10
         const pct = maxObs > 0 ? bufferCount / maxObs : 0
@@ -5651,72 +5651,72 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
       })
 
       document.querySelectorAll('.gauge-arc-dismiss').forEach(canvas => {
-        const id = canvas.dataset.learner
-        const metrics = learnerMetrics[id] || { observations: 0, dismissals: 0 }
-        const data = learnerStates[id]?.data || {}
+        const id = canvas.dataset.neuron
+        const metrics = neuronMetrics[id] || { observations: 0, dismissals: 0 }
+        const data = neuronStates[id]?.data || {}
         const maxDR = data.health?.signalThresholds?.maxDismissalRate || 0.8
         const dr = metrics.observations > 0 ? metrics.dismissals / metrics.observations : 0
         drawArcGauge(canvas, dr, maxDR, 0.5, 0.8)
       })
 
       document.querySelectorAll('.gauge-arc-conf').forEach(canvas => {
-        const id = canvas.dataset.learner
-        const metrics = learnerMetrics[id] || { queryConfidences: [] }
+        const id = canvas.dataset.neuron
+        const metrics = neuronMetrics[id] || { queryConfidences: [] }
         const avgConf = metrics.queryConfidences.length > 0
           ? metrics.queryConfidences.reduce((a, b) => a + b, 0) / metrics.queryConfidences.length : 0
         drawArcGauge(canvas, avgConf, 1, 0.3, 0.7, true)
       })
 
       document.querySelectorAll('.activity-chart').forEach(canvas => {
-        const id = canvas.dataset.learner
-        const metrics = learnerMetrics[id] || { events: [] }
+        const id = canvas.dataset.neuron
+        const metrics = neuronMetrics[id] || { events: [] }
         drawActivityChart(canvas, metrics.events, 5 * 60 * 1000)
       })
 
       document.querySelectorAll('.understanding-growth-canvas').forEach(canvas => {
-        const id = canvas.dataset.learner
-        const metrics = learnerMetrics[id] || { understandingSizes: [] }
-        const understanding = learnerStates[id]?.data?.understanding || ''
+        const id = canvas.dataset.neuron
+        const metrics = neuronMetrics[id] || { understandingSizes: [] }
+        const understanding = neuronStates[id]?.data?.understanding || ''
         const currentSize = understanding.length || 0
         drawUnderstandingGrowth(canvas, metrics.understandingSizes, currentSize)
       })
 
       updateDashboard()
 
-      // Rebuild topology after learner UI update
+      // Rebuild topology after neuron UI update
       if (typeof buildTopoNodes === 'function') {
         buildTopoNodes()
         drawTopo()
       }
     }
 
-    // --- Internal Learners UI ---
-    function updateInternalLearnersUI(internalLearners) {
-      const section = document.getElementById('internalLearnersSection')
-      const grid = document.getElementById('internalLearnersGrid')
-      const count = document.getElementById('internalLearnerCount')
+    // --- Internal Neurons UI ---
+    function updateInternalNeuronsUI(internalNeurons) {
+      const section = document.getElementById('internalNeuronsSection')
+      const grid = document.getElementById('internalNeuronsGrid')
+      const count = document.getElementById('internalNeuronCount')
 
-      if (!internalLearners || internalLearners.length === 0) {
+      if (!internalNeurons || internalNeurons.length === 0) {
         section.style.display = 'none'
         return
       }
 
       section.style.display = ''
-      count.textContent = internalLearners.length
+      count.textContent = internalNeurons.length
       grid.innerHTML = ''
 
-      // Store internal learner data for modal reuse
-      window._internalLearnerData = {}
+      // Store internal neuron data for modal reuse
+      window._internalNeuronData = {}
 
-      internalLearners.forEach(l => {
-        window._internalLearnerData[l.id] = l
+      internalNeurons.forEach(l => {
+        window._internalNeuronData[l.id] = l
 
-        // Ensure learnerStates has data for modal
-        if (!learnerStates[l.id]) {
-          learnerStates[l.id] = { status: 'ready', action: 'Idle', internal: true }
+        // Ensure neuronStates has data for modal
+        if (!neuronStates[l.id]) {
+          neuronStates[l.id] = { status: 'ready', action: 'Idle', internal: true }
         }
-        learnerStates[l.id].data = l
-        learnerStates[l.id].internal = true
+        neuronStates[l.id].data = l
+        neuronStates[l.id].internal = true
 
         const displayName = l.name || l.id.replace('__internal_', '').replace(/_/g, ' ')
         const rawUnderstanding = l.understanding
@@ -5732,16 +5732,16 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
         const healthStatus = l.health?.status || 'dormant'
         const activation = (l.health?.activation ?? 0).toFixed(2)
         const card = document.createElement('div')
-        card.className = 'learner-card'
+        card.className = 'neuron-card'
         card.style.cssText = 'border-color:#333;background:#0f0f0f;cursor:pointer;'
         card.innerHTML = `
-          <div class="learner-card-header" style="padding:8px 10px;">
+          <div class="neuron-card-header" style="padding:8px 10px;">
             <div style="display:flex;align-items:center;gap:6px;">
               <h3 style="font-size:12px;" title="${escapeHtml(l.id)}">${escapeHtml(displayName)}</h3>
-              <span class="learner-type-badge ${l.type || 'text'}" style="font-size:9px;padding:1px 5px;">${(l.type || 'text').toUpperCase()}</span>
+              <span class="neuron-type-badge ${l.type || 'text'}" style="font-size:9px;padding:1px 5px;">${(l.type || 'text').toUpperCase()}</span>
               <span style="font-size:9px;padding:1px 5px;background:#2a1a2a;color:#a78bfa;border-radius:3px;">INTERNAL</span>
             </div>
-            <span class="learner-health-badge ${healthStatus}" style="font-size:9px;">${healthStatus} ${activation}</span>
+            <span class="neuron-health-badge ${healthStatus}" style="font-size:9px;">${healthStatus} ${activation}</span>
           </div>
           <div style="padding:6px 10px 10px;font-size:11px;color:#777;">
             <div style="margin-bottom:6px;line-height:1.4;color:#999;">${escapeHtml(understandingPreview)}</div>
@@ -5754,16 +5754,16 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
             </div>
           </div>
         `
-        card.addEventListener('click', () => openLearnerModal(l.id))
+        card.addEventListener('click', () => openNeuronModal(l.id))
         grid.appendChild(card)
       })
     }
 
-    function updateConsultLearnerDropdown(internalLearners) {
-      const select = document.getElementById('consultLearner')
-      select.innerHTML = '<option value="">All Internal Learners</option>'
-      if (!internalLearners) return
-      internalLearners.forEach(l => {
+    function updateConsultNeuronDropdown(internalNeurons) {
+      const select = document.getElementById('consultNeuron')
+      select.innerHTML = '<option value="">All Internal Neurons</option>'
+      if (!internalNeurons) return
+      internalNeurons.forEach(l => {
         const name = l.name || l.id.replace('__internal_', '').replace(/_/g, ' ')
         const opt = document.createElement('option')
         opt.value = l.id
@@ -5816,12 +5816,12 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
       }
     }
 
-    async function openLearnerModal(learnerId) {
-      currentModalLearnerId = learnerId
-      const state = learnerStates[learnerId]
+    async function openNeuronModal(neuronId) {
+      currentModalNeuronId = neuronId
+      const state = neuronStates[neuronId]
       const data = state?.data || {}
 
-      document.getElementById('modalTitle').textContent = data.name || learnerId
+      document.getElementById('modalTitle').textContent = data.name || neuronId
 
       // Editable fields
       document.getElementById('modalName').value = data.name || ''
@@ -5841,12 +5841,12 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
       // Origin
       const originEl = document.getElementById('modalOrigin')
       originEl.textContent = data.origin || 'unknown'
-      originEl.className = `learner-origin-badge ${data.origin || ''}`
+      originEl.className = `neuron-origin-badge ${data.origin || ''}`
 
       // Health
       const healthEl = document.getElementById('modalHealth')
       healthEl.textContent = `${data.health?.status || 'dormant'} ${(data.health?.activation ?? 0).toFixed(2)}`
-      healthEl.className = `learner-health-badge ${data.health?.status || 'dormant'}`
+      healthEl.className = `neuron-health-badge ${data.health?.status || 'dormant'}`
 
       document.getElementById('modalStatus').textContent = JSON.stringify(data.health || {}, null, 2)
 
@@ -5877,7 +5877,7 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
       const thresholds = data.understandThresholds || {}
       document.getElementById('modalMaxObservations').value = thresholds.maxObservations || 10
       document.getElementById('modalMinImportance').value = thresholds.minImportance || 0.3
-      const lType = getLearnerType(data)
+      const lType = getNeuronType(data)
       document.getElementById('modalGovText').style.display = lType === 'text' ? '' : 'none'
       document.getElementById('modalGovList').style.display = lType === 'list' ? '' : 'none'
       if (lType === 'list') {
@@ -5908,7 +5908,7 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
         buffer: data.buffer
       }, null, 2)
 
-      learnerModal.classList.add('open')
+      neuronModal.classList.add('open')
     }
 
     // --- Tab Switching ---
@@ -6124,8 +6124,8 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
         initBtn.classList.remove('secondary')
         destroyBrainBtn.style.display = 'none'
         updateBrainBtn.style.display = 'none'
-        addLearnerBtn.style.display = 'none'
-        document.getElementById('learnersGrid').innerHTML = ''
+        addNeuronBtn.style.display = 'none'
+        document.getElementById('neuronsGrid').innerHTML = ''
         document.getElementById('brainDashboard').style.display = 'none'
         showToast('observed', 'brain', 'Brain destroyed')
       } catch (err) {
@@ -6134,8 +6134,8 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
       destroyBrainBtn.disabled = false
       destroyBrainBtn.textContent = 'Destroy Brain'
     })
-    saveOverviewBtn.addEventListener('click', saveLearnerOverview)
-    saveSettingsBtn.addEventListener('click', saveLearnerSettings)
+    saveOverviewBtn.addEventListener('click', saveNeuronOverview)
+    saveSettingsBtn.addEventListener('click', saveNeuronSettings)
     projectSelect.addEventListener('change', (e) => {
       currentProject = e.target.value
       if (currentProject) loadSessions(currentProject)
@@ -6152,7 +6152,7 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
     // --- Query Mode Toggle (Ask / Consult) ---
     const queryModeAskBtn = document.getElementById('queryModeAsk')
     const queryModeConsultBtn = document.getElementById('queryModeConsult')
-    const consultLearnerSelect = document.getElementById('consultLearnerSelect')
+    const consultNeuronSelect = document.getElementById('consultNeuronSelect')
 
     function setQueryMode(mode) {
       queryMode = mode
@@ -6161,7 +6161,7 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
         queryModeAskBtn.style.color = '#e0e0e0'
         queryModeConsultBtn.style.background = '#111'
         queryModeConsultBtn.style.color = '#888'
-        consultLearnerSelect.style.display = 'none'
+        consultNeuronSelect.style.display = 'none'
         queryInput.placeholder = 'Ask the brain...'
         askBtn.textContent = 'Ask'
       } else {
@@ -6169,8 +6169,8 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
         queryModeConsultBtn.style.color = '#a78bfa'
         queryModeAskBtn.style.background = '#111'
         queryModeAskBtn.style.color = '#888'
-        consultLearnerSelect.style.display = ''
-        queryInput.placeholder = 'Consult internal learners...'
+        consultNeuronSelect.style.display = ''
+        queryInput.placeholder = 'Consult internal neurons...'
         askBtn.textContent = 'Consult'
       }
     }
@@ -6198,7 +6198,7 @@ Also, separately make sure you track the behaviors where I get frustrated and cu
     // --- Init ---
     connectSSE()
     loadProjects()
-    updateLearners() // Fetch existing brain state on page load
+    updateNeurons() // Fetch existing brain state on page load
   </script>
 </body>
 </html>

@@ -1,25 +1,25 @@
 /**
  * Root decomposition prompt template
  *
- * Reads a raw brain prompt and extracts learner configurations (and future params).
- * Embeds the learner generation fragment for the 7 principles playbook.
+ * Reads a raw brain prompt and extracts neuron configurations (and future params).
+ * Embeds the neuron generation fragment for the 7 principles playbook.
  */
 
-import type { LearnerTypeDescriptor } from '../../learners/types'
-import { learnerGenerationFragment } from './prompt.fragment.learner-generation'
+import type { NeuronTypeDescriptor } from '../../neurons/types'
+import { neuronGenerationFragment } from './prompt.fragment.neuron-generation'
 
 export const rootDecompositionPrompt = (
 	brainPrompt: string,
-	descriptors: LearnerTypeDescriptor[],
+	descriptors: NeuronTypeDescriptor[],
 ) =>
-	`You are a learning system architect. Your task is to decompose a user's prompt into a set of specialized learners.
+	`You are a learning system architect. Your task is to decompose a user's prompt into a set of specialized neurons.
 
 # User Prompt
 
 ${brainPrompt}
 
-# Task 1: Generate Learner Configurations
+# Task 1: Generate Neuron Configurations
 
-${learnerGenerationFragment(descriptors)}
+${neuronGenerationFragment(descriptors)}
 
-Output the learner configurations now.`
+Output the neuron configurations now.`

@@ -4,7 +4,7 @@
 
 **Evaluates:**
 - After prompt change, `brain.ask()` reflects new domain
-- Model cascade propagates to all learners
+- Model cascade propagates to all neurons
 - Learning threshold cascade changes synthesis gating
 - Full pipeline: init -> inject -> ask -> update -> inject -> ask
 

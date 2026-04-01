@@ -4,7 +4,7 @@
 
 **Evaluates:**
 - All BrainCollection CRUD operations
-- state, learners, evolution namespaces
+- state, neurons, evolution namespaces
 - Parity between Memory and SQLite implementations
 
 **Parameters:**

@@ -30,9 +30,9 @@
 }
 ```
 
-### Generated Learners
+### Generated Neurons
 
-#### Learner: Technical Philosophy & Architecture (technical-philosophy-and-architecture)
+#### Neuron: Technical Philosophy & Architecture (technical-philosophy-and-architecture)
 
 **State:**
 ```json
@@ -72,7 +72,7 @@
 }
 ```
 
-#### Learner: Coding Habits & Syntax (coding-habits-and-syntax)
+#### Neuron: Coding Habits & Syntax (coding-habits-and-syntax)
 
 **State:**
 ```json
@@ -112,7 +112,7 @@
 }
 ```
 
-#### Learner: Workflow & Tooling (workflow-and-tooling)
+#### Neuron: Workflow & Tooling (workflow-and-tooling)
 
 **State:**
 ```json
@@ -168,7 +168,7 @@
 }
 ```
 
-| Turn | Events | Types | Learner Results |
+| Turn | Events | Types | Neuron Results |
 | --- | --- | --- | --- |
 | Turn 1 | evt_001–evt_010 | ai_conversation×4, git_commit×3, code_review_given×1, config_change×1, package_install×1 | technical-philosophy-and-architecture:synthesized, coding-habits-and-syntax:synthesized, workflow-and-tooling:synthesized |
 | Turn 2 | evt_011–evt_020 | git_commit×4, ai_conversation×4, code_review_given×2 | technical-philosophy-and-architecture:synthesized, coding-habits-and-syntax:synthesized, workflow-and-tooling:synthesized |
@@ -193,7 +193,7 @@
 }
 ```
 
-**Learner Count:** 3
+**Neuron Count:** 3
 
 #### Technical Philosophy & Architecture (technical-philosophy-and-architecture)
 
@@ -257,7 +257,7 @@ You are a Developer Experience and Workflow observer. You watch for patterns in 
 
 **Insight:** The developer's coding philosophy is defined as 'Pragmatic Functional Minimalism' and 'Radical Transparency.' They reject 'Enterprise Cosplay'—the use of heavyweight, bureaucratic patterns—in favor of explicit, bottom-up architecture where abstractions are earned through repetition rather than dogma. Core pillars include: 1) Functional Integrity: prioritizing strict type safety via Zod, side-effect-free core logic, and explicit Result types over exception-based control flow; 2) Low-Dependency Data Access: favoring raw SQL or Kysely over bloated ORMs for performance and honesty; 3) Transparent Infrastructure: utilizing structured logging (Pino) and security-by-default (httpOnly cookies); and 4) Inclusive Ergonomics: preferring tabs for accessibility and Prettier for automated consistency. They value code that is honest to the data and language paradigms over industry trends.
 **Source Count:** 3
-| Learner | Confidence | Insight Preview |
+| Neuron | Confidence | Insight Preview |
 | --- | --- | --- |
 | technical-philosophy-and-architecture | 0.95 | The developer’s coding philosophy is rooted in **"Pragmatic Functional Minimalism"** and **"Bottom-Up Architecture."*... |
 | coding-habits-and-syntax | 0.95 | The developer’s coding philosophy is rooted in Pragmatic Functionalism and Radical Transparency. They prioritize expl... |
@@ -269,7 +269,7 @@ You are a Developer Experience and Workflow observer. You watch for patterns in 
 
 **Insight:** The developer follows a 'Practical Minimalist' and 'Language Fidelity' philosophy, emphasizing a high signal-to-noise ratio. They prefer unified camelCase naming conventions across all layers (from Postgres columns to JSON APIs and code variables), rejecting 'Enterprise' verbosity in favor of domain-specific accuracy and schema-first naming (e.g., Zod-validated shapes). Key stylistic preferences include tab-based indentation for accessibility, a 100-character print width, and functional programming patterns such as 'Result' types and structured logging (Pino) to stdout. They avoid 'code noise' like redundant comments and heavy ORM abstractions, favoring strict TypeScript and minimal APIs.
 **Source Count:** 3
-| Learner | Confidence | Insight Preview |
+| Neuron | Confidence | Insight Preview |
 | --- | --- | --- |
 | technical-philosophy-and-architecture | 0.85 | The developer prefers a code style defined by 'Language Fidelity' and 'Practical Minimalism.' This manifests as a rej... |
 | coding-habits-and-syntax | 0.95 | The developer prefers a strict, accessibility-focused style characterized by camelCase naming, tab-based indentation ... |
@@ -292,7 +292,7 @@ You are a Developer Experience and Workflow observer. You watch for patterns in 
 }
 ```
 
-| Turn | Events | Types | Learner Results |
+| Turn | Events | Types | Neuron Results |
 | --- | --- | --- | --- |
 | Turn 1 | evt_031–evt_040 | ai_conversation×4, git_commit×3, code_review_given×2, config_change×1 | technical-philosophy-and-architecture:synthesized, coding-habits-and-syntax:synthesized, workflow-and-tooling:synthesized |
 | Turn 2 | evt_041–evt_050 | ai_conversation×4, git_commit×4, code_review_given×2 | technical-philosophy-and-architecture:synthesized, coding-habits-and-syntax:synthesized, workflow-and-tooling:synthesized |
@@ -316,7 +316,7 @@ You are a Developer Experience and Workflow observer. You watch for patterns in 
 }
 ```
 
-**Learner Count:** 3
+**Neuron Count:** 3
 
 #### Technical Philosophy & Architecture (technical-philosophy-and-architecture)
 
@@ -379,7 +379,7 @@ You are a Developer Experience and Workflow observer. You watch for patterns in 
 
 **Insight:** The developer follows a philosophy described as 'Practical Minimalism' or 'Pragmatic Minimalism,' centered on 'Just-In-Time Abstraction.' They strictly adhere to YAGNI (You Ain't Gonna Need It) and the AHA (Avoid Hasty Abstraction) principle, favoring the 'Rule of Three'—prioritizing code duplication over premature abstraction to maintain flexibility. They actively reject 'Enterprise Cosplay' and 'imaginary scalability,' opting for simple functional logic and raw SQL over complex DI containers or heavy ORMs. Key technical pillars include a 'JSON by default' simplicity, mandatory type safety (Zod), and lean tooling consolidation (e.g., Biome) to reduce cognitive overhead. They prioritize speed of delivery and system clarity, using concrete patterns like functional error handling (Result types) and explicit dependency injection. Performance-driven pragmatism is evident in their choice to only introduce infrastructure like Redis or specialized libraries when performance metrics or manual overhead necessitate them.
 **Source Count:** 3
-| Learner | Confidence | Insight Preview |
+| Neuron | Confidence | Insight Preview |
 | --- | --- | --- |
 | technical-philosophy-and-architecture | 0.95 | The developer’s coding philosophy is built on 'Practical Minimalism' and 'Just-In-Time Abstraction.' They reject 'Ent... |
 | coding-habits-and-syntax | 1.00 | The developer follows a philosophy of "Pragmatic Minimalism." This is evidenced by a strict adherence to YAGNI (You A... |
@@ -389,9 +389,9 @@ You are a Developer Experience and Workflow observer. You watch for patterns in 
 
 #### Q: What naming conventions and code style do they prefer?
 
-**Insight:** The developer follows a minimalist, functional-first style that prioritizes a high signal-to-noise ratio and self-documenting logic. Their primary tool for enforcing this is Biome, indicating a preference for consolidated, high-speed linting and formatting over manual style debates. Key conventions include the use of camelCase for both code variables and data layers, combined with the use of tabs for indentation. They reject 'Enterprise Cosplay' documentation, opting for ultra-descriptive naming and explicit Zod types to convey intent. Architecturally, they name functions to reflect a single responsibility, prioritize explicit Result types over exceptions, and maintain a 'flat' aesthetic that avoids complex abstractions in favor of simple composition. A conflict exists regarding database property naming: while one learner suggests names likely align with raw SQL/JSON keys to minimize mapping, another asserts a strict enforcement of camelCase across data layers.
+**Insight:** The developer follows a minimalist, functional-first style that prioritizes a high signal-to-noise ratio and self-documenting logic. Their primary tool for enforcing this is Biome, indicating a preference for consolidated, high-speed linting and formatting over manual style debates. Key conventions include the use of camelCase for both code variables and data layers, combined with the use of tabs for indentation. They reject 'Enterprise Cosplay' documentation, opting for ultra-descriptive naming and explicit Zod types to convey intent. Architecturally, they name functions to reflect a single responsibility, prioritize explicit Result types over exceptions, and maintain a 'flat' aesthetic that avoids complex abstractions in favor of simple composition. A conflict exists regarding database property naming: while one neuron suggests names likely align with raw SQL/JSON keys to minimize mapping, another asserts a strict enforcement of camelCase across data layers.
 **Source Count:** 3
-| Learner | Confidence | Insight Preview |
+| Neuron | Confidence | Insight Preview |
 | --- | --- | --- |
 | technical-philosophy-and-architecture | 0.85 | The developer prioritizes "Signal-to-Noise" in naming and style, favoring clarity over rigid adherence to any specifi... |
 | coding-habits-and-syntax | 0.95 | The developer's code style is defined by a minimalist, "zero-comment" philosophy where clarity is achieved through ul... |
@@ -403,7 +403,7 @@ You are a Developer Experience and Workflow observer. You watch for patterns in 
 
 **Insight:** The developer approaches error handling as a fundamental architectural constraint, prioritizing predictability through 'Functional Error Handling' and 'Schema-First Validation'. They consistently eschew the use of 'throw' for control flow, preferring to treat errors as explicit return values (Result types) within flat, sequential logic structures. Edge cases are addressed primarily at system boundaries using Zod for validation and a 'fail fast' methodology. For infrastructure reliability, they employ dual-tiered health checks and favor structured logging to stdout to maintain a high signal-to-noise ratio. They avoid complex error-recovery frameworks in favor of simplicity, adhering to a 'Rule of Three' abstraction philosophy where duplication is preferred over premature sophistication.
 **Source Count:** 3
-| Learner | Confidence | Insight Preview |
+| Neuron | Confidence | Insight Preview |
 | --- | --- | --- |
 | technical-philosophy-and-architecture | 0.90 | The developer treats error handling as a core architectural constraint rather than an afterthought. They utilize 'Fun... |
 | coding-habits-and-syntax | 1.00 | The developer eschews 'throw' for control flow, preferring explicit Result types and flat, sequential logic. They han... |
@@ -415,7 +415,7 @@ You are a Developer Experience and Workflow observer. You watch for patterns in 
 
 **Insight:** The developer prefers a 'lean stack' characterized by tool consolidation and explicit control, adhering to the YAGNI (You Ain't Gonna Need It) principle. Key library preferences include Biome for unified linting and formatting, Zod for boundary type safety, and raw SQL or Kysely for database interactions to maintain transparency. They avoid 'Enterprise Cosplay' by rejecting heavy ORMs, Dependency Injection (DI) containers (favoring functional DI), and external infrastructure like Redis in favor of in-memory defaults and native language features. Their workflow is underpinned by TypeScript, Postgres, and Docker multi-stage builds, ensuring a small production footprint and high reliability through deep health checks.
 **Source Count:** 3
-| Learner | Confidence | Insight Preview |
+| Neuron | Confidence | Insight Preview |
 | --- | --- | --- |
 | technical-philosophy-and-architecture | 0.90 | The developer prefers a 'lean stack' that avoids 'Enterprise Cosplay.' Key preferences include Biome (consolidation),... |
 | coding-habits-and-syntax | 0.95 | The developer selects tools that unify functionality (Biome) and provide explicit control (Kysely, Zod, Result types)... |
@@ -451,7 +451,7 @@ You are a Developer Experience and Workflow observer. You watch for patterns in 
 }
 ```
 
-**Learner Summary:**
+**Neuron Summary:**
 ```json
 [
   {
@@ -501,7 +501,7 @@ You are a Developer Experience and Workflow observer. You watch for patterns in 
   "changedFields": [
     "prompt"
   ],
-  "learnerResults": [],
+  "neuronResults": [],
   "hasEvolutionResults": true,
   "evolutionResults": {
     "decisionCount": 3,
@@ -513,20 +513,20 @@ You are a Developer Experience and Workflow observer. You watch for patterns in 
           "coding-habits-and-syntax",
           "workflow-and-tooling"
         ],
-        "reasoning": "The current learners (architecture, coding, and workflow) have evolved highly overlapping sets of...",
+        "reasoning": "The current neurons (architecture, coding, and workflow) have evolved highly overlapping sets of...",
         "guidance": "Merge 'technical-philosophy-and-architecture', 'coding-habits-and-syntax', and 'workflow-and-tool..."
       },
       {
         "action": "create",
         "targets": [],
         "reasoning": "The Brain's purpose has shifted specifically toward error handling, defensive coding, and recover...",
-        "guidance": "Create a new learner focused on 'error-handling-and-defensive-strategies'. It should track specif..."
+        "guidance": "Create a new neuron focused on 'error-handling-and-defensive-strategies'. It should track specif..."
       },
       {
         "action": "create",
         "targets": [],
         "reasoning": "Edge case management and validation are key pillars of the new purpose that require dedicated obs...",
-        "guidance": "Create a new learner focused on 'validation-and-edge-case-management'. Instructions should center..."
+        "guidance": "Create a new neuron focused on 'validation-and-edge-case-management'. Instructions should center..."
       }
     ],
     "created": [
@@ -564,7 +564,7 @@ You are a Developer Experience and Workflow observer. You watch for patterns in 
 }
 ```
 
-**Learner Summary:**
+**Neuron Summary:**
 ```json
 [
   {
@@ -615,13 +615,13 @@ You are a Developer Experience and Workflow observer. You watch for patterns in 
   "evaluator:evaluation:started": 2,
   "evaluator:evaluation:completed": 2,
   "evolution:action:started": 3,
-  "learner:init:started": 3,
-  "learner:prompts:regenerated": 3,
-  "learner:config:updated": 3,
-  "learner:init:completed": 3,
-  "brain:learner:added": 3,
-  "learner:understanding:set": 1,
-  "brain:learner:removed": 3,
+  "neuron:init:started": 3,
+  "neuron:prompts:regenerated": 3,
+  "neuron:config:updated": 3,
+  "neuron:init:completed": 3,
+  "brain:neuron:added": 3,
+  "neuron:understanding:set": 1,
+  "brain:neuron:removed": 3,
   "evolution:action:executed": 3,
   "brain:config:updated": 1
 }
@@ -632,7 +632,7 @@ You are a Developer Experience and Workflow observer. You watch for patterns in 
 - **brain:signal:received** from `brain`: SYSTEM DIRECTIVE: Brain purpose has been updated by the user.
 Previous purpose: You help understand a developer's coding habits, philosophy, and preferences by tracking their conversations, commits...
 
-### Learner Set Changes
+### Neuron Set Changes
 
 **Removed:**
 ```json
@@ -689,7 +689,7 @@ Previous purpose: You help understand a developer's coding habits, philosophy, a
 }
 ```
 
-| Turn | Events | Types | Learner Results |
+| Turn | Events | Types | Neuron Results |
 | --- | --- | --- | --- |
 | Turn 1 | evt_051–evt_060 | ai_conversation×4, git_commit×3, code_review_given×2, config_change×1 | 4vUNIpa3hmjkWPfXDUHXF:synthesized, error-handling-and-defensive-strategies:synthesized, validation-and-edge-case-management:synthesized |
 | Turn 2 | evt_061–evt_070 | git_commit×4, ai_conversation×4, code_review_given×2 | 4vUNIpa3hmjkWPfXDUHXF:synthesized, error-handling-and-defensive-strategies:synthesized, validation-and-edge-case-management:synthesized |
@@ -714,7 +714,7 @@ Previous purpose: You help understand a developer's coding habits, philosophy, a
 }
 ```
 
-**Learner Count:** 3
+**Neuron Count:** 3
 
 #### resilience-philosophy-context (4vUNIpa3hmjkWPfXDUHXF)
 
@@ -774,21 +774,21 @@ You are a software reliability and boundary security observer. You watch for sig
 
 #### Q: How does this developer handle errors and edge cases?
 
-**Insight:** The developer employs a 'Zero Magic' and 'Fail-Fast' strategy that focuses on prevention and predictability through explicit constraints rather than complex recovery mechanisms. Key resilience patterns include enforcing strict TypeScript settings like `noUncheckedIndexedAccess` and banning type assertions (`no`), which requires handling `undefined` edge cases at the point of access. External data is sanitized at the system boundary using Zod, preventing 'toxic' data from entering core logic. While one learner notes a preference for functional Result types over throwing exceptions to force explicit caller handling, another highlights the use of atomic transactions to ensure data consistency. Complexity is minimized by favoring hard deletes to eliminate 'ghost data' and using cursor-based pagination to prevent performance-related edge cases. Additionally, the developer ensures contract synchronization by deriving API documentation directly from Zod schemas to prevent documentation-related state errors.
+**Insight:** The developer employs a 'Zero Magic' and 'Fail-Fast' strategy that focuses on prevention and predictability through explicit constraints rather than complex recovery mechanisms. Key resilience patterns include enforcing strict TypeScript settings like `noUncheckedIndexedAccess` and banning type assertions (`no`), which requires handling `undefined` edge cases at the point of access. External data is sanitized at the system boundary using Zod, preventing 'toxic' data from entering core logic. While one neuron notes a preference for functional Result types over throwing exceptions to force explicit caller handling, another highlights the use of atomic transactions to ensure data consistency. Complexity is minimized by favoring hard deletes to eliminate 'ghost data' and using cursor-based pagination to prevent performance-related edge cases. Additionally, the developer ensures contract synchronization by deriving API documentation directly from Zod schemas to prevent documentation-related state errors.
 **Source Count:** 3
-| Learner | Confidence | Insight Preview |
+| Neuron | Confidence | Insight Preview |
 | --- | --- | --- |
 | 4vUNIpa3hmjkWPfXDUHXF | 0.95 | The developer handles errors and edge cases through a "Zero Magic," explicit, and defensive strategy that prioritizes... |
 | error-handling-and-defensive-strategies | 0.85 | The developer handles errors and edge cases through a 'fail-fast' architecture that prioritizes prevention and predic... |
 | validation-and-edge-case-management | 0.85 | The developer handles errors and edge cases through a "Fail-Fast" architectural philosophy that prioritizes declarati... |
 
-**Gaps:** Conflict regarding the use of soft-delete patterns (one learner notes usage for state integrity, while another claims hard deletes are used to reduce state space).; Specific error-handling syntax for asynchronous failures (e.g., specific structure of try/catch blocks vs custom error classes).; Logging and observability preferences (e.g., Sentry, custom logging) and verbosity levels.; Specific retry, backoff, or fallback strategies for external API failures.; Graceful degradation vs. hard-fail behavior in user-facing UI components.; Implementation details of global error middleware or specific HTTP status code mapping.
+**Gaps:** Conflict regarding the use of soft-delete patterns (one neuron notes usage for state integrity, while another claims hard deletes are used to reduce state space).; Specific error-handling syntax for asynchronous failures (e.g., specific structure of try/catch blocks vs custom error classes).; Logging and observability preferences (e.g., Sentry, custom logging) and verbosity levels.; Specific retry, backoff, or fallback strategies for external API failures.; Graceful degradation vs. hard-fail behavior in user-facing UI components.; Implementation details of global error middleware or specific HTTP status code mapping.
 
 #### Q: What validation patterns do they use?
 
 **Insight:** The developer employs a 'Validation at the Edge' and 'Fail-Fast' strategy centered on a 'Code as the Single Source of Truth' principle. This is primarily implemented through Zod-driven schema validation at external boundaries (HTTP/Webhook entry points), which ensures internal application logic can implicitly trust data types. Key patterns include: 1) Schema-Driven Boundaries: Mandatory use of Zod to parse data at the perimeter, paired with the automatic generation of OpenAPI/Swagger documentation to prevent 'documentation drift.' 2) Strict Type Enforcement: Integration with strict TypeScript configurations, specifically using 'noUncheckedIndexedAccess' and a total ban on type assertions ('as' casting), requiring data to prove its validity via parsing. 3) Startup and Persistence Validation: Validating environment variables and configurations before process initialization and using deterministic SQL migrations/schema constraints as a final authoritative layer. 4) Lifecycle Integrity: Management of data integrity through soft-delete patterns, audit trails, and mandatory cursor-based pagination for large datasets to control flow and state transitions.
 **Source Count:** 3
-| Learner | Confidence | Insight Preview |
+| Neuron | Confidence | Insight Preview |
 | --- | --- | --- |
 | 4vUNIpa3hmjkWPfXDUHXF | 1.00 | The developer utilizes a "Validation at the Edge" pattern rooted in the principle of "Code as the Single Source of Tr... |
 | error-handling-and-defensive-strategies | 0.90 | The developer's validation strategy is defined by a 'Fail-Fast' approach centered on structural integrity and perimet... |
@@ -798,9 +798,9 @@ You are a software reliability and boundary security observer. You watch for sig
 
 #### Q: What defensive coding practices do they employ?
 
-**Insight:** The developer employs a multi-layered defensive strategy focused on 'Structural Defense' and 'Code as Single Source of Truth.' This is primarily achieved through: 1. Edge Validation: Strict boundary enforcement using Zod to validate API requests, database returns, and environment variables, integrating with OpenAPI to prevent documentation drift. 2. Result-Based Failure Management: A preference for explicit functional Result types over throwing exceptions, forcing the handling of failure branches at the call site. 3. Honest Type Systems: Enforcement of strict TypeScript (strict:true, noUncheckedIndexedAccess) and a prohibition on type assertions ('as T') to ensure the compiler accurately reflects data states. 4. Zero-Magic Tooling: Use of transparent tools like Kysely/SQL and Biome to avoid hidden behaviors and configuration fragmentation. 5. Predictive State Management: Using cursor-based pagination for performance stability and a preference for either Hard Deletes (to simplify state) or Audit Trails (to maintain integrity), depending on compliance needs. There is a conflict regarding deletion; while one learner highlights Hard Deletes to prevent 'zombie' data, another emphasizes Soft Deletes and Audit Trails for maintaining invariants.
+**Insight:** The developer employs a multi-layered defensive strategy focused on 'Structural Defense' and 'Code as Single Source of Truth.' This is primarily achieved through: 1. Edge Validation: Strict boundary enforcement using Zod to validate API requests, database returns, and environment variables, integrating with OpenAPI to prevent documentation drift. 2. Result-Based Failure Management: A preference for explicit functional Result types over throwing exceptions, forcing the handling of failure branches at the call site. 3. Honest Type Systems: Enforcement of strict TypeScript (strict:true, noUncheckedIndexedAccess) and a prohibition on type assertions ('as T') to ensure the compiler accurately reflects data states. 4. Zero-Magic Tooling: Use of transparent tools like Kysely/SQL and Biome to avoid hidden behaviors and configuration fragmentation. 5. Predictive State Management: Using cursor-based pagination for performance stability and a preference for either Hard Deletes (to simplify state) or Audit Trails (to maintain integrity), depending on compliance needs. There is a conflict regarding deletion; while one neuron highlights Hard Deletes to prevent 'zombie' data, another emphasizes Soft Deletes and Audit Trails for maintaining invariants.
 **Source Count:** 3
-| Learner | Confidence | Insight Preview |
+| Neuron | Confidence | Insight Preview |
 | --- | --- | --- |
 | 4vUNIpa3hmjkWPfXDUHXF | 0.95 | The developer’s defensive coding practices are centered on eliminating runtime ambiguity and enforcing the 'Code as S... |
 | error-handling-and-defensive-strategies | 0.85 | The developer's defensive coding style is rooted in 'Structural Defense'—preventing errors through startup validation... |
@@ -810,21 +810,21 @@ You are a software reliability and boundary security observer. You watch for sig
 
 #### Q: How do they handle failures and recovery?
 
-**Insight:** Failure and recovery are primarily managed through a strategy of 'Bottom-Up Resilience' and 'Architectural Prevention,' emphasizing local correctness and explicit control flow over automated healing. Key mechanisms include Treat-as-Data error handling (Result patterns rather than exceptions) to integrate recovery into business logic, and Edge-to-Edge validation (Zod) at system boundaries to prevent state corruption. This 'Fail-Fast' approach is supported by a 'Lean State' philosophy, which learners debate involves either hard deletes to ensure determinism or soft-deletes/audit trails for data reversal. Recovery is simplified by a monolithic architecture that allows for transactional (ACID) consistency, avoiding microservice-related partial failures. When errors occur, debuggability is prioritized via simple, 'boring' infrastructure like raw SQL (Kysely) and predictable HTTP patterns, ensuring manual or scripted restoration is debt-free. Cursor-based pagination specifically enables recovery for interrupted batch processes.
+**Insight:** Failure and recovery are primarily managed through a strategy of 'Bottom-Up Resilience' and 'Architectural Prevention,' emphasizing local correctness and explicit control flow over automated healing. Key mechanisms include Treat-as-Data error handling (Result patterns rather than exceptions) to integrate recovery into business logic, and Edge-to-Edge validation (Zod) at system boundaries to prevent state corruption. This 'Fail-Fast' approach is supported by a 'Lean State' philosophy, which neurons debate involves either hard deletes to ensure determinism or soft-deletes/audit trails for data reversal. Recovery is simplified by a monolithic architecture that allows for transactional (ACID) consistency, avoiding microservice-related partial failures. When errors occur, debuggability is prioritized via simple, 'boring' infrastructure like raw SQL (Kysely) and predictable HTTP patterns, ensuring manual or scripted restoration is debt-free. Cursor-based pagination specifically enables recovery for interrupted batch processes.
 **Source Count:** 3
-| Learner | Confidence | Insight Preview |
+| Neuron | Confidence | Insight Preview |
 | --- | --- | --- |
 | 4vUNIpa3hmjkWPfXDUHXF | 0.95 | Failure and recovery are handled through a "Bottom-Up Resilience" strategy that prioritizes local correctness, explic... |
 | error-handling-and-defensive-strategies | 0.85 | The developer approaches failure and recovery through a philosophy of "Architectural Prevention" and "Predictable Res... |
 | validation-and-edge-case-management | 0.80 | The developer handles failures primarily through a **Fail-Fast** philosophy and **Auditability**. By enforcing strict... |
 
-**Gaps:** Conflict regarding data recovery: one learner suggests hard deletes for determinism, while another notes soft-delete patterns for reversal.; Specific implementation details for automated retries (e.g., exponential backoff configurations for webhooks).; Usage and configuration of standard resilience patterns like Circuit Breakers or fail-fast network mechanisms.; Details of liveness/readiness probes and health check infrastructure.; Multi-step database transaction rollback strategies and specific disaster recovery/backup protocols.; The specific structure or metadata requirements for custom error classes and reporting verbosity.
+**Gaps:** Conflict regarding data recovery: one neuron suggests hard deletes for determinism, while another notes soft-delete patterns for reversal.; Specific implementation details for automated retries (e.g., exponential backoff configurations for webhooks).; Usage and configuration of standard resilience patterns like Circuit Breakers or fail-fast network mechanisms.; Details of liveness/readiness probes and health check infrastructure.; Multi-step database transaction rollback strategies and specific disaster recovery/backup protocols.; The specific structure or metadata requirements for custom error classes and reporting verbosity.
 
 #### Q: What error handling tools or libraries do they prefer?
 
 **Insight:** The developer utilizes a minimalist, type-safe toolkit that prioritizes 'errors as values' and compile-time safety over enterprise abstraction layers. Their primary tool for boundary validation is Zod, used in a declarative, schema-first approach to ensure runtime data matches expectations. This is reinforced by strict TypeScript configurations, specifically 'noUncheckedIndexedAccess', to mandate explicit handling of failure states. Architecturally, they favor native mechanisms like atomic SQL transactions, environment-based startup checks, and standard HTTP status codes rather than complex resilience frameworks or event buses. This methodology avoids 'Enterprise Cosplay' in favor of Result types and audit trails that make error handling a visible, controllable part of the standard logic path.
 **Source Count:** 3
-| Learner | Confidence | Insight Preview |
+| Neuron | Confidence | Insight Preview |
 | --- | --- | --- |
 | 4vUNIpa3hmjkWPfXDUHXF | 0.90 | The developer avoids 'Enterprise Cosplay' by treating errors as values rather than exceptions. They rely heavily on Z... |
 | error-handling-and-defensive-strategies | 0.80 | The developer avoids 'heavy' or abstracted error-handling libraries in favor of native toolsets and standard protocol... |
@@ -834,7 +834,7 @@ You are a software reliability and boundary security observer. You watch for sig
 
 ## Signal Checkpoint: After Phase 3 Ingestion + Queries
 
-### Learner Governance States
+### Neuron Governance States
 
 #### resilience-philosophy-context (4vUNIpa3hmjkWPfXDUHXF)
 
@@ -973,7 +973,7 @@ _No governance signals emitted yet._
 }
 ```
 
-**Learner Summary:**
+**Neuron Summary:**
 ```json
 [
   {
@@ -1023,23 +1023,23 @@ _No governance signals emitted yet._
   "changedFields": [
     "model"
   ],
-  "learnerResults": [
+  "neuronResults": [
     {
-      "learnerId": "4vUNIpa3hmjkWPfXDUHXF",
+      "neuronId": "4vUNIpa3hmjkWPfXDUHXF",
       "changedFields": [
         "model",
         "synthesize.thresholds.minImportance"
       ]
     },
     {
-      "learnerId": "error-handling-and-defensive-strategies",
+      "neuronId": "error-handling-and-defensive-strategies",
       "changedFields": [
         "model",
         "synthesize.thresholds.minImportance"
       ]
     },
     {
-      "learnerId": "validation-and-edge-case-management",
+      "neuronId": "validation-and-edge-case-management",
       "changedFields": [
         "model",
         "synthesize.thresholds.minImportance"
@@ -1067,7 +1067,7 @@ _No governance signals emitted yet._
 }
 ```
 
-**Learner Summary:**
+**Neuron Summary:**
 ```json
 [
   {
@@ -1114,7 +1114,7 @@ _No governance signals emitted yet._
 **Event Type Counts:**
 ```json
 {
-  "learner:config:updated": 3,
+  "neuron:config:updated": 3,
   "brain:config:updated": 1
 }
 ```
@@ -1123,7 +1123,7 @@ _No governance signals emitted yet._
 
 ## Signal Checkpoint: After Phase 5
 
-### Learner Governance States
+### Neuron Governance States
 
 #### resilience-philosophy-context (4vUNIpa3hmjkWPfXDUHXF)
 
@@ -1258,7 +1258,7 @@ _No governance signals emitted yet._
 }
 ```
 
-**Learner Summary:**
+**Neuron Summary:**
 ```json
 [
   {
@@ -1309,7 +1309,7 @@ _No governance signals emitted yet._
     "evolution.evaluatorSignalThreshold",
     "evolution.autoEvaluate"
   ],
-  "learnerResults": [],
+  "neuronResults": [],
   "hasEvolutionResults": false
 }
 ```
@@ -1331,7 +1331,7 @@ _No governance signals emitted yet._
 }
 ```
 
-**Learner Summary:**
+**Neuron Summary:**
 ```json
 [
   {
@@ -1389,37 +1389,37 @@ _No governance signals emitted yet._
 **Total Duration:** 344.8s
 **Total Events Ingested:** 80
 **Total Brain Events Collected:** 311
-**Final Learner Count:** 3
+**Final Neuron Count:** 3
 
 **All Brain Events by Type:**
 ```json
 {
   "brain:inject:started": 8,
   "brain:inject:batch:started": 8,
-  "learner:observe:started": 24,
-  "learner:observe:thinking": 24,
-  "learner:synthesize:started": 24,
-  "learner:synthesize:thinking": 24,
-  "learner:synthesized": 24,
-  "learner:governance:updated": 24,
+  "neuron:observe:started": 24,
+  "neuron:observe:thinking": 24,
+  "neuron:synthesize:started": 24,
+  "neuron:synthesize:thinking": 24,
+  "neuron:synthesized": 24,
+  "neuron:governance:updated": 24,
   "brain:inject:batch:completed": 8,
   "brain:inject:completed": 8,
   "brain:ask:started": 11,
-  "learner:query:started": 33,
-  "learner:query:completed": 33,
+  "neuron:query:started": 33,
+  "neuron:query:completed": 33,
   "brain:ask:synthesis:started": 11,
   "brain:ask:completed": 11,
   "brain:signal:received": 1,
   "evaluator:evaluation:started": 2,
   "evaluator:evaluation:completed": 2,
   "evolution:action:started": 3,
-  "learner:init:started": 3,
-  "learner:prompts:regenerated": 3,
-  "learner:config:updated": 6,
-  "learner:init:completed": 3,
-  "brain:learner:added": 3,
-  "learner:understanding:set": 1,
-  "brain:learner:removed": 3,
+  "neuron:init:started": 3,
+  "neuron:prompts:regenerated": 3,
+  "neuron:config:updated": 6,
+  "neuron:init:completed": 3,
+  "brain:neuron:added": 3,
+  "neuron:understanding:set": 1,
+  "brain:neuron:removed": 3,
   "evolution:action:executed": 3,
   "brain:config:updated": 3
 }
@@ -1427,7 +1427,7 @@ _No governance signals emitted yet._
 
 ### Signal Recap
 
-**Total Governance Signals (from learners):** 0
+**Total Governance Signals (from neurons):** 0
 **Total System Signals (from brain):** 1
 #### All System Signals
 
@@ -1435,7 +1435,7 @@ _No governance signals emitted yet._
 Previous purpose: You help understand a developer's coding habits, philosophy, and preferences by tracking their conversations, commits, code reviews, and tool choices over time.
 New purpose: You are an expert at analyzing developer er...
 
-### Final Learner States
+### Final Neuron States
 
 #### resilience-philosophy-context (4vUNIpa3hmjkWPfXDUHXF)
 

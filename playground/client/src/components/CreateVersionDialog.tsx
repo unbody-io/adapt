@@ -22,7 +22,7 @@ function modelProvider(m?: string | ModelRef): ProviderType | "" {
 	return m.provider ?? ""
 }
 
-interface LearnerDraft {
+interface NeuronDraft {
 	id: string
 	name: string
 	type: "text" | "list"
@@ -86,9 +86,9 @@ export function CreateVersionDialog({ useCaseId, baseConfig, onClose, onCreated 
 	// Storage
 	const [storagePath, setStoragePath] = useState(baseConfig?.storage?.path ?? "")
 
-	// Learners
-	const [learners, setLearners] = useState<LearnerDraft[]>(
-		baseConfig?.learners?.map((l) => ({ ...l })) ?? [],
+	// Neurons
+	const [neurons, setNeurons] = useState<NeuronDraft[]>(
+		baseConfig?.neurons?.map((l) => ({ ...l })) ?? [],
 	)
 
 	function buildModelRef(modelStr: string, providerOverride: ProviderType | ""): string | ModelRef | undefined {
@@ -147,8 +147,8 @@ export function CreateVersionDialog({ useCaseId, baseConfig, onClose, onCreated 
 		// Storage
 		if (storagePath) config.storage = { path: storagePath }
 
-		// Learners
-		if (learners.length > 0) config.learners = learners
+		// Neurons
+		if (neurons.length > 0) config.neurons = neurons
 
 		return config
 	}
@@ -188,18 +188,18 @@ export function CreateVersionDialog({ useCaseId, baseConfig, onClose, onCreated 
 		}
 	}
 
-	function addLearner() {
-		setLearners([...learners, { id: "", name: "", type: "text", description: "", instructions: "" }])
+	function addNeuron() {
+		setNeurons([...neurons, { id: "", name: "", type: "text", description: "", instructions: "" }])
 	}
 
-	function updateLearner(index: number, field: keyof LearnerDraft, value: string) {
-		const updated = [...learners]
+	function updateNeuron(index: number, field: keyof NeuronDraft, value: string) {
+		const updated = [...neurons]
 		updated[index] = { ...updated[index], [field]: value }
-		setLearners(updated)
+		setNeurons(updated)
 	}
 
-	function removeLearner(index: number) {
-		setLearners(learners.filter((_, i) => i !== index))
+	function removeNeuron(index: number) {
+		setNeurons(neurons.filter((_, i) => i !== index))
 	}
 
 	return (
@@ -355,7 +355,7 @@ export function CreateVersionDialog({ useCaseId, baseConfig, onClose, onCreated 
 								checked={autoSetup}
 								onChange={(e) => setAutoSetup(e.target.checked)}
 							/>
-							Auto Setup (LLM decomposes prompt into learners)
+							Auto Setup (LLM decomposes prompt into neurons)
 						</label>
 					</section>
 
@@ -514,21 +514,21 @@ export function CreateVersionDialog({ useCaseId, baseConfig, onClose, onCreated 
 
 					<section className="form-section">
 						<div className="form-section-header">
-							<h3 className="form-section-title">Learners</h3>
-							<button type="button" className="form-btn-small" onClick={addLearner}>
-								+ Add Learner
+							<h3 className="form-section-title">Neurons</h3>
+							<button type="button" className="form-btn-small" onClick={addNeuron}>
+								+ Add Neuron
 							</button>
 						</div>
 
-						{learners.map((l, i) => (
-							<div key={i} className="form-learner">
+						{neurons.map((l, i) => (
+							<div key={i} className="form-neuron">
 								<div className="form-row">
 									<label className="form-label form-grow">
 										ID
 										<input
 											type="text"
 											value={l.id}
-											onChange={(e) => updateLearner(i, "id", e.target.value)}
+											onChange={(e) => updateNeuron(i, "id", e.target.value)}
 											className="form-input"
 										/>
 									</label>
@@ -537,7 +537,7 @@ export function CreateVersionDialog({ useCaseId, baseConfig, onClose, onCreated 
 										<input
 											type="text"
 											value={l.name}
-											onChange={(e) => updateLearner(i, "name", e.target.value)}
+											onChange={(e) => updateNeuron(i, "name", e.target.value)}
 											className="form-input"
 										/>
 									</label>
@@ -545,7 +545,7 @@ export function CreateVersionDialog({ useCaseId, baseConfig, onClose, onCreated 
 										Type
 										<select
 											value={l.type}
-											onChange={(e) => updateLearner(i, "type", e.target.value)}
+											onChange={(e) => updateNeuron(i, "type", e.target.value)}
 											className="form-select"
 										>
 											<option value="text">text</option>
@@ -555,7 +555,7 @@ export function CreateVersionDialog({ useCaseId, baseConfig, onClose, onCreated 
 									<button
 										type="button"
 										className="form-btn-remove"
-										onClick={() => removeLearner(i)}
+										onClick={() => removeNeuron(i)}
 									>
 										&times;
 									</button>
@@ -565,7 +565,7 @@ export function CreateVersionDialog({ useCaseId, baseConfig, onClose, onCreated 
 									<input
 										type="text"
 										value={l.description}
-										onChange={(e) => updateLearner(i, "description", e.target.value)}
+										onChange={(e) => updateNeuron(i, "description", e.target.value)}
 										className="form-input"
 									/>
 								</label>
@@ -573,7 +573,7 @@ export function CreateVersionDialog({ useCaseId, baseConfig, onClose, onCreated 
 									Instructions
 									<textarea
 										value={l.instructions}
-										onChange={(e) => updateLearner(i, "instructions", e.target.value)}
+										onChange={(e) => updateNeuron(i, "instructions", e.target.value)}
 										className="form-textarea"
 										rows={2}
 									/>

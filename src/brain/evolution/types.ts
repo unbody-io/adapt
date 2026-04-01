@@ -6,37 +6,37 @@
  * Result of a create action
  */
 export interface CreateActionResult {
-	newLearnerIds: string[]
+	newNeuronIds: string[]
 }
 
 /**
  * Result of a merge action
  */
 export interface MergeActionResult {
-	newLearnerIds: string[]
-	deletedLearnerIds: string[]
+	newNeuronIds: string[]
+	deletedNeuronIds: string[]
 }
 
 /**
  * Result of a split action
  */
 export interface SplitActionResult {
-	newLearnerIds: string[]
-	deletedLearnerIds: string[]
+	newNeuronIds: string[]
+	deletedNeuronIds: string[]
 }
 
 /**
  * Result of an update action
  */
 export interface UpdateActionResult {
-	updatedLearnerIds: string[]
+	updatedNeuronIds: string[]
 }
 
 /**
  * Result of a delete action
  */
 export interface DeleteActionResult {
-	deletedLearnerIds: string[]
+	deletedNeuronIds: string[]
 }
 
 /**

@@ -3,8 +3,8 @@
 **Purpose:** Tests `brain.update()` with the 3-category field system: brain-only, mechanical cascade, and signal-driven changes.
 
 **Evaluates:**
-- Brain-only fields update without cascading to learners
-- Mechanical cascade propagates to all learners
+- Brain-only fields update without cascading to neurons
+- Mechanical cascade propagates to all neurons
 - Signal-driven changes trigger the evaluator pipeline
 
 **Parameters:**

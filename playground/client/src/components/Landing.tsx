@@ -109,12 +109,12 @@ export function Landing({ onSelect }: Props) {
 		fetch(`/api/usecases/${uc.id}?version=${defaultVersion}`)
 			.then((r) => r.json())
 			.then((detail) => {
-				const { prompt, provider, model, blueprintModel, commentatorModel, autoSetup, learners, learning, evolution, ingest, appBatchSize, storage } = detail
+				const { prompt, provider, model, blueprintModel, commentatorModel, autoSetup, neurons, learning, evolution, ingest, appBatchSize, storage } = detail
 				const currentPrompt = inline?.prompt
 				closeInline()
 				setDialogFor({
 					useCaseId: uc.id,
-					baseConfig: { prompt: currentPrompt || prompt, provider, model, blueprintModel, commentatorModel, autoSetup, learners, learning, evolution, ingest, appBatchSize, storage },
+					baseConfig: { prompt: currentPrompt || prompt, provider, model, blueprintModel, commentatorModel, autoSetup, neurons, learning, evolution, ingest, appBatchSize, storage },
 				})
 			})
 	}

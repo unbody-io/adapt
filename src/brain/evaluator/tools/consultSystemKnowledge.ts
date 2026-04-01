@@ -1,5 +1,5 @@
 /**
- * Tool for consulting the network's self-knowledge (internal learners)
+ * Tool for consulting the network's self-knowledge (internal neurons)
  */
 
 import { tool } from 'ai'
@@ -15,9 +15,9 @@ export type ConsultSystemKnowledgeParams = z.infer<typeof consultSystemKnowledge
 /**
  * Create consultSystemKnowledge tool with brain context.
  *
- * Wraps brain.consult() — queries all internal learners that have knowledge
+ * Wraps brain.consult() — queries all internal neurons that have knowledge
  * and synthesizes a response. The evaluator sees this as the network's
- * self-awareness, not as individual internal learners.
+ * self-awareness, not as individual internal neurons.
  */
 export function createConsultSystemKnowledgeTool(brain: Brain) {
 	return tool({

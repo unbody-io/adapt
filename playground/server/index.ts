@@ -15,8 +15,8 @@ import Database from "better-sqlite3"
 import { readFileSync, readdirSync, existsSync, mkdirSync, unlinkSync, statSync } from "node:fs"
 import { join } from "node:path"
 import { Brain } from "../../src"
-import { SQLiteBrainStore } from "../../src/brain/stores/sqlite"
-import { SQLiteStore } from "../../src/learners/stores/sqlite"
+import { SQLiteBrainStore } from "../../src/stores/sqlite/brain"
+import { SQLiteNeuronStore } from "../../src/stores/sqlite/neuron"
 import { generate, Output } from "../../src/llm"
 import { Commentator } from "./commentator"
 import { writeFileSync } from "node:fs"
@@ -326,11 +326,11 @@ app.post("/api/brain/start", async (c) => {
 			? { blueprintModel: createModel(usecase.blueprintModel, p) }
 			: {}),
 		autoSetup: usecase.autoSetup ?? true,
-		...(usecase.learners ? { learners: usecase.learners } : {}),
+		...(usecase.neurons ? { neurons: usecase.neurons } : {}),
 		store: new SQLiteBrainStore(join(storagePath, "brain.db")),
 		learning: {
 			...usecase.learning,
-			store: (id: string) => new SQLiteStore(join(storagePath, `learner-${id}.db`)),
+			store: (id: string) => new SQLiteNeuronStore(join(storagePath, `neuron-${id}.db`)),
 		},
 		evolution: evolutionConfig,
 		ingest: usecase.ingest,
@@ -375,23 +375,23 @@ app.post("/api/brain/init", async (c) => {
 	const doInit = async () => {
 		await brain!.initialize()
 		status = "ready"
-		const learners = brain!.getLearners().map((l) => ({
+		const neurons = brain!.getNeurons().map((l) => ({
 			id: l.id,
 			name: l.name,
 			type: l.type,
 			description: l.description,
 			instructions: l.instructions,
 		}))
-		broadcast("brain:ready", { learners })
-		return learners
+		broadcast("brain:ready", { neurons })
+		return neurons
 	}
 
 	initPromise = doInit()
 
 	try {
-		const learners = await initPromise
+		const neurons = await initPromise
 		initPromise = null
-		return c.json({ status: "ready", learners })
+		return c.json({ status: "ready", neurons })
 	} catch (error) {
 		initPromise = null
 		status = "error"
@@ -445,11 +445,11 @@ app.post("/api/brain/reset", async (c) => {
 			? { blueprintModel: createModel(usecase.blueprintModel, rp) }
 			: {}),
 		autoSetup: usecase.autoSetup ?? true,
-		...(usecase.learners ? { learners: usecase.learners } : {}),
+		...(usecase.neurons ? { neurons: usecase.neurons } : {}),
 		store: new SQLiteBrainStore(join(storagePath, "brain.db")),
 		learning: {
 			...usecase.learning,
-			store: (id: string) => new SQLiteStore(join(storagePath, `learner-${id}.db`)),
+			store: (id: string) => new SQLiteNeuronStore(join(storagePath, `neuron-${id}.db`)),
 		},
 		evolution: evolutionConfig,
 		ingest: usecase.ingest,
@@ -471,15 +471,15 @@ app.post("/api/brain/reset", async (c) => {
 	try {
 		await brain.initialize()
 		status = "ready"
-		const learners = brain.getLearners().map((l) => ({
+		const neurons = brain.getNeurons().map((l) => ({
 			id: l.id,
 			name: l.name,
 			type: l.type,
 			description: l.description,
 			instructions: l.instructions,
 		}))
-		broadcast("brain:ready", { learners })
-		return c.json({ status: "ready", learners })
+		broadcast("brain:ready", { neurons })
+		return c.json({ status: "ready", neurons })
 	} catch (error) {
 		status = "error"
 		const message = error instanceof Error ? error.message : "Unknown error"
@@ -535,8 +535,8 @@ app.post("/api/brain/inject", async (c) => {
 app.get("/api/brain/state", async (c) => {
 	if (!brain) return c.json({ status: "idle" })
 
-	const learners = await Promise.all(
-		brain.getLearners().map(async (l) => ({
+	const neurons = await Promise.all(
+		brain.getNeurons().map(async (l) => ({
 			id: l.id,
 			name: l.name,
 			type: l.type,
@@ -550,7 +550,7 @@ app.get("/api/brain/state", async (c) => {
 	return c.json({
 		status,
 		useCaseId: currentUseCaseId,
-		learners,
+		neurons,
 		commentary: commentator?.getFullText() ?? "",
 	})
 })
@@ -564,8 +564,8 @@ app.post("/api/brain/query", async (c) => {
 	if (!brain) return c.json({ error: "No brain" }, 400)
 	if (status !== "ready") return c.json({ error: "Brain not ready" }, 400)
 
-	const body = await c.req.json<{ query: string; mode?: "direct" | "deep"; learnerIds?: string[] }>()
-	const { query, mode: askMode = "direct", learnerIds } = body
+	const body = await c.req.json<{ query: string; mode?: "direct" | "deep"; neuronIds?: string[] }>()
+	const { query, mode: askMode = "direct", neuronIds } = body
 
 	return streamSSE(c, async (stream) => {
 		const send = async (type: string, data: Record<string, unknown> = {}) => {
@@ -578,18 +578,18 @@ app.post("/api/brain/query", async (c) => {
 
 			const uc = loadUseCase(currentUseCaseId!, currentVersion ?? "default")
 			const classifierModel = createModel(uc?.model, uc?.provider)
-			const learnerList = brain!.getLearners().map((l) => `- ${l.name}: ${l.description || l.type}`)
+			const neuronList = brain!.getNeurons().map((l) => `- ${l.name}: ${l.description || l.type}`)
 
 			const classification = await generate({
 				model: classifierModel,
-				system: `You classify user inputs directed at a knowledge system (a "Brain" with specialist learners).
+				system: `You classify user inputs directed at a knowledge system (a "Brain" with specialist neurons).
 
-The Brain has these learners:
-${learnerList.join("\n")}
+The Brain has these neurons:
+${neuronList.join("\n")}
 
 Two categories:
 - "ask": The user wants to RETRIEVE information, ask a question, or query what the system knows. Examples: "What are the main themes?", "Summarize what you know about X", "How many times was Y mentioned?"
-- "signal": The user wants to STEER, adjust, or give feedback to the system. They want to change how it behaves, what it focuses on, or flag something. Examples: "Focus more on sentiment", "You should pay more attention to dates", "Split the topics learner into two", "Ignore duplicate entries"
+- "signal": The user wants to STEER, adjust, or give feedback to the system. They want to change how it behaves, what it focuses on, or flag something. Examples: "Focus more on sentiment", "You should pay more attention to dates", "Split the topics neuron into two", "Ignore duplicate entries"
 
 Classify the following input.`,
 				prompt: query,
@@ -602,30 +602,30 @@ Classify the following input.`,
 
 			// Step 2: Execute based on intent
 			if (intent === "ask") {
-				if (learnerIds?.length) {
-					// Per-learner mode: queryStream each selected learner individually
-					for (const id of learnerIds) {
-						const learner = brain!.getLearner(id)
-						if (!learner) {
-							await send("learner-error", { learnerId: id, message: `Learner "${id}" not found` })
+				if (neuronIds?.length) {
+					// Per-neuron mode: queryStream each selected neuron individually
+					for (const id of neuronIds) {
+						const neuron = brain!.getNeuron(id)
+						if (!neuron) {
+							await send("neuron-error", { neuronId: id, message: `Neuron "${id}" not found` })
 							continue
 						}
 
-						await send("learner-start", { learnerId: id, name: learner.name })
+						await send("neuron-start", { neuronId: id, name: neuron.name })
 
 						try {
-							const stream = await learner.queryStream(query, { mode: "direct" })
+							const stream = await neuron.queryStream(query, { mode: "direct" })
 
 							let text = ""
 							for await (const chunk of stream.textStream) {
 								text += chunk
-								await send("learner-delta", { learnerId: id, text: chunk })
+								await send("neuron-delta", { neuronId: id, text: chunk })
 							}
 
-							await send("learner-done", { learnerId: id, text })
+							await send("neuron-done", { neuronId: id, text })
 						} catch (err) {
 							const msg = err instanceof Error ? err.message : String(err)
-							await send("learner-error", { learnerId: id, message: msg })
+							await send("neuron-error", { neuronId: id, message: msg })
 						}
 					}
 				} else if (askMode === "deep") {
@@ -633,7 +633,7 @@ Classify the following input.`,
 					await send("status", { message: "Querying specialists..." })
 					const result = await brain!.askStream(query, { mode: "deep" })
 
-					const sources: Array<{ learnerId: string; relevance: number; confidence: number; insight: string }> = []
+					const sources: Array<{ neuronId: string; relevance: number; confidence: number; insight: string }> = []
 					const pendingSpecialists = new Map<string, string>()
 
 					for await (const part of result.fullStream) {
@@ -677,7 +677,7 @@ Classify the following input.`,
 									const res = (p.result ?? p.output) as { relevant?: boolean; insight?: string }
 									if (res.relevant) {
 										sources.push({
-											learnerId: specialistId,
+											neuronId: specialistId,
 											relevance: 1,
 											confidence: 1,
 											insight: res.insight ?? "",
@@ -694,7 +694,7 @@ Classify the following input.`,
 						}
 					}
 				} else {
-					// Direct mode: pre-filters learners, queries them, then streams synthesis text
+					// Direct mode: pre-filters neurons, queries them, then streams synthesis text
 					await send("status", { message: "Preparing specialists..." })
 					const result = await brain!.askStream(query, { mode: "direct" })
 
@@ -716,7 +716,7 @@ Classify the following input.`,
 				// Signal
 				await send("status", { message: "Sending signal to brain..." })
 				brain!.signal({ source: "user:query-bar", description: query, bypass: true })
-				await send("signal-ack", { message: "Signal received. The brain will evaluate and may adjust its learners." })
+				await send("signal-ack", { message: "Signal received. The brain will evaluate and may adjust its neurons." })
 			}
 
 			await send("done")
@@ -758,8 +758,8 @@ app.get("/api/events", (c) => {
 		console.log(`[SSE] Client connected (${sseClients.size} total)`)
 
 		// Send current snapshot
-		const learners = brain
-			? brain.getLearners().map((l) => ({
+		const neurons = brain
+			? brain.getNeurons().map((l) => ({
 					id: l.id,
 					name: l.name,
 					type: l.type,
@@ -769,7 +769,7 @@ app.get("/api/events", (c) => {
 		send("snapshot", {
 			status,
 			useCaseId: currentUseCaseId,
-			learners,
+			neurons,
 			commentary: commentator?.getFullText() ?? "",
 		})
 

@@ -8,7 +8,7 @@
 ## Brain Setup
 
 **Base Prompt:** You help build a comprehensive profile of a therapist by analyzing their blog posts, client testimonials, social medi...
-**Learners:** 6
+**Neurons:** 6
 **therapist-approach:** Understand the therapist's overall approach and methodology in therapy.
 
 Watch for:
@@ -37,11 +37,11 @@ Watch for:
 
 ## Scenario 1: Related Pivot (with understanding)
 
-Prompt changes from general therapist profiling to ADHD focus. Learners have accumulated understanding about CBT, ADHD, client experiences.
+Prompt changes from general therapist profiling to ADHD focus. Neurons have accumulated understanding about CBT, ADHD, client experiences.
 
-**Expected:** ADJUST most/all learners — understanding is directly relevant to ADHD. Avoid DELETE.
+**Expected:** ADJUST most/all neurons — understanding is directly relevant to ADHD. Avoid DELETE.
 
-### Learners
+### Neurons
 
 | ID | Understanding | Purpose |
 | --- | --- | --- |
@@ -74,22 +74,22 @@ Watch for:
 
 #### UPDATE → therapist-specializations
 
-**Reasoning:** The Brain's purpose has shifted sharply from a general profile builder to a deep dive specifically on ADHD client management. Learner 'therapist-specializations' already holds knowledge matching the new focus (ADHD) and should be retasked to emphasize tracking assessment methods and coaching strategies.
-**Guidance:** Refocus this learner's instructions specifically to track the therapist's ADHD assessment methods, coaching strategies, and practical tools recommended for executive function challenges, leveraging any existing understanding of ADHD specialization.
+**Reasoning:** The Brain's purpose has shifted sharply from a general profile builder to a deep dive specifically on ADHD client management. Neuron 'therapist-specializations' already holds knowledge matching the new focus (ADHD) and should be retasked to emphasize tracking assessment methods and coaching strategies.
+**Guidance:** Refocus this neuron's instructions specifically to track the therapist's ADHD assessment methods, coaching strategies, and practical tools recommended for executive function challenges, leveraging any existing understanding of ADHD specialization.
 
 #### UPDATE → therapist-approach
 
-**Reasoning:** Learner 'therapist-approach' tracks overall methodology (CBT, ACT, mindfulness), which is foundational to treating ADHD. Its scope needs refinement to prioritize ADHD-relevant applications of these methods, preserving its understanding of core approaches.
+**Reasoning:** Neuron 'therapist-approach' tracks overall methodology (CBT, ACT, mindfulness), which is foundational to treating ADHD. Its scope needs refinement to prioritize ADHD-relevant applications of these methods, preserving its understanding of core approaches.
 **Guidance:** Update instructions to focus on how the therapist applies their overall approach (CBT, ACT, mindfulness) specifically to the treatment of ADHD clients; prioritize content regarding medication philosophy within this context.
 
 #### DELETE → therapist-uniqueness
 
-**Reasoning:** The learner 'therapist-uniqueness' focused on general differentiating factors, which is now too broad. The crucial elements of uniqueness relevant to the new purpose (ADHD tools/strategies) are better tracked by the retasked specialization learner.
-**Guidance:** Delete this learner as its general focus on uniqueness is no longer aligned with the specific functional knowledge required by the new ADHD-centric purpose, and the relevant aspects will be covered by other learners.
+**Reasoning:** The neuron 'therapist-uniqueness' focused on general differentiating factors, which is now too broad. The crucial elements of uniqueness relevant to the new purpose (ADHD tools/strategies) are better tracked by the retasked specialization neuron.
+**Guidance:** Delete this neuron as its general focus on uniqueness is no longer aligned with the specific functional knowledge required by the new ADHD-centric purpose, and the relevant aspects will be covered by other neurons.
 
 #### UPDATE → client-testimonials-analysis
 
-**Reasoning:** The 'client-testimonials-analysis' learner has retained data perhaps relevant to ADHD client reports, which is valuable context for understanding intervention effectiveness.
+**Reasoning:** The 'client-testimonials-analysis' neuron has retained data perhaps relevant to ADHD client reports, which is valuable context for understanding intervention effectiveness.
 **Guidance:** Refine focus to analyze testimonials specifically concerning the effectiveness of strategies mentioned for ADHD clients (e.g., comments on executive function support, organizational tools, or coaching effectiveness).
 
 #### UPDATE → social-media-impact
@@ -108,11 +108,11 @@ Watch for:
 
 ## Scenario 2: Related Pivot (empty understanding)
 
-Same prompt change but learners have no accumulated understanding yet.
+Same prompt change but neurons have no accumulated understanding yet.
 
 **Expected:** ADJUST or mild restructuring. DELETE more acceptable since nothing is lost, but ADJUST still preferred.
 
-### Learners
+### Neurons
 
 | ID | Understanding | Purpose |
 | --- | --- | --- |
@@ -145,12 +145,12 @@ Watch for:
 
 #### UPDATE → therapist-approach
 
-**Reasoning:** The system purpose shifted from a general therapist profile to a specific focus on ADHD client management. Existing learners should be updated to align their scope with the new, specific purpose rather than starting from scratch.
+**Reasoning:** The system purpose shifted from a general therapist profile to a specific focus on ADHD client management. Existing neurons should be updated to align their scope with the new, specific purpose rather than starting from scratch.
 **Guidance:** Update therapist-approach to focus specifically on therapeutic methodologies relevant to ADHD (assessment methods, coaching strategies, medication philosophy) instead of general approach.
 
 #### UPDATE → therapist-specializations
 
-**Reasoning:** The specialization learner needs reframing. Instead of general specialization, it should now track specializations related to ADHD diagnosis, executive function disorders, and specific co-occurring conditions common with ADHD.
+**Reasoning:** The specialization neuron needs reframing. Instead of general specialization, it should now track specializations related to ADHD diagnosis, executive function disorders, and specific co-occurring conditions common with ADHD.
 **Guidance:** Refocus therapist-specializations to track the therapist's documented expertise specifically regarding ADHD, executive function challenges, and related comorbidities.
 
 #### UPDATE → therapist-uniqueness
@@ -181,9 +181,9 @@ Watch for:
 
 Prompt changes from therapist profiling to JavaScript build tools. Understanding is completely irrelevant.
 
-**Expected:** DELETE all learners (understanding is genuinely irrelevant). CREATE new ones for the new domain.
+**Expected:** DELETE all neurons (understanding is genuinely irrelevant). CREATE new ones for the new domain.
 
-### Learners
+### Neurons
 
 | ID | Understanding | Purpose |
 | --- | --- | --- |
@@ -216,28 +216,28 @@ Watch for:
 
 #### DELETE → therapist-approach, therapist-specializations, therapist-uniqueness, client-testimonials-analysis, social-media-impact, podcast-appearances-analysis
 
-**Reasoning:** The Brain purpose has fundamentally shifted from analyzing a therapist's profile to tracking JavaScript build tools. All existing learners are focused on therapist analysis and contain zero relevant knowledge for the new purpose.
-**Guidance:** Delete all existing learners (therapist-approach, therapist-specializations, therapist-uniqueness, client-testimonials-analysis, social-media-impact, podcast-appearances-analysis) as their accumulated knowledge is entirely obsolete for tracking JavaScript bundlers.
+**Reasoning:** The Brain purpose has fundamentally shifted from analyzing a therapist's profile to tracking JavaScript build tools. All existing neurons are focused on therapist analysis and contain zero relevant knowledge for the new purpose.
+**Guidance:** Delete all existing neurons (therapist-approach, therapist-specializations, therapist-uniqueness, client-testimonials-analysis, social-media-impact, podcast-appearances-analysis) as their accumulated knowledge is entirely obsolete for tracking JavaScript bundlers.
 
 #### CREATE → (new)
 
-**Reasoning:** The new purpose requires tracking specific build tools and related concepts, necessitating the creation of new, specialized learners.
-**Guidance:** Create a new learner focused on tracking updates, benchmarks, and new features for Webpack and Rollup.
+**Reasoning:** The new purpose requires tracking specific build tools and related concepts, necessitating the creation of new, specialized neurons.
+**Guidance:** Create a new neuron focused on tracking updates, benchmarks, and new features for Webpack and Rollup.
 
 #### CREATE → (new)
 
 **Reasoning:** Vite and esbuild represent key, modern alternatives that require dedicated tracking.
-**Guidance:** Create a new learner focused on tracking developments, performance benchmarks, and configuration specifics for Vite and esbuild.
+**Guidance:** Create a new neuron focused on tracking developments, performance benchmarks, and configuration specifics for Vite and esbuild.
 
 #### CREATE → (new)
 
 **Reasoning:** Turbopack is a newer tool mentioned in the scope, requiring dedicated monitoring.
-**Guidance:** Create a short-term exploratory learner dedicated solely to tracking Turbopack developments and community adoption.
+**Guidance:** Create a short-term exploratory neuron dedicated solely to tracking Turbopack developments and community adoption.
 
 #### CREATE → (new)
 
 **Reasoning:** The scope requires tracking plugin ecosystems and migration guides, which are horizontal themes across all bundlers.
-**Guidance:** Create a high-level learner to synthesize patterns across plugin ecosystems (e.g., compatibility issues, common plugin types) and compile necessary migration guides across different tool versions.
+**Guidance:** Create a high-level neuron to synthesize patterns across plugin ecosystems (e.g., compatibility issues, common plugin types) and compile necessary migration guides across different tool versions.
 
 ### Analysis
 
@@ -245,11 +245,11 @@ Watch for:
 
 ## Scenario 4: High Dismissal Rate
 
-One learner reports 85% dismissal rate.
+One neuron reports 85% dismissal rate.
 
-**Expected:** SPLIT or ADJUST the struggling learner. Not DELETE (it still has 15% hit rate).
+**Expected:** SPLIT or ADJUST the struggling neuron. Not DELETE (it still has 15% hit rate).
 
-### Learners
+### Neurons
 
 | ID | Understanding | Purpose |
 | --- | --- | --- |
@@ -282,12 +282,12 @@ Watch for:
 
 #### SPLIT → therapist-approach
 
-**Reasoning:** Learner 'therapist-approach' has an 85.0% dismissal rate, indicating its focus is too broad or it is trying to track too many unrelated concepts, causing relevance loss.
-**Guidance:** Analyze the recent stream of dismissed observations to identify two distinct subsets of information related to clinical methodology. Split the scope into two more focused learners: one for specific evidence-based modalities (CBT, ACT, Mindfulness) and another for identity-based approaches (Cultur...
+**Reasoning:** Neuron 'therapist-approach' has an 85.0% dismissal rate, indicating its focus is too broad or it is trying to track too many unrelated concepts, causing relevance loss.
+**Guidance:** Analyze the recent stream of dismissed observations to identify two distinct subsets of information related to clinical methodology. Split the scope into two more focused neurons: one for specific evidence-based modalities (CBT, ACT, Mindfulness) and another for identity-based approaches (Cultur...
 
 #### UPDATE → therapist-specializations, therapist-uniqueness
 
-**Reasoning:** Learners 'therapist-specializations' and 'therapist-uniqueness' have identical, extremely large histories with 'therapist-approach', suggesting high conceptual overlap, but since they are dormant, merging them might consolidate necessary knowledge before they are tested.
+**Reasoning:** Neurons 'therapist-specializations' and 'therapist-uniqueness' have identical, extremely large histories with 'therapist-approach', suggesting high conceptual overlap, but since they are dormant, merging them might consolidate necessary knowledge before they are tested.
 **Guidance:** Merge 'therapist-specializations' and 'therapist-uniqueness' into 'therapist-uniqueness'. The combined understanding is likely redundant across approach and specialization documentation, and consolidating them might create a stronger differentiator focus.
 
 ### Analysis
@@ -296,11 +296,11 @@ Watch for:
 
 ## Scenario 5: Low Confidence
 
-One learner reports consistently low query confidence (0.22).
+One neuron reports consistently low query confidence (0.22).
 
 **Expected:** ADJUST — refine instructions or scope. Not DELETE.
 
-### Learners
+### Neurons
 
 | ID | Understanding | Purpose |
 | --- | --- | --- |
@@ -333,18 +333,18 @@ Watch for:
 
 #### UPDATE → therapist-specializations
 
-**Reasoning:** The 'therapist-specializations' learner reports very low confidence (0.22), indicating its current understanding or instructions are insufficient to accurately capture the breadth of specializations.
-**Guidance:** Refine the scope definition for therapist-specializations. Since the Brain purpose is broad, ensure the learner is explicitly instructed to track all mentioned specializations (anxiety, ADHD, high-achieving professionals, cultural sensitivity) and how they manifest across different data sources.
+**Reasoning:** The 'therapist-specializations' neuron reports very low confidence (0.22), indicating its current understanding or instructions are insufficient to accurately capture the breadth of specializations.
+**Guidance:** Refine the scope definition for therapist-specializations. Since the Brain purpose is broad, ensure the neuron is explicitly instructed to track all mentioned specializations (anxiety, ADHD, high-achieving professionals, cultural sensitivity) and how they manifest across different data sources.
 
 #### MERGE → therapist-approach, therapist-specializations
 
-**Reasoning:** The 'therapist-approach' and 'therapist-specializations' learners have learned substantively identical information and are reporting dormant status, suggesting significant overlap in their focus area for foundational knowledge.
-**Guidance:** Merge 'therapist-specializations' into 'therapist-approach'. Consolidate their understandings, making 'therapist-approach' responsible for capturing both general methodology and specific areas of practice. Then, delete the redundant 'therapist-specializations' learner.
+**Reasoning:** The 'therapist-approach' and 'therapist-specializations' neurons have learned substantively identical information and are reporting dormant status, suggesting significant overlap in their focus area for foundational knowledge.
+**Guidance:** Merge 'therapist-specializations' into 'therapist-approach'. Consolidate their understandings, making 'therapist-approach' responsible for capturing both general methodology and specific areas of practice. Then, delete the redundant 'therapist-specializations' neuron.
 
 #### DELETE → therapist-specializations
 
-**Reasoning:** The 'therapist-specializations' learner is being merged into 'therapist-approach' to consolidate redundant identity and data accumulation pathways.
-**Guidance:** Delete the now redundant learner target 'therapist-specializations' following the execution of the merge decision.
+**Reasoning:** The 'therapist-specializations' neuron is being merged into 'therapist-approach' to consolidate redundant identity and data accumulation pathways.
+**Guidance:** Delete the now redundant neuron target 'therapist-specializations' following the execution of the merge decision.
 
 ### Analysis
 
@@ -352,11 +352,11 @@ Watch for:
 
 ## Scenario 6: Stagnation
 
-One learner reports 150 observations without any synthesis.
+One neuron reports 150 observations without any synthesis.
 
-**Expected:** DELETE — learner is completely irrelevant to the data stream.
+**Expected:** DELETE — neuron is completely irrelevant to the data stream.
 
-### Learners
+### Neurons
 
 | ID | Understanding | Purpose |
 | --- | --- | --- |
@@ -389,7 +389,7 @@ Watch for:
 
 #### UPDATE → therapist-uniqueness
 
-**Reasoning:** The learner 'therapist-uniqueness' is showing complete stagnation (150 observations dismissed), indicating its current focus area is too abstract or irrelevant to the data it is receiving.
+**Reasoning:** The neuron 'therapist-uniqueness' is showing complete stagnation (150 observations dismissed), indicating its current focus area is too abstract or irrelevant to the data it is receiving.
 **Guidance:** Refine the purpose of 'therapist-uniqueness'. Since the brain focuses on approach, specialization, and testimonials, redefine uniqueness to focus specifically on quantifiable elements drawn from public content (e.g., signature phrases, unusual presentation styles, specific case examples mentioned...
 
 ### Analysis
@@ -398,11 +398,11 @@ Watch for:
 
 ## Scenario 7: Mixed Governance Signals
 
-Two learners with high dismissal + one learner stagnating. Tests holistic analysis.
+Two neurons with high dismissal + one neuron stagnating. Tests holistic analysis.
 
-**Expected:** Holistic response: MERGE or ADJUST affected learners, possibly CREATE for gap.
+**Expected:** Holistic response: MERGE or ADJUST affected neurons, possibly CREATE for gap.
 
-### Learners
+### Neurons
 
 | ID | Understanding | Purpose |
 | --- | --- | --- |
@@ -435,18 +435,18 @@ Watch for:
 
 #### MERGE → therapist-approach, therapist-specializations
 
-**Reasoning:** Learners 'therapist-approach' and 'therapist-specializations' show high dismissal rates (88.0% and 82.0%), suggesting their current narrow focuses are redundant or that the key insights overlap significantly, leading to one stealing scope from the other or both rejecting similar data.
+**Reasoning:** Neurons 'therapist-approach' and 'therapist-specializations' show high dismissal rates (88.0% and 82.0%), suggesting their current narrow focuses are redundant or that the key insights overlap significantly, leading to one stealing scope from the other or both rejecting similar data.
 **Guidance:** Merge 'therapist-specializations' into 'therapist-approach'. The combined focus should encompass methodology AND key areas of specialization, as these often inform each other significantly in profiling a therapist.
 
 #### UPDATE → therapist-approach
 
-**Reasoning:** The merged 'therapist-approach' learner's scope is now broader (methodology + specializations), which addresses the high dismissal rates observed in the original two learners.
-**Guidance:** Update the purpose of the merged learner ('therapist-approach') to explicitly cover both therapeutic methodology (CBT, ACT, mindfulness) AND known areas of specialization (anxiety, ADHD, high-achievers) to consolidate scope.
+**Reasoning:** The merged 'therapist-approach' neuron's scope is now broader (methodology + specializations), which addresses the high dismissal rates observed in the original two neurons.
+**Guidance:** Update the purpose of the merged neuron ('therapist-approach') to explicitly cover both therapeutic methodology (CBT, ACT, mindfulness) AND known areas of specialization (anxiety, ADHD, high-achievers) to consolidate scope.
 
 #### DELETE → therapist-uniqueness
 
-**Reasoning:** Learner 'therapist-uniqueness' has zero synthesis events indicating complete data rejection. Since its potential scope greatly overlaps with the refined 'therapist-approach' (methodology often defines uniqueness), it should be removed to reduce redundancy.
-**Guidance:** Delete 'therapist-uniqueness' as it demonstrates complete irrelevance based on 120 dismissed observations, and its core function is likely covered by the newly solidified 'therapist-approach' learner.
+**Reasoning:** Neuron 'therapist-uniqueness' has zero synthesis events indicating complete data rejection. Since its potential scope greatly overlaps with the refined 'therapist-approach' (methodology often defines uniqueness), it should be removed to reduce redundancy.
+**Guidance:** Delete 'therapist-uniqueness' as it demonstrates complete irrelevance based on 120 dismissed observations, and its core function is likely covered by the newly solidified 'therapist-approach' neuron.
 
 ### Analysis
 
@@ -454,11 +454,11 @@ Watch for:
 
 ## Scenario 8: Borderline Signal (No Action)
 
-One learner reports confidence of 0.35 — just above the 0.3 threshold.
+One neuron reports confidence of 0.35 — just above the 0.3 threshold.
 
 **Expected:** Empty decisions — signal is borderline, not critical enough to warrant action.
 
-### Learners
+### Neurons
 
 | ID | Understanding | Purpose |
 | --- | --- | --- |
@@ -491,32 +491,32 @@ Watch for:
 
 #### UPDATE → therapist-approach
 
-**Reasoning:** Learner 'therapist-approach' has low confidence (0.35), indicating its understanding of the therapist's methodology might be too generalized. Since all learners exhibit this low confidence pattern (indicated by dormant status and identical initial knowledge), this suggests the initial approach definition used across all learners is too broad.
+**Reasoning:** Neuron 'therapist-approach' has low confidence (0.35), indicating its understanding of the therapist's methodology might be too generalized. Since all neurons exhibit this low confidence pattern (indicated by dormant status and identical initial knowledge), this suggests the initial approach definition used across all neurons is too broad.
 **Guidance:** Refine the scope and instructions for 'therapist-approach' to specifically focus on distinguishing the fundamental therapeutic methods (CBT, ACT, mindfulness) from specializations, thereby improving confidence in classifying approach-related data.
 
 #### UPDATE → therapist-specializations
 
-**Reasoning:** All active learners share identical, long initial knowledge descriptions and are currently dormant, suggesting they were initialized identically and haven't processed unique data yet. This redundancy needs refinement to ensure distinct focus areas.
+**Reasoning:** All active neurons share identical, long initial knowledge descriptions and are currently dormant, suggesting they were initialized identically and haven't processed unique data yet. This redundancy needs refinement to ensure distinct focus areas.
 **Guidance:** Update the purpose for 'therapist-specializations' to strictly track only the listed specializations (anxiety, ADHD, high-achieving professionals) without overlapping into methodology or uniqueness factors.
 
 #### UPDATE → therapist-uniqueness
 
-**Reasoning:** All active learners share identical, long initial knowledge descriptions and are currently dormant. This indicates potential scope overlap in their initial definitions.
+**Reasoning:** All active neurons share identical, long initial knowledge descriptions and are currently dormant. This indicates potential scope overlap in their initial definitions.
 **Guidance:** Update the purpose for 'therapist-uniqueness' to focus exclusively on non-standard factors, cultural sensitivity application, and reported client impact that differentiates Dr. Chen from peers, distinct from approach or specialization.
 
 #### UPDATE → client-testimonials-analysis
 
-**Reasoning:** All active learners share identical, long initial knowledge descriptions and are currently dormant. Testimonial analysis needs to isolate value judgments from factual procedural data.
+**Reasoning:** All active neurons share identical, long initial knowledge descriptions and are currently dormant. Testimonial analysis needs to isolate value judgments from factual procedural data.
 **Guidance:** Update the purpose for 'client-testimonials-analysis' to rigorously extract sentiment, qualitative feedback themes, and client outcomes, keeping methodological interpretation separate.
 
 #### UPDATE → social-media-impact
 
-**Reasoning:** All active learners share identical, long initial knowledge descriptions and are currently dormant. Social media focus needs clear delineation from podcast analysis.
+**Reasoning:** All active neurons share identical, long initial knowledge descriptions and are currently dormant. Social media focus needs clear delineation from podcast analysis.
 **Guidance:** Update the purpose for 'social-media-impact' to focus on engagement metrics, public persona projection, and interaction style, rather than content themes which might overlap with podcasts.
 
 #### UPDATE → podcast-appearances-analysis
 
-**Reasoning:** All active learners share identical, long initial knowledge descriptions and are currently dormant. Podcast analysis needs to be distinct from social media analysis.
+**Reasoning:** All active neurons share identical, long initial knowledge descriptions and are currently dormant. Podcast analysis needs to be distinct from social media analysis.
 **Guidance:** Update the purpose for 'podcast-appearances-analysis' to focus on deep-dive narrative analysis, explicit statements about theory, and expert framing, different from broad social media outreach.
 
 ### Analysis
@@ -527,13 +527,13 @@ Watch for:
 
 | Scenario | Expected | Actual Decisions | Assessment |
 | --- | --- | --- | --- |
-| 1. Related Pivot (with understanding) | ADJUST most/all learners — understanding is directly relevant to ADHD | UPDATE, UPDATE, DELETE, UPDATE, UPDATE, UPDATE | ⚠ 1 deleted |
+| 1. Related Pivot (with understanding) | ADJUST most/all neurons — understanding is directly relevant to ADHD | UPDATE, UPDATE, DELETE, UPDATE, UPDATE, UPDATE | ⚠ 1 deleted |
 | 2. Related Pivot (empty understanding) | ADJUST or mild restructuring | UPDATE, UPDATE, UPDATE, UPDATE, UPDATE, UPDATE | ✓ 6 adjusted |
-| 3. Unrelated Pivot | DELETE all learners (understanding is genuinely irrelevant) | DELETE, CREATE, CREATE, CREATE, CREATE | ⚠ 1 deleted |
-| 4. High Dismissal Rate | SPLIT or ADJUST the struggling learner | SPLIT, UPDATE | ✓ 1 adjusted |
+| 3. Unrelated Pivot | DELETE all neurons (understanding is genuinely irrelevant) | DELETE, CREATE, CREATE, CREATE, CREATE | ⚠ 1 deleted |
+| 4. High Dismissal Rate | SPLIT or ADJUST the struggling neuron | SPLIT, UPDATE | ✓ 1 adjusted |
 | 5. Low Confidence | ADJUST — refine instructions or scope | UPDATE, MERGE, DELETE | ⚠ 1 deleted |
-| 6. Stagnation | DELETE — learner is completely irrelevant to the data stream | UPDATE | ✓ 1 adjusted |
-| 7. Mixed Governance Signals | Holistic response: MERGE or ADJUST affected learners, possibly CREATE for gap | MERGE, UPDATE, DELETE | ⚠ 1 deleted |
+| 6. Stagnation | DELETE — neuron is completely irrelevant to the data stream | UPDATE | ✓ 1 adjusted |
+| 7. Mixed Governance Signals | Holistic response: MERGE or ADJUST affected neurons, possibly CREATE for gap | MERGE, UPDATE, DELETE | ⚠ 1 deleted |
 | 8. Borderline Signal (No Action) | Empty decisions — signal is borderline, not critical enough to warrant action | UPDATE, UPDATE, UPDATE, UPDATE, UPDATE, UPDATE | ✓ 6 adjusted |
 
 **Total Duration:** 70.1s

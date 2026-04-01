@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback, type CSSProperties } from "react"
 import Markdown from "react-markdown"
-import type { Learner } from "../types"
+import type { Neuron } from "../types"
 
 interface Source {
 	id: string
@@ -18,8 +18,8 @@ interface Activity {
 	relevant?: boolean
 }
 
-interface LearnerResult {
-	learnerId: string
+interface NeuronResult {
+	neuronId: string
 	name: string
 	text: string
 	done: boolean
@@ -37,15 +37,15 @@ interface QueryResult {
 	error?: string
 	thinkingText?: string
 	activities?: Activity[]
-	learnerResults?: LearnerResult[]
+	neuronResults?: NeuronResult[]
 }
 
 interface Props {
-	learners: Learner[]
+	neurons: Neuron[]
 	disabled: boolean
 	onActiveChange?: (active: boolean) => void
-	askLearnerId?: string | null
-	onAskLearnerHandled?: () => void
+	askNeuronId?: string | null
+	onAskNeuronHandled?: () => void
 }
 
 const s = {
@@ -379,7 +379,7 @@ function ThinkingSection({
 	)
 }
 
-export function QueryBar({ learners, disabled, onActiveChange, askLearnerId, onAskLearnerHandled }: Props) {
+export function QueryBar({ neurons, disabled, onActiveChange, askNeuronId, onAskNeuronHandled }: Props) {
 	const [query, setQuery] = useState("")
 	const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
 	const [deepSearch, setDeepSearch] = useState(false)
@@ -390,16 +390,16 @@ export function QueryBar({ learners, disabled, onActiveChange, askLearnerId, onA
 	const inputRef = useRef<HTMLInputElement>(null)
 	const abortRef = useRef<AbortController | null>(null)
 
-	// When a learner "Ask" button is clicked, select it and focus input
+	// When a neuron "Ask" button is clicked, select it and focus input
 	useEffect(() => {
-		if (!askLearnerId) return
-		setSelectedIds(new Set([askLearnerId]))
+		if (!askNeuronId) return
+		setSelectedIds(new Set([askNeuronId]))
 		setFocused(true)
 		setQuery("")
 		setResult(null)
 		inputRef.current?.focus()
-		onAskLearnerHandled?.()
-	}, [askLearnerId, onAskLearnerHandled])
+		onAskNeuronHandled?.()
+	}, [askNeuronId, onAskNeuronHandled])
 
 	// Search overlay is open only when we have an ask result
 	const searchOpen = !!(result && result.intent === "ask")
@@ -426,7 +426,7 @@ export function QueryBar({ learners, disabled, onActiveChange, askLearnerId, onA
 		return () => window.removeEventListener("keydown", onKey)
 	}, [searchOpen, closeSearch])
 
-	const toggleLearner = (id: string) => {
+	const toggleNeuron = (id: string) => {
 		setSelectedIds((prev) => {
 			const next = new Set(prev)
 			if (next.has(id)) next.delete(id)
@@ -448,12 +448,12 @@ export function QueryBar({ learners, disabled, onActiveChange, askLearnerId, onA
 		setResult({ status: "Classifying..." })
 
 		try {
-			const learnerIds = selectedIds.size > 0 ? Array.from(selectedIds) : undefined
+			const neuronIds = selectedIds.size > 0 ? Array.from(selectedIds) : undefined
 			const mode = deepSearch ? "deep" : "direct"
 			const res = await fetch("/api/brain/query", {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ query: q, mode, learnerIds }),
+				body: JSON.stringify({ query: q, mode, neuronIds }),
 				signal: abort.signal,
 			})
 
@@ -514,7 +514,7 @@ export function QueryBar({ learners, disabled, onActiveChange, askLearnerId, onA
 							| Array<Record<string, unknown>>
 							| undefined
 						const sources = rawSources?.map((src) => ({
-							id: (src.id ?? src.learnerId ?? "") as string,
+							id: (src.id ?? src.neuronId ?? "") as string,
 							insight: (src.insight ?? "") as string,
 							relevance: src.relevance as number | undefined,
 							confidence: src.confidence as number | undefined,
@@ -531,41 +531,41 @@ export function QueryBar({ learners, disabled, onActiveChange, askLearnerId, onA
 					case "signal-ack":
 						// Signal already handled — ignore
 						break
-					case "learner-start":
+					case "neuron-start":
 						setResult((prev) => ({
 							...prev,
 							status: undefined,
-							learnerResults: [
-								...(prev?.learnerResults ?? []),
-								{ learnerId: payload.learnerId as string, name: payload.name as string, text: "", done: false },
+							neuronResults: [
+								...(prev?.neuronResults ?? []),
+								{ neuronId: payload.neuronId as string, name: payload.name as string, text: "", done: false },
 							],
 						}))
 						break
-					case "learner-delta":
+					case "neuron-delta":
 						setResult((prev) => ({
 							...prev,
-							learnerResults: (prev?.learnerResults ?? []).map((lr) =>
-								lr.learnerId === payload.learnerId
+							neuronResults: (prev?.neuronResults ?? []).map((lr) =>
+								lr.neuronId === payload.neuronId
 									? { ...lr, text: lr.text + (payload.text as string) }
 									: lr,
 							),
 						}))
 						break
-					case "learner-done":
+					case "neuron-done":
 						setResult((prev) => ({
 							...prev,
-							learnerResults: (prev?.learnerResults ?? []).map((lr) =>
-								lr.learnerId === payload.learnerId
+							neuronResults: (prev?.neuronResults ?? []).map((lr) =>
+								lr.neuronId === payload.neuronId
 									? { ...lr, done: true }
 									: lr,
 							),
 						}))
 						break
-					case "learner-error":
+					case "neuron-error":
 						setResult((prev) => ({
 							...prev,
-							learnerResults: (prev?.learnerResults ?? []).map((lr) =>
-								lr.learnerId === payload.learnerId
+							neuronResults: (prev?.neuronResults ?? []).map((lr) =>
+								lr.neuronId === payload.neuronId
 									? { ...lr, done: true, error: payload.message as string }
 									: lr,
 							),
@@ -674,11 +674,11 @@ export function QueryBar({ learners, disabled, onActiveChange, askLearnerId, onA
 						</div>
 					)}
 
-					{result.learnerResults && result.learnerResults.length > 0 && (
+					{result.neuronResults && result.neuronResults.length > 0 && (
 						<div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-							{result.learnerResults.map((lr) => (
+							{result.neuronResults.map((lr) => (
 								<div
-									key={lr.learnerId}
+									key={lr.neuronId}
 									style={{
 										borderLeft: "2px solid rgba(155, 155, 168, 0.2)",
 										paddingLeft: "0.75rem",
@@ -726,17 +726,17 @@ export function QueryBar({ learners, disabled, onActiveChange, askLearnerId, onA
 						}
 					}}
 				>
-					{/* Learner selection menu */}
-					{menuOpen && learners.length > 0 && (
+					{/* Neuron selection menu */}
+					{menuOpen && neurons.length > 0 && (
 						<div style={s.menu}>
-							{learners.map((l) => {
+							{neurons.map((l) => {
 								const on = selectedIds.has(l.id)
 								return (
 									<button
 										key={l.id}
 										type="button"
 										style={s.menuItem}
-										onClick={() => toggleLearner(l.id)}
+										onClick={() => toggleNeuron(l.id)}
 									>
 										<span style={s.menuCheck}>{on ? "✓" : ""}</span>
 										<span>{l.name}</span>
@@ -770,7 +770,7 @@ export function QueryBar({ learners, disabled, onActiveChange, askLearnerId, onA
 								{deepSearch ? "deep" : "fast"}
 							</button>
 						)}
-						{focused && learners.length > 0 && (
+						{focused && neurons.length > 0 && (
 							<button
 								type="button"
 								style={{

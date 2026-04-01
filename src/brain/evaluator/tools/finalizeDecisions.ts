@@ -27,7 +27,7 @@ const evolutionDecisionSchema = z.object({
 	targets: z
 		.array(z.string())
 		.describe(
-			'Affected learner IDs (empty array for create, one or more for other actions)',
+			'Affected neuron IDs (empty array for create, one or more for other actions)',
 		),
 })
 

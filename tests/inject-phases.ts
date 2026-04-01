@@ -36,7 +36,7 @@ async function injectChunk(items: string[]): Promise<void> {
 	const batch = data.batches?.[0]
 	if (batch) {
 		const statuses = batch.results.map((r: any) =>
-			`${r.learnerId.slice(0, 15)}: ${r.result.status}`
+			`${r.neuronId.slice(0, 15)}: ${r.result.status}`
 		)
 		console.log(`    ${statuses.join(' | ')}`)
 	}
@@ -75,8 +75,8 @@ async function injectPhase(phaseNum: number) {
 async function getStatus() {
 	const res = await fetch(`${BASE_URL}/brain/status`)
 	const data = await res.json() as any
-	console.log(`\n-- Status: ${data.learners.length} learners --`)
-	for (const l of data.learners) {
+	console.log(`\n-- Status: ${data.neurons.length} neurons --`)
+	for (const l of data.neurons) {
 		const gov = l.governance
 		const obs = l.buffer?.count ?? 0
 		console.log(`  ${l.id}: activation=${gov.activation.toFixed(2)} status=${gov.status} buffer=${obs}`)

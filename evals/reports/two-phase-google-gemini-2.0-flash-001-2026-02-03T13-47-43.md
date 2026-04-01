@@ -2,7 +2,7 @@
 
 **Model:** google/gemini-2.0-flash-001
 **Dataset:** Personal Development Memory
-**Learner:** Generic Developer Memory (generic)
+**Neuron:** Generic Developer Memory (generic)
 **Purpose:** Understand core development philosophy, coding style patterns, and recurring problem-solving approaches
 **Events processed:** 20
 **Duration:** 23.3s

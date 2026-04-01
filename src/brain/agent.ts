@@ -1,7 +1,7 @@
 import type { CallSettings, LanguageModel, StreamTextResult, Tool } from 'ai'
 import { tool } from 'ai'
 import { z } from 'zod'
-import type { TokenUsage } from '../learners/types'
+import type { TokenUsage } from '../neurons/types'
 import { generate, hasToolCall, Output, stepCountIs, streamText } from '../llm'
 import { buildSynthesisSystemPrompt } from './prompts/prompt.synthesis.system'
 import type { BrainAskResult } from './types'
@@ -39,7 +39,7 @@ export interface SynthesisOptions extends CallSettings {
 	synthesisDirective?: string
 	query: string
 	specialists: SpecialistDef[]
-	/** Optional consult tools for querying internal learners during synthesis */
+	/** Optional consult tools for querying internal neurons during synthesis */
 	consultTools?: Record<string, Tool>
 }
 
@@ -185,7 +185,7 @@ export async function synthesize(
 		insight: answerResult?.response || '',
 		gaps: answerResult?.gaps ?? [],
 		sources: queriedSpecialists.map((r) => ({
-			learnerId: r.id,
+			neuronId: r.id,
 			relevance: r.relevance,
 			confidence: r.confidence,
 			insight: r.insight,
@@ -210,7 +210,7 @@ export interface DirectSynthesisOptions extends CallSettings {
 		insight: string
 		gaps: string
 	}>
-	/** Global understanding text (from internal learners) */
+	/** Global understanding text (from internal neurons) */
 	globalUnderstanding?: string
 }
 
@@ -280,7 +280,7 @@ ${specialistSections}${globalSection}`
 		insight: output.response,
 		gaps: output.gaps,
 		sources: relevant.map((s) => ({
-			learnerId: s.id,
+			neuronId: s.id,
 			relevance: s.relevance,
 			confidence: s.confidence,
 			insight: s.insight,

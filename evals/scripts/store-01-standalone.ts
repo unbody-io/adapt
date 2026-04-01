@@ -3,18 +3,18 @@
  *
  * Tests the store module in complete isolation — no Brain, no LLM, no dependencies.
  * Verifies all Collection<T> operations across all 4 namespaces.
- * Runs the full suite against both MemoryStore and SQLiteStore.
+ * Runs the full suite against both MemoryNeuronStore and SQLiteNeuronStore.
  */
 
 import {
-	MemoryStore,
-	SQLiteStore,
-	type Store,
+	MemoryNeuronStore,
+	type NeuronStore,
 	type ObservationRecord,
 	type UnderstandingRecord,
 	type EvolutionRecord,
 	type StateRecord,
-} from '../../src/learners/stores'
+} from '../../src/stores'
+import { SQLiteNeuronStore } from '../../src/stores/sqlite/neuron'
 
 let passed = 0
 let failed = 0
@@ -85,13 +85,13 @@ function makeState(id: string, value: unknown): StateRecord {
 	return { id, value, updated_at: new Date().toISOString() }
 }
 
-type CreateStore = () => Store
+type CreateNeuronStore = () => NeuronStore
 
 // ── Test: Collection CRUD (generic, works for any namespace) ────────────────
 
 async function testCollectionCRUD<T extends { id: string }>(
 	label: string,
-	collection: import('../../src/learners/stores').Collection<T>,
+	collection: import('../../src/stores').NeuronCollection<T>,
 	makeItem: (id: string) => T,
 	makeChanges: () => Partial<Omit<T, 'id'>>,
 ) {
@@ -180,7 +180,7 @@ async function testCollectionCRUD<T extends { id: string }>(
 
 // ── Test: list(filter) and count(filter) ────────────────────────────────────
 
-async function testFiltering(createStore: CreateStore) {
+async function testFiltering(createStore: CreateNeuronStore) {
 	section('Filtering — list(filter) and count(filter)')
 
 	const store = createStore()
@@ -220,7 +220,7 @@ async function testFiltering(createStore: CreateStore) {
 
 // ── Test: addBatch ──────────────────────────────────────────────────────────
 
-async function testAddBatch(createStore: CreateStore) {
+async function testAddBatch(createStore: CreateNeuronStore) {
 	section('addBatch')
 
 	const store = createStore()
@@ -241,9 +241,9 @@ async function testAddBatch(createStore: CreateStore) {
 	await store.dispose()
 }
 
-// ── Test: Pipeline simulation (TextLearner-style) ───────────────────────────
+// ── Test: Pipeline simulation (TextNeuron-style) ───────────────────────────
 
-async function testTextPipeline(createStore: CreateStore) {
+async function testTextPipeline(createStore: CreateNeuronStore) {
 	section('Text pipeline simulation')
 
 	const store = createStore()
@@ -319,9 +319,9 @@ async function testTextPipeline(createStore: CreateStore) {
 	await store.dispose()
 }
 
-// ── Test: Pipeline simulation (ListLearner-style) ───────────────────────────
+// ── Test: Pipeline simulation (ListNeuron-style) ───────────────────────────
 
-async function testListPipeline(createStore: CreateStore) {
+async function testListPipeline(createStore: CreateNeuronStore) {
 	section('List pipeline simulation')
 
 	const store = createStore()
@@ -387,7 +387,7 @@ async function testListPipeline(createStore: CreateStore) {
 
 // ── Test: Cross-namespace isolation ─────────────────────────────────────────
 
-async function testIsolation(createStore: CreateStore) {
+async function testIsolation(createStore: CreateNeuronStore) {
 	section('Cross-namespace isolation')
 
 	const store = createStore()
@@ -415,7 +415,7 @@ async function testIsolation(createStore: CreateStore) {
 
 // ── Test: Two stores are independent ────────────────────────────────────────
 
-async function testStoreIndependence(createStore: CreateStore) {
+async function testStoreIndependence(createStore: CreateNeuronStore) {
 	section('Store independence (two stores do not share data)')
 
 	const store1 = createStore()
@@ -436,7 +436,7 @@ async function testStoreIndependence(createStore: CreateStore) {
 
 // ── Test: dispose ───────────────────────────────────────────────────────────
 
-async function testDispose(createStore: CreateStore) {
+async function testDispose(createStore: CreateNeuronStore) {
 	section('dispose')
 
 	const store = createStore()
@@ -450,7 +450,7 @@ async function testDispose(createStore: CreateStore) {
 
 // ── Run all tests for a given adapter ───────────────────────────────────────
 
-async function runSuite(adapterName: string, createStore: CreateStore) {
+async function runSuite(adapterName: string, createStore: CreateNeuronStore) {
 	console.log(`\n${'═'.repeat(60)}`)
 	console.log(`  ${adapterName}`)
 	console.log('═'.repeat(60))
@@ -513,8 +513,8 @@ async function runSuite(adapterName: string, createStore: CreateStore) {
 async function main() {
 	console.log('Store standalone test\n')
 
-	await runSuite('MemoryStore', () => new MemoryStore())
-	await runSuite('SQLiteStore', () => new SQLiteStore())
+	await runSuite('MemoryNeuronStore', () => new MemoryNeuronStore())
+	await runSuite('SQLiteNeuronStore', () => new SQLiteNeuronStore())
 
 	// Summary
 	console.log(`\n${'═'.repeat(60)}`)

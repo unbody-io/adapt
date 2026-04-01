@@ -3,7 +3,7 @@
  *
  * Decomposes guidance into:
  * - mechanical: specific field values (name, description, thresholds)
- * - behavioral: directive for learner.adjust() (incremental evolution)
+ * - behavioral: directive for neuron.adjust() (incremental evolution)
  */
 
 import { z } from 'zod'
@@ -37,7 +37,7 @@ export const updateOutputSchema = z.object({
 		.string()
 		.describe(
 			'Directive for incremental behavioral evolution (for adjust()). ' +
-			'Describes how the learner should evolve its focus, instructions, and prompts. ' +
+			'Describes how the neuron should evolve its focus, instructions, and prompts. ' +
 			'Empty string if no behavioral change needed.',
 		),
 	reasoning: z

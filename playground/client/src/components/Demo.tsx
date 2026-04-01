@@ -4,7 +4,7 @@ import { useSession } from "../hooks/useSession"
 import { DataDeck } from "./DataDeck"
 import { Stream } from "./Stream"
 import { Mycelium, type MyceliumHandle } from "./Mycelium"
-import { LearnerCard } from "./LearnerCard"
+import { NeuronCard } from "./NeuronCard"
 import { QueryBar } from "./QueryBar"
 
 interface Props {
@@ -171,10 +171,10 @@ export function Demo({ useCaseId, version, onBack }: Props) {
 	const [usecase, setUsecase] = useState<UseCaseDetail | null>(null)
 	const [error, setError] = useState<string | null>(null)
 	const [activeTab, setActiveTab] = useState<PanelTab | null>(null)
-	const [selectedLearnerId, setSelectedLearnerId] = useState<string | null>(null)
+	const [selectedNeuronId, setSelectedNeuronId] = useState<string | null>(null)
 	const [queryActive, setQueryActive] = useState(false)
 	const [activeBatchY, setActiveBatchY] = useState<number | null>(null)
-	const [askLearnerId, setAskLearnerId] = useState<string | null>(null)
+	const [askNeuronId, setAskNeuronId] = useState<string | null>(null)
 	const myceliumRef = useRef<MyceliumHandle>(null)
 	const { state, startSession, initSession, resetSession, inject, destroySession } = useSession()
 
@@ -216,11 +216,11 @@ export function Demo({ useCaseId, version, onBack }: Props) {
 		}
 	}
 
-	const handleSelectLearner = useCallback((learnerId: string | null) => {
-		setSelectedLearnerId((prev) => (prev === learnerId ? null : learnerId))
+	const handleSelectNeuron = useCallback((neuronId: string | null) => {
+		setSelectedNeuronId((prev) => (prev === neuronId ? null : neuronId))
 	}, [])
 
-	const handleClearAskLearner = useCallback(() => setAskLearnerId(null), [])
+	const handleClearAskNeuron = useCallback(() => setAskNeuronId(null), [])
 
 	if (error) {
 		return (
@@ -260,9 +260,9 @@ export function Demo({ useCaseId, version, onBack }: Props) {
 		injectionLabel = dateStr ? `${dateStr} · ${batchStr}` : batchStr
 	}
 
-	// Find selected learner and its screen position
-	const selectedLearner = selectedLearnerId
-		? state.learners.find((l) => l.id === selectedLearnerId)
+	// Find selected neuron and its screen position
+	const selectedNeuron = selectedNeuronId
+		? state.neurons.find((l) => l.id === selectedNeuronId)
 		: null
 
 	return (
@@ -270,10 +270,10 @@ export function Demo({ useCaseId, version, onBack }: Props) {
 			<div className="demo-canvas" style={{ opacity: queryActive ? 0.3 : 1, transition: "opacity 0.25s ease" }}>
 				<Mycelium
 					ref={myceliumRef}
-					learners={state.learners}
+					neurons={state.neurons}
 					events={state.events}
-					onSelectLearner={handleSelectLearner}
-					selectedLearnerId={selectedLearnerId}
+					onSelectNeuron={handleSelectNeuron}
+					selectedNeuronId={selectedNeuronId}
 				/>
 			</div>
 
@@ -310,16 +310,16 @@ export function Demo({ useCaseId, version, onBack }: Props) {
 				</div>
 			)}
 
-			{/* Learner detail card */}
-			{selectedLearner && selectedLearnerId && (
-				<LearnerCardOverlay
-					learner={selectedLearner}
-					learnerId={selectedLearnerId}
+			{/* Neuron detail card */}
+			{selectedNeuron && selectedNeuronId && (
+				<NeuronCardOverlay
+					neuron={selectedNeuron}
+					neuronId={selectedNeuronId}
 					myceliumRef={myceliumRef}
-					onClose={() => setSelectedLearnerId(null)}
+					onClose={() => setSelectedNeuronId(null)}
 					onAsk={(id) => {
-						setSelectedLearnerId(null)
-						setAskLearnerId(id)
+						setSelectedNeuronId(null)
+						setAskNeuronId(id)
 					}}
 				/>
 			)}
@@ -435,11 +435,11 @@ export function Demo({ useCaseId, version, onBack }: Props) {
 
 			{/* Query bar */}
 			<QueryBar
-				learners={state.learners}
+				neurons={state.neurons}
 				disabled={state.status !== "ready"}
 				onActiveChange={setQueryActive}
-				askLearnerId={askLearnerId}
-				onAskLearnerHandled={handleClearAskLearner}
+				askNeuronId={askNeuronId}
+				onAskNeuronHandled={handleClearAskNeuron}
 			/>
 		</div>
 	)
@@ -499,27 +499,27 @@ function InjectionFlow({ originY }: { originY: number }) {
 }
 
 /**
- * Wrapper that positions the LearnerCard at the actual blob's screen position.
+ * Wrapper that positions the NeuronCard at the actual blob's screen position.
  */
-function LearnerCardOverlay({
-	learner,
-	learnerId,
+function NeuronCardOverlay({
+	neuron,
+	neuronId,
 	myceliumRef,
 	onClose,
 	onAsk,
 }: {
-	learner: import("../types").Learner
-	learnerId: string
+	neuron: import("../types").Neuron
+	neuronId: string
 	myceliumRef: React.RefObject<MyceliumHandle | null>
 	onClose: () => void
 	onAsk: (id: string) => void
 }) {
-	const anchor = myceliumRef.current?.getBlobScreenPos(learnerId)
+	const anchor = myceliumRef.current?.getBlobScreenPos(neuronId)
 		?? { x: 380, y: 200, radius: 40 }
 
 	return (
-		<LearnerCard
-			learner={learner}
+		<NeuronCard
+			neuron={neuron}
 			anchor={anchor}
 			onClose={onClose}
 			onAsk={onAsk}

@@ -1,9 +1,9 @@
 /**
- * Update action handler - updates existing learner configuration
+ * Update action handler - updates existing neuron configuration
  *
  * Uses both methods for what each is designed for:
- * - learner.adjust(directive) for behavioral evolution (instructions, identity, prompts, schemas)
- * - learner.update({...}) for mechanical config (name, description, thresholds)
+ * - neuron.adjust(directive) for behavioral evolution (instructions, identity, prompts, schemas)
+ * - neuron.update({...}) for mechanical config (name, description, thresholds)
  */
 
 import { Output } from 'ai'
@@ -17,17 +17,17 @@ import { updatePromptTemplate } from '../prompt.template.update'
 
 export class UpdateHandler extends EvolutionActionHandler<UpdateActionResult> {
 	async execute(decisions: EvolutionDecision[]): Promise<UpdateActionResult> {
-		const allUpdatedLearnerIds: string[] = []
+		const allUpdatedNeuronIds: string[] = []
 
 		for (const decision of decisions) {
 			this.emitActionStarted(decision)
 
 			try {
-				for (const learnerId of decision.targets) {
-					const learner = this.brain.learners.get(learnerId)
+				for (const neuronId of decision.targets) {
+					const neuron = this.brain.neurons.get(neuronId)
 
-					if (!learner) {
-						throw new Error(`Learner ${learnerId} not found`)
+					if (!neuron) {
+						throw new Error(`Neuron ${neuronId} not found`)
 					}
 
 					const result = await generate({
@@ -35,7 +35,7 @@ export class UpdateHandler extends EvolutionActionHandler<UpdateActionResult> {
 						system: updateSystemPrompt,
 						prompt: await updatePromptTemplate(
 							decision.guidance,
-							learner,
+							neuron,
 							this.brain.promptContext?.purpose ?? this.brain.prompt,
 						),
 						output: Output.object({ schema: updateOutputSchema }),
@@ -46,7 +46,7 @@ export class UpdateHandler extends EvolutionActionHandler<UpdateActionResult> {
 
 					// Behavioral evolution via adjust() — incremental/adaptive
 					if (behavioral && behavioral.trim().length > 0) {
-						await learner.adjust(behavioral)
+						await neuron.adjust(behavioral)
 					}
 
 					// Mechanical config via update() — specific field values
@@ -58,18 +58,18 @@ export class UpdateHandler extends EvolutionActionHandler<UpdateActionResult> {
 							...rest,
 							...(thresholds ? { understand: { thresholds } } : {}),
 						}
-						await learner.update(adapted)
+						await neuron.update(adapted)
 					}
 
 					if (mechanical.name) {
-						this.brain.__updateLearnerName(learnerId, mechanical.name)
+						this.brain.__updateNeuronName(neuronId, mechanical.name)
 					}
 
-					allUpdatedLearnerIds.push(learnerId)
+					allUpdatedNeuronIds.push(neuronId)
 				}
 
 				const actionResult: UpdateActionResult = {
-					updatedLearnerIds: [...decision.targets],
+					updatedNeuronIds: [...decision.targets],
 				}
 
 				this.emitActionExecuted(decision, actionResult)
@@ -80,6 +80,6 @@ export class UpdateHandler extends EvolutionActionHandler<UpdateActionResult> {
 			}
 		}
 
-		return { updatedLearnerIds: allUpdatedLearnerIds }
+		return { updatedNeuronIds: allUpdatedNeuronIds }
 	}
 }

@@ -30,9 +30,9 @@
 }
 ```
 
-### Generated Learners
+### Generated Neurons
 
-#### Learner: Coding Style Observer (coding-style)
+#### Neuron: Coding Style Observer (coding-style)
 
 **State:**
 ```json
@@ -72,7 +72,7 @@
 }
 ```
 
-#### Learner: Error Handling Analyst (error-handling)
+#### Neuron: Error Handling Analyst (error-handling)
 
 **State:**
 ```json
@@ -112,7 +112,7 @@
 }
 ```
 
-#### Learner: Tool Preference Tracker (tool-preference)
+#### Neuron: Tool Preference Tracker (tool-preference)
 
 **State:**
 ```json
@@ -152,7 +152,7 @@
 }
 ```
 
-#### Learner: Communication Style Analyzer (communication-patterns)
+#### Neuron: Communication Style Analyzer (communication-patterns)
 
 **State:**
 ```json
@@ -208,7 +208,7 @@
 }
 ```
 
-| Turn | Events | Types | Learner Results |
+| Turn | Events | Types | Neuron Results |
 | --- | --- | --- | --- |
 | Turn 1 | evt_001–evt_010 | ai_conversation×4, git_commit×3, code_review_given×1, config_change×1, package_install×1 | coding-style:synthesized, error-handling:synthesized, tool-preference:synthesized, communication-patterns:synthesized |
 | Turn 2 | evt_011–evt_020 | git_commit×4, ai_conversation×4, code_review_given×2 | coding-style:synthesized, error-handling:synthesized, tool-preference:synthesized, communication-patterns:synthesized |
@@ -233,7 +233,7 @@
 }
 ```
 
-**Learner Count:** 4
+**Neuron Count:** 4
 
 #### Coding Style Observer (coding-style)
 
@@ -317,7 +317,7 @@ You are a software developer collaboration style observer. You watch for signals
 
 **Insight:** This developer's coding philosophy centers around pragmatism, minimalism, and a commitment to code quality, emphasizing simplicity and maintainability, especially early in a project. They prioritize explicit control, type safety, and robust error handling, with a strong focus on security. This includes a preference for simpler technologies like Express for smaller projects, and a tendency to avoid premature abstraction, favoring direct queries and functions when fitting. They value writing clean code, leveraging TypeScript's strict settings, using Zod for validation, and prioritizing explicit error handling, using Result types and specific strategies for development vs. production environments (correlation IDs). They show appreciation for integration tests and unit tests, and maintain coding consistency with preferred formatting (tabs, single quotes).
 **Source Count:** 4
-| Learner | Confidence | Insight Preview |
+| Neuron | Confidence | Insight Preview |
 | --- | --- | --- |
 | coding-style | 0.90 | The developer's coding philosophy centers around pragmatism, minimalism, and a commitment to code quality. They favor... |
 | error-handling | 0.90 | Based on my understanding, this developer's coding philosophy emphasizes explicit control, type safety, and robust er... |
@@ -330,7 +330,7 @@ You are a software developer collaboration style observer. You watch for signals
 
 **Insight:** The developer demonstrates preferences for camelCase in API responses and single quotes for string literals. They prefer tabs, likely due to accessibility considerations, and use strict TypeScript configurations. In error handling, they favor generic terms like 'handleError' over more specific ones like 'handleException' and appreciate explicit, descriptive names, with Result types to clearly indicate success or failure. Their comments tend to be concise, focusing on non-obvious behavior.
 **Source Count:** 4
-| Learner | Confidence | Insight Preview |
+| Neuron | Confidence | Insight Preview |
 | --- | --- | --- |
 | coding-style | 0.80 | Based on my understanding, the developer prefers camelCase for API responses. They also appear to favor single quotes... |
 | error-handling | 0.70 | Based on the information I have, they value explicit and descriptive naming conventions. For example, the suggestion ... |
@@ -354,7 +354,7 @@ You are a software developer collaboration style observer. You watch for signals
 }
 ```
 
-| Turn | Events | Types | Learner Results |
+| Turn | Events | Types | Neuron Results |
 | --- | --- | --- | --- |
 | Turn 1 | evt_031–evt_040 | ai_conversation×4, git_commit×3, code_review_given×2, config_change×1 | coding-style:synthesized, error-handling:observe:dismissed, tool-preference:synthesized, communication-patterns:synthesized |
 | Turn 2 | evt_041–evt_050 | ai_conversation×4, git_commit×4, code_review_given×2 | coding-style:synthesized, error-handling:observe:dismissed, tool-preference:synthesized, communication-patterns:synthesized |
@@ -378,7 +378,7 @@ You are a software developer collaboration style observer. You watch for signals
 }
 ```
 
-**Learner Count:** 4
+**Neuron Count:** 4
 
 #### Coding Style Observer (coding-style)
 
@@ -462,7 +462,7 @@ You are a software developer collaboration style observer. You watch for signals
 
 **Insight:** This developer's coding philosophy emphasizes pragmatism, minimalism, and type safety. They favor simpler technologies and avoid premature abstraction, preferring duplication over incorrect abstraction. They value writing code that is easy to understand and debug, opting for direct solutions over complex designs when simplicity suffices. They are committed to code quality through the single-responsibility principle, explicit error handling (using Result types over exceptions), strict TypeScript configurations, TypeScript-first libraries like Zod for validation, direct database interactions, and careful optimization of Docker images. There is also an emphasis on performance, efficiency, and security, reflected in choices of tools (Biome, Pino, k6), load testing, and differentiated error messages for development and production environments.
 **Source Count:** 4
-| Learner | Confidence | Insight Preview |
+| Neuron | Confidence | Insight Preview |
 | --- | --- | --- |
 | coding-style | 0.90 | The developer's coding philosophy centers around pragmatism and minimalism. They favor simpler technologies and avoid... |
 | error-handling | 0.80 | Based on my understanding, this developer values explicit control and type safety in their code. This is demonstrated... |
@@ -475,7 +475,7 @@ You are a software developer collaboration style observer. You watch for signals
 
 **Insight:** The developer prefers camelCase for API responses, tabs for indentation, and single quotes for string consistency. They also prefer URL path-based API versioning (e.g., /v1/). They use TypeScript with strict configurations ('strict', 'noImplicitAny', 'strictNullChecks'), indicating a preference for explicit typing and null safety. They seem to favor explicit control over 'magic', suggesting a more verbose and less implicit coding style. They use Zod for schema validation, pointing towards a preference for declarative validation and data integrity. They use Biome as a linter/formatter, which would enforce certain code style rules. They prefer concise, non-redundant comments, favoring explanations of non-obvious behavior over restating the obvious. They prefer 'handleError' over 'handleException' and prioritize clean code by avoiding redundant comments.
 **Source Count:** 4
-| Learner | Confidence | Insight Preview |
+| Neuron | Confidence | Insight Preview |
 | --- | --- | --- |
 | coding-style | 0.80 | The developer generally prefers camelCase for API responses. They also configure their editor to use tabs for indenta... |
 | error-handling | 0.70 | Based on the information available, I can identify some naming conventions and code style preferences. The developer ... |
@@ -488,7 +488,7 @@ You are a software developer collaboration style observer. You watch for signals
 
 **Insight:** The developer handles errors and edge cases with a preference for explicit control. They consistently use `Result` types for error returns instead of relying on exceptions, and use TypeScript's strict mode for compile-time error detection. They employ Zod for request validation, converting validation errors into `Result` types. Error handling strategies also include error codes and correlation IDs in production and full stack traces in development. Postgres' ACID transactions are used to ensure data consistency. They use simple debugging methods and type safety.
 **Source Count:** 4
-| Learner | Confidence | Insight Preview |
+| Neuron | Confidence | Insight Preview |
 | --- | --- | --- |
 | coding-style | 0.90 | They handle errors explicitly using a `Result` type instead of relying on exceptions. They also use 'handleError' ove... |
 | error-handling | 0.90 | The developer handles errors and edge cases primarily through explicit error returns using Result types instead of re... |
@@ -501,7 +501,7 @@ You are a software developer collaboration style observer. You watch for signals
 
 **Insight:** The developer prefers several tools and libraries for specific reasons. They favor Express over NestJS for simpler applications and raw SQL or Kysely (for complex queries) over ORMs like Prisma and TypeORM. They also lean towards TypeScript-first libraries like Zod for validation due to type inference and a better developer experience. They use Biome for linting and formatting, Pino for logging (rejecting Winston), and template literals for email templating. For error handling, they prefer explicit Result types over exceptions and use TypeScript with strict configurations for type safety. For testing, they use Jest, favoring integration tests for APIs and unit tests for pure functions. They prefer simpler tools, emphasizing clarity and cacheability (e.g., URL path versioning) and minimal production images for Docker. They also show an aversion to 'magic'.
 **Source Count:** 4
-| Learner | Confidence | Insight Preview |
+| Neuron | Confidence | Insight Preview |
 | --- | --- | --- |
 | coding-style | 0.90 | Based on my understanding, the developer has a preference for certain tools and libraries: They prefer Express over N... |
 | error-handling | 0.90 | Based on my understanding, the developer prefers the following tools and libraries:
@@ -540,7 +540,7 @@ You are a software developer collaboration style observer. You watch for signals
 }
 ```
 
-**Learner Summary:**
+**Neuron Summary:**
 ```json
 [
   {
@@ -617,7 +617,7 @@ _(Update threw — prompt/config may be partially applied, evolution may have fa
 }
 ```
 
-**Learner Summary:**
+**Neuron Summary:**
 ```json
 [
   {
@@ -656,14 +656,14 @@ _(Update threw — prompt/config may be partially applied, evolution may have fa
   "evaluator:evaluation:started": 2,
   "evaluator:evaluation:completed": 2,
   "evolution:action:started": 7,
-  "brain:learner:removed": 3,
+  "brain:neuron:removed": 3,
   "evolution:action:executed": 3,
-  "learner:init:started": 2,
-  "learner:prompts:regenerated": 1,
-  "learner:config:updated": 1,
-  "learner:init:completed": 1,
-  "brain:learner:added": 1,
-  "learner:init:failed": 1,
+  "neuron:init:started": 2,
+  "neuron:prompts:regenerated": 1,
+  "neuron:config:updated": 1,
+  "neuron:init:completed": 1,
+  "brain:neuron:added": 1,
+  "neuron:init:failed": 1,
   "evolution:action:failed": 4
 }
 ```
@@ -673,7 +673,7 @@ _(Update threw — prompt/config may be partially applied, evolution may have fa
 - **brain:signal:received** from `brain`: SYSTEM DIRECTIVE: Brain purpose has been updated by the user.
 Previous purpose: You help understand a developer's coding habits, philosophy, and preferences by tracking their conversations, commits...
 
-### Learner Set Changes
+### Neuron Set Changes
 
 **Removed:**
 ```json
@@ -720,7 +720,7 @@ Previous purpose: You help understand a developer's coding habits, philosophy, a
 }
 ```
 
-| Turn | Events | Types | Learner Results |
+| Turn | Events | Types | Neuron Results |
 | --- | --- | --- | --- |
 | Turn 1 | evt_051–evt_060 | ai_conversation×4, git_commit×3, code_review_given×2, config_change×1 | error-handling:synthesized, defensive-coding-strategies:synthesized |
 | Turn 2 | evt_061–evt_070 | git_commit×4, ai_conversation×4, code_review_given×2 | error-handling:observe:dismissed, defensive-coding-strategies:synthesized |
@@ -745,7 +745,7 @@ Previous purpose: You help understand a developer's coding habits, philosophy, a
 }
 ```
 
-**Learner Count:** 2
+**Neuron Count:** 2
 
 #### Error Handling Analyst (error-handling)
 
@@ -789,7 +789,7 @@ You are a defensive coding observer. You watch for signals about the developer's
 
 **Insight:** The developer demonstrates a comprehensive approach to error handling and edge case management, emphasizing explicit error management and proactive validation. They use Result types for controlled failure management and leverage TypeScript's strict mode to catch errors during compilation. Zod is implemented for schema validation to ensure data integrity. The developer uses Postgres with ACID transactions for data consistency, and validates configuration at startup to ensure all dependencies are met. During development, full stack traces are used, while in production error codes with correlation IDs are used. Environment variables are validated at startup, arrays are checked before access, and soft deletes with audit trails are used for users. These practices indicate a focus on data recoverability and accountability.
 **Source Count:** 2
-| Learner | Confidence | Insight Preview |
+| Neuron | Confidence | Insight Preview |
 | --- | --- | --- |
 | error-handling | 0.90 | The developer handles errors and edge cases primarily through explicit means. They favor Result types for error retur... |
 | defensive-coding-strategies | 0.80 | The developer handles errors and edge cases by validating environment variables at startup to ensure required configu... |
@@ -800,7 +800,7 @@ You are a defensive coding observer. You watch for signals about the developer's
 
 **Insight:** The developers employ several validation patterns. They use Zod for schema validation, including validating environment variables upon startup, ensuring that all required configurations are present before the application starts and causing the system to fail fast if configurations are missing. They leverage TypeScript with strict configurations for type safety, which helps catch errors during compile time. They perform array bounds checking before accessing, and have enabled the `noUncheckedIndexedAccess` to prevent undefined bugs when accessing array elements. Finally, they use Postgres for relational data, using ACID transactions for data consistency.
 **Source Count:** 2
-| Learner | Confidence | Insight Preview |
+| Neuron | Confidence | Insight Preview |
 | --- | --- | --- |
 | error-handling | 0.90 | They use Zod for schema validation, which likely means they're handling data validation errors explicitly and convert... |
 | defensive-coding-strategies | 0.75 | The developer uses Zod for input validation, specifically to validate environment variables at startup. This ensures ... |
@@ -811,7 +811,7 @@ You are a defensive coding observer. You watch for signals about the developer's
 
 **Insight:** The developer employs several defensive coding practices. They use TypeScript with strict settings (strict, noImplicitAny, strictNullChecks, noUncheckedIndexedAccess) which enforces strong typing and helps catch potential errors at compile time, such as null reference exceptions and incorrect array accesses. They perform array bounds checking before access, and validate configuration at startup using Zod schemas to ensure all required configurations are present before the application starts and that incoming data conforms to the expected structure. Their choice of Postgres with explicit SQL queries allows greater control over data validation and may prevent SQL injection vulnerabilities. They use Result types for error handling. Also, they implemented soft deletes and audit trails for data recoverability and accountability.
 **Source Count:** 2
-| Learner | Confidence | Insight Preview |
+| Neuron | Confidence | Insight Preview |
 | --- | --- | --- |
 | error-handling | 0.90 | Based on the information I have, the developer employs several defensive coding practices. They use TypeScript with s... |
 | defensive-coding-strategies | 0.90 | The developer employs several defensive coding practices, including: input validation of environment variables using ... |
@@ -822,7 +822,7 @@ You are a defensive coding observer. You watch for signals about the developer's
 
 **Insight:** The developer primarily uses explicit returns of Result types for error handling instead of exceptions. They also leverage Postgres with ACID transactions for data consistency. Environment variables are validated at startup for fail-fast behavior. Soft deletes and audit trails are used for data recovery and accountability. For tracking and debugging, they use error codes and correlation IDs in production. Cursor-based pagination is implemented to improve performance and reduce the risks of failure when fetching large datasets.
 **Source Count:** 2
-| Learner | Confidence | Insight Preview |
+| Neuron | Confidence | Insight Preview |
 | --- | --- | --- |
 | error-handling | 0.80 | Based on my understanding, the developer primarily handles failures using explicit returns of Result types rather tha... |
 | defensive-coding-strategies | 0.75 | The developer uses several strategies to handle failures and enable recovery. Specifically, they validate environment... |
@@ -833,7 +833,7 @@ You are a defensive coding observer. You watch for signals about the developer's
 
 **Insight:** The developer prefers explicit error handling using Result types for error returns and Zod for schema validation, indicating a strategy of handling data validation errors explicitly. They use TypeScript's strict configurations (strict, noImplicitAny, strictNullChecks, noUncheckedIndexedAccess) to catch errors at compile time. They validate environment variables with Zod for a 'fail fast' approach, use soft deletes for data recoverability, and implement error codes alongside correlation IDs for tracking errors in production.
 **Source Count:** 2
-| Learner | Confidence | Insight Preview |
+| Neuron | Confidence | Insight Preview |
 | --- | --- | --- |
 | error-handling | 0.90 | Based on my understanding, they seem to prefer explicit error handling mechanisms over relying on built-in exception-... |
 | defensive-coding-strategies | 0.70 | Based on my understanding, the developer validates environment variables using zod to ensure required configurations ... |
@@ -842,7 +842,7 @@ You are a defensive coding observer. You watch for signals about the developer's
 
 ## Signal Checkpoint: After Phase 3 Ingestion + Queries
 
-### Learner Governance States
+### Neuron Governance States
 
 #### Error Handling Analyst (error-handling)
 
@@ -949,7 +949,7 @@ _No governance signals emitted yet._
 }
 ```
 
-**Learner Summary:**
+**Neuron Summary:**
 ```json
 [
   {
@@ -987,16 +987,16 @@ _No governance signals emitted yet._
   "changedFields": [
     "model"
   ],
-  "learnerResults": [
+  "neuronResults": [
     {
-      "learnerId": "error-handling",
+      "neuronId": "error-handling",
       "changedFields": [
         "model",
         "synthesize.thresholds.minImportance"
       ]
     },
     {
-      "learnerId": "defensive-coding-strategies",
+      "neuronId": "defensive-coding-strategies",
       "changedFields": [
         "model",
         "synthesize.thresholds.minImportance"
@@ -1024,7 +1024,7 @@ _No governance signals emitted yet._
 }
 ```
 
-**Learner Summary:**
+**Neuron Summary:**
 ```json
 [
   {
@@ -1059,7 +1059,7 @@ _No governance signals emitted yet._
 **Event Type Counts:**
 ```json
 {
-  "learner:config:updated": 2,
+  "neuron:config:updated": 2,
   "brain:config:updated": 1
 }
 ```
@@ -1068,7 +1068,7 @@ _No governance signals emitted yet._
 
 ## Signal Checkpoint: After Phase 5
 
-### Learner Governance States
+### Neuron Governance States
 
 #### Error Handling Analyst (error-handling)
 
@@ -1171,7 +1171,7 @@ _No governance signals emitted yet._
 }
 ```
 
-**Learner Summary:**
+**Neuron Summary:**
 ```json
 [
   {
@@ -1210,7 +1210,7 @@ _No governance signals emitted yet._
     "evolution.evaluatorSignalThreshold",
     "evolution.autoEvaluate"
   ],
-  "learnerResults": [],
+  "neuronResults": [],
   "hasEvolutionResults": false
 }
 ```
@@ -1232,7 +1232,7 @@ _No governance signals emitted yet._
 }
 ```
 
-**Learner Summary:**
+**Neuron Summary:**
 ```json
 [
   {
@@ -1278,39 +1278,39 @@ _No governance signals emitted yet._
 **Total Duration:** 221.1s
 **Total Events Ingested:** 80
 **Total Brain Events Collected:** 310
-**Final Learner Count:** 2
+**Final Neuron Count:** 2
 
 **All Brain Events by Type:**
 ```json
 {
   "brain:inject:started": 8,
   "brain:inject:batch:started": 8,
-  "learner:observe:started": 26,
-  "learner:observe:thinking": 26,
-  "learner:synthesize:started": 22,
-  "learner:synthesize:thinking": 22,
-  "learner:synthesized": 22,
-  "learner:governance:updated": 22,
+  "neuron:observe:started": 26,
+  "neuron:observe:thinking": 26,
+  "neuron:synthesize:started": 22,
+  "neuron:synthesize:thinking": 22,
+  "neuron:synthesized": 22,
+  "neuron:governance:updated": 22,
   "brain:inject:batch:completed": 8,
   "brain:inject:completed": 8,
   "brain:ask:started": 11,
-  "learner:query:started": 34,
-  "learner:query:completed": 34,
+  "neuron:query:started": 34,
+  "neuron:query:completed": 34,
   "brain:ask:synthesis:started": 11,
   "brain:ask:completed": 11,
-  "learner:observe:dismissed": 4,
+  "neuron:observe:dismissed": 4,
   "brain:signal:received": 1,
   "evaluator:evaluation:started": 2,
   "evaluator:evaluation:completed": 2,
   "evolution:action:started": 7,
-  "brain:learner:removed": 3,
+  "brain:neuron:removed": 3,
   "evolution:action:executed": 3,
-  "learner:init:started": 2,
-  "learner:prompts:regenerated": 1,
-  "learner:config:updated": 3,
-  "learner:init:completed": 1,
-  "brain:learner:added": 1,
-  "learner:init:failed": 1,
+  "neuron:init:started": 2,
+  "neuron:prompts:regenerated": 1,
+  "neuron:config:updated": 3,
+  "neuron:init:completed": 1,
+  "brain:neuron:added": 1,
+  "neuron:init:failed": 1,
   "evolution:action:failed": 4,
   "brain:config:updated": 2
 }
@@ -1318,7 +1318,7 @@ _No governance signals emitted yet._
 
 ### Signal Recap
 
-**Total Governance Signals (from learners):** 0
+**Total Governance Signals (from neurons):** 0
 **Total System Signals (from brain):** 1
 #### All System Signals
 
@@ -1326,7 +1326,7 @@ _No governance signals emitted yet._
 Previous purpose: You help understand a developer's coding habits, philosophy, and preferences by tracking their conversations, commits, code reviews, and tool choices over time.
 New purpose: You are an expert at analyzing developer er...
 
-### Final Learner States
+### Final Neuron States
 
 #### Error Handling Analyst (error-handling)
 

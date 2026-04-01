@@ -1,14 +1,14 @@
 import { useState, useCallback, useRef } from "react"
 import type {
 	SessionState,
-	Learner,
-	LearnerMetrics,
-	LearnerHealth,
+	Neuron,
+	NeuronMetrics,
+	NeuronHealth,
 	DataItem,
 	InjectionProgress,
 } from "../types"
 
-const defaultMetrics: LearnerMetrics = {
+const defaultMetrics: NeuronMetrics = {
 	observations: 0,
 	dismissals: 0,
 	syntheses: 0,
@@ -17,17 +17,17 @@ const defaultMetrics: LearnerMetrics = {
 	lastSynthesisEvolution: null,
 }
 
-const defaultHealth: LearnerHealth = {
+const defaultHealth: NeuronHealth = {
 	activation: 0.5,
 	status: "active",
 }
 
-/** Map raw server learner to frontend Learner with full metrics */
-function toLearner(
+/** Map raw server neuron to frontend Neuron with full metrics */
+function toNeuron(
 	raw: Record<string, unknown>,
-	existingMetrics?: LearnerMetrics,
-	existingHealth?: LearnerHealth,
-): Learner {
+	existingMetrics?: NeuronMetrics,
+	existingHealth?: NeuronHealth,
+): Neuron {
 	const understanding = raw.understanding
 	let understandingSize = 0
 	if (typeof understanding === "string") {
@@ -38,7 +38,7 @@ function toLearner(
 
 	// Extract health from server data if available
 	const serverHealth = raw.health as Record<string, unknown> | undefined
-	const health: LearnerHealth = serverHealth
+	const health: NeuronHealth = serverHealth
 		? {
 				activation: (serverHealth.activation as number) ?? existingHealth?.activation ?? 0.5,
 				status: (serverHealth.status as string) ?? existingHealth?.status ?? "active",
@@ -47,7 +47,7 @@ function toLearner(
 
 	// Extract metrics from server data if available
 	const serverMetrics = raw.metrics as Record<string, unknown> | undefined
-	const metrics: LearnerMetrics = serverMetrics
+	const metrics: NeuronMetrics = serverMetrics
 		? {
 				observations: (serverMetrics.totalObservations as number) ?? existingMetrics?.observations ?? 0,
 				dismissals: (serverMetrics.totalDismissals as number) ?? existingMetrics?.dismissals ?? 0,
@@ -74,7 +74,7 @@ const initialState: SessionState = {
 	sessionId: null,
 	status: "idle",
 	activity: "",
-	learners: [],
+	neurons: [],
 	commentary: "",
 	events: [],
 	injectedIds: new Set(),
@@ -87,22 +87,22 @@ function activityFromEvent(type: string, payload: Record<string, unknown>): stri
 		case "brain:init:started": return "Decomposing brain prompt..."
 		case "brain:init:config:generated": {
 			const count = (payload.configs as unknown[])?.length ?? 0
-			return `Generated ${count} learner configs`
+			return `Generated ${count} neuron configs`
 		}
-		case "brain:learner:added": return `Creating learner "${payload.name}"...`
+		case "brain:neuron:added": return `Creating neuron "${payload.name}"...`
 		case "brain:init:completed": return "Brain ready"
 		case "inject:started": return `Injecting ${payload.itemCount} items...`
 		case "inject:completed": return "Injection complete"
-		case "learner:observed": return `Observed by ${payload.learnerName ?? payload.learnerId}`
-		case "learner:observe:dismissed": return `Dismissed by ${payload.learnerName ?? payload.learnerId}`
-		case "learner:synthesize:started": return `Synthesizing "${payload.learnerName ?? payload.learnerId}"...`
-		case "learner:synthesized": return `Synthesized "${payload.learnerName ?? payload.learnerId}"`
+		case "neuron:observed": return `Observed by ${payload.neuronName ?? payload.neuronId}`
+		case "neuron:observe:dismissed": return `Dismissed by ${payload.neuronName ?? payload.neuronId}`
+		case "neuron:synthesize:started": return `Synthesizing "${payload.neuronName ?? payload.neuronId}"...`
+		case "neuron:synthesized": return `Synthesized "${payload.neuronName ?? payload.neuronId}"`
 		case "evaluator:evaluation:completed": {
 			const count = payload.decisionCount as number
 			return count > 0 ? `Evolution: ${count} decision(s)` : "Evolution: no changes"
 		}
 		case "evolution:action:executed": return `Evolving: ${payload.action} on ${(payload.targets as string[])?.join(", ")}`
-		case "brain:learner:removed": return `Removed learner`
+		case "brain:neuron:removed": return `Removed neuron`
 		default: return null
 	}
 }
@@ -128,22 +128,22 @@ export function useSession() {
 		}))
 	}, [])
 
-	/** Update a single learner's fields without replacing the whole array */
-	const patchLearner = useCallback((learnerId: string, patch: Partial<Learner>) => {
+	/** Update a single neuron's fields without replacing the whole array */
+	const patchNeuron = useCallback((neuronId: string, patch: Partial<Neuron>) => {
 		setState((prev) => ({
 			...prev,
-			learners: prev.learners.map((l) =>
-				l.id === learnerId ? { ...l, ...patch } : l,
+			neurons: prev.neurons.map((l) =>
+				l.id === neuronId ? { ...l, ...patch } : l,
 			),
 		}))
 	}, [])
 
-	/** Increment a metric counter for a learner */
-	const incrementMetric = useCallback((learnerId: string, key: keyof LearnerMetrics) => {
+	/** Increment a metric counter for a neuron */
+	const incrementMetric = useCallback((neuronId: string, key: keyof NeuronMetrics) => {
 		setState((prev) => ({
 			...prev,
-			learners: prev.learners.map((l) => {
-				if (l.id !== learnerId) return l
+			neurons: prev.neurons.map((l) => {
+				if (l.id !== neuronId) return l
 				return {
 					...l,
 					metrics: {
@@ -155,11 +155,11 @@ export function useSession() {
 		}))
 	}, [])
 
-	const updateLearners = useCallback((learners: Learner[]) => {
+	const updateNeurons = useCallback((neurons: Neuron[]) => {
 		setState((prev) => {
 			// Preserve existing metrics/activity when updating from server
-			const merged = learners.map((newL) => {
-				const existing = prev.learners.find((l) => l.id === newL.id)
+			const merged = neurons.map((newL) => {
+				const existing = prev.neurons.find((l) => l.id === newL.id)
 				if (existing) {
 					return {
 						...newL,
@@ -178,7 +178,7 @@ export function useSession() {
 				}
 				return newL
 			})
-			return { ...prev, learners: merged }
+			return { ...prev, neurons: merged }
 		})
 	}, [])
 
@@ -203,9 +203,9 @@ export function useSession() {
 
 				es.addEventListener("snapshot", (e) => {
 					const payload = JSON.parse(e.data)
-					if (payload.learners?.length) {
-						const learners = payload.learners.map((r: Record<string, unknown>) => toLearner(r))
-						updateLearners(learners)
+					if (payload.neurons?.length) {
+						const neurons = payload.neurons.map((r: Record<string, unknown>) => toNeuron(r))
+						updateNeurons(neurons)
 					}
 					if (payload.commentary) {
 						commentaryBufferRef.current = payload.commentary
@@ -254,12 +254,12 @@ export function useSession() {
 					setState((prev) => ({
 						...prev,
 						status: "ready",
-						learners: payload.learners
-							? payload.learners.map((r: Record<string, unknown>) => {
-									const existing = prev.learners.find((l) => l.id === r.id as string)
-									return toLearner(r, existing?.metrics, existing?.health)
+						neurons: payload.neurons
+							? payload.neurons.map((r: Record<string, unknown>) => {
+									const existing = prev.neurons.find((l) => l.id === r.id as string)
+									return toNeuron(r, existing?.metrics, existing?.health)
 								})
-							: prev.learners,
+							: prev.neurons,
 					}))
 				})
 
@@ -272,7 +272,7 @@ export function useSession() {
 					setState((prev) => ({
 						...prev,
 						status: "idle",
-						learners: [],
+						neurons: [],
 						commentary: "",
 						events: [],
 					}))
@@ -320,19 +320,19 @@ export function useSession() {
 					"brain:init:started",
 					"brain:init:completed",
 					"brain:init:config:generated",
-					"learner:init:completed",
-					"learner:observed",
-					"learner:observe:dismissed",
-					"learner:synthesized",
-					"learner:synthesize:started",
-					"learner:health:updated",
-					"learner:signal",
+					"neuron:init:completed",
+					"neuron:observed",
+					"neuron:observe:dismissed",
+					"neuron:synthesized",
+					"neuron:synthesize:started",
+					"neuron:health:updated",
+					"neuron:signal",
 					"evolution:action:executed",
 					"evaluator:evaluation:completed",
 					"inject:started",
 					"inject:completed",
-					"brain:learner:added",
-					"brain:learner:removed",
+					"brain:neuron:added",
+					"brain:neuron:removed",
 				]) {
 					es.addEventListener(eventType, (e) => {
 						const payload = JSON.parse(e.data)
@@ -343,30 +343,30 @@ export function useSession() {
 							setState((prev) => ({ ...prev, activity }))
 						}
 
-						// Track per-learner metrics
-						const learnerId = payload.learnerId as string | undefined
-						if (learnerId) {
+						// Track per-neuron metrics
+						const neuronId = payload.neuronId as string | undefined
+						if (neuronId) {
 							switch (eventType) {
-								case "learner:observed":
-									incrementMetric(learnerId, "observations")
-									patchLearner(learnerId, { activity: "observing" })
+								case "neuron:observed":
+									incrementMetric(neuronId, "observations")
+									patchNeuron(neuronId, { activity: "observing" })
 									// Reset to idle after a short delay
-									setTimeout(() => patchLearner(learnerId, { activity: "idle" }), 800)
+									setTimeout(() => patchNeuron(neuronId, { activity: "idle" }), 800)
 									break
-								case "learner:observe:dismissed":
-									incrementMetric(learnerId, "dismissals")
+								case "neuron:observe:dismissed":
+									incrementMetric(neuronId, "dismissals")
 									break
-								case "learner:synthesize:started":
-									patchLearner(learnerId, { activity: "synthesizing" })
+								case "neuron:synthesize:started":
+									patchNeuron(neuronId, { activity: "synthesizing" })
 									break
-								case "learner:synthesized":
-									incrementMetric(learnerId, "syntheses")
-									patchLearner(learnerId, { activity: "idle" })
+								case "neuron:synthesized":
+									incrementMetric(neuronId, "syntheses")
+									patchNeuron(neuronId, { activity: "idle" })
 									// Store last synthesis info
 									setState((prev) => ({
 										...prev,
-										learners: prev.learners.map((l) => {
-											if (l.id !== learnerId) return l
+										neurons: prev.neurons.map((l) => {
+											if (l.id !== neuronId) return l
 											return {
 												...l,
 												metrics: {
@@ -380,8 +380,8 @@ export function useSession() {
 										}),
 									}))
 									break
-								case "learner:health:updated":
-									patchLearner(learnerId, {
+								case "neuron:health:updated":
+									patchNeuron(neuronId, {
 										health: {
 											activation: (payload.activation as number) ?? 0.5,
 											status: (payload.status as string) ?? "active",
@@ -394,20 +394,20 @@ export function useSession() {
 						// Fetch full state on structural changes
 						if (
 							eventType === "brain:init:completed" ||
-							eventType === "brain:learner:added" ||
-							eventType === "brain:learner:removed" ||
+							eventType === "brain:neuron:added" ||
+							eventType === "brain:neuron:removed" ||
 							eventType === "evolution:action:executed"
 						) {
 							fetch("/api/brain/state")
 								.then((r) => r.json())
 								.then((s) => {
-									if (s.learners) {
+									if (s.neurons) {
 										setState((prev) => {
-											const newLearners = (s.learners as Record<string, unknown>[]).map((r) => {
-												const existing = prev.learners.find((l) => l.id === r.id as string)
-												return toLearner(r, existing?.metrics, existing?.health)
+											const newNeurons = (s.neurons as Record<string, unknown>[]).map((r) => {
+												const existing = prev.neurons.find((l) => l.id === r.id as string)
+												return toNeuron(r, existing?.metrics, existing?.health)
 											})
-											return { ...prev, learners: newLearners }
+											return { ...prev, neurons: newNeurons }
 										})
 									}
 								})
@@ -455,7 +455,7 @@ export function useSession() {
 				throw error
 			}
 		},
-		[addEvent, updateLearners, patchLearner, incrementMetric],
+		[addEvent, updateNeurons, patchNeuron, incrementMetric],
 	)
 
 	const initSession = useCallback(async () => {

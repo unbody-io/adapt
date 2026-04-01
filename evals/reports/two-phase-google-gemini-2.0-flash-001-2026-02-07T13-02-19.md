@@ -2,7 +2,7 @@
 
 **Model:** google/gemini-2.0-flash-001
 **Dataset:** Preference Evolution & Fact Contradiction
-**Learner:** Personal Fact Tracker (facts)
+**Neuron:** Personal Fact Tracker (facts)
 **Purpose:** Extract and maintain accurate personal facts about the user. When new information contradicts existing facts, update understanding accordingly. Track preferences, habits, opinions, and life circumstances.
 **Events processed:** 24
 **Duration:** 26.2s
@@ -197,7 +197,7 @@ _2998ms_
 
 ### Overall
 
-The learner correctly tracked all 4 preference evolution arcs (shoes, diet, job, phone) and updated its understanding when contradictions arrived. All query confidence scores are high (0.80–1.00). 22/24 events observed with zero dismissals and zero errors — every event was deemed relevant, which is expected since all messages are directly about the user.
+The neuron correctly tracked all 4 preference evolution arcs (shoes, diet, job, phone) and updated its understanding when contradictions arrived. All query confidence scores are high (0.80–1.00). 22/24 events observed with zero dismissals and zero errors — every event was deemed relevant, which is expected since all messages are directly about the user.
 
 ### Synthesis Behavior
 
@@ -220,6 +220,6 @@ The understanding growth chart shows a staircase pattern — understanding only 
 
 ### Key Finding
 
-The **Adidas query at 0.50** reveals the most important behavioral insight: the learner *replaced* old facts rather than *evolving* them. It knows the user wears Nike now, but lost the history that they *used to* love Adidas and switched due to quality issues. This means invalidated facts are being **erased** rather than retained as historical context.
+The **Adidas query at 0.50** reveals the most important behavioral insight: the neuron *replaced* old facts rather than *evolving* them. It knows the user wears Nike now, but lost the history that they *used to* love Adidas and switched due to quality issues. This means invalidated facts are being **erased** rather than retained as historical context.
 
 This is the core tension the dataset tests: should a fact tracker maintain only current-state truth, or should it preserve the arc of change? For a personal memory system, the history of *why* preferences changed is often as valuable as knowing the current preference.

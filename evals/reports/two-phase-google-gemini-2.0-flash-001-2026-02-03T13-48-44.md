@@ -2,7 +2,7 @@
 
 **Model:** google/gemini-2.0-flash-001
 **Dataset:** Crisis Hostage Tracking
-**Learner:** Generic Crisis Tracker (generic)
+**Neuron:** Generic Crisis Tracker (generic)
 **Purpose:** Understand patterns in who gets targeted, killer behavioral evolution, and hostage emotional states
 **Events processed:** 15
 **Duration:** 22.4s

@@ -1,14 +1,14 @@
-import type { LearnerResponse } from '../types'
+import type { NeuronResponse } from '../types'
 
 /**
  * User prompt for brain synthesis
  *
- * Presents learner responses as anonymous knowledge sections.
+ * Presents neuron responses as anonymous knowledge sections.
  * No lossy abstractions — raw knowledge, the model weighs it.
  */
 export function buildSynthesisUserPrompt(
 	query: string,
-	responses: LearnerResponse[],
+	responses: NeuronResponse[],
 ): string {
 	const relevant = responses.filter((r) => r.relevant)
 

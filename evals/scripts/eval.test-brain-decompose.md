@@ -1,2 +1,2 @@
 # Brain Decomposition Test
-Tests how Brain parses a prompt and generates learner configs via LLM. Does NOT test learner initialization — only the decomposition step.
+Tests how Brain parses a prompt and generates neuron configs via LLM. Does NOT test neuron initialization — only the decomposition step.

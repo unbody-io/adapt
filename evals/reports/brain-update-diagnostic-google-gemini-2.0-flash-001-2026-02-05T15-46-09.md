@@ -28,9 +28,9 @@
 }
 ```
 
-### Generated Learners
+### Generated Neurons
 
-#### Learner: Coding Style and Conventions (coding-style)
+#### Neuron: Coding Style and Conventions (coding-style)
 
 **State:**
 ```json
@@ -70,7 +70,7 @@
 }
 ```
 
-#### Learner: Tool and Technology Preferences (tool-preferences)
+#### Neuron: Tool and Technology Preferences (tool-preferences)
 
 **State:**
 ```json
@@ -110,7 +110,7 @@
 }
 ```
 
-#### Learner: Problem-Solving Patterns (problem-solving-patterns)
+#### Neuron: Problem-Solving Patterns (problem-solving-patterns)
 
 **State:**
 ```json
@@ -150,7 +150,7 @@
 }
 ```
 
-#### Learner: Learning and Adaptation Trajectory (learning-and-adaptation)
+#### Neuron: Learning and Adaptation Trajectory (learning-and-adaptation)
 
 **State:**
 ```json
@@ -206,7 +206,7 @@
 }
 ```
 
-| Event | Type | Timestamp | Learner Results |
+| Event | Type | Timestamp | Neuron Results |
 | --- | --- | --- | --- |
 | evt_001 | ai_conversation | 2024-01-02T09... | coding-style:observed, tool-preferences:observed, problem-solving-patterns:observed, learning-and-adaptation:observed |
 | evt_002 | git_commit | 2024-01-02T10... | coding-style:observed, tool-preferences:observed, problem-solving-patterns:observe:dismissed, learning-and-adaptation:observed |
@@ -258,7 +258,7 @@
 }
 ```
 
-**Learner Count:** 4
+**Neuron Count:** 4
 
 #### Coding Style and Conventions (coding-style)
 
@@ -334,7 +334,7 @@ You are a developer skills evolution observer. You watch for signals about new t
 
 **Insight:** This developer's coding philosophy prioritizes pragmatism, simplicity, and explicit control, favoring minimalism and avoiding premature optimization and abstraction. They value type safety, code readability, and adherence to security best practices. They prefer established technologies like Postgres and raw SQL over newer, more abstract solutions unless the benefits are substantial. Error handling is explicit, with a preference for explicit returns, and a gradual adoption of a Result type. They lean towards functional programming for stateless operations instead of classes. The developer starts with a flat structure and extracts complexities as needed. Integration tests are favored for APIs, while unit tests are reserved for pure functions. They also value iterative structural enhancements and aggressive refactoring to avoid premature abstraction, resulting in a lean, maintainable, and testable codebase.
 **Source Count:** 4
-| Learner | Confidence | Insight Preview |
+| Neuron | Confidence | Insight Preview |
 | --- | --- | --- |
 | coding-style | 0.90 | The developer's coding philosophy centers on minimalism, avoiding premature optimization and abstraction. They priori... |
 | tool-preferences | 0.80 | The developer favors a minimalist and explicit approach, prioritizing type safety and avoiding over-engineering. They... |
@@ -347,7 +347,7 @@ You are a developer skills evolution observer. You watch for signals about new t
 
 **Insight:** The developer prefers camelCase for API responses and filenames. They use tabs for indentation and single quotes for string literals, and set printWidth to 100. They favor functions over classes in stateless contexts and employ a custom 'Result' type, avoiding exceptions. They also appreciate TypeScript's strict mode and use Zod for schema validation. They avoid comments that repeat function names but retain comments explaining non-obvious behavior.
 **Source Count:** 4
-| Learner | Confidence | Insight Preview |
+| Neuron | Confidence | Insight Preview |
 | --- | --- | --- |
 | coding-style | 0.90 | The developer prefers camelCase for file names and API responses. For code style, they use tabs for indentation, sing... |
 | tool-preferences | 0.70 | The developer prefers camelCase for API responses to align with JavaScript clients. They also favor explicit returns ... |
@@ -371,7 +371,7 @@ You are a developer skills evolution observer. You watch for signals about new t
 }
 ```
 
-| Event | Type | Timestamp | Learner Results |
+| Event | Type | Timestamp | Neuron Results |
 | --- | --- | --- | --- |
 | evt_031 | ai_conversation | 2024-01-22T14... | coding-style:observed, tool-preferences:synthesized, problem-solving-patterns:observed, learning-and-adaptation:synthesized |
 | evt_032 | git_commit | 2024-01-23T09... | coding-style:observed, tool-preferences:observed, problem-solving-patterns:observed, learning-and-adaptation:observed |
@@ -413,7 +413,7 @@ You are a developer skills evolution observer. You watch for signals about new t
 }
 ```
 
-**Learner Count:** 4
+**Neuron Count:** 4
 
 #### Coding Style and Conventions (coding-style)
 
@@ -489,7 +489,7 @@ You are a developer skills evolution observer. You watch for signals about new t
 
 **Insight:** This developer's coding philosophy centers around a minimalist and pragmatic approach that prioritizes simplicity, readability, and solving immediate problems over anticipating future complexity. They favor incremental design, YAGNI ('You Ain't Gonna Need It') principle, type safety (TypeScript and Zod), explicit error handling (`Result` types instead of exceptions), short and focused functions, and avoiding premature abstraction and optimization (especially ORMs and DI containers). They value clear, maintainable code using proven tools and techniques, integration tests, and prioritize pragmatism and explicit control, initially using flat folder structures and raw SQL in some cases.
 **Source Count:** 4
-| Learner | Confidence | Insight Preview |
+| Neuron | Confidence | Insight Preview |
 | --- | --- | --- |
 | coding-style | 0.90 | The developer's coding philosophy centers around a minimalist and pragmatic approach, prioritizing simplicity, readab... |
 | tool-preferences | 0.90 | The developer favors a minimalist, explicit, and type-safe approach to coding. They prioritize clarity and avoiding o... |
@@ -501,7 +501,7 @@ You are a developer skills evolution observer. You watch for signals about new t
 
 **Insight:** The developer prefers camelCase for API responses and filenames, while using kebab-case for utility files. They use tabs for indentation, single quotes for strings, and set `printWidth` to 100. They also avoid redundant comments that simply repeat a function name but keep comments explaining non-obvious behavior. Additionally, they favor short functions with clear names that perform a single task and are well-documented. They have migrated to Biome for linting and formatting, and prefer exporting functions instead of classes when state isn't required. They also emphasize the importance of renaming for semantic accuracy (e.g., `handleException` to `handleError`).
 **Source Count:** 4
-| Learner | Confidence | Insight Preview |
+| Neuron | Confidence | Insight Preview |
 | --- | --- | --- |
 | coding-style | 0.90 | Here's what I know about the developer's naming conventions and code style: They favor camelCase for filenames, but u... |
 | tool-preferences | 0.90 | The developer prefers camelCase for API responses. They use Prettier with a print width of 100, tabs for indentation,... |
@@ -514,7 +514,7 @@ You are a developer skills evolution observer. You watch for signals about new t
 
 **Insight:** The developer strongly prefers explicit error handling over exceptions, utilizing a `Result` type in TypeScript for explicit returns to indicate potential failure. Error messages are tailored to the environment, with full stack traces in development and correlation IDs in production to prevent information leakage. They use Zod for validation and prefer the term 'error' over 'exception'. Logging of errors is implemented as middleware.
 **Source Count:** 4
-| Learner | Confidence | Insight Preview |
+| Neuron | Confidence | Insight Preview |
 | --- | --- | --- |
 | coding-style | 0.90 | The developer avoids exceptions, preferring explicit returns with a `Result` type to indicate potential failure. Erro... |
 | tool-preferences | 0.90 | The developer prefers explicit returns for error handling instead of throwing exceptions, and they are adopting a Res... |
@@ -538,7 +538,7 @@ They also use template literals for email templates, with potential migration to
 
 They generally avoid GraphQL (initially for small APIs), NestJS, DI containers, heavier ORMs like Prisma or TypeORM, the Repository pattern (for simple queries), and redundant comments.
 **Source Count:** 4
-| Learner | Confidence | Insight Preview |
+| Neuron | Confidence | Insight Preview |
 | --- | --- | --- |
 | coding-style | 0.90 | The developer seems to prefer specific tools and libraries based on their problem-solving approach, and avoids anythi... |
 | tool-preferences | 0.90 | Here's a summary of the developer's preferred tools and libraries, along with their reasons: 
@@ -579,7 +579,7 @@ They generally avoid GraphQL (initially for small APIs), NestJS, DI containers, 
 }
 ```
 
-**Learner Summary:**
+**Neuron Summary:**
 ```json
 [
   {
@@ -637,7 +637,7 @@ They generally avoid GraphQL (initially for small APIs), NestJS, DI containers, 
   "changedFields": [
     "prompt"
   ],
-  "learnerResults": [],
+  "neuronResults": [],
   "hasEvolutionResults": true,
   "evolutionResults": {
     "decisionCount": 7,
@@ -647,50 +647,50 @@ They generally avoid GraphQL (initially for small APIs), NestJS, DI containers, 
         "targets": [
           "coding-style"
         ],
-        "reasoning": "The brain's purpose has significantly changed. The existing learners are not aligned with the new...",
-        "guidance": "Remove the 'coding-style' learner as it focuses on coding style and conventions, which are not di..."
+        "reasoning": "The brain's purpose has significantly changed. The existing neurons are not aligned with the new...",
+        "guidance": "Remove the 'coding-style' neuron as it focuses on coding style and conventions, which are not di..."
       },
       {
         "action": "delete",
         "targets": [
           "tool-preferences"
         ],
-        "reasoning": "The brain's purpose has significantly changed. The existing learners are not aligned with the new...",
-        "guidance": "Remove the 'tool-preferences' learner as it focuses on tool preferences, which are not directly r..."
+        "reasoning": "The brain's purpose has significantly changed. The existing neurons are not aligned with the new...",
+        "guidance": "Remove the 'tool-preferences' neuron as it focuses on tool preferences, which are not directly r..."
       },
       {
         "action": "delete",
         "targets": [
           "problem-solving-patterns"
         ],
-        "reasoning": "The brain's purpose has significantly changed. The existing learners are not aligned with the new...",
-        "guidance": "Remove the 'problem-solving-patterns' learner as it focuses on problem-solving approaches, which ..."
+        "reasoning": "The brain's purpose has significantly changed. The existing neurons are not aligned with the new...",
+        "guidance": "Remove the 'problem-solving-patterns' neuron as it focuses on problem-solving approaches, which ..."
       },
       {
         "action": "delete",
         "targets": [
           "learning-and-adaptation"
         ],
-        "reasoning": "The brain's purpose has significantly changed. The existing learners are not aligned with the new...",
-        "guidance": "Remove the 'learning-and-adaptation' learner as it focuses on the evolution of skills, which is n..."
+        "reasoning": "The brain's purpose has significantly changed. The existing neurons are not aligned with the new...",
+        "guidance": "Remove the 'learning-and-adaptation' neuron as it focuses on the evolution of skills, which is n..."
       },
       {
         "action": "create",
         "targets": [],
-        "reasoning": "The brain's purpose has shifted to understanding error handling and resilience. A new learner is ...",
-        "guidance": "Create a new learner that focuses on identifying and categorizing different error handling techni..."
+        "reasoning": "The brain's purpose has shifted to understanding error handling and resilience. A new neuron is ...",
+        "guidance": "Create a new neuron that focuses on identifying and categorizing different error handling techni..."
       },
       {
         "action": "create",
         "targets": [],
-        "reasoning": "The brain's purpose has shifted to understanding error handling and resilience. A new learner is ...",
-        "guidance": "Create a new learner that focuses on identifying and categorizing the developer's defensive codin..."
+        "reasoning": "The brain's purpose has shifted to understanding error handling and resilience. A new neuron is ...",
+        "guidance": "Create a new neuron that focuses on identifying and categorizing the developer's defensive codin..."
       },
       {
         "action": "create",
         "targets": [],
-        "reasoning": "The brain's purpose has shifted to understanding error handling and resilience. A new learner is ...",
-        "guidance": "Create a new learner that focuses on identifying and categorizing the developer's strategies for ..."
+        "reasoning": "The brain's purpose has shifted to understanding error handling and resilience. A new neuron is ...",
+        "guidance": "Create a new neuron that focuses on identifying and categorizing the developer's strategies for ..."
       }
     ],
     "created": [
@@ -728,7 +728,7 @@ They generally avoid GraphQL (initially for small APIs), NestJS, DI containers, 
 }
 ```
 
-**Learner Summary:**
+**Neuron Summary:**
 ```json
 [
   {
@@ -776,18 +776,18 @@ They generally avoid GraphQL (initially for small APIs), NestJS, DI containers, 
   "evaluator:evaluation:started": 2,
   "evaluator:evaluation:completed": 2,
   "evolution:action:started": 7,
-  "brain:learner:removed": 4,
+  "brain:neuron:removed": 4,
   "evolution:action:executed": 7,
-  "learner:init:started": 3,
-  "learner:prompts:regenerated": 3,
-  "learner:config:updated": 3,
-  "learner:init:completed": 3,
-  "brain:learner:added": 3,
+  "neuron:init:started": 3,
+  "neuron:prompts:regenerated": 3,
+  "neuron:config:updated": 3,
+  "neuron:init:completed": 3,
+  "brain:neuron:added": 3,
   "brain:config:updated": 1
 }
 ```
 
-### Learner Set Changes
+### Neuron Set Changes
 
 **Removed:**
 ```json
@@ -847,7 +847,7 @@ They generally avoid GraphQL (initially for small APIs), NestJS, DI containers, 
 }
 ```
 
-| Event | Type | Timestamp | Learner Results |
+| Event | Type | Timestamp | Neuron Results |
 | --- | --- | --- | --- |
 | evt_051 | ai_conversation | 2024-02-08T14... | error-handling-techniques:observed, defensive-coding-practices:synthesized, failure-resilience-strategies:observed |
 | evt_052 | git_commit | 2024-02-09T09... | error-handling-techniques:observe:dismissed, defensive-coding-practices:observed, failure-resilience-strategies:observe:dismissed |
@@ -879,7 +879,7 @@ They generally avoid GraphQL (initially for small APIs), NestJS, DI containers, 
 }
 ```
 
-**Learner Count:** 3
+**Neuron Count:** 3
 
 #### Error Handling Techniques (error-handling-techniques)
 
@@ -938,7 +938,7 @@ You are a resilience observer. You watch for signals about how the developer han
 
 **Insight:** The developer's coding philosophy emphasizes robust configuration management and early error detection. They validate environment variables at startup using libraries like Zod to define validation rules and prioritize clear error reporting. This suggests a 'fail fast' approach, with a focus on preventing application startup with invalid configurations to ensure system stability, reliability, and maintainability.
 **Source Count:** 1
-| Learner | Confidence | Insight Preview |
+| Neuron | Confidence | Insight Preview |
 | --- | --- | --- |
 | defensive-coding-practices | 0.90 | Based on the information available, the developer's coding philosophy emphasizes robust configuration management and ... |
 
@@ -948,7 +948,7 @@ You are a resilience observer. You watch for signals about how the developer han
 
 **Insight:** They prioritize validating environment variables using Zod to ensure the application doesn't start in a bad state due to invalid configuration. Specific naming conventions and code styles used by the developer are unknown.
 **Source Count:** 1
-| Learner | Confidence | Insight Preview |
+| Neuron | Confidence | Insight Preview |
 | --- | --- | --- |
 | defensive-coding-practices | 0.50 | I don't have information about specific naming conventions and code styles, but I can share that they prioritize vali... |
 
@@ -958,7 +958,7 @@ You are a resilience observer. You watch for signals about how the developer han
 
 **Insight:** The system uses Zod for validation, providing error handling when environment variables don't match the defined schema. This 'fail-fast' approach ensures the system doesn't proceed with invalid configurations, effectively handling certain edge cases.
 **Source Count:** 1
-| Learner | Confidence | Insight Preview |
+| Neuron | Confidence | Insight Preview |
 | --- | --- | --- |
 | defensive-coding-practices | 0.70 | Based on my understanding, the system uses Zod for validation, which inherently provides error handling. Zod's valida... |
 
@@ -968,7 +968,7 @@ You are a resilience observer. You watch for signals about how the developer han
 
 **Insight:** They prefer using Zod for validating environment variables because it allows them to define robust validation rules and provides clear error reporting.
 **Source Count:** 1
-| Learner | Confidence | Insight Preview |
+| Neuron | Confidence | Insight Preview |
 | --- | --- | --- |
 | defensive-coding-practices | 0.90 | Based on my understanding, they prefer using Zod for validating environment variables because it allows them to defin... |
 
@@ -1009,7 +1009,7 @@ You are a resilience observer. You watch for signals about how the developer han
 }
 ```
 
-**Learner Summary:**
+**Neuron Summary:**
 ```json
 [
   {
@@ -1056,23 +1056,23 @@ You are a resilience observer. You watch for signals about how the developer han
   "changedFields": [
     "model"
   ],
-  "learnerResults": [
+  "neuronResults": [
     {
-      "learnerId": "error-handling-techniques",
+      "neuronId": "error-handling-techniques",
       "changedFields": [
         "model",
         "synthesize.thresholds.minImportance"
       ]
     },
     {
-      "learnerId": "defensive-coding-practices",
+      "neuronId": "defensive-coding-practices",
       "changedFields": [
         "model",
         "synthesize.thresholds.minImportance"
       ]
     },
     {
-      "learnerId": "failure-resilience-strategies",
+      "neuronId": "failure-resilience-strategies",
       "changedFields": [
         "model",
         "synthesize.thresholds.minImportance"
@@ -1100,7 +1100,7 @@ You are a resilience observer. You watch for signals about how the developer han
 }
 ```
 
-**Learner Summary:**
+**Neuron Summary:**
 ```json
 [
   {
@@ -1144,7 +1144,7 @@ You are a resilience observer. You watch for signals about how the developer han
 **Event Type Counts:**
 ```json
 {
-  "learner:config:updated": 3,
+  "neuron:config:updated": 3,
   "brain:config:updated": 1
 }
 ```
@@ -1182,7 +1182,7 @@ You are a resilience observer. You watch for signals about how the developer han
 }
 ```
 
-**Learner Summary:**
+**Neuron Summary:**
 ```json
 [
   {
@@ -1230,7 +1230,7 @@ You are a resilience observer. You watch for signals about how the developer han
     "evolution.evaluatorSignalThreshold",
     "evolution.autoEvaluate"
   ],
-  "learnerResults": [],
+  "neuronResults": [],
   "hasEvolutionResults": false
 }
 ```
@@ -1252,7 +1252,7 @@ You are a resilience observer. You watch for signals about how the developer han
 }
 ```
 
-**Learner Summary:**
+**Neuron Summary:**
 ```json
 [
   {
@@ -1307,45 +1307,45 @@ You are a resilience observer. You watch for signals about how the developer han
 **Total Duration:** 298.5s
 **Total Events Ingested:** 60
 **Total Brain Events Collected:** 1122
-**Final Learner Count:** 3
+**Final Neuron Count:** 3
 
 **All Brain Events by Type:**
 ```json
 {
   "brain:inject:started": 60,
   "brain:inject:batch:started": 60,
-  "learner:observe:started": 230,
-  "learner:observe:thinking": 225,
-  "learner:observed": 179,
+  "neuron:observe:started": 230,
+  "neuron:observe:thinking": 225,
+  "neuron:observed": 179,
   "brain:inject:batch:completed": 60,
   "brain:inject:completed": 60,
-  "learner:observe:dismissed": 29,
-  "learner:synthesize:started": 17,
-  "learner:synthesize:thinking": 17,
-  "learner:synthesized": 17,
-  "learner:governance:updated": 17,
-  "learner:observe:error": 5,
+  "neuron:observe:dismissed": 29,
+  "neuron:synthesize:started": 17,
+  "neuron:synthesize:thinking": 17,
+  "neuron:synthesized": 17,
+  "neuron:governance:updated": 17,
+  "neuron:observe:error": 5,
   "brain:ask:started": 10,
-  "learner:query:started": 36,
-  "learner:query:completed": 36,
+  "neuron:query:started": 36,
+  "neuron:query:completed": 36,
   "brain:ask:synthesis:started": 10,
   "brain:ask:completed": 10,
   "brain:signal:received": 1,
   "evaluator:evaluation:started": 2,
   "evaluator:evaluation:completed": 2,
   "evolution:action:started": 7,
-  "brain:learner:removed": 4,
+  "brain:neuron:removed": 4,
   "evolution:action:executed": 7,
-  "learner:init:started": 3,
-  "learner:prompts:regenerated": 3,
-  "learner:config:updated": 6,
-  "learner:init:completed": 3,
-  "brain:learner:added": 3,
+  "neuron:init:started": 3,
+  "neuron:prompts:regenerated": 3,
+  "neuron:config:updated": 6,
+  "neuron:init:completed": 3,
+  "brain:neuron:added": 3,
   "brain:config:updated": 3
 }
 ```
 
-### Final Learner States
+### Final Neuron States
 
 #### Error Handling Techniques (error-handling-techniques)
 

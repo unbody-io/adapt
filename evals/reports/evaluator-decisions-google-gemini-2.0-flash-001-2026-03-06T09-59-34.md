@@ -7,7 +7,7 @@
 ## Brain Setup
 
 **Base Prompt:** You help build a comprehensive profile of a therapist by analyzing their blog posts, client testimonials, social medi...
-**Learners:** 4
+**Neurons:** 4
 **therapeutic-approach:** Understand the therapist's overarching therapeutic approach and the core principles that guide their practice.
 
 Watch for:
@@ -31,7 +31,7 @@ Prompt changes from general therapist profiling to ADHD focus. Specialists are e
 
 **Expected:** UPDATE or MERGE — restructure specialists for new focus. Avoid unnecessary DELETE.
 
-### Learners
+### Neurons
 
 | ID | Type | Instructions |
 | --- | --- | --- |
@@ -101,9 +101,9 @@ Watch for:
 
 Prompt changes from therapist profiling to JavaScript build tools. Completely different domain.
 
-**Expected:** DELETE all learners (genuinely irrelevant). CREATE new ones for the new domain.
+**Expected:** DELETE all neurons (genuinely irrelevant). CREATE new ones for the new domain.
 
-### Learners
+### Neurons
 
 | ID | Type | Instructions |
 | --- | --- | --- |
@@ -166,11 +166,11 @@ Watch for:
 
 ## Scenario 3: High Dismissal Rate
 
-One learner reports 85% dismissal rate.
+One neuron reports 85% dismissal rate.
 
-**Expected:** SPLIT, UPDATE, or MERGE the struggling learner. Not DELETE (it still has 15% hit rate).
+**Expected:** SPLIT, UPDATE, or MERGE the struggling neuron. Not DELETE (it still has 15% hit rate).
 
-### Learners
+### Neurons
 
 | ID | Type | Instructions |
 | --- | --- | --- |
@@ -203,11 +203,11 @@ Watch for:
 
 ## Scenario 4: Low Confidence
 
-One learner reports consistently low query confidence (0.22).
+One neuron reports consistently low query confidence (0.22).
 
 **Expected:** UPDATE — refine instructions or scope. Not DELETE.
 
-### Learners
+### Neurons
 
 | ID | Type | Instructions |
 | --- | --- | --- |
@@ -237,11 +237,11 @@ _No decisions — evaluator chose stability._
 
 ## Scenario 5: Stagnation
 
-One learner reports 150 observations without any synthesis.
+One neuron reports 150 observations without any synthesis.
 
-**Expected:** DELETE or UPDATE — learner is either irrelevant to data stream or needs broader instructions.
+**Expected:** DELETE or UPDATE — neuron is either irrelevant to data stream or needs broader instructions.
 
-### Learners
+### Neurons
 
 | ID | Type | Instructions |
 | --- | --- | --- |
@@ -274,11 +274,11 @@ Watch for:
 
 ## Scenario 6: Mixed Signals
 
-Two learners with high dismissal + one learner stagnating. Tests holistic analysis.
+Two neurons with high dismissal + one neuron stagnating. Tests holistic analysis.
 
-**Expected:** Holistic response: MERGE or UPDATE affected learners, possibly CREATE for gap.
+**Expected:** Holistic response: MERGE or UPDATE affected neurons, possibly CREATE for gap.
 
-### Learners
+### Neurons
 
 | ID | Type | Instructions |
 | --- | --- | --- |
@@ -321,11 +321,11 @@ Watch for:
 
 ## Scenario 7: Borderline Signal (No Action)
 
-One learner reports confidence of 0.35 — just above the 0.3 threshold.
+One neuron reports confidence of 0.35 — just above the 0.3 threshold.
 
 **Expected:** Empty decisions — signal is borderline, not critical enough to warrant action.
 
-### Learners
+### Neurons
 
 | ID | Type | Instructions |
 | --- | --- | --- |
@@ -361,11 +361,11 @@ Watch for:
 | Scenario | Expected | Actual Decisions | Assessment |
 | --- | --- | --- | --- |
 | 1. Related Pivot | UPDATE or MERGE — restructure specialists for new focus | UPDATE, UPDATE, DELETE, DELETE, CREATE, CREATE, CREATE, CREATE | ⚠ 2 deleted |
-| 2. Unrelated Pivot | DELETE all learners (genuinely irrelevant) | DELETE, DELETE, DELETE, DELETE, CREATE, CREATE, CREATE | ⚠ 4 deleted |
-| 3. High Dismissal Rate | SPLIT, UPDATE, or MERGE the struggling learner | UPDATE | ✓ 1 adjusted |
+| 2. Unrelated Pivot | DELETE all neurons (genuinely irrelevant) | DELETE, DELETE, DELETE, DELETE, CREATE, CREATE, CREATE | ⚠ 4 deleted |
+| 3. High Dismissal Rate | SPLIT, UPDATE, or MERGE the struggling neuron | UPDATE | ✓ 1 adjusted |
 | 4. Low Confidence | UPDATE — refine instructions or scope | (none) | ✓ no action |
-| 5. Stagnation | DELETE or UPDATE — learner is either irrelevant to data stream or needs broader instructions | UPDATE | ✓ 1 adjusted |
-| 6. Mixed Signals | Holistic response: MERGE or UPDATE affected learners, possibly CREATE for gap | UPDATE, UPDATE, UPDATE | ✓ 3 adjusted |
+| 5. Stagnation | DELETE or UPDATE — neuron is either irrelevant to data stream or needs broader instructions | UPDATE | ✓ 1 adjusted |
+| 6. Mixed Signals | Holistic response: MERGE or UPDATE affected neurons, possibly CREATE for gap | UPDATE, UPDATE, UPDATE | ✓ 3 adjusted |
 | 7. Borderline Signal (No Action) | Empty decisions — signal is borderline, not critical enough to warrant action | UPDATE | ✓ 1 adjusted |
 
 **Total Duration:** 111.1s

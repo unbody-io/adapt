@@ -6,11 +6,11 @@
 
 ## Scenario 1: Related Pivot (with understanding)
 
-Prompt changes from general therapist profiling to ADHD focus. Learners have accumulated understanding about CBT, ADHD, client experiences.
+Prompt changes from general therapist profiling to ADHD focus. Neurons have accumulated understanding about CBT, ADHD, client experiences.
 
-**Expected:** ADJUST most/all learners — understanding is directly relevant to ADHD. Avoid DELETE.
+**Expected:** ADJUST most/all neurons — understanding is directly relevant to ADHD. Avoid DELETE.
 
-### Learners Before
+### Neurons Before
 
 | ID | Name | Understanding | Purpose |
 | --- | --- | --- | --- |
@@ -39,20 +39,20 @@ Watch for:
 
 #### DELETE → therapist-approach, therapist-specializations, therapist-uniqueness, client-testimonials, public-content
 
-**Reasoning:** All existing learners are dormant with 0 activation and success rate. They do not serve any purpose under the new focus which is specifically on ADHD-related assessment methods and strategies.
-**Guidance:** Remove all dormant learners as they have not contributed meaningfully to the new purpose and do not contain active or relevant knowledge to build upon.
+**Reasoning:** All existing neurons are dormant with 0 activation and success rate. They do not serve any purpose under the new focus which is specifically on ADHD-related assessment methods and strategies.
+**Guidance:** Remove all dormant neurons as they have not contributed meaningfully to the new purpose and do not contain active or relevant knowledge to build upon.
 
 #### CREATE → (new)
 
-**Reasoning:** With the Brain's new purpose focusing specifically on ADHD, we need to establish learners that can specifically track assessment methods, coaching strategies, and other aspects related to ADHD clients.
-**Guidance:** Create several new learners focusing on distinct aspects: assessment methods, coaching strategies, medication philosophy, and practical tools for executive function challenges.
+**Reasoning:** With the Brain's new purpose focusing specifically on ADHD, we need to establish neurons that can specifically track assessment methods, coaching strategies, and other aspects related to ADHD clients.
+**Guidance:** Create several new neurons focusing on distinct aspects: assessment methods, coaching strategies, medication philosophy, and practical tools for executive function challenges.
 
 #### CREATE → (new)
 
-**Reasoning:** Create a new learner focused specifically on the practical tools the therapist recommends for clients dealing with executive function challenges, as this is a directly relevant area under the new purpose that is not covered by existing dormant learners.
-**Guidance:** Establish a learner who tracks and synthesizes practical tools and techniques the therapist suggests for clients facing executive function challenges related to ADHD.
+**Reasoning:** Create a new neuron focused specifically on the practical tools the therapist recommends for clients dealing with executive function challenges, as this is a directly relevant area under the new purpose that is not covered by existing dormant neurons.
+**Guidance:** Establish a neuron who tracks and synthesizes practical tools and techniques the therapist suggests for clients facing executive function challenges related to ADHD.
 
-### Learners After
+### Neurons After
 
 | ID | Name | Understanding | Purpose |
 | --- | --- | --- | --- |
@@ -73,16 +73,16 @@ Watch for:
 ### Analysis
 
 **Action counts:** {"delete":1,"create":2}
-**Learners before:** 5
-**Learners after:** 4
+**Neurons before:** 5
+**Neurons after:** 4
 
 ## Scenario 2: Related Pivot (empty understanding)
 
-Same prompt change but learners have no accumulated understanding yet.
+Same prompt change but neurons have no accumulated understanding yet.
 
 **Expected:** ADJUST or mild restructuring. DELETE is more acceptable here since nothing is lost, but ADJUST is still preferred.
 
-### Learners Before
+### Neurons Before
 
 | ID | Name | Understanding | Purpose |
 | --- | --- | --- | --- |
@@ -111,15 +111,15 @@ Watch for:
 
 #### DELETE → therapist-approach, therapist-specializations, therapist-unique-quality, therapist-online-content, therapist-client-testimonials
 
-**Reasoning:** All existing learners are dormant with no accumulated understanding, making them irrelevant to the new purpose as they do not track any relevant data about ADHD-specific client work.
-**Guidance:** Remove all dormant learners as they currently serve no purpose and do not have relevant understanding for the updated focus on ADHD.
+**Reasoning:** All existing neurons are dormant with no accumulated understanding, making them irrelevant to the new purpose as they do not track any relevant data about ADHD-specific client work.
+**Guidance:** Remove all dormant neurons as they currently serve no purpose and do not have relevant understanding for the updated focus on ADHD.
 
 #### CREATE → (new)
 
-**Reasoning:** The new purpose indicates a need for specialized learners that address ADHD assessment methods, coaching strategies, medication philosophy, and practical tools.
-**Guidance:** Create new learners focusing on ADHD client support: one for assessment methods, another for coaching strategies, one for medication philosophy, and a final learner for practical tools for executiv...
+**Reasoning:** The new purpose indicates a need for specialized neurons that address ADHD assessment methods, coaching strategies, medication philosophy, and practical tools.
+**Guidance:** Create new neurons focusing on ADHD client support: one for assessment methods, another for coaching strategies, one for medication philosophy, and a final neuron for practical tools for executiv...
 
-### Learners After
+### Neurons After
 
 | ID | Name | Understanding | Purpose |
 | --- | --- | --- | --- |
@@ -143,16 +143,16 @@ Watch for:
 ### Analysis
 
 **Action counts:** {"delete":1,"create":1}
-**Learners before:** 5
-**Learners after:** 4
+**Neurons before:** 5
+**Neurons after:** 4
 
 ## Scenario 3: Unrelated Pivot
 
 Prompt changes from therapist profiling to JavaScript build tools. Understanding is completely irrelevant.
 
-**Expected:** DELETE all learners (understanding is genuinely irrelevant). CREATE new ones for the new domain.
+**Expected:** DELETE all neurons (understanding is genuinely irrelevant). CREATE new ones for the new domain.
 
-### Learners Before
+### Neurons Before
 
 | ID | Name | Understanding | Purpose |
 | --- | --- | --- | --- |
@@ -181,15 +181,15 @@ Watch for:
 
 #### DELETE → therapist-blog-analytics, client-testimonials-analysis, social-media-impressions, podcast-appearances-tracker, professional-content-evaluation
 
-**Reasoning:** All existing learners have accumulated knowledge that is entirely irrelevant to the new purpose of tracking JavaScript build tools and bundlers.
-**Guidance:** Remove all dormant learners as their accumulated understanding does not contribute to the current focus on JavaScript build tools.
+**Reasoning:** All existing neurons have accumulated knowledge that is entirely irrelevant to the new purpose of tracking JavaScript build tools and bundlers.
+**Guidance:** Remove all dormant neurons as their accumulated understanding does not contribute to the current focus on JavaScript build tools.
 
 #### CREATE → (new)
 
-**Reasoning:** New purpose requires tracking JavaScript build tools and bundlers, which is currently not covered by any existing learners.
-**Guidance:** Create learners dedicated to monitoring Webpack, Vite, esbuild, Rollup, and Turbopack developments, benchmarking results, plugin ecosystems, and migration guides.
+**Reasoning:** New purpose requires tracking JavaScript build tools and bundlers, which is currently not covered by any existing neurons.
+**Guidance:** Create neurons dedicated to monitoring Webpack, Vite, esbuild, Rollup, and Turbopack developments, benchmarking results, plugin ecosystems, and migration guides.
 
-### Learners After
+### Neurons After
 
 | ID | Name | Understanding | Purpose |
 | --- | --- | --- | --- |
@@ -217,16 +217,16 @@ Watch for:
 ### Analysis
 
 **Action counts:** {"delete":1,"create":1}
-**Learners before:** 5
-**Learners after:** 5
+**Neurons before:** 5
+**Neurons after:** 5
 
 ## Scenario 4: High Dismissal Rate
 
-One learner reports 85% dismissal rate.
+One neuron reports 85% dismissal rate.
 
-**Expected:** SPLIT or ADJUST the struggling learner. Not DELETE (it still has 15% hit rate).
+**Expected:** SPLIT or ADJUST the struggling neuron. Not DELETE (it still has 15% hit rate).
 
-### Learners Before
+### Neurons Before
 
 | ID | Name | Understanding | Purpose |
 | --- | --- | --- | --- |
@@ -262,10 +262,10 @@ Watch for:
 
 #### MERGE → therapist-approach, therapist-specializations, therapist-uniqueness, client-testimonials, social-media-presence, podcast-appearances, professional-content
 
-**Reasoning:** All learners have overlapping content focused on the therapist's approach, specializations, uniqueness, testimonials, media presence, podcast discussions, and professional content; merging will preserve and enhance understanding while reducing redundancy.
-**Guidance:** Combine all related learners into a single comprehensive learner that covers approach, specializations, uniqueness, client testimonials, social media, podcast content, and professional contribution...
+**Reasoning:** All neurons have overlapping content focused on the therapist's approach, specializations, uniqueness, testimonials, media presence, podcast discussions, and professional content; merging will preserve and enhance understanding while reducing redundancy.
+**Guidance:** Combine all related neurons into a single comprehensive neuron that covers approach, specializations, uniqueness, client testimonials, social media, podcast content, and professional contribution...
 
-### Learners After
+### Neurons After
 
 | ID | Name | Understanding | Purpose |
 | --- | --- | --- | --- |
@@ -274,16 +274,16 @@ Watch for:
 ### Analysis
 
 **Action counts:** {"merge":1}
-**Learners before:** 7
-**Learners after:** 1
+**Neurons before:** 7
+**Neurons after:** 1
 
 ## Scenario 5: Low Confidence
 
-One learner reports consistently low query confidence (0.22).
+One neuron reports consistently low query confidence (0.22).
 
 **Expected:** ADJUST — refine instructions or scope. Not DELETE.
 
-### Learners Before
+### Neurons Before
 
 | ID | Name | Understanding | Purpose |
 | --- | --- | --- | --- |
@@ -320,26 +320,26 @@ Watch for:
 
 #### DELETE → therapist-approach, therapist-specializations, therapist-uniqueness, client-testimonials, social-media-activity, podcast-appearances, professional-content
 
-**Reasoning:** All active learners are dormant and lack any significant engagement or retrieval activity, indicating they are irrelevant to current data processing efforts.
-**Guidance:** Remove all dormant learners as they are not contributing to the Brain's purpose of profiling the therapist. Ensure a fresh start with new, active learners when relevant data becomes available.
+**Reasoning:** All active neurons are dormant and lack any significant engagement or retrieval activity, indicating they are irrelevant to current data processing efforts.
+**Guidance:** Remove all dormant neurons as they are not contributing to the Brain's purpose of profiling the therapist. Ensure a fresh start with new, active neurons when relevant data becomes available.
 
-### Learners After
+### Neurons After
 
-_No learners remaining._
+_No neurons remaining._
 
 ### Analysis
 
 **Action counts:** {"delete":1}
-**Learners before:** 7
-**Learners after:** 0
+**Neurons before:** 7
+**Neurons after:** 0
 
 ## Scenario 6: Stagnation
 
-One learner reports 150 observations without any synthesis.
+One neuron reports 150 observations without any synthesis.
 
-**Expected:** DELETE — learner is completely irrelevant to the data stream.
+**Expected:** DELETE — neuron is completely irrelevant to the data stream.
 
-### Learners Before
+### Neurons Before
 
 | ID | Name | Understanding | Purpose |
 | --- | --- | --- | --- |
@@ -364,10 +364,10 @@ Watch for:
 
 #### DELETE → therapist-uniqueness
 
-**Reasoning:** The learner therapist-uniqueness has dismissed all observations with no synthesis for 150 entries, indicating it is not relevant to the current data stream and therefore serves no purpose.
-**Guidance:** Remove the therapist-uniqueness learner as it does not contribute any understanding to the system.
+**Reasoning:** The neuron therapist-uniqueness has dismissed all observations with no synthesis for 150 entries, indicating it is not relevant to the current data stream and therefore serves no purpose.
+**Guidance:** Remove the therapist-uniqueness neuron as it does not contribute any understanding to the system.
 
-### Learners After
+### Neurons After
 
 | ID | Name | Understanding | Purpose |
 | --- | --- | --- | --- |
@@ -387,16 +387,16 @@ Watch for:
 ### Analysis
 
 **Action counts:** {"delete":1}
-**Learners before:** 4
-**Learners after:** 3
+**Neurons before:** 4
+**Neurons after:** 3
 
 ## Scenario 7: Mixed Governance Signals
 
-Two learners with high dismissal + one learner stagnating. Tests holistic analysis.
+Two neurons with high dismissal + one neuron stagnating. Tests holistic analysis.
 
-**Expected:** Holistic response: MERGE stagnating pair, ADJUST or SPLIT high-dismissal learners, possibly CREATE for gap.
+**Expected:** Holistic response: MERGE stagnating pair, ADJUST or SPLIT high-dismissal neurons, possibly CREATE for gap.
 
-### Learners Before
+### Neurons Before
 
 | ID | Name | Understanding | Purpose |
 | --- | --- | --- | --- |
@@ -421,15 +421,15 @@ Watch for:
 
 #### MERGE → therapist-blog-analysis, client-testimonials, social-media-engagement
 
-**Reasoning:** High dismissal rates in multiple learners (88% and 82%) indicate that their scopes significantly overlap or no longer align with incoming data. Merging helps consolidate knowledge and reduce redundancy.
-**Guidance:** Combine 'therapist-blog-analysis', 'client-testimonials', and 'social-media-engagement' into a single learner that reflects a broader understanding of the therapist's methodologies and client senti...
+**Reasoning:** High dismissal rates in multiple neurons (88% and 82%) indicate that their scopes significantly overlap or no longer align with incoming data. Merging helps consolidate knowledge and reduce redundancy.
+**Guidance:** Combine 'therapist-blog-analysis', 'client-testimonials', and 'social-media-engagement' into a single neuron that reflects a broader understanding of the therapist's methodologies and client senti...
 
 #### DELETE → podcast-appearances, professional-content
 
-**Reasoning:** The 'podcast-appearances' and 'professional-content' learners are completely dormant and have not engaged with any data, suggesting they are presently irrelevant.
-**Guidance:** Remove the 'podcast-appearances' and 'professional-content' learners as they do not contribute to building the therapist's profile and have not been activated.
+**Reasoning:** The 'podcast-appearances' and 'professional-content' neurons are completely dormant and have not engaged with any data, suggesting they are presently irrelevant.
+**Guidance:** Remove the 'podcast-appearances' and 'professional-content' neurons as they do not contribute to building the therapist's profile and have not been activated.
 
-### Learners After
+### Neurons After
 
 | ID | Name | Understanding | Purpose |
 | --- | --- | --- | --- |
@@ -438,16 +438,16 @@ Watch for:
 ### Analysis
 
 **Action counts:** {"merge":1,"delete":1}
-**Learners before:** 5
-**Learners after:** 1
+**Neurons before:** 5
+**Neurons after:** 1
 
 ## Scenario 8: Borderline Signal (No Action)
 
-One learner reports confidence of 0.35 — just above the 0.3 threshold.
+One neuron reports confidence of 0.35 — just above the 0.3 threshold.
 
 **Expected:** Empty decisions — signal is borderline, not critical enough to warrant action.
 
-### Learners Before
+### Neurons Before
 
 | ID | Name | Understanding | Purpose |
 | --- | --- | --- | --- |
@@ -476,15 +476,15 @@ Watch for:
 
 #### MERGE → therapist-approach, specializations, uniqueness-factors, client-experience, public-presence
 
-**Reasoning:** All active learners have the exact same accumulated understanding and are currently dormant, suggesting redundancy; merging them will combine their understanding into a single more effective learner.
-**Guidance:** Merge the learner scopes into one comprehensive learner that addresses therapist approach, specializations, uniqueness factors, client experience, and public presence to consolidate understanding a...
+**Reasoning:** All active neurons have the exact same accumulated understanding and are currently dormant, suggesting redundancy; merging them will combine their understanding into a single more effective neuron.
+**Guidance:** Merge the neuron scopes into one comprehensive neuron that addresses therapist approach, specializations, uniqueness factors, client experience, and public presence to consolidate understanding a...
 
 #### CREATE → (new)
 
-**Reasoning:** The current understanding lacks activation and engagement, indicating a potential need for a new focused learner guided by current data trends or areas that may not be adequately covered by the merged learner's general purpose.
-**Guidance:** Analyze recent trends in the mental health field relevant to Dr. Chen's practice, and create a new learner to track these emerging themes or insights that support the therapist's profile development.
+**Reasoning:** The current understanding lacks activation and engagement, indicating a potential need for a new focused neuron guided by current data trends or areas that may not be adequately covered by the merged neuron's general purpose.
+**Guidance:** Analyze recent trends in the mental health field relevant to Dr. Chen's practice, and create a new neuron to track these emerging themes or insights that support the therapist's profile development.
 
-### Learners After
+### Neurons After
 
 | ID | Name | Understanding | Purpose |
 | --- | --- | --- | --- |
@@ -497,20 +497,20 @@ Watch for:
 ### Analysis
 
 **Action counts:** {"merge":1,"create":1}
-**Learners before:** 5
-**Learners after:** 2
+**Neurons before:** 5
+**Neurons after:** 2
 
 ## Summary
 
 | Scenario | Expected | Actual Decisions | Assessment |
 | --- | --- | --- | --- |
-| 1. Related Pivot (with understanding) | ADJUST most/all learners — understanding is directly relevant to ADHD | DELETE, CREATE, CREATE | ⚠ 1 deleted |
+| 1. Related Pivot (with understanding) | ADJUST most/all neurons — understanding is directly relevant to ADHD | DELETE, CREATE, CREATE | ⚠ 1 deleted |
 | 2. Related Pivot (empty understanding) | ADJUST or mild restructuring | DELETE, CREATE | ⚠ 1 deleted |
-| 3. Unrelated Pivot | DELETE all learners (understanding is genuinely irrelevant) | DELETE, CREATE | ⚠ 1 deleted |
-| 4. High Dismissal Rate | SPLIT or ADJUST the struggling learner | MERGE | 1 actions |
+| 3. Unrelated Pivot | DELETE all neurons (understanding is genuinely irrelevant) | DELETE, CREATE | ⚠ 1 deleted |
+| 4. High Dismissal Rate | SPLIT or ADJUST the struggling neuron | MERGE | 1 actions |
 | 5. Low Confidence | ADJUST — refine instructions or scope | DELETE | ⚠ 1 deleted |
-| 6. Stagnation | DELETE — learner is completely irrelevant to the data stream | DELETE | ⚠ 1 deleted |
-| 7. Mixed Governance Signals | Holistic response: MERGE stagnating pair, ADJUST or SPLIT high-dismissal learners, possibly CREATE for gap | MERGE, DELETE | ⚠ 1 deleted |
+| 6. Stagnation | DELETE — neuron is completely irrelevant to the data stream | DELETE | ⚠ 1 deleted |
+| 7. Mixed Governance Signals | Holistic response: MERGE stagnating pair, ADJUST or SPLIT high-dismissal neurons, possibly CREATE for gap | MERGE, DELETE | ⚠ 1 deleted |
 | 8. Borderline Signal (No Action) | Empty decisions — signal is borderline, not critical enough to warrant action | MERGE, CREATE | 2 actions |
 
 **Total Duration:** 581.3s

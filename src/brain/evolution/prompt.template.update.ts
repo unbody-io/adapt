@@ -1,25 +1,25 @@
 /**
  * Template for update action prompt
  *
- * Formats learner data for LLM to generate config updates
+ * Formats neuron data for LLM to generate config updates
  */
 
-import type { BaseLearner } from '../../learners/base/class'
+import type { BaseNeuron } from '../../neurons/base/class'
 import { stringifyUnderstanding } from './utils'
 
 /**
- * Format update prompt with learner data and guidance
+ * Format update prompt with neuron data and guidance
  */
 export async function updatePromptTemplate(
 	guidance: string,
-	learner: BaseLearner<unknown>,
+	neuron: BaseNeuron<unknown>,
 	purpose: string,
 ): Promise<string> {
-	const health = learner.getHealth()
-	const metrics = learner.getMetrics()
-	const understanding = stringifyUnderstanding(await learner.getUnderstanding())
+	const health = neuron.getHealth()
+	const metrics = neuron.getMetrics()
+	const understanding = stringifyUnderstanding(await neuron.getUnderstanding())
 
-	const thresholds = learner.getUnderstandThresholds()
+	const thresholds = neuron.getUnderstandThresholds()
 
 	return `# Brain Context
 
@@ -29,14 +29,14 @@ export async function updatePromptTemplate(
 
 ${guidance}
 
-# Learner to Adjust
+# Neuron to Adjust
 
-**ID**: ${learner.id}
-**Name**: ${learner.id}
-**Description**: ${learner.description || 'N/A'}
+**ID**: ${neuron.id}
+**Name**: ${neuron.id}
+**Description**: ${neuron.description || 'N/A'}
 
 **Current Instructions**:
-${learner.instructions}
+${neuron.instructions}
 
 **Current Thresholds**:
 - Min Importance: ${thresholds.minImportance}
@@ -67,7 +67,7 @@ Based on the guidance, decompose the needed changes into two categories:
 - Empty string if no behavioral change needed
 
 **Mechanical** (for update — specific field values):
-- name: Change the learner's name
+- name: Change the neuron's name
 - description: Update the description
 - thresholds.minImportance: Adjust importance threshold (0-1)
 - thresholds.maxObservations: Adjust buffer size (integer)

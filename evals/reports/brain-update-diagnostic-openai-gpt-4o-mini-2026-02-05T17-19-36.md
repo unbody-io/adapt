@@ -30,9 +30,9 @@
 }
 ```
 
-### Generated Learners
+### Generated Neurons
 
-#### Learner: Therapist Approach (therapist-approach)
+#### Neuron: Therapist Approach (therapist-approach)
 
 **State:**
 ```json
@@ -72,7 +72,7 @@
 }
 ```
 
-#### Learner: Therapist Specializations (therapist-specializations)
+#### Neuron: Therapist Specializations (therapist-specializations)
 
 **State:**
 ```json
@@ -112,7 +112,7 @@
 }
 ```
 
-#### Learner: Client Feedback (client-feedback)
+#### Neuron: Client Feedback (client-feedback)
 
 **State:**
 ```json
@@ -152,7 +152,7 @@
 }
 ```
 
-#### Learner: Media Presence (media-presence)
+#### Neuron: Media Presence (media-presence)
 
 **State:**
 ```json
@@ -192,7 +192,7 @@
 }
 ```
 
-#### Learner: Unique Attributes (unique-attributes)
+#### Neuron: Unique Attributes (unique-attributes)
 
 **State:**
 ```json
@@ -252,7 +252,7 @@
 }
 ```
 
-| Turn | Events | Types | Learner Results |
+| Turn | Events | Types | Neuron Results |
 | --- | --- | --- | --- |
 | Turn 1 | evt_001–evt_010 | profile_bio×2, blog_post×3, video_transcript×1, testimonial×2, social_media_post×1, podcast_appearance×1 | therapist-approach:synthesized, therapist-specializations:synthesized, client-feedback:synthesized, media-presence:synthesized, unique-attributes:synthesized |
 | Turn 2 | evt_011–evt_020 | profile_service×2, blog_post×2, video_transcript×1, testimonial×2, social_media_post×1, podcast_appearance×1, profile_faq×1 | therapist-approach:synthesized, therapist-specializations:synthesized, client-feedback:synthesized, media-presence:synthesized, unique-attributes:synthesized |
@@ -277,7 +277,7 @@
 }
 ```
 
-**Learner Count:** 5
+**Neuron Count:** 5
 
 #### Therapist Approach (therapist-approach)
 
@@ -375,7 +375,7 @@ You are a therapist differentiation observer. You watch for signals about how th
 
 **Insight:** Dr. Sarah Chen's therapeutic approach is a sophisticated blend of evidence-based methods and cultural sensitivity, particularly tailored for high-achieving Asian-American clients dealing with issues like anxiety, ADHD, perfectionism, and burnout. Central to her practice is an emphasis on self-compassion, where she believes it enhances performance and mitigates self-criticism. Techniques such as diaphragmatic breathing, grounding exercises, and gamification are integrated to help clients recalibrate their responses to stress and support those with ADHD. Dr. Chen values a collaborative therapeutic relationship, employing a strengths-based perspective on ADHD as a neurological difference and facilitating skill-building through experimentation and feedback. She also highlights the importance of discussing less emotionally charged topics before addressing deeper issues, reinforcing the relevance of adaptability in her approach. Client testimonials underscore her practical and empathetic style, enabling personal and professional growth and making therapy accessible through flexible scheduling, including video appointments.
 **Source Count:** 5
-| Learner | Confidence | Insight Preview |
+| Neuron | Confidence | Insight Preview |
 | --- | --- | --- |
 | therapist-approach | 1.00 | Dr. Sarah Chen's therapeutic approach is characterized by a blend of evidence-based therapy and cultural sensitivity,... |
 | therapist-specializations | 0.90 | Dr. Sarah Chen employs an eclectic therapeutic approach utilizing CBT, ACT, mindfulness, and other evidence-based met... |
@@ -389,7 +389,7 @@ You are a therapist differentiation observer. You watch for signals about how th
 
 **Insight:** Dr. Sarah Chen is unique among therapists due to her integrative approach that blends evidence-based therapy with cultural sensitivity, particularly for high-achieving professionals in the Asian-American community. Her emphasis on self-compassion, which she believes enhances performance and mitigates anxiety, alongside a strengths-based perspective on ADHD, sets her apart. Dr. Chen's therapy is characterized by a collaborative style, where she provides practical techniques like diaphragmatic breathing and grounding exercises, while also addressing deeper emotional layers over time. She specializes in common issues such as anxiety, perfectionism, and burnout, particularly in fast-paced fields like technology. Her commitment to accessibility through flexible scheduling, including evening and video appointments, further distinguishes her practice. Clients have noted her empathetic and tailored approaches lead to transformative outcomes, enhancing their work-life balance and overall well-being.
 **Source Count:** 5
-| Learner | Confidence | Insight Preview |
+| Neuron | Confidence | Insight Preview |
 | --- | --- | --- |
 | therapist-approach | 0.90 | Dr. Sarah Chen's uniqueness as a therapist stems from her integrative approach that combines evidence-based therapy w... |
 | therapist-specializations | 0.90 | Dr. Sarah Chen stands out as a therapist for several reasons:
@@ -419,7 +419,7 @@ You are a therapist differentiation observer. You watch for signals about how th
 }
 ```
 
-| Turn | Events | Types | Learner Results |
+| Turn | Events | Types | Neuron Results |
 | --- | --- | --- | --- |
 | Turn 1 | evt_031–evt_040 | blog_post×3, profile_faq×1, podcast_appearance×1, testimonial×2, video_transcript×1, social_media_post×1, profile_approach×1 | therapist-approach:synthesized, therapist-specializations:synthesized, client-feedback:synthesized, media-presence:synthesized, unique-attributes:synthesized |
 | Turn 2 | evt_041–evt_050 | video_transcript×2, testimonial×2, social_media_post×2, blog_post×2, podcast_appearance×1, profile_faq×1 | therapist-approach:synthesized, therapist-specializations:synthesized, client-feedback:synthesized, media-presence:synthesized, unique-attributes:synthesized |
@@ -443,7 +443,7 @@ You are a therapist differentiation observer. You watch for signals about how th
 }
 ```
 
-**Learner Count:** 5
+**Neuron Count:** 5
 
 #### Therapist Approach (therapist-approach)
 
@@ -541,7 +541,7 @@ You are a therapist differentiation observer. You watch for signals about how th
 
 **Insight:** Dr. Sarah Chen employs a multifaceted therapeutic approach that integrates various evidence-based methodologies tailored for high-achieving professionals, particularly those facing anxiety and ADHD challenges. Her primary techniques include Cognitive Behavioral Therapy (CBT), Acceptance and Commitment Therapy (ACT), and mindfulness-based interventions, emphasizing the importance of an understanding of clients' nervous systems and promoting psychological flexibility. Dr. Chen advocates for self-compassion and an awareness of emotional responses while encouraging a non-judgmental exploration of challenges in both personal and professional contexts. She creates a supportive environment wherein clients can take responsibility for their growth and engage actively in their therapeutic journey, focusing on practical skills related to executive function and the implications of cultural expectations. Additionally, she addresses issues such as burnout, toxic positivity, and the impacts of hustle culture, all while recognizing the supportive role of medication rather than positioning it as the sole solution.
 **Source Count:** 5
-| Learner | Confidence | Insight Preview |
+| Neuron | Confidence | Insight Preview |
 | --- | --- | --- |
 | therapist-approach | 1.00 | Dr. Sarah Chen's therapeutic approach is multifaceted and incorporates several evidence-based methodologies. She spec... |
 | therapist-specializations | 0.95 | Dr. Sarah Chen's therapeutic approach primarily incorporates evidence-based strategies such as Cognitive Behavioral T... |
@@ -557,7 +557,7 @@ You are a therapist differentiation observer. You watch for signals about how th
 
 **Insight:** Dr. Sarah Chen distinguishes herself from other therapists through her holistic and client-centered approach, particularly focusing on high-achieving Asian-American professionals dealing with anxiety and ADHD. She integrates evidence-based therapies such as Cognitive Behavioral Therapy (CBT), Acceptance and Commitment Therapy (ACT), and mindfulness practices, tailoring them to individual client needs. Her unique emphasis on the nervous system's role in anxiety management through somatic techniques, along with her challenge against toxic positivity, allows her to address emotions as valuable data rather than moral judgments. Furthermore, her focus on self-compassion and the separation of self-worth from professional performance is particularly beneficial for her clients, many of whom experience pressures from cultural expectations. Dr. Chen's understanding of ADHD also extends to its impact on relationships, providing strategies for effective communication and emotional regulation. Clients appreciate her hands-on approach and ability to push them beyond their comfort zones, fostering personal growth and resilience. Overall, her multifaceted techniques, cultural sensitivity, and commitment to mental health advocacy set her apart in the therapeutic landscape.
 **Source Count:** 5
-| Learner | Confidence | Insight Preview |
+| Neuron | Confidence | Insight Preview |
 | --- | --- | --- |
 | therapist-approach | 0.90 | Dr. Sarah Chen stands out among other therapists due to her comprehensive and holistic approach to mental health, emp... |
 | therapist-specializations | 0.90 | Dr. Sarah Chen stands out for several unique aspects in her therapeutic approach. One notable feature is her speciali... |
@@ -573,7 +573,7 @@ You are a therapist differentiation observer. You watch for signals about how th
 
 **Insight:** Yes, Dr. Sarah Chen works with anxiety as part of her therapy practice. She specializes in anxiety management, utilizing evidence-based therapies such as Cognitive Behavioral Therapy (CBT) and Acceptance and Commitment Therapy (ACT). Additionally, she incorporates mindfulness-based interventions and somatic techniques like progressive muscle relaxation and diaphragmatic breathing. Dr. Chen emphasizes creating a safe therapeutic environment and highlights the importance of psychological flexibility, emotional awareness, and cultural sensitivity, particularly for high-achieving Asian-American professionals. Her approach includes challenging toxic positivity and promoting self-compassion, allowing clients to navigate their anxiety in a supportive space.
 **Source Count:** 5
-| Learner | Confidence | Insight Preview |
+| Neuron | Confidence | Insight Preview |
 | --- | --- | --- |
 | therapist-approach | 1.00 | Yes, Dr. Sarah Chen works with anxiety as part of her therapy practice. She specializes in anxiety management, utiliz... |
 | therapist-specializations | 0.90 | Yes, Dr. Sarah Chen does work with anxiety. She specializes in helping clients manage their anxiety symptoms through ... |
@@ -587,7 +587,7 @@ You are a therapist differentiation observer. You watch for signals about how th
 
 **Insight:** Clients of Dr. Sarah Chen express appreciation for her culturally sensitive approach and her ability to understand the unique challenges faced by individuals from the Asian-American community. They value her practical strategies for managing anxiety, perfectionism, and ADHD, which help them navigate emotional dysregulation and improve communication in their relationships. Common testimonials highlight her effectiveness in creating a supportive environment that normalizes mental health discussions, reinforces self-compassion, and promotes resilience. Clients specifically mention her innovative techniques, such as mindfulness-based interventions and somatic practices, which allow for a comprehensive exploration of emotions. Additionally, they recognize her challenge-oriented approach that encourages personal growth while addressing complex feelings, contributing to their progress in therapy. Overall, her empathetic demeanor and commitment to fostering understanding resonate strongly with those she works with.
 **Source Count:** 4
-| Learner | Confidence | Insight Preview |
+| Neuron | Confidence | Insight Preview |
 | --- | --- | --- |
 | therapist-approach | 0.70 | I don't have specific client testimonials or feedback about Dr. Sarah Chen. However, based on her described therapeut... |
 | therapist-specializations | 0.90 | Clients often describe Dr. Sarah Chen as culturally sensitive and adept at understanding their unique backgrounds, es... |
@@ -624,7 +624,7 @@ You are a therapist differentiation observer. You watch for signals about how th
 }
 ```
 
-**Learner Summary:**
+**Neuron Summary:**
 ```json
 [
   {
@@ -698,7 +698,7 @@ You are a therapist differentiation observer. You watch for signals about how th
   "changedFields": [
     "prompt"
   ],
-  "learnerResults": [],
+  "neuronResults": [],
   "hasEvolutionResults": true,
   "evolutionResults": {
     "decisionCount": 3,
@@ -708,15 +708,15 @@ You are a therapist differentiation observer. You watch for signals about how th
         "targets": [
           "therapist-approach"
         ],
-        "reasoning": "The learner 'therapist-approach' contains knowledge that is not specifically relevant to ADHD cli...",
-        "guidance": "Remove 'therapist-approach' learner as its focus is too general for the new purpose centered on A..."
+        "reasoning": "The neuron 'therapist-approach' contains knowledge that is not specifically relevant to ADHD cli...",
+        "guidance": "Remove 'therapist-approach' neuron as its focus is too general for the new purpose centered on A..."
       },
       {
         "action": "delete",
         "targets": [
           "therapist-specializations"
         ],
-        "reasoning": "The learner 'therapist-specializations' provides specialized knowledge but does not directly addr...",
+        "reasoning": "The neuron 'therapist-specializations' provides specialized knowledge but does not directly addr...",
         "guidance": "Remove 'therapist-specializations' since it focuses on broader therapy specialties rather than th..."
       },
       {
@@ -726,8 +726,8 @@ You are a therapist differentiation observer. You watch for signals about how th
           "media-presence",
           "unique-attributes"
         ],
-        "reasoning": "The learners 'client-feedback', 'media-presence', and 'unique-attributes' each provide insights t...",
-        "guidance": "Merge 'client-feedback', 'media-presence', and 'unique-attributes' into a single learner that foc..."
+        "reasoning": "The neurons 'client-feedback', 'media-presence', and 'unique-attributes' each provide insights t...",
+        "guidance": "Merge 'client-feedback', 'media-presence', and 'unique-attributes' into a single neuron that foc..."
       }
     ],
     "created": [],
@@ -764,7 +764,7 @@ You are a therapist differentiation observer. You watch for signals about how th
 }
 ```
 
-**Learner Summary:**
+**Neuron Summary:**
 ```json
 [
   {
@@ -791,14 +791,14 @@ You are a therapist differentiation observer. You watch for signals about how th
   "evaluator:evaluation:started": 2,
   "evaluator:evaluation:completed": 2,
   "evolution:action:started": 3,
-  "brain:learner:removed": 5,
+  "brain:neuron:removed": 5,
   "evolution:action:executed": 3,
-  "learner:init:started": 1,
-  "learner:prompts:regenerated": 1,
-  "learner:config:updated": 1,
-  "learner:init:completed": 1,
-  "brain:learner:added": 1,
-  "learner:understanding:set": 1,
+  "neuron:init:started": 1,
+  "neuron:prompts:regenerated": 1,
+  "neuron:config:updated": 1,
+  "neuron:init:completed": 1,
+  "brain:neuron:added": 1,
+  "neuron:understanding:set": 1,
   "brain:config:updated": 1
 }
 ```
@@ -808,7 +808,7 @@ You are a therapist differentiation observer. You watch for signals about how th
 - **brain:signal:received** from `brain`: SYSTEM DIRECTIVE: Brain purpose has been updated by the user.
 Previous purpose: You help build a comprehensive profile of a therapist by analyzing their blog posts, client testimonials, social medi...
 
-### Learner Set Changes
+### Neuron Set Changes
 
 **Removed:**
 ```json
@@ -867,7 +867,7 @@ Previous purpose: You help build a comprehensive profile of a therapist by analy
 }
 ```
 
-| Turn | Events | Types | Learner Results |
+| Turn | Events | Types | Neuron Results |
 | --- | --- | --- | --- |
 | Turn 1 | evt_051–evt_060 | testimonial×3, blog_post×2, profile_faq×1, video_transcript×1, social_media_post×1, podcast_appearance×1, profile_availability×1 | WlFTA1VHkq1beaNzNs2S4:synthesized |
 | Turn 2 | evt_061–evt_070 | blog_post×3, video_transcript×2, social_media_post×2, testimonial×2, profile_faq×1 | WlFTA1VHkq1beaNzNs2S4:synthesized |
@@ -893,7 +893,7 @@ Previous purpose: You help build a comprehensive profile of a therapist by analy
 }
 ```
 
-**Learner Count:** 1
+**Neuron Count:** 1
 
 #### Dr. Sarah Chen's ADHD Therapeutic Approach (WlFTA1VHkq1beaNzNs2S4)
 
@@ -919,7 +919,7 @@ You are a therapeutic methods observer. You watch for signals about Dr. Chen's s
 
 **Insight:** Dr. Chen's experience with ADHD is not explicitly detailed, but it can be inferred that she combines clinical knowledge with an understanding that may reflect personal insights from her practice. Her therapeutic approach emphasizes strengths, self-acceptance, and cultural competence, indicating a nuanced method that likely connects well with clients.
 **Source Count:** 1
-| Learner | Confidence | Insight Preview |
+| Neuron | Confidence | Insight Preview |
 | --- | --- | --- |
 | WlFTA1VHkq1beaNzNs2S4 | 0.70 | Unfortunately, I do not have specific information on Dr. Chen's personal experience with ADHD, such as if she has dir... |
 
@@ -929,7 +929,7 @@ You are a therapeutic methods observer. You watch for signals about Dr. Chen's s
 
 **Insight:** Dr. Sarah Chen's ADHD management strategies focus on a holistic approach, emphasizing self-acceptance of ADHD traits, setting boundaries to create structure, adjusting work hours to match clients' peak performance times, and using habit-building techniques like routines and visual aids. She also promotes actionable strategies for immediate challenges and incorporates mindfulness practices to help reduce anxiety and improve focus. These strategies aim to empower clients and leverage their strengths for personal growth.
 **Source Count:** 1
-| Learner | Confidence | Insight Preview |
+| Neuron | Confidence | Insight Preview |
 | --- | --- | --- |
 | WlFTA1VHkq1beaNzNs2S4 | 0.90 | Dr. Sarah Chen recommends several ADHD management strategies that align with her holistic therapeutic approach. Key s... |
 
@@ -938,7 +938,7 @@ You are a therapeutic methods observer. You watch for signals about Dr. Chen's s
 
 **Insight:** Dr. Sarah Chen employs a comprehensive and tailored approach to ADHD assessment and coaching. Her assessment involves an in-depth exploration of the client's personal history, strengths, and environmental factors that could affect their ADHD experiences, allowing for a more personalized strategy during coaching. In her coaching, she emphasizes leveraging client strengths and offers practical, actionable strategies to manage everyday ADHD challenges. Techniques from cognitive-behavioral therapy (CBT) and acceptance and commitment therapy (ACT) are used, alongside approaches like setting clear boundaries and having self-acceptance practices, focusing on both immediate issues and long-term growth. Clients appreciate her practical guidance and supportive coaching style.
 **Source Count:** 1
-| Learner | Confidence | Insight Preview |
+| Neuron | Confidence | Insight Preview |
 | --- | --- | --- |
 | WlFTA1VHkq1beaNzNs2S4 | 0.80 | Dr. Sarah Chen approaches ADHD assessment and coaching through a comprehensive and tailored process. Her assessment i... |
 
@@ -948,7 +948,7 @@ You are a therapeutic methods observer. You watch for signals about Dr. Chen's s
 
 **Insight:** ADHD clients generally report positive experiences when working with Dr. Sarah Chen. They appreciate her practical approach that focuses on present challenges and actionable strategies beyond traditional therapy. Clients feel that her emphasis on self-acceptance and leveraging individual strengths helps them manage ADHD-related difficulties effectively in both their careers and personal lives. Many have noted improvements in coping strategies and self-esteem, while her cultural competence enriches their therapeutic experience. Strategies such as establishing healthy boundaries and flexible work environments also empower clients, making them feel more in control of their lives.
 **Source Count:** 1
-| Learner | Confidence | Insight Preview |
+| Neuron | Confidence | Insight Preview |
 | --- | --- | --- |
 | WlFTA1VHkq1beaNzNs2S4 | 0.90 | ADHD clients often express positive sentiments regarding their experiences working with Dr. Sarah Chen. Feedback high... |
 
@@ -958,14 +958,14 @@ You are a therapeutic methods observer. You watch for signals about Dr. Chen's s
 
 **Insight:** Dr. Sarah Chen effectively combines therapy and ADHD coaching by integrating therapeutic techniques with practical coaching methods that are tailored to her clients' specific needs. She addresses underlying emotional and psychological challenges through evidence-based therapies such as Cognitive Behavioral Therapy (CBT) and Acceptance and Commitment Therapy (ACT), while also equipping clients with actionable strategies to manage day-to-day challenges. This dual approach fosters self-acceptance, resilience, and goal-setting skills, allowing clients to recognize their unique strengths and cultivate a sense of agency in their lives. Dr. Chen's culturally competent methods further enhance the relatability and effectiveness of her coaching, ensuring a comprehensive support system for her clients.
 **Source Count:** 1
-| Learner | Confidence | Insight Preview |
+| Neuron | Confidence | Insight Preview |
 | --- | --- | --- |
 | WlFTA1VHkq1beaNzNs2S4 | 0.90 | Dr. Sarah Chen effectively combines therapy and ADHD coaching by integrating therapeutic techniques with practical co... |
 
 
 ## Signal Checkpoint: After Phase 3 Ingestion + Queries
 
-### Learner Governance States
+### Neuron Governance States
 
 #### Dr. Sarah Chen's ADHD Therapeutic Approach (WlFTA1VHkq1beaNzNs2S4)
 
@@ -1040,7 +1040,7 @@ _No governance signals emitted yet._
 }
 ```
 
-**Learner Summary:**
+**Neuron Summary:**
 ```json
 [
   {
@@ -1066,9 +1066,9 @@ _No governance signals emitted yet._
   "changedFields": [
     "model"
   ],
-  "learnerResults": [
+  "neuronResults": [
     {
-      "learnerId": "WlFTA1VHkq1beaNzNs2S4",
+      "neuronId": "WlFTA1VHkq1beaNzNs2S4",
       "changedFields": [
         "model",
         "synthesize.thresholds.minImportance"
@@ -1096,7 +1096,7 @@ _No governance signals emitted yet._
 }
 ```
 
-**Learner Summary:**
+**Neuron Summary:**
 ```json
 [
   {
@@ -1119,7 +1119,7 @@ _No governance signals emitted yet._
 **Event Type Counts:**
 ```json
 {
-  "learner:config:updated": 1,
+  "neuron:config:updated": 1,
   "brain:config:updated": 1
 }
 ```
@@ -1143,7 +1143,7 @@ _No governance signals emitted yet._
 }
 ```
 
-| Turn | Events | Types | Learner Results |
+| Turn | Events | Types | Neuron Results |
 | --- | --- | --- | --- |
 | Turn 1 | evt_091–evt_100 | profile_rates×1, video_transcript×2, testimonial×3, social_media_post×1, blog_post×1, podcast_appearance×1, profile_consultation×1 | WlFTA1VHkq1beaNzNs2S4:synthesized |
 | Turn 2 | evt_101–evt_110 | social_media_post×3, blog_post×2, testimonial×3, profile_location×1, video_transcript×1 | WlFTA1VHkq1beaNzNs2S4:synthesized |
@@ -1167,7 +1167,7 @@ _No governance signals emitted yet._
 }
 ```
 
-**Learner Count:** 1
+**Neuron Count:** 1
 
 #### Dr. Sarah Chen's ADHD Therapeutic Approach (WlFTA1VHkq1beaNzNs2S4)
 
@@ -1193,7 +1193,7 @@ You are a therapeutic methods observer. You watch for signals about Dr. Chen's s
 
 **Insight:** Dr. Sarah Chen does not have specified personal experience with ADHD, but her therapeutic approach indicates a strong understanding of the condition. She utilizes evidence-based strategies tailored to the unique challenges faced by ADHD clients, particularly in high-stress environments. This suggests that her expertise may come from professional practice rather than personal experience.
 **Source Count:** 1
-| Learner | Confidence | Insight Preview |
+| Neuron | Confidence | Insight Preview |
 | --- | --- | --- |
 | WlFTA1VHkq1beaNzNs2S4 | 0.70 | The information provided does not specifically mention Dr. Chen's personal experience with ADHD. However, her therape... |
 
@@ -1203,7 +1203,7 @@ You are a therapeutic methods observer. You watch for signals about Dr. Chen's s
 
 **Insight:** Dr. Sarah Chen's ADHD management strategies include the use of Cognitive Behavioral Techniques to reframe negative thoughts, Acceptance and Commitment Therapy for psychological flexibility, and a strength-based approach to build confidence. She also focuses on managing perfectionism, developing practical skills, collaborative goal setting, and addressing comorbid issues like anxiety. Additionally, her culturally sensitive approach tailors her strategies to the unique perspectives of clients, particularly those in high-pressure environments. Overall, her methods prioritize actionable strategies and personal strengths to navigate challenges associated with ADHD.
 **Source Count:** 1
-| Learner | Confidence | Insight Preview |
+| Neuron | Confidence | Insight Preview |
 | --- | --- | --- |
 | WlFTA1VHkq1beaNzNs2S4 | 0.90 | Dr. Sarah Chen recommends several ADHD management strategies that focus on practical skill-building and a holistic un... |
 
@@ -1212,7 +1212,7 @@ You are a therapeutic methods observer. You watch for signals about Dr. Chen's s
 
 **Insight:** Dr. Sarah Chen's approach to ADHD assessment and coaching is characterized by a comprehensive evaluation that emphasizes the client's narrative and unique experiences, particularly considering co-existing conditions like anxiety. This holistic assessment allows her to identify the impact of ADHD symptoms on daily life. Following assessment, she employs a collaborative and skills-oriented coaching model that focuses on practical skill-building, addressing present challenges, and providing actionable strategies. Key components of her coaching include habit formation and managing traits like perfectionism and Rejection Sensitive Dysphoria (RSD). This tailored approach resonates with clients, as it provides them with tools necessary for their personal and professional contexts, fostering resilience and self-compassion.
 **Source Count:** 1
-| Learner | Confidence | Insight Preview |
+| Neuron | Confidence | Insight Preview |
 | --- | --- | --- |
 | WlFTA1VHkq1beaNzNs2S4 | 0.90 | Dr. Sarah Chen's approach to ADHD assessment and coaching incorporates a blend of comprehensive evaluation methods an... |
 
@@ -1220,7 +1220,7 @@ You are a therapeutic methods observer. You watch for signals about Dr. Chen's s
 
 ## Signal Checkpoint: After Phase 5
 
-### Learner Governance States
+### Neuron Governance States
 
 #### Dr. Sarah Chen's ADHD Therapeutic Approach (WlFTA1VHkq1beaNzNs2S4)
 
@@ -1291,7 +1291,7 @@ _No governance signals emitted yet._
 }
 ```
 
-**Learner Summary:**
+**Neuron Summary:**
 ```json
 [
   {
@@ -1318,7 +1318,7 @@ _No governance signals emitted yet._
     "evolution.evaluatorSignalThreshold",
     "evolution.autoEvaluate"
   ],
-  "learnerResults": [],
+  "neuronResults": [],
   "hasEvolutionResults": false
 }
 ```
@@ -1340,7 +1340,7 @@ _No governance signals emitted yet._
 }
 ```
 
-**Learner Summary:**
+**Neuron Summary:**
 ```json
 [
   {
@@ -1384,7 +1384,7 @@ _No governance signals emitted yet._
 }
 ```
 
-| Turn | Events | Types | Learner Results |
+| Turn | Events | Types | Neuron Results |
 | --- | --- | --- | --- |
 | Turn 1 | evt_111–evt_120 | blog_post×2, profile_updates×1, testimonial×3, social_media_post×2, profile_philosophy×1, profile_closing×1 | WlFTA1VHkq1beaNzNs2S4:synthesized |
 
@@ -1407,7 +1407,7 @@ _No governance signals emitted yet._
 }
 ```
 
-**Learner Count:** 1
+**Neuron Count:** 1
 
 #### Dr. Sarah Chen's ADHD Therapeutic Approach (WlFTA1VHkq1beaNzNs2S4)
 
@@ -1433,7 +1433,7 @@ You are a therapeutic methods observer. You watch for signals about Dr. Chen's s
 
 **Insight:** Dr. Sarah Chen's therapeutic approach for ADHD is comprehensive and integrated, utilizing evidence-based methods such as Cognitive Behavioral Therapy (CBT) and Acceptance and Commitment Therapy (ACT). She considers clients as whole individuals with unique strengths and challenges, and often begins sessions by addressing anxiety, which may uncover undiagnosed ADHD. Dr. Chen emphasizes a holistic strategy that incorporates therapy, medication, lifestyle changes, and systemic support. Her sessions focus on practical skills tailored to immediate challenges while promoting self-compassion and managing perfectionism, particularly for high-performing professionals in the tech field. Clients appreciate her warm and direct communication style, which fosters a safe environment for personal growth, and her cultural competence allows her to effectively support specific demographics, especially Asian women in tech, navigating cultural dynamics. She encourages a pressure-free engagement with therapy, enhancing the therapeutic experience.
 **Source Count:** 1
-| Learner | Confidence | Insight Preview |
+| Neuron | Confidence | Insight Preview |
 | --- | --- | --- |
 | WlFTA1VHkq1beaNzNs2S4 | 1.00 | Dr. Sarah Chen's therapeutic approach for ADHD is multifaceted and integrated, combining evidence-based techniques su... |
 
@@ -1442,7 +1442,7 @@ You are a therapeutic methods observer. You watch for signals about Dr. Chen's s
 
 **Insight:** Dr. Sarah Chen is unique compared to other therapists due to her comprehensive therapeutic approach that integrates evidence-based techniques like Cognitive Behavioral Therapy (CBT) and Acceptance and Commitment Therapy (ACT), specifically tailored for high-performing professionals in the tech industry. She emphasizes a collaborative and action-oriented therapy environment, fostering real-time problem-solving and developing actionable skills. Her warmth and directness create a safe space for clients, coupled with her cultural competence that resonates with specific demographics, such as Asian women in tech. Additionally, her focus on self-acceptance and personal growth enhances the therapeutic experience, making her approach distinctive.
 **Source Count:** 1
-| Learner | Confidence | Insight Preview |
+| Neuron | Confidence | Insight Preview |
 | --- | --- | --- |
 | WlFTA1VHkq1beaNzNs2S4 | 0.95 | Dr. Sarah Chen stands out among other therapists for several reasons:
 
@@ -1453,7 +1453,7 @@ You are a therapeutic methods observer. You watch for signals about Dr. Chen's s
 
 **Insight:** Yes, Dr. Chen works with anxiety, particularly because it commonly co-occurs with ADHD. Her approach often starts with addressing anxiety, which can help reveal undiagnosed ADHD conditions. She takes a holistic view, focusing on the interconnectedness of mental health issues rather than treating them as separate diagnoses, thus enabling clients to better manage their ADHD and foster personal growth.
 **Source Count:** 1
-| Learner | Confidence | Insight Preview |
+| Neuron | Confidence | Insight Preview |
 | --- | --- | --- |
 | WlFTA1VHkq1beaNzNs2S4 | 0.90 | Yes, Dr. Chen does work with anxiety, especially as it often presents alongside ADHD. Her therapeutic approach typica... |
 
@@ -1462,7 +1462,7 @@ You are a therapeutic methods observer. You watch for signals about Dr. Chen's s
 
 **Insight:** Clients of Dr. Sarah Chen appreciate her therapeutic approach, often highlighting her warmth combined with a direct manner. They feel safe and understood, which helps in their growth and self-acceptance. Her ability to address not only ADHD symptoms but also related issues like anxiety and perfectionism is frequently mentioned, leading to transformative experiences for many.
 **Source Count:** 1
-| Learner | Confidence | Insight Preview |
+| Neuron | Confidence | Insight Preview |
 | --- | --- | --- |
 | WlFTA1VHkq1beaNzNs2S4 | 0.90 | Clients often express a deep appreciation for Dr. Chen's therapeutic approach, highlighting her unique blend of warmt... |
 
@@ -1473,52 +1473,52 @@ You are a therapeutic methods observer. You watch for signals about Dr. Chen's s
 **Total Duration:** 611.7s
 **Total Events Ingested:** 120
 **Total Brain Events Collected:** 404
-**Final Learner Count:** 1
+**Final Neuron Count:** 1
 
 **All Brain Events by Type:**
 ```json
 {
   "brain:inject:started": 12,
   "brain:inject:batch:started": 12,
-  "learner:observe:started": 32,
-  "learner:observe:thinking": 32,
-  "learner:synthesize:started": 32,
-  "learner:synthesize:thinking": 32,
-  "learner:synthesized": 32,
-  "learner:governance:updated": 32,
+  "neuron:observe:started": 32,
+  "neuron:observe:thinking": 32,
+  "neuron:synthesize:started": 32,
+  "neuron:synthesize:thinking": 32,
+  "neuron:synthesized": 32,
+  "neuron:governance:updated": 32,
   "brain:inject:batch:completed": 12,
   "brain:inject:completed": 12,
   "brain:ask:started": 18,
-  "learner:query:started": 42,
-  "learner:query:completed": 42,
+  "neuron:query:started": 42,
+  "neuron:query:completed": 42,
   "brain:ask:synthesis:started": 18,
   "brain:ask:completed": 18,
   "brain:signal:received": 1,
   "evaluator:evaluation:started": 2,
   "evaluator:evaluation:completed": 2,
   "evolution:action:started": 3,
-  "brain:learner:removed": 5,
+  "brain:neuron:removed": 5,
   "evolution:action:executed": 3,
-  "learner:init:started": 1,
-  "learner:prompts:regenerated": 1,
-  "learner:config:updated": 2,
-  "learner:init:completed": 1,
-  "brain:learner:added": 1,
-  "learner:understanding:set": 1,
+  "neuron:init:started": 1,
+  "neuron:prompts:regenerated": 1,
+  "neuron:config:updated": 2,
+  "neuron:init:completed": 1,
+  "brain:neuron:added": 1,
+  "neuron:understanding:set": 1,
   "brain:config:updated": 3
 }
 ```
 
 ### Signal Recap
 
-**Total Governance Signals (from learners):** 0
+**Total Governance Signals (from neurons):** 0
 **Total System Signals (from brain):** 1
 #### All System Signals
 
 - SYSTEM DIRECTIVE: Brain purpose has been updated by the user.
 Previous purpose: You help build a comprehensive profile of a therapist by analyzing their blog posts, client testimonials, social media, podcast appearances, and professional content to understand their approach, specializations, and ...
 
-### Final Learner States
+### Final Neuron States
 
 #### Dr. Sarah Chen's ADHD Therapeutic Approach (WlFTA1VHkq1beaNzNs2S4)
 

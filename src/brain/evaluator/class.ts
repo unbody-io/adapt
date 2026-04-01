@@ -1,7 +1,7 @@
 /**
  * Evaluator: Decision-making component for Living Brain evolution
  *
- * Buffers signals from learners and external sources, then uses LLM
+ * Buffers signals from neurons and external sources, then uses LLM
  * with tools to investigate and determine what evolution actions
  * (create, merge, split, update, delete) are needed.
  *
@@ -49,7 +49,7 @@ export class Evaluator extends TypedEmitter<EvaluatorEventMap> {
 	}
 
 	/**
-	 * Receive a signal from a learner or external source
+	 * Receive a signal from a neuron or external source
 	 */
 	signal(signal: Signal): void {
 		this.signals.push(signal)
@@ -352,14 +352,14 @@ export class Evaluator extends TypedEmitter<EvaluatorEventMap> {
 	 * Build context object for evaluation
 	 */
 	private async buildContext() {
-		const learners = Array.from(this.brain.learners.values()).map((learner) => {
-			const health = learner.getHealth()
-			const metrics = learner.getMetrics()
+		const neurons = Array.from(this.brain.neurons.values()).map((neuron) => {
+			const health = neuron.getHealth()
+			const metrics = neuron.getMetrics()
 			return {
-				id: learner.id,
-				name: learner.name,
-				type: learner.type,
-				instructions: learner.instructions,
+				id: neuron.id,
+				name: neuron.name,
+				type: neuron.type,
+				instructions: neuron.instructions,
 				health: {
 					activation: health.activation,
 					status: health.status,
@@ -379,9 +379,9 @@ export class Evaluator extends TypedEmitter<EvaluatorEventMap> {
 			brain: {
 				prompt: this.brain.prompt,
 				evolutionContext: this.brain.evolutionContext,
-				learnerCount: this.brain.learners.size,
+				neuronCount: this.brain.neurons.size,
 			},
-			learners,
+			neurons,
 			dismissedBatchCount,
 		}
 	}

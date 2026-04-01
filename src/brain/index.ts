@@ -8,15 +8,16 @@ export type {
 	BrainInjectOptions,
 	BrainInjectResult,
 	BrainOwnEventMap,
-	LearnerBatchResult,
-	LearnerResponse,
+	NeuronBatchResult,
+	NeuronResponse,
 } from './types'
 export type {
 	BrainStore,
 	BrainCollection,
 	BrainStateRecord,
-	BrainLearnerRecord,
+	BrainNeuronRecord,
 	BrainEvolutionRecord,
-} from './stores'
-export { MemoryBrainStore, SQLiteBrainStore } from './stores'
+} from '../stores'
+export { MemoryBrainStore } from '../stores'
+export { SQLiteBrainStore } from '../stores/sqlite'
 export type { InspectResult } from './inspect'

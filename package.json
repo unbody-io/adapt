@@ -1,10 +1,20 @@
 {
-  "name": "@unbody/brain",
+  "name": "@unbody/adapt",
   "version": "0.0.1",
-  "description": "Unbody Brain - Learning agents that build understanding over time",
+  "description": "A self-evolving memory layer for AI applications",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./sqlite": {
+      "import": "./dist/sqlite.js",
+      "types": "./dist/sqlite.d.ts"
+    }
+  },
   "scripts": {
     "build": "tsc && tsc-alias -f",
     "dev": "tsc --watch",
@@ -17,17 +27,17 @@
     "eval:crisis": "bun evals/run-eval.ts crisis-hostage",
     "eval:developer": "bun evals/run-eval.ts developer-memory",
     "eval:therapist": "bun evals/run-eval.ts therapist-profile",
-    "eval:learner": "bun evals/learner.eval.ts",
-    "eval:learner:list": "bun evals/learner.eval.ts --list",
-    "eval:living:learner-01": "bun evals/scripts/learner-01-lifecycle.ts",
-    "eval:living:learner-02": "bun evals/scripts/learner-02-update.ts",
-    "eval:living:learner-03": "bun evals/scripts/learner-03-learn.ts",
-    "eval:living:learner-04": "bun evals/scripts/learner-04-query.ts",
-    "eval:living:learner-05": "bun evals/scripts/learner-05-signal-dismissal.ts",
-    "eval:living:learner-06": "bun evals/scripts/learner-06-signal-confidence.ts",
-    "eval:living:learner-07": "bun evals/scripts/learner-07-signal-buffer.ts",
-    "eval:living:learner-08": "bun evals/scripts/learner-08-signal-stagnation.ts",
-    "eval:living:learner-09": "bun evals/scripts/learner-09-comprehensive-update.ts",
+    "eval:neuron": "bun evals/neuron.eval.ts",
+    "eval:neuron:list": "bun evals/neuron.eval.ts --list",
+    "eval:living:neuron-01": "bun evals/scripts/neuron-01-lifecycle.ts",
+    "eval:living:neuron-02": "bun evals/scripts/neuron-02-update.ts",
+    "eval:living:neuron-03": "bun evals/scripts/neuron-03-learn.ts",
+    "eval:living:neuron-04": "bun evals/scripts/neuron-04-query.ts",
+    "eval:living:neuron-05": "bun evals/scripts/neuron-05-signal-dismissal.ts",
+    "eval:living:neuron-06": "bun evals/scripts/neuron-06-signal-confidence.ts",
+    "eval:living:neuron-07": "bun evals/scripts/neuron-07-signal-buffer.ts",
+    "eval:living:neuron-08": "bun evals/scripts/neuron-08-signal-stagnation.ts",
+    "eval:living:neuron-09": "bun evals/scripts/neuron-09-comprehensive-update.ts",
     "eval:living:brain-01": "bun evals/scripts/brain-01-initialization.ts",
     "eval:living:brain-02": "bun evals/scripts/brain-02-signal-buffering.ts",
     "eval:living:brain-03": "bun evals/scripts/brain-03-manual-create.ts",
@@ -36,17 +46,18 @@
     "eval:living:brain-06": "bun evals/scripts/brain-06-manual-update.ts",
     "eval:living:brain-07": "bun evals/scripts/brain-07-manual-delete.ts",
     "eval:living:brain-08": "bun evals/scripts/brain-08-brain-update.ts",
-    "eval:living:phase1": "bun evals/scripts/learner-01-lifecycle.ts && bun evals/scripts/learner-02-update.ts && bun evals/scripts/learner-03-learn.ts && bun evals/scripts/learner-04-query.ts && bun evals/scripts/brain-01-initialization.ts && bun evals/scripts/brain-03-manual-create.ts",
-    "eval:living:phase2": "bun evals/scripts/learner-05-signal-dismissal.ts && bun evals/scripts/learner-06-signal-confidence.ts && bun evals/scripts/learner-07-signal-buffer.ts && bun evals/scripts/learner-08-signal-stagnation.ts && bun evals/scripts/brain-02-signal-buffering.ts && bun evals/scripts/brain-04-manual-merge.ts && bun evals/scripts/brain-05-manual-split.ts && bun evals/scripts/brain-06-manual-update.ts && bun evals/scripts/brain-07-manual-delete.ts && bun evals/scripts/brain-08-brain-update.ts",
+    "eval:living:phase1": "bun evals/scripts/neuron-01-lifecycle.ts && bun evals/scripts/neuron-02-update.ts && bun evals/scripts/neuron-03-learn.ts && bun evals/scripts/neuron-04-query.ts && bun evals/scripts/brain-01-initialization.ts && bun evals/scripts/brain-03-manual-create.ts",
+    "eval:living:phase2": "bun evals/scripts/neuron-05-signal-dismissal.ts && bun evals/scripts/neuron-06-signal-confidence.ts && bun evals/scripts/neuron-07-signal-buffer.ts && bun evals/scripts/neuron-08-signal-stagnation.ts && bun evals/scripts/brain-02-signal-buffering.ts && bun evals/scripts/brain-04-manual-merge.ts && bun evals/scripts/brain-05-manual-split.ts && bun evals/scripts/brain-06-manual-update.ts && bun evals/scripts/brain-07-manual-delete.ts && bun evals/scripts/brain-08-brain-update.ts",
     "server": "bun server/index.ts",
     "server:dev": "bun --watch server/index.ts",
     "playground": "concurrently -n server,client -c blue,green \"npx tsx --env-file=.env.local --watch playground/server/index.ts\" \"cd playground/client && npx vite\""
   },
   "keywords": [
     "unbody",
-    "brain",
-    "learning",
-    "agents"
+    "adapt",
+    "memory",
+    "neurons",
+    "ai"
   ],
   "license": "MIT",
   "devDependencies": {

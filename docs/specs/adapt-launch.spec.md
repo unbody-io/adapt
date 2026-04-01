@@ -266,3 +266,7 @@ There are questions you can only answer if you were paying attention when the da
 
 ### How
 Adapt routes incoming data through a Brain — an orchestrator that coordinates specialized Neurons, each responsible for a different domain of knowledge. Neurons don't store raw data. They observe what's relevant, discard what isn't, and synthesize what they keep into compressed, evolving understanding. Query the Brain and it answers from what the system has learned, not by searching what it saved. But more importantly, Adapt is designed to live like a living organisation; the architecture reshapes itself with usage: Neurons are created when new domains emerge, merged when they overlap, split when they're overloaded. You define the purpose. The structure adapts to the data.
+
+
+Also somehere 
+"Think of Adapt like a mycelium network..."

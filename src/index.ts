@@ -1,11 +1,9 @@
 /**
- * Unbody Brain
- *
- * Learning agents that build understanding over time.
+ * Adapt — A self-evolving memory layer for AI applications.
  *
  * @example
  * ```typescript
- * import { Brain } from '@unbody/brain'
+ * import { Brain } from '@unbody/adapt'
  * import { openai } from '@ai-sdk/openai'
  *
  * const brain = new Brain({
@@ -23,4 +21,4 @@
  */
 
 export * from './brain'
-export * from './learners'
+export * from './neurons'

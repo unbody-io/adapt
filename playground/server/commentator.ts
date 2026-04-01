@@ -26,7 +26,7 @@ Examples:
 
 Rules:
 - 1 sentence, max 2. Keep it tight. Natural and human. No system jargon.
-- Never say "specialist", "evaluator", "signal", "restructuring", "evolution", or "learner". Talk about ideas, topics, and thinking.
+- Never say "specialist", "evaluator", "signal", "restructuring", "evolution", or "neuron". Talk about ideas, topics, and thinking.
 - Never narrate process mechanics ("processing", "initializing", "synthesizing").
 - Never reference raw IDs or technical identifiers. If you don't know a name, describe what it seems to be about.
 - Vary your openings. No "Okay so" or "Ok so".
@@ -48,16 +48,16 @@ export class Commentator {
 
 	private brainContext(): string {
 		if (!this.brain) return ""
-		const learners = this.brain.learners
-		if (learners.size === 0) return ""
-		const names = Array.from(learners.values()).map((l) => l.name).join(", ")
+		const neurons = this.brain.neurons
+		if (neurons.size === 0) return ""
+		const names = Array.from(neurons.values()).map((l) => l.name).join(", ")
 		return `[Current areas of focus: ${names}]`
 	}
 
 	private resolveName(id: string): string {
-		const learner = this.brain?.getLearner(id)
-		if (learner?.name) return `"${learner.name}"`
-		if (learner?.description) return `the one tracking ${learner.description.slice(0, 60)}`
+		const neuron = this.brain?.getNeuron(id)
+		if (neuron?.name) return `"${neuron.name}"`
+		if (neuron?.description) return `the one tracking ${neuron.description.slice(0, 60)}`
 		return "an unnamed area"
 	}
 
@@ -79,8 +79,8 @@ export class Commentator {
 			)
 		})
 
-		brain.on("brain:learner:added", (payload) => {
-			this.enqueue("brain:learner:added",
+		brain.on("brain:neuron:added", (payload) => {
+			this.enqueue("brain:neuron:added",
 				`${this.brainContext()}\nWHAT HAPPENED: A new area of thinking opened up — "${payload.name}". It will focus on: ${payload.instructions?.slice(0, 200) || "to be determined"}.`,
 			)
 		})
@@ -102,12 +102,12 @@ export class Commentator {
 
 		// --- Living: Synthesis ---
 
-		brain.on("learner:synthesized", (payload) => {
+		brain.on("neuron:synthesized", (payload) => {
 			const sig = (payload.significance as unknown as number) ?? 0
 			if (sig < 0.4) return
 
-			const name = this.resolveName(payload.learnerId)
-			this.enqueue("learner:synthesized",
+			const name = this.resolveName(payload.neuronId)
+			this.enqueue("neuron:synthesized",
 				`WHAT HAPPENED: ${name} updated its understanding: ${truncate(stringify(payload.newUnderstanding), 300)}`,
 			)
 		})
@@ -163,7 +163,7 @@ export class Commentator {
 				.map((id) => this.resolveName(id))
 				.join(", ")
 			const newNames = (
-				payload.result?.newLearnerIds as string[] | undefined
+				payload.result?.newNeuronIds as string[] | undefined
 			)
 				?.map((id) => this.resolveName(id))
 				.join(", ")

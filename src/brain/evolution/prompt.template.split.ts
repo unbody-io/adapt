@@ -1,21 +1,21 @@
 /**
  * Template for split action prompt
  *
- * Formats learner data for LLM to divide into focused learners
+ * Formats neuron data for LLM to divide into focused neurons
  */
 
-import type { BaseLearner } from '../../learners/base/class'
+import type { BaseNeuron } from '../../neurons/base/class'
 import { stringifyUnderstanding } from './utils'
 
 /**
- * Format split prompt with learner data and guidance
+ * Format split prompt with neuron data and guidance
  */
 export async function splitPromptTemplate(
 	guidance: string,
-	learner: BaseLearner<unknown>,
+	neuron: BaseNeuron<unknown>,
 	purpose: string,
 ): Promise<string> {
-	const understanding = await learner.getUnderstanding()
+	const understanding = await neuron.getUnderstanding()
 
 	return `# Brain Context
 
@@ -25,38 +25,38 @@ export async function splitPromptTemplate(
 
 ${guidance}
 
-# Learner to Split
+# Neuron to Split
 
-**ID**: ${learner.id}
-**Description**: ${learner.description || 'N/A'}
+**ID**: ${neuron.id}
+**Description**: ${neuron.description || 'N/A'}
 
 **Instructions**:
-${learner.instructions}
+${neuron.instructions}
 
 **Understanding**:
 ${stringifyUnderstanding(understanding)}
 
 **Health**:
-- Activation: ${learner.getHealth().activation.toFixed(2)}
-- Status: ${learner.getHealth().status}
-- Query Count: ${learner.getMetrics().query.count}
-- Dismissal Rate: ${(learner.getMetrics().ingestion.dismissalRate * 100).toFixed(1)}%
+- Activation: ${neuron.getHealth().activation.toFixed(2)}
+- Status: ${neuron.getHealth().status}
+- Query Count: ${neuron.getMetrics().query.count}
+- Dismissal Rate: ${(neuron.getMetrics().ingestion.dismissalRate * 100).toFixed(1)}%
 
 ---
 
 # Your Task
 
-Divide this learner into 2 or more focused learners that:
+Divide this neuron into 2 or more focused neurons that:
 1. Each have a clear, narrow scope (more focused than the original)
-2. Together cover the original learner's domain
+2. Together cover the original neuron's domain
 3. Have appropriate knowledge distribution (split the understanding logically)
 4. Have distinct, non-overlapping instructions
 
-For each new learner, provide:
+For each new neuron, provide:
 - name: Clear, descriptive name
 - description: Brief purpose description
 - instructions: Focused instructions defining scope
 - understanding: Relevant portion of the original understanding
 
-Output an array of 2 or more learner configurations.`
+Output an array of 2 or more neuron configurations.`
 }

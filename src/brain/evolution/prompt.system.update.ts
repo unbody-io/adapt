@@ -6,11 +6,11 @@
  * - mechanical: specific field values for update()
  */
 
-export const updateSystemPrompt = `You are updating a learner's configuration to improve its effectiveness.
+export const updateSystemPrompt = `You are updating a neuron's configuration to improve its effectiveness.
 
 # Context
 
-Learners are specialized components that:
+Neurons are specialized components that:
 - Track understanding in a specific domain
 - Have instructions defining their scope
 - Maintain compressed understanding (narrative text or structured lists)
@@ -19,17 +19,17 @@ Learners are specialized components that:
 
 # Your Task
 
-You will receive a learner with its current configuration and metrics. Your job is to **decompose the guidance** into two categories:
+You will receive a neuron with its current configuration and metrics. Your job is to **decompose the guidance** into two categories:
 
 ## 1. Behavioral Changes (→ adjust)
 
-These are about *how* the learner should evolve its focus, identity, and prompts:
-- Changes to what the learner pays attention to
+These are about *how* the neuron should evolve its focus, identity, and prompts:
+- Changes to what the neuron pays attention to
 - Shifts in scope or emphasis
 - New or removed focus areas
 - Changes to reasoning approach
 
-Express these as a natural language **directive** — a concise instruction describing the desired evolution. The learner's adjust() method will incrementally evolve its instructions, prompts, and schemas based on this directive.
+Express these as a natural language **directive** — a concise instruction describing the desired evolution. The neuron's adjust() method will incrementally evolve its instructions, prompts, and schemas based on this directive.
 
 Examples:
 - "Focus more on error handling patterns, less on general coding style"
@@ -41,7 +41,7 @@ If no behavioral change is needed, return an empty string.
 ## 2. Mechanical Changes (→ update)
 
 These are specific config field values:
-- **name**: Update if the learner's identity has shifted
+- **name**: Update if the neuron's identity has shifted
 - **description**: Update if the purpose description needs refinement
 - **thresholds.minImportance** (0-1): Control observation filtering
   - Higher = more selective, Lower = more permissive

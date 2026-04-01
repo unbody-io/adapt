@@ -3,7 +3,7 @@
  *
  * The state object is the single source of truth for all persisted Brain data.
  * Cached in memory as `this.state`, backed by `store.state`.
- * Same pattern as BaseLearnerState — everything persisted, stateTransforms
+ * Same pattern as BaseNeuronState — everything persisted, stateTransforms
  * handle the serialization boundary for non-serializable types (models).
  *
  * What lives in state (persisted):
@@ -14,11 +14,11 @@
  *
  * What stays outside state (not serializable, immutable, or runtime-only):
  * - store — the persistence layer itself
- * - learners Map — live instances, rebuilt from store.learners on restore
+ * - neurons Map — live instances, rebuilt from store.neurons on restore
  * - evaluator, orchestrator — rebuilt on init
  * - autoSetup — constructor config, only affects first init
- * - learnerStoreFactory — constructor config, factory function
- * - configLearners — constructor config, only affects first init
+ * - neuronStoreFactory — constructor config, factory function
+ * - configNeurons — constructor config, only affects first init
  */
 
 import type { LanguageModel } from 'ai'

@@ -5,8 +5,7 @@
  * All events are logged for manual semantic inspection.
  */
 
-import { TextNeuron } from '../../src/neurons/text/class'
-import { MemoryNeuronStore } from '../../src/stores'
+import { TextNeuron, MemoryNeuronStore } from '@unbody/adapt'
 import { logger } from '../helpers/logger'
 import { createOpenRouter } from '@openrouter/ai-sdk-provider'
 

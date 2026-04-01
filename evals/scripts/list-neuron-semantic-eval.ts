@@ -5,8 +5,7 @@
  * Domain: tracking notable restaurants/cafes visited — a natural "list of items" use case.
  */
 
-import { ListNeuron } from '../../src/neurons/list/class'
-import { MemoryNeuronStore } from '../../src/stores'
+import { ListNeuron, MemoryNeuronStore } from '@unbody/adapt'
 import { logger } from '../helpers/logger'
 import { createOpenRouter } from '@openrouter/ai-sdk-provider'
 

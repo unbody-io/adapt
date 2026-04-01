@@ -52,6 +52,9 @@
     "server:dev": "bun --watch server/index.ts",
     "playground": "concurrently -n server,client -c blue,green \"npx tsx --env-file=.env.local --watch playground/server/index.ts\" \"cd playground/client && npx vite\""
   },
+  "files": [
+    "dist"
+  ],
   "keywords": [
     "unbody",
     "adapt",
@@ -61,26 +64,31 @@
   ],
   "license": "MIT",
   "devDependencies": {
+    "@ai-sdk/openai-compatible": "^2.0.35",
     "@biomejs/biome": "^2.3.13",
+    "@hono/node-server": "^1.19.9",
+    "@openrouter/ai-sdk-provider": "^2.1.1",
     "@types/better-sqlite3": "^7.6.13",
     "@types/node": "^22.0.0",
+    "ai": "^6.0.0",
     "concurrently": "^9.2.1",
+    "hono": "^4.11.7",
     "tsc-alias": "^1.8.16",
     "tsx": "^4.21.0",
     "typescript": "^5.7.0",
     "vitest": "^3.0.0"
   },
   "dependencies": {
-    "@ai-sdk/openai-compatible": "^2.0.35",
-    "@hono/node-server": "^1.19.9",
-    "@openrouter/ai-sdk-provider": "^2.1.1",
-    "ai": "^6.0.0",
-    "better-sqlite3": "^12.6.2",
-    "hono": "^4.11.7",
     "nanoid": "^5.1.6",
     "zod": "^4.3.6"
   },
   "peerDependencies": {
-    "ai": "^6.0.0"
+    "ai": "^6.0.0",
+    "better-sqlite3": "^12.6.2"
+  },
+  "peerDependenciesMeta": {
+    "better-sqlite3": {
+      "optional": true
+    }
   }
 }

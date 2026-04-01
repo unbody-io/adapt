@@ -109,30 +109,60 @@ import { SQLiteBrainStore, SQLiteNeuronStore } from '@unbody/adapt/sqlite'
 
 ### Phase 2: Package Setup
 
+#### Decisions
+
+- **Version**: `0.0.1` (not `0.1.0` — neuron structure may change significantly, `0.0.x` signals "experimental, expect breaking changes in any release")
+- **ESM-only** for v0.0.1 — no CommonJS support needed
+- **Target runtimes**: Node.js, edge runtimes (Cloudflare Workers, Vercel Edge), browsers
+- **Root export must be edge/browser-safe** — no Node.js-only APIs (verified: core only depends on `ai`, `zod`, `nanoid`, all edge-compatible)
+- **SQLite behind subpath** because `better-sqlite3` is a native C++ addon — importing it from root would crash edge/browser runtimes even if the consumer never uses SQLite
+- **`ai` SDK as peerDependency** — consumers already install it to create model instances (`openai('gpt-4o')`), they own the version
+- **`zod` as dependency** — internal only, consumers define custom schemas via JSON Schema, never touch zod directly
+- **Playground/server import via package name** (`@unbody/adapt`, `@unbody/adapt/sqlite`) not relative paths — use `npm link` for local dev, serves as dogfooding check for the exports map
+
+#### Tasks
+
 5. **Configure `package.json` for publishing**
-   - `name`: `@unbody/adapt`
-   - `version`: `0.1.0`
-   - `license`: `MIT`
-   - `files`: `["dist"]`
-   - `exports`: `{ ".": "./dist/index.js", "./sqlite": "./dist/sqlite.js" }`
-   - Move `hono`, `@hono/node-server`, playground deps to `devDependencies`
-   - Move `better-sqlite3` to `peerDependencies` (optional)
-   - Add `peerDependenciesMeta` for `better-sqlite3`
+   - `name`: `@unbody/adapt` (already done)
+   - `version`: `0.0.1` (already correct)
+   - `license`: `MIT` (already done)
+   - Add `files`: `["dist"]` (npm auto-includes `package.json`, `README.md`, `LICENSE`)
+   - `exports` — keep current shape (already correct):
+     ```json
+     {
+       ".": { "import": "./dist/index.js", "types": "./dist/index.d.ts" },
+       "./sqlite": { "import": "./dist/sqlite.js", "types": "./dist/sqlite.d.ts" }
+     }
+     ```
+   - **Dependency audit:**
+     | Package | Current | Target | Reason |
+     |---|---|---|---|
+     | `ai` | dependencies + peerDependencies | peerDependencies only (`^6.0.0`) | Consumer owns version, passes model instances |
+     | `zod` | dependencies | dependencies (keep) | Internal only, consumers use JSON Schema |
+     | `nanoid` | dependencies | dependencies (keep) | Internal ID generation |
+     | `better-sqlite3` | dependencies | peerDependencies (optional) | Native addon, opt-in only |
+     | `@ai-sdk/openai-compatible` | dependencies | devDependencies | Not imported in src/, used in evals/server only |
+     | `@openrouter/ai-sdk-provider` | dependencies | devDependencies | Not imported in src/, used in evals/server only |
+     | `hono` | dependencies | devDependencies | Not imported in src/, server/playground only |
+     | `@hono/node-server` | dependencies | devDependencies | Not imported in src/, server/playground only |
+   - Add `peerDependenciesMeta` for `better-sqlite3` (`{ "optional": true }`)
 
-6. **Update `src/index.ts`** — root export
-   - Export Brain, TextNeuron, ListNeuron, BaseNeuron
-   - Export MemoryBrainStore, MemoryNeuronStore
-   - Export all types, configs, events
-   - Do NOT export SQLite stores from root
+6. **Fix root export — remove SQLite leak**
+   - `src/brain/index.ts` currently exports `SQLiteBrainStore` — remove it
+   - Audit `src/index.ts` for duplicate type re-exports (brain/ and neurons/ both re-export store types)
+   - Ensure root export surface is: Brain, TextNeuron, ListNeuron, BaseNeuron, MemoryBrainStore, MemoryNeuronStore, all types/configs/events — NO SQLite
 
-7. **Create `src/sqlite.ts`** — subpath export
-   - Export SQLiteBrainStore, SQLiteNeuronStore
+7. **`src/sqlite.ts`** — already exists and correct (exports SQLiteBrainStore, SQLiteNeuronStore)
 
-8. **Verify build** — `tsc` compiles cleanly with new structure
+8. **Update playground/server imports**
+   - Change all relative imports (`../../src`, `../src`) → `@unbody/adapt` and `@unbody/adapt/sqlite`
+   - This validates the exports map works correctly
+
+9. **Verify build** — `tsc` compiles cleanly with new structure
 
 ### Phase 3: Git History
 
-9. **Interactive rebase** — squash commits into meaningful milestones
+9. **Squash commits into milestones** — see [adapt-launch-phase3-git-history.spec.md](adapt-launch-phase3-git-history.spec.md)
 
 ### Phase 4: Documentation
 

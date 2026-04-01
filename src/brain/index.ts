@@ -19,5 +19,4 @@ export type {
 	BrainEvolutionRecord,
 } from '../stores'
 export { MemoryBrainStore } from '../stores'
-export { SQLiteBrainStore } from '../stores/sqlite'
 export type { InspectResult } from './inspect'

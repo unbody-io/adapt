@@ -3,7 +3,7 @@
  * Tests complete end-to-end evolution flow: neuron signal → buffering → evaluation → action execution
  */
 
-import { Brain } from '../../src/brain/class'
+import { Brain } from '@unbody/adapt'
 import { logger } from '../helpers/logger'
 import {
 	assertTrue,

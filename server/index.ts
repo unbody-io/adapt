@@ -12,11 +12,9 @@ import { createOpenRouter } from '@openrouter/ai-sdk-provider'
 import type { LanguageModel } from 'ai'
 import { appendFileSync, mkdirSync, existsSync } from 'node:fs'
 import { join } from 'node:path'
-import { Brain } from '../src'
-import { SQLiteNeuronStore } from '../src/stores/sqlite/neuron'
-import { SQLiteBrainStore } from '../src/stores/sqlite/brain'
+import { Brain, type BrainConfig } from '@unbody/adapt'
+import { SQLiteNeuronStore, SQLiteBrainStore } from '@unbody/adapt/sqlite'
 import { parseClaudeSessions, listClaudeProjects, listClaudeSessions } from './lib/claude-parser'
-import type { BrainConfig } from '../src/brain/types'
 
 // --- Session Logging ---
 

@@ -13,8 +13,9 @@ import {
 	type UnderstandingRecord,
 	type EvolutionRecord,
 	type StateRecord,
-} from '../../src/stores'
-import { SQLiteNeuronStore } from '../../src/stores/sqlite/neuron'
+	type NeuronCollection,
+} from '@unbody/adapt'
+import { SQLiteNeuronStore } from '@unbody/adapt/sqlite'
 
 let passed = 0
 let failed = 0
@@ -91,7 +92,7 @@ type CreateNeuronStore = () => NeuronStore
 
 async function testCollectionCRUD<T extends { id: string }>(
 	label: string,
-	collection: import('../../src/stores').NeuronCollection<T>,
+	collection: NeuronCollection<T>,
 	makeItem: (id: string) => T,
 	makeChanges: () => Partial<Omit<T, 'id'>>,
 ) {

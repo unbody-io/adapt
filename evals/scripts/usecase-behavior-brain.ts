@@ -36,9 +36,8 @@
  *   export $(cat .env.local | xargs) && QUERY_ONLY=1 npx tsx evals/scripts/usecase-behavior-brain.ts
  */
 
-import { Brain } from '../../src/brain'
-import { SQLiteBrainStore } from '../../src/stores/sqlite'
-import { SQLiteNeuronStore } from '../../src/stores/sqlite/neuron'
+import { Brain, type BrainAskResult } from '@unbody/adapt'
+import { SQLiteBrainStore, SQLiteNeuronStore } from '@unbody/adapt/sqlite'
 import { createOpenRouter } from '@openrouter/ai-sdk-provider'
 import { readFileSync, mkdirSync } from 'node:fs'
 import { join, dirname } from 'node:path'
@@ -62,7 +61,7 @@ function elapsed() {
 	return ((Date.now() - startTime) / 1000).toFixed(1)
 }
 
-async function askSafe(brain: Brain, query: string): Promise<import('../../src/brain/types').BrainAskResult | null> {
+async function askSafe(brain: Brain, query: string): Promise<BrainAskResult | null> {
 	try {
 		return await brain.ask(query)
 	} catch (err) {
@@ -71,7 +70,7 @@ async function askSafe(brain: Brain, query: string): Promise<import('../../src/b
 	}
 }
 
-function printAskResult(result: import('../../src/brain/types').BrainAskResult | null) {
+function printAskResult(result: BrainAskResult | null) {
 	if (!result) return
 	console.log(`\nSynthesized insight:\n${result.insight}`)
 	console.log(`\nSources:`)

@@ -5,7 +5,7 @@
  * Streams text token-by-token over SSE.
  */
 import { streamText, type LanguageModel } from "ai"
-import type { Brain } from "../../src"
+import type { Brain } from "@unbody/adapt"
 import type { SSESender } from "./types"
 
 const SYSTEM_PROMPT = `You're watching a mind learn in real time. You observe two things:

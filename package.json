@@ -47,10 +47,7 @@
     "eval:living:brain-07": "bun evals/scripts/brain-07-manual-delete.ts",
     "eval:living:brain-08": "bun evals/scripts/brain-08-brain-update.ts",
     "eval:living:phase1": "bun evals/scripts/neuron-01-lifecycle.ts && bun evals/scripts/neuron-02-update.ts && bun evals/scripts/neuron-03-learn.ts && bun evals/scripts/neuron-04-query.ts && bun evals/scripts/brain-01-initialization.ts && bun evals/scripts/brain-03-manual-create.ts",
-    "eval:living:phase2": "bun evals/scripts/neuron-05-signal-dismissal.ts && bun evals/scripts/neuron-06-signal-confidence.ts && bun evals/scripts/neuron-07-signal-buffer.ts && bun evals/scripts/neuron-08-signal-stagnation.ts && bun evals/scripts/brain-02-signal-buffering.ts && bun evals/scripts/brain-04-manual-merge.ts && bun evals/scripts/brain-05-manual-split.ts && bun evals/scripts/brain-06-manual-update.ts && bun evals/scripts/brain-07-manual-delete.ts && bun evals/scripts/brain-08-brain-update.ts",
-    "server": "bun server/index.ts",
-    "server:dev": "bun --watch server/index.ts",
-    "playground": "concurrently -n server,client -c blue,green \"npx tsx --env-file=.env.local --watch playground/server/index.ts\" \"cd playground/client && npx vite\""
+    "eval:living:phase2": "bun evals/scripts/neuron-05-signal-dismissal.ts && bun evals/scripts/neuron-06-signal-confidence.ts && bun evals/scripts/neuron-07-signal-buffer.ts && bun evals/scripts/neuron-08-signal-stagnation.ts && bun evals/scripts/brain-02-signal-buffering.ts && bun evals/scripts/brain-04-manual-merge.ts && bun evals/scripts/brain-05-manual-split.ts && bun evals/scripts/brain-06-manual-update.ts && bun evals/scripts/brain-07-manual-delete.ts && bun evals/scripts/brain-08-brain-update.ts"
   },
   "files": [
     "dist"
@@ -66,24 +63,20 @@
   "devDependencies": {
     "@ai-sdk/openai-compatible": "^2.0.35",
     "@biomejs/biome": "^2.3.13",
-    "@hono/node-server": "^1.19.9",
     "@openrouter/ai-sdk-provider": "^2.1.1",
     "@types/better-sqlite3": "^7.6.13",
     "@types/node": "^22.0.0",
-    "ai": "^6.0.0",
-    "concurrently": "^9.2.1",
-    "hono": "^4.11.7",
     "tsc-alias": "^1.8.16",
     "tsx": "^4.21.0",
     "typescript": "^5.7.0",
     "vitest": "^3.0.0"
   },
   "dependencies": {
+    "ai": "^6.0.0",
     "nanoid": "^5.1.6",
     "zod": "^4.3.6"
   },
   "peerDependencies": {
-    "ai": "^6.0.0",
     "better-sqlite3": "^12.6.2"
   },
   "peerDependenciesMeta": {

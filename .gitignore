@@ -4,11 +4,8 @@ dist/
 .env.*
 *.log
 .DS_Store
-server/logs/
-server/data/
-
 # Eval data (SQLite stores)
 evals/.data/
 
-# Playground persistent storage
-playground/usecases/**/storage/
+# Internal docs (specs, history, playbooks)
+internal-docs/

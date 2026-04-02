@@ -3,6 +3,8 @@ title: Brain API Reference
 description: Complete Brain class API — lifecycle, data, neuron management, evolution, and result types.
 ---
 
+Complete API reference for the `Brain` class, covering lifecycle management, data operations, neuron management, evolution controls, and all associated result types.
+
 ## Lifecycle
 
 | Method | Returns | Description |

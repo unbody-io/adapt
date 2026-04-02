@@ -3,6 +3,8 @@ title: Configuration
 description: Full BrainConfig reference, model cascade, LLM call costs, and tuning guidance.
 ---
 
+Every aspect of a Brain's behavior can be configured — from which models to use at each pipeline stage, to learning thresholds, persistence, and evolution triggers. This page covers all available options.
+
 ## BrainConfig
 
 ```typescript
@@ -67,7 +69,7 @@ interface BrainConfig {
 
 ## Model Cascade
 
-Models flow from Brain → Neuron → Phase. Each level falls back to its parent:
+Different operations have different cost/quality trade-offs. Observation runs on every inject and scales linearly with neurons — a cheap, fast model works well here. Synthesis and querying run less often but need higher quality output. The model cascade lets you assign different models to different operations, with each level falling back to its parent if not explicitly set:
 
 ```text
 brain.model (default for everything)
@@ -107,7 +109,7 @@ const brain = new Brain({
 
 ## LLM Call Cost Model
 
-Every operation maps to a known number of LLM calls. Use this to estimate cost and latency.
+To help you estimate cost and latency, here's how many LLM calls each operation makes. As a rough guide: a typical brain with 5 neurons costs about 5 calls per inject (observation only) and 7 calls per ask. The tables below give exact formulas.
 
 N = number of neurons, B = number of batches.
 
@@ -207,7 +209,7 @@ If your model doesn't support tool calling, **TextNeuron in direct mode** still 
 
 ## Understand Thresholds
 
-Three settings control when synthesis triggers:
+After observations are buffered, synthesis doesn't happen immediately — it triggers when enough observations have accumulated. Three settings control this:
 
 | Threshold | Default | Effect |
 |---|---|---|

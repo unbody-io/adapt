@@ -3,23 +3,27 @@ title: Getting Started
 description: Install Adapt and build your first Brain in under 5 minutes.
 ---
 
+Adapt is a TypeScript library for building AI systems that learn and evolve from data. This guide walks you through installation and building your first Brain in under 5 minutes.
+
 ## Install
 
 ```bash
 npm install @unbody/adapt
 ```
 
-Adapt uses the [Vercel AI SDK](https://sdk.vercel.ai) for LLM access. Install a provider:
+Adapt connects to LLMs through [Vercel AI SDK](https://sdk.vercel.ai) providers. Install the one that matches your LLM service — for example, `@ai-sdk/openai` for OpenAI or `@ai-sdk/anthropic` for Claude:
 
 ```bash
-npm install @ai-sdk/openai    # or @ai-sdk/anthropic, @ai-sdk/google, etc.
+npm install @ai-sdk/openai
 ```
+
+See [Configuration — Using Different Providers](./configuration#using-different-providers) for the full list of supported providers.
 
 ## Quick Start
 
 ### Brain
 
-Brain auto-decomposes a prompt into specialized neurons, routes data to all of them, and synthesizes unified answers.
+A Brain takes a prompt describing what to learn, automatically creates specialized neurons to cover different aspects of that domain, and coordinates them. You feed it data, it routes to all neurons, and when you ask a question it synthesizes answers from all of them.
 
 ```typescript
 import { Brain } from '@unbody/adapt'
@@ -41,7 +45,7 @@ console.log(result.insight)
 
 ### Standalone Neuron
 
-Neurons work independently without a Brain — direct control over a single domain:
+If you don't need multi-domain orchestration, neurons work independently without a Brain. You get direct control over a single learning domain:
 
 ```typescript
 import { TextNeuron, MemoryNeuronStore } from '@unbody/adapt'
@@ -64,7 +68,7 @@ console.log(result.insight)
 
 ### Explicit Neurons
 
-Skip LLM decomposition and define neurons yourself:
+By default, Brain uses the LLM to decompose your prompt into neurons automatically. If you already know what neurons you want, you can define them explicitly:
 
 ```typescript
 const brain = new Brain({
@@ -96,7 +100,7 @@ Both `autoSetup` and `neurons` can coexist — Brain will auto-generate addition
 
 ### SQLite Persistence
 
-By default, Adapt stores everything in memory. For persistence across sessions, use SQLite:
+By default, all state is held in memory and lost when the process exits. To persist knowledge across sessions (so a Brain can pick up where it left off), use SQLite:
 
 ```bash
 npm install better-sqlite3

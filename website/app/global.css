@@ -2,8 +2,65 @@
 @import 'fumadocs-ui/css/neutral.css';
 @import 'fumadocs-ui/css/preset.css';
 
+@theme {
+  --color-fd-background: hsl(0, 0%, 94.7%);
+  --color-fd-border: transparent;
+}
+
+.dark {
+  --color-fd-background: hsl(0, 0%, 9.8%);
+  --color-fd-border: transparent;
+}
+
 html {
   scrollbar-gutter: stable;
+  font-family: 'Google Sans Code', monospace;
+}
+
+
+.prose {
+  font-size: 0.875rem;
+  line-height: 1.6;
+
+  :where(h1):not(:where([class~="not-prose"], [class~="not-prose"] *)) {
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.4;
+  }
+
+  :where(h2):not(:where([class~="not-prose"], [class~="not-prose"] *)) {
+    font-size: 0.9375rem;
+    font-weight: 400;
+    line-height: 1.4;
+  }
+
+  :where(h3):not(:where([class~="not-prose"], [class~="not-prose"] *)) {
+    font-size: 0.875rem;
+    font-weight: 400;
+    line-height: 1.4;
+  }
+
+  :where(h4):not(:where([class~="not-prose"], [class~="not-prose"] *)) {
+    font-size: 0.8125rem;
+    font-weight: 400;
+    line-height: 1.4;
+  }
+
+  :where(a:not([data-card])):not(:where([class~="not-prose"], [class~="not-prose"] *)) {
+    font-size: inherit;
+    font-weight: inherit;
+    color: inherit;
+  }
+}
+
+
+#nd-sidebar {
+  font-size: 0.8125rem;
+  line-height: 1.4;
+
+  a, button {
+    padding: 0.25rem 0.5rem;
+  }
 }
 
 html > body[data-scroll-locked] {

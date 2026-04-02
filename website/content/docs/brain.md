@@ -3,9 +3,11 @@ title: Brain
 description: Creating, configuring, and querying a Brain.
 ---
 
+A Brain is the top-level orchestrator — it takes a prompt describing what to learn, decomposes it into specialized neurons, and coordinates them through data ingestion, querying, and evolution.
+
 ## Creating a Brain
 
-Only `prompt` and `model` are required:
+Only two things are required — `prompt` (what to learn about) and `model` (which LLM to use):
 
 ```typescript
 import { Brain } from '@unbody/adapt'
@@ -17,7 +19,7 @@ const brain = new Brain({
 })
 ```
 
-Everything else has sensible defaults — auto-decomposition is on, memory stores are used, evolution is enabled. Customize as needed:
+With just these two fields, the Brain will auto-decompose the prompt into neurons, store everything in memory, and enable evolution — all with sensible defaults. When you need more control, you can configure persistence, learning thresholds, and evolution behavior:
 
 ```typescript
 import { Brain } from '@unbody/adapt'
@@ -26,11 +28,15 @@ import { SQLiteBrainStore, SQLiteNeuronStore } from '@unbody/adapt/sqlite'
 const brain = new Brain({
   prompt: 'Track user coding patterns and development philosophy.',
   model: openai('gpt-4o'),
+  // Persist state to disk (default: in-memory, lost on exit)
   store: new SQLiteBrainStore('./brain.db'),
   learning: {
+    // Each neuron gets its own SQLite store
     store: (id) => new SQLiteNeuronStore(`./neuron-${id}.db`),
+    // Synthesize understanding after every 5 observations instead of the default 10
     understand: { thresholds: { maxObservations: 5 } },
   },
+  // Evolution is on by default — shown here for clarity
   evolution: { enabled: true },
 })
 ```
@@ -58,9 +64,9 @@ await brain.inject([
 await brain.inject(data, { id: 'session-42' })
 ```
 
-Data is sent to **all** neurons in parallel. Each neuron's observer independently decides what's relevant. Items are batched by `ingest.batchSize` (default: 20).
+Data is sent to **all** neurons in parallel. Each neuron independently decides what's relevant to its domain and ignores the rest (this is the "observe" phase from the [learning pipeline](./concepts#learning-pipeline)). Items are batched by `ingest.batchSize` (default: 20).
 
-When all neurons dismiss a batch, it enters the dismissed batch buffer and feeds the internal gap neuron.
+When *every* neuron dismisses a batch — meaning nothing in the batch was relevant to any neuron — it gets tracked as a coverage gap. These gaps feed into the [evolution system](./evolution), helping the Brain detect domains it's not yet equipped to handle.
 
 ### What observers see
 
@@ -83,7 +89,7 @@ await brain.inject([
 await brain.inject(['https://example.com/local-first'])
 ```
 
-The observer does **not** see the neuron's current understanding when filtering — it only uses its generated identity (derived from `instructions`) to decide relevance. This is intentional: observation is fast and stateless.
+The observer does **not** see the neuron's accumulated knowledge when filtering — it only uses the neuron's identity (derived from `instructions`) to decide relevance. This is intentional: it keeps observation fast and stateless, but it also means the observer can't filter based on "I already know this." That trade-off is handled downstream during synthesis, where the neuron integrates new observations with existing knowledge.
 
 **Timestamps matter.** If your use case involves temporal patterns, include timestamps in the data. The observer and synthesizer will see them and can reason about time if the neuron's instructions ask for it.
 
@@ -99,8 +105,8 @@ result.gaps       // Knowledge gaps across all neurons
 
 Two query modes:
 
-- **`direct`** (default) — All neurons queried in parallel (single LLM call each), then one synthesis call. Fast.
-- **`deep`** — Agentic synthesis where the LLM decides which neurons to consult, what to ask, and when it has enough. Slower but can do follow-up queries. Internal neurons available as consult tools.
+- **`direct`** (default) — All neurons are queried in parallel (one LLM call each), then a single synthesis call combines their answers. Fast and predictable.
+- **`deep`** — An LLM agent drives the query interactively. It decides which neurons to consult, what to ask each one, and whether to ask follow-up questions based on what it learns. It can also consult [internal neurons](#consulting-internal-neurons) (gap tracking, cross-domain patterns) to build a more complete answer. Slower, but better for complex questions that benefit from multi-step reasoning.
 
 ```typescript
 // Default — fast, parallel
@@ -141,14 +147,14 @@ const usage = await stream.usage
 
 ## Consulting Internal Neurons
 
-Brain maintains internal neurons that track meta-knowledge:
+Beyond the neurons that learn from your data, Brain maintains **internal neurons** that track how the system itself is performing. This gives you (and the evolution system) visibility into coverage gaps, query patterns, and cross-domain connections.
 
-| Internal Neuron | Type | Tracks |
-|---|---|---|
-| Global Understanding | text | Cross-domain patterns from all neuron knowledge |
-| Global Query Understanding | list | Query topics, frequency, clusters |
-| Injection Gaps | text | Data no neuron could process |
-| Query Gaps | text | Questions no neuron could answer well |
+| Internal Neuron | Type | What it tracks | When to consult it |
+|---|---|---|---|
+| Global Understanding | text | Cross-domain patterns from all neuron knowledge | "What themes connect my different domains?" |
+| Global Query Understanding | list | Query topics, frequency, clusters | "What are users asking about most?" |
+| Injection Gaps | text | Data no neuron could process | "What data am I not capturing?" |
+| Query Gaps | text | Questions no neuron could answer well | "Where are my blind spots?" |
 
 Query them via `consult()`:
 
@@ -192,7 +198,9 @@ Unlike `ask()` (which queries neuron knowledge) or `consult()` (which queries in
 
 ## Managing Neurons
 
-**Basic management** — works without evolution:
+There are two ways to manage neurons: **basic management** (you provide explicit configs) and **evolution management** (the LLM designs neurons from natural language guidance). Basic management is always available. Evolution management requires `evolution.enabled` (on by default).
+
+**Basic management** — you specify exactly what to create or change:
 
 ```typescript
 // Add with explicit config
@@ -215,7 +223,7 @@ brain.getNeurons()              // all external neurons
 brain.getNeuron('ui-patterns')  // specific neuron
 ```
 
-**Evolution management** — requires `evolution.enabled` (default: true):
+**Evolution management** — the LLM designs neurons from natural language guidance. Use this when you know *what* you want but want the system to figure out the specifics (name, instructions, type, schema):
 
 ```typescript
 // LLM designs the neuron from guidance
@@ -251,7 +259,7 @@ await brain.adjustNeuron('topics', 'Be stricter about what counts as a distinct 
 await brain.adjustNeuron('patterns', 'Also track testing patterns going forward')
 ```
 
-**`brain.update(config)`** — Config replacement. Mechanical fields cascade to all neurons immediately. Semantic fields (prompt, instructions) go through the evaluator. Three phases: brain-only state → mechanical cascade → signal-driven semantic.
+**`brain.update(config)`** — Config replacement. Changes to mechanical fields (like models, thresholds, governance) take effect immediately across all neurons. Changes to semantic fields (like `prompt`) trigger an evolution evaluation, because changing the Brain's purpose may require restructuring its neurons.
 
 ```typescript
 // Mechanical: cascades immediately to all neurons

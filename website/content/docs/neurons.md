@@ -3,6 +3,8 @@ title: Neurons
 description: TextNeuron and ListNeuron — learning, querying, governance, and schemas.
 ---
 
+Neurons are the individual learning units inside a Brain. Each neuron specializes in one domain, processes data through an observe-then-understand pipeline, and answers queries with tool-based reasoning. Adapt ships two types: TextNeuron for narrative knowledge and ListNeuron for structured collections.
+
 ## TextNeuron
 
 Builds narrative understanding — a single body of prose that evolves over time.
@@ -28,7 +30,7 @@ const understanding = await neuron.getUnderstanding() // string
 const result = await neuron.query('What are the key design principles?')
 ```
 
-Customize governance and thresholds as needed:
+You can control how the neuron grows and when it synthesizes. **Governance** determines how understanding evolves over time (see [Governance Strategies](#governance-strategies) below). **Thresholds** control how many observations accumulate before synthesis triggers:
 
 ```typescript
 const neuron = new TextNeuron({
@@ -42,24 +44,26 @@ const neuron = new TextNeuron({
 
 ### Cognitive Skills
 
-TextNeuron uses two skill sets during synthesis to recognize patterns in observations:
+When a TextNeuron synthesizes new observations into its understanding, it doesn't just append information — it actively reasons about how each observation relates to what it already knows. It does this through two built-in skill sets:
 
-| Skill Set | Skills | What they detect |
+| Skill Set | Skills | What the neuron asks itself |
 |---|---|---|
-| **Compare** | `confirms`, `contradicts`, `extends`, `new` | How new observations relate to existing understanding |
-| **Dynamics** | `recurs`, `intensifies`, `fades`, `shifts`, `avoids` | How patterns change over time — frequency, acceleration, decline, direction changes, avoidance |
+| **Compare** | `confirms`, `contradicts`, `extends`, `new` | "Does this observation reinforce, challenge, add to, or introduce something new relative to what I already know?" |
+| **Dynamics** | `recurs`, `intensifies`, `fades`, `shifts`, `avoids` | "Is this pattern repeating? Getting stronger? Declining? Changing direction? Being avoided?" |
 
-Each skill is defined as a question the neuron asks itself when recognizing the pattern. For example, `recurs` asks "This keeps appearing — how many times? Over what timespan? In what contexts?"
+For example, when the neuron applies `recurs`, it asks itself: "This keeps appearing — how many times? Over what timespan? In what contexts?" This produces grounded observations like "cancelled gym 6 times in 3 weeks" rather than vague summaries like "sometimes skips gym."
 
-Skills are automatic — you don't configure them. Your instructions influence *how* the neuron applies them to your domain.
+These skills are automatic — you don't configure them. Your neuron instructions influence *what domain* the skills are applied to. See [Prompt Design](./prompt-design) for how to write instructions that get the most out of these skills.
 
 ### Governance Strategies
 
-| Strategy | Behavior | Use when |
+A neuron's understanding grows over time as it synthesizes observations. Governance strategies control what happens when it gets too large — because if understanding becomes too long, the LLM loses focus when answering queries.
+
+| Strategy | How it works | Good for |
 |---|---|---|
-| `continuous` | Unbounded growth, no compression | Low volume, want full detail |
-| `cumulative` | Grows until `maxTokens`, then compresses to a seed and resets | Default. Bounded learning with periodic consolidation |
-| `decay` | Organizes into Current/Recent/Historical; older content compresses | Evolving knowledge where recency matters |
+| `continuous` | Understanding grows indefinitely with no compression | Low-volume domains where you want every detail preserved (e.g., design decisions) |
+| `cumulative` (default) | Grows until `maxTokens`, then the LLM compresses it to a ~500-token seed summary and starts a new cycle. The seed carries forward the most important patterns | General-purpose learning — bounded size with periodic consolidation |
+| `decay` | Organizes understanding into temporal sections (Current / Recent / Historical). As it grows, older content is progressively compressed while recent stays detailed | Domains where recency matters — the latest observations get the most detail |
 
 ## ListNeuron
 
@@ -85,7 +89,9 @@ await neuron.learn([
 const items = await neuron.getUnderstanding() // ListItem[]
 ```
 
-The LLM generates the data schema from your instructions. For "track restaurants with cuisine, location, price range, and rating," it produces fields like `name`, `cuisine`, `location`, `priceRange`, `rating`. During synthesis, the LLM agent uses CRUD tools (`addItem`, `updateItem`, `removeItem`, `listItems`, `searchItems`, `getItem`) to manage the collection.
+The LLM generates the data schema from your instructions. For "track restaurants with cuisine, location, price range, and rating," it produces fields like `name`, `cuisine`, `location`, `priceRange`, `rating`.
+
+During synthesis, the LLM works like an agent with tools: it reads the buffered observations and decides how to update the collection using `addItem`, `updateItem`, `removeItem`, and other collection management tools. For example, if an observation mentions a restaurant the neuron already tracks, the LLM calls `updateItem` to revise it rather than creating a duplicate.
 
 **Schema generation depends on your instructions.** The fields in the schema come directly from what you describe. If your instructions say "track whether it's been rejected by the PM," the schema will have a rejection field. If you don't mention it, it won't exist — and that data will be lost even if it appears in observations. See [Prompt Design](./prompt-design) for guidance.
 
@@ -147,9 +153,9 @@ When provided, schemas are used as-is — no LLM call, fully deterministic. This
 }
 ```
 
-**Confidence is mechanical, not LLM-judged.** Each time an observation references an item (via `updateItem`), its `touchCount` increments. After each synthesis, confidence is normalized: `touchCount / maxTouchCount` across all items. The most-referenced item always has confidence 1.0.
+**Confidence tells you how much evidence backs an item.** It's calculated mechanically, not by the LLM: each time an observation references an item (via `updateItem`), its `touchCount` increments. After each synthesis, confidence is normalized across all items as `touchCount / maxTouchCount`. The most-referenced item always has confidence 1.0. Items mentioned only once will have low confidence — this helps you distinguish well-established items from one-off mentions.
 
-**Deduplication during synthesis:** When the LLM agent calls `addItem`, the system automatically searches existing items using full-text search. If similar items are found, the tool returns them and asks the LLM to use `updateItem` instead.
+**Deduplication is automatic.** When the LLM calls `addItem` during synthesis, the system searches existing items for similar matches. If it finds any, it returns them to the LLM and suggests using `updateItem` instead — preventing the same entity from appearing multiple times.
 
 ### List Governance
 

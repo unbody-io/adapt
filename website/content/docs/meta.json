@@ -1,0 +1,19 @@
+{
+  "title": "Documentation",
+  "pages": [
+    "---Getting Started---",
+    "index",
+    "concepts",
+    "---Guides---",
+    "brain",
+    "neurons",
+    "configuration",
+    "stores",
+    "evolution",
+    "events",
+    "prompt-design",
+    "recipes",
+    "---",
+    "reference"
+  ]
+}

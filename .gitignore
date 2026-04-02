@@ -1,4 +1,5 @@
 node_modules/
+bun.lock
 dist/
 .env
 .env.*
@@ -9,3 +10,8 @@ evals/.data/
 
 # Internal docs (specs, history, playbooks)
 internal-docs/
+
+# Website (docs site)
+website/.next/
+website/node_modules/
+website/.source/

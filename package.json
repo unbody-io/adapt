@@ -27,7 +27,9 @@
     "eval:list-neuron": "npx tsx evals/scripts/list-neuron-semantic-eval.ts",
     "eval:behavior-brain": "npx tsx evals/scripts/usecase-behavior-brain.ts",
     "test:store": "npx tsx tests/store-standalone.ts",
-    "test:docs": "npx tsx tests/docs-code/run-all.ts"
+    "test:docs": "npx tsx tests/docs-code/run-all.ts",
+    "docs:dev": "cd website && npm run dev",
+    "docs:build": "cd website && npm run build"
   },
   "files": [
     "dist"

@@ -84,7 +84,7 @@ const items = await neuron.getUnderstanding() // ListItem[]
 
 The LLM generates the data schema from your instructions. For "track restaurants with cuisine, location, price range, and rating," it produces fields like `name`, `cuisine`, `location`, `priceRange`, `rating`. During synthesis, the LLM agent uses CRUD tools (`addItem`, `updateItem`, `removeItem`, `listItems`, `searchItems`, `getItem`) to manage the collection.
 
-**Schema generation depends on your instructions.** The fields in the schema come directly from what you describe. If your instructions say "track whether it's been rejected by the PM," the schema will have a rejection field. If you don't mention it, it won't exist — and that data will be lost even if it appears in observations. See [Writing Instructions](./09-writing-instructions.md) for guidance.
+**Schema generation depends on your instructions.** The fields in the schema come directly from what you describe. If your instructions say "track whether it's been rejected by the PM," the schema will have a rejection field. If you don't mention it, it won't exist — and that data will be lost even if it appears in observations. See [Prompt Design](./09-prompt-design.md) for guidance.
 
 ### Custom Schemas
 
@@ -177,7 +177,7 @@ await neuron.hasKnowledge()                  // Has any understanding?
 
 // Introspection
 neuron.getHealth()                           // { activation, status, signalThresholds }
-neuron.getMetrics()                          // { dismissalRate, avgRelevance, avgConfidence, ... }
+neuron.getMetrics()                          // { ingestion: { dismissalRate, ... }, query: { ... } }
 await neuron.getEvolution()                  // EvolutionRecord[]
 neuron.getObservationSchema()                // JSON Schema for observations
 neuron.getUnderstandingSchema()              // JSON Schema for understanding
@@ -198,7 +198,7 @@ neuron.instructions                          // string
 neuron.description                           // string
 neuron.type                                  // 'text' | 'list'
 neuron.focus                                 // string | null
-neuron.origin                                // 'decomposition' | 'explicit'
+neuron.origin                                // 'prompt' | 'developer' | 'emergent'
 ```
 
 ### Learn Output

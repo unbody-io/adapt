@@ -48,7 +48,7 @@ Discriminated union — check `status` to determine the outcome:
   relevance: number      // 0–1
   confidence: number     // 0–1
   insight: string
-  gaps: string[]
+  gaps: string
   usage: TokenUsage
 }
 ```
@@ -74,7 +74,7 @@ Discriminated union — check `status` to determine the outcome:
 | Method | Returns | Description |
 |---|---|---|
 | `getHealth()` | `NeuronHealth` | Activation, status, signal thresholds |
-| `getMetrics()` | `NeuronMetrics` | Dismissal rate, avg relevance, avg confidence |
+| `getMetrics()` | `NeuronMetrics` | `{ ingestion: { dismissalRate, ... }, query: { relevanceScores, confidenceScores, gaps } }` |
 | `getMetadata()` | `NeuronMetadata` | Combined metadata |
 | `getEvolution()` | `Promise<EvolutionRecord[]>` | Change history |
 | `getObservationSchema()` | `Record \| null` | JSON Schema for observations |
@@ -95,11 +95,8 @@ Discriminated union — check `status` to determine the outcome:
 ```typescript
 {
   changedFields: string[]
-  adjustedConfig: Record<string, unknown>
-  adjustedUnderstanding?: {
-    evolution: string
-    significance: Significance
-  }
+  adjustedConfig: boolean
+  adjustedUnderstanding: boolean
 }
 ```
 
@@ -113,4 +110,4 @@ Discriminated union — check `status` to determine the outcome:
 | `description` | `string` | What this neuron tracks |
 | `instructions` | `string` | Neuron instructions |
 | `focus` | `string \| null` | Narrowed focus (from adjust) |
-| `origin` | `NeuronOrigin` | `'decomposition'` or `'explicit'` |
+| `origin` | `NeuronOrigin` | `'prompt'`, `'developer'`, or `'emergent'` |

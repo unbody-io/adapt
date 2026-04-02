@@ -1,0 +1,106 @@
+/**
+ * Docs code test: 08-events.md
+ *
+ * Verifies every TypeScript code block from the Events guide
+ * compiles and runs correctly.
+ *
+ * Run:
+ *   export $(cat .env.local | xargs) && npx tsx tests/docs-code/08-events.ts
+ */
+
+import { Brain } from '@unbody/adapt'
+import { model } from '../../evals/helpers/provider'
+
+let passed = 0
+let failed = 0
+
+function assert(condition: boolean, message: string) {
+	if (condition) {
+		passed++
+		console.log(`  ✓ ${message}`)
+	} else {
+		failed++
+		console.log(`  ✗ ${message}`)
+	}
+}
+
+function section(title: string) {
+	console.log(`\n━━━ ${title} ━━━`)
+}
+
+async function main() {
+	const brain = new Brain({
+		prompt: 'Track event test patterns.',
+		model,
+		evolution: { enabled: false },
+		autoSetup: false,
+		neurons: [
+			{ id: 'events', type: 'text', name: 'Events', description: 'Event patterns', instructions: 'Track event patterns.' },
+		],
+	})
+
+	// ── Specific Event (typed) ───────────────────────────────────────────
+	section('Specific Event Subscription')
+
+	let synthesizedFired = false
+	brain.on('neuron:synthesized', (payload) => {
+		synthesizedFired = true
+		assert(typeof payload.neuronId === 'string', 'neuron:synthesized payload has neuronId')
+		assert(typeof payload.significance === 'string', 'neuron:synthesized payload has significance')
+		assert(typeof payload.evolution === 'string', 'neuron:synthesized payload has evolution')
+		console.log(`  ${payload.neuronId}: ${payload.significance} — ${payload.evolution}`)
+	})
+	assert(true, 'brain.on(specific event) registers without error')
+
+	// ── All Events ───────────────────────────────────────────────────────
+	section('All Events Subscription')
+
+	const allEvents: string[] = []
+	brain.on((event) => {
+		allEvents.push(event.type)
+		// Verify event shape
+		assert(typeof event.type === 'string', `event has type: ${event.type}`)
+		assert(typeof event.id === 'string', 'event has id')
+		assert(typeof event.timestamp === 'string' || typeof event.timestamp === 'number', 'event has timestamp')
+	})
+	assert(true, 'brain.on(all events) registers without error')
+
+	// ── Trigger some events via inject ────────────────────────────────────
+	section('Trigger Events via inject')
+
+	await brain.inject([
+		{ type: 'test', data: 'Event trigger data 1' },
+		{ type: 'test', data: 'Event trigger data 2' },
+	])
+
+	assert(allEvents.length > 0, `Events fired during inject: ${allEvents.length} events`)
+	assert(allEvents.includes('brain:inject:started'), 'brain:inject:started event fired')
+	assert(allEvents.includes('brain:inject:completed'), 'brain:inject:completed event fired')
+
+	// ── Forwarding Pattern ───────────────────────────────────────────────
+	section('Forwarding Pattern')
+
+	// Simulate forwarding to a UI (Electron or SSE)
+	const forwarded: Array<Record<string, unknown>> = []
+	brain.on((event) => {
+		forwarded.push({
+			type: event.type,
+			...event.payload as Record<string, unknown>,
+		})
+	})
+
+	await brain.inject([{ type: 'forward-test' }])
+	assert(forwarded.length > 0, 'Events forwarded to simulated UI')
+
+	await brain.dispose()
+
+	// ── Summary ──────────────────────────────────────────────────────────
+	console.log(`\n${'═'.repeat(60)}`)
+	console.log(`08-events: ${passed} passed, ${failed} failed`)
+	if (failed > 0) process.exit(1)
+}
+
+main().catch((err) => {
+	console.error(err)
+	process.exit(1)
+})

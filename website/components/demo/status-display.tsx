@@ -65,13 +65,23 @@ export function StatusDisplay({ activity, commentary, injectionProgress }: Props
 						)}
 					</div>
 					<div style={{
-						padding: "0.6rem 0.75rem",
+						padding: "0.85rem 0.75rem",
 						background: "rgba(26, 26, 31, 0.03)",
 						border: "1px solid rgba(26, 26, 31, 0.08)",
-						borderBottom: "none",
-						borderRadius: "6px 6px 0 0",
+						borderRadius: 6,
 						overflow: "hidden",
 					}}>
+						<span style={{
+							display: "block",
+							fontSize: "0.6rem",
+							fontFamily: mono,
+							color: "#9b9ba8",
+							textTransform: "uppercase",
+							letterSpacing: "0.08em",
+							marginBottom: "0.4rem",
+						}}>
+							Summary
+						</span>
 						<p style={{
 							margin: 0,
 							fontSize: "0.7rem",
@@ -82,9 +92,11 @@ export function StatusDisplay({ activity, commentary, injectionProgress }: Props
 							{injectionProgress.sourceSummary}
 						</p>
 						<div style={{
-							margin: "0 -0.75rem -0.6rem",
+							margin: "0.85rem -0.75rem -0.85rem",
 							height: 2,
 							background: "rgba(155, 155, 168, 0.15)",
+							borderRadius: "0 0 6px 6px",
+							overflow: "hidden",
 						}}>
 							<div style={{
 								width: `${progress * 100}%`,

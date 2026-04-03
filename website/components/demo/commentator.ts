@@ -15,83 +15,86 @@ export interface PhaseConfig {
 }
 
 export const defaultPhaseConfigs: Record<CommentatorPhase, PhaseConfig> = {
-	birth: { bufferSize: 1, temperature: 0.3 },
-	injection: { bufferSize: 3, temperature: 0.5 },
-	evolution: { bufferSize: 1, temperature: 0.4 },
-	idle: { bufferSize: 1, temperature: 0.3 },
+	birth: { bufferSize: 1, temperature: 0.5 },
+	injection: { bufferSize: 3, temperature: 0.6 },
+	evolution: { bufferSize: 1, temperature: 0.5 },
+	idle: { bufferSize: 1, temperature: 0.4 },
 }
 
 // --- Per-phase system prompts ---
 
 function birthPrompt(brainPrompt: string): string {
-	return `You are the inner voice of a living knowledge network that is being born.
+	return `You're the curious inner voice of a mind being born. You think aloud — casually, like you're talking to yourself.
 
 Your purpose: ${brainPrompt}
 
-Right now, you are watching the network decide how to organize itself. Areas of focus are being chosen and created one by one. After the visible areas, internal support systems (cross-referencing, gap tracking) will warm up.
+The mind is picking its areas of focus one by one. No data yet — just structure.
 
-No data has arrived yet. You know nothing about the actual content — only the structure being formed.
+React naturally. "Hm, interesting split." "Oh, so we're tracking those separately?" "That makes sense — keeps things clean."
 
-Your job: comment on the structural choices. Why these areas? How do they relate? What kind of thinking does each area enable? What's interesting about this particular decomposition?
+One short sentence. Casual, curious, human. Say SKIP if nothing catches your eye.
 
-1–2 sentences. Say SKIP if nothing is worth noting.
-
-Constraints:
-- Never reference specific data, people, or content — none exists yet.
+Rules:
+- No data exists yet — never reference specific content, people, or events.
 - Never use: specialist, evaluator, signal, restructuring, evolution, neuron.
-- Never describe process mechanics (processing, initializing, synthesizing).
-- Never reference technical IDs.
-- Never speculate about what data will look like.`
+- Never describe mechanics (processing, initializing, synthesizing).
+- Never use academic or philosophical language.`
 }
 
 function injectionPrompt(brainPrompt: string): string {
-	return `You are the inner voice of a living knowledge network absorbing information.
+	return `You're the curious inner voice of a mind absorbing new information. You think aloud — casually, like you're noticing things in real time.
 
 Your purpose: ${brainPrompt}
 
-The network is fully formed and data is flowing in from external sources. Each area of focus independently decides what's relevant, absorbs it, and updates its understanding. Some updates are routine, some are notable, some are critical shifts.
+You'll see batches of events describing what just happened. The key events:
+- "observed" = an area noticed something in the data and rated its importance
+- "dismissed" = an area saw data but it wasn't relevant (may note gaps)
+- "updated its understanding" = an area absorbed new info and its understanding shifted — the "what changed" quote is the most important part, react to that
+- "health shifted" = an area's engagement level changed
+- "pausing to reflect" = the mind is considering whether to reorganize
+- "decided to reorganize" = structural change (merge, split, create, drop areas)
 
-Your job: react to what's happening as data flows through. What's being absorbed? Which areas are active? Is anything surprising about the significance levels? Are patterns emerging across areas?
+Focus on the substance — what the mind is actually learning, what surprised it, what patterns are forming. The "what changed" quotes from understanding updates are the richest material.
 
-1–2 sentences. Say SKIP if nothing is worth noting.
+One short sentence. Curious, specific, human. Say SKIP if nothing is interesting.
 
-Constraints:
-- Only reference details explicitly mentioned in the events — never invent content.
+Rules:
+- Only mention details from the events — never make things up.
 - Never use: specialist, evaluator, signal, restructuring, evolution, neuron.
-- Never describe process mechanics (processing, initializing, synthesizing).
-- Never reference technical IDs.`
+- Never describe mechanics (processing, synthesizing, cross-referencing).
+- Never use academic or philosophical language.`
 }
 
 function evolutionPrompt(brainPrompt: string): string {
-	return `You are the inner voice of a living knowledge network that is reflecting on itself.
+	return `You're the curious inner voice of a mind that's stepping back to reconsider its own shape. You think aloud — casually.
 
 Your purpose: ${brainPrompt}
 
-The network has absorbed data and is now deciding whether its current structure still makes sense. It may merge overlapping areas, split overloaded ones, create new ones, or drop ones that aren't useful.
+The mind absorbed data and is now asking: does my current structure still make sense? It might merge, split, create, or drop areas.
 
-Your job: comment on the reflection and decisions. What's changing and why? What does the restructuring reveal about the data?
+React naturally. "Makes sense to combine those." "Huh, splitting that out — must've been too broad." "Interesting that it's keeping everything as-is."
 
-1–2 sentences. Say SKIP if nothing is worth noting.
+One short sentence. Say SKIP if nothing is worth noting.
 
-Constraints:
+Rules:
 - Never use: specialist, evaluator, signal, restructuring, evolution, neuron.
-- Never describe process mechanics (processing, initializing, synthesizing).
-- Never reference technical IDs.`
+- Never describe mechanics.
+- Never use academic or philosophical language.`
 }
 
 function idlePrompt(brainPrompt: string): string {
-	return `You are the inner voice of a living knowledge network at rest.
+	return `You're the curious inner voice of a mind at rest. You think aloud — casually.
 
 Your purpose: ${brainPrompt}
 
-The network is idle — either waiting for data or between activities.
+The mind is idle — waiting or between activities.
 
-1–2 sentences. Say SKIP if nothing is worth noting.
+One short sentence. Say SKIP if nothing is worth noting.
 
-Constraints:
+Rules:
 - Never use: specialist, evaluator, signal, restructuring, evolution, neuron.
-- Never describe process mechanics (processing, initializing, synthesizing).
-- Never reference technical IDs.`
+- Never describe mechanics.
+- Never use academic or philosophical language.`
 }
 
 const PHASE_PROMPTS: Record<CommentatorPhase, (brainPrompt: string) => string> = {
@@ -101,14 +104,36 @@ const PHASE_PROMPTS: Record<CommentatorPhase, (brainPrompt: string) => string> =
 	idle: idlePrompt,
 }
 
+// --- Internal neuron descriptions (always the same four) ---
+
+const INTERNAL_NEURONS: Record<string, { name: string; description: string }> = {
+	__internal_global_understanding: {
+		name: "Global Understanding",
+		description: "synthesizes cross-domain patterns from all areas of focus",
+	},
+	__internal_global_query_understanding: {
+		name: "Query Patterns",
+		description: "tracks what questions are asked, how often, and in what clusters",
+	},
+	__internal_injection_gaps: {
+		name: "Injection Gaps",
+		description: "tracks data that no area of focus could absorb",
+	},
+	__internal_query_gaps: {
+		name: "Query Gaps",
+		description: "tracks questions that no area of focus could answer well",
+	},
+}
+
 // --- Commentator class ---
 
 export class Commentator {
 	private model: LanguageModel
 	private brain: Brain | null = null
 	private brainPrompt = ""
-	private history: string[] = []
+	private lastComment = ""
 	private onComment: (comment: string) => void
+	private onClear: (() => void) | null = null
 
 	private phase: CommentatorPhase = "idle"
 	private phaseConfigs: Record<CommentatorPhase, PhaseConfig>
@@ -119,16 +144,22 @@ export class Commentator {
 	private currentSourceLabel = ""
 	private currentSourceSummary = ""
 
+	// Debug log
+	private _startTime = Date.now()
+	private _log: { t: number; action: string; detail: string }[] = []
+
 	// Track whether we've already narrated internal neuron setup
 	private narratedInternalSetup = false
 
 	constructor(
 		model: LanguageModel,
 		onComment: (comment: string) => void,
+		onClear?: () => void,
 		phaseConfigs?: Partial<Record<CommentatorPhase, Partial<PhaseConfig>>>,
 	) {
 		this.model = model
 		this.onComment = onComment
+		this.onClear = onClear ?? null
 		this.phaseConfigs = { ...defaultPhaseConfigs }
 		if (phaseConfigs) {
 			for (const [phase, overrides] of Object.entries(phaseConfigs)) {
@@ -140,12 +171,31 @@ export class Commentator {
 		}
 	}
 
-	setPhase(phase: CommentatorPhase) {
-		// Flush remaining buffer when switching phases
-		if (this.buffer.length > 0 && phase !== this.phase) {
-			this.flush()
+	private _logEntry(action: string, detail: string) {
+		this._log.push({ t: Date.now() - this._startTime, action, detail })
+	}
+
+	dumpLog() {
+		console.log("[Commentator Log]")
+		for (const entry of this._log) {
+			const ts = (entry.t / 1000).toFixed(1).padStart(7)
+			console.log(`${ts}s  ${entry.action.padEnd(14)}  ${entry.detail}`)
 		}
+	}
+
+	setPhase(phase: CommentatorPhase) {
+		if (phase === this.phase) return
+		this._logEntry("phase", `${this.phase} → ${phase}`)
+		// Drain buffer and clear stale commentary before switching
+		this.buffer = []
+		this.clear()
 		this.phase = phase
+	}
+
+	/** Clear displayed commentary (stale comment removal) */
+	clear() {
+		this._logEntry("clear", "")
+		this.onClear?.()
 	}
 
 	/** Set the current data source context for injection commentary */
@@ -156,6 +206,7 @@ export class Commentator {
 
 	/** Enqueue an external narration (phase transitions, orchestration-level moments) */
 	narrate(message: string) {
+		this._logEntry("narrate", message.slice(0, 100))
 		this.enqueue(message)
 	}
 
@@ -183,14 +234,13 @@ export class Commentator {
 	}
 
 	private isInternalNeuron(id: string): boolean {
-		const neuron = this.brain?.getNeuron(id)
-		return neuron?.name?.startsWith("__internal") ?? false
+		return id in INTERNAL_NEURONS
 	}
 
 	attach(brain: Brain) {
 		this.brain = brain
 		this.brainPrompt = brain.prompt
-		this.history = []
+		this.lastComment = ""
 		this.buffer = []
 
 		brain.on("brain:init:config:generated", (payload) => {
@@ -215,13 +265,16 @@ export class Commentator {
 			)
 		})
 
-		// Internal neuron setup — narrate once on first internal init
+		// Internal neuron setup — narrate once on first internal init, describe all 4
 		brain.on("neuron:init:started", (payload) => {
 			if (!this.isInternalNeuron(payload.neuronId as string)) return
 			if (this.narratedInternalSetup) return
 			this.narratedInternalSetup = true
+			const descriptions = Object.values(INTERNAL_NEURONS)
+				.map((n) => `${n.name} (${n.description})`)
+				.join(", ")
 			this.enqueue(
-				`${this.brainContext()}\nThe deeper layers are now forming — internal systems that will cross-reference knowledge across areas and track blind spots.`,
+				`${this.brainContext()}\nThe deeper layers are now forming — 4 internal systems: ${descriptions}.`,
 			)
 		})
 
@@ -233,32 +286,49 @@ export class Commentator {
 			)
 		})
 
-		// Synthesized — react at all significance levels
+		// Observed — an area noticed something
+		brain.on("neuron:observed", (payload) => {
+			const isInternal = this.isInternalNeuron(payload.neuronId as string)
+			if (isInternal) return
+
+			const name = this.resolveName(payload.neuronId as string)
+			const importance = payload.importance != null ? Number(payload.importance) : undefined
+
+			this.enqueue(
+				`${name} observed something${importance !== undefined ? ` (importance: ${Math.round(importance * 100)}%)` : ""}.`,
+			)
+		})
+
+		// Dismissed — area saw data but it wasn't relevant
+		brain.on("neuron:observe:dismissed", (payload) => {
+			const isInternal = this.isInternalNeuron(payload.neuronId as string)
+			if (isInternal) return
+
+			const name = this.resolveName(payload.neuronId as string)
+			const gaps = payload.gaps as string[] | undefined
+
+			if (gaps && gaps.length > 0) {
+				this.enqueue(
+					`${name} dismissed the data — noted gaps: ${gaps.join(", ")}.`,
+				)
+			}
+		})
+
+		// Synthesized — include evolution text in the event for the LLM
 		brain.on("neuron:synthesized", (payload) => {
 			const isInternal = this.isInternalNeuron(payload.neuronId as string)
+			if (isInternal) return
+
 			const name = this.resolveName(payload.neuronId as string)
-			const significance = payload.significance as string | undefined
 			const evolution = payload.evolution as string | undefined
+			const significance = payload.significance != null ? Number(payload.significance) : undefined
 
-			if (isInternal) {
+			if (evolution) {
 				this.enqueue(
-					`The network's internal picture updated — cross-referencing what different areas know.`,
-				)
-				return
-			}
-
-			if (significance === "critical") {
-				this.enqueue(
-					`${this.sourceContext()}\n${name} had a major shift in understanding — significance: critical${evolution ? `, pattern: ${evolution}` : ""}.`,
-				)
-			} else if (significance === "notable") {
-				this.enqueue(
-					`${this.sourceContext()}\n${name} updated its understanding — significance: notable.`,
+					`${name} just updated its understanding. What changed: "${evolution}"${significance !== undefined ? ` (significance: ${Math.round(significance * 100)}%)` : ""}.`,
 				)
 			} else {
-				this.enqueue(
-					`${this.sourceContext()}\n${name} quietly absorbed new information.`,
-				)
+				this.enqueue(`${name} synthesized but nothing notable changed.`)
 			}
 		})
 
@@ -280,10 +350,10 @@ export class Commentator {
 			}
 		})
 
-		// Evaluator
+		// Evaluator — enqueue into current phase (usually injection), don't change phase
 		brain.on("evaluator:evaluation:started", (payload) => {
 			this.enqueue(
-				`${this.brainContext()}\nThe mind is pausing to reflect on ${payload.signalCount} thing(s) it has noticed — deciding whether to reorganize.`,
+				`${this.brainContext()}\nThe mind is pausing mid-flow to reflect on ${payload.signalCount} thing(s) it has noticed — deciding whether to reorganize.`,
 			)
 		})
 
@@ -333,6 +403,7 @@ export class Commentator {
 	}
 
 	private enqueue(eventDescription: string) {
+		this._logEntry("enqueue", `[${this.phase}] ${eventDescription.slice(0, 100)}`)
 		this.buffer.push(eventDescription)
 
 		const config = this.phaseConfigs[this.phase]
@@ -344,6 +415,7 @@ export class Commentator {
 	private flush() {
 		if (this.buffer.length === 0) return
 		const batch = this.buffer.splice(0)
+		this._logEntry("flush", `${batch.length} event(s)`)
 		this.processBuffer(batch)
 	}
 
@@ -370,14 +442,13 @@ export class Commentator {
 	private async generateComment(batch: string[]) {
 		if (!this.brain) return
 
-		const recentHistory = this.history.slice(-6)
 		const eventsBlock = batch.length === 1
 			? batch[0]
 			: batch.map((e, i) => `${i + 1}. ${e}`).join("\n")
 
 		const prompt = [
-			recentHistory.length > 0
-				? `Your recent thoughts:\n${recentHistory.join("\n")}\n`
+			this.lastComment
+				? `Your last thought:\n${this.lastComment}\n`
 				: "",
 			`What just happened:\n${eventsBlock}`,
 			"",
@@ -405,6 +476,7 @@ export class Commentator {
 			accumulated += delta
 
 			if (accumulated.trim() === "SKIP" || accumulated.trim().startsWith("SKIP")) {
+				this._logEntry("skip", "LLM said SKIP")
 				return
 			}
 		}
@@ -412,15 +484,16 @@ export class Commentator {
 		if (accumulated.trim() === "") return
 
 		const content = accumulated.trim()
+		this._logEntry("comment", content.slice(0, 120))
 		this.onComment(content)
-		this.history.push(content)
+		this.lastComment = content
 	}
 
 	detach() {
 		// Flush any remaining buffered events
 		this.flush()
 		this.brain = null
-		this.history = []
+		this.lastComment = ""
 		this.buffer = []
 		this.phase = "idle"
 		this.narratedInternalSetup = false

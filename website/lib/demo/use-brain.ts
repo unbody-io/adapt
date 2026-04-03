@@ -155,20 +155,15 @@ export function useBrain() {
 		const commentator = new Commentator(
 			options.commentatorModel ?? options.model,
 			(comment: string) => {
-				setState((prev) => ({
-					...prev,
-					commentary: prev.commentary
-						? `${prev.commentary}\n\n${comment}`
-						: comment,
-				}))
+				setState((prev) => ({ ...prev, commentary: comment }))
+			},
+			() => {
+				setState((prev) => ({ ...prev, commentary: "thinking..." }))
 			},
 		)
 		commentator.attach(brain)
 		commentator.setPhase("birth")
 		commentatorRef.current = commentator
-
-		// Phase-transition narration: birth begins
-		commentator.narrate("The mind is coming into being — analyzing its purpose and deciding how to organize its thinking.")
 
 		// Log ALL brain events to timeline
 		;(brain as unknown as { on(fn: (event: { type: string; payload: unknown }) => void): void }).on((event) => {
@@ -282,20 +277,6 @@ export function useBrain() {
 					syncNeurons(brain)
 				}
 
-				// Phase transitions for commentator
-				if (eventType === "brain:inject:started") {
-					commentatorRef.current?.setPhase("injection")
-				}
-				if (eventType === "brain:inject:completed") {
-					commentatorRef.current?.setPhase("idle")
-				}
-				if (eventType === "evaluator:evaluation:started") {
-					commentatorRef.current?.setPhase("evolution")
-				}
-				if (eventType === "evaluator:evaluation:completed" || eventType === "evolution:action:executed") {
-					commentatorRef.current?.setPhase("idle")
-				}
-
 				// Injection batch progress
 				if (eventType === "brain:inject:started") {
 					setState((prev) => ({
@@ -326,13 +307,6 @@ export function useBrain() {
 		try {
 			await retryAsync(() => brain.initialize(), 3)
 			syncNeurons(brain)
-			commentator.setPhase("idle")
-
-			// Phase-transition narration: brain ready
-			commentator.narrate(
-				`${brainContext(brain)}\nThe mind is fully formed and ready. All areas of focus are in place.`,
-			)
-
 			setState((prev) => ({ ...prev, phase: "ready" }))
 		} catch (err) {
 			console.error("[useBrain] Init failed:", err)
@@ -373,9 +347,10 @@ export function useBrain() {
 		const brain = brainRef.current
 		if (!brain) return
 
-		// Phase-transition narration: injection phase begins
+		// Phase transition: birth → injection (merged "brain ready" + "injection starting")
+		commentatorRef.current?.setPhase("injection")
 		commentatorRef.current?.narrate(
-			`Now it's time to learn. ${dataSources.length} source${dataSources.length > 1 ? "s" : ""} of information ${dataSources.length > 1 ? "are" : "is"} about to flow in: ${dataSources.map((s) => s.label).join(", ")}.`,
+			`The mind is fully formed and ready. ${dataSources.length} source${dataSources.length > 1 ? "s" : ""} of information ${dataSources.length > 1 ? "are" : "is"} about to flow in: ${dataSources.map((s) => s.label).join(", ")}.`,
 		)
 
 		for (let i = 0; i < dataSources.length; i++) {
@@ -398,6 +373,7 @@ export function useBrain() {
 
 			// Source-transition narration
 			if (i > 0) {
+				commentatorRef.current?.clear()
 				commentatorRef.current?.narrate(
 					`Moving on to source ${i + 1} of ${dataSources.length}: "${source.label}".`,
 				)
@@ -416,21 +392,21 @@ export function useBrain() {
 			}
 		}
 
-		// Clear source context
+		// Phase transition: injection → idle
 		commentatorRef.current?.setSourceContext("", "")
-
-		setState((prev) => ({
-			...prev,
-			activity: "Injection complete",
-			injectionProgress: null,
-		}))
-
-		// Phase-transition narration: all injection done
+		commentatorRef.current?.setPhase("idle")
 		commentatorRef.current?.narrate(
 			`All sources have been absorbed. The mind is ready to answer questions.`,
 		)
 
+		setState((prev) => ({
+			...prev,
+			activity: "Ready",
+			injectionProgress: null,
+		}))
+
 		console.log("[Brain Timeline]", JSON.stringify(timelineRef.current.map(e => ({ t: e.t, event: e.event })), null, 2))
+		commentatorRef.current?.dumpLog()
 	}, [])
 
 	const destroy = useCallback(() => {
@@ -449,19 +425,15 @@ export function useBrain() {
 	}
 }
 
-function isInternalNeuron(brain: import("@unbody/adapt").Brain, neuronId: string): boolean {
-	const neuron = brain.getNeuron(neuronId)
-	return neuron?.name?.startsWith("__internal") ?? false
+const INTERNAL_NEURONS: Record<string, string> = {
+	__internal_global_understanding: "Global Understanding",
+	__internal_global_query_understanding: "Query Patterns",
+	__internal_injection_gaps: "Injection Gaps",
+	__internal_query_gaps: "Query Gaps",
 }
 
-function brainContext(brain: import("@unbody/adapt").Brain): string {
-	const neurons = brain.neurons
-	if (neurons.size === 0) return ""
-	const names = Array.from(neurons.values())
-		.filter((l) => !l.name.startsWith("__internal"))
-		.map((l) => l.name)
-		.join(", ")
-	return `[Current areas of focus: ${names}]`
+function isInternalNeuron(_brain: import("@unbody/adapt").Brain, neuronId: string): boolean {
+	return neuronId in INTERNAL_NEURONS
 }
 
 function activityFromEvent(
@@ -478,8 +450,9 @@ function activityFromEvent(
 		case "brain:neuron:added": return `Created "${payload.name}"`
 		case "neuron:init:started": {
 			const neuronId = payload.neuronId as string
-			if (isInternalNeuron(brain, neuronId)) {
-				return "Preparing internal systems..."
+			const internalName = INTERNAL_NEURONS[neuronId]
+			if (internalName) {
+				return `Preparing ${internalName}...`
 			}
 			const neuron = brain.getNeuron(neuronId)
 			return `Setting up "${neuron?.name ?? neuronId}"...`
@@ -496,8 +469,9 @@ function activityFromEvent(
 		case "neuron:synthesized": return null
 		case "neuron:query:started": {
 			const neuronId = payload.neuronId as string
-			if (isInternalNeuron(brain, neuronId)) {
-				return "Cross-referencing knowledge..."
+			const internalName = INTERNAL_NEURONS[neuronId]
+			if (internalName) {
+				return `Cross-referencing ${internalName}...`
 			}
 			return null
 		}

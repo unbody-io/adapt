@@ -16,8 +16,6 @@ export interface UseCase {
 	model?: string | ModelRef
 	/** Blueprint model — string or { provider, model } */
 	blueprintModel?: string | ModelRef
-	/** Commentator model — string or { provider, model } */
-	commentatorModel?: string | ModelRef
 	learning?: {
 		understand?: {
 			thresholds?: {

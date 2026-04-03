@@ -47,7 +47,6 @@ export function DemoOrchestrator() {
 			prompt,
 			model,
 			blueprintModel: useCase.blueprintModel ? createModel(useCase.blueprintModel) : model,
-			commentatorModel: useCase.commentatorModel ? createModel(useCase.commentatorModel) : model,
 			autoSetup: useCase.autoSetup,
 			learning: useCase.learning,
 			evolution: useCase.evolution ? {

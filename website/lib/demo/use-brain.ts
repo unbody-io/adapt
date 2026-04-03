@@ -8,6 +8,7 @@ import type {
 	InjectionProgress,
 	DataSource,
 } from "./types"
+import { commentaryFromEvent, isInternalNeuron, INTERNAL_NEURONS } from "./commentary"
 
 const defaultMetrics: NeuronMetrics = {
 	observations: 0,
@@ -43,10 +44,12 @@ const initialState: DemoState = {
 	injectionProgress: null,
 }
 
+const COMMENTARY_MIN_INTERVAL = 2500
+const COMMENTARY_QUEUE_CAP = 5
+
 interface UseBrainOptions {
 	model: LanguageModel
 	blueprintModel?: LanguageModel
-	commentatorModel?: LanguageModel
 	prompt: string
 	autoSetup?: boolean
 	learning?: {
@@ -76,10 +79,62 @@ interface UseBrainOptions {
 export function useBrain() {
 	const [state, setState] = useState<DemoState>(initialState)
 	const brainRef = useRef<import("@unbody/adapt").Brain | null>(null)
-	const commentatorRef = useRef<import("../../components/demo/commentator").Commentator | null>(null)
 	const eventIdCounter = useRef(0)
 	const timelineRef = useRef<{ t: number; event: string; payload: Record<string, unknown> }[]>([])
 	const startTimeRef = useRef(0)
+	const narratedInternalSetupRef = useRef(false)
+
+	// Commentary queue
+	const commentaryQueueRef = useRef<{ text: string; priority?: boolean }[]>([])
+	const commentaryTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+	const commentaryLastDisplayRef = useRef(0)
+
+	const displayCommentary = useCallback((text: string) => {
+		commentaryLastDisplayRef.current = Date.now()
+		setState((prev) => ({ ...prev, commentary: text }))
+	}, [])
+
+	const drainCommentaryQueue = useCallback(() => {
+		commentaryTimerRef.current = null
+		const queue = commentaryQueueRef.current
+		if (queue.length === 0) return
+		const item = queue.shift()!
+		displayCommentary(item.text)
+		if (queue.length > 0) {
+			commentaryTimerRef.current = setTimeout(drainCommentaryQueue, COMMENTARY_MIN_INTERVAL)
+		}
+	}, [displayCommentary])
+
+	const enqueueCommentary = useCallback((text: string, priority?: boolean) => {
+		const queue = commentaryQueueRef.current
+		queue.push({ text, priority })
+
+		// Overflow protection: drop oldest non-priority items
+		if (queue.length > COMMENTARY_QUEUE_CAP) {
+			const kept: typeof queue = []
+			for (const item of queue) {
+				if (item.priority || kept.length < 3) kept.push(item)
+			}
+			// Keep last 3 + all priority items
+			commentaryQueueRef.current = kept.slice(-COMMENTARY_QUEUE_CAP)
+		}
+
+		const elapsed = Date.now() - commentaryLastDisplayRef.current
+		if (!commentaryTimerRef.current && elapsed >= COMMENTARY_MIN_INTERVAL) {
+			drainCommentaryQueue()
+		} else if (!commentaryTimerRef.current) {
+			commentaryTimerRef.current = setTimeout(drainCommentaryQueue, COMMENTARY_MIN_INTERVAL - elapsed)
+		}
+	}, [drainCommentaryQueue])
+
+	const setCommentaryImmediate = useCallback((text: string) => {
+		if (commentaryTimerRef.current) {
+			clearTimeout(commentaryTimerRef.current)
+			commentaryTimerRef.current = null
+		}
+		commentaryQueueRef.current = []
+		displayCommentary(text)
+	}, [displayCommentary])
 
 	const addEvent = useCallback((type: string, payload: Record<string, unknown>) => {
 		setState((prev) => ({
@@ -123,10 +178,10 @@ export function useBrain() {
 
 	const start = useCallback(async (options: UseBrainOptions) => {
 		const { Brain, MemoryBrainStore, MemoryNeuronStore } = await import("@unbody/adapt")
-		const { Commentator } = await import("../../components/demo/commentator")
 
 		startTimeRef.current = Date.now()
 		timelineRef.current = []
+		narratedInternalSetupRef.current = false
 		setState({ ...initialState, phase: "initializing", activity: "Creating brain..." })
 
 		const brain = new Brain({
@@ -150,20 +205,6 @@ export function useBrain() {
 		})
 
 		brainRef.current = brain
-
-		// Commentator
-		const commentator = new Commentator(
-			options.commentatorModel ?? options.model,
-			(comment: string) => {
-				setState((prev) => ({ ...prev, commentary: comment }))
-			},
-			() => {
-				setState((prev) => ({ ...prev, commentary: "thinking..." }))
-			},
-		)
-		commentator.attach(brain)
-		commentator.setPhase("birth")
-		commentatorRef.current = commentator
 
 		// Log ALL brain events to timeline
 		;(brain as unknown as { on(fn: (event: { type: string; payload: unknown }) => void): void }).on((event) => {
@@ -197,6 +238,8 @@ export function useBrain() {
 			"evolution:action:executed",
 		]
 
+		const flags = { get narratedInternalSetup() { return narratedInternalSetupRef.current }, set narratedInternalSetup(v: boolean) { narratedInternalSetupRef.current = v } }
+
 		for (const eventType of eventTypes) {
 			(brain as unknown as { on(event: string, fn: (payload: Record<string, unknown>) => void): void }).on(eventType, (payload: Record<string, unknown>) => {
 				addEvent(eventType, payload)
@@ -207,25 +250,31 @@ export function useBrain() {
 					setState((prev) => ({ ...prev, activity }))
 				}
 
+				// Commentary
+				const comment = commentaryFromEvent(eventType, payload, brain, flags)
+				if (comment) {
+					enqueueCommentary(comment.text, comment.priority)
+				}
+
 				// Per-neuron tracking
 				const neuronId = payload.neuronId as string | undefined
 				if (neuronId) {
-					const isInternal = isInternalNeuron(brain, neuronId)
+					const internal = isInternalNeuron(neuronId)
 
 					switch (eventType) {
 						case "neuron:observe:started":
-							if (!isInternal) {
+							if (!internal) {
 								patchNeuron(neuronId, { activity: "observing" })
 							}
 							break
 						case "neuron:observe:thinking":
-							if (!isInternal) {
+							if (!internal) {
 								patchNeuron(neuronId, { activity: "thinking" })
 							}
 							break
 						case "neuron:observed":
 							incrementMetric(neuronId, "observations")
-							if (!isInternal) {
+							if (!internal) {
 								patchNeuron(neuronId, { activity: "idle" })
 							}
 							break
@@ -233,29 +282,29 @@ export function useBrain() {
 							incrementMetric(neuronId, "dismissals")
 							break
 						case "neuron:synthesize:started":
-							if (!isInternal) {
+							if (!internal) {
 								patchNeuron(neuronId, { activity: "synthesizing" })
 							}
 							break
 						case "neuron:synthesized":
 							incrementMetric(neuronId, "syntheses")
-							if (!isInternal) {
+							if (!internal) {
 								patchNeuron(neuronId, { activity: "idle" })
 							}
 							break
 						case "neuron:query:started":
 							incrementMetric(neuronId, "queries")
-							if (!isInternal) {
+							if (!internal) {
 								patchNeuron(neuronId, { activity: "querying" })
 							}
 							break
 						case "neuron:query:completed":
-							if (!isInternal) {
+							if (!internal) {
 								patchNeuron(neuronId, { activity: "idle" })
 							}
 							break
 						case "neuron:health:updated":
-							if (!isInternal) {
+							if (!internal) {
 								patchNeuron(neuronId, {
 									health: {
 										activation: (payload.activation as number) ?? 0.5,
@@ -312,7 +361,7 @@ export function useBrain() {
 			console.error("[useBrain] Init failed:", err)
 			setState((prev) => ({ ...prev, phase: "error", activity: String(err) }))
 		}
-	}, [addEvent, patchNeuron, incrementMetric])
+	}, [addEvent, patchNeuron, incrementMetric, enqueueCommentary])
 
 	const syncNeurons = (brain: import("@unbody/adapt").Brain) => {
 		const neuronMap = brain.neurons
@@ -347,10 +396,9 @@ export function useBrain() {
 		const brain = brainRef.current
 		if (!brain) return
 
-		// Phase transition: birth → injection (merged "brain ready" + "injection starting")
-		commentatorRef.current?.setPhase("injection")
-		commentatorRef.current?.narrate(
-			`The mind is fully formed and ready. ${dataSources.length} source${dataSources.length > 1 ? "s" : ""} of information ${dataSources.length > 1 ? "are" : "is"} about to flow in: ${dataSources.map((s) => s.label).join(", ")}.`,
+		const labels = dataSources.map((s) => s.label).join(", ")
+		setCommentaryImmediate(
+			`The mind is ready. ${dataSources.length} source${dataSources.length > 1 ? "s" : ""} about to flow in: ${labels}.`,
 		)
 
 		for (let i = 0; i < dataSources.length; i++) {
@@ -368,13 +416,8 @@ export function useBrain() {
 				},
 			}))
 
-			// Give commentator source context
-			commentatorRef.current?.setSourceContext(source.label, source.summary || source.description)
-
-			// Source-transition narration
 			if (i > 0) {
-				commentatorRef.current?.clear()
-				commentatorRef.current?.narrate(
+				setCommentaryImmediate(
 					`Moving on to source ${i + 1} of ${dataSources.length}: "${source.label}".`,
 				)
 			}
@@ -392,26 +435,21 @@ export function useBrain() {
 			}
 		}
 
-		// Phase transition: injection → idle
-		commentatorRef.current?.setSourceContext("", "")
-		commentatorRef.current?.setPhase("idle")
-		commentatorRef.current?.narrate(
-			`All sources have been absorbed. The mind is ready to answer questions.`,
-		)
+		setCommentaryImmediate("All sources absorbed. Ready to answer questions.")
 
 		setState((prev) => ({
 			...prev,
 			activity: "Ready",
 			injectionProgress: null,
 		}))
-
-		console.log("[Brain Timeline]", JSON.stringify(timelineRef.current.map(e => ({ t: e.t, event: e.event })), null, 2))
-		commentatorRef.current?.dumpLog()
-	}, [])
+	}, [setCommentaryImmediate])
 
 	const destroy = useCallback(() => {
-		commentatorRef.current?.detach()
-		commentatorRef.current = null
+		if (commentaryTimerRef.current) {
+			clearTimeout(commentaryTimerRef.current)
+			commentaryTimerRef.current = null
+		}
+		commentaryQueueRef.current = []
 		brainRef.current = null
 		setState(initialState)
 	}, [])
@@ -423,17 +461,6 @@ export function useBrain() {
 		inject,
 		destroy,
 	}
-}
-
-const INTERNAL_NEURONS: Record<string, string> = {
-	__internal_global_understanding: "Global Understanding",
-	__internal_global_query_understanding: "Query Patterns",
-	__internal_injection_gaps: "Injection Gaps",
-	__internal_query_gaps: "Query Gaps",
-}
-
-function isInternalNeuron(_brain: import("@unbody/adapt").Brain, neuronId: string): boolean {
-	return neuronId in INTERNAL_NEURONS
 }
 
 function activityFromEvent(
@@ -450,9 +477,9 @@ function activityFromEvent(
 		case "brain:neuron:added": return `Created "${payload.name}"`
 		case "neuron:init:started": {
 			const neuronId = payload.neuronId as string
-			const internalName = INTERNAL_NEURONS[neuronId]
-			if (internalName) {
-				return `Preparing ${internalName}...`
+			const internal = INTERNAL_NEURONS[neuronId]
+			if (internal) {
+				return `Preparing ${internal.name}...`
 			}
 			const neuron = brain.getNeuron(neuronId)
 			return `Setting up "${neuron?.name ?? neuronId}"...`
@@ -469,9 +496,9 @@ function activityFromEvent(
 		case "neuron:synthesized": return null
 		case "neuron:query:started": {
 			const neuronId = payload.neuronId as string
-			const internalName = INTERNAL_NEURONS[neuronId]
-			if (internalName) {
-				return `Cross-referencing ${internalName}...`
+			const internal = INTERNAL_NEURONS[neuronId]
+			if (internal) {
+				return `Cross-referencing ${internal.name}...`
 			}
 			return null
 		}

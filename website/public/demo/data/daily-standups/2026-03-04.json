@@ -1,0 +1,273 @@
+{
+	"id": "standup-2026-03-04",
+	"source": "standup-2026-03-04",
+	"label": "Day 2, Mar 4",
+	"summary": "Sandboxing solutions, Mycelium prototype demo, module design direction, and safety architecture review.",
+	"description": "R&D daily sprint with Amir Houieh, Noémi Biró, and Gabor Kerekes. Topics: sandboxing solution for Mac OS to accelerate AI-assisted development, Mycelium prototype demo showing URL processing and contextual thread-weaving, Brain nexus analysis covering 70% of Mycelium use cases, UI-driven prototyping approaches, offline-first technology validation, safety architecture review including six-layer message processing and tier classification, and session manager as an early feature focused on user retention.",
+	"items": [
+		{
+			"id": "standup-2026-03-04-000000",
+			"label": "2026-03-04 [00:00:00]",
+			"data": {
+				"chunk": "Noémi Biró: I'm excited to put all the ideas I've been having in my head onto the board. Amir Houieh: We need to start with the board. Gabor Kerekes: It works. Amir Houieh: Did you have a haircut? Gabor Kerekes: No, it's not a dye. It's removing color, not adding color. Amir Houieh: Bleaching. Gabor Kerekes: Yeah, bleach. This is how my hair was when I was a kid. All of it was like this. Amir Houieh: How long did it take? Gabor Kerekes: It takes 30 minutes usually, but I forgot to set a timer, so it was 45 minutes.",
+				"date": "2026-03-04"
+			}
+		},
+		{
+			"id": "standup-2026-03-04-000150",
+			"label": "2026-03-04 [00:01:50]",
+			"data": {
+				"chunk": "Gabor Kerekes: A friend of mine did it, but I was supposed to set the timer because he was busy and I of course didn't because my attention went immediately to something else. Anyway, a bit of update. We had a call with Melissa going through the March planning, the stylized version I sent her, and to discuss how she sees the safety regulations. So it's going to be a hovering research module throughout the month where she's taking the lead gathering research material that might change how we look at the chat later. But she will need our input on what we think because she values that.",
+				"date": "2026-03-04"
+			}
+		},
+		{
+			"id": "standup-2026-03-04-000305",
+			"label": "2026-03-04 [00:03:05]",
+			"data": {
+				"chunk": "Gabor Kerekes: It's nothing about implementation. Strictly about research and gathering to understand the boundaries we have to work within. With that in mind, we also discussed that the modules are steering away from the chat. But I think that's also fine — it puts an interesting design constraint. With this bookmarking prototype, there's not really a chat right now. You enter a bookmark, but it still leaves something that feels personalized. And we're going to have a meeting next Wednesday to discuss first ideas of the module focusing on the 60-day period after. She's going to cancel the Friday meeting because she's doing a demo at Christmas.",
+				"date": "2026-03-04"
+			}
+		},
+		{
+			"id": "standup-2026-03-04-000416",
+			"label": "2026-03-04 [00:04:16]",
+			"data": {
+				"chunk": "Gabor Kerekes: Good stuff. I worked on multiple things. Converging on a sandboxing solution — the sandboxing landscape has exploded in just the last two weeks. Exactly when it came up that we need to accelerate development, because in December there was a step function change in model capabilities where you can run them without supervision — to explore multiple ideas at the same time without babysitting them. Since then, everybody started building sandboxes, so many options out there. Took a while to understand what's good enough. I settled on something for Mac OS that's not as secure as I'd like, but it reduces babysitting by a lot and is very easy to set up.",
+				"date": "2026-03-04"
+			}
+		},
+		{
+			"id": "standup-2026-03-04-000601",
+			"label": "2026-03-04 [00:06:01]",
+			"data": {
+				"chunk": "Gabor Kerekes: I'll share the configuration with you. It's been really helpful — yesterday I could run meaningful experiments on Mycelium inside the sandbox. I really needed to start building something that does meaningful work. Let me show you. The goal with this was to prototype the idea itself, move toward something that can work, prototype the mechanism of how it works, and also validate technology choices. There's a matrix of options we can go with and this was to validate one possible configuration of the tech stack.",
+				"date": "2026-03-04"
+			}
+		},
+		{
+			"id": "standup-2026-03-04-000820",
+			"label": "2026-03-04 [00:08:20]",
+			"data": {
+				"chunk": "Gabor Kerekes: This was built in a sandbox in about an hour. There's a fully functional but limited back end which processes a URL and weaves it together with information it already has about you. I seeded it with some data so it understands things about me — for example, it knows I'm building this cognitive exoskeleton. These tags are the conceptual threads going on in my daily life. Let me find an interesting URL. Maybe this one — an interesting library for building local-first applications.",
+				"date": "2026-03-04"
+			}
+		},
+		{
+			"id": "standup-2026-03-04-001011",
+			"label": "2026-03-04 [00:10:11]",
+			"data": {
+				"chunk": "Gabor Kerekes: There's a basic visualization of the Mycelium digesting this. The agent in the back processes the URL, looks at what bookmarks I've been saving, identifies the threads it can attach this new bookmark onto, and makes an interpretation. It attaches it to \"building a cognitive exoskeleton\" — which is exactly what I'd use it for. It says this provides a local-first reactive foundation for building malleable personal software that extends cognition, like the Ryome vision. It understands I'm working on Ryome and why this is important to me. Also that AI is a partner, not a replacement. Let me try something else.",
+				"date": "2026-03-04"
+			}
+		},
+		{
+			"id": "standup-2026-03-04-001225",
+			"label": "2026-03-04 [00:12:25]",
+			"data": {
+				"chunk": "Gabor Kerekes: It has trouble with Substack articles. I didn't prepare the demo. Amir Houieh: Try this, just wondering how it responds to technical content. Gabor Kerekes: I just wanted to ask the Mycelium where this belongs. I imagine something much nicer — really visualizing how it's weaving the threads together. But it also attaches to the right concepts. Amir Houieh: It's cool. So what's next? Today I was going to do some prototyping of my scenario use case. Are we still aligned with the idea that we're prototyping at the UI level, or are you going to keep building both back end and front end? Gabor Kerekes: For me, this has spawned ideas that I want to prototype just on the UI level.",
+				"date": "2026-03-04"
+			}
+		},
+		{
+			"id": "standup-2026-03-04-001446",
+			"label": "2026-03-04 [00:14:46]",
+			"data": {
+				"chunk": "Gabor Kerekes: They don't necessarily need the back end. Amir Houieh: We need to make sure we're not doing redundant work. For example, I'm working on the brain and the things it's going to do — you shouldn't develop that separately, or we should do it together. I just want to make sure we're not going to redo stuff. But I understand this was needed to give you better ideas on how to move forward. Gabor Kerekes: I don't think we will redo stuff, but even if we overlap at some point, that's fine. We're traversing a search space and maybe we cross paths at some points. All of these are experimental — for me this is throwaway code. I'm not building something substantial.",
+				"date": "2026-03-04"
+			}
+		},
+		{
+			"id": "standup-2026-03-04-001551",
+			"label": "2026-03-04 [00:15:51]",
+			"data": {
+				"chunk": "Gabor Kerekes: I'm validating ideas, not building something I want to keep. Amir Houieh: Indeed. But if we say we're going to specifically design and work on brain for Mycelium, then it's good to improve that along the way and merge our efforts. Gabor Kerekes: Let's see what it says about this. I'm also going to focus today on my use case. Oh, see — \"understanding core AI SDK is the practical step in designing AI that truly partners with humans.\" Essential for projects like Cibil. So it understands I'm working on Cibil because it was seeded with that context. Also here: \"privacy-first AI that truly knows you, a core tenet for Cibil and your broader vision.\" It's so on point. That's what I want to demonstrate — a system that really understands what I'm thinking about.",
+				"date": "2026-03-04"
+			}
+		},
+		{
+			"id": "standup-2026-03-04-001735",
+			"label": "2026-03-04 [00:17:35]",
+			"data": {
+				"chunk": "Amir Houieh: Why does this sit where it does within your world? Gabor Kerekes: Exactly. It has a model of me and what I'm busy with — issues across multiple dimensions: professional projects, intellectual fascinations, psychology. It understands I have ADHD and it weaves all of these together. You have ADHD and you want to build this cognitive exoskeleton, so you're interested in this tech — all of these things are woven together. And this is just the bookmarking aspect of it. Amir Houieh: That's the most important part — a living context of you that's everywhere. Gabor Kerekes: This gave me ideas that I want to try just on the UI level.",
+				"date": "2026-03-04"
+			}
+		},
+		{
+			"id": "standup-2026-03-04-001854",
+			"label": "2026-03-04 [00:18:54]",
+			"data": {
+				"chunk": "Amir Houieh: As for me, yesterday I worked on a few things. One was the brain nexus — I don't love either name, but anyway. I asked Claude to analyze the Mycelium codebase you shared and extract the main use cases. We ended up with 12 particular use cases and user flows. Then I asked Claude to look at the brain's current implementation and see if it's a fit for building those behaviors and if there's anything missing. It said 70% of the scenarios can be covered. A couple of things were missing, mainly around proactivity. I had a backlog of features and it said if I enable these features and make these adjustments, it would be a perfect fit. I made the specs but haven't implemented them yet.",
+				"date": "2026-03-04"
+			}
+		},
+		{
+			"id": "standup-2026-03-04-002013",
+			"label": "2026-03-04 [00:20:13]",
+			"data": {
+				"chunk": "Amir Houieh: Today I was going to add those and then run the 12 use cases powered by brain on top of Mycelium and see how it works — feed it with some mock content. The other thing was a quick sketch on my scenario: I'm going to my email, trying to write, and Mycelium is floating somewhere knowing it can take over and write the email based on different documents it has. Gabor Kerekes: Whatever interests you. I came across this book yesterday — \"Why Greatness Cannot Be Planned.\"",
+				"date": "2026-03-04"
+			}
+		},
+		{
+			"id": "standup-2026-03-04-002134",
+			"label": "2026-03-04 [00:21:34]",
+			"data": {
+				"chunk": "Gabor Kerekes: It's about the myth of the objective — different ways of working on an idea, bottom-up vs top-down. The fundamental idea is that to arrive at something really new, you can't use top-down processes. You can't decide you're going to arrive at something novel. You can only do that through exploring your own interests and traversing a search space in an organic way. As soon as you organize your activity by an objective that is too narrow, you're limiting that search space and can't arrive at something truly new. I notice in how I work that a lot of times I don't really know why something is important — I just have this instinct that a topic is important to dig into, and only months later things come together into a new idea.",
+				"date": "2026-03-04"
+			}
+		},
+		{
+			"id": "standup-2026-03-04-002335",
+			"label": "2026-03-04 [00:23:35]",
+			"data": {
+				"chunk": "Amir Houieh: I didn't get the point. Gabor Kerekes: Maybe I need to digest it. Was your point that we should each do our own use case? To tap into personal interest — what is really important to you, not what's important in the abstract. Amir Houieh: I think we came to an understanding that Mycelium as a whole is what interests all of us. We're past that stage — we know what fascinates each of us. At least for me, it's the ongoing learning and growing understanding, and breaking down the borders between individual contexts. These are the concepts I find in Mycelium that interest me.",
+				"date": "2026-03-04"
+			}
+		},
+		{
+			"id": "standup-2026-03-04-002500",
+			"label": "2026-03-04 [00:25:00]",
+			"data": {
+				"chunk": "Amir Houieh: I'm pretty sure each of you has that too, and that's why we agreed to work on Mycelium. We're all aligned. But let's look at how we each see it and imagine it — I'm pretty sure we'll come together at some point. If you ask me which part is important for me to keep working on, it's what I started with the brain. That's what keeps me motivated — the back end, how the system learns. Gabor Kerekes: I wonder if you could hook the brain up to a specific use case, like the email one? Amir Houieh: The email thing was the UI exploration. I wanted to hook the brain up to the Mycelium use cases.",
+				"date": "2026-03-04"
+			}
+		},
+		{
+			"id": "standup-2026-03-04-002619",
+			"label": "2026-03-04 [00:26:19]",
+			"data": {
+				"chunk": "Amir Houieh: I wanted to rebuild Mycelium on top of the brain as the memory layer and see what types of use cases can be built on top of it. Gabor Kerekes: That would already be a good experiment. You've been working on the brain for a while and even if it doesn't have all the capabilities you want, it would be good to anchor it in something more concrete — something with a UI you can interact with for validation. Amir Houieh: The adjustments I mentioned — I'm not going to implement them all now. I'll only do the cosmetic ones and then start prototyping with Mycelium use cases. I think that would be a good validation of how the brain works.",
+				"date": "2026-03-04"
+			}
+		},
+		{
+			"id": "standup-2026-03-04-002728",
+			"label": "2026-03-04 [00:27:28]",
+			"data": {
+				"chunk": "Gabor Kerekes: The way I'm thinking about the code we're producing now — it's really so cheap to produce. That's why sandboxing was so important, because that's what makes it cheap. Once you have a specification — the design part, clarifying your ideas on what you need — once you have that and hand it to the model, it can really deliver. This was built in an hour without my intervention. I basically said, \"Build me this, including the UI, the back end on this particular stack, and don't talk to me until you're done.\" And it did. Amir Houieh: The only thing about the brain is that I don't see it like that. It's been more of an idea I've been working on for months.",
+				"date": "2026-03-04"
+			}
+		},
+		{
+			"id": "standup-2026-03-04-002852",
+			"label": "2026-03-04 [00:28:52]",
+			"data": {
+				"chunk": "Amir Houieh: I vibe coded it, but the architecture is solid. It's not that I'm going to roll it out as open source or a module, but I'd like to put it to the test. At some point if we see it's a great fit, we can reimplement it. It's something I'd like to test as an experiment. Gabor Kerekes: Let's do that. So how would you connect it to your practical use case? Amir Houieh: I don't have a practical use case right now. The one I had in mind was very UI-driven — how we imagine Mycelium. It assumes Mycelium has this very strong engine behind the scene that learns and everything.",
+				"date": "2026-03-04"
+			}
+		},
+		{
+			"id": "standup-2026-03-04-002958",
+			"label": "2026-03-04 [00:29:58]",
+			"data": {
+				"chunk": "Amir Houieh: I wanted to implement the UI for how Mycelium can live at the OS level — when I open my email it's there, when I'm talking about something all the relevant context starts appearing. Gabor Kerekes: You said, \"How to find a relevant bookmark during a conversation. Help me draft an article based on all the relevant stuff.\" Amir Houieh: Exactly. That's what I wanted to build. For the brain, I only work on it in my free time — it's not active work. But after that prototype, I'd like to hook it up to see how brain can help build Mycelium. I have those 12 use cases with the threads and stuff you defined, but I need to dig into it.",
+				"date": "2026-03-04"
+			}
+		},
+		{
+			"id": "standup-2026-03-04-003059",
+			"label": "2026-03-04 [00:30:59]",
+			"data": {
+				"chunk": "Amir Houieh: I need to pick one or two really strong use cases to build. Gabor Kerekes: It would be interesting to pull the brain into these experiments, including the UI, to start anchoring it in something real. Amir Houieh: There's a difference in our approaches. With UI, I completely fake it. I assume there's some data and produce two or three different sketches to see how they work. Once I have a clearer idea of the UI, then I start worrying about real data. Gabor Kerekes: But how do you guide the design of the brain if you don't know what you're going to use it for? Amir Houieh: It's just hypothetical scenarios.",
+				"date": "2026-03-04"
+			}
+		},
+		{
+			"id": "standup-2026-03-04-003209",
+			"label": "2026-03-04 [00:32:09]",
+			"data": {
+				"chunk": "Amir Houieh: I say, \"Imagine I've been talking about this and this, and now I want to make an email or draft an article. Show me the hypothetical tweets, the hypothetical website.\" I just want to see it. That's how I usually work. Gabor Kerekes: That's helpful. I'll probably work in a similar way because I'm not going to be able to go through the whole thing. Amir Houieh: If you compare it to making a movie, I take one scene and fake it. You say this character has this personality, this wardrobe, this lighting. I fake everything to see one picture of the scene, and that gives me an idea whether this is the right direction. Then I work my way back to the data.",
+				"date": "2026-03-04"
+			}
+		},
+		{
+			"id": "standup-2026-03-04-003305",
+			"label": "2026-03-04 [00:33:05]",
+			"data": {
+				"chunk": "Gabor Kerekes: But you're working in both ways. The brain is about the data. Amir Houieh: The brain is something else. It's not my main focus — just whenever I have time, I spend a bit on it as a hobby. Now because of Mycelium it started becoming more serious. In the next week or two, when we have a clearer idea what Mycelium will be, I'll hook it up as one of the experiments. Gabor Kerekes: It doesn't and shouldn't be too defined. Amir Houieh: No, but you need to explore ideas, sketch here and there to see what it is. I don't want the data to be a blocker for me. I'm pretty sure at some point when we have the demand, making the back end is easy — whether it's brain or something else.",
+				"date": "2026-03-04"
+			}
+		},
+		{
+			"id": "standup-2026-03-04-003355",
+			"label": "2026-03-04 [00:33:55]",
+			"data": {
+				"chunk": "Gabor Kerekes: I'm thinking about it similarly, only at some points I need something that actually works dynamically that I can interact with, instead of a static mockup. And this spawns new ideas that I'm going to explore using mockups and then come back to the back end. Amir Houieh: I think we just have different approaches and both are working. Gabor Kerekes: What I also want to work out is first-class offline support. When you're saving notes, it stays on your device. I hate it with my mind-bookmarking — if their back end is down and I have a brainstorm while walking, I open it and it's loading forever. I just want to put down my thought while it's there, or read an article. So I'm also validating technology choices that make offline support possible.",
+				"date": "2026-03-04"
+			}
+		},
+		{
+			"id": "standup-2026-03-04-003629",
+			"label": "2026-03-04 [00:36:29]",
+			"data": {
+				"chunk": "Amir Houieh: If you guys are all happy with everything, I can connect the website to the domain today. Gabor Kerekes: I think it's time. Did the back button get checked? Does it work well on your phone now? Amir Houieh: I was going to review and measure that today. Gabor Kerekes: Cool. Amir Houieh: I still need to do my task with Cibil. Noémi, do you need me for starting the Cibil mind map and visual exploration, or are you good? Gabor Kerekes: I think it's best that we each do our explorations and then converge. Amir Houieh: Do you want me to also do the exploration, or more be helping? For me the convenient way is working more actively as a developer rather than a designer, but if you need my input I can help.",
+				"date": "2026-03-04"
+			}
+		},
+		{
+			"id": "standup-2026-03-04-003725",
+			"label": "2026-03-04 [00:37:25]",
+			"data": {
+				"chunk": "Gabor Kerekes: We can try with me having a go and then we can meet to see what kind of input is needed. I do appreciate your perspective because you think from an angle that I don't necessarily do. Amir Houieh: Sure. The first thing would be to go through what Melissa shared — or actually, it's more of an exploration. If you can go out and see what's out there, then once you have that we can go through it together. Gabor Kerekes: That's indeed a good starting point. Yesterday I also did an exploration of the safety documents she shared — some visualizations of what that means. Amir Houieh: Let's do that in another session then.",
+				"date": "2026-03-04"
+			}
+		},
+		{
+			"id": "standup-2026-03-04-003836",
+			"label": "2026-03-04 [00:38:36]",
+			"data": {
+				"chunk": "Gabor Kerekes: You can find it in the same document. Amir Houieh: I can stay, but I don't know if Gabor wants to — we can end the daily. Gabor Kerekes: I'll head out. Amir Houieh: Cool, we'll be in touch. Noémi Biró: I can stay for a bit to share this. Amir Houieh: Okay. Noémi Biró: Basically Melissa was sharing random links and asking us our opinion and how we could use them. So I did a bit of a deep dive. There are these two frameworks — MindGuard could be something we use within Cibil as a system-wide judge for security behavior. And then there are other frameworks useful for prompt work. From the safety guardrail spec Melissa was talking about, there's this architecture she defined — six layers, each message going through them.",
+				"date": "2026-03-04"
+			}
+		},
+		{
+			"id": "standup-2026-03-04-004004",
+			"label": "2026-03-04 [00:40:04]",
+			"data": {
+				"chunk": "Noémi Biró: This is based on Dina's input and what Melissa mentioned today — she wants to validate it by end of week. She's thinking about six layers and how each message goes through them. Then there's a tier classifier which classifies messages into five tiers. I did these visualizations for my own sake to understand it better. I also made the definitions more concrete — what it means to have a session, what it means to have a turn, because we were missing some definitions there. I think one of the first things to implement would be the session manager — an actor that has the input of the user's current tier and the rules that come with it. The document goes into future scenarios with daily caps and end-of-session triggers, but our actual problem right now is retention, not addiction. So it would be more beneficial to configure the session manager with that in mind.",
+				"date": "2026-03-04"
+			}
+		},
+		{
+			"id": "standup-2026-03-04-004109",
+			"label": "2026-03-04 [00:41:09]",
+			"data": {
+				"chunk": "Noémi Biró: There are some really good overlapping ideas — from both a security and retention point of view, it helps to define the session better for users. If we keep an end-of-session check-in, I think these are ideas I'll think further about — what this means in the context of modules where there's no chat function, just these structures. For example, one of Melissa's questions was what can we outsource. Based on the classification she wants, there's a risk signal — MindGuard from one of the shared articles could take over the load of defining if a user message is actually critical.",
+				"date": "2026-03-04"
+			}
+		},
+		{
+			"id": "standup-2026-03-04-004228",
+			"label": "2026-03-04 [00:42:28]",
+			"data": {
+				"chunk": "Amir Houieh: What are the five tiers? Noémi Biró: Think of a tier as: if you're low risk then you're tier one or tier two. If you're potentially escalating — grieving heavily but not at risk yet — that's another tier. Amir Houieh: I see. But these are categories. What are the tiers exactly? Moderate risk, high distress, crisis. I think these shouldn't be called tiers — the more accurate technical term is taxonomy. Technically this is doable. All we need is a more fine-tuned classification model. I saw one of the blog posts Melissa shared as an example. Strategically, I think we should keep this as background work since the chat isn't our main focus.",
+				"date": "2026-03-04"
+			}
+		},
+		{
+			"id": "standup-2026-03-04-004332",
+			"label": "2026-03-04 [00:43:32]",
+			"data": {
+				"chunk": "Noémi Biró: That wasn't my goal either — to define the workload. Now that I've mapped this system, I understand better where we could look for outsourcing, which was one of Melissa's concerns. I think this architecture is not that complicated to build. Amir Houieh: Cool. What I can do is go through the whole document sometime this week in my free time and make comments if relevant. Is there any particular question in terms of technical stuff I should look at?",
+				"date": "2026-03-04"
+			}
+		},
+		{
+			"id": "standup-2026-03-04-004506",
+			"label": "2026-03-04 [00:45:06]",
+			"data": {
+				"chunk": "Noémi Biró: I don't know how much work each part would be — that wasn't my goal to define. But now that I've mapped the system I understand better where we could outsource. I think this architecture is not that complicated to build. Amir Houieh: I'll go through the Google Docs document Melissa shared and make comments this week. Noémi Biró: These are ongoing research questions for the whole month of March. Amir Houieh: Did she put that in a document or in the email? Noémi Biró: I think it was from emails. Amir Houieh: Do I have access to the document? Noémi Biró: You should — it's the same one where we were doing the planning. I sent the link.",
+				"date": "2026-03-04"
+			}
+		},
+		{
+			"id": "standup-2026-03-04-004638",
+			"label": "2026-03-04 [00:46:38]",
+			"data": {
+				"chunk": "Noémi Biró: Have a nice exploration. Amir Houieh: Exploration on Cibil or Mycelium? Noémi Biró: Mycelium. I wanted to focus on that today. Amir Houieh: Cool. We need to make sure we have multiple ideas by Wednesday, right? Noémi Biró: Yes, that's correct. Amir Houieh: Today is Tuesday — wait, it's Wednesday. How about Friday, you and I have an hour working session where we brainstorm and look at things? Also tomorrow you can put together that mind map exploration for Cibil. Would that work? Noémi Biró: Yep. Want to meet after the daily? Amir Houieh: Sure. Then we do that.",
+				"date": "2026-03-04"
+			}
+		}
+	]
+}

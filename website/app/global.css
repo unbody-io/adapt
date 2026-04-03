@@ -51,6 +51,14 @@ html {
     font-weight: inherit;
     color: inherit;
   }
+
+  :where(table):not(:where([class~="not-prose"], [class~="not-prose"] *)) {
+    border: 1px solid hsla(0, 0%, 50%, 0.25);
+  }
+
+  :where(th, td):not(:where([class~="not-prose"], [class~="not-prose"] *)) {
+    border-color: hsla(0, 0%, 50%, 0.25);
+  }
 }
 
 
@@ -65,4 +73,10 @@ html {
 
 html > body[data-scroll-locked] {
   margin-right: 0px !important;
+}
+
+.demo-option-card:not(:disabled):hover {
+  background: rgba(26, 26, 31, 0.06) !important;
+  border-color: rgba(26, 26, 31, 0.2) !important;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
 }

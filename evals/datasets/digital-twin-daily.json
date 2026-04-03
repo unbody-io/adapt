@@ -21,361 +21,361 @@
     {
       "id": "evt_001",
       "timestamp": "2024-09-01T09:00:00Z",
-      "domain": "software-development",
+      "type": "software-development",
       "content": "Spent the morning refactoring our API gateway. Moved from a monolithic Express app to a modular plugin architecture. Each route handler is now a self-contained module with its own middleware chain. Much cleaner separation of concerns."
     },
     {
       "id": "evt_002",
       "timestamp": "2024-09-01T19:30:00Z",
-      "domain": "cooking-food",
+      "type": "cooking-food",
       "content": "Tried making homemade ramen tonight. The broth took 6 hours — pork bones, kombu, dried shiitake, garlic. Soft-boiled the eggs perfectly at 6.5 minutes. The chashu pork was a bit dry though, need to braise it longer next time."
     },
     {
       "id": "evt_003",
       "timestamp": "2024-09-02T07:00:00Z",
-      "domain": "fitness",
+      "type": "fitness",
       "content": "Morning run, 7km in 38 minutes. Left knee felt a bit stiff for the first kilometer but loosened up. Heart rate averaged 155bpm. I think I need new running shoes — these have about 500km on them."
     },
     {
       "id": "evt_004",
       "timestamp": "2024-09-02T14:00:00Z",
-      "domain": "software-development",
+      "type": "software-development",
       "content": "Code review discussion today about whether to use Zod or io-ts for runtime validation. I argued for Zod — simpler API, better error messages, huge community. The team agreed. We'll standardize on Zod across all services."
     },
     {
       "id": "evt_005",
       "timestamp": "2024-09-03T10:00:00Z",
-      "domain": "health-therapy",
+      "type": "health-therapy",
       "content": "Therapy session with Dr. Martinez today. We talked about my tendency to over-commit at work and then feel resentful. She pointed out that saying yes to everything is a way of avoiding the discomfort of setting boundaries. She gave me homework: say no to at least one request this week and sit with the feeling."
     },
     {
       "id": "evt_006",
       "timestamp": "2024-09-03T20:00:00Z",
-      "domain": "hobbies-reading",
+      "type": "hobbies-reading",
       "content": "Finished reading 'Project Hail Mary' by Andy Weir. Incredible book. The friendship between Ryland and Rocky was so well done. The science felt plausible and the problem-solving was satisfying. Going to read 'Children of Time' next."
     },
     {
       "id": "evt_007",
       "timestamp": "2024-09-04T11:00:00Z",
-      "domain": "software-development",
+      "type": "software-development",
       "content": "Deployed our new event-sourcing pipeline to staging. Using Kafka for the event bus with a PostgreSQL projection store. The replay capability is amazing — we can rebuild any read model from scratch. Latency is about 50ms for event processing."
     },
     {
       "id": "evt_008",
       "timestamp": "2024-09-04T18:00:00Z",
-      "domain": "relationships",
+      "type": "relationships",
       "content": "Had dinner with Sarah's parents. Her dad asked about my work again and I tried to explain what an API is using a restaurant menu analogy. He seemed to get it this time. Her mom made her famous lamb tagine — I need to get that recipe."
     },
     {
       "id": "evt_009",
       "timestamp": "2024-09-05T08:30:00Z",
-      "domain": "finance",
+      "type": "finance",
       "content": "Reviewed my investment portfolio this morning. The S&P 500 index fund is up 18% YTD. My crypto allocation (5% of portfolio) is volatile as usual. Thinking about increasing my monthly contribution to the retirement account by $200. Need to also look into I-bonds for the emergency fund."
     },
     {
       "id": "evt_010",
       "timestamp": "2024-09-05T15:00:00Z",
-      "domain": "software-development",
+      "type": "software-development",
       "content": "Long debugging session. Race condition in our WebSocket handler — two clients connecting simultaneously could corrupt the session store. Fixed it with a mutex lock on the connection handler. Added a regression test that spawns 50 concurrent connections."
     },
     {
       "id": "evt_011",
       "timestamp": "2024-09-06T07:30:00Z",
-      "domain": "fitness",
+      "type": "fitness",
       "content": "Started a new strength training program. 5x5 squats at 80kg, bench press at 60kg, barbell rows at 55kg. My form on squats needs work — coach said I'm leaning too far forward. Need to work on ankle mobility."
     },
     {
       "id": "evt_012",
       "timestamp": "2024-09-06T19:00:00Z",
-      "domain": "cooking-food",
+      "type": "cooking-food",
       "content": "Made a Thai green curry from scratch. Ground the paste in the mortar — lemongrass, galangal, green chilies, shrimp paste, cilantro roots. Added chicken thighs, Thai eggplant, and bamboo shoots. The fresh paste makes such a difference compared to store-bought."
     },
     {
       "id": "evt_013",
       "timestamp": "2024-09-07T16:00:00Z",
-      "domain": "home-living",
+      "type": "home-living",
       "content": "Finally fixed the leaky bathroom faucet. The cartridge was worn out — replaced it with a Moen 1222 replacement. While I was at it, I cleaned the aerator which was completely clogged with calcium buildup. Water pressure is great now."
     },
     {
       "id": "evt_014",
       "timestamp": "2024-09-08T10:00:00Z",
-      "domain": "health-therapy",
+      "type": "health-therapy",
       "content": "Follow-up with Dr. Martinez. I managed to say no to a weekend deployment request and it went fine — the world didn't end. We explored why I expected catastrophe. She called it 'catastrophizing' and we practiced cognitive restructuring. Reframing: 'They asked, I said no, they found someone else. That's how healthy teams work.'"
     },
     {
       "id": "evt_015",
       "timestamp": "2024-09-09T11:00:00Z",
-      "domain": "music",
+      "type": "music",
       "content": "Been learning 'Nuvole Bianche' by Ludovico Einaudi on piano. The left hand arpeggios are tricky — need to keep them even while the right hand plays the melody. Practiced for 45 minutes. My teacher says I should use more pedal in the middle section."
     },
     {
       "id": "evt_016",
       "timestamp": "2024-09-10T09:00:00Z",
-      "domain": "software-development",
+      "type": "software-development",
       "content": "Architecture meeting about migrating our auth system from session-based to JWT. I pushed back — JWTs can't be revoked easily and we'd need a token blacklist which defeats the purpose. Proposed keeping sessions but adding Redis for distributed session storage. Team went with my approach."
     },
     {
       "id": "evt_017",
       "timestamp": "2024-09-11T20:00:00Z",
-      "domain": "travel",
+      "type": "travel",
       "content": "Booked flights to Lisbon for November. Found a great Airbnb in Alfama near the Fado museum. Planning to visit Sintra, the Time Out Market, and maybe take a day trip to Porto. Sarah wants to do a food tour. Need to check if we need travel insurance."
     },
     {
       "id": "evt_018",
       "timestamp": "2024-09-12T12:00:00Z",
-      "domain": "cooking-food",
+      "type": "cooking-food",
       "content": "Lunchtime sourdough baking experiment. My starter is finally active after 2 weeks of feeding. First loaf had good oven spring but the crumb was a bit dense. I think I need to extend the bulk fermentation by an hour. The crust had beautiful blistering though."
     },
     {
       "id": "evt_019",
       "timestamp": "2024-09-13T14:00:00Z",
-      "domain": "software-development",
+      "type": "software-development",
       "content": "Wrote a custom ESLint rule to enforce our team's import ordering convention. Groups: node builtins, external packages, internal modules, relative imports. Each group alphabetized. Took about 2 hours but will save countless code review comments."
     },
     {
       "id": "evt_020",
       "timestamp": "2024-09-14T09:00:00Z",
-      "domain": "fitness",
+      "type": "fitness",
       "content": "Tried a yoga class for the first time. Vinyasa flow, 60 minutes. I was terrible at balance poses — couldn't hold tree pose for more than 10 seconds. But the hip openers felt incredible after all the sitting I do. Going to try to go weekly."
     },
     {
       "id": "evt_021",
       "timestamp": "2024-09-15T17:00:00Z",
-      "domain": "relationships",
+      "type": "relationships",
       "content": "Sarah and I had a long talk about whether we want to get a dog. I'm worried about the time commitment with our work schedules. She suggested starting with fostering to see how it goes. That actually sounds like a great idea — lower commitment, still helps animals."
     },
     {
       "id": "evt_022",
       "timestamp": "2024-09-16T08:00:00Z",
-      "domain": "finance",
+      "type": "finance",
       "content": "Met with a financial advisor about tax-loss harvesting. She suggested selling some underperforming individual stocks to offset the capital gains from my RSU vests. Also recommended setting up a backdoor Roth IRA since my income is above the direct contribution limit. Need to do this before year-end."
     },
     {
       "id": "evt_023",
       "timestamp": "2024-09-17T10:00:00Z",
-      "domain": "health-therapy",
+      "type": "health-therapy",
       "content": "Noticed my sleep has been terrible — averaging 5.5 hours according to my watch. Dr. Martinez and I identified a pattern: I stay up late coding personal projects after Sarah goes to bed. It feels productive in the moment but I'm paying for it all week. Setting a hard 11pm cutoff starting tonight."
     },
     {
       "id": "evt_024",
       "timestamp": "2024-09-18T15:00:00Z",
-      "domain": "software-development",
+      "type": "software-development",
       "content": "Interesting tech talk at work about using AI for code review. The presenter showed how they trained a model on their team's PR comments to auto-suggest improvements. Skeptical about the quality but the idea of catching common patterns automatically is appealing. Maybe we could use it for style enforcement."
     },
     {
       "id": "evt_025",
       "timestamp": "2024-09-19T19:00:00Z",
-      "domain": "hobbies-reading",
+      "type": "hobbies-reading",
       "content": "Started 'Children of Time' by Adrian Tchaikovsky. The spider civilization chapters are fascinating — the way he portrays non-human intelligence and social evolution. Only 100 pages in but already hooked. The parallel storyline on the generation ship is darker than expected."
     },
     {
       "id": "evt_026",
       "timestamp": "2024-09-20T11:00:00Z",
-      "domain": "home-living",
+      "type": "home-living",
       "content": "Spent the morning reorganizing the home office. Got a monitor arm to free up desk space, added a cable management tray underneath, and finally wall-mounted the pegboard for headphones and cables. Also bought a small succulent for the desk. The space feels so much better now."
     },
     {
       "id": "evt_027",
       "timestamp": "2024-09-21T08:00:00Z",
-      "domain": "fitness",
+      "type": "fitness",
       "content": "Ran my first 10K race. Finished in 52 minutes which I'm happy with. The last 2km were brutal — my calves cramped up. Need to work on hydration and maybe add more electrolytes. The runner's high afterward was incredible though. Already looking at half marathon training plans."
     },
     {
       "id": "evt_028",
       "timestamp": "2024-09-22T14:00:00Z",
-      "domain": "cooking-food",
+      "type": "cooking-food",
       "content": "Sunday meal prep. Made a big batch of chicken tikka masala, roasted a whole cauliflower with tahini, and prepped overnight oats for the week. The tikka masala trick: blooming the spices in oil first, then adding yogurt-marinated chicken. Game changer for depth of flavor."
     },
     {
       "id": "evt_029",
       "timestamp": "2024-09-23T09:30:00Z",
-      "domain": "software-development",
+      "type": "software-development",
       "content": "Introduced feature flags using LaunchDarkly in our deployment pipeline. Now we can ship code to production without exposing it to users. Did a gradual rollout of the new search feature — 5%, 25%, 50%, 100% over two days. Caught a performance regression at 25% that we fixed before full rollout."
     },
     {
       "id": "evt_030",
       "timestamp": "2024-09-24T18:30:00Z",
-      "domain": "music",
+      "type": "music",
       "content": "Went to a jazz concert at the Blue Note. The pianist was insane — modal jazz improvisation that just flowed. Made me think about how jazz musicians balance structure and freedom, kind of like good software architecture. Need to listen to more Herbie Hancock."
     },
     {
       "id": "evt_031",
       "timestamp": "2024-09-25T10:00:00Z",
-      "domain": "health-therapy",
+      "type": "health-therapy",
       "content": "The 11pm cutoff is working. Sleeping 7 hours now and my focus during the day is noticeably better. Dr. Martinez also suggested journaling before bed instead of screen time. Tried it for 3 nights — helps quiet the racing thoughts about tomorrow's tasks."
     },
     {
       "id": "evt_032",
       "timestamp": "2024-09-26T13:00:00Z",
-      "domain": "relationships",
+      "type": "relationships",
       "content": "We got our first foster dog! A 3-year-old beagle mix named Luna. She's nervous but sweet. Already follows me around the apartment. Sarah set up a crate in the living room with a blanket. The rescue said she was found as a stray so she might need time to decompress."
     },
     {
       "id": "evt_033",
       "timestamp": "2024-09-27T11:00:00Z",
-      "domain": "software-development",
+      "type": "software-development",
       "content": "Deep dive into our database query performance. Found a missing index on the users table for email lookups — queries went from 200ms to 2ms. Also discovered we were N+1 querying in the order history endpoint. Fixed with a JOIN and batch loading. Response time dropped from 1.2s to 80ms."
     },
     {
       "id": "evt_034",
       "timestamp": "2024-09-28T16:00:00Z",
-      "domain": "travel",
+      "type": "travel",
       "content": "Research for the Lisbon trip. Found that the Lisboa Card gives free public transport and museum entry — seems worth it for 3 days. Also discovered pastéis de nata originated in Belém, not just any bakery. Planning to visit the original Pastéis de Belém shop. Sarah found a cooking class where you make cataplana."
     },
     {
       "id": "evt_035",
       "timestamp": "2024-09-29T09:00:00Z",
-      "domain": "fitness",
+      "type": "fitness",
       "content": "Second yoga class. Balance is slightly better but still wobbly on one-legged poses. The instructor showed me how to use a block for support in half moon pose. My hamstrings are incredibly tight from all the running. She recommended 10 minutes of stretching daily before bed."
     },
     {
       "id": "evt_036",
       "timestamp": "2024-10-01T10:00:00Z",
-      "domain": "finance",
+      "type": "finance",
       "content": "Quarterly portfolio review. Total return is 12.4% YTD. Sold some individual tech stocks to rebalance into broader index funds. The financial advisor's tax-loss harvesting suggestion saved about $2,800 in taxes. Also maxed out my HSA contribution for the year."
     },
     {
       "id": "evt_037",
       "timestamp": "2024-10-02T14:00:00Z",
-      "domain": "software-development",
+      "type": "software-development",
       "content": "Started experimenting with Effect-TS for error handling. The typed errors and dependency injection are elegant but the learning curve is steep. Wrote a small proof-of-concept converting one service endpoint. The pipe syntax takes getting used to but the compiler catches so many error cases."
     },
     {
       "id": "evt_038",
       "timestamp": "2024-10-03T19:00:00Z",
-      "domain": "cooking-food",
+      "type": "cooking-food",
       "content": "Made fresh pasta for the first time. 100g flour per egg, knead 10 minutes, rest 30 minutes. Rolled it out with a pasta machine — so much easier than a rolling pin. Made tagliatelle with a simple butter and sage sauce. The texture of fresh pasta is incomparable to dried."
     },
     {
       "id": "evt_039",
       "timestamp": "2024-10-04T08:00:00Z",
-      "domain": "home-living",
+      "type": "home-living",
       "content": "Luna chewed through the charging cable for my laptop. Third cable this month. Ordered some cable protectors and bitter apple spray. Also baby-gated the office area because she keeps getting under my desk. Fostering is more work than I expected but she's starting to trust us."
     },
     {
       "id": "evt_040",
       "timestamp": "2024-10-05T10:00:00Z",
-      "domain": "health-therapy",
+      "type": "health-therapy",
       "content": "Dr. Martinez introduced me to the concept of 'emotional granularity' — instead of just saying I feel 'stressed', breaking it down into more specific emotions. Am I anxious? Frustrated? Overwhelmed? Bored? The more precise I can be, the better I can address what's actually going on. Tried it this week and noticed most of my 'stress' is actually frustration with context-switching."
     },
     {
       "id": "evt_041",
       "timestamp": "2024-10-06T15:00:00Z",
-      "domain": "hobbies-reading",
+      "type": "hobbies-reading",
       "content": "Finished 'Children of Time'. The ending was beautiful — the way the two civilizations found a way to coexist despite being fundamentally different. Tchaikovsky's imagination for alien cognition is unmatched. Adding 'Children of Ruin' to my list. Also picked up 'Thinking, Fast and Slow' for some non-fiction variety."
     },
     {
       "id": "evt_042",
       "timestamp": "2024-10-07T09:00:00Z",
-      "domain": "software-development",
+      "type": "software-development",
       "content": "Sprint retrospective. The team flagged that our PR review turnaround is too slow — average 2 days. We agreed on a new rule: PRs under 200 lines get reviewed same-day, larger ones within 48 hours. Also decided to do pair programming for complex features instead of large async PRs."
     },
     {
       "id": "evt_043",
       "timestamp": "2024-10-08T18:00:00Z",
-      "domain": "music",
+      "type": "music",
       "content": "Finally learned the full 'Nuvole Bianche' piece. Played it through three times without major mistakes. My teacher wants me to work on dynamics now — the piece should breathe, not be played at one volume. She suggested listening to Einaudi's live recordings to hear how he shapes the phrases."
     },
     {
       "id": "evt_044",
       "timestamp": "2024-10-09T12:00:00Z",
-      "domain": "relationships",
+      "type": "relationships",
       "content": "We decided to adopt Luna! She's become part of the family. The rescue was thrilled. Took her to the vet for a full checkup — she's healthy but needs dental cleaning. Sarah made her an Instagram account already. Having a dog has been weirdly good for my routine — forced morning walks."
     },
     {
       "id": "evt_045",
       "timestamp": "2024-10-10T14:00:00Z",
-      "domain": "software-development",
+      "type": "software-development",
       "content": "Production incident: our Redis cluster ran out of memory because someone set TTL to -1 on session keys. Wrote a cleanup script that removed 2.3 million stale sessions. Added monitoring alerts for memory usage and a default TTL policy. Post-mortem documented and shared with the team."
     },
     {
       "id": "evt_046",
       "timestamp": "2024-10-12T09:00:00Z",
-      "domain": "fitness",
+      "type": "fitness",
       "content": "Started half marathon training. The plan is 12 weeks, building from 25km/week to 50km/week. First week: 3 easy runs (5km each) and one long run (10km). The key is keeping easy runs truly easy — heart rate under 145bpm. It feels painfully slow but the aerobic base building is important."
     },
     {
       "id": "evt_047",
       "timestamp": "2024-10-14T19:00:00Z",
-      "domain": "cooking-food",
+      "type": "cooking-food",
       "content": "Hosted a dinner party for 8 people. Menu: bruschetta with heirloom tomatoes, homemade ravioli with ricotta and spinach, braised short ribs with polenta, and tiramisu. Started cooking at noon. The ravioli was the hit — everyone asked for the filling recipe. Note to self: make double the tiramisu next time."
     },
     {
       "id": "evt_048",
       "timestamp": "2024-10-16T10:00:00Z",
-      "domain": "health-therapy",
+      "type": "health-therapy",
       "content": "Therapy session focused on imposter syndrome at work. Got promoted to senior engineer last month and I keep waiting for someone to realize I don't deserve it. Dr. Martinez helped me list concrete evidence of my competence — the production incidents I resolved, the architecture decisions I led, the juniors I mentored. Intellectually I know it, emotionally it's harder."
     },
     {
       "id": "evt_049",
       "timestamp": "2024-10-18T11:00:00Z",
-      "domain": "software-development",
+      "type": "software-development",
       "content": "Mentoring session with Alex, our new junior developer. Walked through how to read a complex codebase: start with the entry point, follow the happy path, ignore edge cases on first read. Showed them how I use git blame and git log to understand why code exists, not just what it does."
     },
     {
       "id": "evt_050",
       "timestamp": "2024-10-20T15:00:00Z",
-      "domain": "travel",
+      "type": "travel",
       "content": "Just landed in Lisbon. The light here is incredible — golden and warm even in November. Checked into the Airbnb in Alfama, narrow cobblestone streets with laundry hanging between buildings. Can hear Fado music from a nearby restaurant. Had our first pastel de nata at a corner bakery. Crispy, creamy, perfect."
     },
     {
       "id": "evt_051",
       "timestamp": "2024-10-21T12:00:00Z",
-      "domain": "travel",
+      "type": "travel",
       "content": "Day trip to Sintra. The Pena Palace is like a fever dream — bright yellow and red towers sitting in misty forests. Walked through the old Moorish castle ruins along the mountain ridge. The fog rolling through the valleys made it feel like a fantasy novel. Legs are destroyed from all the uphill walking."
     },
     {
       "id": "evt_052",
       "timestamp": "2024-10-22T18:00:00Z",
-      "domain": "cooking-food",
+      "type": "cooking-food",
       "content": "Took the cataplana cooking class in Lisbon. It's a traditional Portuguese copper pot used for seafood stew. The key is layering: onions, peppers, then clams and shrimp, white wine, and fresh coriander. The pot creates steam that cooks everything perfectly. Bought a cataplana pot to bring home."
     },
     {
       "id": "evt_053",
       "timestamp": "2024-10-25T09:00:00Z",
-      "domain": "finance",
+      "type": "finance",
       "content": "While on vacation I got an email about my company's stock options vesting schedule. 25% cliff at 1 year, then monthly vesting. With the promotion, they added a refresh grant. Need to figure out the tax implications — AMT vs. ISO vs. NSO. This stuff is confusing, scheduled a call with my tax advisor."
     },
     {
       "id": "evt_054",
       "timestamp": "2024-10-28T10:00:00Z",
-      "domain": "software-development",
+      "type": "software-development",
       "content": "Back from vacation. 347 Slack messages and 12 PRs to review. The team shipped the new notification system while I was away — looks clean. One thing I'd change: they used polling instead of WebSockets. But it works and is simple, so maybe that's fine for now. Don't let perfect be the enemy of good."
     },
     {
       "id": "evt_055",
       "timestamp": "2024-11-01T14:00:00Z",
-      "domain": "home-living",
+      "type": "home-living",
       "content": "Luna destroyed a throw pillow while we were at work. Need to get more enrichment toys — she's clearly bored during the day. Ordered a Kong, a snuffle mat, and a puzzle feeder. Also looking into doggy daycare for 2 days a week. The local one has a webcam which is both helpful and addictive."
     },
     {
       "id": "evt_056",
       "timestamp": "2024-11-03T16:00:00Z",
-      "domain": "hobbies-reading",
+      "type": "hobbies-reading",
       "content": "Reading 'Thinking, Fast and Slow' by Kahneman. The section on anchoring bias blew my mind — how a completely random number can influence your estimate of something unrelated. I see this in sprint planning all the time. If someone says 'this might take 5 days', everyone anchors around 5 days."
     },
     {
       "id": "evt_057",
       "timestamp": "2024-11-05T10:00:00Z",
-      "domain": "health-therapy",
+      "type": "health-therapy",
       "content": "Dr. Martinez and I are starting to wind down our sessions — going from weekly to biweekly. I've made real progress on boundary-setting and sleep hygiene. She says the work now is maintenance: keeping the habits and catching old patterns when they resurface. It's a good feeling to need less therapy."
     },
     {
       "id": "evt_058",
       "timestamp": "2024-11-08T08:00:00Z",
-      "domain": "fitness",
+      "type": "fitness",
       "content": "Week 4 of half marathon training. Long run today: 15km. Discovered the importance of fueling during runs — took a gel at 10km and it made the last 5km feel easy. New shoes (Brooks Ghost 15) are way better than the old ones. No knee pain for 2 weeks now."
     },
     {
       "id": "evt_059",
       "timestamp": "2024-11-10T19:00:00Z",
-      "domain": "music",
+      "type": "music",
       "content": "Started learning 'Clair de Lune' by Debussy. It's significantly harder than the Einaudi piece — the chord voicings require bigger hand stretches and the rhythm is more fluid. My teacher says to focus on the first 16 bars until they're effortless before moving on. Patience is key with this one."
     },
     {
       "id": "evt_060",
       "timestamp": "2024-11-12T11:00:00Z",
-      "domain": "software-development",
+      "type": "software-development",
       "content": "Gave a tech talk at the company all-hands about our event-sourcing migration. Covered the why (audit trail, replay capability, temporal queries), the how (Kafka + PostgreSQL projections), and the gotchas (event versioning, schema evolution). Got good questions. CTO asked about applying the pattern to more services."
     }
   ]

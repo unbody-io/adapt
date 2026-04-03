@@ -61,17 +61,7 @@ function elapsed() {
 	return ((Date.now() - startTime) / 1000).toFixed(1)
 }
 
-async function askSafe(brain: Brain, query: string): Promise<BrainAskResult | null> {
-	try {
-		return await brain.ask(query)
-	} catch (err) {
-		console.log(`  ⚠ brain.ask() failed: ${err instanceof Error ? err.message : String(err)}`)
-		return null
-	}
-}
-
-function printAskResult(result: BrainAskResult | null) {
-	if (!result) return
+function printAskResult(result: BrainAskResult) {
 	console.log(`\nSynthesized insight:\n${result.insight}`)
 	console.log(`\nSources:`)
 	for (const s of result.sources) {
@@ -100,15 +90,22 @@ async function main() {
 	const brain = new Brain({
 		prompt: [
 			"Learn about a person's behavioral patterns from their digital activity stream.",
+			'You start knowing nothing about this person. Everything must be discovered from the data as it arrives.',
 			'',
 			'This includes messages, browsing history, calendar events, journal entries,',
-			'and app usage data. Build a comprehensive understanding of:',
+			'and app usage data. As data comes in, stay open and attentive. Let the data reveal patterns.',
+			'',
+			'When you start recognizing distinct concerns, prioritize specialization over generalization.',
+			'Create dedicated specialists for each distinct thing you discover rather than lumping things together.',
+			'The kinds of things to watch for as they emerge:',
 			'- Avoidance patterns: things they postpone, cancel, or make excuses about',
 			'- Recurring topics and their frequency across different contexts',
 			'- Emotional patterns: frustration, aggression, anxiety, excitement — and triggers',
 			'- Browsing behaviors: timing patterns, depth vs breadth, categories',
 			'- The gap between stated intentions and actual actions',
 			'',
+			'Do not generalize. If two things could be separate specialists, they should be.',
+			'The goal is maximum coverage with maximum depth.',
 			'Flag frustration or hostility moments prominently when detected.',
 		].join('\n'),
 		model,
@@ -248,17 +245,17 @@ async function main() {
 	// ── 6. Cross-neuron queries ────────────────────────────────────────────
 
 	console.log('\n━━━ 6. Query: "What have I been avoiding the most?" ━━━')
-	printAskResult(await askSafe(brain, 'What have I been avoiding the most?'))
+	printAskResult(await brain.ask( 'What have I been avoiding the most?'))
 
 	console.log('\n━━━ 7. Query: "How many times did I talk about career change?" ━━━')
-	printAskResult(await askSafe(brain, 'How many times did I talk about career change?'))
+	printAskResult(await brain.ask( 'How many times did I talk about career change?'))
 
 	console.log('\n━━━ 8. Query: "Give me a deep analysis of my browsing behavior" ━━━')
-	printAskResult(await askSafe(brain, 'Give me a deep analysis of my browsing behavior'))
+	printAskResult(await brain.ask( 'Give me a deep analysis of my browsing behavior'))
 
 	console.log('\n━━━ 9. Query: "Am I showing signs of burnout?" ━━━')
 	console.log('  (Cross-cutting query — should combine emotional + behavioral + browsing signals)')
-	printAskResult(await askSafe(brain, 'Am I showing signs of burnout?'))
+	printAskResult(await brain.ask( 'Am I showing signs of burnout?'))
 
 	// ── 10. Done ────────────────────────────────────────────────────────────
 

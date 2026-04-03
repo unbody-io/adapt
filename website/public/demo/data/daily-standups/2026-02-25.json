@@ -1,0 +1,129 @@
+{
+	"id": "standup-2026-02-25",
+	"source": "standup-2026-02-25",
+	"label": "Day 1, Feb 25",
+	"summary": "Debugging a body system crash, system architecture principles, website deployment, and task management.",
+	"description": "R&D daily sprint with Amir Houieh, Noémi Biró, and Gabor Kerekes. Topics: body system crash caused by a 6.5M character spam page, discussion on component isolation as an engineering principle, website deployment issues with Vercel, Mycelium project scoping, OS project prototyping plans, analytics feature request for session time tracking, and task management tool selection.",
+	"items": [
+		{
+			"id": "standup-2026-02-25-000000",
+			"label": "2026-02-25 [00:00:00]",
+			"data": {
+				"chunk": "Noémi Biró: Hello. Amir Houieh: Hello. Gabor Kerekes: Good morning. Amir Houieh: You are in a cafe. I'm going to also go work from cafe today later in afternoon. Cool. What's up? Yesterday I couldn't work at all. I mean I was working but on body — we couldn't figure it out at the end of the day but this morning I figured it out. Gabor Kerekes: What was it? Was it the new implementation? Amir Houieh: So carefinder sends URLs to body to get enhanced. It was crawling everything, but one of these websites out of thousands — one of them has like 25 pages and one of the pages has this hello world page that has 6.5 million characters.",
+				"date": "2026-02-25"
+			}
+		},
+		{
+			"id": "standup-2026-02-25-000510",
+			"label": "2026-02-25 [00:05:10]",
+			"data": {
+				"chunk": "Amir Houieh: It's a spam repellent. The crawler was crawling it and trying to digest it and it overwhelmed the whole process. Gabor Kerekes: Is it the new implementation or the old? Amir Houieh: The old — that was the problem, nothing has changed. The only symptom was that viate couldn't clean after itself when it created the shards. Gabor Kerekes: That's the worst kind of bug. Amir Houieh: Yesterday we decided to just rewrite the whole crawling part for stories. This morning when I crawled it in isolation, cloud noticed it and says hey it has 6.5 million characters. Gabor Kerekes: This is why it's important to have a reproducible local development environment where you can run components in isolation.",
+				"date": "2026-02-25"
+			}
+		},
+		{
+			"id": "standup-2026-02-25-000626",
+			"label": "2026-02-25 [00:06:26]",
+			"data": {
+				"chunk": "Amir Houieh: Isolation — yeah, that's the problem. The way Hussein architects things, everything works together as a machine. I'm pretty sure he knows how to isolate them, but it's not his first principle. Gabor Kerekes: For me I can't write another way — I write something small, test it, write something else, put them together, everything works together but also in isolation. Amir Houieh: Exactly. Everything has to work in isolation like a function. Input, output. That's it. Period. That's how I also wrote Nexus. Noémi Biró: Is that one of those principles? Gabor Kerekes: That's actually like every complex, every functional —",
+				"date": "2026-02-25"
+			}
+		},
+		{
+			"id": "standup-2026-02-25-000729",
+			"label": "2026-02-25 [00:07:29]",
+			"data": {
+				"chunk": "Gabor Kerekes: Every complex system inevitably evolved from a simpler system. And the opposite is also true — complex systems cannot be made to work when you are already starting with that. We should put this in our engineering manifesto. Amir Houieh: I think it's like Lego. You can't have one brick that is broken — you need to fix that and then connect it to another one. Noémi Biró: That's what I mean. Amir Houieh: Oh, there are new type of Legos — they're not from the Lego company, but they are super tiny and it's so obsessive. As soon as you start building with them, you can't stop. Noémi Biró: This morning, my trainer called me obsessed because I've been going yesterday and today and I'm going to go tomorrow.",
+				"date": "2026-02-25"
+			}
+		},
+		{
+			"id": "standup-2026-02-25-000840",
+			"label": "2026-02-25 [00:08:40]",
+			"data": {
+				"chunk": "Noémi Biró: She was like, \"Do you want to also come Friday?\" Amir Houieh: What do you do? Weightlifting or — Noémi Biró: No, it's functional patterns. It's a lot about body posture and doing exercises. It's similar to the Lego idea because you do exercises isolated and then that becomes how you move throughout your day. Amir Houieh: I went to physiotherapy a few months back when I had the back problem and he started talking about exercises about fascia. Noémi Biró: That's exactly it. For the first month all I did was massaging my fascia with rollers. Gabor Kerekes: Actually the person we stayed with in Rotterdam — they are this kind of physiotherapist, functional patterns, fascia focused.",
+				"date": "2026-02-25"
+			}
+		},
+		{
+			"id": "standup-2026-02-25-000950",
+			"label": "2026-02-25 [00:09:50]",
+			"data": {
+				"chunk": "Gabor Kerekes: So if you want, it's literally 10 minutes walk from space. I can hook you up. Amir Houieh: Do they have a website? You can send it to me. The exercises are fun — the first thing they were saying is just even if you're washing dishes, move. That was the key principle. Gabor Kerekes: That's why I have this chair — it's really good because I can move. It actually makes you move. But I also have to, because of ADHD restlessness and stuff.",
+				"date": "2026-02-25"
+			}
+		},
+		{
+			"id": "standup-2026-02-25-001059",
+			"label": "2026-02-25 [00:10:59]",
+			"data": {
+				"chunk": "Amir Houieh: So yeah, Vercel failed. I need to still fix the image on deployment for the website. Apart from that I think we are good — I can take care of the website today. Gabor Kerekes: Maybe some of the blog posts need to be cut out. Basically just a review — see what blog posts we should remove. I think each of us should have a pass also on phone. Check the online version, check the content, flag anything that should be removed. Then I think we're good. Noémi Biró: Yeah, I want to add something to the landing page.",
+				"date": "2026-02-25"
+			}
+		},
+		{
+			"id": "standup-2026-02-25-001223",
+			"label": "2026-02-25 [00:12:23]",
+			"data": {
+				"chunk": "Amir Houieh: I'm going to also look into other solutions than Vercel. I don't want to make it a bottleneck but it's good if you guys also have access. Gabor Kerekes: I already set up Cloudflare. It's very easy to deploy. Amir Houieh: Let's not make a task for now — let's just have the website launch and then figure it out. Gabor Kerekes: Yeah. I'm continuing with specifying what to build for Mycelium — more in the technical sense, defining the scope of what would be a good slice. I've made some progress with the planning.",
+				"date": "2026-02-25"
+			}
+		},
+		{
+			"id": "standup-2026-02-25-001350",
+			"label": "2026-02-25 [00:13:50]",
+			"data": {
+				"chunk": "Gabor Kerekes: I guess we should talk about the inhab project — maybe we can do that separately. Amir Houieh: Yeah, let's do that. Noémi Biró: So the analytics — Amir has permissions right? Amir Houieh: That's something we need to still test with Gab because yesterday I was getting an error. Gabor Kerekes: Let's do that separately. Amir Houieh: Do we want to do our brainstorming on the OS thing today as planned? Gabor Kerekes: I don't have anything new.",
+				"date": "2026-02-25"
+			}
+		},
+		{
+			"id": "standup-2026-02-25-001459",
+			"label": "2026-02-25 [00:14:59]",
+			"data": {
+				"chunk": "Amir Houieh: I have the same feeling that it's a bit too early — we need time to process. Gabor, you need to also show what you have in mind. Gabor Kerekes: I really want to build. Noémi Biró: Then take the time to build. Would it help to push this session to Friday? Amir Houieh: You know what helps? You could also just make a fake interface with Gemini's AI studio — just to show how you envision it. Because that prototype I made in Gemini shows exactly what I have in mind. Gabor Kerekes: That's a really good idea. I like that approach.",
+				"date": "2026-02-25"
+			}
+		},
+		{
+			"id": "standup-2026-02-25-001615",
+			"label": "2026-02-25 [00:16:15]",
+			"data": {
+				"chunk": "Amir Houieh: So it's more like Photoshop it for now. No code. Gabor Kerekes: Yeah, that makes sense. Noémi Biró: Okay, so then it makes sense maybe Friday. Amir Houieh: Friday is better — we can always block Fridays for working together sessions like mini workshops or hackathons. Once you have that Gemini prototype you can share it and everyone could make a different version or add to it. That's what Figma should have had — such a feature, but they don't. Gabor Kerekes: Okay, I like that. Then yeah, that's it I think.",
+				"date": "2026-02-25"
+			}
+		},
+		{
+			"id": "standup-2026-02-25-001723",
+			"label": "2026-02-25 [00:17:23]",
+			"data": {
+				"chunk": "Gabor Kerekes: Let's fix your permissions. Noémi Biró: And can you then add the time spent in the app? Amir Houieh: Yeah, sure. For Cibil I haven't spent much time apart from the meetings. Noémi Biró: And what about the contract? Amir Houieh: I sent it to Melissa on Monday. I should probably send her another reminder today. Noémi Biró: So you will update the time spent in the app. Gabor Kerekes: That's a new analytics. Noémi Biró: It's the new analytics that Melissa was asking. Amir Houieh: Do we have a card for it or somewhere that is defined?",
+				"date": "2026-02-25"
+			}
+		},
+		{
+			"id": "standup-2026-02-25-001826",
+			"label": "2026-02-25 [00:18:26]",
+			"data": {
+				"chunk": "Noémi Biró: I've been asking about it for a few times — basically it's just adding an extra export. The description is: export the time of the user spent in the app. Amir Houieh: Okay, I just need to remember it. I'm going to write it on Discord so I don't forget. Gabor Kerekes: Should we agree on one place for task management so that we know exactly where things are? Noémi Biró: For me Notion works better — I've been keeping it up to date since the beginning of this four-week period.",
+				"date": "2026-02-25"
+			}
+		},
+		{
+			"id": "standup-2026-02-25-001939",
+			"label": "2026-02-25 [00:19:39]",
+			"data": {
+				"chunk": "Amir Houieh: So basically we want to know the time that a user spent on Cibil in one session or in total. Noémi Biró: In one session — then if we know sessions we'll also know intervals. Gabor Kerekes: So how many sessions they had and what's the average time spent? Noémi Biró: We already know how many sessions — that's already in analytics. We just miss the duration. Amir Houieh: What we could do is per session — see the first message and the last. Gabor Kerekes: There's already session count. It's only about adding how long the sessions were.",
+				"date": "2026-02-25"
+			}
+		},
+		{
+			"id": "standup-2026-02-25-002042",
+			"label": "2026-02-25 [00:20:42]",
+			"data": {
+				"chunk": "Amir Houieh: So basically calculating it based on the data we already have. Gabor Kerekes: Yeah. I will walk you through — let's fix your permissions and then I'll show you what's there. Amir Houieh: Nice. Okay, me and Gabor we can stay. Noémi Biró: I'm going to read the Kira document that Melissa sent — I'm curious why the conclusion says it's better. That means all the work we're basing things off is gone, so we need to do a lot more than what we accounted for.",
+				"date": "2026-02-25"
+			}
+		}
+	]
+}

@@ -3,7 +3,9 @@ title: Evolution
 description: Signal-driven self-organization — how Brain adapts its neuron structure.
 ---
 
-Brain adapts its neuron structure through signals and an LLM evaluator.
+As a Brain processes data and answers queries, its initial neuron structure may not be the right one forever. Some neurons get overloaded, some overlap, some domains emerge that no neuron covers. Evolution is how the Brain detects these problems and restructures itself — creating, merging, splitting, updating, or deleting neurons as needed.
+
+For an overview of the concepts, see [Concepts — Evolution](./concepts#evolution). This page covers configuration and manual control.
 
 ## Signal Flow
 
@@ -70,7 +72,7 @@ for await (const part of stream.fullStream) {
 const { decisions: d, results } = await decisions // resolves after stream completes
 ```
 
-The evaluator has tools to inspect neurons, query them, consult internal neurons, review dismissed data, and review past decisions before making choices.
+The evaluator is an LLM agent with tools to inspect neurons, query their knowledge, consult [internal neurons](./brain#consulting-internal-neurons) (gap tracking, cross-domain patterns), review dismissed data, and review past decisions — all before making structural choices.
 
 ## Evolution vs Basic Neuron Management
 
@@ -87,9 +89,9 @@ The evaluator has tools to inspect neurons, query them, consult internal neurons
 
 ## When to Enable/Disable
 
-**Enable** (default) when you want the system to self-organize — creating neurons for uncovered domains, merging overlaps, splitting overloaded neurons.
+**Enable** (default) when the Brain is long-lived and the domain may shift over time. Evolution lets the system adapt — creating neurons for uncovered domains, merging overlaps, splitting overloaded neurons — without you having to monitor and restructure manually.
 
-**Disable** when you want full manual control over neuron structure — for example, session-scoped brains where the neuron set is fixed and short-lived.
+**Disable** when the neuron structure is known upfront and shouldn't change. For example: session-scoped brains that process a single conversation, or brains with carefully hand-crafted neurons where automatic restructuring would be counterproductive.
 
 ```typescript
 // Long-term brain: let it evolve

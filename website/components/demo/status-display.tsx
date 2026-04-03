@@ -1,0 +1,133 @@
+"use client"
+
+import { useState, useEffect, useRef } from "react"
+import { TextReveal } from "./text-reveal"
+import type { InjectionProgress } from "../../lib/demo/types"
+
+const mono = '"SF Mono", "Fira Code", "Cascadia Code", monospace'
+
+interface Props {
+	activity: string
+	commentary: string
+	injectionProgress: InjectionProgress | null
+}
+
+export function StatusDisplay({ activity, commentary, injectionProgress }: Props) {
+	const lines = commentary ? commentary.split("\n\n").filter(Boolean) : []
+	const latestComment = lines.length > 0 ? lines[lines.length - 1] : null
+	const [commentKey, setCommentKey] = useState(0)
+	const prevCommentRef = useRef<string | null>(null)
+
+	useEffect(() => {
+		if (latestComment && latestComment !== prevCommentRef.current) {
+			prevCommentRef.current = latestComment
+			setCommentKey((k) => k + 1)
+		}
+	}, [latestComment])
+
+	const progress = injectionProgress?.batchCount
+		? injectionProgress.batchIndex / injectionProgress.batchCount
+		: 0
+
+	return (
+		<div style={{
+			position: "fixed",
+			top: "4.5rem",
+			left: "1.25rem",
+			zIndex: 50,
+			maxWidth: 420,
+			pointerEvents: "none",
+			display: "flex",
+			flexDirection: "column",
+			gap: "1.25rem",
+		}}>
+			{/* Injection progress */}
+			{injectionProgress && (
+				<div style={{
+					display: "flex",
+					flexDirection: "column",
+					gap: "0.4rem",
+				}}>
+					<div style={{
+						display: "flex",
+						justifyContent: "space-between",
+						alignItems: "baseline",
+						fontFamily: mono,
+						fontSize: "0.72rem",
+						color: "#6b6b78",
+						lineHeight: 1.6,
+					}}>
+						<span>Injecting {injectionProgress.sourceLabel}</span>
+						{injectionProgress.batchCount > 0 && (
+							<span style={{ color: "#9b9ba8", fontSize: "0.65rem" }}>
+								{injectionProgress.batchIndex}/{injectionProgress.batchCount}
+							</span>
+						)}
+					</div>
+					<div style={{
+						padding: "0.6rem 0.75rem",
+						background: "rgba(26, 26, 31, 0.03)",
+						border: "1px solid rgba(26, 26, 31, 0.08)",
+						borderBottom: "none",
+						borderRadius: "6px 6px 0 0",
+						overflow: "hidden",
+					}}>
+						<p style={{
+							margin: 0,
+							fontSize: "0.7rem",
+							fontFamily: mono,
+							color: "#9b9ba8",
+							lineHeight: 1.6,
+						}}>
+							{injectionProgress.sourceSummary}
+						</p>
+						<div style={{
+							margin: "0 -0.75rem -0.6rem",
+							height: 2,
+							background: "rgba(155, 155, 168, 0.15)",
+						}}>
+							<div style={{
+								width: `${progress * 100}%`,
+								height: "100%",
+								background: "rgba(26, 26, 31, 0.4)",
+								transition: "width 0.6s ease",
+							}} />
+						</div>
+					</div>
+				</div>
+			)}
+
+			{/* Activity without injection */}
+			{!injectionProgress && activity && (
+				<div style={{
+					fontSize: "0.7rem",
+					fontFamily: mono,
+					color: "#9b9ba8",
+					letterSpacing: "0.04em",
+				}}>
+					{activity}
+				</div>
+			)}
+
+			{/* Commentary */}
+			{latestComment && (
+				<div style={{
+					fontSize: "0.95rem",
+					fontFamily: '"Georgia", "Times New Roman", serif',
+					color: "#6b6b78",
+					fontStyle: "italic",
+					lineHeight: 1.7,
+				}}>
+					<TextReveal
+						text={latestComment}
+						chunkType="sentence"
+						staggerDelay={0.04}
+						duration={0.4}
+						blurAmount="6px"
+						animationKey={commentKey}
+					/>
+				</div>
+			)}
+		</div>
+	)
+}

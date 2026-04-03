@@ -94,9 +94,9 @@ await brain2.ask('What do you know?') // Has full knowledge from session 1
 
 ## Custom Stores
 
-Implement the `NeuronStore` interface (4 namespaces) and `BrainStore` interface (5 namespaces) to use any backend.
+If you need a backend other than in-memory or SQLite (e.g., PostgreSQL, Redis, a cloud database), you can implement your own stores. Both interfaces follow a simple collection-based pattern — each namespace is a CRUD collection for a specific type of record.
 
-**NeuronStore:**
+**NeuronStore** — one per neuron, holds that neuron's observations, understanding, evolution history, and state:
 
 ```typescript
 interface NeuronStore {
@@ -108,7 +108,7 @@ interface NeuronStore {
 }
 ```
 
-**BrainStore:**
+**BrainStore** — one per brain, holds the brain's state, neuron registry, internal neuron registry, evolution history, and dismissed batches:
 
 ```typescript
 interface BrainStore {
@@ -121,7 +121,7 @@ interface BrainStore {
 }
 ```
 
-Both `NeuronCollection` and `BrainCollection` implement the same CRUD interface:
+Both `NeuronCollection` and `BrainCollection` implement the same CRUD interface. Each method does what you'd expect — the important one to note is `search()`, which should support full-text search (used by ListNeuron's deduplication during synthesis):
 
 ```typescript
 interface NeuronCollection<T extends { id: string }> {

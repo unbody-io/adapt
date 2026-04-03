@@ -1,16 +1,41 @@
 import Link from 'next/link';
+import { ScrambleText } from '@/components/scramble-text';
+import { InstallCommand } from '@/components/install-command';
+import { buttonVariants } from 'fumadocs-ui/components/ui/button';
 
 export default function HomePage() {
   return (
-    <div className="flex flex-col justify-center text-center flex-1">
-      <h1 className="text-2xl font-bold mb-4">Hello World</h1>
-      <p>
-        You can open{' '}
-        <Link href="/docs" className="font-medium underline">
-          /docs
-        </Link>{' '}
-        and see the documentation.
-      </p>
+    <div className="flex items-center justify-center flex-1">
+      <div className="flex flex-col items-start gap-4">
+      <div className="flex flex-col gap-1">
+        <h1 className="text-sm">
+          <ScrambleText text={[
+            'Adapt Memory',
+            'That\'s new...',
+            'Seen this before...',
+            'This matters...',
+            'Things are shifting...',
+            'I\'ll remember...',
+          ]} pause={2500} />
+        </h1>
+        <p className="text-sm text-fd-muted-foreground">A self-evolving memory layer for AI applications.</p>
+      </div>
+      <InstallCommand />
+      <div className="flex flex-row gap-3 items-center">
+        <Link
+          href="/docs"
+          className={buttonVariants({ color: 'primary', size: 'sm' })}
+        >
+          Get started
+        </Link>
+        <Link
+          href="/demo"
+          className={buttonVariants({ color: 'ghost', size: 'sm' })}
+        >
+          Try it
+        </Link>
+      </div>
+      </div>
     </div>
   );
 }

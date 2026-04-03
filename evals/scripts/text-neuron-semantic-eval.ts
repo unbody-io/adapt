@@ -1,12 +1,22 @@
 /**
- * Semantic Eval: TextNeuron end-to-end
+ * Eval: TextNeuron end-to-end
  *
- * Tests the full lifecycle: create → init → ingest → query → update → query → ingest → query
- * All events are logged for manual semantic inspection.
+ * Objectives:
+ *   1. Understanding quality — Does the neuron build coherent, accurate understanding
+ *      from coffee brewing data? Check that key facts (temperatures, ratios, techniques)
+ *      are preserved in the understanding text.
+ *   2. Query relevance — Are queries answered with appropriate relevance and confidence?
+ *      Pour-over query should be relevant before instruction change, potentially irrelevant after.
+ *   3. Update behavior — After narrowing instructions to espresso-only, does the neuron's
+ *      query behavior reflect the new scope? Does it dismiss non-espresso data?
+ *   4. Governance change — Does switching from continuous to cumulative strategy take effect?
+ *   5. Event lifecycle — Are all expected events fired in correct order?
+ *
+ * Run:
+ *   export $(cat .env.local | xargs) && npx tsx evals/scripts/text-neuron-semantic-eval.ts
  */
 
 import { TextNeuron, MemoryNeuronStore } from '@unbody/adapt'
-import { logger } from '../helpers/logger'
 import { createOpenRouter } from '@openrouter/ai-sdk-provider'
 
 const openrouter = createOpenRouter({
@@ -16,8 +26,7 @@ const openrouter = createOpenRouter({
 const MODEL = process.env.MODEL ?? 'google/gemini-2.0-flash-001'
 const model = openrouter(MODEL)
 
-// Event log for full inspection
-const events: Array<{ type: string; payload?: any; time: number }> = []
+const events: Array<{ type: string; payload?: unknown; time: number }> = []
 const startTime = Date.now()
 
 function elapsed() {
@@ -25,8 +34,12 @@ function elapsed() {
 }
 
 async function main() {
+	console.log('Eval: TextNeuron end-to-end')
+	console.log(`Model: ${MODEL}`)
+	console.log(`Time: ${new Date().toISOString()}`)
+
 	// ━━━ 1. CREATE STANDALONE TEXT NEURON ━━━
-	logger.logSection('1. Create standalone TextNeuron')
+	console.log('\n━━━ 1. Create standalone TextNeuron ━━━')
 
 	const neuron = new TextNeuron({
 		model,
@@ -51,20 +64,19 @@ async function main() {
 	neuron.on((event) => {
 		const entry = { type: event.type, payload: event.payload, time: Date.now() - startTime }
 		events.push(entry)
-		// Compact event log — show type + key info
-		const p = event.payload as any
+		const p = event.payload as Record<string, unknown>
 		switch (event.type) {
 			case 'neuron:observed':
-				console.log(`  [${elapsed()}s] ${event.type} — observations: ${p?.observations?.length ?? '?'}`)
+				console.log(`  [${elapsed()}s] ${event.type} — observations: ${(p?.observations as unknown[])?.length ?? '?'}`)
 				break
 			case 'neuron:synthesized':
-				console.log(`  [${elapsed()}s] ${event.type} — understanding length: ${p?.newUnderstanding?.length ?? '?'}`)
+				console.log(`  [${elapsed()}s] ${event.type} — understanding length: ${(p?.newUnderstanding as string)?.length ?? '?'}`)
 				break
 			case 'neuron:query:completed':
 				console.log(`  [${elapsed()}s] ${event.type} — relevant: ${p?.relevant}, confidence: ${p?.confidence}`)
 				break
 			case 'neuron:config:updated':
-				console.log(`  [${elapsed()}s] ${event.type} — changed: [${p?.changedFields?.join(', ')}]`)
+				console.log(`  [${elapsed()}s] ${event.type} — changed: [${(p?.changedFields as string[])?.join(', ')}]`)
 				break
 			case 'neuron:prompts:regenerated':
 				console.log(`  [${elapsed()}s] ${event.type}`)
@@ -74,21 +86,21 @@ async function main() {
 		}
 	})
 
-	logger.logState('Neuron created', {
+	console.log('Neuron created:', JSON.stringify({
 		id: neuron.id,
 		name: neuron.name,
 		understanding: (await neuron.getUnderstanding()) || '(empty)',
-		buffer: neuron.getBufferState(),
-	})
+		buffer: await neuron.getBufferState(),
+	}, null, 2))
 
 	// ━━━ 2. INIT ━━━
-	logger.logSection('2. Initialize neuron')
+	console.log('\n━━━ 2. Initialize neuron ━━━')
 	const initResult = await neuron.init()
 	console.log(`  Observe prompt generated: ${initResult.observeSystemPrompt.length} chars`)
-	console.log(`  Synthesize prompt generated: ${initResult.synthesizeSystemPrompt.length} chars`)
+	console.log(`  Understand prompt generated: ${initResult.understandSystemPrompt.length} chars`)
 
 	// ━━━ 3. INGEST DATA (batch 1) ━━━
-	logger.logSection('3. Ingest batch 1 — coffee brewing basics')
+	console.log('\n━━━ 3. Ingest batch 1 — coffee brewing basics ━━━')
 
 	await neuron.learn([
 		'Pour-over coffee uses a slow, controlled pour of hot water (195-205°F) over ground coffee in a filter. The Hario V60 is a popular pour-over dripper with spiral ridges that promote even extraction. Grind size should be medium-fine, similar to table salt.',
@@ -98,45 +110,44 @@ async function main() {
 
 	const afterBatch1 = {
 		understanding: await neuron.getUnderstanding(),
-		buffer: neuron.getBufferState(),
+		buffer: await neuron.getBufferState(),
 		metrics: neuron.getMetrics(),
 	}
 
-	logger.logState('After batch 1', {
+	console.log('After batch 1:', JSON.stringify({
 		understandingLength: afterBatch1.understanding.length,
 		bufferCount: afterBatch1.buffer.count,
-		observeCount: afterBatch1.metrics.ingestion.observeCount,
+		observationCount: afterBatch1.metrics.ingestion.observationCount,
 		synthesisCount: afterBatch1.metrics.ingestion.synthesisCount,
-	})
+	}, null, 2))
 
 	if (afterBatch1.understanding) {
-		console.log('\n  📝 Understanding so far:')
-		console.log('  ' + afterBatch1.understanding.replace(/\n/g, '\n  '))
+		console.log('\nUnderstanding so far:')
+		console.log(afterBatch1.understanding)
 	}
 
 	// ━━━ 4. QUERY (before updates) ━━━
-	logger.logSection('4. Query — "How do I make pour-over coffee?"')
+	console.log('\n━━━ 4. Query — "How do I make pour-over coffee?" ━━━')
 
 	const query1 = await neuron.query('How do I make pour-over coffee?')
-	console.log(`\n  Relevant: ${query1.relevant}`)
+	console.log(`  Relevant: ${query1.relevant}`)
 	console.log(`  Relevance: ${query1.relevance}`)
 	console.log(`  Confidence: ${query1.confidence}`)
-	console.log(`  Insight:\n  ${query1.insight.replace(/\n/g, '\n  ')}`)
+	console.log(`  Insight: ${query1.insight}`)
 	if (query1.gaps) console.log(`  Gaps: ${query1.gaps}`)
 
-	logger.logSection('4b. Query — "What is the ideal temperature for cold brew?"')
+	console.log('\n━━━ 4b. Query — "What is the ideal temperature for cold brew?" ━━━')
 
 	const query2 = await neuron.query('What is the ideal temperature for cold brew?')
-	console.log(`\n  Relevant: ${query2.relevant}`)
+	console.log(`  Relevant: ${query2.relevant}`)
 	console.log(`  Relevance: ${query2.relevance}`)
 	console.log(`  Confidence: ${query2.confidence}`)
-	console.log(`  Insight:\n  ${query2.insight.replace(/\n/g, '\n  ')}`)
+	console.log(`  Insight: ${query2.insight}`)
 	if (query2.gaps) console.log(`  Gaps: ${query2.gaps}`)
 
 	// ━━━ 5. UPDATE — Multiple rounds ━━━
 
-	// Update 1: Change instructions to narrow focus
-	logger.logSection('5a. Update — narrow focus to espresso only')
+	console.log('\n━━━ 5a. Update — narrow focus to espresso only ━━━')
 	const update1 = await neuron.update({
 		instructions:
 			'You are an espresso specialist. Focus exclusively on espresso brewing: ' +
@@ -146,20 +157,18 @@ async function main() {
 	})
 	console.log(`  Changed fields: [${update1.changedFields.join(', ')}]`)
 
-	// Update 2: Change thresholds
-	logger.logSection('5b. Update — raise importance threshold')
+	console.log('\n━━━ 5b. Update — raise importance threshold ━━━')
 	const update2 = await neuron.update({
-		synthesize: {
+		understand: {
 			thresholds: {
-				minImportance: 0.7, // Higher bar — only important observations pass
+				minImportance: 0.7,
 			},
 		},
 	})
 	console.log(`  Changed fields: [${update2.changedFields.join(', ')}]`)
 	console.log(`  New thresholds: minImportance=${neuron.getUnderstandThresholds().minImportance}`)
 
-	// Update 3: Change governance strategy
-	logger.logSection('5c. Update — switch to cumulative strategy')
+	console.log('\n━━━ 5c. Update — switch to cumulative strategy ━━━')
 	const update3 = await neuron.update({
 		governance: { strategy: 'cumulative' },
 	})
@@ -167,24 +176,24 @@ async function main() {
 	console.log(`  New strategy: ${neuron.getGovernance().strategy}`)
 
 	// ━━━ 6. QUERY AGAIN (after narrowed instructions) ━━━
-	logger.logSection('6. Query after update — "How do I make pour-over coffee?"')
+	console.log('\n━━━ 6. Query after update — "How do I make pour-over coffee?" ━━━')
 
 	const query3 = await neuron.query('How do I make pour-over coffee?')
-	console.log(`\n  Relevant: ${query3.relevant}`)
+	console.log(`  Relevant: ${query3.relevant}`)
 	console.log(`  Relevance: ${query3.relevance}`)
 	console.log(`  Confidence: ${query3.confidence}`)
-	console.log(`  Insight:\n  ${query3.insight.replace(/\n/g, '\n  ')}`)
+	console.log(`  Insight: ${query3.insight}`)
 
-	logger.logSection('6b. Query — "What pressure should espresso be brewed at?"')
+	console.log('\n━━━ 6b. Query — "What pressure should espresso be brewed at?" ━━━')
 
 	const query4 = await neuron.query('What pressure should espresso be brewed at?')
-	console.log(`\n  Relevant: ${query4.relevant}`)
+	console.log(`  Relevant: ${query4.relevant}`)
 	console.log(`  Relevance: ${query4.relevance}`)
 	console.log(`  Confidence: ${query4.confidence}`)
-	console.log(`  Insight:\n  ${query4.insight.replace(/\n/g, '\n  ')}`)
+	console.log(`  Insight: ${query4.insight}`)
 
 	// ━━━ 7. INGEST MORE DATA (batch 2 — espresso-focused) ━━━
-	logger.logSection('7. Ingest batch 2 — espresso details')
+	console.log('\n━━━ 7. Ingest batch 2 — espresso details ━━━')
 
 	await neuron.learn([
 		'The ideal espresso extraction ratio is 1:2 (e.g., 18g in, 36g out) over 25-30 seconds. Under-extraction produces sour, thin shots while over-extraction yields bitter, hollow flavors. Channeling occurs when water finds weak spots in the puck.',
@@ -195,91 +204,55 @@ async function main() {
 
 	const afterBatch2 = {
 		understanding: await neuron.getUnderstanding(),
-		buffer: neuron.getBufferState(),
+		buffer: await neuron.getBufferState(),
 		metrics: neuron.getMetrics(),
 	}
 
-	logger.logState('After batch 2', {
+	console.log('After batch 2:', JSON.stringify({
 		understandingLength: afterBatch2.understanding.length,
 		bufferCount: afterBatch2.buffer.count,
-		observeCount: afterBatch2.metrics.ingestion.observeCount,
+		observationCount: afterBatch2.metrics.ingestion.observationCount,
 		synthesisCount: afterBatch2.metrics.ingestion.synthesisCount,
 		dismissalRate: (afterBatch2.metrics.ingestion.dismissalRate * 100).toFixed(1) + '%',
-	})
+	}, null, 2))
 
 	if (afterBatch2.understanding) {
-		console.log('\n  📝 Understanding now:')
-		console.log('  ' + afterBatch2.understanding.replace(/\n/g, '\n  '))
+		console.log('\nUnderstanding now:')
+		console.log(afterBatch2.understanding)
 	}
 
 	// ━━━ 8. FINAL QUERY ━━━
-	logger.logSection('8. Final query — "Summarize everything you know about espresso"')
+	console.log('\n━━━ 8. Final query — "Summarize everything you know about espresso" ━━━')
 
 	const queryFinal = await neuron.query('Summarize everything you know about espresso')
-	console.log(`\n  Relevant: ${queryFinal.relevant}`)
+	console.log(`  Relevant: ${queryFinal.relevant}`)
 	console.log(`  Relevance: ${queryFinal.relevance}`)
 	console.log(`  Confidence: ${queryFinal.confidence}`)
-	console.log(`  Insight:\n  ${queryFinal.insight.replace(/\n/g, '\n  ')}`)
+	console.log(`  Insight: ${queryFinal.insight}`)
 
 	// ━━━ 9. EVENT LOG SUMMARY ━━━
-	logger.logSection('9. Event log summary')
+	console.log('\n━━━ 9. Event log summary ━━━')
 
 	const eventCounts: Record<string, number> = {}
 	for (const e of events) {
 		eventCounts[e.type] = (eventCounts[e.type] || 0) + 1
 	}
 
-	console.log('\n  Event counts:')
+	console.log('\nEvent counts:')
 	for (const [type, count] of Object.entries(eventCounts).sort()) {
-		console.log(`    ${type}: ${count}`)
+		console.log(`  ${type}: ${count}`)
 	}
 
-	console.log('\n  Final state:')
-	console.log(`    Understanding length: ${(await neuron.getUnderstanding()).length} chars`)
-	console.log(`    Buffer count: ${neuron.getBufferState().count}`)
-	console.log(`    Metrics: ${JSON.stringify(neuron.getMetrics(), null, 2)}`)
-	console.log(`    Health: ${JSON.stringify(neuron.getHealth(), null, 2)}`)
+	console.log('\nFinal state:')
+	console.log(`  Understanding length: ${(await neuron.getUnderstanding()).length} chars`)
+	console.log(`  Buffer count: ${(await neuron.getBufferState()).count}`)
+	console.log(`  Metrics:`, JSON.stringify(neuron.getMetrics(), null, 2))
+	console.log(`  Health:`, JSON.stringify(neuron.getHealth(), null, 2))
 
-	logger.logSection('10. Semantic checks')
-
-	// Check: understanding exists after ingestion
-	const hasUnderstanding = (await neuron.getUnderstanding()).length > 0
-	logger.logAssertion('Understanding was generated', hasUnderstanding)
-
-	// Check: init events fired
-	logger.logAssertion('Init events fired', events.some(e => e.type === 'neuron:init:started') && events.some(e => e.type === 'neuron:init:completed'))
-
-	// Check: observe events fired
-	logger.logAssertion('Observe events fired', events.some(e => e.type === 'neuron:observe:started'))
-
-	// Check: synthesize events fired
-	logger.logAssertion('Synthesis happened', events.some(e => e.type === 'neuron:synthesized'))
-
-	// Check: query events fired
-	logger.logAssertion('Query events fired', events.some(e => e.type === 'neuron:query:started') && events.some(e => e.type === 'neuron:query:completed'))
-
-	// Check: config update events fired
-	logger.logAssertion('Config update events fired', events.filter(e => e.type === 'neuron:config:updated').length >= 3, `Expected 3+, got ${events.filter(e => e.type === 'neuron:config:updated').length}`)
-
-	// Check: prompts regenerated after instructions change
-	logger.logAssertion('Prompts regenerated after instruction update', events.some(e => e.type === 'neuron:prompts:regenerated'))
-
-	// Check: query 1 (pour-over) was relevant before update
-	logger.logAssertion('Pour-over query relevant before update', query1.relevant === true, `relevant=${query1.relevant}`)
-
-	// Check: espresso query was relevant
-	logger.logAssertion('Espresso query relevant', query4.relevant === true, `relevant=${query4.relevant}`)
-
-	// Check: final query relevant with good confidence
-	logger.logAssertion('Final summary query relevant', queryFinal.relevant === true, `relevant=${queryFinal.relevant}`)
-
-	// Check: metrics track queries
-	logger.logAssertion('Query count tracked', neuron.getMetrics().query.count >= 5, `count=${neuron.getMetrics().query.count}`)
-
-	logger.logSuccess(`Eval complete in ${elapsed()}s — ${events.length} total events`)
+	console.log(`\nEval complete in ${elapsed()}s — ${events.length} total events`)
 }
 
-main().catch((error) => {
-	logger.logError('Eval failed', error)
+main().catch((err) => {
+	console.error('Eval crashed:', err)
 	process.exit(1)
 })

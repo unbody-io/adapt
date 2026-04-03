@@ -3,9 +3,13 @@ title: Recipes
 description: Real-world patterns — proactive insights, quality gating, dual-brain architecture.
 ---
 
+Common patterns for building with Adapt. Each recipe addresses a specific problem you'll likely encounter.
+
 ## Proactive Insights
 
-Trigger queries when a neuron learns something significant:
+**Problem:** By default, insights only come when you ask for them via `ask()`. But sometimes you want the system to proactively surface important findings — for example, notifying a user when a critical pattern emerges.
+
+**Solution:** Subscribe to `neuron:synthesized` events and trigger a query when significance is high:
 
 ```typescript
 brain.on('neuron:synthesized', async (payload) => {
@@ -20,7 +24,9 @@ brain.on('neuron:synthesized', async (payload) => {
 
 ## Quality Gating
 
-Filter out low-confidence answers before surfacing:
+**Problem:** Not every query produces a good answer. If neurons don't have enough knowledge, you'll get low-confidence, speculative responses. You don't want to surface these to users.
+
+**Solution:** Filter results by confidence and relevance before showing them:
 
 ```typescript
 const result = await brain.ask(query)
@@ -33,7 +39,9 @@ return { insight: result.insight, gaps: result.gaps }
 
 ## Cross-Domain Connections
 
-The synthesis LLM sees all neuron responses and can find bridges:
+**Problem:** Each neuron is an independent specialist. But sometimes the most interesting insights come from *connecting* knowledge across domains — patterns that no single neuron can see on its own.
+
+**Solution:** Just ask. The synthesis step in `brain.ask()` sees all neuron responses together and can draw connections between them:
 
 ```typescript
 const result = await brain.ask('What connects my interest in calm tech with my wedding planning?')
@@ -41,7 +49,9 @@ const result = await brain.ask('What connects my interest in calm tech with my w
 
 ## User-Steerable Taxonomy
 
-Let users reshape the neuron structure at runtime:
+**Problem:** Your users may want to control how knowledge is organized — merging categories that feel redundant, splitting broad ones that are too noisy, or adjusting what a neuron pays attention to.
+
+**Solution:** Expose the evolution management API to your users, letting them reshape the Brain's structure at runtime:
 
 ```typescript
 await brain.mergeNeurons(['eink', 'paper-displays'], 'Combine under hardware')
@@ -51,7 +61,9 @@ await brain.adjustNeuron('categories', 'Stop categorizing things as inspiration'
 
 ## Dual-Brain Architecture
 
-Use separate brains for different time horizons — one for long-term memory, one for short-lived processing:
+**Problem:** Some use cases need both long-term memory (patterns across weeks or months) and short-term processing (extracting observations from a single session). A single Brain can't easily serve both — long-term brains have accumulated knowledge that biases observation, while session brains need to start fresh.
+
+**Solution:** Use two separate brains. A session brain processes the immediate data with a fixed, lightweight structure. After the session, transfer its knowledge into the long-term brain:
 
 ```typescript
 import { Brain } from '@unbody/adapt'
@@ -91,7 +103,9 @@ for (const neuron of sessionBrain.getNeurons()) {
 
 ## Event-Driven Synchronization
 
-Wait for Brain to fully settle after injection (including synthesis and evolution):
+**Problem:** `brain.inject()` returns after observation completes, but synthesis may still be running. If you need to guarantee that all neurons have finished processing before continuing (e.g., before querying), you need to wait for the full pipeline.
+
+**Solution:** Listen for the `brain:inject:completed` event, which fires after all neurons finish both observation and synthesis:
 
 ```typescript
 const injectDone = new Promise<void>((resolve) => {
@@ -104,7 +118,9 @@ await injectDone // Block until all neurons finish processing
 
 ## Multi-Provider Model Setup
 
-Use different providers for different phases — a local model for high-volume observation and a cloud model for synthesis:
+**Problem:** You want to minimize cloud API costs, but local models aren't good enough for synthesis and querying.
+
+**Solution:** Use the [model cascade](./configuration#model-cascade) to assign a local model for high-volume observation and a cloud model for the operations that need quality:
 
 ```typescript
 import { openai } from '@ai-sdk/openai'
@@ -130,7 +146,9 @@ const brain = new Brain({
 
 ## SSE Event Broadcasting
 
-Forward Brain events to SSE clients:
+**Problem:** You're building a web app and want to stream Brain activity (observation progress, synthesis results, evolution decisions) to the browser in real time.
+
+**Solution:** Forward Brain events over Server-Sent Events. The event system emits structured payloads that map cleanly to SSE:
 
 ```typescript
 // Forward all brain events to connected clients

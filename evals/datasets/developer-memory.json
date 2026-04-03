@@ -43,1366 +43,901 @@
       "id": "evt_001",
       "timestamp": "2024-01-02T09:00:00Z",
       "type": "ai_conversation",
-      "context": "Starting new project",
-      "user_message": "I'm starting a new API project. Should I use NestJS or just plain Express?",
-      "assistant_response": "For a new API, both are valid choices...",
-      "user_followup": "I think I'll go with plain Express. NestJS feels over-engineered for what I need. I can add structure as I go.",
-      "tags": ["architecture", "framework-choice"]
+      "content": "[Context: Starting new project]\n\nI'm starting a new API project. Should I use NestJS or just plain Express?\n\n[Assistant]: For a new API, both are valid choices...\n\n[User]: I think I'll go with plain Express. NestJS feels over-engineered for what I need. I can add structure as I go."
     },
     {
       "id": "evt_002",
       "timestamp": "2024-01-02T10:30:00Z",
       "type": "git_commit",
-      "message": "chore: init project with minimal express setup",
-      "files": ["src/index.ts", "package.json", "tsconfig.json"],
-      "additions": 45,
-      "deletions": 0
+      "content": "chore: init project with minimal express setup\nFiles: src/index.ts, package.json, tsconfig.json\n+45 -0"
     },
     {
       "id": "evt_003",
       "timestamp": "2024-01-02T14:00:00Z",
       "type": "ai_conversation",
-      "context": "Project structure",
-      "user_message": "What folder structure do you recommend?",
-      "assistant_response": "Common patterns include feature-based, layer-based...",
-      "user_followup": "I'll start flat and extract when patterns emerge. Premature structure is as bad as premature optimization.",
-      "tags": ["architecture", "philosophy"]
+      "content": "[Context: Project structure]\n\nWhat folder structure do you recommend?\n\n[Assistant]: Common patterns include feature-based, layer-based...\n\n[User]: I'll start flat and extract when patterns emerge. Premature structure is as bad as premature optimization."
     },
     {
       "id": "evt_004",
       "timestamp": "2024-01-03T09:15:00Z",
       "type": "git_commit",
-      "message": "feat: add user registration endpoint",
-      "files": ["src/routes/users.ts", "src/handlers/register.ts"],
-      "additions": 89,
-      "deletions": 0
+      "content": "feat: add user registration endpoint\nFiles: src/routes/users.ts, src/handlers/register.ts\n+89 -0"
     },
     {
       "id": "evt_005",
       "timestamp": "2024-01-03T11:00:00Z",
       "type": "code_review_given",
-      "pr": "PR #12 - Add logging middleware",
-      "comment": "This abstracts too early. We only have 3 routes. Just add console.log where needed and extract a middleware when we have 10+ routes.",
-      "sentiment": "reject"
+      "content": "PR: PR #12 - Add logging middleware [reject]\nThis abstracts too early. We only have 3 routes. Just add console.log where needed and extract a middleware when we have 10+ routes."
     },
     {
       "id": "evt_006",
       "timestamp": "2024-01-03T14:30:00Z",
       "type": "ai_conversation",
-      "context": "Error handling",
-      "user_message": "How should I handle errors in Express routes?",
-      "assistant_response": "You can use try/catch, error middleware, or Result types...",
-      "user_followup": "I'll use explicit returns. throw feels like goto. If a function can fail, I want it in the return type.",
-      "tags": ["error-handling", "philosophy"]
+      "content": "[Context: Error handling]\n\nHow should I handle errors in Express routes?\n\n[Assistant]: You can use try/catch, error middleware, or Result types...\n\n[User]: I'll use explicit returns. throw feels like goto. If a function can fail, I want it in the return type."
     },
     {
       "id": "evt_007",
       "timestamp": "2024-01-04T09:00:00Z",
       "type": "git_commit",
-      "message": "feat: add Result type for explicit error handling",
-      "files": ["src/types/result.ts"],
-      "additions": 34,
-      "deletions": 0
+      "content": "feat: add Result type for explicit error handling\nFiles: src/types/result.ts\n+34 -0"
     },
     {
       "id": "evt_008",
       "timestamp": "2024-01-04T10:45:00Z",
       "type": "config_change",
-      "file": "tsconfig.json",
-      "change": "Set strict: true, noImplicitAny: true, strictNullChecks: true",
-      "reason": "Type safety is non-negotiable"
+      "content": "File: tsconfig.json\nChange: Set strict: true, noImplicitAny: true, strictNullChecks: true\nReason: Type safety is non-negotiable"
     },
     {
       "id": "evt_009",
       "timestamp": "2024-01-04T15:00:00Z",
       "type": "ai_conversation",
-      "context": "Validation",
-      "user_message": "What's the best validation library?",
-      "assistant_response": "Popular options include Joi, Yup, Zod...",
-      "user_followup": "Zod looks good. TypeScript-first, infers types automatically. One source of truth for runtime and compile-time validation.",
-      "tags": ["validation", "tooling"]
+      "content": "[Context: Validation]\n\nWhat's the best validation library?\n\n[Assistant]: Popular options include Joi, Yup, Zod...\n\n[User]: Zod looks good. TypeScript-first, infers types automatically. One source of truth for runtime and compile-time validation."
     },
     {
       "id": "evt_010",
       "timestamp": "2024-01-05T09:30:00Z",
       "type": "package_install",
-      "package": "zod",
-      "version": "^3.22.0",
-      "reason": "Schema validation with type inference"
+      "content": "zod@^3.22.0\nReason: Schema validation with type inference"
     },
     {
       "id": "evt_011",
       "timestamp": "2024-01-05T11:00:00Z",
       "type": "git_commit",
-      "message": "refactor: use zod schemas for request validation",
-      "files": ["src/schemas/user.ts", "src/handlers/register.ts"],
-      "additions": 56,
-      "deletions": 23
+      "content": "refactor: use zod schemas for request validation\nFiles: src/schemas/user.ts, src/handlers/register.ts\n+56 -23"
     },
     {
       "id": "evt_012",
       "timestamp": "2024-01-08T09:00:00Z",
       "type": "ai_conversation",
-      "context": "Testing strategy",
-      "user_message": "Should I write unit tests or integration tests first?",
-      "assistant_response": "Testing pyramid suggests unit tests at base...",
-      "user_followup": "I'll focus on integration tests for APIs. Unit tests for pure functions only. Testing implementation details is a waste of time.",
-      "tags": ["testing", "philosophy"]
+      "content": "[Context: Testing strategy]\n\nShould I write unit tests or integration tests first?\n\n[Assistant]: Testing pyramid suggests unit tests at base...\n\n[User]: I'll focus on integration tests for APIs. Unit tests for pure functions only. Testing implementation details is a waste of time."
     },
     {
       "id": "evt_013",
       "timestamp": "2024-01-08T14:00:00Z",
       "type": "git_commit",
-      "message": "test: add integration tests for user registration",
-      "files": ["tests/integration/register.test.ts"],
-      "additions": 78,
-      "deletions": 0
+      "content": "test: add integration tests for user registration\nFiles: tests/integration/register.test.ts\n+78 -0"
     },
     {
       "id": "evt_014",
       "timestamp": "2024-01-09T10:00:00Z",
       "type": "code_review_given",
-      "pr": "PR #15 - Add UserService class",
-      "comment": "Why a class? This has no state. Just export functions. Classes should only exist when you need encapsulated state.",
-      "sentiment": "reject"
+      "content": "PR: PR #15 - Add UserService class [reject]\nWhy a class? This has no state. Just export functions. Classes should only exist when you need encapsulated state."
     },
     {
       "id": "evt_015",
       "timestamp": "2024-01-09T15:30:00Z",
       "type": "ai_conversation",
-      "context": "Database choice",
-      "user_message": "Postgres or MongoDB for this project?",
-      "assistant_response": "Depends on your data model...",
-      "user_followup": "Postgres. Relational data, ACID transactions, and I actually know my schema. NoSQL is for when you don't know your data model yet.",
-      "tags": ["database", "architecture"]
+      "content": "[Context: Database choice]\n\nPostgres or MongoDB for this project?\n\n[Assistant]: Depends on your data model...\n\n[User]: Postgres. Relational data, ACID transactions, and I actually know my schema. NoSQL is for when you don't know your data model yet."
     },
     {
       "id": "evt_016",
       "timestamp": "2024-01-10T09:00:00Z",
       "type": "git_commit",
-      "message": "feat: add postgres connection with raw SQL",
-      "files": ["src/db/connection.ts", "src/db/queries/users.ts"],
-      "additions": 67,
-      "deletions": 0
+      "content": "feat: add postgres connection with raw SQL\nFiles: src/db/connection.ts, src/db/queries/users.ts\n+67 -0"
     },
     {
       "id": "evt_017",
       "timestamp": "2024-01-10T11:30:00Z",
       "type": "ai_conversation",
-      "context": "ORM choice",
-      "user_message": "Should I use Prisma or TypeORM?",
-      "assistant_response": "Both are popular choices...",
-      "user_followup": "Neither for now. Raw SQL with a thin wrapper. ORMs add magic I don't need yet. If queries get complex, I'll add Kysely.",
-      "tags": ["database", "tooling", "philosophy"]
+      "content": "[Context: ORM choice]\n\nShould I use Prisma or TypeORM?\n\n[Assistant]: Both are popular choices...\n\n[User]: Neither for now. Raw SQL with a thin wrapper. ORMs add magic I don't need yet. If queries get complex, I'll add Kysely."
     },
     {
       "id": "evt_018",
       "timestamp": "2024-01-11T09:00:00Z",
       "type": "code_review_given",
-      "pr": "PR #18 - Add repository pattern",
-      "comment": "Repository pattern for 2 tables? This is enterprise cosplay. Just use the query functions directly.",
-      "sentiment": "reject"
+      "content": "PR: PR #18 - Add repository pattern [reject]\nRepository pattern for 2 tables? This is enterprise cosplay. Just use the query functions directly."
     },
     {
       "id": "evt_019",
       "timestamp": "2024-01-11T14:00:00Z",
       "type": "git_commit",
-      "message": "refactor: simplify db layer, remove unnecessary abstractions",
-      "files": ["src/db/queries/users.ts"],
-      "additions": 12,
-      "deletions": 45
+      "content": "refactor: simplify db layer, remove unnecessary abstractions\nFiles: src/db/queries/users.ts\n+12 -45"
     },
     {
       "id": "evt_020",
       "timestamp": "2024-01-12T10:00:00Z",
       "type": "ai_conversation",
-      "context": "Naming conventions",
-      "user_message": "camelCase or snake_case for API responses?",
-      "assistant_response": "JavaScript convention is camelCase, but some prefer snake_case for APIs...",
-      "user_followup": "camelCase everywhere. One convention, no translation layers. The API is consumed by JS clients anyway.",
-      "tags": ["naming", "style"]
+      "content": "[Context: Naming conventions]\n\ncamelCase or snake_case for API responses?\n\n[Assistant]: JavaScript convention is camelCase, but some prefer snake_case for APIs...\n\n[User]: camelCase everywhere. One convention, no translation layers. The API is consumed by JS clients anyway."
     },
     {
       "id": "evt_021",
       "timestamp": "2024-01-15T09:00:00Z",
       "type": "git_commit",
-      "message": "feat: add authentication with JWT",
-      "files": ["src/auth/jwt.ts", "src/middleware/auth.ts"],
-      "additions": 89,
-      "deletions": 0
+      "content": "feat: add authentication with JWT\nFiles: src/auth/jwt.ts, src/middleware/auth.ts\n+89 -0"
     },
     {
       "id": "evt_022",
       "timestamp": "2024-01-15T14:30:00Z",
       "type": "ai_conversation",
-      "context": "JWT storage",
-      "user_message": "Where should I store JWT tokens on the client?",
-      "assistant_response": "Options include localStorage, sessionStorage, httpOnly cookies...",
-      "user_followup": "httpOnly cookies. Never trust client-side storage with auth tokens. XSS is too easy.",
-      "tags": ["security", "architecture"]
+      "content": "[Context: JWT storage]\n\nWhere should I store JWT tokens on the client?\n\n[Assistant]: Options include localStorage, sessionStorage, httpOnly cookies...\n\n[User]: httpOnly cookies. Never trust client-side storage with auth tokens. XSS is too easy."
     },
     {
       "id": "evt_023",
       "timestamp": "2024-01-16T09:30:00Z",
       "type": "config_change",
-      "file": ".prettierrc",
-      "change": "Set printWidth: 100, useTabs: true, singleQuote: true",
-      "reason": "Tabs for accessibility, single quotes for consistency"
+      "content": "File: .prettierrc\nChange: Set printWidth: 100, useTabs: true, singleQuote: true\nReason: Tabs for accessibility, single quotes for consistency"
     },
     {
       "id": "evt_024",
       "timestamp": "2024-01-16T11:00:00Z",
       "type": "code_review_given",
-      "pr": "PR #22 - Add comments to all functions",
-      "comment": "These comments just repeat the function name. 'getUserById gets a user by ID' - I can read. Remove noise, add comments only for non-obvious behavior.",
-      "sentiment": "reject"
+      "content": "PR: PR #22 - Add comments to all functions [reject]\nThese comments just repeat the function name. 'getUserById gets a user by ID' - I can read. Remove noise, add comments only for non-obvious behavior."
     },
     {
       "id": "evt_025",
       "timestamp": "2024-01-17T09:00:00Z",
       "type": "ai_conversation",
-      "context": "Logging",
-      "user_message": "What logging library should I use?",
-      "assistant_response": "Popular options include Winston, Pino, Bunyan...",
-      "user_followup": "Pino. Fastest, JSON by default, minimal API. Winston is bloated. I just need structured logs to stdout.",
-      "tags": ["tooling", "logging"]
+      "content": "[Context: Logging]\n\nWhat logging library should I use?\n\n[Assistant]: Popular options include Winston, Pino, Bunyan...\n\n[User]: Pino. Fastest, JSON by default, minimal API. Winston is bloated. I just need structured logs to stdout."
     },
     {
       "id": "evt_026",
       "timestamp": "2024-01-17T14:00:00Z",
       "type": "package_install",
-      "package": "pino",
-      "version": "^8.17.0",
-      "reason": "Fast structured logging"
+      "content": "pino@^8.17.0\nReason: Fast structured logging"
     },
     {
       "id": "evt_027",
       "timestamp": "2024-01-18T09:00:00Z",
       "type": "git_commit",
-      "message": "feat: add request logging middleware",
-      "files": ["src/middleware/logging.ts"],
-      "additions": 23,
-      "deletions": 0
+      "content": "feat: add request logging middleware\nFiles: src/middleware/logging.ts\n+23 -0"
     },
     {
       "id": "evt_028",
       "timestamp": "2024-01-18T15:00:00Z",
       "type": "ai_conversation",
-      "context": "Error messages",
-      "user_message": "How detailed should error messages be?",
-      "assistant_response": "Balance between helpful and secure...",
-      "user_followup": "Different for dev and prod. Dev: full stack traces. Prod: error codes with correlation IDs. Never leak internals to users.",
-      "tags": ["error-handling", "security"]
+      "content": "[Context: Error messages]\n\nHow detailed should error messages be?\n\n[Assistant]: Balance between helpful and secure...\n\n[User]: Different for dev and prod. Dev: full stack traces. Prod: error codes with correlation IDs. Never leak internals to users."
     },
     {
       "id": "evt_029",
       "timestamp": "2024-01-19T10:00:00Z",
       "type": "git_commit",
-      "message": "feat: add error response formatting with correlation IDs",
-      "files": ["src/middleware/error-handler.ts", "src/types/api-error.ts"],
-      "additions": 56,
-      "deletions": 12
+      "content": "feat: add error response formatting with correlation IDs\nFiles: src/middleware/error-handler.ts, src/types/api-error.ts\n+56 -12"
     },
     {
       "id": "evt_030",
       "timestamp": "2024-01-22T09:00:00Z",
       "type": "code_review_given",
-      "pr": "PR #28 - Add global exception handler",
-      "comment": "Good. But rename 'handleException' to 'handleError'. Exceptions are a Java concept. In JS we handle errors.",
-      "sentiment": "approve_with_changes"
+      "content": "PR: PR #28 - Add global exception handler [approve_with_changes]\nGood. But rename 'handleException' to 'handleError'. Exceptions are a Java concept. In JS we handle errors."
     },
     {
       "id": "evt_031",
       "timestamp": "2024-01-22T14:00:00Z",
       "type": "ai_conversation",
-      "context": "Function length",
-      "user_message": "How long should a function be?",
-      "assistant_response": "Some say under 20 lines, others focus on single responsibility...",
-      "user_followup": "No magic number. A function should do one thing. If I can't name it clearly, it's doing too much. If it needs comments explaining sections, split it.",
-      "tags": ["style", "philosophy"]
+      "content": "[Context: Function length]\n\nHow long should a function be?\n\n[Assistant]: Some say under 20 lines, others focus on single responsibility...\n\n[User]: No magic number. A function should do one thing. If I can't name it clearly, it's doing too much. If it needs comments explaining sections, split it."
     },
     {
       "id": "evt_032",
       "timestamp": "2024-01-23T09:30:00Z",
       "type": "git_commit",
-      "message": "refactor: split large registration handler into steps",
-      "files": ["src/handlers/register.ts"],
-      "additions": 45,
-      "deletions": 38
+      "content": "refactor: split large registration handler into steps\nFiles: src/handlers/register.ts\n+45 -38"
     },
     {
       "id": "evt_033",
       "timestamp": "2024-01-23T11:00:00Z",
       "type": "ai_conversation",
-      "context": "DRY principle",
-      "user_message": "I have similar code in two places. Should I extract it?",
-      "assistant_response": "DRY suggests yes...",
-      "user_followup": "Not yet. Duplication is cheaper than the wrong abstraction. Wait until I see it three times and understand the pattern.",
-      "tags": ["philosophy", "refactoring"]
+      "content": "[Context: DRY principle]\n\nI have similar code in two places. Should I extract it?\n\n[Assistant]: DRY suggests yes...\n\n[User]: Not yet. Duplication is cheaper than the wrong abstraction. Wait until I see it three times and understand the pattern."
     },
     {
       "id": "evt_034",
       "timestamp": "2024-01-24T09:00:00Z",
       "type": "code_review_given",
-      "pr": "PR #31 - Extract common validation logic",
-      "comment": "These validations are only 'similar', not identical. Different contexts, different requirements. Keep them separate until they truly converge.",
-      "sentiment": "reject"
+      "content": "PR: PR #31 - Extract common validation logic [reject]\nThese validations are only 'similar', not identical. Different contexts, different requirements. Keep them separate until they truly converge."
     },
     {
       "id": "evt_035",
       "timestamp": "2024-01-25T10:00:00Z",
       "type": "git_commit",
-      "message": "feat: add password reset flow",
-      "files": ["src/handlers/reset-password.ts", "src/email/templates.ts"],
-      "additions": 112,
-      "deletions": 0
+      "content": "feat: add password reset flow\nFiles: src/handlers/reset-password.ts, src/email/templates.ts\n+112 -0"
     },
     {
       "id": "evt_036",
       "timestamp": "2024-01-25T15:30:00Z",
       "type": "ai_conversation",
-      "context": "Email templates",
-      "user_message": "Should I use a template engine for emails?",
-      "assistant_response": "Options include Handlebars, EJS, or React Email...",
-      "user_followup": "Template literals for now. Only 2 email types. I'll add React Email if we get to 10+ templates.",
-      "tags": ["tooling", "philosophy"]
+      "content": "[Context: Email templates]\n\nShould I use a template engine for emails?\n\n[Assistant]: Options include Handlebars, EJS, or React Email...\n\n[User]: Template literals for now. Only 2 email types. I'll add React Email if we get to 10+ templates."
     },
     {
       "id": "evt_037",
       "timestamp": "2024-01-26T09:00:00Z",
       "type": "config_change",
-      "file": "biome.json",
-      "change": "Migrated from ESLint+Prettier to Biome",
-      "reason": "Single tool, faster, same results"
+      "content": "File: biome.json\nChange: Migrated from ESLint+Prettier to Biome\nReason: Single tool, faster, same results"
     },
     {
       "id": "evt_038",
       "timestamp": "2024-01-29T10:00:00Z",
       "type": "ai_conversation",
-      "context": "API versioning",
-      "user_message": "How should I version my API?",
-      "assistant_response": "Common approaches include URL path, header, query param...",
-      "user_followup": "URL path (/v1/). Clear, cacheable, obvious. Header versioning is clever but clients hate it.",
-      "tags": ["api-design", "architecture"]
+      "content": "[Context: API versioning]\n\nHow should I version my API?\n\n[Assistant]: Common approaches include URL path, header, query param...\n\n[User]: URL path (/v1/). Clear, cacheable, obvious. Header versioning is clever but clients hate it."
     },
     {
       "id": "evt_039",
       "timestamp": "2024-01-29T14:00:00Z",
       "type": "git_commit",
-      "message": "refactor: add /v1 prefix to all routes",
-      "files": ["src/routes/index.ts"],
-      "additions": 15,
-      "deletions": 12
+      "content": "refactor: add /v1 prefix to all routes\nFiles: src/routes/index.ts\n+15 -12"
     },
     {
       "id": "evt_040",
       "timestamp": "2024-01-30T09:00:00Z",
       "type": "code_review_given",
-      "pr": "PR #36 - Add GraphQL endpoint",
-      "comment": "Why GraphQL? We have 5 REST endpoints. GraphQL adds complexity with no benefit at this scale. Solve problems you have, not problems you imagine.",
-      "sentiment": "reject"
+      "content": "PR: PR #36 - Add GraphQL endpoint [reject]\nWhy GraphQL? We have 5 REST endpoints. GraphQL adds complexity with no benefit at this scale. Solve problems you have, not problems you imagine."
     },
     {
       "id": "evt_041",
       "timestamp": "2024-01-31T11:00:00Z",
       "type": "ai_conversation",
-      "context": "Dependency injection",
-      "user_message": "Should I use a DI container?",
-      "assistant_response": "DI containers like tsyringe, inversify...",
-      "user_followup": "No container needed. Just pass dependencies as function arguments. If that gets unwieldy, I'll reconsider. Most DI libraries are overkill for non-enterprise apps.",
-      "tags": ["architecture", "philosophy"]
+      "content": "[Context: Dependency injection]\n\nShould I use a DI container?\n\n[Assistant]: DI containers like tsyringe, inversify...\n\n[User]: No container needed. Just pass dependencies as function arguments. If that gets unwieldy, I'll reconsider. Most DI libraries are overkill for non-enterprise apps."
     },
     {
       "id": "evt_042",
       "timestamp": "2024-02-01T09:00:00Z",
       "type": "git_commit",
-      "message": "feat: add rate limiting middleware",
-      "files": ["src/middleware/rate-limit.ts"],
-      "additions": 34,
-      "deletions": 0
+      "content": "feat: add rate limiting middleware\nFiles: src/middleware/rate-limit.ts\n+34 -0"
     },
     {
       "id": "evt_043",
       "timestamp": "2024-02-01T14:00:00Z",
       "type": "ai_conversation",
-      "context": "Rate limiting",
-      "user_message": "Redis or in-memory for rate limiting?",
-      "assistant_response": "Redis for distributed, in-memory for single instance...",
-      "user_followup": "In-memory. Single instance for now. I'll add Redis when we scale horizontally. YAGNI until then.",
-      "tags": ["architecture", "scaling"]
+      "content": "[Context: Rate limiting]\n\nRedis or in-memory for rate limiting?\n\n[Assistant]: Redis for distributed, in-memory for single instance...\n\n[User]: In-memory. Single instance for now. I'll add Redis when we scale horizontally. YAGNI until then."
     },
     {
       "id": "evt_044",
       "timestamp": "2024-02-02T10:00:00Z",
       "type": "code_review_given",
-      "pr": "PR #40 - Add Redis caching layer",
-      "comment": "We're not at scale where this matters. Add it when response times are actually a problem. Premature caching creates invalidation bugs.",
-      "sentiment": "reject"
+      "content": "PR: PR #40 - Add Redis caching layer [reject]\nWe're not at scale where this matters. Add it when response times are actually a problem. Premature caching creates invalidation bugs."
     },
     {
       "id": "evt_045",
       "timestamp": "2024-02-05T09:00:00Z",
       "type": "git_commit",
-      "message": "test: add load tests with k6",
-      "files": ["tests/load/registration.js"],
-      "additions": 45,
-      "deletions": 0
+      "content": "test: add load tests with k6\nFiles: tests/load/registration.js\n+45 -0"
     },
     {
       "id": "evt_046",
       "timestamp": "2024-02-05T15:00:00Z",
       "type": "ai_conversation",
-      "context": "Performance testing",
-      "user_message": "When should I run load tests?",
-      "assistant_response": "Regular intervals, before major releases...",
-      "user_followup": "Before production and after major changes. Not in CI for every commit - too slow. Have a separate performance pipeline.",
-      "tags": ["testing", "devops"]
+      "content": "[Context: Performance testing]\n\nWhen should I run load tests?\n\n[Assistant]: Regular intervals, before major releases...\n\n[User]: Before production and after major changes. Not in CI for every commit - too slow. Have a separate performance pipeline."
     },
     {
       "id": "evt_047",
       "timestamp": "2024-02-06T09:30:00Z",
       "type": "git_commit",
-      "message": "feat: add health check endpoint",
-      "files": ["src/routes/health.ts"],
-      "additions": 23,
-      "deletions": 0
+      "content": "feat: add health check endpoint\nFiles: src/routes/health.ts\n+23 -0"
     },
     {
       "id": "evt_048",
       "timestamp": "2024-02-06T11:00:00Z",
       "type": "ai_conversation",
-      "context": "Health checks",
-      "user_message": "What should a health check include?",
-      "assistant_response": "Options include simple ping, database check, dependency checks...",
-      "user_followup": "Two endpoints: /health (always 200, for LB), /health/deep (checks DB, for monitoring). Separate concerns.",
-      "tags": ["api-design", "devops"]
+      "content": "[Context: Health checks]\n\nWhat should a health check include?\n\n[Assistant]: Options include simple ping, database check, dependency checks...\n\n[User]: Two endpoints: /health (always 200, for LB), /health/deep (checks DB, for monitoring). Separate concerns."
     },
     {
       "id": "evt_049",
       "timestamp": "2024-02-07T10:00:00Z",
       "type": "code_review_given",
-      "pr": "PR #45 - Add Docker support",
-      "comment": "Good Dockerfile. But remove the dev dependencies from the image. Production images should be minimal.",
-      "sentiment": "approve_with_changes"
+      "content": "PR: PR #45 - Add Docker support [approve_with_changes]\nGood Dockerfile. But remove the dev dependencies from the image. Production images should be minimal."
     },
     {
       "id": "evt_050",
       "timestamp": "2024-02-08T09:00:00Z",
       "type": "git_commit",
-      "message": "chore: optimize Docker image with multi-stage build",
-      "files": ["Dockerfile"],
-      "additions": 25,
-      "deletions": 15
+      "content": "chore: optimize Docker image with multi-stage build\nFiles: Dockerfile\n+25 -15"
     },
     {
       "id": "evt_051",
       "timestamp": "2024-02-08T14:00:00Z",
       "type": "ai_conversation",
-      "context": "Environment config",
-      "user_message": "How should I handle environment variables?",
-      "assistant_response": "Use .env files, config libraries like dotenv...",
-      "user_followup": "Validate at startup with zod. If required config is missing, fail fast with clear error. Don't let the app start in bad state.",
-      "tags": ["configuration", "philosophy"]
+      "content": "[Context: Environment config]\n\nHow should I handle environment variables?\n\n[Assistant]: Use .env files, config libraries like dotenv...\n\n[User]: Validate at startup with zod. If required config is missing, fail fast with clear error. Don't let the app start in bad state."
     },
     {
       "id": "evt_052",
       "timestamp": "2024-02-09T09:00:00Z",
       "type": "git_commit",
-      "message": "feat: add config validation on startup",
-      "files": ["src/config/index.ts", "src/config/schema.ts"],
-      "additions": 56,
-      "deletions": 12
+      "content": "feat: add config validation on startup\nFiles: src/config/index.ts, src/config/schema.ts\n+56 -12"
     },
     {
       "id": "evt_053",
       "timestamp": "2024-02-12T10:00:00Z",
       "type": "ai_conversation",
-      "context": "Async patterns",
-      "user_message": "Callbacks, promises, or async/await?",
-      "assistant_response": "Modern JS favors async/await...",
-      "user_followup": "async/await everywhere. Promises when composing. Never callbacks unless forced by old library. Consistency is key.",
-      "tags": ["style", "async"]
+      "content": "[Context: Async patterns]\n\nCallbacks, promises, or async/await?\n\n[Assistant]: Modern JS favors async/await...\n\n[User]: async/await everywhere. Promises when composing. Never callbacks unless forced by old library. Consistency is key."
     },
     {
       "id": "evt_054",
       "timestamp": "2024-02-12T15:00:00Z",
       "type": "code_review_given",
-      "pr": "PR #50 - Refactor to use callbacks for performance",
-      "comment": "The performance difference is nanoseconds. Readability matters more. Keep async/await unless you profile and prove it's a bottleneck.",
-      "sentiment": "reject"
+      "content": "PR: PR #50 - Refactor to use callbacks for performance [reject]\nThe performance difference is nanoseconds. Readability matters more. Keep async/await unless you profile and prove it's a bottleneck."
     },
     {
       "id": "evt_055",
       "timestamp": "2024-02-13T09:00:00Z",
       "type": "git_commit",
-      "message": "feat: add database migrations",
-      "files": ["migrations/001_users.sql", "src/db/migrate.ts"],
-      "additions": 78,
-      "deletions": 0
+      "content": "feat: add database migrations\nFiles: migrations/001_users.sql, src/db/migrate.ts\n+78 -0"
     },
     {
       "id": "evt_056",
       "timestamp": "2024-02-13T11:30:00Z",
       "type": "ai_conversation",
-      "context": "Migrations",
-      "user_message": "What migration tool should I use?",
-      "assistant_response": "Options include Knex migrations, Prisma migrate...",
-      "user_followup": "Plain SQL files with a simple runner. I want to see and version the exact DDL. Migration tools add magic.",
-      "tags": ["database", "tooling"]
+      "content": "[Context: Migrations]\n\nWhat migration tool should I use?\n\n[Assistant]: Options include Knex migrations, Prisma migrate...\n\n[User]: Plain SQL files with a simple runner. I want to see and version the exact DDL. Migration tools add magic."
     },
     {
       "id": "evt_057",
       "timestamp": "2024-02-14T09:00:00Z",
       "type": "code_review_given",
-      "pr": "PR #53 - Add transaction support",
-      "comment": "Good. But wrap the transaction logic in a helper that handles begin/commit/rollback. Reduces boilerplate.",
-      "sentiment": "approve_with_changes"
+      "content": "PR: PR #53 - Add transaction support [approve_with_changes]\nGood. But wrap the transaction logic in a helper that handles begin/commit/rollback. Reduces boilerplate."
     },
     {
       "id": "evt_058",
       "timestamp": "2024-02-15T10:00:00Z",
       "type": "git_commit",
-      "message": "refactor: add transaction helper function",
-      "files": ["src/db/transaction.ts"],
-      "additions": 34,
-      "deletions": 0
+      "content": "refactor: add transaction helper function\nFiles: src/db/transaction.ts\n+34 -0"
     },
     {
       "id": "evt_059",
       "timestamp": "2024-02-15T15:00:00Z",
       "type": "ai_conversation",
-      "context": "Type assertions",
-      "user_message": "When is it okay to use 'as' type assertions?",
-      "assistant_response": "When you know more than the compiler...",
-      "user_followup": "Almost never. If I need 'as', usually means I should fix the types. Only exception: test mocks where I'm intentionally partial.",
-      "tags": ["typescript", "philosophy"]
+      "content": "[Context: Type assertions]\n\nWhen is it okay to use 'as' type assertions?\n\n[Assistant]: When you know more than the compiler...\n\n[User]: Almost never. If I need 'as', usually means I should fix the types. Only exception: test mocks where I'm intentionally partial."
     },
     {
       "id": "evt_060",
       "timestamp": "2024-02-16T09:00:00Z",
       "type": "config_change",
-      "file": "tsconfig.json",
-      "change": "Added noUncheckedIndexedAccess: true",
-      "reason": "Arrays should be checked before access. Prevents undefined bugs."
+      "content": "File: tsconfig.json\nChange: Added noUncheckedIndexedAccess: true\nReason: Arrays should be checked before access. Prevents undefined bugs."
     },
     {
       "id": "evt_061",
       "timestamp": "2024-02-19T10:00:00Z",
       "type": "git_commit",
-      "message": "feat: add user profile endpoints",
-      "files": ["src/handlers/profile.ts", "src/routes/profile.ts"],
-      "additions": 89,
-      "deletions": 0
+      "content": "feat: add user profile endpoints\nFiles: src/handlers/profile.ts, src/routes/profile.ts\n+89 -0"
     },
     {
       "id": "evt_062",
       "timestamp": "2024-02-19T14:00:00Z",
       "type": "ai_conversation",
-      "context": "REST naming",
-      "user_message": "Singular or plural for REST resources?",
-      "assistant_response": "Both conventions exist...",
-      "user_followup": "Plural. /users, /posts, /comments. Consistent and matches the collection concept. Exception: /me for current user.",
-      "tags": ["api-design", "naming"]
+      "content": "[Context: REST naming]\n\nSingular or plural for REST resources?\n\n[Assistant]: Both conventions exist...\n\n[User]: Plural. /users, /posts, /comments. Consistent and matches the collection concept. Exception: /me for current user."
     },
     {
       "id": "evt_063",
       "timestamp": "2024-02-20T09:00:00Z",
       "type": "code_review_given",
-      "pr": "PR #58 - Add soft deletes",
-      "comment": "Soft deletes add complexity. Do we actually need to restore data? If yes, proceed. If 'maybe someday', just delete. We have backups.",
-      "sentiment": "needs_discussion"
+      "content": "PR: PR #58 - Add soft deletes [needs_discussion]\nSoft deletes add complexity. Do we actually need to restore data? If yes, proceed. If 'maybe someday', just delete. We have backups."
     },
     {
       "id": "evt_064",
       "timestamp": "2024-02-20T15:00:00Z",
       "type": "ai_conversation",
-      "context": "Soft vs hard delete",
-      "user_message": "Should I implement soft deletes?",
-      "assistant_response": "Soft deletes preserve data...",
-      "user_followup": "Only for things with legal/compliance requirements. For user data, yes. For temporary resources like sessions, hard delete.",
-      "tags": ["database", "architecture"]
+      "content": "[Context: Soft vs hard delete]\n\nShould I implement soft deletes?\n\n[Assistant]: Soft deletes preserve data...\n\n[User]: Only for things with legal/compliance requirements. For user data, yes. For temporary resources like sessions, hard delete."
     },
     {
       "id": "evt_065",
       "timestamp": "2024-02-21T09:30:00Z",
       "type": "git_commit",
-      "message": "feat: add soft delete for users with audit trail",
-      "files": ["src/db/queries/users.ts", "migrations/002_soft_delete.sql"],
-      "additions": 45,
-      "deletions": 12
+      "content": "feat: add soft delete for users with audit trail\nFiles: src/db/queries/users.ts, migrations/002_soft_delete.sql\n+45 -12"
     },
     {
       "id": "evt_066",
       "timestamp": "2024-02-22T10:00:00Z",
       "type": "ai_conversation",
-      "context": "Interface vs Type",
-      "user_message": "Should I use interface or type in TypeScript?",
-      "assistant_response": "Interfaces are extendable, types are more flexible...",
-      "user_followup": "type for data shapes, interface for contracts that might be implemented. In practice, type for almost everything.",
-      "tags": ["typescript", "style"]
+      "content": "[Context: Interface vs Type]\n\nShould I use interface or type in TypeScript?\n\n[Assistant]: Interfaces are extendable, types are more flexible...\n\n[User]: type for data shapes, interface for contracts that might be implemented. In practice, type for almost everything."
     },
     {
       "id": "evt_067",
       "timestamp": "2024-02-22T15:00:00Z",
       "type": "code_review_given",
-      "pr": "PR #62 - Use interfaces everywhere",
-      "comment": "Not needed. Types are fine for DTOs and response shapes. Save interfaces for when you need declaration merging or class contracts.",
-      "sentiment": "reject"
+      "content": "PR: PR #62 - Use interfaces everywhere [reject]\nNot needed. Types are fine for DTOs and response shapes. Save interfaces for when you need declaration merging or class contracts."
     },
     {
       "id": "evt_068",
       "timestamp": "2024-02-23T09:00:00Z",
       "type": "git_commit",
-      "message": "feat: add pagination to list endpoints",
-      "files": ["src/handlers/users-list.ts", "src/types/pagination.ts"],
-      "additions": 67,
-      "deletions": 12
+      "content": "feat: add pagination to list endpoints\nFiles: src/handlers/users-list.ts, src/types/pagination.ts\n+67 -12"
     },
     {
       "id": "evt_069",
       "timestamp": "2024-02-26T10:00:00Z",
       "type": "ai_conversation",
-      "context": "Pagination style",
-      "user_message": "Offset or cursor pagination?",
-      "assistant_response": "Offset is simpler, cursor is more efficient for large datasets...",
-      "user_followup": "Cursor. Offset breaks on real-time data and gets slow at scale. Start with cursor, never have to migrate later.",
-      "tags": ["api-design", "architecture"]
+      "content": "[Context: Pagination style]\n\nOffset or cursor pagination?\n\n[Assistant]: Offset is simpler, cursor is more efficient for large datasets...\n\n[User]: Cursor. Offset breaks on real-time data and gets slow at scale. Start with cursor, never have to migrate later."
     },
     {
       "id": "evt_070",
       "timestamp": "2024-02-26T15:00:00Z",
       "type": "git_commit",
-      "message": "refactor: switch to cursor-based pagination",
-      "files": ["src/handlers/users-list.ts", "src/types/pagination.ts"],
-      "additions": 45,
-      "deletions": 34
+      "content": "refactor: switch to cursor-based pagination\nFiles: src/handlers/users-list.ts, src/types/pagination.ts\n+45 -34"
     },
     {
       "id": "evt_071",
       "timestamp": "2024-02-27T09:00:00Z",
       "type": "code_review_given",
-      "pr": "PR #65 - Add OpenAPI spec",
-      "comment": "Good idea. But generate from code, don't manually maintain. Code is source of truth. Spec should be derived.",
-      "sentiment": "approve_with_changes"
+      "content": "PR: PR #65 - Add OpenAPI spec [approve_with_changes]\nGood idea. But generate from code, don't manually maintain. Code is source of truth. Spec should be derived."
     },
     {
       "id": "evt_072",
       "timestamp": "2024-02-28T10:00:00Z",
       "type": "package_install",
-      "package": "@asteasolutions/zod-to-openapi",
-      "version": "^5.0.0",
-      "reason": "Generate OpenAPI from Zod schemas"
+      "content": "@asteasolutions/zod-to-openapi@^5.0.0\nReason: Generate OpenAPI from Zod schemas"
     },
     {
       "id": "evt_073",
       "timestamp": "2024-02-28T14:00:00Z",
       "type": "ai_conversation",
-      "context": "Documentation",
-      "user_message": "How should I document the API?",
-      "assistant_response": "OpenAPI/Swagger, README, dedicated docs site...",
-      "user_followup": "Generate OpenAPI from schemas. Self-documenting. Manual docs drift from reality. If the schema changes, docs update automatically.",
-      "tags": ["documentation", "tooling"]
+      "content": "[Context: Documentation]\n\nHow should I document the API?\n\n[Assistant]: OpenAPI/Swagger, README, dedicated docs site...\n\n[User]: Generate OpenAPI from schemas. Self-documenting. Manual docs drift from reality. If the schema changes, docs update automatically."
     },
     {
       "id": "evt_074",
       "timestamp": "2024-02-29T09:00:00Z",
       "type": "git_commit",
-      "message": "feat: auto-generate OpenAPI spec from Zod schemas",
-      "files": ["src/docs/openapi.ts", "scripts/generate-docs.ts"],
-      "additions": 89,
-      "deletions": 0
+      "content": "feat: auto-generate OpenAPI spec from Zod schemas\nFiles: src/docs/openapi.ts, scripts/generate-docs.ts\n+89 -0"
     },
     {
       "id": "evt_075",
       "timestamp": "2024-03-01T10:00:00Z",
       "type": "ai_conversation",
-      "context": "Feature flags",
-      "user_message": "Should I add feature flags?",
-      "assistant_response": "Feature flags enable gradual rollouts...",
-      "user_followup": "Not until we have a feature that needs gradual rollout. Environment-based config suffices for now. Feature flags are infrastructure debt.",
-      "tags": ["architecture", "philosophy"]
+      "content": "[Context: Feature flags]\n\nShould I add feature flags?\n\n[Assistant]: Feature flags enable gradual rollouts...\n\n[User]: Not until we have a feature that needs gradual rollout. Environment-based config suffices for now. Feature flags are infrastructure debt."
     },
     {
       "id": "evt_076",
       "timestamp": "2024-03-01T15:00:00Z",
       "type": "code_review_given",
-      "pr": "PR #70 - Add LaunchDarkly integration",
-      "comment": "We're 3 developers. Talk to each other. Feature flags solve coordination problems at scale we don't have.",
-      "sentiment": "reject"
+      "content": "PR: PR #70 - Add LaunchDarkly integration [reject]\nWe're 3 developers. Talk to each other. Feature flags solve coordination problems at scale we don't have."
     },
     {
       "id": "evt_077",
       "timestamp": "2024-03-04T09:00:00Z",
       "type": "git_commit",
-      "message": "feat: add webhook support for user events",
-      "files": ["src/webhooks/dispatcher.ts", "src/types/events.ts"],
-      "additions": 78,
-      "deletions": 0
+      "content": "feat: add webhook support for user events\nFiles: src/webhooks/dispatcher.ts, src/types/events.ts\n+78 -0"
     },
     {
       "id": "evt_078",
       "timestamp": "2024-03-04T11:30:00Z",
       "type": "ai_conversation",
-      "context": "Event-driven",
-      "user_message": "Should I use an event bus like RabbitMQ?",
-      "assistant_response": "Event buses enable decoupling...",
-      "user_followup": "HTTP webhooks first. Simpler, debuggable, no infrastructure. Event bus when we have multiple consumers or need guaranteed delivery.",
-      "tags": ["architecture", "messaging"]
+      "content": "[Context: Event-driven]\n\nShould I use an event bus like RabbitMQ?\n\n[Assistant]: Event buses enable decoupling...\n\n[User]: HTTP webhooks first. Simpler, debuggable, no infrastructure. Event bus when we have multiple consumers or need guaranteed delivery."
     },
     {
       "id": "evt_079",
       "timestamp": "2024-03-05T09:00:00Z",
       "type": "code_review_given",
-      "pr": "PR #73 - Add microservices structure",
-      "comment": "We have one service with 10 endpoints. Microservices solve distribution problems. We have a complexity problem. Monolith first.",
-      "sentiment": "reject"
+      "content": "PR: PR #73 - Add microservices structure [reject]\nWe have one service with 10 endpoints. Microservices solve distribution problems. We have a complexity problem. Monolith first."
     },
     {
       "id": "evt_080",
       "timestamp": "2024-03-05T14:00:00Z",
       "type": "ai_conversation",
-      "context": "Monolith vs microservices",
-      "user_message": "When should we move to microservices?",
-      "assistant_response": "Common triggers include team scaling...",
-      "user_followup": "When team boundaries require service boundaries. Or when a component needs different scaling/deployment. Never for 'good architecture' alone.",
-      "tags": ["architecture", "philosophy"]
+      "content": "[Context: Monolith vs microservices]\n\nWhen should we move to microservices?\n\n[Assistant]: Common triggers include team scaling...\n\n[User]: When team boundaries require service boundaries. Or when a component needs different scaling/deployment. Never for 'good architecture' alone."
     },
     {
       "id": "evt_081",
       "timestamp": "2024-03-06T10:00:00Z",
       "type": "git_commit",
-      "message": "refactor: organize monolith by feature, not layer",
-      "files": ["src/features/users/*", "src/features/auth/*"],
-      "additions": 0,
-      "deletions": 0,
-      "note": "File reorganization"
+      "content": "refactor: organize monolith by feature, not layer\nFiles: src/features/users/*, src/features/auth/*\n+0 -0\nNote: File reorganization"
     },
     {
       "id": "evt_082",
       "timestamp": "2024-03-07T09:00:00Z",
       "type": "ai_conversation",
-      "context": "Code organization",
-      "user_message": "Should I organize by layer (routes, handlers, models) or by feature?",
-      "assistant_response": "Both have merits...",
-      "user_followup": "Feature. When I work on users, I want all user code together. Layer organization means jumping between folders constantly.",
-      "tags": ["architecture", "organization"]
+      "content": "[Context: Code organization]\n\nShould I organize by layer (routes, handlers, models) or by feature?\n\n[Assistant]: Both have merits...\n\n[User]: Feature. When I work on users, I want all user code together. Layer organization means jumping between folders constantly."
     },
     {
       "id": "evt_083",
       "timestamp": "2024-03-08T10:00:00Z",
       "type": "code_review_given",
-      "pr": "PR #77 - Add shared utils folder",
-      "comment": "What's 'shared'? If it's used everywhere, it's a library. If it's used by 2 features, put it in one and import. 'Shared' folders become junk drawers.",
-      "sentiment": "reject"
+      "content": "PR: PR #77 - Add shared utils folder [reject]\nWhat's 'shared'? If it's used everywhere, it's a library. If it's used by 2 features, put it in one and import. 'Shared' folders become junk drawers."
     },
     {
       "id": "evt_084",
       "timestamp": "2024-03-08T15:00:00Z",
       "type": "git_commit",
-      "message": "refactor: move truly shared code to lib/",
-      "files": ["src/lib/result.ts", "src/lib/validation.ts"],
-      "additions": 12,
-      "deletions": 8
+      "content": "refactor: move truly shared code to lib/\nFiles: src/lib/result.ts, src/lib/validation.ts\n+12 -8"
     },
     {
       "id": "evt_085",
       "timestamp": "2024-03-11T09:00:00Z",
       "type": "ai_conversation",
-      "context": "Observability",
-      "user_message": "What observability stack do you recommend?",
-      "assistant_response": "Options include Datadog, New Relic, open-source stacks...",
-      "user_followup": "Logs, metrics, traces. Start with structured logs (Pino). Add Prometheus metrics when we need dashboards. Traces when debugging distributed calls.",
-      "tags": ["observability", "devops"]
+      "content": "[Context: Observability]\n\nWhat observability stack do you recommend?\n\n[Assistant]: Options include Datadog, New Relic, open-source stacks...\n\n[User]: Logs, metrics, traces. Start with structured logs (Pino). Add Prometheus metrics when we need dashboards. Traces when debugging distributed calls."
     },
     {
       "id": "evt_086",
       "timestamp": "2024-03-11T14:00:00Z",
       "type": "git_commit",
-      "message": "feat: add prometheus metrics endpoint",
-      "files": ["src/metrics/index.ts", "src/routes/metrics.ts"],
-      "additions": 56,
-      "deletions": 0
+      "content": "feat: add prometheus metrics endpoint\nFiles: src/metrics/index.ts, src/routes/metrics.ts\n+56 -0"
     },
     {
       "id": "evt_087",
       "timestamp": "2024-03-12T09:00:00Z",
       "type": "code_review_given",
-      "pr": "PR #80 - Add comprehensive metrics",
-      "comment": "Too many metrics. Focus on RED: Rate, Errors, Duration. Add others when we have specific questions to answer.",
-      "sentiment": "approve_with_changes"
+      "content": "PR: PR #80 - Add comprehensive metrics [approve_with_changes]\nToo many metrics. Focus on RED: Rate, Errors, Duration. Add others when we have specific questions to answer."
     },
     {
       "id": "evt_088",
       "timestamp": "2024-03-12T15:00:00Z",
       "type": "ai_conversation",
-      "context": "Security headers",
-      "user_message": "What security headers should I add?",
-      "assistant_response": "Common headers include CORS, CSP, HSTS...",
-      "user_followup": "Use Helmet.js but understand each header. Don't just copy defaults. CSP needs to match actual resources we load.",
-      "tags": ["security", "tooling"]
+      "content": "[Context: Security headers]\n\nWhat security headers should I add?\n\n[Assistant]: Common headers include CORS, CSP, HSTS...\n\n[User]: Use Helmet.js but understand each header. Don't just copy defaults. CSP needs to match actual resources we load."
     },
     {
       "id": "evt_089",
       "timestamp": "2024-03-13T09:00:00Z",
       "type": "package_install",
-      "package": "helmet",
-      "version": "^7.1.0",
-      "reason": "Security headers middleware"
+      "content": "helmet@^7.1.0\nReason: Security headers middleware"
     },
     {
       "id": "evt_090",
       "timestamp": "2024-03-13T11:00:00Z",
       "type": "git_commit",
-      "message": "feat: add security headers with customized CSP",
-      "files": ["src/middleware/security.ts"],
-      "additions": 34,
-      "deletions": 0
+      "content": "feat: add security headers with customized CSP\nFiles: src/middleware/security.ts\n+34 -0"
     },
     {
       "id": "evt_091",
       "timestamp": "2024-03-14T10:00:00Z",
       "type": "ai_conversation",
-      "context": "Code coverage",
-      "user_message": "What code coverage should I target?",
-      "assistant_response": "Industry standards suggest 80%...",
-      "user_followup": "Coverage is vanity. Focus on testing behavior, not lines. 100% coverage with bad tests is worse than 60% with good ones.",
-      "tags": ["testing", "philosophy"]
+      "content": "[Context: Code coverage]\n\nWhat code coverage should I target?\n\n[Assistant]: Industry standards suggest 80%...\n\n[User]: Coverage is vanity. Focus on testing behavior, not lines. 100% coverage with bad tests is worse than 60% with good ones."
     },
     {
       "id": "evt_092",
       "timestamp": "2024-03-14T15:00:00Z",
       "type": "code_review_given",
-      "pr": "PR #84 - Add tests to reach 80% coverage",
-      "comment": "Some of these tests just exercise code without asserting behavior. Remove the getter tests. Add tests for edge cases we missed.",
-      "sentiment": "approve_with_changes"
+      "content": "PR: PR #84 - Add tests to reach 80% coverage [approve_with_changes]\nSome of these tests just exercise code without asserting behavior. Remove the getter tests. Add tests for edge cases we missed."
     },
     {
       "id": "evt_093",
       "timestamp": "2024-03-15T09:00:00Z",
       "type": "git_commit",
-      "message": "test: add edge case tests, remove trivial coverage tests",
-      "files": ["tests/integration/auth.test.ts"],
-      "additions": 45,
-      "deletions": 23
+      "content": "test: add edge case tests, remove trivial coverage tests\nFiles: tests/integration/auth.test.ts\n+45 -23"
     },
     {
       "id": "evt_094",
       "timestamp": "2024-03-15T14:00:00Z",
       "type": "ai_conversation",
-      "context": "Mocking",
-      "user_message": "When should I mock in tests?",
-      "assistant_response": "Mock external dependencies...",
-      "user_followup": "Mock what you don't own: external APIs, databases in unit tests. Never mock your own code - that tests implementation, not behavior.",
-      "tags": ["testing", "philosophy"]
+      "content": "[Context: Mocking]\n\nWhen should I mock in tests?\n\n[Assistant]: Mock external dependencies...\n\n[User]: Mock what you don't own: external APIs, databases in unit tests. Never mock your own code - that tests implementation, not behavior."
     },
     {
       "id": "evt_095",
       "timestamp": "2024-03-18T09:00:00Z",
       "type": "code_review_given",
-      "pr": "PR #87 - Mock database in handler tests",
-      "comment": "These are integration tests. Use a real test database. Mocking the DB defeats the purpose - we want to test actual queries.",
-      "sentiment": "reject"
+      "content": "PR: PR #87 - Mock database in handler tests [reject]\nThese are integration tests. Use a real test database. Mocking the DB defeats the purpose - we want to test actual queries."
     },
     {
       "id": "evt_096",
       "timestamp": "2024-03-18T15:00:00Z",
       "type": "git_commit",
-      "message": "chore: add test database setup with docker-compose",
-      "files": ["docker-compose.test.yml", "scripts/setup-test-db.sh"],
-      "additions": 45,
-      "deletions": 0
+      "content": "chore: add test database setup with docker-compose\nFiles: docker-compose.test.yml, scripts/setup-test-db.sh\n+45 -0"
     },
     {
       "id": "evt_097",
       "timestamp": "2024-03-19T10:00:00Z",
       "type": "ai_conversation",
-      "context": "CI/CD",
-      "user_message": "GitHub Actions or CircleCI?",
-      "assistant_response": "Both are capable...",
-      "user_followup": "GitHub Actions. We're on GitHub, native integration, good enough for our needs. Simpler than managing another service.",
-      "tags": ["devops", "tooling"]
+      "content": "[Context: CI/CD]\n\nGitHub Actions or CircleCI?\n\n[Assistant]: Both are capable...\n\n[User]: GitHub Actions. We're on GitHub, native integration, good enough for our needs. Simpler than managing another service."
     },
     {
       "id": "evt_098",
       "timestamp": "2024-03-19T14:00:00Z",
       "type": "git_commit",
-      "message": "ci: add GitHub Actions workflow",
-      "files": [".github/workflows/ci.yml"],
-      "additions": 56,
-      "deletions": 0
+      "content": "ci: add GitHub Actions workflow\nFiles: .github/workflows/ci.yml\n+56 -0"
     },
     {
       "id": "evt_099",
       "timestamp": "2024-03-20T09:00:00Z",
       "type": "code_review_given",
-      "pr": "PR #90 - Add deployment workflow",
-      "comment": "Good start. But separate build and deploy stages. Build artifact should be immutable - same artifact to staging and production.",
-      "sentiment": "approve_with_changes"
+      "content": "PR: PR #90 - Add deployment workflow [approve_with_changes]\nGood start. But separate build and deploy stages. Build artifact should be immutable - same artifact to staging and production."
     },
     {
       "id": "evt_100",
       "timestamp": "2024-03-20T15:00:00Z",
       "type": "ai_conversation",
-      "context": "Deployment",
-      "user_message": "Kubernetes or simpler?",
-      "assistant_response": "K8s is powerful but complex...",
-      "user_followup": "Fly.io or Railway. We're a small app. K8s operational overhead doesn't make sense until we have dedicated infra team.",
-      "tags": ["devops", "architecture"]
+      "content": "[Context: Deployment]\n\nKubernetes or simpler?\n\n[Assistant]: K8s is powerful but complex...\n\n[User]: Fly.io or Railway. We're a small app. K8s operational overhead doesn't make sense until we have dedicated infra team."
     },
     {
       "id": "evt_101",
       "timestamp": "2024-03-21T09:00:00Z",
       "type": "git_commit",
-      "message": "chore: add fly.io configuration",
-      "files": ["fly.toml"],
-      "additions": 23,
-      "deletions": 0
+      "content": "chore: add fly.io configuration\nFiles: fly.toml\n+23 -0"
     },
     {
       "id": "evt_102",
       "timestamp": "2024-03-21T11:30:00Z",
       "type": "ai_conversation",
-      "context": "Branch strategy",
-      "user_message": "GitFlow or trunk-based?",
-      "assistant_response": "GitFlow for releases, trunk-based for continuous...",
-      "user_followup": "Trunk-based. Short-lived feature branches, direct to main. GitFlow is for enterprises with release trains. We ship continuously.",
-      "tags": ["git", "workflow"]
+      "content": "[Context: Branch strategy]\n\nGitFlow or trunk-based?\n\n[Assistant]: GitFlow for releases, trunk-based for continuous...\n\n[User]: Trunk-based. Short-lived feature branches, direct to main. GitFlow is for enterprises with release trains. We ship continuously."
     },
     {
       "id": "evt_103",
       "timestamp": "2024-03-22T09:00:00Z",
       "type": "code_review_given",
-      "pr": "PR #93 - Add develop branch",
-      "comment": "We don't need develop. Main is always deployable. Feature branches merge to main. Adding branches adds ceremony, not safety.",
-      "sentiment": "reject"
+      "content": "PR: PR #93 - Add develop branch [reject]\nWe don't need develop. Main is always deployable. Feature branches merge to main. Adding branches adds ceremony, not safety."
     },
     {
       "id": "evt_104",
       "timestamp": "2024-03-22T14:00:00Z",
       "type": "ai_conversation",
-      "context": "PR reviews",
-      "user_message": "How thorough should code reviews be?",
-      "assistant_response": "Balance between thoroughness and velocity...",
-      "user_followup": "Focus on: logic errors, security issues, unclear code. Don't bikeshed naming or style - that's what linters are for. Ship fast, fix forward.",
-      "tags": ["workflow", "philosophy"]
+      "content": "[Context: PR reviews]\n\nHow thorough should code reviews be?\n\n[Assistant]: Balance between thoroughness and velocity...\n\n[User]: Focus on: logic errors, security issues, unclear code. Don't bikeshed naming or style - that's what linters are for. Ship fast, fix forward."
     },
     {
       "id": "evt_105",
       "timestamp": "2024-03-25T09:00:00Z",
       "type": "git_commit",
-      "message": "feat: add admin endpoints with role-based access",
-      "files": ["src/features/admin/*", "src/middleware/authorize.ts"],
-      "additions": 134,
-      "deletions": 0
+      "content": "feat: add admin endpoints with role-based access\nFiles: src/features/admin/*, src/middleware/authorize.ts\n+134 -0"
     },
     {
       "id": "evt_106",
       "timestamp": "2024-03-25T15:00:00Z",
       "type": "ai_conversation",
-      "context": "Authorization",
-      "user_message": "RBAC or ABAC?",
-      "assistant_response": "RBAC is simpler, ABAC more flexible...",
-      "user_followup": "RBAC for now. We have 3 roles. ABAC adds complexity we don't need. Can migrate if requirements grow.",
-      "tags": ["security", "architecture"]
+      "content": "[Context: Authorization]\n\nRBAC or ABAC?\n\n[Assistant]: RBAC is simpler, ABAC more flexible...\n\n[User]: RBAC for now. We have 3 roles. ABAC adds complexity we don't need. Can migrate if requirements grow."
     },
     {
       "id": "evt_107",
       "timestamp": "2024-03-26T09:00:00Z",
       "type": "code_review_given",
-      "pr": "PR #96 - Add CASL for authorization",
-      "comment": "CASL is overkill for 3 roles. A simple middleware checking role is enough. Libraries solve problems, not check boxes.",
-      "sentiment": "reject"
+      "content": "PR: PR #96 - Add CASL for authorization [reject]\nCASL is overkill for 3 roles. A simple middleware checking role is enough. Libraries solve problems, not check boxes."
     },
     {
       "id": "evt_108",
       "timestamp": "2024-03-26T14:00:00Z",
       "type": "git_commit",
-      "message": "feat: add simple role-based middleware",
-      "files": ["src/middleware/authorize.ts"],
-      "additions": 23,
-      "deletions": 0
+      "content": "feat: add simple role-based middleware\nFiles: src/middleware/authorize.ts\n+23 -0"
     },
     {
       "id": "evt_109",
       "timestamp": "2024-03-27T10:00:00Z",
       "type": "ai_conversation",
-      "context": "Date handling",
-      "user_message": "date-fns or dayjs?",
-      "assistant_response": "Both are good, date-fns is tree-shakeable...",
-      "user_followup": "date-fns. Tree-shaking matters for bundle. Only import functions I use. dayjs requires full library.",
-      "tags": ["tooling", "performance"]
+      "content": "[Context: Date handling]\n\ndate-fns or dayjs?\n\n[Assistant]: Both are good, date-fns is tree-shakeable...\n\n[User]: date-fns. Tree-shaking matters for bundle. Only import functions I use. dayjs requires full library."
     },
     {
       "id": "evt_110",
       "timestamp": "2024-03-27T15:00:00Z",
       "type": "package_install",
-      "package": "date-fns",
-      "version": "^3.3.0",
-      "reason": "Tree-shakeable date utilities"
+      "content": "date-fns@^3.3.0\nReason: Tree-shakeable date utilities"
     },
     {
       "id": "evt_111",
       "timestamp": "2024-03-28T09:00:00Z",
       "type": "code_review_given",
-      "pr": "PR #99 - Add moment.js for dates",
-      "comment": "Moment is deprecated and huge. Use date-fns or native Intl. Stop adding legacy libraries.",
-      "sentiment": "reject"
+      "content": "PR: PR #99 - Add moment.js for dates [reject]\nMoment is deprecated and huge. Use date-fns or native Intl. Stop adding legacy libraries."
     },
     {
       "id": "evt_112",
       "timestamp": "2024-03-28T14:00:00Z",
       "type": "ai_conversation",
-      "context": "Null vs undefined",
-      "user_message": "Should I use null or undefined?",
-      "assistant_response": "JavaScript has both...",
-      "user_followup": "undefined for absence, null for intentional empty. In practice: avoid both with proper types. Optional chaining and nullish coalescing help.",
-      "tags": ["typescript", "style"]
+      "content": "[Context: Null vs undefined]\n\nShould I use null or undefined?\n\n[Assistant]: JavaScript has both...\n\n[User]: undefined for absence, null for intentional empty. In practice: avoid both with proper types. Optional chaining and nullish coalescing help."
     },
     {
       "id": "evt_113",
       "timestamp": "2024-03-29T09:00:00Z",
       "type": "git_commit",
-      "message": "refactor: replace null checks with optional chaining",
-      "files": ["src/features/users/*"],
-      "additions": 15,
-      "deletions": 23
+      "content": "refactor: replace null checks with optional chaining\nFiles: src/features/users/*\n+15 -23"
     },
     {
       "id": "evt_114",
       "timestamp": "2024-03-29T11:00:00Z",
       "type": "code_review_given",
-      "pr": "PR #102 - Add utility functions for null checks",
-      "comment": "TypeScript has optional chaining and nullish coalescing. Native features > utility functions.",
-      "sentiment": "reject"
+      "content": "PR: PR #102 - Add utility functions for null checks [reject]\nTypeScript has optional chaining and nullish coalescing. Native features > utility functions."
     },
     {
       "id": "evt_115",
       "timestamp": "2024-03-29T15:00:00Z",
       "type": "ai_conversation",
-      "context": "Project retrospective",
-      "user_message": "What would you change about this project?",
-      "assistant_response": "Looking at the codebase...",
-      "user_followup": "Started about right. Kept it simple, added complexity only when needed. Main regret: should have added cursor pagination earlier. Retrofitting was painful.",
-      "tags": ["retrospective", "philosophy"]
+      "content": "[Context: Project retrospective]\n\nWhat would you change about this project?\n\n[Assistant]: Looking at the codebase...\n\n[User]: Started about right. Kept it simple, added complexity only when needed. Main regret: should have added cursor pagination earlier. Retrofitting was painful."
     },
     {
       "id": "evt_116",
       "timestamp": "2024-01-05T16:00:00Z",
       "type": "ai_conversation",
-      "context": "Learning patterns",
-      "user_message": "I keep making the same abstraction mistake. How do I learn?",
-      "assistant_response": "Practice and reflection...",
-      "user_followup": "The pattern: I want to 'do it right' so I abstract early. Then requirements change and abstraction doesn't fit. Lesson: write the thing three times, then extract.",
-      "tags": ["philosophy", "learning"]
+      "content": "[Context: Learning patterns]\n\nI keep making the same abstraction mistake. How do I learn?\n\n[Assistant]: Practice and reflection...\n\n[User]: The pattern: I want to 'do it right' so I abstract early. Then requirements change and abstraction doesn't fit. Lesson: write the thing three times, then extract."
     },
     {
       "id": "evt_117",
       "timestamp": "2024-01-20T10:00:00Z",
       "type": "ai_conversation",
-      "context": "Dealing with legacy code",
-      "user_message": "We have some legacy code from before I joined. Rewrite or refactor?",
-      "assistant_response": "Depends on the scope and risk...",
-      "user_followup": "Strangle fig pattern. Add tests first. Replace piece by piece. Big rewrites fail. Incremental improvement wins.",
-      "tags": ["refactoring", "philosophy"]
+      "content": "[Context: Dealing with legacy code]\n\nWe have some legacy code from before I joined. Rewrite or refactor?\n\n[Assistant]: Depends on the scope and risk...\n\n[User]: Strangle fig pattern. Add tests first. Replace piece by piece. Big rewrites fail. Incremental improvement wins."
     },
     {
       "id": "evt_118",
       "timestamp": "2024-02-10T14:00:00Z",
       "type": "code_review_given",
-      "pr": "PR #48 - Rewrite auth module",
-      "comment": "This is a full rewrite with no tests. Add integration tests first to capture current behavior. Then refactor with safety net.",
-      "sentiment": "reject"
+      "content": "PR: PR #48 - Rewrite auth module [reject]\nThis is a full rewrite with no tests. Add integration tests first to capture current behavior. Then refactor with safety net."
     },
     {
       "id": "evt_119",
       "timestamp": "2024-02-25T09:00:00Z",
       "type": "ai_conversation",
-      "context": "Technical debt",
-      "user_message": "How do you manage technical debt?",
-      "assistant_response": "Track it, prioritize...",
-      "user_followup": "TODO comments for small stuff. Issues for bigger stuff. But most importantly: fix it when you're in the file. Don't plan debt cleanup sprints.",
-      "tags": ["philosophy", "workflow"]
+      "content": "[Context: Technical debt]\n\nHow do you manage technical debt?\n\n[Assistant]: Track it, prioritize...\n\n[User]: TODO comments for small stuff. Issues for bigger stuff. But most importantly: fix it when you're in the file. Don't plan debt cleanup sprints."
     },
     {
       "id": "evt_120",
       "timestamp": "2024-03-10T15:00:00Z",
       "type": "ai_conversation",
-      "context": "Team standards",
-      "user_message": "How do you establish coding standards in a team?",
-      "assistant_response": "Document and enforce...",
-      "user_followup": "Automate everything possible. Linters for style, types for correctness. Discussions for design patterns. Never argue about things a tool can check.",
-      "tags": ["workflow", "philosophy"]
+      "content": "[Context: Team standards]\n\nHow do you establish coding standards in a team?\n\n[Assistant]: Document and enforce...\n\n[User]: Automate everything possible. Linters for style, types for correctness. Discussions for design patterns. Never argue about things a tool can check."
     },
     {
       "id": "evt_121",
       "timestamp": "2024-03-15T10:30:00Z",
       "type": "code_review_given",
-      "pr": "PR #86 - Add style guide document",
-      "comment": "Good initiative, but most of this is enforceable by biome. Convert to rules, not prose. Docs get ignored, linter errors don't.",
-      "sentiment": "approve_with_changes"
+      "content": "PR: PR #86 - Add style guide document [approve_with_changes]\nGood initiative, but most of this is enforceable by biome. Convert to rules, not prose. Docs get ignored, linter errors don't."
     },
     {
       "id": "evt_122",
       "timestamp": "2024-03-30T09:00:00Z",
       "type": "git_commit",
-      "message": "chore: add strict biome rules replacing style guide",
-      "files": ["biome.json"],
-      "additions": 34,
-      "deletions": 0
+      "content": "chore: add strict biome rules replacing style guide\nFiles: biome.json\n+34 -0"
     },
     {
       "id": "evt_123",
       "timestamp": "2024-03-30T11:00:00Z",
       "type": "ai_conversation",
-      "context": "Project summary",
-      "user_message": "Looking back at 3 months, what are my main patterns?",
-      "assistant_response": "Analyzing your history...",
-      "user_followup": "Simplicity over cleverness. Types over tests (both matter, types catch more). Explicit over implicit. Native over library when possible. Ship, then improve.",
-      "tags": ["retrospective", "philosophy"]
+      "content": "[Context: Project summary]\n\nLooking back at 3 months, what are my main patterns?\n\n[Assistant]: Analyzing your history...\n\n[User]: Simplicity over cleverness. Types over tests (both matter, types catch more). Explicit over implicit. Native over library when possible. Ship, then improve."
     },
     {
       "id": "evt_124",
       "timestamp": "2024-03-30T14:00:00Z",
       "type": "code_review_given",
-      "pr": "PR #105 - Final Q1 improvements",
-      "comment": "Good quarter. Code is simpler than when we started. That's rare - usually codebases only grow complex. Well done team.",
-      "sentiment": "approve"
+      "content": "PR: PR #105 - Final Q1 improvements [approve]\nGood quarter. Code is simpler than when we started. That's rare - usually codebases only grow complex. Well done team."
     },
     {
       "id": "evt_125",
       "timestamp": "2024-03-31T09:00:00Z",
       "type": "git_commit",
-      "message": "docs: update README with current architecture",
-      "files": ["README.md"],
-      "additions": 89,
-      "deletions": 45
+      "content": "docs: update README with current architecture\nFiles: README.md\n+89 -45"
     },
     {
       "id": "evt_126",
       "timestamp": "2024-01-08T16:00:00Z",
       "type": "ai_conversation",
-      "context": "Naming variables",
-      "user_message": "Best practices for variable naming?",
-      "assistant_response": "Be descriptive, use consistent conventions...",
-      "user_followup": "Names should explain what, not how. 'filteredUsers' good, 'loopResult' bad. If I need a comment to explain a name, the name is wrong.",
-      "tags": ["naming", "style"]
+      "content": "[Context: Naming variables]\n\nBest practices for variable naming?\n\n[Assistant]: Be descriptive, use consistent conventions...\n\n[User]: Names should explain what, not how. 'filteredUsers' good, 'loopResult' bad. If I need a comment to explain a name, the name is wrong."
     },
     {
       "id": "evt_127",
       "timestamp": "2024-01-18T11:00:00Z",
       "type": "code_review_given",
-      "pr": "PR #24 - Rename variables for clarity",
-      "comment": "Good change. 'data' -> 'userProfile', 'res' -> 'apiResponse'. Specific is always better than generic.",
-      "sentiment": "approve"
+      "content": "PR: PR #24 - Rename variables for clarity [approve]\nGood change. 'data' -> 'userProfile', 'res' -> 'apiResponse'. Specific is always better than generic."
     },
     {
       "id": "evt_128",
       "timestamp": "2024-02-03T09:00:00Z",
       "type": "ai_conversation",
-      "context": "Boolean naming",
-      "user_message": "How should I name boolean variables?",
-      "assistant_response": "Use prefixes like is, has, should...",
-      "user_followup": "is/has/can/should prefix for booleans. 'active' is ambiguous. 'isActive' is clear. Exception: obvious booleans like 'visible', 'enabled'.",
-      "tags": ["naming", "style"]
+      "content": "[Context: Boolean naming]\n\nHow should I name boolean variables?\n\n[Assistant]: Use prefixes like is, has, should...\n\n[User]: is/has/can/should prefix for booleans. 'active' is ambiguous. 'isActive' is clear. Exception: obvious booleans like 'visible', 'enabled'."
     },
     {
       "id": "evt_129",
       "timestamp": "2024-02-17T14:00:00Z",
       "type": "git_commit",
-      "message": "refactor: standardize boolean naming with is/has prefixes",
-      "files": ["src/types/user.ts", "src/handlers/profile.ts"],
-      "additions": 23,
-      "deletions": 23
+      "content": "refactor: standardize boolean naming with is/has prefixes\nFiles: src/types/user.ts, src/handlers/profile.ts\n+23 -23"
     },
     {
       "id": "evt_130",
       "timestamp": "2024-03-02T10:00:00Z",
       "type": "ai_conversation",
-      "context": "Function naming",
-      "user_message": "What about function naming conventions?",
-      "assistant_response": "Verbs for actions, nouns for getters...",
-      "user_followup": "Verb for actions (createUser, deletePost), adjective for transformers (formatted, validated), question for predicates (isEmpty, hasAccess).",
-      "tags": ["naming", "style"]
+      "content": "[Context: Function naming]\n\nWhat about function naming conventions?\n\n[Assistant]: Verbs for actions, nouns for getters...\n\n[User]: Verb for actions (createUser, deletePost), adjective for transformers (formatted, validated), question for predicates (isEmpty, hasAccess)."
     },
     {
       "id": "evt_131",
       "timestamp": "2024-03-16T15:00:00Z",
       "type": "code_review_given",
-      "pr": "PR #88 - Rename utility functions",
-      "comment": "Good. 'process' -> 'normalizeInput', 'handle' -> 'routeRequest'. Generic verbs are code smells.",
-      "sentiment": "approve"
+      "content": "PR: PR #88 - Rename utility functions [approve]\nGood. 'process' -> 'normalizeInput', 'handle' -> 'routeRequest'. Generic verbs are code smells."
     },
     {
       "id": "evt_132",
       "timestamp": "2024-01-12T14:30:00Z",
       "type": "ai_conversation",
-      "context": "Constants naming",
-      "user_message": "SCREAMING_SNAKE_CASE for constants?",
-      "assistant_response": "It's common in some languages...",
-      "user_followup": "Only for true constants: MAX_RETRIES, API_TIMEOUT. Not for config values that could change. Regular camelCase for those.",
-      "tags": ["naming", "style"]
+      "content": "[Context: Constants naming]\n\nSCREAMING_SNAKE_CASE for constants?\n\n[Assistant]: It's common in some languages...\n\n[User]: Only for true constants: MAX_RETRIES, API_TIMEOUT. Not for config values that could change. Regular camelCase for those."
     },
     {
       "id": "evt_133",
       "timestamp": "2024-02-08T10:30:00Z",
       "type": "git_commit",
-      "message": "refactor: fix constant naming conventions",
-      "files": ["src/config/constants.ts"],
-      "additions": 12,
-      "deletions": 12
+      "content": "refactor: fix constant naming conventions\nFiles: src/config/constants.ts\n+12 -12"
     },
     {
       "id": "evt_134",
       "timestamp": "2024-01-28T09:00:00Z",
       "type": "ai_conversation",
-      "context": "Import organization",
-      "user_message": "How should I organize imports?",
-      "assistant_response": "Group by type, alphabetize...",
-      "user_followup": "External packages first, then internal. Let the linter sort within groups. Don't waste mental energy on import order.",
-      "tags": ["style", "organization"]
+      "content": "[Context: Import organization]\n\nHow should I organize imports?\n\n[Assistant]: Group by type, alphabetize...\n\n[User]: External packages first, then internal. Let the linter sort within groups. Don't waste mental energy on import order."
     },
     {
       "id": "evt_135",
       "timestamp": "2024-02-18T11:00:00Z",
       "type": "config_change",
-      "file": "biome.json",
-      "change": "Added import sorting rules",
-      "reason": "Automate import organization"
+      "content": "File: biome.json\nChange: Added import sorting rules\nReason: Automate import organization"
     },
     {
       "id": "evt_136",
       "timestamp": "2024-03-03T14:00:00Z",
       "type": "code_review_given",
-      "pr": "PR #71 - Manual import sorting",
-      "comment": "Remove manual import organization. Enable biome's import sorter. Never manually do what tools can automate.",
-      "sentiment": "reject"
+      "content": "PR: PR #71 - Manual import sorting [reject]\nRemove manual import organization. Enable biome's import sorter. Never manually do what tools can automate."
     },
     {
       "id": "evt_137",
       "timestamp": "2024-01-14T15:00:00Z",
       "type": "ai_conversation",
-      "context": "Early returns",
-      "user_message": "Should I use early returns or single return?",
-      "assistant_response": "Both have advocates...",
-      "user_followup": "Early returns always. Guard clauses at the top, happy path at the bottom. Deeply nested if/else is unreadable.",
-      "tags": ["style", "philosophy"]
+      "content": "[Context: Early returns]\n\nShould I use early returns or single return?\n\n[Assistant]: Both have advocates...\n\n[User]: Early returns always. Guard clauses at the top, happy path at the bottom. Deeply nested if/else is unreadable."
     },
     {
       "id": "evt_138",
       "timestamp": "2024-01-21T09:30:00Z",
       "type": "git_commit",
-      "message": "refactor: convert nested conditions to early returns",
-      "files": ["src/handlers/register.ts", "src/handlers/login.ts"],
-      "additions": 25,
-      "deletions": 35
+      "content": "refactor: convert nested conditions to early returns\nFiles: src/handlers/register.ts, src/handlers/login.ts\n+25 -35"
     },
     {
       "id": "evt_139",
       "timestamp": "2024-02-04T14:00:00Z",
       "type": "code_review_given",
-      "pr": "PR #42 - Add else blocks for clarity",
-      "comment": "This adds visual noise. After 'if (invalid) return error', the next line is implicitly the valid case. No else needed.",
-      "sentiment": "reject"
+      "content": "PR: PR #42 - Add else blocks for clarity [reject]\nThis adds visual noise. After 'if (invalid) return error', the next line is implicitly the valid case. No else needed."
     },
     {
       "id": "evt_140",
       "timestamp": "2024-03-09T10:00:00Z",
       "type": "ai_conversation",
-      "context": "Ternary operators",
-      "user_message": "When are ternary operators okay?",
-      "assistant_response": "For simple conditionals...",
-      "user_followup": "Single line, simple values only. condition ? valueA : valueB. Never nested ternaries. If it needs multiple lines, use if/else.",
-      "tags": ["style", "philosophy"]
+      "content": "[Context: Ternary operators]\n\nWhen are ternary operators okay?\n\n[Assistant]: For simple conditionals...\n\n[User]: Single line, simple values only. condition ? valueA : valueB. Never nested ternaries. If it needs multiple lines, use if/else."
     },
     {
       "id": "evt_141",
       "timestamp": "2024-03-23T15:30:00Z",
       "type": "code_review_given",
-      "pr": "PR #94 - Refactor with ternaries",
-      "comment": "The nested ternary on line 45 is unreadable. Convert to if/else or early returns. Clever code is not good code.",
-      "sentiment": "approve_with_changes"
+      "content": "PR: PR #94 - Refactor with ternaries [approve_with_changes]\nThe nested ternary on line 45 is unreadable. Convert to if/else or early returns. Clever code is not good code."
     },
     {
       "id": "evt_142",
       "timestamp": "2024-02-11T09:00:00Z",
       "type": "ai_conversation",
-      "context": "Destructuring",
-      "user_message": "Best practices for destructuring?",
-      "assistant_response": "Use for objects and arrays...",
-      "user_followup": "Destructure at point of use, not at function start. Only destructure what you need. Deep destructuring is a smell - flatten your data.",
-      "tags": ["style", "typescript"]
+      "content": "[Context: Destructuring]\n\nBest practices for destructuring?\n\n[Assistant]: Use for objects and arrays...\n\n[User]: Destructure at point of use, not at function start. Only destructure what you need. Deep destructuring is a smell - flatten your data."
     },
     {
       "id": "evt_143",
       "timestamp": "2024-02-24T11:00:00Z",
       "type": "code_review_given",
-      "pr": "PR #61 - Destructure all params at start",
-      "comment": "This destructures 12 fields, uses 3. Only destructure what you need, where you need it.",
-      "sentiment": "reject"
+      "content": "PR: PR #61 - Destructure all params at start [reject]\nThis destructures 12 fields, uses 3. Only destructure what you need, where you need it."
     },
     {
       "id": "evt_144",
       "timestamp": "2024-03-17T09:00:00Z",
       "type": "git_commit",
-      "message": "refactor: clean up excessive destructuring",
-      "files": ["src/features/users/handlers.ts"],
-      "additions": 8,
-      "deletions": 15
+      "content": "refactor: clean up excessive destructuring\nFiles: src/features/users/handlers.ts\n+8 -15"
     },
     {
       "id": "evt_145",
       "timestamp": "2024-01-07T14:00:00Z",
       "type": "ai_conversation",
-      "context": "Spread operator",
-      "user_message": "When to use spread vs Object.assign?",
-      "assistant_response": "Spread is more readable...",
-      "user_followup": "Spread for shallow copies: { ...obj, newProp }. Object.assign only for mutating in place, which I avoid anyway. Immutability by default.",
-      "tags": ["style", "philosophy"]
+      "content": "[Context: Spread operator]\n\nWhen to use spread vs Object.assign?\n\n[Assistant]: Spread is more readable...\n\n[User]: Spread for shallow copies: { ...obj, newProp }. Object.assign only for mutating in place, which I avoid anyway. Immutability by default."
     },
     {
       "id": "evt_146",
       "timestamp": "2024-02-01T11:00:00Z",
       "type": "code_review_given",
-      "pr": "PR #41 - Use Object.assign for merging",
-      "comment": "Use spread: { ...defaults, ...overrides }. Clearer than Object.assign, same result, immutable.",
-      "sentiment": "reject"
+      "content": "PR: PR #41 - Use Object.assign for merging [reject]\nUse spread: { ...defaults, ...overrides }. Clearer than Object.assign, same result, immutable."
     },
     {
       "id": "evt_147",
       "timestamp": "2024-03-24T14:00:00Z",
       "type": "ai_conversation",
-      "context": "Final thoughts",
-      "user_message": "Any advice for developers starting out?",
-      "assistant_response": "Learn fundamentals, practice...",
-      "user_followup": "Write code. Delete code. Shipping beats planning. Types catch bugs, tests verify behavior. Simple code lives longer. The best code is code you don't write.",
-      "tags": ["philosophy", "advice"]
+      "content": "[Context: Final thoughts]\n\nAny advice for developers starting out?\n\n[Assistant]: Learn fundamentals, practice...\n\n[User]: Write code. Delete code. Shipping beats planning. Types catch bugs, tests verify behavior. Simple code lives longer. The best code is code you don't write."
     },
     {
       "id": "evt_148",
       "timestamp": "2024-03-31T14:00:00Z",
       "type": "git_commit",
-      "message": "chore: Q1 complete - tag v1.0.0",
-      "files": ["package.json"],
-      "additions": 1,
-      "deletions": 1
+      "content": "chore: Q1 complete - tag v1.0.0\nFiles: package.json\n+1 -1"
     },
     {
       "id": "evt_149",
       "timestamp": "2024-03-31T15:00:00Z",
       "type": "code_review_given",
-      "pr": "PR #106 - v1.0.0 release",
-      "comment": "From 0 to production in 3 months. Clean code, comprehensive tests, simple architecture. This is how software should be built. Ship it.",
-      "sentiment": "approve"
+      "content": "PR: PR #106 - v1.0.0 release [approve]\nFrom 0 to production in 3 months. Clean code, comprehensive tests, simple architecture. This is how software should be built. Ship it."
     },
     {
       "id": "evt_150",
       "timestamp": "2024-03-31T16:00:00Z",
       "type": "ai_conversation",
-      "context": "Project complete",
-      "user_message": "v1.0 is live. What's the most important thing I learned?",
-      "assistant_response": "Reflecting on your journey...",
-      "user_followup": "Simplicity is a feature. Every line of code is a liability. The goal isn't to write code, it's to solve problems. Sometimes the best solution is not writing code at all.",
-      "tags": ["philosophy", "retrospective"]
+      "content": "[Context: Project complete]\n\nv1.0 is live. What's the most important thing I learned?\n\n[Assistant]: Reflecting on your journey...\n\n[User]: Simplicity is a feature. Every line of code is a liability. The goal isn't to write code, it's to solve problems. Sometimes the best solution is not writing code at all."
     }
   ]
 }

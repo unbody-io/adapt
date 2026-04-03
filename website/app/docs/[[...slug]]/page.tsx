@@ -23,7 +23,7 @@ export default async function Page(props: PageProps<'/docs/[[...slug]]'>) {
 
   return (
     <DocsPage toc={page.data.toc} full={page.data.full} breadcrumb={{ enabled: false }}>
-      <div className="fixed bottom-4 right-4 z-50 flex flex-row gap-2 items-center">
+      <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 flex flex-row gap-2 items-center">
         <MarkdownCopyButton markdownUrl={markdownUrl} />
         <ViewOptionsPopover
           markdownUrl={markdownUrl}

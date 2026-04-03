@@ -12,6 +12,9 @@
     "format": "biome format --write"
   },
   "dependencies": {
+    "@openrouter/ai-sdk-provider": "^2.1.1",
+    "@unbody/adapt": "file:..",
+    "ai": "^6.0.0",
     "fumadocs-core": "16.7.9",
     "fumadocs-mdx": "14.2.11",
     "fumadocs-ui": "16.7.9",
@@ -19,6 +22,8 @@
     "next": "16.2.1",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
+    "motion": "^11.0.0",
+    "react-markdown": "^9.0.0",
     "tailwind-merge": "^3.5.0"
   },
   "devDependencies": {

@@ -8,7 +8,12 @@
       "name": "Dr. Sarah Chen",
       "credentials": "PhD, Licensed Clinical Psychologist",
       "location": "San Francisco, CA",
-      "specializations": ["Anxiety", "ADHD", "High-achievers", "Asian-American identity"]
+      "specializations": [
+        "Anxiety",
+        "ADHD",
+        "High-achievers",
+        "Asian-American identity"
+      ]
     },
     "learners": [
       {
@@ -47,888 +52,771 @@
     {
       "id": "evt_001",
       "type": "profile_bio",
+      "timestamp": "2024-01-01T00:00:00.000Z",
       "content": "Dr. Sarah Chen is a licensed clinical psychologist specializing in anxiety, ADHD, and the unique challenges faced by high-achieving professionals. With over 12 years of experience, she combines evidence-based approaches with cultural sensitivity, particularly for Asian-American clients navigating identity and family dynamics.",
       "source": "website_bio"
     },
     {
       "id": "evt_002",
       "type": "profile_bio",
+      "timestamp": "2024-01-01T00:00:00.000Z",
       "content": "Dr. Chen received her PhD in Clinical Psychology from UC Berkeley, completed her internship at Stanford Hospital, and her postdoctoral fellowship at UCSF. She has published research on perfectionism and anxiety in high-pressure work environments.",
       "source": "website_credentials"
     },
     {
       "id": "evt_003",
       "type": "blog_post",
-      "title": "Why 'Just Relax' Doesn't Work for Anxiety",
-      "date": "2024-01-15",
-      "excerpt": "If you've ever been told to 'just relax' when you're anxious, you know how unhelpful that advice is. Anxiety isn't a choice - it's your nervous system's response to perceived threat. In this post, I'll explain the neuroscience behind anxiety and offer evidence-based strategies that actually work.",
-      "content": "Anxiety activates our sympathetic nervous system - the fight-or-flight response. Telling someone to 'just relax' is like telling them to consciously slow their heartbeat. Instead, we need to work with the body, not against it. Techniques like diaphragmatic breathing, progressive muscle relaxation, and grounding exercises help signal safety to the nervous system. But here's the key: these aren't just coping strategies. They're training your nervous system to regulate more effectively over time."
+      "timestamp": "2024-01-15T12:00:00.000Z",
+      "content": "Why 'Just Relax' Doesn't Work for Anxiety\n\nAnxiety activates our sympathetic nervous system - the fight-or-flight response. Telling someone to 'just relax' is like telling them to consciously slow their heartbeat. Instead, we need to work with the body, not against it. Techniques like diaphragmatic breathing, progressive muscle relaxation, and grounding exercises help signal safety to the nervous system. But here's the key: these aren't just coping strategies. They're training your nervous system to regulate more effectively over time."
     },
     {
       "id": "evt_004",
       "type": "blog_post",
-      "title": "ADHD in Adults: More Than Just Distraction",
-      "date": "2024-01-28",
-      "excerpt": "Adult ADHD is widely misunderstood. It's not about being 'distracted' or 'lazy' - it's a neurological difference in executive function. Many of my clients are highly successful professionals who've developed sophisticated compensatory strategies, yet still struggle.",
-      "content": "The tech industry is full of adults with undiagnosed ADHD. Why? Because hyperfocus - a common ADHD trait - can be a superpower in coding or problem-solving. But the same person who can code for 10 hours straight might struggle to send a simple email or pay bills on time. I work with clients to understand their unique ADHD profile, leverage their strengths, and build sustainable systems for their challenges. Medication can be helpful for some, but it's not the whole answer. We also address emotional dysregulation, time blindness, and the shame that often accompanies late diagnosis."
+      "timestamp": "2024-01-28T12:00:00.000Z",
+      "content": "ADHD in Adults: More Than Just Distraction\n\nThe tech industry is full of adults with undiagnosed ADHD. Why? Because hyperfocus - a common ADHD trait - can be a superpower in coding or problem-solving. But the same person who can code for 10 hours straight might struggle to send a simple email or pay bills on time. I work with clients to understand their unique ADHD profile, leverage their strengths, and build sustainable systems for their challenges. Medication can be helpful for some, but it's not the whole answer. We also address emotional dysregulation, time blindness, and the shame that often accompanies late diagnosis."
     },
     {
       "id": "evt_005",
       "type": "video_transcript",
-      "title": "Understanding Anxiety: A Therapist's Perspective",
-      "duration": "12:34",
-      "date": "2024-02-01",
-      "content": "Hi, I'm Dr. Sarah Chen. Today I want to talk about anxiety - specifically, what it actually is and isn't. Anxiety is not a character flaw. It's not weakness. It's your brain doing exactly what it evolved to do: protect you from danger. The problem is, our brains haven't caught up with modern life. That presentation at work? Your brain might treat it like a saber-toothed tiger. So when you feel anxious before a big meeting, your body is responding appropriately to a perceived threat - even if logically you know you're safe. This is why logic alone doesn't fix anxiety. We need to work with your nervous system, not just your thoughts."
+      "timestamp": "2024-02-01T12:00:00.000Z",
+      "content": "[Video: Understanding Anxiety: A Therapist's Perspective (12:34)]\n\nHi, I'm Dr. Sarah Chen. Today I want to talk about anxiety - specifically, what it actually is and isn't. Anxiety is not a character flaw. It's not weakness. It's your brain doing exactly what it evolved to do: protect you from danger. The problem is, our brains haven't caught up with modern life. That presentation at work? Your brain might treat it like a saber-toothed tiger. So when you feel anxious before a big meeting, your body is responding appropriately to a perceived threat - even if logically you know you're safe. This is why logic alone doesn't fix anxiety. We need to work with your nervous system, not just your thoughts."
     },
     {
       "id": "evt_006",
       "type": "testimonial",
-      "source": "verified_client",
-      "date": "2024-02-05",
-      "content": "Dr. Chen completely changed how I understand my anxiety. As a software engineer, I was constantly stressed about deadlines and performance reviews. She helped me see that my anxiety was actually trying to protect me, and taught me practical techniques I could use even in meetings. After 6 months of working together, I feel like a different person.",
-      "rating": 5
+      "timestamp": "2024-02-05T12:00:00.000Z",
+      "content": "Dr. Chen completely changed how I understand my anxiety. As a software engineer, I was constantly stressed about deadlines and performance reviews. She helped me see that my anxiety was actually trying to protect me, and taught me practical techniques I could use even in meetings. After 6 months of working together, I feel like a different person. (Rating: 5/5)",
+      "source": "verified_client"
     },
     {
       "id": "evt_007",
       "type": "social_media_post",
-      "platform": "linkedin",
-      "date": "2024-02-08",
-      "content": "Imposter syndrome isn't a personal failing - it's often a natural response to being in environments where you're underrepresented. For my Asian-American clients in tech, I see this constantly. High achievement and self-doubt can coexist. Therapy can help you own your accomplishments while also acknowledging systemic factors at play."
+      "timestamp": "2024-02-08T12:00:00.000Z",
+      "content": "Imposter syndrome isn't a personal failing - it's often a natural response to being in environments where you're underrepresented. For my Asian-American clients in tech, I see this constantly. High achievement and self-doubt can coexist. Therapy can help you own your accomplishments while also acknowledging systemic factors at play.",
+      "source": "linkedin"
     },
     {
       "id": "evt_008",
       "type": "blog_post",
-      "title": "The Perfectionism Trap: When Good Enough Never Is",
-      "date": "2024-02-12",
-      "excerpt": "Perfectionism often masquerades as a positive trait. 'I have high standards.' 'I'm detail-oriented.' But clinical perfectionism is different - it's never feeling satisfied, constantly fearing failure, and sacrificing well-being for impossible standards.",
-      "content": "Many of my clients are high-achievers who've succeeded precisely because of their perfectionism. So why would they want to change? Because they're exhausted. Because success doesn't feel satisfying. Because they're so afraid of failure that they've stopped taking risks. In therapy, we don't eliminate high standards - we examine which standards serve you and which harm you. We work on tolerating imperfection in low-stakes areas first, building the muscle for healthy risk-taking."
+      "timestamp": "2024-02-12T12:00:00.000Z",
+      "content": "The Perfectionism Trap: When Good Enough Never Is\n\nMany of my clients are high-achievers who've succeeded precisely because of their perfectionism. So why would they want to change? Because they're exhausted. Because success doesn't feel satisfying. Because they're so afraid of failure that they've stopped taking risks. In therapy, we don't eliminate high standards - we examine which standards serve you and which harm you. We work on tolerating imperfection in low-stakes areas first, building the muscle for healthy risk-taking."
     },
     {
       "id": "evt_009",
       "type": "podcast_appearance",
-      "show": "Mind Matters Podcast",
-      "episode": "E45: ADHD and High Achievement",
-      "date": "2024-02-15",
-      "transcript_excerpt": "Host: So you're saying ADHD can actually be an advantage in some careers? Dr. Chen: In some contexts, absolutely. The ability to hyperfocus, to think divergently, to make unexpected connections - these are assets in creative and technical fields. But here's the nuance: it's not that ADHD is a 'superpower.' It's that certain environments are better suited to how ADHD brains work. My job is to help clients find and create those environments while building skills for the unavoidable areas that are harder for them."
+      "timestamp": "2024-02-15T12:00:00.000Z",
+      "content": "[Podcast: Mind Matters Podcast — E45: ADHD and High Achievement]\n\nHost: So you're saying ADHD can actually be an advantage in some careers? Dr. Chen: In some contexts, absolutely. The ability to hyperfocus, to think divergently, to make unexpected connections - these are assets in creative and technical fields. But here's the nuance: it's not that ADHD is a 'superpower.' It's that certain environments are better suited to how ADHD brains work. My job is to help clients find and create those environments while building skills for the unavoidable areas that are harder for them."
     },
     {
       "id": "evt_010",
       "type": "testimonial",
-      "source": "verified_client",
-      "date": "2024-02-18",
-      "content": "As a first-generation Chinese-American woman in finance, I never felt like traditional therapy 'got' me. Dr. Chen understood the cultural pressures, the family expectations, the constant code-switching. She helped me navigate setting boundaries with my parents without feeling like I was betraying my culture. I finally feel like I can be myself.",
-      "rating": 5
+      "timestamp": "2024-02-18T12:00:00.000Z",
+      "content": "As a first-generation Chinese-American woman in finance, I never felt like traditional therapy 'got' me. Dr. Chen understood the cultural pressures, the family expectations, the constant code-switching. She helped me navigate setting boundaries with my parents without feeling like I was betraying my culture. I finally feel like I can be myself. (Rating: 5/5)",
+      "source": "verified_client"
     },
     {
       "id": "evt_011",
       "type": "profile_service",
-      "service": "Individual Therapy",
-      "description": "50-minute sessions focusing on anxiety, ADHD, perfectionism, and identity. I use evidence-based approaches including CBT, ACT, and mindfulness-based interventions, tailored to each client's needs and cultural context.",
-      "modality": "In-person (San Francisco) or video sessions"
+      "timestamp": "2024-01-01T00:00:00.000Z",
+      "content": "Individual Therapy (In-person (San Francisco) or video sessions): 50-minute sessions focusing on anxiety, ADHD, perfectionism, and identity. I use evidence-based approaches including CBT, ACT, and mindfulness-based interventions, tailored to each client's needs and cultural context."
     },
     {
       "id": "evt_012",
       "type": "profile_service",
-      "service": "ADHD Assessment and Coaching",
-      "description": "Comprehensive ADHD evaluation for adults, including clinical interview, standardized testing, and personalized recommendations. For diagnosed clients, I offer coaching focused on executive function skills, time management, and building sustainable systems."
+      "timestamp": "2024-01-01T00:00:00.000Z",
+      "content": "ADHD Assessment and Coaching: Comprehensive ADHD evaluation for adults, including clinical interview, standardized testing, and personalized recommendations. For diagnosed clients, I offer coaching focused on executive function skills, time management, and building sustainable systems."
     },
     {
       "id": "evt_013",
       "type": "blog_post",
-      "title": "Therapy Isn't Just Talking: What Actually Happens",
-      "date": "2024-02-22",
-      "excerpt": "Many people imagine therapy as lying on a couch talking about your childhood. While we might discuss your past, therapy is much more active and present-focused than that. Here's what a session with me actually looks like.",
-      "content": "In a typical session, we might start by checking in on how the past week went, especially any homework or experiments we'd agreed on. Then we dive into a specific focus - maybe a situation that triggered anxiety, an ADHD challenge, or a relationship pattern. I ask questions, but I also teach skills, suggest experiments, and sometimes give direct feedback. I'm not a blank slate nodding silently. I'm an active collaborator in your growth. And yes, sometimes we do talk about childhood - but only because patterns often have roots there, not because I think everything is your parents' fault."
+      "timestamp": "2024-02-22T12:00:00.000Z",
+      "content": "Therapy Isn't Just Talking: What Actually Happens\n\nIn a typical session, we might start by checking in on how the past week went, especially any homework or experiments we'd agreed on. Then we dive into a specific focus - maybe a situation that triggered anxiety, an ADHD challenge, or a relationship pattern. I ask questions, but I also teach skills, suggest experiments, and sometimes give direct feedback. I'm not a blank slate nodding silently. I'm an active collaborator in your growth. And yes, sometimes we do talk about childhood - but only because patterns often have roots there, not because I think everything is your parents' fault."
     },
     {
       "id": "evt_014",
       "type": "video_transcript",
-      "title": "How to Know if You Need Therapy",
-      "duration": "8:21",
-      "date": "2024-02-25",
-      "content": "You don't need to be in crisis to benefit from therapy. Some signs that therapy might help: you're functioning but exhausted, the same patterns keep repeating, you feel stuck or unfulfilled despite external success, or you've had symptoms of anxiety or depression for more than a few weeks. Therapy is also valuable during major life transitions - starting a new job, ending a relationship, becoming a parent. Think of it like personal training for your mind. You don't wait until you're injured to work out. You invest in your mental health proactively."
+      "timestamp": "2024-02-25T12:00:00.000Z",
+      "content": "[Video: How to Know if You Need Therapy (8:21)]\n\nYou don't need to be in crisis to benefit from therapy. Some signs that therapy might help: you're functioning but exhausted, the same patterns keep repeating, you feel stuck or unfulfilled despite external success, or you've had symptoms of anxiety or depression for more than a few weeks. Therapy is also valuable during major life transitions - starting a new job, ending a relationship, becoming a parent. Think of it like personal training for your mind. You don't wait until you're injured to work out. You invest in your mental health proactively."
     },
     {
       "id": "evt_015",
       "type": "testimonial",
-      "source": "verified_client",
-      "date": "2024-02-28",
-      "content": "I was skeptical about therapy for my ADHD - I'd tried medication and it helped but didn't solve everything. Dr. Chen's approach was practical and empathetic. She helped me build systems that actually work with my brain instead of against it. My relationship with my wife has improved because I'm not constantly forgetting things anymore.",
-      "rating": 5
+      "timestamp": "2024-02-28T12:00:00.000Z",
+      "content": "I was skeptical about therapy for my ADHD - I'd tried medication and it helped but didn't solve everything. Dr. Chen's approach was practical and empathetic. She helped me build systems that actually work with my brain instead of against it. My relationship with my wife has improved because I'm not constantly forgetting things anymore. (Rating: 5/5)",
+      "source": "verified_client"
     },
     {
       "id": "evt_016",
       "type": "social_media_post",
-      "platform": "instagram",
-      "date": "2024-03-01",
-      "content": "Hot take: Most productivity advice is written by neurotypical people for neurotypical brains. If you have ADHD, 'just use a planner' probably hasn't worked. You need systems designed for how YOUR brain works. That might mean body doubling, gamification, or external accountability. What works for others might not work for you - and that's not a personal failing."
+      "timestamp": "2024-03-01T12:00:00.000Z",
+      "content": "Hot take: Most productivity advice is written by neurotypical people for neurotypical brains. If you have ADHD, 'just use a planner' probably hasn't worked. You need systems designed for how YOUR brain works. That might mean body doubling, gamification, or external accountability. What works for others might not work for you - and that's not a personal failing.",
+      "source": "instagram"
     },
     {
       "id": "evt_017",
       "type": "blog_post",
-      "title": "Asian-American Mental Health: Breaking the Silence",
-      "date": "2024-03-05",
-      "excerpt": "In many Asian cultures, mental health struggles are taboo. We're supposed to be the 'model minority' - successful, problem-free. But this pressure creates its own mental health crisis. Here's why Asian-Americans face unique challenges seeking help.",
-      "content": "Growing up, I never saw a therapist who looked like me or understood my background. Mental health wasn't discussed in my family - it was considered shameful or unnecessary. 'Others have it worse.' 'Just work harder.' These messages are common in Asian-American households. But suppressing emotions doesn't make them disappear. As a therapist, I specifically work to create a space where Asian-American clients don't have to explain cultural context. I understand the weight of family expectations, the complexity of immigrant identity, the model minority myth. You don't have to educate me - we can go straight to the work."
+      "timestamp": "2024-03-05T12:00:00.000Z",
+      "content": "Asian-American Mental Health: Breaking the Silence\n\nGrowing up, I never saw a therapist who looked like me or understood my background. Mental health wasn't discussed in my family - it was considered shameful or unnecessary. 'Others have it worse.' 'Just work harder.' These messages are common in Asian-American households. But suppressing emotions doesn't make them disappear. As a therapist, I specifically work to create a space where Asian-American clients don't have to explain cultural context. I understand the weight of family expectations, the complexity of immigrant identity, the model minority myth. You don't have to educate me - we can go straight to the work."
     },
     {
       "id": "evt_018",
       "type": "podcast_appearance",
-      "show": "The Therapy Chair",
-      "episode": "Cultural Considerations in Therapy",
-      "date": "2024-03-08",
-      "transcript_excerpt": "Host: How do you adapt your approach for clients from different backgrounds? Dr. Chen: It starts with cultural humility - recognizing that I'll never fully understand someone else's experience, even if we share some identity markers. I explicitly ask about cultural factors. For some clients, family expectations are central. For others, it's navigating a predominantly white workplace. Some want to integrate traditional practices with Western therapy. I follow the client's lead while being attuned to culturally-shaped patterns like indirect communication or reluctance to express needs."
+      "timestamp": "2024-03-08T12:00:00.000Z",
+      "content": "[Podcast: The Therapy Chair — Cultural Considerations in Therapy]\n\nHost: How do you adapt your approach for clients from different backgrounds? Dr. Chen: It starts with cultural humility - recognizing that I'll never fully understand someone else's experience, even if we share some identity markers. I explicitly ask about cultural factors. For some clients, family expectations are central. For others, it's navigating a predominantly white workplace. Some want to integrate traditional practices with Western therapy. I follow the client's lead while being attuned to culturally-shaped patterns like indirect communication or reluctance to express needs."
     },
     {
       "id": "evt_019",
       "type": "testimonial",
-      "source": "verified_client",
-      "date": "2024-03-10",
-      "content": "I've seen three therapists before Dr. Chen, and she's the first one who understood the tech industry and ADHD together. She doesn't just help me cope - she helps me build systems that work. The ROI on therapy with her has been enormous for my career and my relationships.",
-      "rating": 5
+      "timestamp": "2024-03-10T12:00:00.000Z",
+      "content": "I've seen three therapists before Dr. Chen, and she's the first one who understood the tech industry and ADHD together. She doesn't just help me cope - she helps me build systems that work. The ROI on therapy with her has been enormous for my career and my relationships. (Rating: 5/5)",
+      "source": "verified_client"
     },
     {
       "id": "evt_020",
       "type": "profile_faq",
-      "question": "Do you prescribe medication?",
-      "answer": "As a psychologist, I don't prescribe medication, but I often collaborate with psychiatrists who do. My view on medication is nuanced: it can be tremendously helpful for some people, particularly for ADHD and severe anxiety, but it's rarely the whole solution. I support clients in making informed decisions about medication without pushing in either direction."
+      "timestamp": "2024-01-01T00:00:00.000Z",
+      "content": "Q: Do you prescribe medication?\nA: As a psychologist, I don't prescribe medication, but I often collaborate with psychiatrists who do. My view on medication is nuanced: it can be tremendously helpful for some people, particularly for ADHD and severe anxiety, but it's rarely the whole solution. I support clients in making informed decisions about medication without pushing in either direction."
     },
     {
       "id": "evt_021",
       "type": "profile_faq",
-      "question": "Do you offer evening or weekend appointments?",
-      "answer": "Yes, I maintain some evening availability for clients with demanding work schedules. This is common for tech professionals who can't step away during business hours. I don't currently offer weekend sessions, but video appointments provide flexibility for those working unusual hours or traveling frequently."
+      "timestamp": "2024-01-01T00:00:00.000Z",
+      "content": "Q: Do you offer evening or weekend appointments?\nA: Yes, I maintain some evening availability for clients with demanding work schedules. This is common for tech professionals who can't step away during business hours. I don't currently offer weekend sessions, but video appointments provide flexibility for those working unusual hours or traveling frequently."
     },
     {
       "id": "evt_022",
       "type": "video_transcript",
-      "title": "ADHD Myths Debunked",
-      "duration": "15:42",
-      "date": "2024-03-12",
-      "content": "Myth one: ADHD is just for hyperactive kids. Reality: ADHD presents differently in adults and is often missed in those who were good students. Myth two: ADHD means you can't focus. Reality: People with ADHD can often hyperfocus intensely - it's executive control over attention that's the challenge. Myth three: Everyone's a little ADHD. Reality: While everyone has moments of distraction, ADHD is a persistent pattern that significantly impacts daily functioning. Myth four: ADHD is an excuse for laziness. Reality: ADHD brains often work harder to accomplish the same tasks - it's exhausting, not easy."
+      "timestamp": "2024-03-12T12:00:00.000Z",
+      "content": "[Video: ADHD Myths Debunked (15:42)]\n\nMyth one: ADHD is just for hyperactive kids. Reality: ADHD presents differently in adults and is often missed in those who were good students. Myth two: ADHD means you can't focus. Reality: People with ADHD can often hyperfocus intensely - it's executive control over attention that's the challenge. Myth three: Everyone's a little ADHD. Reality: While everyone has moments of distraction, ADHD is a persistent pattern that significantly impacts daily functioning. Myth four: ADHD is an excuse for laziness. Reality: ADHD brains often work harder to accomplish the same tasks - it's exhausting, not easy."
     },
     {
       "id": "evt_023",
       "type": "blog_post",
-      "title": "Why High-Achievers Struggle with Self-Compassion",
-      "date": "2024-03-15",
-      "excerpt": "If you're used to achieving through self-criticism, the idea of being kind to yourself can feel dangerous. What if you lose your edge? What if you become complacent? This fear is common among my high-achieving clients.",
-      "content": "Research actually shows the opposite: self-compassion improves performance, not just well-being. Self-criticism triggers the threat system, narrowing focus and creating anxiety. Self-compassion activates the care system, promoting motivation through encouragement rather than fear. But here's the tricky part: if you've always used self-criticism as motivation, self-compassion feels foreign and risky. We work on it gradually - starting with less emotionally charged situations and building the skill over time."
+      "timestamp": "2024-03-15T12:00:00.000Z",
+      "content": "Why High-Achievers Struggle with Self-Compassion\n\nResearch actually shows the opposite: self-compassion improves performance, not just well-being. Self-criticism triggers the threat system, narrowing focus and creating anxiety. Self-compassion activates the care system, promoting motivation through encouragement rather than fear. But here's the tricky part: if you've always used self-criticism as motivation, self-compassion feels foreign and risky. We work on it gradually - starting with less emotionally charged situations and building the skill over time."
     },
     {
       "id": "evt_024",
       "type": "social_media_post",
-      "platform": "linkedin",
-      "date": "2024-03-18",
-      "content": "PSA for managers: Your 'highest performers' may be masking anxiety or ADHD symptoms through overwork. Just because someone delivers doesn't mean they're thriving. Create space for honest conversations about workload and well-being. Your best employees might be struggling in silence."
+      "timestamp": "2024-03-18T12:00:00.000Z",
+      "content": "PSA for managers: Your 'highest performers' may be masking anxiety or ADHD symptoms through overwork. Just because someone delivers doesn't mean they're thriving. Create space for honest conversations about workload and well-being. Your best employees might be struggling in silence.",
+      "source": "linkedin"
     },
     {
       "id": "evt_025",
       "type": "testimonial",
-      "source": "verified_client",
-      "date": "2024-03-20",
-      "content": "Dr. Chen helped me realize my perfectionism wasn't helping me - it was holding me back. I was so afraid of failure that I wasn't taking any risks in my career. After working with her, I launched a side project I'd been postponing for years. It didn't go perfectly, but I survived, and that was transformative.",
-      "rating": 5
+      "timestamp": "2024-03-20T12:00:00.000Z",
+      "content": "Dr. Chen helped me realize my perfectionism wasn't helping me - it was holding me back. I was so afraid of failure that I wasn't taking any risks in my career. After working with her, I launched a side project I'd been postponing for years. It didn't go perfectly, but I survived, and that was transformative. (Rating: 5/5)",
+      "source": "verified_client"
     },
     {
       "id": "evt_026",
       "type": "blog_post",
-      "title": "The Burnout Trap in Tech",
-      "date": "2024-03-22",
-      "excerpt": "Burnout isn't just being tired. It's the collapse of meaning, motivation, and energy after prolonged stress. I see this constantly among tech professionals, and the pandemic made it worse.",
-      "content": "Tech workers face unique burnout risks: blurred work-life boundaries, always-on cultures, and rapid change. Add in imposter syndrome, especially for underrepresented groups, and burnout risk skyrockets. Recovery isn't just about vacation - it requires examining the patterns that led to burnout. Why couldn't you set boundaries? What beliefs about worth and productivity drove you? Without addressing these, burnout will recur. In therapy, we work on both immediate relief and the deeper patterns."
+      "timestamp": "2024-03-22T12:00:00.000Z",
+      "content": "The Burnout Trap in Tech\n\nTech workers face unique burnout risks: blurred work-life boundaries, always-on cultures, and rapid change. Add in imposter syndrome, especially for underrepresented groups, and burnout risk skyrockets. Recovery isn't just about vacation - it requires examining the patterns that led to burnout. Why couldn't you set boundaries? What beliefs about worth and productivity drove you? Without addressing these, burnout will recur. In therapy, we work on both immediate relief and the deeper patterns."
     },
     {
       "id": "evt_027",
       "type": "profile_insurance",
+      "timestamp": "2024-01-01T00:00:00.000Z",
       "content": "I am out-of-network with insurance but provide superbills for reimbursement. Many PPO plans cover a significant portion of out-of-network mental health services. I've found that out-of-network status allows me to provide the quality and flexibility of care that my clients need, without the restrictions of insurance-based models."
     },
     {
       "id": "evt_028",
       "type": "video_transcript",
-      "title": "What to Look for in a Therapist",
-      "duration": "11:08",
-      "date": "2024-03-25",
-      "content": "Finding the right therapist is like dating - fit matters as much as qualifications. Here's what I recommend: First, consider what you need. Are you looking for someone who shares your identity or background? Do you want a more structured, skills-based approach or more open-ended exploration? Second, try multiple people. Many therapists, myself included, offer brief consultations. Use them. The relationship is the foundation of therapy. Third, trust your gut. After a few sessions, do you feel understood? Are you learning something new? If not, it's okay to keep looking."
+      "timestamp": "2024-03-25T12:00:00.000Z",
+      "content": "[Video: What to Look for in a Therapist (11:08)]\n\nFinding the right therapist is like dating - fit matters as much as qualifications. Here's what I recommend: First, consider what you need. Are you looking for someone who shares your identity or background? Do you want a more structured, skills-based approach or more open-ended exploration? Second, try multiple people. Many therapists, myself included, offer brief consultations. Use them. The relationship is the foundation of therapy. Third, trust your gut. After a few sessions, do you feel understood? Are you learning something new? If not, it's okay to keep looking."
     },
     {
       "id": "evt_029",
       "type": "testimonial",
-      "source": "verified_client",
-      "date": "2024-03-28",
-      "content": "I was burned out from my startup job and skeptical that therapy could help. Dr. Chen didn't just validate my feelings - she challenged me to examine why I kept ending up in the same patterns. Hard work, but worth it. I now have a job I love without sacrificing my health.",
-      "rating": 5
+      "timestamp": "2024-03-28T12:00:00.000Z",
+      "content": "I was burned out from my startup job and skeptical that therapy could help. Dr. Chen didn't just validate my feelings - she challenged me to examine why I kept ending up in the same patterns. Hard work, but worth it. I now have a job I love without sacrificing my health. (Rating: 5/5)",
+      "source": "verified_client"
     },
     {
       "id": "evt_030",
       "type": "social_media_post",
-      "platform": "instagram",
-      "date": "2024-03-30",
-      "content": "Normalize taking mental health days before you're in crisis. You don't wait until you have a cavity to brush your teeth. Preventive care matters for mental health too. Taking a day to rest isn't lazy - it's strategic."
+      "timestamp": "2024-03-30T12:00:00.000Z",
+      "content": "Normalize taking mental health days before you're in crisis. You don't wait until you have a cavity to brush your teeth. Preventive care matters for mental health too. Taking a day to rest isn't lazy - it's strategic.",
+      "source": "instagram"
     },
     {
       "id": "evt_031",
       "type": "blog_post",
-      "title": "ADHD and Relationships: Common Challenges",
-      "date": "2024-04-02",
-      "excerpt": "ADHD doesn't just affect work and productivity - it impacts relationships too. Partners of people with ADHD often feel frustrated by forgetfulness, inconsistency, or emotional reactivity. Understanding ADHD as a couples issue can transform relationships.",
-      "content": "Common ADHD relationship challenges: forgetting commitments or important dates, difficulty with household management, emotional dysregulation during conflict, and hyperfocus on work at the expense of connection. Partners may feel like they're parenting rather than partnering. In couples work, I help both partners understand ADHD patterns without using them as excuses. We develop practical systems for shared responsibilities and communication strategies for navigating conflict. Most importantly, we rebuild connection that may have eroded under frustration and misunderstanding."
+      "timestamp": "2024-04-02T12:00:00.000Z",
+      "content": "ADHD and Relationships: Common Challenges\n\nCommon ADHD relationship challenges: forgetting commitments or important dates, difficulty with household management, emotional dysregulation during conflict, and hyperfocus on work at the expense of connection. Partners may feel like they're parenting rather than partnering. In couples work, I help both partners understand ADHD patterns without using them as excuses. We develop practical systems for shared responsibilities and communication strategies for navigating conflict. Most importantly, we rebuild connection that may have eroded under frustration and misunderstanding."
     },
     {
       "id": "evt_032",
       "type": "profile_faq",
-      "question": "What is your cancellation policy?",
-      "answer": "I require 48 hours notice for cancellations. This allows me to offer the slot to another client who may be waiting. Emergencies and illness are handled on a case-by-case basis. I understand that high-demand jobs sometimes require last-minute changes, and we can discuss flexibility when that's a pattern."
+      "timestamp": "2024-01-01T00:00:00.000Z",
+      "content": "Q: What is your cancellation policy?\nA: I require 48 hours notice for cancellations. This allows me to offer the slot to another client who may be waiting. Emergencies and illness are handled on a case-by-case basis. I understand that high-demand jobs sometimes require last-minute changes, and we can discuss flexibility when that's a pattern."
     },
     {
       "id": "evt_033",
       "type": "podcast_appearance",
-      "show": "Founders in Therapy",
-      "episode": "Managing Anxiety While Scaling a Company",
-      "date": "2024-04-05",
-      "transcript_excerpt": "Host: What do you see most often with founder clients? Dr. Chen: Isolation and identity fusion. Founders often don't feel they can show vulnerability to investors, employees, or even family. Their identity becomes entirely wrapped up in the company. When things go well, they feel good. When things go badly - which is constant in startups - they feel worthless. Separating self-worth from company performance is crucial work."
+      "timestamp": "2024-04-05T12:00:00.000Z",
+      "content": "[Podcast: Founders in Therapy — Managing Anxiety While Scaling a Company]\n\nHost: What do you see most often with founder clients? Dr. Chen: Isolation and identity fusion. Founders often don't feel they can show vulnerability to investors, employees, or even family. Their identity becomes entirely wrapped up in the company. When things go well, they feel good. When things go badly - which is constant in startups - they feel worthless. Separating self-worth from company performance is crucial work."
     },
     {
       "id": "evt_034",
       "type": "testimonial",
-      "source": "verified_client",
-      "date": "2024-04-08",
-      "content": "As a founder, I felt like I couldn't admit I was struggling. Dr. Chen created a safe space where I could be honest about my anxiety without judgment. She gets the startup world and doesn't try to convince me to quit - she helps me build the resilience to do what I love sustainably.",
-      "rating": 5
+      "timestamp": "2024-04-08T12:00:00.000Z",
+      "content": "As a founder, I felt like I couldn't admit I was struggling. Dr. Chen created a safe space where I could be honest about my anxiety without judgment. She gets the startup world and doesn't try to convince me to quit - she helps me build the resilience to do what I love sustainably. (Rating: 5/5)",
+      "source": "verified_client"
     },
     {
       "id": "evt_035",
       "type": "blog_post",
-      "title": "The Mind-Body Connection: Why Your Anxiety Lives in Your Body",
-      "date": "2024-04-10",
-      "excerpt": "Anxiety isn't just worrying thoughts - it's a full-body experience. Racing heart, tight shoulders, shallow breathing, stomach knots. Learning to read and regulate your body is often more effective than trying to think your way out of anxiety.",
-      "content": "The vagus nerve connects your brain to your body, carrying signals in both directions. This means your body can influence your mind, not just the other way around. When you're anxious, your body tenses up - and that physical tension signals to your brain that danger is present, perpetuating the cycle. Somatic techniques break this loop. Deep diaphragmatic breathing activates the parasympathetic nervous system. Progressive muscle relaxation teaches your body what relaxation feels like. These aren't just coping techniques - they're training your nervous system to return to baseline more quickly."
+      "timestamp": "2024-04-10T12:00:00.000Z",
+      "content": "The Mind-Body Connection: Why Your Anxiety Lives in Your Body\n\nThe vagus nerve connects your brain to your body, carrying signals in both directions. This means your body can influence your mind, not just the other way around. When you're anxious, your body tenses up - and that physical tension signals to your brain that danger is present, perpetuating the cycle. Somatic techniques break this loop. Deep diaphragmatic breathing activates the parasympathetic nervous system. Progressive muscle relaxation teaches your body what relaxation feels like. These aren't just coping techniques - they're training your nervous system to return to baseline more quickly."
     },
     {
       "id": "evt_036",
       "type": "video_transcript",
-      "title": "Setting Boundaries at Work",
-      "duration": "13:55",
-      "date": "2024-04-12",
-      "content": "Boundaries aren't about being difficult - they're about sustainability. If you never say no, you'll eventually burn out, and then you can't help anyone. Start small: don't respond to non-urgent emails after 7pm. Block focus time on your calendar. Practice the phrase 'Let me check my bandwidth and get back to you' instead of instant yes. For many of my clients, boundary-setting triggers guilt or fear of being seen as not a team player. We work through these feelings while building the skill. Over time, good boundaries often increase respect, not decrease it."
+      "timestamp": "2024-04-12T12:00:00.000Z",
+      "content": "[Video: Setting Boundaries at Work (13:55)]\n\nBoundaries aren't about being difficult - they're about sustainability. If you never say no, you'll eventually burn out, and then you can't help anyone. Start small: don't respond to non-urgent emails after 7pm. Block focus time on your calendar. Practice the phrase 'Let me check my bandwidth and get back to you' instead of instant yes. For many of my clients, boundary-setting triggers guilt or fear of being seen as not a team player. We work through these feelings while building the skill. Over time, good boundaries often increase respect, not decrease it."
     },
     {
       "id": "evt_037",
       "type": "social_media_post",
-      "platform": "linkedin",
-      "date": "2024-04-15",
-      "content": "The phrase 'just push through' has probably caused more burnout than any other advice. Pushing through works for short sprints. As a lifestyle, it's a recipe for exhaustion and resentment. Sustainable high performance requires recovery, not just effort."
+      "timestamp": "2024-04-15T12:00:00.000Z",
+      "content": "The phrase 'just push through' has probably caused more burnout than any other advice. Pushing through works for short sprints. As a lifestyle, it's a recipe for exhaustion and resentment. Sustainable high performance requires recovery, not just effort.",
+      "source": "linkedin"
     },
     {
       "id": "evt_038",
       "type": "testimonial",
-      "source": "verified_client",
-      "date": "2024-04-18",
-      "content": "Dr. Chen helped me finally get an ADHD diagnosis at 38. I spent years thinking I was just lazy or undisciplined. Understanding that my brain works differently was incredibly validating. Now I have strategies that work for me, not against me.",
-      "rating": 5
+      "timestamp": "2024-04-18T12:00:00.000Z",
+      "content": "Dr. Chen helped me finally get an ADHD diagnosis at 38. I spent years thinking I was just lazy or undisciplined. Understanding that my brain works differently was incredibly validating. Now I have strategies that work for me, not against me. (Rating: 5/5)",
+      "source": "verified_client"
     },
     {
       "id": "evt_039",
       "type": "blog_post",
-      "title": "Navigating Family Expectations as an Asian-American Adult",
-      "date": "2024-04-20",
-      "excerpt": "You're successful by any measure, but your parents keep asking when you'll get married, have kids, or get a 'real' job. Setting boundaries with Asian parents can feel like betrayal. It's not.",
-      "content": "Cultural values around filial piety and collectivism create unique challenges for Asian-American adults. Saying no to parents can feel like rejecting your entire culture. But there's a middle path: honoring your cultural values while also honoring yourself. In therapy, we explore what you actually want versus what you've internalized. We practice boundary-setting conversations that are respectful but firm. We process the guilt and grief that often accompany choosing your own path. You can be a good daughter/son and also live your own life."
+      "timestamp": "2024-04-20T12:00:00.000Z",
+      "content": "Navigating Family Expectations as an Asian-American Adult\n\nCultural values around filial piety and collectivism create unique challenges for Asian-American adults. Saying no to parents can feel like rejecting your entire culture. But there's a middle path: honoring your cultural values while also honoring yourself. In therapy, we explore what you actually want versus what you've internalized. We practice boundary-setting conversations that are respectful but firm. We process the guilt and grief that often accompany choosing your own path. You can be a good daughter/son and also live your own life."
     },
     {
       "id": "evt_040",
       "type": "profile_approach",
+      "timestamp": "2024-01-01T00:00:00.000Z",
       "content": "My approach integrates Cognitive Behavioral Therapy (CBT), Acceptance and Commitment Therapy (ACT), and mindfulness-based interventions. I adapt my style to each client - some prefer structured skill-building, others need more space for exploration. I'm direct and collaborative, not a blank slate. I'll challenge you when I think it'll help, and I'll acknowledge when I'm wrong. Therapy with me is active work, not just venting."
     },
     {
       "id": "evt_041",
       "type": "video_transcript",
-      "title": "ADHD Medication: What to Know",
-      "duration": "16:30",
-      "date": "2024-04-22",
-      "content": "Let me be clear: I'm a psychologist, not a psychiatrist, so I don't prescribe medication. But I work closely with psychiatrists and have opinions. Medication can be life-changing for ADHD - many clients describe it as 'putting on glasses for the first time.' But medication isn't magic. It won't organize your closet or fix your relationships. It provides a foundation that makes other strategies more effective. I support clients in making informed decisions, getting proper evaluation, and finding the right medication and dose if they choose that path."
+      "timestamp": "2024-04-22T12:00:00.000Z",
+      "content": "[Video: ADHD Medication: What to Know (16:30)]\n\nLet me be clear: I'm a psychologist, not a psychiatrist, so I don't prescribe medication. But I work closely with psychiatrists and have opinions. Medication can be life-changing for ADHD - many clients describe it as 'putting on glasses for the first time.' But medication isn't magic. It won't organize your closet or fix your relationships. It provides a foundation that makes other strategies more effective. I support clients in making informed decisions, getting proper evaluation, and finding the right medication and dose if they choose that path."
     },
     {
       "id": "evt_042",
       "type": "testimonial",
-      "source": "verified_client",
-      "date": "2024-04-25",
-      "content": "What I appreciate most about Dr. Chen is that she challenges me. Other therapists just validated everything I said. She pushes me to see my own patterns and take responsibility. Uncomfortable sometimes, but necessary.",
-      "rating": 5
+      "timestamp": "2024-04-25T12:00:00.000Z",
+      "content": "What I appreciate most about Dr. Chen is that she challenges me. Other therapists just validated everything I said. She pushes me to see my own patterns and take responsibility. Uncomfortable sometimes, but necessary. (Rating: 5/5)",
+      "source": "verified_client"
     },
     {
       "id": "evt_043",
       "type": "social_media_post",
-      "platform": "instagram",
-      "date": "2024-04-28",
-      "content": "Reminder: You don't have to earn rest. You don't have to 'deserve' taking care of yourself. Rest is not a reward for productivity. It's a requirement for being human. Capitalism has convinced us otherwise. Capitalism is wrong."
+      "timestamp": "2024-04-28T12:00:00.000Z",
+      "content": "Reminder: You don't have to earn rest. You don't have to 'deserve' taking care of yourself. Rest is not a reward for productivity. It's a requirement for being human. Capitalism has convinced us otherwise. Capitalism is wrong.",
+      "source": "instagram"
     },
     {
       "id": "evt_044",
       "type": "blog_post",
-      "title": "The Problem with Positive Thinking",
-      "date": "2024-04-30",
-      "excerpt": "Toxic positivity - the pressure to be happy all the time - actually makes mental health worse. Emotions aren't good or bad, they're information. Suppressing 'negative' emotions doesn't make them disappear.",
-      "content": "When clients tell me they 'shouldn't' feel anxious or sad, I get curious. Who decided that? All emotions have functions. Anxiety alerts us to potential threats. Sadness signals loss. Anger points to violated boundaries. The goal isn't to feel good all the time - it's to feel whatever's present without being overwhelmed, and to use emotions as data for action. In ACT terms, we work on psychological flexibility: the ability to be present with all experience and still move toward your values."
+      "timestamp": "2024-04-30T12:00:00.000Z",
+      "content": "The Problem with Positive Thinking\n\nWhen clients tell me they 'shouldn't' feel anxious or sad, I get curious. Who decided that? All emotions have functions. Anxiety alerts us to potential threats. Sadness signals loss. Anger points to violated boundaries. The goal isn't to feel good all the time - it's to feel whatever's present without being overwhelmed, and to use emotions as data for action. In ACT terms, we work on psychological flexibility: the ability to be present with all experience and still move toward your values."
     },
     {
       "id": "evt_045",
       "type": "podcast_appearance",
-      "show": "The Anxious Achiever",
-      "episode": "Perfectionism in High Performers",
-      "date": "2024-05-02",
-      "transcript_excerpt": "Host: Can perfectionism ever be adaptive? Dr. Chen: High standards can absolutely drive success. The question is: what's the cost? Clinical perfectionism involves rigid, all-or-nothing standards, contingent self-worth, and fear of failure that prevents risk-taking. Healthy striving is flexible - you can adjust standards based on context, and your worth doesn't depend on perfect outcomes. Many of my clients need to dial down perfectionism in some areas while maintaining high standards in others."
+      "timestamp": "2024-05-02T12:00:00.000Z",
+      "content": "[Podcast: The Anxious Achiever — Perfectionism in High Performers]\n\nHost: Can perfectionism ever be adaptive? Dr. Chen: High standards can absolutely drive success. The question is: what's the cost? Clinical perfectionism involves rigid, all-or-nothing standards, contingent self-worth, and fear of failure that prevents risk-taking. Healthy striving is flexible - you can adjust standards based on context, and your worth doesn't depend on perfect outcomes. Many of my clients need to dial down perfectionism in some areas while maintaining high standards in others."
     },
     {
       "id": "evt_046",
       "type": "testimonial",
-      "source": "verified_client",
-      "date": "2024-05-05",
-      "content": "After years of anxiety holding me back, working with Dr. Chen helped me finally apply for the promotion I'd been avoiding. I didn't get it - but I survived the rejection and learned from the feedback. That's huge progress for me.",
-      "rating": 5
+      "timestamp": "2024-05-05T12:00:00.000Z",
+      "content": "After years of anxiety holding me back, working with Dr. Chen helped me finally apply for the promotion I'd been avoiding. I didn't get it - but I survived the rejection and learned from the feedback. That's huge progress for me. (Rating: 5/5)",
+      "source": "verified_client"
     },
     {
       "id": "evt_047",
       "type": "profile_faq",
-      "question": "How long does therapy typically last?",
-      "answer": "It varies. Some clients come for a specific issue and make significant progress in 8-12 sessions. Others work with me for years on deeper patterns. I'm not in the business of creating dependency - we regularly assess progress and your goals. Some clients do intensive weekly work and then transition to monthly check-ins."
+      "timestamp": "2024-01-01T00:00:00.000Z",
+      "content": "Q: How long does therapy typically last?\nA: It varies. Some clients come for a specific issue and make significant progress in 8-12 sessions. Others work with me for years on deeper patterns. I'm not in the business of creating dependency - we regularly assess progress and your goals. Some clients do intensive weekly work and then transition to monthly check-ins."
     },
     {
       "id": "evt_048",
       "type": "blog_post",
-      "title": "Decision Fatigue and ADHD",
-      "date": "2024-05-08",
-      "excerpt": "Do you feel exhausted by simple decisions? Does choosing what to eat for dinner feel harder than solving complex work problems? Decision fatigue is real, and it hits harder for ADHD brains.",
-      "content": "ADHD involves weakened executive function, and decision-making is an executive function. Every choice depletes your limited decision-making capacity. By evening, even simple choices feel impossible. Strategies: Reduce unnecessary decisions through routines (same breakfast every day, capsule wardrobe). Front-load important decisions to morning. Create default options for recurring choices. Delegate decisions where possible. These aren't shortcuts for lazy people - they're essential ADHD management."
+      "timestamp": "2024-05-08T12:00:00.000Z",
+      "content": "Decision Fatigue and ADHD\n\nADHD involves weakened executive function, and decision-making is an executive function. Every choice depletes your limited decision-making capacity. By evening, even simple choices feel impossible. Strategies: Reduce unnecessary decisions through routines (same breakfast every day, capsule wardrobe). Front-load important decisions to morning. Create default options for recurring choices. Delegate decisions where possible. These aren't shortcuts for lazy people - they're essential ADHD management."
     },
     {
       "id": "evt_049",
       "type": "video_transcript",
-      "title": "Managing Anxiety in Uncertainty",
-      "duration": "14:22",
-      "date": "2024-05-10",
-      "content": "Uncertainty is anxiety's favorite playground. Our brains crave predictability, and when we don't have it, we imagine worst-case scenarios to prepare. The problem? Imagining disasters is exhausting and often inaccurate. We suffer events that never happen. Strategies for uncertainty tolerance: Acknowledge what you can and can't control. Take action on the controllable. Practice sitting with discomfort rather than seeking reassurance. Build evidence that you can handle bad outcomes. Remember: you've survived 100% of your difficult days so far."
+      "timestamp": "2024-05-10T12:00:00.000Z",
+      "content": "[Video: Managing Anxiety in Uncertainty (14:22)]\n\nUncertainty is anxiety's favorite playground. Our brains crave predictability, and when we don't have it, we imagine worst-case scenarios to prepare. The problem? Imagining disasters is exhausting and often inaccurate. We suffer events that never happen. Strategies for uncertainty tolerance: Acknowledge what you can and can't control. Take action on the controllable. Practice sitting with discomfort rather than seeking reassurance. Build evidence that you can handle bad outcomes. Remember: you've survived 100% of your difficult days so far."
     },
     {
       "id": "evt_050",
       "type": "social_media_post",
-      "platform": "linkedin",
-      "date": "2024-05-12",
-      "content": "The 'hustle culture' glorifies overwork and sleep deprivation. But research is clear: chronic sleep deprivation impairs cognition as much as alcohol intoxication. You wouldn't brag about being drunk at work. Why brag about running on 4 hours of sleep?"
+      "timestamp": "2024-05-12T12:00:00.000Z",
+      "content": "The 'hustle culture' glorifies overwork and sleep deprivation. But research is clear: chronic sleep deprivation impairs cognition as much as alcohol intoxication. You wouldn't brag about being drunk at work. Why brag about running on 4 hours of sleep?",
+      "source": "linkedin"
     },
     {
       "id": "evt_051",
       "type": "testimonial",
-      "source": "verified_client",
-      "date": "2024-05-15",
-      "content": "Dr. Chen's approach to ADHD is the most practical I've encountered. No shame, no lectures, just 'here's how your brain works and here's what we can do about it.' I finally feel like I have tools that actually work.",
-      "rating": 5
+      "timestamp": "2024-05-15T12:00:00.000Z",
+      "content": "Dr. Chen's approach to ADHD is the most practical I've encountered. No shame, no lectures, just 'here's how your brain works and here's what we can do about it.' I finally feel like I have tools that actually work. (Rating: 5/5)",
+      "source": "verified_client"
     },
     {
       "id": "evt_052",
       "type": "blog_post",
-      "title": "Therapy Isn't Just for Crisis",
-      "date": "2024-05-18",
-      "excerpt": "You don't have to be depressed or in crisis to benefit from therapy. Some of my most productive work is with clients who are 'fine' but want to be better - at relationships, at work, at life.",
-      "content": "Think of therapy like coaching or personal training. You might hire a trainer not because you're unhealthy, but because you want to optimize. Therapy can help you understand your patterns, make better decisions, and live more intentionally. Many of my tech clients initially come for anxiety but stay because they value having a thinking partner for life's challenges. Self-aware people who actively work on their growth tend to do better in life - and that work doesn't stop when crisis passes."
+      "timestamp": "2024-05-18T12:00:00.000Z",
+      "content": "Therapy Isn't Just for Crisis\n\nThink of therapy like coaching or personal training. You might hire a trainer not because you're unhealthy, but because you want to optimize. Therapy can help you understand your patterns, make better decisions, and live more intentionally. Many of my tech clients initially come for anxiety but stay because they value having a thinking partner for life's challenges. Self-aware people who actively work on their growth tend to do better in life - and that work doesn't stop when crisis passes."
     },
     {
       "id": "evt_053",
       "type": "profile_faq",
-      "question": "What's the difference between a psychologist and a therapist?",
-      "answer": "Psychologist is a specific title requiring a doctoral degree and licensure. Therapist is a broader term that can include psychologists, social workers, and counselors. As a licensed clinical psychologist, I have extensive training in assessment, diagnosis, and evidence-based treatment. I'm particularly trained in psychological testing, including ADHD assessment."
+      "timestamp": "2024-01-01T00:00:00.000Z",
+      "content": "Q: What's the difference between a psychologist and a therapist?\nA: Psychologist is a specific title requiring a doctoral degree and licensure. Therapist is a broader term that can include psychologists, social workers, and counselors. As a licensed clinical psychologist, I have extensive training in assessment, diagnosis, and evidence-based treatment. I'm particularly trained in psychological testing, including ADHD assessment."
     },
     {
       "id": "evt_054",
       "type": "video_transcript",
-      "title": "CBT vs ACT: What's the Difference?",
-      "duration": "10:45",
-      "date": "2024-05-20",
-      "content": "Both CBT and ACT are evidence-based approaches, but they work differently. CBT focuses on identifying and changing unhelpful thoughts. If you think 'I'll fail this presentation,' CBT helps you examine that thought and consider alternatives. ACT, on the other hand, focuses on changing your relationship with thoughts. Instead of fighting the 'I'll fail' thought, you notice it, acknowledge it, and take valued action anyway. I often use both approaches depending on the client and situation. For anxiety spirals, CBT's thought challenging can break loops. For chronic self-criticism, ACT's defusion techniques often work better."
+      "timestamp": "2024-05-20T12:00:00.000Z",
+      "content": "[Video: CBT vs ACT: What's the Difference? (10:45)]\n\nBoth CBT and ACT are evidence-based approaches, but they work differently. CBT focuses on identifying and changing unhelpful thoughts. If you think 'I'll fail this presentation,' CBT helps you examine that thought and consider alternatives. ACT, on the other hand, focuses on changing your relationship with thoughts. Instead of fighting the 'I'll fail' thought, you notice it, acknowledge it, and take valued action anyway. I often use both approaches depending on the client and situation. For anxiety spirals, CBT's thought challenging can break loops. For chronic self-criticism, ACT's defusion techniques often work better."
     },
     {
       "id": "evt_055",
       "type": "testimonial",
-      "source": "verified_client",
-      "date": "2024-05-22",
-      "content": "I've tried therapy before and it never clicked. Dr. Chen's style is different - direct, practical, and she actually assigns homework. I like having things to practice between sessions. It makes progress faster.",
-      "rating": 5
+      "timestamp": "2024-05-22T12:00:00.000Z",
+      "content": "I've tried therapy before and it never clicked. Dr. Chen's style is different - direct, practical, and she actually assigns homework. I like having things to practice between sessions. It makes progress faster. (Rating: 5/5)",
+      "source": "verified_client"
     },
     {
       "id": "evt_056",
       "type": "social_media_post",
-      "platform": "instagram",
-      "date": "2024-05-25",
-      "content": "Boundaries aren't walls. They're bridges with gates. They define what kind of treatment you accept, not whether you have relationships. Good boundaries often improve relationships by reducing resentment and increasing authenticity."
+      "timestamp": "2024-05-25T12:00:00.000Z",
+      "content": "Boundaries aren't walls. They're bridges with gates. They define what kind of treatment you accept, not whether you have relationships. Good boundaries often improve relationships by reducing resentment and increasing authenticity.",
+      "source": "instagram"
     },
     {
       "id": "evt_057",
       "type": "blog_post",
-      "title": "Why Successful People Get Imposter Syndrome",
-      "date": "2024-05-28",
-      "excerpt": "The more you achieve, the more you might feel like a fraud. Counter-intuitive, right? Here's why imposter syndrome often increases with success.",
-      "content": "Imposter syndrome is common among high-achievers because each new level of success brings new comparisons and higher stakes. You got the job, but now you're surrounded by brilliant colleagues. You launched the product, but now you're responsible for customer outcomes. Success also means visibility - more eyes on your work, more chances to be 'found out.' For people from underrepresented backgrounds, imposter syndrome compounds: you might literally be the only person like you in the room, wondering if you belong. Therapy addresses both the internal patterns (perfectionism, external validation seeking) and the systemic factors (stereotypes, biased feedback) that feed imposter syndrome."
+      "timestamp": "2024-05-28T12:00:00.000Z",
+      "content": "Why Successful People Get Imposter Syndrome\n\nImposter syndrome is common among high-achievers because each new level of success brings new comparisons and higher stakes. You got the job, but now you're surrounded by brilliant colleagues. You launched the product, but now you're responsible for customer outcomes. Success also means visibility - more eyes on your work, more chances to be 'found out.' For people from underrepresented backgrounds, imposter syndrome compounds: you might literally be the only person like you in the room, wondering if you belong. Therapy addresses both the internal patterns (perfectionism, external validation seeking) and the systemic factors (stereotypes, biased feedback) that feed imposter syndrome."
     },
     {
       "id": "evt_058",
       "type": "podcast_appearance",
-      "show": "Asian Boss Girl",
-      "episode": "Mental Health in the Asian-American Community",
-      "date": "2024-05-30",
-      "transcript_excerpt": "Host: What do you wish more Asian-American families understood about mental health? Dr. Chen: That seeking help is strength, not weakness. That emotions aren't shameful or ungrateful. That you can honor your parents and culture while also taking care of yourself. And that therapy doesn't mean you're crazy - it means you're intentional about your growth."
+      "timestamp": "2024-05-30T12:00:00.000Z",
+      "content": "[Podcast: Asian Boss Girl — Mental Health in the Asian-American Community]\n\nHost: What do you wish more Asian-American families understood about mental health? Dr. Chen: That seeking help is strength, not weakness. That emotions aren't shameful or ungrateful. That you can honor your parents and culture while also taking care of yourself. And that therapy doesn't mean you're crazy - it means you're intentional about your growth."
     },
     {
       "id": "evt_059",
       "type": "testimonial",
-      "source": "verified_client",
-      "date": "2024-06-02",
-      "content": "Video sessions with Dr. Chen work surprisingly well. I travel a lot for work, and being able to have therapy from hotel rooms has been a game-changer. She's helped me maintain consistency even with a hectic schedule.",
-      "rating": 5
+      "timestamp": "2024-06-02T12:00:00.000Z",
+      "content": "Video sessions with Dr. Chen work surprisingly well. I travel a lot for work, and being able to have therapy from hotel rooms has been a game-changer. She's helped me maintain consistency even with a hectic schedule. (Rating: 5/5)",
+      "source": "verified_client"
     },
     {
       "id": "evt_060",
       "type": "profile_availability",
+      "timestamp": "2024-01-01T00:00:00.000Z",
       "content": "I currently have limited availability for new clients. I maintain a waitlist and reach out as spots open. For urgent situations, I can provide referrals to trusted colleagues. If you're interested in working together, I encourage scheduling a free 15-minute consultation to discuss fit."
     },
     {
       "id": "evt_061",
       "type": "blog_post",
-      "title": "Time Blindness: The Hidden ADHD Symptom",
-      "date": "2024-06-05",
-      "excerpt": "If you chronically underestimate how long things take, you might have time blindness - a common but under-discussed ADHD symptom. Here's what it is and what helps.",
-      "content": "Time blindness isn't about being irresponsible. It's a genuine difference in how ADHD brains perceive time. People with ADHD often have two time zones: now and not-now. A deadline three weeks away feels the same as one three months away - both are 'not-now' and thus not urgent. Strategies: Visual timers that show time passing. Breaking projects into daily tasks with daily deadlines. Building in buffer time (if you think it takes 30 minutes, schedule 60). External accountability. These aren't crutches - they're tools that match how your brain works."
+      "timestamp": "2024-06-05T12:00:00.000Z",
+      "content": "Time Blindness: The Hidden ADHD Symptom\n\nTime blindness isn't about being irresponsible. It's a genuine difference in how ADHD brains perceive time. People with ADHD often have two time zones: now and not-now. A deadline three weeks away feels the same as one three months away - both are 'not-now' and thus not urgent. Strategies: Visual timers that show time passing. Breaking projects into daily tasks with daily deadlines. Building in buffer time (if you think it takes 30 minutes, schedule 60). External accountability. These aren't crutches - they're tools that match how your brain works."
     },
     {
       "id": "evt_062",
       "type": "video_transcript",
-      "title": "Emotional Dysregulation in ADHD",
-      "duration": "12:18",
-      "date": "2024-06-08",
-      "content": "ADHD isn't just about attention - it often includes emotional dysregulation. Big emotions come fast and hard. Frustration flares instantly. Rejection feels devastating. This isn't a character flaw - it's a neurological feature. The prefrontal cortex, which manages impulse control and emotional regulation, develops differently in ADHD brains. Medication can help, but so can skills: recognizing early warning signs, building pause before reaction, self-compassion practices. Partners and colleagues can help by not taking outbursts personally and providing feedback when emotions have settled."
+      "timestamp": "2024-06-08T12:00:00.000Z",
+      "content": "[Video: Emotional Dysregulation in ADHD (12:18)]\n\nADHD isn't just about attention - it often includes emotional dysregulation. Big emotions come fast and hard. Frustration flares instantly. Rejection feels devastating. This isn't a character flaw - it's a neurological feature. The prefrontal cortex, which manages impulse control and emotional regulation, develops differently in ADHD brains. Medication can help, but so can skills: recognizing early warning signs, building pause before reaction, self-compassion practices. Partners and colleagues can help by not taking outbursts personally and providing feedback when emotions have settled."
     },
     {
       "id": "evt_063",
       "type": "social_media_post",
-      "platform": "linkedin",
-      "date": "2024-06-10",
-      "content": "If your employee with ADHD is thriving in some areas and struggling in others, don't assume they're not trying. ADHD performance is often context-dependent. Ask what conditions help them do their best work, then create more of those conditions."
+      "timestamp": "2024-06-10T12:00:00.000Z",
+      "content": "If your employee with ADHD is thriving in some areas and struggling in others, don't assume they're not trying. ADHD performance is often context-dependent. Ask what conditions help them do their best work, then create more of those conditions.",
+      "source": "linkedin"
     },
     {
       "id": "evt_064",
       "type": "testimonial",
-      "source": "verified_client",
-      "date": "2024-06-12",
-      "content": "Dr. Chen helped me understand that my 'sensitivity' wasn't a weakness - it was part of my ADHD emotional regulation. That reframe alone changed everything. I'm not broken, my brain just works differently.",
-      "rating": 5
+      "timestamp": "2024-06-12T12:00:00.000Z",
+      "content": "Dr. Chen helped me understand that my 'sensitivity' wasn't a weakness - it was part of my ADHD emotional regulation. That reframe alone changed everything. I'm not broken, my brain just works differently. (Rating: 5/5)",
+      "source": "verified_client"
     },
     {
       "id": "evt_065",
       "type": "blog_post",
-      "title": "Why I Don't Just Give Advice",
-      "date": "2024-06-15",
-      "excerpt": "Clients sometimes want me to just tell them what to do. While I'm direct and do give recommendations, therapy is more than advice-giving. Here's why.",
-      "content": "If advice solved problems, you'd already be fixed - friends and family have been giving advice for free. The issue usually isn't not knowing what to do. It's something blocking you from doing it: fear, competing needs, past patterns, unconscious beliefs. Good therapy explores why you're stuck, not just what to do next. That said, I'm not purely non-directive. I teach skills, share observations, and sometimes give direct feedback. The key is collaboration: we figure out together what's blocking you and what might help."
+      "timestamp": "2024-06-15T12:00:00.000Z",
+      "content": "Why I Don't Just Give Advice\n\nIf advice solved problems, you'd already be fixed - friends and family have been giving advice for free. The issue usually isn't not knowing what to do. It's something blocking you from doing it: fear, competing needs, past patterns, unconscious beliefs. Good therapy explores why you're stuck, not just what to do next. That said, I'm not purely non-directive. I teach skills, share observations, and sometimes give direct feedback. The key is collaboration: we figure out together what's blocking you and what might help."
     },
     {
       "id": "evt_066",
       "type": "profile_faq",
-      "question": "Do you work with couples?",
-      "answer": "I primarily work with individuals, but I do see couples where ADHD is a significant relationship factor. These are typically existing individual clients who want to involve a partner in addressing ADHD-related relationship patterns. For couples without an ADHD component, I refer to colleagues who specialize in couples therapy."
+      "timestamp": "2024-01-01T00:00:00.000Z",
+      "content": "Q: Do you work with couples?\nA: I primarily work with individuals, but I do see couples where ADHD is a significant relationship factor. These are typically existing individual clients who want to involve a partner in addressing ADHD-related relationship patterns. For couples without an ADHD component, I refer to colleagues who specialize in couples therapy."
     },
     {
       "id": "evt_067",
       "type": "video_transcript",
-      "title": "The Research on Therapy Effectiveness",
-      "duration": "9:32",
-      "date": "2024-06-18",
-      "content": "Therapy works. Research consistently shows that therapy is effective for anxiety, depression, ADHD, and many other conditions - often as effective as medication, sometimes more so for long-term outcomes. But not all therapy is equal. Evidence-based approaches like CBT and ACT have the strongest support. The therapeutic relationship also matters enormously - feeling understood and respected by your therapist predicts outcomes more than the specific technique used. This is why fit is so important when choosing a therapist."
+      "timestamp": "2024-06-18T12:00:00.000Z",
+      "content": "[Video: The Research on Therapy Effectiveness (9:32)]\n\nTherapy works. Research consistently shows that therapy is effective for anxiety, depression, ADHD, and many other conditions - often as effective as medication, sometimes more so for long-term outcomes. But not all therapy is equal. Evidence-based approaches like CBT and ACT have the strongest support. The therapeutic relationship also matters enormously - feeling understood and respected by your therapist predicts outcomes more than the specific technique used. This is why fit is so important when choosing a therapist."
     },
     {
       "id": "evt_068",
       "type": "testimonial",
-      "source": "verified_client",
-      "date": "2024-06-20",
-      "content": "As a PM at a big tech company, I was skeptical about how much a therapist could understand my world. Dr. Chen gets it - the oncall stress, the constant context-switching, the politics. It made opening up so much easier.",
-      "rating": 5
+      "timestamp": "2024-06-20T12:00:00.000Z",
+      "content": "As a PM at a big tech company, I was skeptical about how much a therapist could understand my world. Dr. Chen gets it - the oncall stress, the constant context-switching, the politics. It made opening up so much easier. (Rating: 5/5)",
+      "source": "verified_client"
     },
     {
       "id": "evt_069",
       "type": "social_media_post",
-      "platform": "instagram",
-      "date": "2024-06-22",
-      "content": "Your feelings are always valid. Your actions aren't always justified. Both can be true. Validating emotions doesn't mean accepting all behavior. This distinction matters in therapy and in life."
+      "timestamp": "2024-06-22T12:00:00.000Z",
+      "content": "Your feelings are always valid. Your actions aren't always justified. Both can be true. Validating emotions doesn't mean accepting all behavior. This distinction matters in therapy and in life.",
+      "source": "instagram"
     },
     {
       "id": "evt_070",
       "type": "blog_post",
-      "title": "Executive Function: What It Is and Why It Matters",
-      "date": "2024-06-25",
-      "excerpt": "Executive function is like your brain's CEO. It handles planning, prioritizing, starting tasks, managing time, and regulating emotions. Weak executive function is the core of ADHD.",
-      "content": "Executive function skills include: working memory (holding information while using it), cognitive flexibility (switching between tasks or perspectives), and inhibition (controlling impulses). ADHD involves deficits in some or all of these areas. This is why ADHD isn't just about attention - it affects how you organize life itself. The good news: while you can't cure executive function deficits, you can build external systems that compensate. Calendars, reminders, routines, and accountability partners serve as external executive function. We're essentially creating scaffolding for a brain that doesn't self-scaffold as well."
+      "timestamp": "2024-06-25T12:00:00.000Z",
+      "content": "Executive Function: What It Is and Why It Matters\n\nExecutive function skills include: working memory (holding information while using it), cognitive flexibility (switching between tasks or perspectives), and inhibition (controlling impulses). ADHD involves deficits in some or all of these areas. This is why ADHD isn't just about attention - it affects how you organize life itself. The good news: while you can't cure executive function deficits, you can build external systems that compensate. Calendars, reminders, routines, and accountability partners serve as external executive function. We're essentially creating scaffolding for a brain that doesn't self-scaffold as well."
     },
     {
       "id": "evt_071",
       "type": "podcast_appearance",
-      "show": "ADHD Experts Podcast",
-      "episode": "ADHD in the Tech Industry",
-      "date": "2024-06-28",
-      "transcript_excerpt": "Host: Why do you think ADHD is so common in tech? Dr. Chen: Several factors. Tech jobs often reward ADHD strengths: creativity, problem-solving, hyperfocus on interesting challenges. The industry tends to be more accepting of neurodivergent styles. And frankly, the flexible schedules and project-based work can accommodate ADHD needs better than traditional 9-5 roles. But there's also selection bias - people with ADHD may gravitate toward tech precisely because it works better for them."
+      "timestamp": "2024-06-28T12:00:00.000Z",
+      "content": "[Podcast: ADHD Experts Podcast — ADHD in the Tech Industry]\n\nHost: Why do you think ADHD is so common in tech? Dr. Chen: Several factors. Tech jobs often reward ADHD strengths: creativity, problem-solving, hyperfocus on interesting challenges. The industry tends to be more accepting of neurodivergent styles. And frankly, the flexible schedules and project-based work can accommodate ADHD needs better than traditional 9-5 roles. But there's also selection bias - people with ADHD may gravitate toward tech precisely because it works better for them."
     },
     {
       "id": "evt_072",
       "type": "testimonial",
-      "source": "verified_client",
-      "date": "2024-06-30",
-      "content": "The ADHD assessment process with Dr. Chen was thorough but not overwhelming. She didn't just give me a label - she helped me understand exactly how my brain works and what to do about it.",
-      "rating": 5
+      "timestamp": "2024-06-30T12:00:00.000Z",
+      "content": "The ADHD assessment process with Dr. Chen was thorough but not overwhelming. She didn't just give me a label - she helped me understand exactly how my brain works and what to do about it. (Rating: 5/5)",
+      "source": "verified_client"
     },
     {
       "id": "evt_073",
       "type": "profile_education",
+      "timestamp": "2024-01-01T00:00:00.000Z",
       "content": "PhD in Clinical Psychology, University of California Berkeley. Predoctoral Internship: Stanford Hospital Department of Psychiatry. Postdoctoral Fellowship: UCSF Adult ADHD Clinic. Licensed Psychologist, California (#PSY 32145). Research publications on perfectionism, anxiety, and work stress in high-achieving populations."
     },
     {
       "id": "evt_074",
       "type": "blog_post",
-      "title": "When Anxiety Looks Like Anger",
-      "date": "2024-07-02",
-      "excerpt": "Anxiety doesn't always look like worry. Sometimes it shows up as irritability, impatience, or snapping at loved ones. Understanding anxiety's many faces helps us address it.",
-      "content": "Fight-flight-freeze: we talk about the last two, but fight is part of threat response too. When anxious, some people don't withdraw - they get activated, edgy, ready to fight. This can look like a short temper, impatience with others' pace, or conflict over small issues. If you notice you're more irritable during stressful periods, anxiety might be driving it. Addressing the underlying anxiety often calms the irritability. This is especially common in high-pressure work environments where showing fear isn't acceptable, but showing toughness is."
+      "timestamp": "2024-07-02T12:00:00.000Z",
+      "content": "When Anxiety Looks Like Anger\n\nFight-flight-freeze: we talk about the last two, but fight is part of threat response too. When anxious, some people don't withdraw - they get activated, edgy, ready to fight. This can look like a short temper, impatience with others' pace, or conflict over small issues. If you notice you're more irritable during stressful periods, anxiety might be driving it. Addressing the underlying anxiety often calms the irritability. This is especially common in high-pressure work environments where showing fear isn't acceptable, but showing toughness is."
     },
     {
       "id": "evt_075",
       "type": "video_transcript",
-      "title": "How I Approach New Clients",
-      "duration": "8:47",
-      "date": "2024-07-05",
-      "content": "When we first start working together, I want to understand your current situation, your history, and your goals. The first few sessions involve assessment - learning your patterns, your strengths, and what's not working. I'll share my initial impressions and we'll create a treatment plan together. From there, sessions are collaborative. We address immediate concerns while also working on deeper patterns. I assign homework between sessions - therapy isn't just what happens in this room. Progress depends on what you do the other 167 hours of the week."
+      "timestamp": "2024-07-05T12:00:00.000Z",
+      "content": "[Video: How I Approach New Clients (8:47)]\n\nWhen we first start working together, I want to understand your current situation, your history, and your goals. The first few sessions involve assessment - learning your patterns, your strengths, and what's not working. I'll share my initial impressions and we'll create a treatment plan together. From there, sessions are collaborative. We address immediate concerns while also working on deeper patterns. I assign homework between sessions - therapy isn't just what happens in this room. Progress depends on what you do the other 167 hours of the week."
     },
     {
       "id": "evt_076",
       "type": "testimonial",
-      "source": "verified_client",
-      "date": "2024-07-08",
-      "content": "I appreciate that Dr. Chen is Asian-American herself. It means I don't have to explain cultural context - she gets why my parents' expectations feel so heavy, why I can't 'just set boundaries' without guilt. That shared understanding speeds up the real work.",
-      "rating": 5
+      "timestamp": "2024-07-08T12:00:00.000Z",
+      "content": "I appreciate that Dr. Chen is Asian-American herself. It means I don't have to explain cultural context - she gets why my parents' expectations feel so heavy, why I can't 'just set boundaries' without guilt. That shared understanding speeds up the real work. (Rating: 5/5)",
+      "source": "verified_client"
     },
     {
       "id": "evt_077",
       "type": "social_media_post",
-      "platform": "linkedin",
-      "date": "2024-07-10",
-      "content": "Reminder for managers: feedback should be specific, timely, and behavioral. 'You're doing great' or 'you need to improve' isn't feedback - it's opinion without data. Tell me what specific behavior you want more or less of."
+      "timestamp": "2024-07-10T12:00:00.000Z",
+      "content": "Reminder for managers: feedback should be specific, timely, and behavioral. 'You're doing great' or 'you need to improve' isn't feedback - it's opinion without data. Tell me what specific behavior you want more or less of.",
+      "source": "linkedin"
     },
     {
       "id": "evt_078",
       "type": "blog_post",
-      "title": "Motivation Myths and ADHD Reality",
-      "date": "2024-07-12",
-      "excerpt": "If you have ADHD and struggle with motivation, you've probably been told you're lazy or unmotivated. The reality is more complex. ADHD brains aren't unmotivated - they're differently motivated.",
-      "content": "Neurotypical motivation works on importance: if something matters, you do it. ADHD motivation works on interest, novelty, urgency, and challenge. Important but boring tasks languish while new projects get hyperfocus attention. This isn't a character flaw - it's dopamine system differences. Strategies: Make boring tasks interesting (gamify), create urgency (artificial deadlines, body doubling), add novelty (change environment, add music), or stack with things you like. Don't fight your motivation system - work with it."
+      "timestamp": "2024-07-12T12:00:00.000Z",
+      "content": "Motivation Myths and ADHD Reality\n\nNeurotypical motivation works on importance: if something matters, you do it. ADHD motivation works on interest, novelty, urgency, and challenge. Important but boring tasks languish while new projects get hyperfocus attention. This isn't a character flaw - it's dopamine system differences. Strategies: Make boring tasks interesting (gamify), create urgency (artificial deadlines, body doubling), add novelty (change environment, add music), or stack with things you like. Don't fight your motivation system - work with it."
     },
     {
       "id": "evt_079",
       "type": "profile_specialties",
+      "timestamp": "2024-01-01T00:00:00.000Z",
       "content": "Primary specializations: Anxiety disorders (generalized anxiety, social anxiety, panic), Adult ADHD (diagnosis and treatment), Perfectionism and high-achiever challenges, Asian-American identity and cultural stress, Burnout and work-life balance. Secondary areas: Depression (especially high-functioning depression), Relationship patterns, Life transitions and career decisions."
     },
     {
       "id": "evt_080",
       "type": "video_transcript",
-      "title": "Anxiety vs. Anxiety Disorder",
-      "duration": "7:55",
-      "date": "2024-07-15",
-      "content": "Everyone experiences anxiety sometimes - it's a normal human emotion. Anxiety disorder is different: it's persistent, excessive, and interferes with daily functioning. Here's how to tell the difference: Frequency - are you anxious most days, not just occasionally? Intensity - is the anxiety proportional to the situation? Impairment - is anxiety stopping you from doing things you value? Duration - has this been going on for months? If you answered yes to several of these, you might have an anxiety disorder. The good news is that anxiety disorders are highly treatable."
+      "timestamp": "2024-07-15T12:00:00.000Z",
+      "content": "[Video: Anxiety vs. Anxiety Disorder (7:55)]\n\nEveryone experiences anxiety sometimes - it's a normal human emotion. Anxiety disorder is different: it's persistent, excessive, and interferes with daily functioning. Here's how to tell the difference: Frequency - are you anxious most days, not just occasionally? Intensity - is the anxiety proportional to the situation? Impairment - is anxiety stopping you from doing things you value? Duration - has this been going on for months? If you answered yes to several of these, you might have an anxiety disorder. The good news is that anxiety disorders are highly treatable."
     },
     {
       "id": "evt_081",
       "type": "testimonial",
-      "source": "verified_client",
-      "date": "2024-07-18",
-      "content": "Dr. Chen doesn't treat me like a diagnosis - she treats me like a whole person. Yes, I have ADHD and anxiety. But she also sees my strengths and helps me leverage them. That balanced view is rare.",
-      "rating": 5
+      "timestamp": "2024-07-18T12:00:00.000Z",
+      "content": "Dr. Chen doesn't treat me like a diagnosis - she treats me like a whole person. Yes, I have ADHD and anxiety. But she also sees my strengths and helps me leverage them. That balanced view is rare. (Rating: 5/5)",
+      "source": "verified_client"
     },
     {
       "id": "evt_082",
       "type": "social_media_post",
-      "platform": "instagram",
-      "date": "2024-07-20",
-      "content": "Your nervous system isn't trying to ruin your life. It's trying to protect you. The problem is it's using old programming for new situations. Therapy helps update the software."
+      "timestamp": "2024-07-20T12:00:00.000Z",
+      "content": "Your nervous system isn't trying to ruin your life. It's trying to protect you. The problem is it's using old programming for new situations. Therapy helps update the software.",
+      "source": "instagram"
     },
     {
       "id": "evt_083",
       "type": "blog_post",
-      "title": "The Cost of Masking",
-      "date": "2024-07-22",
-      "excerpt": "Many people with ADHD or anxiety learn to 'mask' - hide their symptoms to appear normal. While effective in the short term, masking has serious long-term costs.",
-      "content": "Masking takes enormous cognitive effort. Constantly monitoring yourself, compensating for deficits, pretending to be someone you're not - it's exhausting. Many clients come to me burned out not just from work, but from the effort of passing as neurotypical. In therapy, we explore when masking serves you and when it harms you. We identify safe spaces to drop the mask. We work on self-acceptance that reduces the need for masking. Some professional masking may always be necessary, but reducing it where possible frees up energy for the things that matter."
+      "timestamp": "2024-07-22T12:00:00.000Z",
+      "content": "The Cost of Masking\n\nMasking takes enormous cognitive effort. Constantly monitoring yourself, compensating for deficits, pretending to be someone you're not - it's exhausting. Many clients come to me burned out not just from work, but from the effort of passing as neurotypical. In therapy, we explore when masking serves you and when it harms you. We identify safe spaces to drop the mask. We work on self-acceptance that reduces the need for masking. Some professional masking may always be necessary, but reducing it where possible frees up energy for the things that matter."
     },
     {
       "id": "evt_084",
       "type": "podcast_appearance",
-      "show": "Mental Health @ Work",
-      "episode": "Supporting Neurodivergent Employees",
-      "date": "2024-07-25",
-      "transcript_excerpt": "Host: What accommodations help employees with ADHD? Dr. Chen: Start by asking them - everyone's different. Common helpful adjustments: flexible work hours, quiet workspace or noise-canceling headphones, written instructions rather than just verbal, breaking large projects into clear milestones, regular check-ins for accountability. Most of these are just good management practices that help everyone."
+      "timestamp": "2024-07-25T12:00:00.000Z",
+      "content": "[Podcast: Mental Health @ Work — Supporting Neurodivergent Employees]\n\nHost: What accommodations help employees with ADHD? Dr. Chen: Start by asking them - everyone's different. Common helpful adjustments: flexible work hours, quiet workspace or noise-canceling headphones, written instructions rather than just verbal, breaking large projects into clear milestones, regular check-ins for accountability. Most of these are just good management practices that help everyone."
     },
     {
       "id": "evt_085",
       "type": "testimonial",
-      "source": "verified_client",
-      "date": "2024-07-28",
-      "content": "Working with Dr. Chen changed my relationship with work. I used to think burnout was inevitable in my industry. Now I know how to set boundaries, manage energy, and actually enjoy my career again.",
-      "rating": 5
+      "timestamp": "2024-07-28T12:00:00.000Z",
+      "content": "Working with Dr. Chen changed my relationship with work. I used to think burnout was inevitable in my industry. Now I know how to set boundaries, manage energy, and actually enjoy my career again. (Rating: 5/5)",
+      "source": "verified_client"
     },
     {
       "id": "evt_086",
       "type": "profile_faq",
-      "question": "How do I know if I have ADHD or if I'm just stressed?",
-      "answer": "It's a great question, and sometimes hard to distinguish. Key differences: ADHD symptoms are present from childhood (even if undiagnosed), persist across situations, and aren't fully explained by stress. Stress-related concentration issues improve when stress decreases. A thorough assessment includes developmental history, standardized questionnaires, and sometimes cognitive testing. I can help you determine if a full evaluation is warranted."
+      "timestamp": "2024-01-01T00:00:00.000Z",
+      "content": "Q: How do I know if I have ADHD or if I'm just stressed?\nA: It's a great question, and sometimes hard to distinguish. Key differences: ADHD symptoms are present from childhood (even if undiagnosed), persist across situations, and aren't fully explained by stress. Stress-related concentration issues improve when stress decreases. A thorough assessment includes developmental history, standardized questionnaires, and sometimes cognitive testing. I can help you determine if a full evaluation is warranted."
     },
     {
       "id": "evt_087",
       "type": "video_transcript",
-      "title": "Building Sustainable Habits",
-      "duration": "11:24",
-      "date": "2024-07-30",
-      "content": "Habit-building is especially challenging with ADHD. The key is working with your brain, not against it. Start ridiculously small - tiny habits that feel almost too easy. Stack new habits onto existing routines - after I pour coffee, I take my medication. Use visual cues and make the habit convenient. Build in accountability - apps, friends, or me. Expect inconsistency and don't shame yourself - just restart. Most importantly, find habits that create immediate positive feedback. Delayed rewards don't motivate ADHD brains."
+      "timestamp": "2024-07-30T12:00:00.000Z",
+      "content": "[Video: Building Sustainable Habits (11:24)]\n\nHabit-building is especially challenging with ADHD. The key is working with your brain, not against it. Start ridiculously small - tiny habits that feel almost too easy. Stack new habits onto existing routines - after I pour coffee, I take my medication. Use visual cues and make the habit convenient. Build in accountability - apps, friends, or me. Expect inconsistency and don't shame yourself - just restart. Most importantly, find habits that create immediate positive feedback. Delayed rewards don't motivate ADHD brains."
     },
     {
       "id": "evt_088",
       "type": "social_media_post",
-      "platform": "linkedin",
-      "date": "2024-08-02",
-      "content": "Vulnerability isn't weakness. It takes strength to admit you're struggling, to ask for help, to show up imperfectly. The performative confidence culture in tech makes this hard. But authentic leadership requires some vulnerability."
+      "timestamp": "2024-08-02T12:00:00.000Z",
+      "content": "Vulnerability isn't weakness. It takes strength to admit you're struggling, to ask for help, to show up imperfectly. The performative confidence culture in tech makes this hard. But authentic leadership requires some vulnerability.",
+      "source": "linkedin"
     },
     {
       "id": "evt_089",
       "type": "testimonial",
-      "source": "verified_client",
-      "date": "2024-08-05",
-      "content": "I was worried therapy would mean hours of talking about my childhood. Dr. Chen is much more practical. Yes, we discussed my past, but mostly we focus on present challenges and actionable strategies. I leave sessions with things to try.",
-      "rating": 5
+      "timestamp": "2024-08-05T12:00:00.000Z",
+      "content": "I was worried therapy would mean hours of talking about my childhood. Dr. Chen is much more practical. Yes, we discussed my past, but mostly we focus on present challenges and actionable strategies. I leave sessions with things to try. (Rating: 5/5)",
+      "source": "verified_client"
     },
     {
       "id": "evt_090",
       "type": "blog_post",
-      "title": "The Inner Critic: Understanding Self-Criticism",
-      "date": "2024-08-08",
-      "excerpt": "That voice in your head that tells you you're not good enough - where did it come from and what can you do about it?",
-      "content": "The inner critic often develops as a protective mechanism. If I criticize myself first, I can prevent criticism from others. If I set impossibly high standards, I ensure I never become complacent. The critic thinks it's helping. The problem is, the critic doesn't know when to stop. It generalizes single failures to global worthlessness. It uses past mistakes to predict future catastrophe. In therapy, we don't try to silence the critic - that usually backfires. Instead, we develop a different relationship with it. We recognize when it's speaking, acknowledge its intention, and choose whether to follow its advice."
+      "timestamp": "2024-08-08T12:00:00.000Z",
+      "content": "The Inner Critic: Understanding Self-Criticism\n\nThe inner critic often develops as a protective mechanism. If I criticize myself first, I can prevent criticism from others. If I set impossibly high standards, I ensure I never become complacent. The critic thinks it's helping. The problem is, the critic doesn't know when to stop. It generalizes single failures to global worthlessness. It uses past mistakes to predict future catastrophe. In therapy, we don't try to silence the critic - that usually backfires. Instead, we develop a different relationship with it. We recognize when it's speaking, acknowledge its intention, and choose whether to follow its advice."
     },
     {
       "id": "evt_091",
       "type": "profile_rates",
+      "timestamp": "2024-01-01T00:00:00.000Z",
       "content": "Individual therapy: $300 per 50-minute session. ADHD assessment: $1,500 (includes interview, testing, report, and feedback session). I offer a limited number of reduced-fee spots and provide superbills for insurance reimbursement. Investment in mental health often provides significant return through improved work performance, relationships, and well-being."
     },
     {
       "id": "evt_092",
       "type": "video_transcript",
-      "title": "Therapy Myths Debunked",
-      "duration": "10:15",
-      "date": "2024-08-10",
-      "content": "Myth: Therapy is just paying someone to listen. Reality: Good therapy involves active skill-building, pattern identification, and collaborative problem-solving. Myth: Therapy takes years. Reality: Many issues improve in months; longer treatment is for deeper patterns. Myth: Therapists judge you. Reality: We're trained to be non-judgmental. I've heard it all and my job is to understand, not evaluate. Myth: Therapy means you're broken. Reality: High-performers often benefit most because they're intentional about growth."
+      "timestamp": "2024-08-10T12:00:00.000Z",
+      "content": "[Video: Therapy Myths Debunked (10:15)]\n\nMyth: Therapy is just paying someone to listen. Reality: Good therapy involves active skill-building, pattern identification, and collaborative problem-solving. Myth: Therapy takes years. Reality: Many issues improve in months; longer treatment is for deeper patterns. Myth: Therapists judge you. Reality: We're trained to be non-judgmental. I've heard it all and my job is to understand, not evaluate. Myth: Therapy means you're broken. Reality: High-performers often benefit most because they're intentional about growth."
     },
     {
       "id": "evt_093",
       "type": "testimonial",
-      "source": "verified_client",
-      "date": "2024-08-12",
-      "content": "The combination of understanding ADHD AND the tech world is what makes Dr. Chen special. She doesn't suggest I 'just use a planner' - she knows I've tried that. We find solutions that actually fit my life.",
-      "rating": 5
+      "timestamp": "2024-08-12T12:00:00.000Z",
+      "content": "The combination of understanding ADHD AND the tech world is what makes Dr. Chen special. She doesn't suggest I 'just use a planner' - she knows I've tried that. We find solutions that actually fit my life. (Rating: 5/5)",
+      "source": "verified_client"
     },
     {
       "id": "evt_094",
       "type": "social_media_post",
-      "platform": "instagram",
-      "date": "2024-08-15",
-      "content": "Unpopular opinion: 'self-care' has been commodified into another productivity hack. True self-care isn't bubble baths and face masks. It's honoring your limits, setting boundaries, and making decisions that align with your values - even when they're hard."
+      "timestamp": "2024-08-15T12:00:00.000Z",
+      "content": "Unpopular opinion: 'self-care' has been commodified into another productivity hack. True self-care isn't bubble baths and face masks. It's honoring your limits, setting boundaries, and making decisions that align with your values - even when they're hard.",
+      "source": "instagram"
     },
     {
       "id": "evt_095",
       "type": "blog_post",
-      "title": "RSD: The ADHD Symptom Nobody Talks About",
-      "date": "2024-08-18",
-      "excerpt": "Rejection Sensitive Dysphoria (RSD) is intense emotional pain triggered by perceived rejection. It's not officially in the DSM, but most adults with ADHD know exactly what it is.",
-      "content": "RSD can feel like a sudden wave of overwhelming distress when you perceive criticism or rejection - even if it's not real. A friend's delayed text response. A manager's neutral feedback. An invitation you weren't included in. The pain is real and intense. RSD isn't about being 'too sensitive' - it's a neurological difference in how ADHD brains process rejection. Strategies: Recognize it as RSD, not reality. Build in time before reacting. Practice self-compassion. Challenge cognitive distortions. Consider medication if severe."
+      "timestamp": "2024-08-18T12:00:00.000Z",
+      "content": "RSD: The ADHD Symptom Nobody Talks About\n\nRSD can feel like a sudden wave of overwhelming distress when you perceive criticism or rejection - even if it's not real. A friend's delayed text response. A manager's neutral feedback. An invitation you weren't included in. The pain is real and intense. RSD isn't about being 'too sensitive' - it's a neurological difference in how ADHD brains process rejection. Strategies: Recognize it as RSD, not reality. Build in time before reacting. Practice self-compassion. Challenge cognitive distortions. Consider medication if severe."
     },
     {
       "id": "evt_096",
       "type": "podcast_appearance",
-      "show": "The Psychology Podcast",
-      "episode": "High-Functioning Anxiety",
-      "date": "2024-08-20",
-      "transcript_excerpt": "Host: What is high-functioning anxiety? Dr. Chen: It's anxiety that fuels achievement rather than paralysis. The person looks successful on the outside while struggling internally. They might never miss a deadline but also never feel at ease. The problem is that 'high-functioning' masks the suffering. People don't get help because they don't look like they need it."
+      "timestamp": "2024-08-20T12:00:00.000Z",
+      "content": "[Podcast: The Psychology Podcast — High-Functioning Anxiety]\n\nHost: What is high-functioning anxiety? Dr. Chen: It's anxiety that fuels achievement rather than paralysis. The person looks successful on the outside while struggling internally. They might never miss a deadline but also never feel at ease. The problem is that 'high-functioning' masks the suffering. People don't get help because they don't look like they need it."
     },
     {
       "id": "evt_097",
       "type": "testimonial",
-      "source": "verified_client",
-      "date": "2024-08-22",
-      "content": "Finally finding a therapist who understands what it's like to be an Asian woman in tech - the cultural pressures, the workplace dynamics, the imposter syndrome - has been invaluable. Dr. Chen gets it without me having to explain.",
-      "rating": 5
+      "timestamp": "2024-08-22T12:00:00.000Z",
+      "content": "Finally finding a therapist who understands what it's like to be an Asian woman in tech - the cultural pressures, the workplace dynamics, the imposter syndrome - has been invaluable. Dr. Chen gets it without me having to explain. (Rating: 5/5)",
+      "source": "verified_client"
     },
     {
       "id": "evt_098",
       "type": "profile_consultation",
+      "timestamp": "2024-01-01T00:00:00.000Z",
       "content": "I offer free 15-minute phone consultations to discuss whether we might be a good fit. This isn't therapy - it's a chance to ask questions, share a brief overview of what you're looking for, and get a sense of my style. You can schedule through my website or email me directly at dr.chen@example.com."
     },
     {
       "id": "evt_099",
       "type": "video_transcript",
-      "title": "Final Thoughts: You're Not Broken",
-      "duration": "6:33",
-      "date": "2024-08-25",
-      "content": "If there's one thing I want you to take away, it's this: You're not broken. Having anxiety doesn't make you weak. Having ADHD doesn't make you lazy. Struggling with perfectionism doesn't make you ungrateful. You're a human being dealing with real challenges in a demanding world. The goal of therapy isn't to 'fix' you - it's to help you understand yourself, develop skills, and live in alignment with your values. You deserve support. You deserve compassion. And you're capable of far more growth than you might believe right now."
+      "timestamp": "2024-08-25T12:00:00.000Z",
+      "content": "[Video: Final Thoughts: You're Not Broken (6:33)]\n\nIf there's one thing I want you to take away, it's this: You're not broken. Having anxiety doesn't make you weak. Having ADHD doesn't make you lazy. Struggling with perfectionism doesn't make you ungrateful. You're a human being dealing with real challenges in a demanding world. The goal of therapy isn't to 'fix' you - it's to help you understand yourself, develop skills, and live in alignment with your values. You deserve support. You deserve compassion. And you're capable of far more growth than you might believe right now."
     },
     {
       "id": "evt_100",
       "type": "testimonial",
-      "source": "verified_client",
-      "date": "2024-08-28",
-      "content": "Two years working with Dr. Chen has transformed how I relate to myself. I still have ADHD and anxiety, but they don't define me anymore. I have tools, I have understanding, and most importantly, I have self-compassion. Worth every penny.",
-      "rating": 5
+      "timestamp": "2024-08-28T12:00:00.000Z",
+      "content": "Two years working with Dr. Chen has transformed how I relate to myself. I still have ADHD and anxiety, but they don't define me anymore. I have tools, I have understanding, and most importantly, I have self-compassion. Worth every penny. (Rating: 5/5)",
+      "source": "verified_client"
     },
     {
       "id": "evt_101",
       "type": "social_media_post",
-      "platform": "linkedin",
-      "date": "2024-08-30",
-      "content": "To the person who just got diagnosed with ADHD as an adult: It's okay to grieve what might have been different. It's also okay to feel relieved. Both are valid. What matters now is using this understanding to build a life that works for you."
+      "timestamp": "2024-08-30T12:00:00.000Z",
+      "content": "To the person who just got diagnosed with ADHD as an adult: It's okay to grieve what might have been different. It's also okay to feel relieved. Both are valid. What matters now is using this understanding to build a life that works for you.",
+      "source": "linkedin"
     },
     {
       "id": "evt_102",
       "type": "blog_post",
-      "title": "Finding the Right Therapist: A Practical Guide",
-      "date": "2024-09-02",
-      "excerpt": "Not every therapist is right for every person. Here's how to find someone who's a good fit for you.",
-      "content": "First, know what you need. Are you looking for someone who shares your identity or background? Do you want skills-based work or deeper exploration? Are there specific modalities you're interested in (CBT, ACT, psychodynamic)? Second, do your research. Read therapist profiles, bios, and any content they've shared. Does their approach resonate? Third, try consultations. Most therapists offer brief calls. Use them. Pay attention to how you feel talking to them. Fourth, give it a few sessions. It takes time to build rapport. But if after 4-6 sessions you don't feel understood or aren't learning anything, it's okay to find someone else."
+      "timestamp": "2024-09-02T12:00:00.000Z",
+      "content": "Finding the Right Therapist: A Practical Guide\n\nFirst, know what you need. Are you looking for someone who shares your identity or background? Do you want skills-based work or deeper exploration? Are there specific modalities you're interested in (CBT, ACT, psychodynamic)? Second, do your research. Read therapist profiles, bios, and any content they've shared. Does their approach resonate? Third, try consultations. Most therapists offer brief calls. Use them. Pay attention to how you feel talking to them. Fourth, give it a few sessions. It takes time to build rapport. But if after 4-6 sessions you don't feel understood or aren't learning anything, it's okay to find someone else."
     },
     {
       "id": "evt_103",
       "type": "testimonial",
-      "source": "verified_client",
-      "date": "2024-09-05",
-      "content": "Dr. Chen's approach to perfectionism literally saved my career. I was on the verge of burnout because I could never be 'good enough.' Learning to tolerate imperfection - in myself and my work - was uncomfortable but necessary.",
-      "rating": 5
+      "timestamp": "2024-09-05T12:00:00.000Z",
+      "content": "Dr. Chen's approach to perfectionism literally saved my career. I was on the verge of burnout because I could never be 'good enough.' Learning to tolerate imperfection - in myself and my work - was uncomfortable but necessary. (Rating: 5/5)",
+      "source": "verified_client"
     },
     {
       "id": "evt_104",
       "type": "profile_location",
+      "timestamp": "2024-01-01T00:00:00.000Z",
       "content": "Office located in the Financial District of San Francisco, easily accessible by BART and Muni. Private waiting area with comfortable seating. For clients who prefer remote sessions, I use a secure, HIPAA-compliant video platform. Most clients choose a mix of in-person and video depending on their schedule."
     },
     {
       "id": "evt_105",
       "type": "social_media_post",
-      "platform": "instagram",
-      "date": "2024-09-08",
-      "content": "You don't have to be positive all the time. You don't have to be productive all the time. You don't have to be available all the time. You're a human being, not a human doing."
+      "timestamp": "2024-09-08T12:00:00.000Z",
+      "content": "You don't have to be positive all the time. You don't have to be productive all the time. You don't have to be available all the time. You're a human being, not a human doing.",
+      "source": "instagram"
     },
     {
       "id": "evt_106",
       "type": "blog_post",
-      "title": "One Year In Review: What I've Learned from My Clients",
-      "date": "2024-09-10",
-      "excerpt": "As a therapist, I'm always learning from the people I work with. Here are some insights from the past year of practice.",
-      "content": "My clients consistently remind me that: 1) Humans are more resilient than they believe. 2) Small changes compound into big transformations. 3) Understanding 'why' is helpful, but behavior change requires practice. 4) Medication isn't a magic bullet, but it can provide crucial support. 5) Cultural context matters enormously - therapy that ignores it fails people. 6) High achievement and deep suffering often coexist. 7) The therapeutic relationship matters more than any technique. I'm grateful for the trust my clients place in me."
+      "timestamp": "2024-09-10T12:00:00.000Z",
+      "content": "One Year In Review: What I've Learned from My Clients\n\nMy clients consistently remind me that: 1) Humans are more resilient than they believe. 2) Small changes compound into big transformations. 3) Understanding 'why' is helpful, but behavior change requires practice. 4) Medication isn't a magic bullet, but it can provide crucial support. 5) Cultural context matters enormously - therapy that ignores it fails people. 6) High achievement and deep suffering often coexist. 7) The therapeutic relationship matters more than any technique. I'm grateful for the trust my clients place in me."
     },
     {
       "id": "evt_107",
       "type": "testimonial",
-      "source": "verified_client",
-      "date": "2024-09-12",
-      "content": "Started seeing Dr. Chen for anxiety, ended up addressing ADHD I didn't know I had. The anxiety was partially a compensation strategy. Now that I understand my brain better, both are more manageable.",
-      "rating": 5
+      "timestamp": "2024-09-12T12:00:00.000Z",
+      "content": "Started seeing Dr. Chen for anxiety, ended up addressing ADHD I didn't know I had. The anxiety was partially a compensation strategy. Now that I understand my brain better, both are more manageable. (Rating: 5/5)",
+      "source": "verified_client"
     },
     {
       "id": "evt_108",
       "type": "video_transcript",
-      "title": "To New Clients: What to Expect",
-      "duration": "5:45",
-      "date": "2024-09-15",
-      "content": "If we decide to work together, here's what to expect. Our first few sessions focus on understanding your situation, history, and goals. I'll share my initial impressions and we'll create a plan together. Sessions are collaborative - I'll teach skills, ask challenging questions, and sometimes give direct feedback. I assign homework because change happens between sessions. Progress isn't linear - expect ups and downs. And remember: therapy is confidential. What we discuss stays between us, with limited exceptions for safety."
+      "timestamp": "2024-09-15T12:00:00.000Z",
+      "content": "[Video: To New Clients: What to Expect (5:45)]\n\nIf we decide to work together, here's what to expect. Our first few sessions focus on understanding your situation, history, and goals. I'll share my initial impressions and we'll create a plan together. Sessions are collaborative - I'll teach skills, ask challenging questions, and sometimes give direct feedback. I assign homework because change happens between sessions. Progress isn't linear - expect ups and downs. And remember: therapy is confidential. What we discuss stays between us, with limited exceptions for safety."
     },
     {
       "id": "evt_109",
       "type": "social_media_post",
-      "platform": "linkedin",
-      "date": "2024-09-18",
-      "content": "Mental health awareness shouldn't just be hashtags in May. It should be: adequate mental health coverage in insurance plans, reasonable workloads that don't cause burnout, managers trained to recognize and support struggling employees, and reducing stigma so people actually seek help."
+      "timestamp": "2024-09-18T12:00:00.000Z",
+      "content": "Mental health awareness shouldn't just be hashtags in May. It should be: adequate mental health coverage in insurance plans, reasonable workloads that don't cause burnout, managers trained to recognize and support struggling employees, and reducing stigma so people actually seek help.",
+      "source": "linkedin"
     },
     {
       "id": "evt_110",
       "type": "testimonial",
-      "source": "verified_client",
-      "date": "2024-09-20",
-      "content": "I've recommended Dr. Chen to several friends now. Her combination of warmth and directness is unique. She makes you feel accepted AND challenged to grow. That balance is hard to find.",
-      "rating": 5
+      "timestamp": "2024-09-20T12:00:00.000Z",
+      "content": "I've recommended Dr. Chen to several friends now. Her combination of warmth and directness is unique. She makes you feel accepted AND challenged to grow. That balance is hard to find. (Rating: 5/5)",
+      "source": "verified_client"
     },
     {
       "id": "evt_111",
       "type": "blog_post",
-      "title": "When Therapy Isn't Enough",
-      "date": "2024-09-22",
-      "excerpt": "Therapy is powerful, but it's not the only tool. Sometimes you also need medication, lifestyle changes, or systemic support. Here's how I think about integrated treatment.",
-      "content": "Therapy addresses thoughts, emotions, and behaviors. But mental health is also affected by: biology (where medication may help), lifestyle (sleep, exercise, nutrition), environment (toxic relationships, impossible jobs), and systems (discrimination, poverty). If therapy alone isn't working, we explore other factors. Maybe you need a psychiatry consult. Maybe you need to address work-life balance. Maybe the relationship you're in is making everything harder. Good treatment is comprehensive, not just one modality."
+      "timestamp": "2024-09-22T12:00:00.000Z",
+      "content": "When Therapy Isn't Enough\n\nTherapy addresses thoughts, emotions, and behaviors. But mental health is also affected by: biology (where medication may help), lifestyle (sleep, exercise, nutrition), environment (toxic relationships, impossible jobs), and systems (discrimination, poverty). If therapy alone isn't working, we explore other factors. Maybe you need a psychiatry consult. Maybe you need to address work-life balance. Maybe the relationship you're in is making everything harder. Good treatment is comprehensive, not just one modality."
     },
     {
       "id": "evt_112",
       "type": "profile_updates",
+      "timestamp": "2024-01-01T00:00:00.000Z",
       "content": "Follow my blog for articles on anxiety, ADHD, perfectionism, and Asian-American mental health. Subscribe to my newsletter for occasional updates and mental health tips. Connect on LinkedIn for professional content. I share practical insights, research summaries, and perspectives on navigating mental health in demanding careers."
     },
     {
       "id": "evt_113",
       "type": "testimonial",
-      "source": "verified_client",
-      "date": "2024-09-25",
-      "content": "Dr. Chen helped me prepare for my first time managing people. We worked on imposter syndrome, assertive communication, and handling difficult conversations. My anxiety didn't disappear, but I learned to lead despite it.",
-      "rating": 5
+      "timestamp": "2024-09-25T12:00:00.000Z",
+      "content": "Dr. Chen helped me prepare for my first time managing people. We worked on imposter syndrome, assertive communication, and handling difficult conversations. My anxiety didn't disappear, but I learned to lead despite it. (Rating: 5/5)",
+      "source": "verified_client"
     },
     {
       "id": "evt_114",
       "type": "social_media_post",
-      "platform": "instagram",
-      "date": "2024-09-28",
-      "content": "Growth isn't always visible. Sometimes progress looks like: choosing not to react, setting a boundary quietly, feeling a feeling without drowning in it, or getting back up one more time. Celebrate the invisible wins."
+      "timestamp": "2024-09-28T12:00:00.000Z",
+      "content": "Growth isn't always visible. Sometimes progress looks like: choosing not to react, setting a boundary quietly, feeling a feeling without drowning in it, or getting back up one more time. Celebrate the invisible wins.",
+      "source": "instagram"
     },
     {
       "id": "evt_115",
       "type": "blog_post",
-      "title": "Thank You: A Note to My Clients",
-      "date": "2024-09-30",
-      "excerpt": "As another year wraps up, I want to express gratitude to the people who've trusted me with their most vulnerable moments.",
-      "content": "Being a therapist is a privilege. You show up, week after week, and do the hard work of growth. You share things you've never told anyone. You try new things even when they feel scary. You challenge yourself even when it's uncomfortable. I'm continually inspired by your courage. Thank you for trusting me. Thank you for your honesty. Thank you for doing the work. The world needs more people committed to their own growth. You're making it better."
+      "timestamp": "2024-09-30T12:00:00.000Z",
+      "content": "Thank You: A Note to My Clients\n\nBeing a therapist is a privilege. You show up, week after week, and do the hard work of growth. You share things you've never told anyone. You try new things even when they feel scary. You challenge yourself even when it's uncomfortable. I'm continually inspired by your courage. Thank you for trusting me. Thank you for your honesty. Thank you for doing the work. The world needs more people committed to their own growth. You're making it better."
     },
     {
       "id": "evt_116",
       "type": "testimonial",
-      "source": "verified_client",
-      "date": "2024-10-02",
-      "content": "Finding Dr. Chen was a turning point in my life. Not because she 'fixed' me, but because she helped me understand and accept myself while still growing. I'm not perfect, but I'm okay with that now.",
-      "rating": 5
+      "timestamp": "2024-10-02T12:00:00.000Z",
+      "content": "Finding Dr. Chen was a turning point in my life. Not because she 'fixed' me, but because she helped me understand and accept myself while still growing. I'm not perfect, but I'm okay with that now. (Rating: 5/5)",
+      "source": "verified_client"
     },
     {
       "id": "evt_117",
       "type": "profile_philosophy",
+      "timestamp": "2024-01-01T00:00:00.000Z",
       "content": "I believe therapy should be collaborative, practical, and culturally informed. I don't have all the answers - you're the expert on your life. My job is to provide evidence-based tools, honest feedback, and a space where you can explore without judgment. I believe in the capacity for change, the importance of self-compassion, and the value of doing hard things for meaningful goals."
     },
     {
       "id": "evt_118",
       "type": "social_media_post",
-      "platform": "linkedin",
-      "date": "2024-10-05",
-      "content": "If you're considering therapy but aren't sure, just try one session. A good therapist won't pressure you to commit. That single session might give you insight, tools, or just clarity about what you actually need. You can always decide afterward."
+      "timestamp": "2024-10-05T12:00:00.000Z",
+      "content": "If you're considering therapy but aren't sure, just try one session. A good therapist won't pressure you to commit. That single session might give you insight, tools, or just clarity about what you actually need. You can always decide afterward.",
+      "source": "linkedin"
     },
     {
       "id": "evt_119",
       "type": "testimonial",
-      "source": "verified_client",
-      "date": "2024-10-08",
-      "content": "Dr. Chen helped me navigate the most difficult period of my career - a layoff, job search, and starting at a new company. Her practical approach and emotional support made an impossible time manageable.",
-      "rating": 5
+      "timestamp": "2024-10-08T12:00:00.000Z",
+      "content": "Dr. Chen helped me navigate the most difficult period of my career - a layoff, job search, and starting at a new company. Her practical approach and emotional support made an impossible time manageable. (Rating: 5/5)",
+      "source": "verified_client"
     },
     {
       "id": "evt_120",
       "type": "profile_closing",
+      "timestamp": "2024-01-01T00:00:00.000Z",
       "content": "If you're struggling with anxiety, ADHD, perfectionism, or navigating cultural identity, I'd be honored to work with you. Reach out for a free consultation to see if we're a good fit. Change is possible. You don't have to figure this out alone."
     }
   ]

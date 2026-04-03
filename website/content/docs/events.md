@@ -3,6 +3,8 @@ title: Events
 description: Event system, subscription patterns, and complete event reference.
 ---
 
+Brain and its neurons emit events at every stage of the pipeline — observation, synthesis, querying, evolution, and more. You can subscribe to these events to build real-time UIs, trigger side effects (like notifying a user when something important is learned), debug pipeline behavior, or forward events to external systems.
+
 ## Subscribing
 
 ```typescript
@@ -21,6 +23,8 @@ Neuron events are automatically forwarded through Brain — subscribe on Brain, 
 
 ### Forwarding to a UI
 
+Events are useful for building real-time interfaces — showing users what the Brain is doing as it processes data:
+
 ```typescript
 // Forward all brain events to an Electron renderer
 brain.on((event) => {
@@ -31,7 +35,11 @@ brain.on((event) => {
 })
 ```
 
+See [Recipes — SSE Event Broadcasting](./recipes#sse-event-broadcasting) for a server-sent events example.
+
 ## Event Reference
+
+Events are grouped by phase. The most commonly used events are `neuron:synthesized` (a neuron updated its knowledge), `brain:ask:completed` (a query finished), and `evaluator:evaluation:completed` (the evolution system made decisions).
 
 ### Brain Events
 
@@ -61,4 +69,4 @@ brain.on((event) => {
 
 ### Thinking Events
 
-`neuron:observe:thinking`, `neuron:synthesize:thinking`, and `neuron:query:thinking` fire when the LLM produces intermediate reasoning. Payload includes `thoughts: string[]` and `usage: TokenUsage`. Useful for debugging and real-time UI feedback.
+`neuron:observe:thinking`, `neuron:synthesize:thinking`, and `neuron:query:thinking` fire when the LLM produces intermediate reasoning. Payload includes `thoughts: string[]` and `usage: TokenUsage`. These are useful for two things: debugging (seeing *why* a neuron made a decision) and real-time UI feedback (streaming the neuron's thought process to users).

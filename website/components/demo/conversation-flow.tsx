@@ -45,6 +45,13 @@ export function ConversationFlow({ onStart }: Props) {
 		}, 800)
 	}, [selectedUseCase, prompt, started, onStart])
 
+	const handleBack = useCallback(() => {
+		setRevealDone(false)
+		setStep("pick")
+	}, [])
+
+	const activeStepIndex = step === "pick" ? 0 : 1
+
 
 
 	return (
@@ -52,9 +59,11 @@ export function ConversationFlow({ onStart }: Props) {
 			width: "100%",
 			height: "100%",
 			display: "flex",
+			flexDirection: "column",
 			justifyContent: "center",
 			alignItems: "center",
 			paddingBottom: "8vh",
+			gap: "1.5rem",
 		}}>
 			<div style={{
 				width: "100%",
@@ -196,26 +205,51 @@ export function ConversationFlow({ onStart }: Props) {
 								display: "flex",
 								justifyContent: "flex-end",
 								alignItems: "center",
+								gap: "0.5rem",
 							}}>
+								<button
+									type="button"
+									onClick={handleBack}
+									style={{
+										background: "none",
+										border: "none",
+										padding: "0.35rem 0.5rem",
+										cursor: "pointer",
+										fontSize: "0.7rem",
+										fontFamily: mono,
+										color: "#9b9ba8",
+										transition: "color 0.15s",
+									}}
+									onMouseEnter={(e) => {
+										e.currentTarget.style.color = "#1a1a1f"
+									}}
+									onMouseLeave={(e) => {
+										e.currentTarget.style.color = "#9b9ba8"
+									}}
+								>
+									← Back
+								</button>
 								<button
 									type="button"
 									onClick={handleStart}
 									style={{
-										background: "none",
-										border: "1px solid rgba(26, 26, 31, 0.12)",
+										background: "#1a1a1f",
+										border: "1px solid #1a1a1f",
 										borderRadius: 5,
-										padding: "0.3rem 0.75rem",
+										padding: "0.35rem 0.9rem",
 										cursor: "pointer",
 										fontSize: "0.7rem",
 										fontFamily: mono,
-										color: "#1a1a1f",
-										transition: "background 0.15s",
+										color: "#fff",
+										transition: "background 0.15s, border-color 0.15s",
 									}}
 									onMouseEnter={(e) => {
-										e.currentTarget.style.background = "rgba(26, 26, 31, 0.04)"
+										e.currentTarget.style.background = "#000"
+										e.currentTarget.style.borderColor = "#000"
 									}}
 									onMouseLeave={(e) => {
-										e.currentTarget.style.background = "none"
+										e.currentTarget.style.background = "#1a1a1f"
+										e.currentTarget.style.borderColor = "#1a1a1f"
 									}}
 								>
 									Start
@@ -252,6 +286,26 @@ export function ConversationFlow({ onStart }: Props) {
 					</div>
 				)}
 			</div>
+			{step !== "starting" && (
+				<div style={{
+					display: "flex",
+					gap: "0.5rem",
+					alignItems: "center",
+				}}>
+					{[0, 1].map((i) => (
+						<span
+							key={i}
+							style={{
+								width: i === activeStepIndex ? 18 : 6,
+								height: 6,
+								borderRadius: 3,
+								background: i === activeStepIndex ? "#1a1a1f" : "rgba(26, 26, 31, 0.18)",
+								transition: "width 0.25s ease, background 0.25s ease",
+							}}
+						/>
+					))}
+				</div>
+			)}
 		</div>
 	)
 }

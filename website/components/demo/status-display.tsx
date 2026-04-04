@@ -29,6 +29,8 @@ export function StatusDisplay({ activity, commentary, injectionProgress }: Props
 		? injectionProgress.batchIndex / injectionProgress.batchCount
 		: 0
 
+	const showActivitySpinner = activity !== "" && activity !== "Ready" && activity !== "Brain ready" && activity !== "Injection complete"
+
 	return (
 		<div style={{
 			position: "fixed",
@@ -51,13 +53,16 @@ export function StatusDisplay({ activity, commentary, injectionProgress }: Props
 					<div style={{
 						display: "flex",
 						justifyContent: "space-between",
-						alignItems: "baseline",
+						alignItems: "center",
 						fontFamily: mono,
 						fontSize: "0.72rem",
 						color: "#6b6b78",
 						lineHeight: 1.6,
 					}}>
-						<span>Injecting {injectionProgress.sourceLabel}</span>
+						<span style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem" }}>
+							<Spinner />
+							Injecting {injectionProgress.sourceLabel}
+						</span>
 						{injectionProgress.batchCount > 0 && (
 							<span style={{ color: "#9b9ba8", fontSize: "0.65rem" }}>
 								{injectionProgress.batchIndex}/{injectionProgress.batchCount}
@@ -116,7 +121,11 @@ export function StatusDisplay({ activity, commentary, injectionProgress }: Props
 					fontFamily: mono,
 					color: "#9b9ba8",
 					letterSpacing: "0.04em",
+					display: "inline-flex",
+					alignItems: "center",
+					gap: "0.5rem",
 				}}>
+					{showActivitySpinner && <Spinner />}
 					{activity}
 				</div>
 			)}
@@ -141,5 +150,25 @@ export function StatusDisplay({ activity, commentary, injectionProgress }: Props
 				</div>
 			)}
 		</div>
+	)
+}
+
+function Spinner() {
+	return (
+		<>
+			<style>{`@keyframes status-spin { to { transform: rotate(360deg); } }`}</style>
+			<span
+				style={{
+					width: 10,
+					height: 10,
+					borderRadius: "50%",
+					border: "1.5px solid rgba(26, 26, 31, 0.15)",
+					borderTopColor: "rgba(26, 26, 31, 0.55)",
+					display: "inline-block",
+					animation: "status-spin 0.8s linear infinite",
+					flexShrink: 0,
+				}}
+			/>
+		</>
 	)
 }

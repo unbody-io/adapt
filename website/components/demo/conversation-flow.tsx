@@ -28,7 +28,7 @@ export function ConversationFlow({ onStart }: Props) {
 
 	const handleSelect = useCallback((uc: UseCase) => {
 		setSelectedUseCase(uc)
-		setPrompt(uc.prompt)
+		setPrompt("")
 		setTimeout(() => {
 			setRevealDone(false)
 			setStep("prompt")
@@ -153,7 +153,7 @@ export function ConversationFlow({ onStart }: Props) {
 							lineHeight: 1.7,
 						}}>
 							<TextReveal
-								text="This is the prompt that tells the Brain what to pay attention to. Tweak it or just hit Start."
+								text="Instruct the Brain."
 								chunkType="word"
 								staggerDelay={0.03}
 								duration={0.35}
@@ -176,6 +176,7 @@ export function ConversationFlow({ onStart }: Props) {
 								ref={textareaRef}
 								value={prompt}
 								onChange={(e) => setPrompt(e.target.value)}
+								placeholder={selectedUseCase?.prompt}
 								rows={8}
 								style={{
 									flex: 1,

@@ -3,6 +3,7 @@ bun.lock
 dist/
 .env
 .env.*
+!.env.example
 *.log
 .DS_Store
 # Eval data (SQLite stores)

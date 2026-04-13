@@ -46,6 +46,9 @@
     "type": "git",
     "url": "https://github.com/unbody-io/adapt.git"
   },
+  "homepage": "https://adapt.unbody.io",
+  "bugs": "https://github.com/unbody-io/adapt/issues",
+  "author": "Unbody <hello@unbody.io> (https://unbody.io)",
   "license": "MIT",
   "devDependencies": {
     "@ai-sdk/openai-compatible": "^2.0.35",

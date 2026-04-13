@@ -2,7 +2,7 @@
  * Commentary — maps Brain events to human-readable commentary strings.
  * No LLM calls. Pure functions.
  */
-import type { Brain } from "@unbody/adapt"
+import type { Brain } from "@unbody-io/adapt"
 
 // --- Internal neuron definitions (always the same four) ---
 

@@ -66,8 +66,8 @@ await brain.adjustNeuron('categories', 'Stop categorizing things as inspiration'
 **Solution:** Use two separate brains. A session brain processes the immediate data with a fixed, lightweight structure. After the session, transfer its knowledge into the long-term brain:
 
 ```typescript
-import { Brain } from '@unbody/adapt'
-import { SQLiteBrainStore, SQLiteNeuronStore } from '@unbody/adapt/sqlite'
+import { Brain } from '@unbody-io/adapt'
+import { SQLiteBrainStore, SQLiteNeuronStore } from '@unbody-io/adapt/sqlite'
 
 // Long-term brain: evolves over time, persists everything
 const longTermBrain = new Brain({

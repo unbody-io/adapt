@@ -13,7 +13,7 @@ Brain has two independent storage layers:
 ## Memory Stores (default)
 
 ```typescript
-import { Brain, MemoryBrainStore, MemoryNeuronStore } from '@unbody/adapt'
+import { Brain, MemoryBrainStore, MemoryNeuronStore } from '@unbody-io/adapt'
 
 const brain = new Brain({
   prompt: '...',
@@ -30,8 +30,8 @@ Ephemeral — data lost on process exit. Good for development and testing.
 ## SQLite Stores
 
 ```typescript
-import { Brain } from '@unbody/adapt'
-import { SQLiteBrainStore, SQLiteNeuronStore } from '@unbody/adapt/sqlite'
+import { Brain } from '@unbody-io/adapt'
+import { SQLiteBrainStore, SQLiteNeuronStore } from '@unbody-io/adapt/sqlite'
 
 const brain = new Brain({
   prompt: '...',

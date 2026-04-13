@@ -14,7 +14,7 @@
   "dependencies": {
     "@base-ui/react": "^1.4.0",
     "@openrouter/ai-sdk-provider": "^2.1.1",
-    "@unbody/adapt": "file:..",
+    "@unbody-io/adapt": "0.0.1",
     "ai": "^6.0.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",

@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback, type CSSProperties, type RefObject } from "react"
 import Markdown from "react-markdown"
-import type { Brain, BaseNeuron } from "@unbody/adapt"
+import type { Brain, BaseNeuron } from "@unbody-io/adapt"
 import type { Neuron } from "../../lib/demo/types"
 import { Switch } from "@/components/ui/switch"
 import { Button } from "@/components/ui/button"

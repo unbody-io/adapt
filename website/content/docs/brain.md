@@ -10,7 +10,7 @@ A Brain is the top-level orchestrator — it takes a prompt describing what to l
 Only two things are required — `prompt` (what to learn about) and `model` (which LLM to use):
 
 ```typescript
-import { Brain } from '@unbody/adapt'
+import { Brain } from '@unbody-io/adapt'
 import { openai } from '@ai-sdk/openai'
 
 const brain = new Brain({
@@ -22,8 +22,8 @@ const brain = new Brain({
 With just these two fields, the Brain will auto-decompose the prompt into neurons, store everything in memory, and enable evolution — all with sensible defaults. When you need more control, you can configure persistence, learning thresholds, and evolution behavior:
 
 ```typescript
-import { Brain } from '@unbody/adapt'
-import { SQLiteBrainStore, SQLiteNeuronStore } from '@unbody/adapt/sqlite'
+import { Brain } from '@unbody-io/adapt'
+import { SQLiteBrainStore, SQLiteNeuronStore } from '@unbody-io/adapt/sqlite'
 
 const brain = new Brain({
   prompt: 'Track user coding patterns and development philosophy.',

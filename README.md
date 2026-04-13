@@ -28,7 +28,7 @@ Neurons don't store raw data. They observe what's relevant, discard what isn't, 
 ## Install
 
 ```bash
-npm install @unbody/adapt
+npm install @unbody-io/adapt
 ```
 
 Adapt uses the [Vercel AI SDK](https://sdk.vercel.ai) for LLM access. Install a provider:
@@ -42,7 +42,7 @@ npm install @ai-sdk/openai    # or @ai-sdk/anthropic, @ai-sdk/google, etc.
 ### Brain
 
 ```typescript
-import { Brain } from '@unbody/adapt'
+import { Brain } from '@unbody-io/adapt'
 import { openai } from '@ai-sdk/openai'
 
 const brain = new Brain({
@@ -67,7 +67,7 @@ console.log(updated.insight)
 ### Standalone Neuron
 
 ```typescript
-import { TextNeuron, MemoryNeuronStore } from '@unbody/adapt'
+import { TextNeuron, MemoryNeuronStore } from '@unbody-io/adapt'
 import { openai } from '@ai-sdk/openai'
 
 const neuron = new TextNeuron({

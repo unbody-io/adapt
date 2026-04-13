@@ -727,7 +727,7 @@ function buildUseCaseCode(useCase: UseCase): string {
 	const evolutionModel = modelName(useCase.evolution?.model)
 
 	const lines = [
-		'import { Brain, MemoryBrainStore, MemoryNeuronStore } from "@unbody/adapt"',
+		'import { Brain, MemoryBrainStore, MemoryNeuronStore } from "@unbody-io/adapt"',
 		'import { createOpenRouter } from "@openrouter/ai-sdk-provider"',
 		"",
 		"const openrouter = createOpenRouter({",

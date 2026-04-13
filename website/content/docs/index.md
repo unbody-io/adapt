@@ -8,7 +8,7 @@ Adapt is a TypeScript library for building AI systems that learn and evolve from
 ## Install
 
 ```bash
-npm install @unbody/adapt
+npm install @unbody-io/adapt
 ```
 
 Adapt connects to LLMs through [Vercel AI SDK](https://sdk.vercel.ai) providers. Install the one that matches your LLM service — for example, `@ai-sdk/openai` for OpenAI or `@ai-sdk/anthropic` for Claude:
@@ -26,7 +26,7 @@ See [Configuration — Using Different Providers](./configuration#using-differen
 A Brain takes a prompt describing what to learn, automatically creates specialized neurons to cover different aspects of that domain, and coordinates them. You feed it data, it routes to all neurons, and when you ask a question it synthesizes answers from all of them.
 
 ```typescript
-import { Brain } from '@unbody/adapt'
+import { Brain } from '@unbody-io/adapt'
 import { openai } from '@ai-sdk/openai'
 
 const brain = new Brain({
@@ -48,7 +48,7 @@ console.log(result.insight)
 If you don't need multi-domain orchestration, neurons work independently without a Brain. You get direct control over a single learning domain:
 
 ```typescript
-import { TextNeuron, MemoryNeuronStore } from '@unbody/adapt'
+import { TextNeuron, MemoryNeuronStore } from '@unbody-io/adapt'
 import { openai } from '@ai-sdk/openai'
 
 const neuron = new TextNeuron({
@@ -107,8 +107,8 @@ npm install better-sqlite3
 ```
 
 ```typescript
-import { Brain } from '@unbody/adapt'
-import { SQLiteBrainStore, SQLiteNeuronStore } from '@unbody/adapt/sqlite'
+import { Brain } from '@unbody-io/adapt'
+import { SQLiteBrainStore, SQLiteNeuronStore } from '@unbody-io/adapt/sqlite'
 import { openai } from '@ai-sdk/openai'
 
 const brain = new Brain({

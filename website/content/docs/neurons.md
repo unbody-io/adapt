@@ -12,7 +12,7 @@ Builds narrative understanding — a single body of prose that evolves over time
 Only `model`, `instructions`, and `store` are required:
 
 ```typescript
-import { TextNeuron, MemoryNeuronStore } from '@unbody/adapt'
+import { TextNeuron, MemoryNeuronStore } from '@unbody-io/adapt'
 import { openai } from '@ai-sdk/openai'
 
 const neuron = new TextNeuron({
@@ -72,7 +72,7 @@ Maintains a structured collection with LLM-generated schemas.
 Same required fields — `model`, `instructions`, `store`:
 
 ```typescript
-import { ListNeuron, MemoryNeuronStore } from '@unbody/adapt'
+import { ListNeuron, MemoryNeuronStore } from '@unbody-io/adapt'
 import { openai } from '@ai-sdk/openai'
 
 const neuron = new ListNeuron({

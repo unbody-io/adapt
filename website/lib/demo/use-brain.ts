@@ -83,6 +83,7 @@ export function useBrain() {
 	const timelineRef = useRef<{ t: number; event: string; payload: Record<string, unknown> }[]>([])
 	const startTimeRef = useRef(0)
 	const narratedInternalSetupRef = useRef(false)
+	const pendingEvolutionRef = useRef(0)
 
 	// Commentary queue
 	const commentaryQueueRef = useRef<{ text: string; priority?: boolean }[]>([])
@@ -236,6 +237,8 @@ export function useBrain() {
 			"evaluator:evaluation:started",
 			"evaluator:evaluation:completed",
 			"evolution:action:executed",
+			"evolution:action:failed",
+			"evaluator:evaluation:failed",
 		]
 
 		const flags = { get narratedInternalSetup() { return narratedInternalSetupRef.current }, set narratedInternalSetup(v: boolean) { narratedInternalSetupRef.current = v } }
@@ -314,6 +317,24 @@ export function useBrain() {
 							}
 							break
 					}
+				}
+
+				// Evolution action tracking
+				if (eventType === "evaluator:evaluation:completed") {
+					pendingEvolutionRef.current = payload.decisionCount as number
+					if (pendingEvolutionRef.current === 0) {
+						setState((prev) => ({ ...prev, activity: "Ready" }))
+					}
+				}
+				if (eventType === "evolution:action:executed" || eventType === "evolution:action:failed") {
+					pendingEvolutionRef.current = Math.max(0, pendingEvolutionRef.current - 1)
+					if (pendingEvolutionRef.current === 0) {
+						setState((prev) => ({ ...prev, activity: "Ready" }))
+					}
+				}
+				if (eventType === "evaluator:evaluation:failed") {
+					pendingEvolutionRef.current = 0
+					setState((prev) => ({ ...prev, activity: "Ready" }))
 				}
 
 				// Structural changes → sync neuron list
@@ -510,6 +531,8 @@ function activityFromEvent(
 			return count > 0 ? `Evolution: ${count} decision(s)` : "Evolution: no changes"
 		}
 		case "evolution:action:executed": return `Evolving: ${payload.action} on ${(payload.targets as string[])?.join(", ")}`
+		case "evolution:action:failed": return `Evolution failed: ${payload.action} on ${(payload.targets as string[])?.join(", ")}`
+		case "evaluator:evaluation:failed": return "Evolution error"
 		default: return null
 	}
 }

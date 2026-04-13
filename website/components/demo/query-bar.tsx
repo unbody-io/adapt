@@ -1,21 +1,30 @@
 import { useState, useRef, useEffect, useCallback, type CSSProperties, type RefObject } from "react"
 import Markdown from "react-markdown"
-import type { Brain } from "@unbody/adapt"
+import type { Brain, BaseNeuron } from "@unbody/adapt"
 import type { Neuron } from "../../lib/demo/types"
 
 interface Source {
 	id: string
 	relevance?: number
-	confidence?: number
 	insight: string
 }
 
+interface NeuronResult {
+	neuronId: string
+	name: string
+	text: string
+	done: boolean
+	error?: string
+}
+
 interface QueryResult {
+	intent?: "ask" | "signal"
+	status?: string
 	insight?: string
 	sources?: Source[]
 	gaps?: string[]
+	neuronResults?: NeuronResult[]
 	error?: string
-	status?: string
 }
 
 interface Props {
@@ -23,6 +32,21 @@ interface Props {
 	disabled: boolean
 	brainRef: RefObject<Brain | null>
 	onActiveChange?: (active: boolean) => void
+}
+
+async function classifyIntent(query: string, neurons: Neuron[]): Promise<"ask" | "signal"> {
+	try {
+		const res = await fetch("/api/brain/classify", {
+			method: "POST",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify({ query, neurons: neurons.map((n) => ({ name: n.name, description: n.description })) }),
+		})
+		if (!res.ok) return "ask"
+		const data = await res.json() as { intent: "ask" | "signal" }
+		return data.intent
+	} catch {
+		return "ask"
+	}
 }
 
 const s = {
@@ -170,6 +194,13 @@ const s = {
 		color: "#9b9ba8",
 		marginBottom: "0.25rem",
 	} as CSSProperties,
+
+	inlineStatus: {
+		fontSize: "0.68rem",
+		fontFamily: '"SF Mono", "Fira Code", "Cascadia Code", monospace',
+		color: "#9b9ba8",
+		padding: "0.25rem 0",
+	} as CSSProperties,
 }
 
 function SourceCards({ sources }: { sources: Source[] }) {
@@ -187,9 +218,7 @@ function SourceCards({ sources }: { sources: Source[] }) {
 								type="button"
 								onClick={() => setExpandedId(isOpen ? null : src.id)}
 								style={{
-									background: isOpen
-										? "rgba(26, 26, 31, 0.06)"
-										: "rgba(26, 26, 31, 0.03)",
+									background: isOpen ? "rgba(26, 26, 31, 0.06)" : "rgba(26, 26, 31, 0.03)",
 									border: "1px solid rgba(155, 155, 168, 0.15)",
 									borderRadius: 6,
 									padding: "0.3rem 0.55rem",
@@ -242,14 +271,14 @@ export function QueryBar({ neurons, disabled, brainRef, onActiveChange }: Props)
 	const [result, setResult] = useState<QueryResult | null>(null)
 	const [menuOpen, setMenuOpen] = useState(false)
 	const inputRef = useRef<HTMLInputElement>(null)
-	const abortRef = useRef(false)
+	const abortRef = useRef<AbortController | null>(null)
 
-	const searchOpen = !!(result && result.insight)
+	const searchOpen = result?.intent === "ask"
 
 	const closeSearch = useCallback(() => {
 		setResult(null)
 		setMenuOpen(false)
-		abortRef.current = true
+		abortRef.current?.abort()
 		onActiveChange?.(false)
 	}, [onActiveChange])
 
@@ -259,9 +288,7 @@ export function QueryBar({ neurons, disabled, brainRef, onActiveChange }: Props)
 
 	useEffect(() => {
 		if (!searchOpen) return
-		const onKey = (e: KeyboardEvent) => {
-			if (e.key === "Escape") closeSearch()
-		}
+		const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") closeSearch() }
 		window.addEventListener("keydown", onKey)
 		return () => window.removeEventListener("keydown", onKey)
 	}, [searchOpen, closeSearch])
@@ -282,35 +309,99 @@ export function QueryBar({ neurons, disabled, brainRef, onActiveChange }: Props)
 		const brain = brainRef.current
 		if (!brain) return
 
-		abortRef.current = false
+		abortRef.current?.abort()
+		const abort = new AbortController()
+		abortRef.current = abort
+
 		setLoading(true)
-		setResult({ status: "Thinking..." })
+		setResult({ status: "Classifying..." })
 
 		try {
-			const mode = deepSearch ? "deep" : "direct"
-			const streamResult = await brain.askStream(q, { mode })
+			const intent = await classifyIntent(q, neurons)
+			if (abort.signal.aborted) return
 
-			let accumulated = ""
-			for await (const chunk of streamResult.textStream) {
-				if (abortRef.current) break
-				accumulated += chunk
-				setResult({ insight: accumulated })
+			if (intent === "signal") {
+				brain.signal({ source: "user:query-bar", description: q, bypass: true })
+				setQuery("")
+				setResult(null)
+				return
 			}
 
-			// Get final result for sources
-			const final = await streamResult.response
-			const sources = (final as Record<string, unknown>).sources as Source[] | undefined
+			// Ask: open overlay
+			setResult({ intent: "ask", status: "Thinking..." })
+			const mode = deepSearch ? "deep" : "direct"
 
-			setResult((prev) => ({
-				...prev,
-				insight: accumulated,
-				sources: sources ?? [],
-			}))
+			if (selectedIds.size > 0) {
+				const selectedNeurons = Array.from(selectedIds)
+					.map((id) => brain.getNeuron(id))
+					.filter((n): n is BaseNeuron<unknown> => n != null)
+
+				setResult((prev) => ({
+					...prev,
+					status: undefined,
+					neuronResults: selectedNeurons.map((n) => ({
+						neuronId: n.id,
+						name: neurons.find((x) => x.id === n.id)?.name ?? n.id,
+						text: "",
+						done: false,
+					})),
+				}))
+
+				await Promise.all(
+					selectedNeurons.map(async (neuron) => {
+						try {
+							const stream = await neuron.queryStream(q)
+							for await (const chunk of stream.textStream) {
+								if (abort.signal.aborted) return
+								setResult((prev) => ({
+									...prev,
+									neuronResults: prev?.neuronResults?.map((r) =>
+										r.neuronId === neuron.id ? { ...r, text: r.text + chunk } : r
+									),
+								}))
+							}
+							setResult((prev) => ({
+								...prev,
+								neuronResults: prev?.neuronResults?.map((r) =>
+									r.neuronId === neuron.id ? { ...r, done: true } : r
+								),
+							}))
+						} catch (err) {
+							if (abort.signal.aborted) return
+							setResult((prev) => ({
+								...prev,
+								neuronResults: prev?.neuronResults?.map((r) =>
+									r.neuronId === neuron.id
+										? { ...r, done: true, error: err instanceof Error ? err.message : "Failed" }
+										: r
+								),
+							}))
+						}
+					})
+				)
+			} else {
+				const streamResult = await brain.askStream(q, { mode })
+
+				let accumulated = ""
+				for await (const chunk of streamResult.textStream) {
+					if (abort.signal.aborted) break
+					accumulated += chunk
+					setResult((prev) => ({ ...prev, insight: accumulated, status: undefined }))
+				}
+
+				const final = await streamResult.response
+				const sources = (final as Record<string, unknown>).sources as Source[] | undefined
+
+				setResult((prev) => ({
+					...prev,
+					insight: accumulated,
+					sources: sources ?? [],
+					status: undefined,
+				}))
+			}
 		} catch (err) {
-			if (!abortRef.current) {
-				setResult({
-					error: err instanceof Error ? err.message : "Unknown error",
-				})
+			if (!abort.signal.aborted) {
+				setResult({ intent: "ask", error: err instanceof Error ? err.message : "Unknown error" })
 			}
 		} finally {
 			setLoading(false)
@@ -326,7 +417,6 @@ export function QueryBar({ neurons, disabled, brainRef, onActiveChange }: Props)
 
 	return (
 		<>
-			{/* Backdrop — only when search results are showing */}
 			<div
 				style={{
 					...s.backdropBase,
@@ -336,27 +426,50 @@ export function QueryBar({ neurons, disabled, brainRef, onActiveChange }: Props)
 				onClick={closeSearch}
 			/>
 
-			{/* Results overlay */}
 			{searchOpen && result && (
 				<div style={s.resultsAnchor}>
+					{result.status && (
+						<div style={{ ...s.resultText, color: "#9b9ba8", marginBottom: "0.5rem" }}>
+							{result.status}
+						</div>
+					)}
+
 					{result.insight && (
 						<div>
-							<div style={s.resultText} className="query-markdown"><Markdown>{result.insight}</Markdown></div>
+							<div style={s.resultText} className="query-markdown">
+								<Markdown>{result.insight}</Markdown>
+							</div>
 							{result.sources && result.sources.length > 0 && (
 								<SourceCards sources={result.sources} />
 							)}
 							{result.gaps && result.gaps.length > 0 && (
-								<div
-									style={{
-										...s.resultText,
-										marginTop: "0.5rem",
-										fontSize: "0.72rem",
-										opacity: 0.4,
-									}}
-								>
+								<div style={{ ...s.resultText, marginTop: "0.5rem", fontSize: "0.72rem", opacity: 0.4 }}>
 									gaps: {result.gaps.join(", ")}
 								</div>
 							)}
+						</div>
+					)}
+
+					{result.neuronResults && result.neuronResults.length > 0 && (
+						<div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+							{result.neuronResults.map((r) => (
+								<div
+									key={r.neuronId}
+									style={{ borderLeft: "2px solid rgba(155, 155, 168, 0.2)", paddingLeft: "0.75rem" }}
+								>
+									<div style={{ ...s.label, marginBottom: "0.35rem", display: "flex", alignItems: "center", gap: "0.4rem" }}>
+										<span>{r.name}</span>
+										{!r.done && <span style={{ opacity: 0.5, fontSize: "0.5rem" }}>streaming...</span>}
+									</div>
+									{r.error ? (
+										<div style={{ ...s.resultText, color: "#d94848", fontSize: "0.82rem" }}>{r.error}</div>
+									) : (
+										<div style={s.resultText} className="query-markdown">
+											<Markdown>{r.text}</Markdown>
+										</div>
+									)}
+								</div>
+							))}
 						</div>
 					)}
 
@@ -366,7 +479,6 @@ export function QueryBar({ neurons, disabled, brainRef, onActiveChange }: Props)
 				</div>
 			)}
 
-			{/* Search bar */}
 			<div style={s.wrapper}>
 				<div
 					style={{ ...s.card, position: "relative" }}
@@ -377,20 +489,14 @@ export function QueryBar({ neurons, disabled, brainRef, onActiveChange }: Props)
 						}
 					}}
 				>
-					{/* Neuron selection menu */}
 					{menuOpen && neurons.length > 0 && (
 						<div style={s.menu}>
-							{neurons.map((l) => {
-								const on = selectedIds.has(l.id)
+							{neurons.map((n) => {
+								const on = selectedIds.has(n.id)
 								return (
-									<button
-										key={l.id}
-										type="button"
-										style={s.menuItem}
-										onClick={() => toggleNeuron(l.id)}
-									>
-										<span style={s.menuCheck}>{on ? "\u2713" : ""}</span>
-										<span>{l.name}</span>
+									<button key={n.id} type="button" style={s.menuItem} onClick={() => toggleNeuron(n.id)}>
+										<span style={s.menuCheck}>{on ? "✓" : ""}</span>
+										<span>{n.name}</span>
 									</button>
 								)
 							})}
@@ -411,10 +517,7 @@ export function QueryBar({ neurons, disabled, brainRef, onActiveChange }: Props)
 						{focused && (
 							<button
 								type="button"
-								style={{
-									...s.menuToggle,
-									color: deepSearch ? "#1a1a1f" : "#9b9ba8",
-								}}
+								style={{ ...s.menuToggle, color: deepSearch ? "#1a1a1f" : "#9b9ba8" }}
 								onClick={() => setDeepSearch((v) => !v)}
 								title={deepSearch ? "Deep search (agentic)" : "Direct search (fast)"}
 							>
@@ -424,41 +527,26 @@ export function QueryBar({ neurons, disabled, brainRef, onActiveChange }: Props)
 						{focused && neurons.length > 0 && (
 							<button
 								type="button"
-								style={{
-									...s.menuToggle,
-									color: selectedIds.size > 0 ? "#1a1a1f" : "#9b9ba8",
-								}}
+								style={{ ...s.menuToggle, color: selectedIds.size > 0 ? "#1a1a1f" : "#9b9ba8" }}
 								onClick={() => setMenuOpen((v) => !v)}
 							>
-								{selectedIds.size > 0 ? `${selectedIds.size}\u2195` : "\u2195"}
+								{selectedIds.size > 0 ? `${selectedIds.size}↕` : "↕"}
 							</button>
 						)}
 						{focused && (
 							<button
 								type="button"
-								style={{
-									...s.submitBtn,
-									opacity: loading ? 0.4 : 1,
-									cursor: loading ? "default" : "pointer",
-								}}
+								style={{ ...s.submitBtn, opacity: loading ? 0.4 : 1, cursor: loading ? "default" : "pointer" }}
 								onClick={submit}
 								disabled={loading}
 							>
-								\u21B5
+								↵
 							</button>
 						)}
 					</div>
 
-					{/* Inline status */}
-					{result && !result.insight && result.status && (
-						<div style={{
-							fontSize: "0.68rem",
-							fontFamily: '"SF Mono", "Fira Code", "Cascadia Code", monospace',
-							color: "#9b9ba8",
-							padding: "0.25rem 0",
-						}}>
-							{result.status}
-						</div>
+					{result && !result.intent && result.status && (
+						<div style={s.inlineStatus}>{result.status}</div>
 					)}
 				</div>
 			</div>

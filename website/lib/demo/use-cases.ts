@@ -63,7 +63,7 @@ export const USE_CASES: UseCase[] = [
 		evolution: {
 			enabled: true,
 			autoEvaluate: true,
-			evaluatorSignalThreshold: 3,
+			evaluatorSignalThreshold: 1,
 		},
 		dataPaths: [
 			"/demo/data/daily-standups/2026-02-25.json",
@@ -90,7 +90,7 @@ export const USE_CASES: UseCase[] = [
 		evolution: {
 			enabled: true,
 			autoEvaluate: true,
-			evaluatorSignalThreshold: 5,
+			evaluatorSignalThreshold: 1,
 		},
 		dataPaths: [
 			"/demo/data/product-feedback/tweets.json",

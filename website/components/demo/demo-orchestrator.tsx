@@ -10,7 +10,7 @@ import { ConversationFlow } from "./conversation-flow"
 import { Mycelium } from "./mycelium"
 import { QueryBar } from "./query-bar"
 import { StatusDisplay } from "./status-display"
-import { CloseButton } from "./close-button"
+import { DemoBreadcrumb } from "./breadcrumb"
 
 // --- Model Factory (mirrors playground's createModel) ---
 
@@ -37,7 +37,7 @@ function createModel(slot?: string | ModelRef, defaultModel = "google/gemini-2.5
 export function DemoOrchestrator() {
 	const [live, setLive] = useState(false)
 	const [activeUseCase, setActiveUseCase] = useState<UseCase | null>(null)
-	const { state, brain, start, inject, destroy, downloadLog } = useBrain()
+	const { state, brain, start, inject, destroy } = useBrain()
 	const injectionStarted = state.injectionProgress !== null || state.events.some((event) => event.type === "brain:inject:started")
 
 	const handleStart = useCallback(async (useCase: UseCase, prompt: string) => {
@@ -75,49 +75,26 @@ export function DemoOrchestrator() {
 
 	if (!live) {
 		return (
-			<div style={{ width: "100%", height: "100vh" }}>
-				<CloseButton />
+			<div style={{ width: "100%", height: "100dvh" }}>
+				<DemoBreadcrumb />
 				<ConversationFlow onStart={handleStart} />
 			</div>
 		)
 	}
 
 	return (
-		<div style={{ width: "100%", height: "100vh", position: "relative", overflow: "hidden" }}>
-			<CloseButton />
-			<button
-				type="button"
-				onClick={downloadLog}
-				title="Download event log"
-				style={{
-					position: "fixed",
-					top: "1rem",
-					right: "3rem",
-					zIndex: 70,
-					background: "none",
-					border: "none",
-					cursor: "pointer",
-					fontSize: "0.9rem",
-					color: "#9b9ba8",
-					padding: "0.25rem 0.5rem",
-					lineHeight: 1,
-					transition: "color 0.15s",
-				}}
-				onMouseEnter={(e) => { e.currentTarget.style.color = "#1a1a1f" }}
-				onMouseLeave={(e) => { e.currentTarget.style.color = "#9b9ba8" }}
-			>
-				↓
-			</button>
+		<div style={{ width: "100%", height: "100dvh", position: "relative", overflow: "hidden" }}>
+			<DemoBreadcrumb useCaseName={activeUseCase?.title} />
 
-			{/* Shader visualization — centered, max 800x600 */}
-			<div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
+			{/* Shader visualization — centered on desktop, bottom on mobile */}
+			<div className="absolute inset-0 bottom-[50px] flex items-end justify-center md:bottom-0 md:items-center">
 				<Mycelium
 					neurons={state.neurons}
 					events={state.events}
 				/>
 			</div>
 
-			{/* Status display — top center */}
+			{/* Status + info button */}
 			<StatusDisplay
 				activity={state.activity}
 				commentary={state.commentary}

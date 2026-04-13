@@ -231,10 +231,10 @@ export const Mycelium = forwardRef<MyceliumHandle, Props>(function Mycelium({ ne
 
 	// ─── Setup offscreen WebGL ──────────────────────────────────────
 
-	const initGL = useCallback(() => {
+	const initGL = useCallback((w: number, h: number) => {
 		const offscreen = document.createElement("canvas")
-		offscreen.width = 800
-		offscreen.height = 600
+		offscreen.width = w
+		offscreen.height = h
 
 		const gl = offscreen.getContext("webgl", { preserveDrawingBuffer: true })
 		if (!gl) return null
@@ -281,15 +281,15 @@ export const Mycelium = forwardRef<MyceliumHandle, Props>(function Mycelium({ ne
 		const canvas = canvasRef.current
 		if (!canvas) return
 
-		const w = 800
-		const h = 600
+		const w = Math.min(800, window.innerWidth)
+		const h = Math.min(600, window.innerHeight)
 		canvas.width = w
 		canvas.height = h
 
 		const ctx2d = canvas.getContext("2d")
 		if (!ctx2d) return
 
-		const glCtx = initGL()
+		const glCtx = initGL(w, h)
 		if (!glCtx) return
 		glRef.current = glCtx
 		const { offscreen, gl, locs } = glCtx
@@ -379,9 +379,7 @@ export const Mycelium = forwardRef<MyceliumHandle, Props>(function Mycelium({ ne
 		<canvas
 			ref={canvasRef}
 			className="mycelium"
-			width={800}
-			height={600}
-			style={{ width: "100%", maxWidth: 800, height: "100%", maxHeight: 600, mixBlendMode: "multiply", cursor: onSelectNeuron ? "pointer" : "default" }}
+			style={{ width: "100%", maxWidth: 800, height: "auto", maxHeight: "100%", mixBlendMode: "multiply", cursor: onSelectNeuron ? "pointer" : "default" }}
 			onClick={handleCanvasClick}
 		/>
 	)

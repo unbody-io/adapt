@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useRef, type ReactNode } from "react"
-import { BookOpenText } from "lucide-react"
+import { Settings2 } from "lucide-react"
 import type { UseCase, ModelRef } from "../../lib/demo/use-cases"
 import type { InjectionProgress } from "../../lib/demo/types"
 import { TextReveal } from "./text-reveal"
@@ -75,72 +75,51 @@ export function StatusDisplay({
 
 	return (
 		<>
+			{/* Desktop-only: fixed top-right */}
+			{useCase && (
+				<>
+					<Button
+						type="button"
+						size="sm"
+						onClick={() => setDetailsOpen(true)}
+						aria-label={`Open ${useCase.title} details`}
+						className="hidden md:inline-flex fixed top-4 right-4 z-50 gap-1.5"
+					>
+						<Settings2 size={14} strokeWidth={1.8} />
+						Parameters
+					</Button>
+					<UseCaseDetailsDialog
+						open={detailsOpen}
+						onOpenChange={setDetailsOpen}
+						useCase={useCase}
+					/>
+				</>
+			)}
+
 			<div style={{
 				position: "fixed",
 				top: "4.5rem",
-				left: "1.25rem",
+				left: "1rem",
 				zIndex: 50,
-				maxWidth: 420,
+				maxWidth: "min(420px, calc(100% - 2rem))",
 				pointerEvents: "none",
 				display: "flex",
 				flexDirection: "column",
 				gap: "1.25rem",
 			}}>
+				{/* Mobile-only: inline above status */}
 				{useCase && (
-					<div style={{
-						display: "flex",
-						flexDirection: "column",
-						gap: "0.45rem",
-					}}>
-						<div style={{
-							display: "flex",
-							alignItems: "flex-start",
-							justifyContent: "space-between",
-							gap: "0.8rem",
-							pointerEvents: "auto",
-						}}>
-							<div style={{
-								display: "flex",
-								flexDirection: "column",
-								gap: "0.3rem",
-							}}>
-								<h2 style={{
-									margin: 0,
-									fontSize: "0.84rem",
-									lineHeight: 1.2,
-									fontWeight: 500,
-									color: "#1a1a1f",
-									fontFamily: '"Georgia", "Times New Roman", serif',
-								}}>
-									{useCase.title}
-								</h2>
-								<div style={{
-									fontSize: "0.6rem",
-									fontFamily: mono,
-									color: "#9b9ba8",
-									letterSpacing: "0.04em",
-								}}>
-									{useCase.dataPaths.length} data source{useCase.dataPaths.length === 1 ? "" : "s"}
-								</div>
-							</div>
-							<Button
-								type="button"
-								size="icon-sm"
-								onClick={() => setDetailsOpen(true)}
-								aria-label={`Open ${useCase.title} details`}
-								style={{
-									background: "rgba(245, 245, 248, 0.96)",
-									border: "1px solid rgba(155, 155, 168, 0.18)",
-									color: "#62626f",
-									boxShadow: "0 10px 24px rgba(26, 26, 31, 0.06)",
-								}}
-							>
-								<BookOpenText size={15} strokeWidth={1.8} />
-							</Button>
-						</div>
-					</div>
+					<Button
+						type="button"
+						size="sm"
+						onClick={() => setDetailsOpen(true)}
+						aria-label={`Open ${useCase.title} details`}
+						className="md:hidden pointer-events-auto self-start gap-1.5"
+					>
+						<Settings2 size={14} strokeWidth={1.8} />
+						Parameters
+					</Button>
 				)}
-
 				{injectionProgress && (
 					<div style={{
 						display: "flex",
@@ -227,7 +206,7 @@ export function StatusDisplay({
 				)}
 
 				{latestComment && (
-					<div style={{
+					<div className="rounded-lg backdrop-blur-sm bg-white/10 p-3 md:backdrop-blur-none md:bg-transparent md:p-0 md:rounded-none" style={{
 						fontSize: "0.95rem",
 						fontFamily: '"Georgia", "Times New Roman", serif',
 						color: "#6b6b78",
@@ -288,14 +267,26 @@ export function StatusDisplay({
 					</div>
 				)}
 			</div>
+		</>
+	)
+}
 
-			{useCase && (
-				<UseCaseDetailsDialog
-					open={detailsOpen}
-					onOpenChange={setDetailsOpen}
-					useCase={useCase}
-				/>
-			)}
+function Spinner() {
+	return (
+		<>
+			<style>{`@keyframes status-spin { to { transform: rotate(360deg); } }`}</style>
+			<span
+				style={{
+					width: 10,
+					height: 10,
+					borderRadius: "50%",
+					border: "1.5px solid rgba(26, 26, 31, 0.15)",
+					borderTopColor: "rgba(26, 26, 31, 0.55)",
+					display: "inline-block",
+					animation: "status-spin 0.8s linear infinite",
+					flexShrink: 0,
+				}}
+			/>
 		</>
 	)
 }
@@ -681,25 +672,6 @@ function MetaPill({ label, value }: { label: string; value: string }) {
 	)
 }
 
-function Spinner() {
-	return (
-		<>
-			<style>{`@keyframes status-spin { to { transform: rotate(360deg); } }`}</style>
-			<span
-				style={{
-					width: 10,
-					height: 10,
-					borderRadius: "50%",
-					border: "1.5px solid rgba(26, 26, 31, 0.15)",
-					borderTopColor: "rgba(26, 26, 31, 0.55)",
-					display: "inline-block",
-					animation: "status-spin 0.8s linear infinite",
-					flexShrink: 0,
-				}}
-			/>
-		</>
-	)
-}
 
 function modelName(slot: string | ModelRef | undefined): string | null {
 	if (!slot) return null

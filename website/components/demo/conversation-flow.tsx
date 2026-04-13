@@ -62,23 +62,8 @@ export function ConversationFlow({ onStart }: Props) {
 	const activeStepIndex = step === "pick" ? 0 : 1
 
 	return (
-		<div style={{
-			width: "100%",
-			height: "100%",
-			display: "flex",
-			flexDirection: "column",
-			justifyContent: "center",
-			alignItems: "center",
-			paddingBottom: "8vh",
-			gap: "1.5rem",
-		}}>
-			<div style={{
-				width: "100%",
-				maxWidth: 720,
-				minHeight: 340,
-				padding: "0 2rem",
-				boxSizing: "border-box",
-			}}>
+		<div className="w-full h-full flex flex-col gap-6 pt-16 px-4 overflow-auto md:justify-center md:items-center md:pt-0 md:pb-[8vh] md:overflow-visible">
+			<div className="w-full max-w-[720px] md:min-h-[340px]">
 				{step === "pick" && (
 					<div style={{
 						display: "flex",
@@ -100,6 +85,14 @@ export function ConversationFlow({ onStart }: Props) {
 								animationKey="pick"
 								onComplete={() => setRevealDone(true)}
 							/>
+							<p style={{
+								margin: "0.5rem 0 0",
+								fontSize: "0.68rem",
+								color: "#9b9ba8",
+								fontFamily: mono,
+							}}>
+								Everything runs in your browser — no backend, just Adapt.
+							</p>
 						</div>
 						<div
 							className="demo-card-grid"
@@ -214,11 +207,11 @@ export function ConversationFlow({ onStart }: Props) {
 						</div>
 						<style>{`
 							.demo-card-grid {
-								grid-template-columns: repeat(2, 1fr);
+								grid-template-columns: 1fr;
 							}
-							@media (max-width: 600px) {
+							@media (min-width: 640px) {
 								.demo-card-grid {
-									grid-template-columns: 1fr;
+									grid-template-columns: repeat(2, 1fr);
 								}
 							}
 						`}</style>
@@ -261,7 +254,8 @@ export function ConversationFlow({ onStart }: Props) {
 								value={prompt}
 								onChange={(e) => setPrompt(e.target.value)}
 								placeholder={selectedUseCase?.prompt}
-								rows={8}
+								className="min-h-[40dvh] md:min-h-0"
+								rows={5}
 								style={{
 									flex: 1,
 									width: "100%",
@@ -276,7 +270,7 @@ export function ConversationFlow({ onStart }: Props) {
 									padding: 0,
 								}}
 							/>
-							<div className="flex justify-end items-center gap-2">
+							<div className="hidden md:flex justify-end items-center gap-2">
 								<Button variant="ghost" size="sm" onClick={handleBack}>
 									← Back
 								</Button>
@@ -313,23 +307,31 @@ export function ConversationFlow({ onStart }: Props) {
 				)}
 			</div>
 			{step !== "starting" && (
-				<div style={{
-					display: "flex",
-					gap: "0.5rem",
-					alignItems: "center",
-				}}>
-					{[0, 1].map((i) => (
-						<span
-							key={i}
-							style={{
-								width: i === activeStepIndex ? 18 : 6,
-								height: 6,
-								borderRadius: 3,
-								background: i === activeStepIndex ? "#1a1a1f" : "rgba(26, 26, 31, 0.18)",
-								transition: "width 0.25s ease, background 0.25s ease",
-							}}
-						/>
-					))}
+				<div className="fixed bottom-6 left-0 right-0 flex flex-col items-center gap-3 md:static md:flex-row md:justify-center">
+					{step === "prompt" && (
+						<div className="flex md:hidden items-center gap-2">
+							<Button variant="ghost" size="sm" onClick={handleBack}>
+								← Back
+							</Button>
+							<Button size="sm" onClick={handleStart}>
+								Start
+							</Button>
+						</div>
+					)}
+					<div className="flex gap-2 items-center">
+						{[0, 1].map((i) => (
+							<span
+								key={i}
+								style={{
+									width: i === activeStepIndex ? 18 : 6,
+									height: 6,
+									borderRadius: 3,
+									background: i === activeStepIndex ? "#1a1a1f" : "rgba(26, 26, 31, 0.18)",
+									transition: "width 0.25s ease, background 0.25s ease",
+								}}
+							/>
+						))}
+					</div>
 				</div>
 			)}
 		</div>

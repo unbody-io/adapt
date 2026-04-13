@@ -6,7 +6,7 @@ import { buttonVariants } from '@/components/ui/button';
 export default function HomePage() {
   return (
     <div className="flex items-center justify-center flex-1">
-      <div className="flex flex-col items-start gap-4">
+      <div className="flex flex-col items-start gap-4 px-4">
       <div className="flex flex-col gap-1">
         <h1 className="text-sm">
           <ScrambleText text={[

@@ -5,6 +5,6 @@ export const docsContentRoute = '/llms.mdx/docs';
 
 export const gitConfig = {
   user: 'unbody-io',
-  repo: 'brain-v0',
+  repo: 'adapt',
   branch: 'main',
 };

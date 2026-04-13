@@ -19,7 +19,7 @@ export default function Layout({ children }: LayoutProps<'/'>) {
       </head>
       <body className="flex flex-col min-h-screen">
         <RootProvider>
-          <Link href="/" className="fixed top-4 left-5 z-50 text-sm no-underline text-fd-foreground">
+          <Link href="/" className="fixed top-4 left-4 z-50 text-sm no-underline text-fd-foreground">
             <LogoScramble />
           </Link>
           {children}

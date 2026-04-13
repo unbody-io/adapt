@@ -77,7 +77,7 @@ const s = {
 		left: "50%",
 		transform: "translateX(-50%)",
 		zIndex: 60,
-		width: 600,
+		width: "min(600px, calc(100% - 2rem))",
 		display: "flex",
 		flexDirection: "column",
 		gap: "0.5rem",
@@ -125,12 +125,12 @@ const s = {
 		top: 0,
 		left: "50%",
 		transform: "translateX(-50%)",
-		width: 620,
+		width: "min(620px, calc(100% - 2rem))",
 		zIndex: 60,
-		height: "100vh",
+		height: "100dvh",
 		overflowY: "auto",
 		scrollbarWidth: "none",
-		padding: "2rem 0 7rem",
+		padding: "1.5rem 0 7rem",
 		boxSizing: "border-box",
 	} as CSSProperties,
 
@@ -257,7 +257,10 @@ function SuggestionGroup({ label, items, onPick }: { label: string; items: strin
 						e.currentTarget.style.color = isSignal ? "rgba(45, 122, 79, 0.6)" : "#9b9ba8"
 						e.currentTarget.style.borderColor = isSignal ? "rgba(45, 122, 79, 0.15)" : "rgba(155, 155, 168, 0.15)"
 					}}
-					onClick={() => onPick(item)}
+					onMouseDown={(e) => {
+						e.preventDefault()
+						onPick(item)
+					}}
 				>
 					{item}
 				</button>
@@ -276,6 +279,7 @@ export function QueryBar({ neurons, disabled, brainRef, onActiveChange, suggesti
 	const [menuOpen, setMenuOpen] = useState(false)
 	const inputRef = useRef<HTMLTextAreaElement>(null)
 	const abortRef = useRef<AbortController | null>(null)
+	const pendingSubmitRef = useRef<string | null>(null)
 
 	const searchOpen = result?.intent === "ask"
 
@@ -432,6 +436,14 @@ export function QueryBar({ neurons, disabled, brainRef, onActiveChange, suggesti
 		}
 	}
 
+	// Auto-submit when a suggestion is picked
+	useEffect(() => {
+		if (pendingSubmitRef.current && query === pendingSubmitRef.current) {
+			pendingSubmitRef.current = null
+			submit()
+		}
+	}, [query])
+
 	const showSuggestions = focused && !query && !loading && !searchOpen && suggestions && (suggestions.ask.length > 0 || suggestions.signal.length > 0)
 
 	return (
@@ -514,14 +526,14 @@ export function QueryBar({ neurons, disabled, brainRef, onActiveChange, suggesti
 							<SuggestionGroup
 								label="ask"
 								items={suggestions.ask}
-								onPick={(q) => { setQuery(q); inputRef.current?.focus() }}
+								onPick={(q) => { setQuery(q); pendingSubmitRef.current = q }}
 							/>
 						)}
 						{suggestions.signal.length > 0 && (
 							<SuggestionGroup
 								label="signal"
 								items={suggestions.signal}
-								onPick={(q) => { setQuery(q); inputRef.current?.focus() }}
+								onPick={(q) => { setQuery(q); pendingSubmitRef.current = q }}
 							/>
 						)}
 					</div>
@@ -530,7 +542,9 @@ export function QueryBar({ neurons, disabled, brainRef, onActiveChange, suggesti
 				<div
 					style={{ ...s.card, position: "relative" }}
 					onBlur={(e) => {
-						if (!e.currentTarget.contains(e.relatedTarget as Node)) {
+						const related = e.relatedTarget as HTMLElement | null
+						// Don't blur if focus moved to a portal (popover content)
+						if (related && !e.currentTarget.contains(related) && !related.closest?.("[data-slot=popover-content]")) {
 							setFocused(false)
 							setMenuOpen(false)
 						}
@@ -549,49 +563,50 @@ export function QueryBar({ neurons, disabled, brainRef, onActiveChange, suggesti
 						/>
 						{focused && (
 							<div className="flex items-center gap-1.5 shrink-0">
-								<span className="text-xs text-muted-foreground">fast</span>
-								<Switch
-									checked={deepSearch}
-									onCheckedChange={setDeepSearch}
-								/>
-								<span className="text-xs text-muted-foreground">deep</span>
-							</div>
-						)}
-						{focused && neurons.length > 0 && (
-							<Popover open={menuOpen} onOpenChange={setMenuOpen}>
-								<PopoverTrigger
-									render={<Button variant="outline" size="sm" />}
+								<div className="flex items-center gap-1.5">
+									<span className="text-xs text-muted-foreground">fast</span>
+									<Switch
+										checked={deepSearch}
+										onCheckedChange={setDeepSearch}
+									/>
+									<span className="text-xs text-muted-foreground">deep</span>
+								</div>
+								{neurons.length > 0 && (
+									<Popover open={menuOpen} onOpenChange={setMenuOpen}>
+										<PopoverTrigger
+											render={<Button variant="outline" size="sm" />}
+										>
+											{selectedIds.size > 0 ? `${selectedIds.size} neurons` : "neurons"}
+										</PopoverTrigger>
+										<PopoverContent side="top" sideOffset={8} className="w-56 p-1">
+											{neurons.map((n) => {
+												const on = selectedIds.has(n.id)
+												return (
+													<button
+														key={n.id}
+														type="button"
+														className="flex w-full items-center gap-2 rounded-md px-2.5 py-2 text-sm hover:bg-muted transition-colors text-left"
+														onClick={() => toggleNeuron(n.id)}
+													>
+														<span className="flex size-4 items-center justify-center">
+															{on && <Check className="size-3.5" />}
+														</span>
+														<span>{n.name}</span>
+													</button>
+												)
+											})}
+										</PopoverContent>
+									</Popover>
+								)}
+								<Button
+									size="sm"
+									disabled={loading}
+									onClick={submit}
+									className="shrink-0"
 								>
-									{selectedIds.size > 0 ? `${selectedIds.size} neurons` : "neurons"}
-								</PopoverTrigger>
-								<PopoverContent side="top" sideOffset={8} className="w-56 p-1">
-									{neurons.map((n) => {
-										const on = selectedIds.has(n.id)
-										return (
-											<button
-												key={n.id}
-												type="button"
-												className="flex w-full items-center gap-2 rounded-md px-2.5 py-2 text-sm hover:bg-muted transition-colors text-left"
-												onClick={() => toggleNeuron(n.id)}
-											>
-												<span className="flex size-4 items-center justify-center">
-													{on && <Check className="size-3.5" />}
-												</span>
-												<span>{n.name}</span>
-											</button>
-										)
-									})}
-								</PopoverContent>
-							</Popover>
-						)}
-						{focused && (
-							<Button
-								size="sm"
-								disabled={loading}
-								onClick={submit}
-							>
-								↵
-							</Button>
+									↵
+								</Button>
+							</div>
 						)}
 					</div>
 

@@ -31,6 +31,8 @@ export interface DemoState {
 	activity: string
 	neurons: Neuron[]
 	commentary: string
+	evolutionCommentary: string
+	evolutionActivity: string
 	events: BrainEvent[]
 	injectionProgress: InjectionProgress | null
 }
@@ -40,6 +42,8 @@ const initialState: DemoState = {
 	activity: "",
 	neurons: [],
 	commentary: "",
+	evolutionCommentary: "",
+	evolutionActivity: "",
 	events: [],
 	injectionProgress: null,
 }
@@ -84,15 +88,25 @@ export function useBrain() {
 	const startTimeRef = useRef(0)
 	const narratedInternalSetupRef = useRef(false)
 	const pendingEvolutionRef = useRef(0)
+	const evoActivityTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-	// Commentary queue
+	// Commentary queues (one per category)
 	const commentaryQueueRef = useRef<{ text: string; priority?: boolean }[]>([])
 	const commentaryTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 	const commentaryLastDisplayRef = useRef(0)
 
+	const evoQueueRef = useRef<{ text: string; priority?: boolean }[]>([])
+	const evoTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+	const evoLastDisplayRef = useRef(0)
+
 	const displayCommentary = useCallback((text: string) => {
 		commentaryLastDisplayRef.current = Date.now()
 		setState((prev) => ({ ...prev, commentary: text }))
+	}, [])
+
+	const displayEvoCommentary = useCallback((text: string) => {
+		evoLastDisplayRef.current = Date.now()
+		setState((prev) => ({ ...prev, evolutionCommentary: text }))
 	}, [])
 
 	const drainCommentaryQueue = useCallback(() => {
@@ -106,7 +120,37 @@ export function useBrain() {
 		}
 	}, [displayCommentary])
 
-	const enqueueCommentary = useCallback((text: string, priority?: boolean) => {
+	const drainEvoQueue = useCallback(() => {
+		evoTimerRef.current = null
+		const queue = evoQueueRef.current
+		if (queue.length === 0) return
+		const item = queue.shift()!
+		displayEvoCommentary(item.text)
+		if (queue.length > 0) {
+			evoTimerRef.current = setTimeout(drainEvoQueue, COMMENTARY_MIN_INTERVAL)
+		}
+	}, [displayEvoCommentary])
+
+	const enqueueCommentary = useCallback((text: string, priority?: boolean, category: "progress" | "evolution" = "progress") => {
+		if (category === "evolution") {
+			const queue = evoQueueRef.current
+			queue.push({ text, priority })
+			if (queue.length > COMMENTARY_QUEUE_CAP) {
+				const kept: typeof queue = []
+				for (const item of queue) {
+					if (item.priority || kept.length < 3) kept.push(item)
+				}
+				evoQueueRef.current = kept.slice(-COMMENTARY_QUEUE_CAP)
+			}
+			const elapsed = Date.now() - evoLastDisplayRef.current
+			if (!evoTimerRef.current && elapsed >= COMMENTARY_MIN_INTERVAL) {
+				drainEvoQueue()
+			} else if (!evoTimerRef.current) {
+				evoTimerRef.current = setTimeout(drainEvoQueue, COMMENTARY_MIN_INTERVAL - elapsed)
+			}
+			return
+		}
+
 		const queue = commentaryQueueRef.current
 		queue.push({ text, priority })
 
@@ -126,7 +170,7 @@ export function useBrain() {
 		} else if (!commentaryTimerRef.current) {
 			commentaryTimerRef.current = setTimeout(drainCommentaryQueue, COMMENTARY_MIN_INTERVAL - elapsed)
 		}
-	}, [drainCommentaryQueue])
+	}, [drainCommentaryQueue, drainEvoQueue])
 
 	const setCommentaryImmediate = useCallback((text: string) => {
 		if (commentaryTimerRef.current) {
@@ -250,13 +294,28 @@ export function useBrain() {
 				// Activity label
 				const activity = activityFromEvent(eventType, payload, brain)
 				if (activity) {
-					setState((prev) => ({ ...prev, activity }))
+					if (activity.category === "evolution") {
+						if (evoActivityTimerRef.current) {
+							clearTimeout(evoActivityTimerRef.current)
+							evoActivityTimerRef.current = null
+						}
+						setState((prev) => ({ ...prev, evolutionActivity: activity.text }))
+						// Signal received is transient — auto-clear unless evaluation starts
+						if (eventType === "brain:signal:received") {
+							evoActivityTimerRef.current = setTimeout(() => {
+								evoActivityTimerRef.current = null
+								setState((prev) => ({ ...prev, evolutionActivity: "" }))
+							}, 3000)
+						}
+					} else {
+						setState((prev) => ({ ...prev, activity: activity.text }))
+					}
 				}
 
 				// Commentary
 				const comment = commentaryFromEvent(eventType, payload, brain, flags)
 				if (comment) {
-					enqueueCommentary(comment.text, comment.priority)
+					enqueueCommentary(comment.text, comment.priority, comment.category)
 				}
 
 				// Per-neuron tracking
@@ -323,18 +382,18 @@ export function useBrain() {
 				if (eventType === "evaluator:evaluation:completed") {
 					pendingEvolutionRef.current = payload.decisionCount as number
 					if (pendingEvolutionRef.current === 0) {
-						setState((prev) => ({ ...prev, activity: "Ready" }))
+						setState((prev) => ({ ...prev, evolutionActivity: "" }))
 					}
 				}
 				if (eventType === "evolution:action:executed" || eventType === "evolution:action:failed") {
 					pendingEvolutionRef.current = Math.max(0, pendingEvolutionRef.current - 1)
 					if (pendingEvolutionRef.current === 0) {
-						setState((prev) => ({ ...prev, activity: "Ready" }))
+						setState((prev) => ({ ...prev, evolutionActivity: "" }))
 					}
 				}
 				if (eventType === "evaluator:evaluation:failed") {
 					pendingEvolutionRef.current = 0
-					setState((prev) => ({ ...prev, activity: "Ready" }))
+					setState((prev) => ({ ...prev, evolutionActivity: "" }))
 				}
 
 				// Structural changes → sync neuron list
@@ -462,6 +521,8 @@ export function useBrain() {
 			...prev,
 			activity: "Ready",
 			injectionProgress: null,
+			evolutionActivity: "",
+			evolutionCommentary: "",
 		}))
 	}, [setCommentaryImmediate])
 
@@ -470,7 +531,16 @@ export function useBrain() {
 			clearTimeout(commentaryTimerRef.current)
 			commentaryTimerRef.current = null
 		}
+		if (evoTimerRef.current) {
+			clearTimeout(evoTimerRef.current)
+			evoTimerRef.current = null
+		}
+		if (evoActivityTimerRef.current) {
+			clearTimeout(evoActivityTimerRef.current)
+			evoActivityTimerRef.current = null
+		}
 		commentaryQueueRef.current = []
+		evoQueueRef.current = []
 		brainRef.current = null
 		setState(initialState)
 	}, [])
@@ -484,32 +554,37 @@ export function useBrain() {
 	}
 }
 
+interface ActivityResult {
+	text: string
+	category: "progress" | "evolution"
+}
+
 function activityFromEvent(
 	type: string,
 	payload: Record<string, unknown>,
 	brain: import("@unbody/adapt").Brain,
-): string | null {
+): ActivityResult | null {
 	switch (type) {
-		case "brain:init:started": return "Analyzing prompt..."
+		case "brain:init:started": return { text: "Analyzing prompt...", category: "progress" }
 		case "brain:init:config:generated": {
 			const count = (payload.configs as unknown[])?.length ?? 0
-			return `Designing ${count} neurons...`
+			return { text: `Designing ${count} neurons...`, category: "progress" }
 		}
-		case "brain:neuron:added": return `Created "${payload.name}"`
+		case "brain:neuron:added": return { text: `Created "${payload.name}"`, category: "progress" }
 		case "neuron:init:started": {
 			const neuronId = payload.neuronId as string
 			const internal = INTERNAL_NEURONS[neuronId]
 			if (internal) {
-				return `Preparing ${internal.name}...`
+				return { text: `Preparing ${internal.name}...`, category: "progress" }
 			}
 			const neuron = brain.getNeuron(neuronId)
-			return `Setting up "${neuron?.name ?? neuronId}"...`
+			return { text: `Setting up "${neuron?.name ?? neuronId}"...`, category: "progress" }
 		}
-		case "brain:init:completed": return "Brain ready"
-		case "brain:inject:started": return `Injecting ${payload.itemCount} items...`
-		case "brain:inject:batch:started": return "Processing batch..."
-		case "brain:inject:completed": return "Injection complete"
-		case "neuron:observe:started": return null // silent — neuron activity state handles it
+		case "brain:init:completed": return { text: "Brain ready", category: "progress" }
+		case "brain:inject:started": return { text: `Injecting ${payload.itemCount} items...`, category: "progress" }
+		case "brain:inject:batch:started": return { text: "Processing batch...", category: "progress" }
+		case "brain:inject:completed": return { text: "Injection complete", category: "progress" }
+		case "neuron:observe:started": return null
 		case "neuron:observe:thinking": return null
 		case "neuron:observed": return null
 		case "neuron:observe:dismissed": return null
@@ -519,20 +594,24 @@ function activityFromEvent(
 			const neuronId = payload.neuronId as string
 			const internal = INTERNAL_NEURONS[neuronId]
 			if (internal) {
-				return `Cross-referencing ${internal.name}...`
+				return { text: `Cross-referencing ${internal.name}...`, category: "progress" }
 			}
 			return null
 		}
 		case "neuron:query:completed": return null
-		case "brain:signal:received": return "Signal received"
-		case "evaluator:evaluation:started": return "Reflecting..."
+		case "brain:signal:received": {
+			const source = payload.source as string
+			if (!source.startsWith("user:")) return null
+			return { text: "Signal received", category: "evolution" }
+		}
+		case "evaluator:evaluation:started": return { text: "Reflecting...", category: "evolution" }
 		case "evaluator:evaluation:completed": {
 			const count = payload.decisionCount as number
-			return count > 0 ? `Evolution: ${count} decision(s)` : "Evolution: no changes"
+			return { text: count > 0 ? `Evolution: ${count} decision(s)` : "Evolution: no changes", category: "evolution" }
 		}
-		case "evolution:action:executed": return `Evolving: ${payload.action} on ${(payload.targets as string[])?.join(", ")}`
-		case "evolution:action:failed": return `Evolution failed: ${payload.action} on ${(payload.targets as string[])?.join(", ")}`
-		case "evaluator:evaluation:failed": return "Evolution error"
+		case "evolution:action:executed": return { text: `Evolving: ${payload.action} on ${(payload.targets as string[])?.join(", ")}`, category: "evolution" }
+		case "evolution:action:failed": return { text: `Evolution failed: ${payload.action} on ${(payload.targets as string[])?.join(", ")}`, category: "evolution" }
+		case "evaluator:evaluation:failed": return { text: "Evolution error", category: "evolution" }
 		default: return null
 	}
 }

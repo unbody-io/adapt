@@ -39,6 +39,8 @@ export interface UseCase {
 		batchSize?: number
 	}
 	appBatchSize?: number
+	/** Estimated duration label, e.g. "~3 min" */
+	duration?: string
 	dataPaths: string[]
 }
 
@@ -47,11 +49,12 @@ export const USE_CASES: UseCase[] = [
 		id: "daily-standups",
 		title: "Daily Standups",
 		description: "Watch a Brain learn from standup meeting transcripts — discovering team dynamics, projects, and patterns.",
-		prompt: "Learn from daily standup transcripts of a software team. Discover team members, projects, and dynamics — start with no assumptions.\n\nKeep it lean and focused.",
+		prompt: "You are learning from daily standup transcripts of a software team. You start knowing nothing — everything must be discovered from the data.\n\nPrioritize specialization over generalization. Create dedicated specialists for each distinct thing you discover — individual team members, projects, dynamics, cultural signals — rather than lumping things together. If two things could be separate specialists, they should be.\n\nLet understanding build incrementally. Follow the data.",
 		model: "google/gemini-3.1-flash-lite-preview",
 		autoSetup: true,
 		ingest: { batchSize: 3 },
 		appBatchSize: 10,
+		duration: "~3 min",
 		learning: {
 			understand: {
 				thresholds: {
@@ -63,7 +66,8 @@ export const USE_CASES: UseCase[] = [
 		evolution: {
 			enabled: true,
 			autoEvaluate: true,
-			evaluatorSignalThreshold: 1,
+			evaluatorSignalThreshold: 5,
+			model: "x-ai/grok-4.1-fast",
 		},
 		dataPaths: [
 			"/demo/data/daily-standups/2026-02-25.json",
@@ -75,10 +79,11 @@ export const USE_CASES: UseCase[] = [
 		id: "product-feedback",
 		title: "Product Feedback",
 		description: "Watch a Brain learn from multi-channel feedback — tweets, support tickets, and app reviews.",
-		prompt: "Track product feedback for a B2B SaaS tool across support tickets, social media, and app reviews. Identify recurring themes, sentiment patterns, and emerging issues.\n\nKeep it lean — group related signals together rather than tracking each concern separately.",
+		prompt: "You are learning from product feedback for a B2B SaaS tool across support tickets, social media, and app reviews. You start knowing nothing.\n\nCreate dedicated specialists for each distinct concern you discover — sentiment patterns, feature requests, recurring issues, user segments. Specialize rather than generalize. Let understanding build incrementally from the data.",
 		model: "google/gemini-3.1-flash-lite-preview",
 		autoSetup: true,
 		ingest: { batchSize: 3 },
+		duration: "~1 min",
 		learning: {
 			understand: {
 				thresholds: {
@@ -89,8 +94,9 @@ export const USE_CASES: UseCase[] = [
 		},
 		evolution: {
 			enabled: true,
-			autoEvaluate: true,
-			evaluatorSignalThreshold: 1,
+			autoEvaluate: false,
+			evaluatorSignalThreshold: 5,
+			model: "x-ai/grok-4.1-fast",
 		},
 		dataPaths: [
 			"/demo/data/product-feedback/tweets.json",

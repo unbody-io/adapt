@@ -96,9 +96,11 @@ export function DemoOrchestrator() {
 				activity={state.activity}
 				commentary={state.commentary}
 				injectionProgress={state.injectionProgress}
+				evolutionActivity={state.evolutionActivity}
+				evolutionCommentary={state.evolutionCommentary}
 			/>
 
-			{/* Query bar — bottom center */}
+			{/* Query bar + evolution status — bottom center */}
 			<QueryBar
 				neurons={state.neurons}
 				disabled={state.phase !== "ready"}

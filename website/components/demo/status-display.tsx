@@ -10,13 +10,18 @@ interface Props {
 	activity: string
 	commentary: string
 	injectionProgress: InjectionProgress | null
+	evolutionActivity: string
+	evolutionCommentary: string
 }
 
-export function StatusDisplay({ activity, commentary, injectionProgress }: Props) {
+export function StatusDisplay({ activity, commentary, injectionProgress, evolutionActivity, evolutionCommentary }: Props) {
 	const lines = commentary ? commentary.split("\n\n").filter(Boolean) : []
 	const latestComment = lines.length > 0 ? lines[lines.length - 1] : null
 	const [commentKey, setCommentKey] = useState(0)
 	const prevCommentRef = useRef<string | null>(null)
+
+	const [evoCommentKey, setEvoCommentKey] = useState(0)
+	const prevEvoCommentRef = useRef<string | null>(null)
 
 	useEffect(() => {
 		if (latestComment && latestComment !== prevCommentRef.current) {
@@ -25,11 +30,19 @@ export function StatusDisplay({ activity, commentary, injectionProgress }: Props
 		}
 	}, [latestComment])
 
+	useEffect(() => {
+		if (evolutionCommentary && evolutionCommentary !== prevEvoCommentRef.current) {
+			prevEvoCommentRef.current = evolutionCommentary
+			setEvoCommentKey((k) => k + 1)
+		}
+	}, [evolutionCommentary])
+
 	const progress = injectionProgress?.batchCount
 		? injectionProgress.batchIndex / injectionProgress.batchCount
 		: 0
 
 	const showActivitySpinner = activity !== "" && activity !== "Ready" && activity !== "Brain ready" && activity !== "Injection complete"
+	const showEvoSpinner = evolutionActivity !== ""
 
 	return (
 		<div style={{
@@ -147,6 +160,50 @@ export function StatusDisplay({ activity, commentary, injectionProgress }: Props
 						blurAmount="6px"
 						animationKey={commentKey}
 					/>
+				</div>
+			)}
+
+			{/* Evolution block */}
+			{(evolutionActivity || evolutionCommentary) && (
+				<div style={{
+					display: "flex",
+					flexDirection: "column",
+					gap: "0.6rem",
+					paddingTop: "0.75rem",
+					borderTop: "1px solid rgba(155, 155, 168, 0.1)",
+				}}>
+					{evolutionActivity && (
+						<div style={{
+							fontSize: "0.7rem",
+							fontFamily: mono,
+							color: "#9b9ba8",
+							letterSpacing: "0.04em",
+							display: "inline-flex",
+							alignItems: "center",
+							gap: "0.5rem",
+						}}>
+							{showEvoSpinner && <Spinner />}
+							{evolutionActivity}
+						</div>
+					)}
+					{evolutionCommentary && (
+						<div style={{
+							fontSize: "0.88rem",
+							fontFamily: '"Georgia", "Times New Roman", serif',
+							color: "#6b6b78",
+							fontStyle: "italic",
+							lineHeight: 1.7,
+						}}>
+							<TextReveal
+								text={evolutionCommentary}
+								chunkType="sentence"
+								staggerDelay={0.04}
+								duration={0.4}
+								blurAmount="6px"
+								animationKey={evoCommentKey}
+							/>
+						</div>
+					)}
 				</div>
 			)}
 		</div>

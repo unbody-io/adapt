@@ -46,6 +46,8 @@ export interface CommentaryResult {
 	text: string
 	/** Priority events (evaluator, evolution) should never be dropped from the queue */
 	priority?: boolean
+	/** Where this commentary should appear */
+	category: "progress" | "evolution"
 }
 
 /**
@@ -65,7 +67,7 @@ export function commentaryFromEvent(
 			const configs = (payload.configs as Array<{ name: string; description: string }>)
 				.filter((c) => !c.name.startsWith("__internal"))
 			const areas = configs.map((c) => c.name).join(", ")
-			return { text: `Choosing ${configs.length} areas of focus: ${areas}.` }
+			return { text: `Choosing ${configs.length} areas of focus: ${areas}.`, category: "progress" }
 		}
 
 		case "brain:neuron:added": {
@@ -74,6 +76,7 @@ export function commentaryFromEvent(
 			const instructions = payload.instructions as string | undefined
 			return {
 				text: `Setting up ${name}${instructions ? ` — ${truncate(instructions, 150)}` : ""}.`,
+				category: "progress",
 			}
 		}
 
@@ -84,11 +87,12 @@ export function commentaryFromEvent(
 			flags.narratedInternalSetup = true
 			return {
 				text: "Deeper layers forming — global understanding, pattern tracking, gap detection.",
+				category: "progress",
 			}
 		}
 
 		case "brain:init:completed":
-			return { text: "All areas active and ready." }
+			return { text: "All areas active and ready.", category: "progress" }
 
 		// --- Injection: the star ---
 
@@ -97,15 +101,18 @@ export function commentaryFromEvent(
 			if (isInternalNeuron(neuronId)) return null
 			const evolution = payload.evolution as string | undefined
 			if (!evolution) return null
-			return { text: evolution }
+			return { text: evolution, category: "progress" }
 		}
 
 		// --- Injection: signals ---
 
 		case "brain:signal:received": {
-			const source = (payload.source as string).replace(/^user:/, "")
+			const source = payload.source as string
+			// Only show user-initiated signals, not internal system signals
+			if (!source.startsWith("user:")) return null
+			const label = source.replace(/^user:/, "")
 			const description = payload.description as string
-			return { text: `Signal from ${source}: "${truncate(description, 200)}"` }
+			return { text: `Signal from ${label}: "${truncate(description, 200)}"`, category: "evolution" }
 		}
 
 		// --- Injection: health changes ---
@@ -117,7 +124,7 @@ export function commentaryFromEvent(
 			const previousStatus = payload.previousStatus as string | undefined
 			if (!previousStatus || previousStatus === status) return null
 			const name = resolveName(brain, neuronId)
-			return { text: `${name}: ${previousStatus} → ${status}` }
+			return { text: `${name}: ${previousStatus} → ${status}`, category: "progress" }
 		}
 
 		// --- Evaluator ---
@@ -127,6 +134,7 @@ export function commentaryFromEvent(
 			return {
 				text: `Pausing to reflect on ${signalCount} signal${signalCount !== 1 ? "s" : ""}...`,
 				priority: true,
+				category: "evolution",
 			}
 		}
 
@@ -139,12 +147,14 @@ export function commentaryFromEvent(
 				return {
 					text: `Reorganizing: ${decisions}`,
 					priority: true,
+					category: "evolution",
 				}
 			}
 			const reasoning = payload.reasoning as string | undefined
 			return {
 				text: `Reflected — current structure works fine.${reasoning ? ` ${reasoning}` : ""}`,
 				priority: true,
+				category: "evolution",
 			}
 		}
 
@@ -172,6 +182,7 @@ export function commentaryFromEvent(
 			return {
 				text: templates[action] ?? `Changed ${targets}.`,
 				priority: true,
+				category: "evolution",
 			}
 		}
 

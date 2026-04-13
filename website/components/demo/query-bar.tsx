@@ -63,7 +63,7 @@ const s = {
 
 	wrapper: {
 		position: "fixed",
-		bottom: "1.5rem",
+		bottom: "3.5rem",
 		left: "50%",
 		transform: "translateX(-50%)",
 		zIndex: 60,

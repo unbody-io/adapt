@@ -8,7 +8,7 @@ import type {
 	InjectionProgress,
 	DataSource,
 } from "./types"
-import { commentaryFromEvent, isInternalNeuron, INTERNAL_NEURONS } from "./commentary"
+import { commentaryFromEvent, isInternalNeuron } from "./commentary"
 
 const defaultMetrics: NeuronMetrics = {
 	observations: 0,
@@ -378,22 +378,30 @@ export function useBrain() {
 					}
 				}
 
+				// Reset activity on top-level completion events
+				if (
+					eventType === "brain:init:completed" ||
+					eventType === "brain:inject:completed"
+				) {
+					setState((prev) => ({ ...prev, activity: "Ready" }))
+				}
+
 				// Evolution action tracking
 				if (eventType === "evaluator:evaluation:completed") {
 					pendingEvolutionRef.current = payload.decisionCount as number
 					if (pendingEvolutionRef.current === 0) {
-						setState((prev) => ({ ...prev, evolutionActivity: "" }))
+						setState((prev) => ({ ...prev, activity: "Ready", evolutionActivity: "" }))
 					}
 				}
 				if (eventType === "evolution:action:executed" || eventType === "evolution:action:failed") {
 					pendingEvolutionRef.current = Math.max(0, pendingEvolutionRef.current - 1)
 					if (pendingEvolutionRef.current === 0) {
-						setState((prev) => ({ ...prev, evolutionActivity: "" }))
+						setState((prev) => ({ ...prev, activity: "Ready", evolutionActivity: "" }))
 					}
 				}
 				if (eventType === "evaluator:evaluation:failed") {
 					pendingEvolutionRef.current = 0
-					setState((prev) => ({ ...prev, evolutionActivity: "" }))
+					setState((prev) => ({ ...prev, activity: "Ready", evolutionActivity: "" }))
 				}
 
 				// Structural changes → sync neuron list
@@ -573,10 +581,7 @@ function activityFromEvent(
 		case "brain:neuron:added": return { text: `Created "${payload.name}"`, category: "progress" }
 		case "neuron:init:started": {
 			const neuronId = payload.neuronId as string
-			const internal = INTERNAL_NEURONS[neuronId]
-			if (internal) {
-				return { text: `Preparing ${internal.name}...`, category: "progress" }
-			}
+			if (isInternalNeuron(neuronId)) return null
 			const neuron = brain.getNeuron(neuronId)
 			return { text: `Setting up "${neuron?.name ?? neuronId}"...`, category: "progress" }
 		}
@@ -590,14 +595,7 @@ function activityFromEvent(
 		case "neuron:observe:dismissed": return null
 		case "neuron:synthesize:started": return null
 		case "neuron:synthesized": return null
-		case "neuron:query:started": {
-			const neuronId = payload.neuronId as string
-			const internal = INTERNAL_NEURONS[neuronId]
-			if (internal) {
-				return { text: `Cross-referencing ${internal.name}...`, category: "progress" }
-			}
-			return null
-		}
+		case "neuron:query:started": return null
 		case "neuron:query:completed": return null
 		case "brain:signal:received": {
 			const source = payload.source as string

@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { ScrambleText } from '@/components/scramble-text';
 import { InstallCommand } from '@/components/install-command';
-import { buttonVariants } from 'fumadocs-ui/components/ui/button';
+import { buttonVariants } from '@/components/ui/button';
 
 export default function HomePage() {
   return (
@@ -24,13 +24,13 @@ export default function HomePage() {
       <div className="flex flex-row gap-3 items-center">
         <Link
           href="/docs"
-          className={buttonVariants({ color: 'primary', size: 'sm' })}
+          className={buttonVariants({ variant: 'default', size: 'sm' })}
         >
           Get started
         </Link>
         <Link
           href="/demo"
-          className={buttonVariants({ color: 'ghost', size: 'sm' })}
+          className={buttonVariants({ variant: 'ghost', size: 'sm' })}
         >
           Try it
         </Link>

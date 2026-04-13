@@ -3,13 +3,13 @@
 	"source": "standup-2026-03-10",
 	"label": "Day 3, Mar 10",
 	"summary": "Module sketches review, Mycelium brain integration test, and defining a unified project goal.",
-	"description": "R&D daily sprint with Amir Houieh, Noémi Biró, and Gabor Kerekes. Topics: scheduling a separate Friday meeting for safety regulations review, module design sketches exploring text-heavy and journey-based map views, Mycelium prototype demo with brain-powered bookmark clustering, and aligning on a unified concrete goal for the project.",
+	"description": "R&D daily sprint with Alex Chen, Nina Torres, and Greg Palmer. Topics: scheduling a separate Friday meeting for safety regulations review, module design sketches exploring text-heavy and journey-based map views, Mycelium prototype demo with brain-powered bookmark clustering, and aligning on a unified concrete goal for the project.",
 	"items": [
 		{
 			"id": "standup-2026-03-10-000000",
 			"label": "2026-03-10 [00:00:00]",
 			"data": {
-				"chunk": "Amir Houieh: Hey. Okay, sorry I had therapy. I think I will have my sketches as we discussed around five or six. I haven't looked at the safety documents yet — I'll make sure to do that before Friday. I also tried out some Mycelium features using the brain. It's nice, I wanted to show you. Noémi Biró: Oh, cool. So I'm not sure if Melissa expects us to discuss safety on Wednesday or not. But if we say we need more time to go through this document — she just sent it yesterday and I think she needs quite some input on it — then we can propose to do it later.",
+				"chunk": "Alex Chen: Hey. Okay, sorry I had therapy. I think I will have my sketches as we discussed around five or six. I haven't looked at the safety documents yet — I'll make sure to do that before Friday. I also tried out some Mycelium features using the brain. It's nice, I wanted to show you. Nina Torres: Oh, cool. So I'm not sure if Morgan expects us to discuss safety on Wednesday or not. But if we say we need more time to go through this document — she just sent it yesterday and I think she needs quite some input on it — then we can propose to do it later.",
 				"date": "2026-03-10"
 			}
 		},
@@ -17,7 +17,7 @@
 			"id": "standup-2026-03-10-000124",
 			"label": "2026-03-10 [00:01:24]",
 			"data": {
-				"chunk": "Amir Houieh: She sent it yesterday? I thought she sent it way before. But she already sent a lot of other things previously, right? Noémi Biró: This is the final document from Dina, and based on it Melissa now has a safety requirements product roadmap document. Does this work better for you? I tried something new — here we had the safety regulations and I linked the document here. Amir Houieh: Sounds good. As long as you have them all in one place, that definitely works better for me. Some of them might also need Gabor's input. Noémi Biró: I think for this whole thing it would be nice to have both of your input. I also gathered the questions we want to be able to answer — ultimately, what are the off-the-shelf products.",
+				"chunk": "Alex Chen: She sent it yesterday? I thought she sent it way before. But she already sent a lot of other things previously, right? Nina Torres: This is the final document from Dina, and based on it Morgan now has a safety requirements product roadmap document. Does this work better for you? I tried something new — here we had the safety regulations and I linked the document here. Alex Chen: Sounds good. As long as you have them all in one place, that definitely works better for me. Some of them might also need Greg's input. Nina Torres: I think for this whole thing it would be nice to have both of your input. I also gathered the questions we want to be able to answer — ultimately, what are the off-the-shelf products.",
 				"date": "2026-03-10"
 			}
 		},
@@ -25,7 +25,7 @@
 			"id": "standup-2026-03-10-000252",
 			"label": "2026-03-10 [00:02:52]",
 			"data": {
-				"chunk": "Noémi Biró: Okay, so I think it would be nicer to leave tomorrow's meeting about the modules and discuss safety on Friday. Amir Houieh: Definitely, no safety tomorrow — that should be separate. Noémi Biró: I'll send an invite to Melissa for Friday where we can discuss safety. That gives us more time to really dive deep into it. Amir Houieh: We can do that. And today I can send you my sketches if you're thinking to put them in FigJam or something. Noémi Biró: But you'll have them in the evening, right? Amir Houieh: After this I'm going to work on those. Gabor Kerekes: Hey, I'm just getting back from lunch. What's up?",
+				"chunk": "Nina Torres: Okay, so I think it would be nicer to leave tomorrow's meeting about the modules and discuss safety on Friday. Alex Chen: Definitely, no safety tomorrow — that should be separate. Nina Torres: I'll send an invite to Morgan for Friday where we can discuss safety. That gives us more time to really dive deep into it. Alex Chen: We can do that. And today I can send you my sketches if you're thinking to put them in FigJam or something. Nina Torres: But you'll have them in the evening, right? Alex Chen: After this I'm going to work on those. Greg Palmer: Hey, I'm just getting back from lunch. What's up?",
 				"date": "2026-03-10"
 			}
 		},
@@ -33,7 +33,7 @@
 			"id": "standup-2026-03-10-000428",
 			"label": "2026-03-10 [00:04:28]",
 			"data": {
-				"chunk": "Noémi Biró: I was just saying that tomorrow we're going to have this discussion with Melissa. I think it's good to focus tomorrow on the modules and then propose another meeting for Friday to tackle the safety regulations. We've already got quite some documents from her — she sent the last one, the safety requirements product roadmap, yesterday, and I think we need time to go through them. I gathered them here and I'll link the other ones too. I think it would be nice if all of us go through them and see if we can answer the questions. She really needs our input on what we think would be the best way to tackle this and what are the actionable points. So if we propose a Friday meeting with her —",
+				"chunk": "Nina Torres: I was just saying that tomorrow we're going to have this discussion with Morgan. I think it's good to focus tomorrow on the modules and then propose another meeting for Friday to tackle the safety regulations. We've already got quite some documents from her — she sent the last one, the safety requirements product roadmap, yesterday, and I think we need time to go through them. I gathered them here and I'll link the other ones too. I think it would be nice if all of us go through them and see if we can answer the questions. She really needs our input on what we think would be the best way to tackle this and what are the actionable points. So if we propose a Friday meeting with her —",
 				"date": "2026-03-10"
 			}
 		},
@@ -41,7 +41,7 @@
 			"id": "standup-2026-03-10-000540",
 			"label": "2026-03-10 [00:05:40]",
 			"data": {
-				"chunk": "Noémi Biró: — let's say around two, would that be enough time for you guys to read through these documents and digest them? Gabor Kerekes: Yeah. Noémi Biró: Okay. I'll set up that meeting. Other than that, I've been sketching a lot of the modules. Amir is also going to do some sketches, so we'll have quite a lot for tomorrow. The analytics dashboard we said we wait till the end of the week. Gabor Kerekes: Hopefully I'll have something by Friday. Do you need any input on sketching the modules? Noémi Biró: I can share where I'm at. There are two distinct approaches I've figured out. One is from the chat you have the option to enter a module, and inside the module you have a lot of text content.",
+				"chunk": "Nina Torres: — let's say around two, would that be enough time for you guys to read through these documents and digest them? Greg Palmer: Yeah. Nina Torres: Okay. I'll set up that meeting. Other than that, I've been sketching a lot of the modules. Alex is also going to do some sketches, so we'll have quite a lot for tomorrow. The analytics dashboard we said we wait till the end of the week. Greg Palmer: Hopefully I'll have something by Friday. Do you need any input on sketching the modules? Nina Torres: I can share where I'm at. There are two distinct approaches I've figured out. One is from the chat you have the option to enter a module, and inside the module you have a lot of text content.",
 				"date": "2026-03-10"
 			}
 		},
@@ -49,7 +49,7 @@
 			"id": "standup-2026-03-10-000738",
 			"label": "2026-03-10 [00:07:38]",
 			"data": {
-				"chunk": "Noémi Biró: This makes visible what tools are inside the module, and some tools are also available outside the module — for example appointment preparation — it just gives more focus inside. An alternative version is thinking in thematic maps. I went back to this because I always felt there's something there. If we think about the journey through these themes, this becomes your journey — how you experience it six weeks after loss. You're in this 'finding ground' phase, and the sessions you access connect to that stage. You get suggestions for where to focus today, exercises surfaced from these bubbles. But if you feel like focusing on the mind, you click on mind and get all eight sessions inside it.",
+				"chunk": "Nina Torres: This makes visible what tools are inside the module, and some tools are also available outside the module — for example appointment preparation — it just gives more focus inside. An alternative version is thinking in thematic maps. I went back to this because I always felt there's something there. If we think about the journey through these themes, this becomes your journey — how you experience it six weeks after loss. You're in this 'finding ground' phase, and the sessions you access connect to that stage. You get suggestions for where to focus today, exercises surfaced from these bubbles. But if you feel like focusing on the mind, you click on mind and get all eight sessions inside it.",
 				"date": "2026-03-10"
 			}
 		},
@@ -57,7 +57,7 @@
 			"id": "standup-2026-03-10-000918",
 			"label": "2026-03-10 [00:09:18]",
 			"data": {
-				"chunk": "Noémi Biró: You could also get a daily digest — a timeline showing things like an upcoming appointment in four days. Then you have both: the mind map view and a linear timeframe view, without making the linear timeline something you have to strictly follow. What I like about the journey approach is it can grow from where you are — incrementally expanding based on your interests and what you want to explore. For example, inside the six-weeks-after-loss module you have appointment prep, this questionnaire to gather information. But you'd also be able to access appointment prep directly without going through the module. Some exercises are just one click away.",
+				"chunk": "Nina Torres: You could also get a daily digest — a timeline showing things like an upcoming appointment in four days. Then you have both: the mind map view and a linear timeframe view, without making the linear timeline something you have to strictly follow. What I like about the journey approach is it can grow from where you are — incrementally expanding based on your interests and what you want to explore. For example, inside the six-weeks-after-loss module you have appointment prep, this questionnaire to gather information. But you'd also be able to access appointment prep directly without going through the module. Some exercises are just one click away.",
 				"date": "2026-03-10"
 			}
 		},
@@ -65,7 +65,7 @@
 			"id": "standup-2026-03-10-001025",
 			"label": "2026-03-10 [00:10:25]",
 			"data": {
-				"chunk": "Noémi Biró: You don't have to go through body and then inside. Those were the latest sketches. Today I wanted to sketch what happens when you go inside one of these — different exercises like what does a body check-in mean or what does a five senses exercise look like. Gabor Kerekes: Do you know the app called Open? It's for breathwork and meditation. It could be interesting to look at their interface because they have really good design. Noémi Biró: The mindfulness part? Gabor Kerekes: I mean they just have good design overall. Noémi Biró: Right, but this isn't really about the visual design — it's more about how to organize the content.",
+				"chunk": "Nina Torres: You don't have to go through body and then inside. Those were the latest sketches. Today I wanted to sketch what happens when you go inside one of these — different exercises like what does a body check-in mean or what does a five senses exercise look like. Greg Palmer: Do you know the app called Open? It's for breathwork and meditation. It could be interesting to look at their interface because they have really good design. Nina Torres: The mindfulness part? Greg Palmer: I mean they just have good design overall. Nina Torres: Right, but this isn't really about the visual design — it's more about how to organize the content.",
 				"date": "2026-03-10"
 			}
 		},
@@ -73,7 +73,7 @@
 			"id": "standup-2026-03-10-001200",
 			"label": "2026-03-10 [00:12:00]",
 			"data": {
-				"chunk": "Gabor Kerekes: That's also what I mean — there could be patterns that are useful because they also have these modules, and taking a look at how they organize them. Not the colors and fonts, more the patterns and how you navigate. Noémi Biró: Is this clear what this means? Amir Houieh: Definitely, from the UI point as we discussed yesterday there's work to be done, but that's what we're exploring. Maybe also show those inspirations quickly so Gab can get some ideas. Noémi Biró: One was these cards — when you're journaling you input your things on a card and resurface it later.",
+				"chunk": "Greg Palmer: That's also what I mean — there could be patterns that are useful because they also have these modules, and taking a look at how they organize them. Not the colors and fonts, more the patterns and how you navigate. Nina Torres: Is this clear what this means? Alex Chen: Definitely, from the UI point as we discussed yesterday there's work to be done, but that's what we're exploring. Maybe also show those inspirations quickly so Greg can get some ideas. Nina Torres: One was these cards — when you're journaling you input your things on a card and resurface it later.",
 				"date": "2026-03-10"
 			}
 		},
@@ -81,7 +81,7 @@
 			"id": "standup-2026-03-10-001314",
 			"label": "2026-03-10 [00:13:14]",
 			"data": {
-				"chunk": "Noémi Biró: And having a more calendar view. I already got inspired by this for the version I showed — what's today and what's upcoming. Amir Houieh: There was also the idea of reducing the UI's role so you can interact with Civil or do exercises without having your phone in hand — interacting through voice, or Civil reads something out. What type of exercise or activity could work that way, I'm going to sketch today at the exploration phase. Gabor Kerekes: That's pretty nice. I have this reservation around splitting things into very clean modules — here's your mind, here's your body, everything in boxes — where all these things interrelate and overlap in feedback loops.",
+				"chunk": "Nina Torres: And having a more calendar view. I already got inspired by this for the version I showed — what's today and what's upcoming. Alex Chen: There was also the idea of reducing the UI's role so you can interact with Civil or do exercises without having your phone in hand — interacting through voice, or Civil reads something out. What type of exercise or activity could work that way, I'm going to sketch today at the exploration phase. Greg Palmer: That's pretty nice. I have this reservation around splitting things into very clean modules — here's your mind, here's your body, everything in boxes — where all these things interrelate and overlap in feedback loops.",
 				"date": "2026-03-10"
 			}
 		},
@@ -89,7 +89,7 @@
 			"id": "standup-2026-03-10-001509",
 			"label": "2026-03-10 [00:15:09]",
 			"data": {
-				"chunk": "Gabor Kerekes: We do need those boxes because you need entry points into an exercise and you have to focus your attention. When meditating, sometimes you're looking at the mind, sometimes the body, sometimes holding both in awareness. Other times you're really focused — what's the sensation in my fingertip. But it's not clear where the mind starts and the body starts. I think somehow reflecting that in the design and navigation would be important — having a holistic vision that doesn't box things in. Maybe that's more philosophical than useful. Noémi Biró: I agree. Exercises would probably be tagged from multiple categories, not just one.",
+				"chunk": "Greg Palmer: We do need those boxes because you need entry points into an exercise and you have to focus your attention. When meditating, sometimes you're looking at the mind, sometimes the body, sometimes holding both in awareness. Other times you're really focused — what's the sensation in my fingertip. But it's not clear where the mind starts and the body starts. I think somehow reflecting that in the design and navigation would be important — having a holistic vision that doesn't box things in. Maybe that's more philosophical than useful. Nina Torres: I agree. Exercises would probably be tagged from multiple categories, not just one.",
 				"date": "2026-03-10"
 			}
 		},
@@ -97,7 +97,7 @@
 			"id": "standup-2026-03-10-001651",
 			"label": "2026-03-10 [00:16:51]",
 			"data": {
-				"chunk": "Amir Houieh: On my end, I tried to make a first prototype. The Mycelium I had was the very first version from mobile. I tried to connect the bookmark saving to the brain and built an interface. Let me share my screen — it's not quite there and it's very generic, but it's a start. Do you see it? Okay, so these are the feeds you want to save — a web page or whatever. I generated this data based on the Mycelium prototype. When you save items, they get processed — one or multiple — and first it does clustering against its existing knowledge base.",
+				"chunk": "Alex Chen: On my end, I tried to make a first prototype. The Mycelium I had was the very first version from mobile. I tried to connect the bookmark saving to the brain and built an interface. Let me share my screen — it's not quite there and it's very generic, but it's a start. Do you see it? Okay, so these are the feeds you want to save — a web page or whatever. I generated this data based on the Mycelium prototype. When you save items, they get processed — one or multiple — and first it does clustering against its existing knowledge base.",
 				"date": "2026-03-10"
 			}
 		},
@@ -105,7 +105,7 @@
 			"id": "standup-2026-03-10-001839",
 			"label": "2026-03-10 [00:18:39]",
 			"data": {
-				"chunk": "Amir Houieh: It determines which thread each item belongs to, then it gets processed and injected into the brain. Behind the scene there are these learners working, and you have threads you can ask questions about. For example, 'what tools and concepts have I been exploring?' — though I'm not sure if this is based on real data or something was lost in transformation. These are very small, cheap models behind the scene, not big ones. As you keep saving, everything evolves and grows over time. So these three items are done. Let's go to the threads — these are the threads that have been detected so far.",
+				"chunk": "Alex Chen: It determines which thread each item belongs to, then it gets processed and injected into the brain. Behind the scene there are these learners working, and you have threads you can ask questions about. For example, 'what tools and concepts have I been exploring?' — though I'm not sure if this is based on real data or something was lost in transformation. These are very small, cheap models behind the scene, not big ones. As you keep saving, everything evolves and grows over time. So these three items are done. Let's go to the threads — these are the threads that have been detected so far.",
 				"date": "2026-03-10"
 			}
 		},
@@ -113,7 +113,7 @@
 			"id": "standup-2026-03-10-002024",
 			"label": "2026-03-10 [00:20:24]",
 			"data": {
-				"chunk": "Amir Houieh: These are all based on one simple prompt. Let me destroy the whole thing and the data so we can run it again. Maybe it also helps to show how we initialize the brain. So this is the entire prompt I gave it — you are a memory behind Mycelium, my personal attention tracker. I think calling it just an attention tracker creates bad decisions because it's not only that — it's personal memory. I save things from everywhere: bookmarks, articles, notes, product ideas, code repositories. You describe what it is, could be much more refined. Then I define one handmade custom learner — its job is to observe and create threads based on the knowledge base. That's it.",
+				"chunk": "Alex Chen: These are all based on one simple prompt. Let me destroy the whole thing and the data so we can run it again. Maybe it also helps to show how we initialize the brain. So this is the entire prompt I gave it — you are a memory behind Mycelium, my personal attention tracker. I think calling it just an attention tracker creates bad decisions because it's not only that — it's personal memory. I save things from everywhere: bookmarks, articles, notes, product ideas, code repositories. You describe what it is, could be much more refined. Then I define one handmade custom learner — its job is to observe and create threads based on the knowledge base. That's it.",
 				"date": "2026-03-10"
 			}
 		},
@@ -121,7 +121,7 @@
 			"id": "standup-2026-03-10-002252",
 			"label": "2026-03-10 [00:22:52]",
 			"data": {
-				"chunk": "Amir Houieh: Then we initialize. For decomposing that prompt into learners we use Claude, which is a good model, but for the rest we use a cheap Gemini model. Right now it's decomposing the prompt into particular learners that it's supposed to learn from. The system keeps evaluating based on signals it receives and the data — it can grow these learners, split them, merge them. What happened? We have an error. Oh, I'm out of credit. But you get the idea. This is just a quick test. Gabor Kerekes: Nice. Where do you want to go with it further? Amir Houieh: I'd like to see it based on a more concrete scenario — real data that I can put to the test would be really nice.",
+				"chunk": "Alex Chen: Then we initialize. For decomposing that prompt into learners we use Claude, which is a good model, but for the rest we use a cheap Gemini model. Right now it's decomposing the prompt into particular learners that it's supposed to learn from. The system keeps evaluating based on signals it receives and the data — it can grow these learners, split them, merge them. What happened? We have an error. Oh, I'm out of credit. But you get the idea. This is just a quick test. Greg Palmer: Nice. Where do you want to go with it further? Alex Chen: I'd like to see it based on a more concrete scenario — real data that I can put to the test would be really nice.",
 				"date": "2026-03-10"
 			}
 		},
@@ -129,7 +129,7 @@
 			"id": "standup-2026-03-10-002419",
 			"label": "2026-03-10 [00:24:19]",
 			"data": {
-				"chunk": "Gabor Kerekes: What kind of real data? Amir Houieh: If you have real data that would be great, or if you already have the utilities for processing saved items, I could use those and keep saving things to see how it processes them. Or it could be historic data — my browser history or my Claude chat history, which is harder to get. Gabor Kerekes: Are there interesting questions you might want to ask Mycelium about yourself or your browsing habits? What kind of data would you give it, or what use case? For me, these use cases emerge from moments during my day when I want to do something and there's no tool for it. I'm using MyMind, this bookmarking thing —",
+				"chunk": "Greg Palmer: What kind of real data? Alex Chen: If you have real data that would be great, or if you already have the utilities for processing saved items, I could use those and keep saving things to see how it processes them. Or it could be historic data — my browser history or my Claude chat history, which is harder to get. Greg Palmer: Are there interesting questions you might want to ask Mycelium about yourself or your browsing habits? What kind of data would you give it, or what use case? For me, these use cases emerge from moments during my day when I want to do something and there's no tool for it. I'm using MyMind, this bookmarking thing —",
 				"date": "2026-03-10"
 			}
 		},
@@ -137,7 +137,7 @@
 			"id": "standup-2026-03-10-002603",
 			"label": "2026-03-10 [00:26:03]",
 			"data": {
-				"chunk": "Gabor Kerekes: — I use it but there are all these paper cuts and I don't like it, and then I have all these ideas. It's these friction points during the day. Do you have anything like that? Amir Houieh: The only friction I usually have every day is context switching between apps and having to copy-paste things around. Gabor Kerekes: If that's something repeatedly coming up, I feel like that's the most natural angle. It comes from within — you're not looking for some abstract use case or imagining how this will be useful for others. I think the best outcome is going to be when it comes from your own experience.",
+				"chunk": "Greg Palmer: — I use it but there are all these paper cuts and I don't like it, and then I have all these ideas. It's these friction points during the day. Do you have anything like that? Alex Chen: The only friction I usually have every day is context switching between apps and having to copy-paste things around. Greg Palmer: If that's something repeatedly coming up, I feel like that's the most natural angle. It comes from within — you're not looking for some abstract use case or imagining how this will be useful for others. I think the best outcome is going to be when it comes from your own experience.",
 				"date": "2026-03-10"
 			}
 		},
@@ -145,7 +145,7 @@
 			"id": "standup-2026-03-10-002724",
 			"label": "2026-03-10 [00:27:24]",
 			"data": {
-				"chunk": "Amir Houieh: That's a problem I have in general — I'm not very keen on particular problems. I'm keen on solutions, and that's probably why I'm here. I never built from problems, I built from the idea or solution I think is cool. Gabor Kerekes: There are two ways to approach it. If I think back on Kabika, the best projects were when those things met. On one hand I was just doing cool stuff — sitting down with no idea, just sketching in Photoshop, pure formal exploration, what looks cool, zero thought. On the other hand we had Susanna's assignments which were much more conceptual. Sometimes they connected and that's where the magic happened.",
+				"chunk": "Alex Chen: That's a problem I have in general — I'm not very keen on particular problems. I'm keen on solutions, and that's probably why I'm here. I never built from problems, I built from the idea or solution I think is cool. Greg Palmer: There are two ways to approach it. If I think back on Kabika, the best projects were when those things met. On one hand I was just doing cool stuff — sitting down with no idea, just sketching in Photoshop, pure formal exploration, what looks cool, zero thought. On the other hand we had Susanna's assignments which were much more conceptual. Sometimes they connected and that's where the magic happened.",
 				"date": "2026-03-10"
 			}
 		},
@@ -153,7 +153,7 @@
 			"id": "standup-2026-03-10-002838",
 			"label": "2026-03-10 [00:28:38]",
 			"data": {
-				"chunk": "Gabor Kerekes: You need that randomness — discovering things not edited by your rational mind — and then the other thread of thinking more linearly and rationally. Those two can intersect at some point. Both are valid. What's working for me is having things I wish existed that don't exist — that's what I want to build, solving my own problems. Amir Houieh: Indeed.",
+				"chunk": "Greg Palmer: You need that randomness — discovering things not edited by your rational mind — and then the other thread of thinking more linearly and rationally. Those two can intersect at some point. Both are valid. What's working for me is having things I wish existed that don't exist — that's what I want to build, solving my own problems. Alex Chen: Indeed.",
 				"date": "2026-03-10"
 			}
 		},
@@ -161,7 +161,7 @@
 			"id": "standup-2026-03-10-002955",
 			"label": "2026-03-10 [00:29:55]",
 			"data": {
-				"chunk": "Amir Houieh: Mentally I'm at this stage where I can't really think of problems, so I need a bit more direction — do this, try that. But I also think we should start bringing our things together and work towards the same goal. Otherwise we can keep exploring, but it's good to aim for one particular use case. It's important to define that tiny goal we're all unified on, make it, see what happens, then go next. I was expecting that to come from you since you started from your problem. Gabor Kerekes: Okay.",
+				"chunk": "Alex Chen: Mentally I'm at this stage where I can't really think of problems, so I need a bit more direction — do this, try that. But I also think we should start bringing our things together and work towards the same goal. Otherwise we can keep exploring, but it's good to aim for one particular use case. It's important to define that tiny goal we're all unified on, make it, see what happens, then go next. I was expecting that to come from you since you started from your problem. Greg Palmer: Okay.",
 				"date": "2026-03-10"
 			}
 		},
@@ -169,7 +169,7 @@
 			"id": "standup-2026-03-10-003059",
 			"label": "2026-03-10 [00:30:59]",
 			"data": {
-				"chunk": "Amir Houieh: If it was up to me, I would randomly go build the therapy session recording thing, but I don't want to just do random stuff. You don't have to answer now, but I wanted to bring it up. I think it's better to have some direction or merge our efforts together. Gabor Kerekes: I'll give it some thought. I do have ideas actually, I just need to write them down. I can cut out very specific things I would explore. For me the priority became: I want to get something working, even if it's duct tape — something in the browser where I can save articles, start using it. Maybe if we do some research together, collect items into a space, send each other links, so it becomes something —",
+				"chunk": "Alex Chen: If it was up to me, I would randomly go build the therapy session recording thing, but I don't want to just do random stuff. You don't have to answer now, but I wanted to bring it up. I think it's better to have some direction or merge our efforts together. Greg Palmer: I'll give it some thought. I do have ideas actually, I just need to write them down. I can cut out very specific things I would explore. For me the priority became: I want to get something working, even if it's duct tape — something in the browser where I can save articles, start using it. Maybe if we do some research together, collect items into a space, send each other links, so it becomes something —",
 				"date": "2026-03-10"
 			}
 		},
@@ -177,7 +177,7 @@
 			"id": "standup-2026-03-10-003220",
 			"label": "2026-03-10 [00:32:20]",
 			"data": {
-				"chunk": "Gabor Kerekes: — something living that meets us in our daily workflows, because that's where it meets reality. Otherwise it stays abstract. I do have a bunch of ideas in that direction. Amir Houieh: It would be nice to define common ground so we don't waste time exploring aimlessly. For example, if we all agree this is going to be an OS-level app like what you've built, then it doesn't make sense to build a browser extension. Instead, someone could focus on how to read data from the browser using that OS-level foundation — how you can bookmark things from the browser. That would be a much better effort. This way we'd be more constructive.",
+				"chunk": "Greg Palmer: — something living that meets us in our daily workflows, because that's where it meets reality. Otherwise it stays abstract. I do have a bunch of ideas in that direction. Alex Chen: It would be nice to define common ground so we don't waste time exploring aimlessly. For example, if we all agree this is going to be an OS-level app like what you've built, then it doesn't make sense to build a browser extension. Instead, someone could focus on how to read data from the browser using that OS-level foundation — how you can bookmark things from the browser. That would be a much better effort. This way we'd be more constructive.",
 				"date": "2026-03-10"
 			}
 		},
@@ -185,7 +185,7 @@
 			"id": "standup-2026-03-10-003324",
 			"label": "2026-03-10 [00:33:24]",
 			"data": {
-				"chunk": "Amir Houieh: For example, someone could focus on reading data from third parties — Gmail and other things. Or one of us focuses on how to read a real-time conversation, how to extract a transcription. Noémi Biró: That could already connect to what we're doing and to the therapy idea. Amir Houieh: Right, but the therapy is different. I'd like to focus on Mycelium and make it more concrete — have one version that gives us an idea, even very small and limited in features, but a complete end-to-end pipeline where we can say 'Mycelium is this.'",
+				"chunk": "Alex Chen: For example, someone could focus on reading data from third parties — Gmail and other things. Or one of us focuses on how to read a real-time conversation, how to extract a transcription. Nina Torres: That could already connect to what we're doing and to the therapy idea. Alex Chen: Right, but the therapy is different. I'd like to focus on Mycelium and make it more concrete — have one version that gives us an idea, even very small and limited in features, but a complete end-to-end pipeline where we can say 'Mycelium is this.'",
 				"date": "2026-03-10"
 			}
 		},
@@ -193,7 +193,7 @@
 			"id": "standup-2026-03-10-003435",
 			"label": "2026-03-10 [00:34:35]",
 			"data": {
-				"chunk": "Noémi Biró: I think to really show what Mycelium is, it's important to not have only one use case. Otherwise the association will be 'Mycelium is just a bookmarking tool.' Gabor Kerekes: Right, to show it works across different things — something tracking your attention that interrupts you with a breathing exercise, then another interface for bookmarking, maybe a third one too. I can definitely think of really small tasks that can be cut out from this to build. Noémi Biró: How about we agree that in tomorrow's daily you show us some concrete scenarios so we can narrow it down? Gabor Kerekes: Yeah. Amir Houieh: Overall we're going well. I just wanted to have a bit more direction.",
+				"chunk": "Nina Torres: I think to really show what Mycelium is, it's important to not have only one use case. Otherwise the association will be 'Mycelium is just a bookmarking tool.' Greg Palmer: Right, to show it works across different things — something tracking your attention that interrupts you with a breathing exercise, then another interface for bookmarking, maybe a third one too. I can definitely think of really small tasks that can be cut out from this to build. Nina Torres: How about we agree that in tomorrow's daily you show us some concrete scenarios so we can narrow it down? Greg Palmer: Yeah. Alex Chen: Overall we're going well. I just wanted to have a bit more direction.",
 				"date": "2026-03-10"
 			}
 		},
@@ -201,7 +201,7 @@
 			"id": "standup-2026-03-10-003601",
 			"label": "2026-03-10 [00:36:01]",
 			"data": {
-				"chunk": "Amir Houieh: Awesome. I have another call in two minutes. I'll talk to you this afternoon, Noémi, or I'll just send my sketches. I should watch out — I think I'm on the edge of a mental breakdown. Gabor Kerekes: Take it easy. Don't push yourself. Amir Houieh: I think work also helps, honestly. But okay, don't worry guys, it's going to be alright — I just might not be at 100% energy. Okay, thanks. Talk to you later. Oh by the way, I need to work on the minutes as well — I'll make a proposal and we can review it together.",
+				"chunk": "Alex Chen: Awesome. I have another call in two minutes. I'll talk to you this afternoon, Nina, or I'll just send my sketches. I should watch out — I think I'm on the edge of a mental breakdown. Greg Palmer: Take it easy. Don't push yourself. Alex Chen: I think work also helps, honestly. But okay, don't worry guys, it's going to be alright — I just might not be at 100% energy. Okay, thanks. Talk to you later. Oh by the way, I need to work on the minutes as well — I'll make a proposal and we can review it together.",
 				"date": "2026-03-10"
 			}
 		}

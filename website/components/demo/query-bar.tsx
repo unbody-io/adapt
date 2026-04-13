@@ -2,6 +2,10 @@ import { useState, useRef, useEffect, useCallback, type CSSProperties, type RefO
 import Markdown from "react-markdown"
 import type { Brain, BaseNeuron } from "@unbody/adapt"
 import type { Neuron } from "../../lib/demo/types"
+import { Switch } from "@/components/ui/switch"
+import { Button } from "@/components/ui/button"
+import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover"
+import { Check } from "lucide-react"
 
 interface Source {
 	id: string
@@ -27,11 +31,17 @@ interface QueryResult {
 	error?: string
 }
 
+interface Suggestions {
+	ask: string[]
+	signal: string[]
+}
+
 interface Props {
 	neurons: Neuron[]
 	disabled: boolean
 	brainRef: RefObject<Brain | null>
 	onActiveChange?: (active: boolean) => void
+	suggestions?: Suggestions
 }
 
 async function classifyIntent(query: string, neurons: Neuron[]): Promise<"ask" | "signal"> {
@@ -67,7 +77,7 @@ const s = {
 		left: "50%",
 		transform: "translateX(-50%)",
 		zIndex: 60,
-		width: 500,
+		width: 600,
 		display: "flex",
 		flexDirection: "column",
 		gap: "0.5rem",
@@ -79,7 +89,7 @@ const s = {
 		WebkitBackdropFilter: "blur(32px)",
 		borderRadius: 14,
 		boxShadow: "0 4px 24px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.04)",
-		padding: "0.75rem 1.2rem",
+		padding: "0.85rem 1.3rem",
 		display: "flex",
 		flexDirection: "column",
 		gap: "0.5rem",
@@ -87,90 +97,35 @@ const s = {
 
 	inputRow: {
 		display: "flex",
-		alignItems: "center",
-		gap: "0.5rem",
+		alignItems: "flex-end",
+		gap: "0.6rem",
 	} as CSSProperties,
 
 	input: {
 		flex: 1,
+		minHeight: "1.9rem",
+		maxHeight: 180,
 		background: "none",
 		border: "none",
 		outline: "none",
-		fontSize: "0.92rem",
+		fontSize: "0.95rem",
 		fontFamily: '"SF Mono", "Fira Code", "Cascadia Code", monospace',
 		color: "#1a1a1f",
-		padding: "0.4rem 0",
+		padding: "0.45rem 0",
 		letterSpacing: "-0.01em",
-	} as CSSProperties,
-
-	submitBtn: {
-		background: "none",
-		border: "none",
-		cursor: "pointer",
-		color: "#9b9ba8",
-		fontSize: "0.9rem",
-		padding: "4px 6px",
-		lineHeight: 1,
-		transition: "color 0.15s",
-	} as CSSProperties,
-
-	menuToggle: {
-		background: "none",
-		border: "none",
-		cursor: "pointer",
-		color: "#9b9ba8",
-		fontSize: "0.72rem",
-		padding: "4px 6px",
-		lineHeight: 1,
-		transition: "color 0.15s",
-		fontFamily: '"SF Mono", "Fira Code", "Cascadia Code", monospace',
-	} as CSSProperties,
-
-	menu: {
-		position: "absolute",
-		bottom: "100%",
-		left: 0,
-		right: 0,
-		marginBottom: 4,
-		background: "rgba(255, 255, 255, 0.85)",
-		backdropFilter: "blur(24px)",
-		WebkitBackdropFilter: "blur(24px)",
-		borderRadius: 10,
-		boxShadow: "0 4px 16px rgba(0,0,0,0.08)",
-		padding: "0.35rem 0",
-		maxHeight: 200,
+		lineHeight: 1.5,
+		resize: "none",
 		overflowY: "auto",
-		scrollbarWidth: "none",
+		fieldSizing: "content",
 	} as CSSProperties,
 
-	menuItem: {
-		display: "flex",
-		alignItems: "center",
-		gap: "0.5rem",
-		width: "100%",
-		padding: "0.45rem 0.9rem",
-		background: "none",
-		border: "none",
-		cursor: "pointer",
-		fontSize: "0.75rem",
-		color: "#6b6b78",
-		textAlign: "left",
-		transition: "background 0.1s",
-		fontFamily: '"SF Mono", "Fira Code", "Cascadia Code", monospace',
-	} as CSSProperties,
-
-	menuCheck: {
-		width: 14,
-		fontSize: "0.65rem",
-		color: "#1a1a1f",
-	} as CSSProperties,
 
 	resultsAnchor: {
 		position: "fixed",
 		top: 0,
 		left: "50%",
 		transform: "translateX(-50%)",
-		width: 520,
+		width: 620,
 		zIndex: 60,
 		height: "100vh",
 		overflowY: "auto",
@@ -262,7 +217,56 @@ function SourceCards({ sources }: { sources: Source[] }) {
 	)
 }
 
-export function QueryBar({ neurons, disabled, brainRef, onActiveChange }: Props) {
+function SuggestionGroup({ label, items, onPick }: { label: string; items: string[]; onPick: (q: string) => void }) {
+	const isSignal = label === "signal"
+	return (
+		<div style={{ display: "flex", flexDirection: "column", gap: "0.3rem" }}>
+			<span style={{
+				fontSize: "0.54rem",
+				fontWeight: 500,
+				textTransform: "uppercase",
+				letterSpacing: "0.08em",
+				color: "#9b9ba8",
+				fontFamily: '"SF Mono", "Fira Code", "Cascadia Code", monospace',
+				paddingLeft: "0.15rem",
+			}}>
+				{label}
+			</span>
+			{items.map((item) => (
+				<button
+					key={item}
+					type="button"
+					style={{
+						background: isSignal ? "rgba(45, 122, 79, 0.04)" : "rgba(26, 26, 31, 0.03)",
+						border: `1px solid ${isSignal ? "rgba(45, 122, 79, 0.15)" : "rgba(155, 155, 168, 0.15)"}`,
+						borderRadius: 99,
+						padding: "0.3rem 0.7rem",
+						cursor: "pointer",
+						fontSize: "0.68rem",
+						fontFamily: '"SF Mono", "Fira Code", "Cascadia Code", monospace',
+						color: isSignal ? "rgba(45, 122, 79, 0.6)" : "#9b9ba8",
+						transition: "color 0.15s, border-color 0.15s",
+						textAlign: "left",
+						alignSelf: "flex-start",
+					}}
+					onMouseEnter={(e) => {
+						e.currentTarget.style.color = isSignal ? "rgb(45, 122, 79)" : "#1a1a1f"
+						e.currentTarget.style.borderColor = isSignal ? "rgba(45, 122, 79, 0.35)" : "rgba(155, 155, 168, 0.3)"
+					}}
+					onMouseLeave={(e) => {
+						e.currentTarget.style.color = isSignal ? "rgba(45, 122, 79, 0.6)" : "#9b9ba8"
+						e.currentTarget.style.borderColor = isSignal ? "rgba(45, 122, 79, 0.15)" : "rgba(155, 155, 168, 0.15)"
+					}}
+					onClick={() => onPick(item)}
+				>
+					{item}
+				</button>
+			))}
+		</div>
+	)
+}
+
+export function QueryBar({ neurons, disabled, brainRef, onActiveChange, suggestions }: Props) {
 	const [query, setQuery] = useState("")
 	const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
 	const [deepSearch, setDeepSearch] = useState(false)
@@ -270,7 +274,7 @@ export function QueryBar({ neurons, disabled, brainRef, onActiveChange }: Props)
 	const [loading, setLoading] = useState(false)
 	const [result, setResult] = useState<QueryResult | null>(null)
 	const [menuOpen, setMenuOpen] = useState(false)
-	const inputRef = useRef<HTMLInputElement>(null)
+	const inputRef = useRef<HTMLTextAreaElement>(null)
 	const abortRef = useRef<AbortController | null>(null)
 
 	const searchOpen = result?.intent === "ask"
@@ -292,6 +296,19 @@ export function QueryBar({ neurons, disabled, brainRef, onActiveChange }: Props)
 		window.addEventListener("keydown", onKey)
 		return () => window.removeEventListener("keydown", onKey)
 	}, [searchOpen, closeSearch])
+
+	useEffect(() => {
+		if (!disabled) return
+		setFocused(false)
+		setMenuOpen(false)
+	}, [disabled])
+
+	useEffect(() => {
+		const textarea = inputRef.current
+		if (!textarea) return
+		textarea.style.height = "0px"
+		textarea.style.height = `${Math.min(textarea.scrollHeight, 180)}px`
+	}, [query, disabled])
 
 	const toggleNeuron = (id: string) => {
 		setSelectedIds((prev) => {
@@ -408,22 +425,28 @@ export function QueryBar({ neurons, disabled, brainRef, onActiveChange }: Props)
 		}
 	}
 
-	const onKeyDown = (e: React.KeyboardEvent) => {
-		if (e.key === "Enter" && !e.shiftKey) {
+	const onKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+		if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
 			e.preventDefault()
 			submit()
 		}
 	}
 
+	const showSuggestions = focused && !query && !loading && !searchOpen && suggestions && (suggestions.ask.length > 0 || suggestions.signal.length > 0)
+
 	return (
 		<>
+			{/* Backdrop: full blur for search results, lighter blur for focused/suggestions */}
 			<div
 				style={{
 					...s.backdropBase,
-					opacity: searchOpen ? 1 : 0,
+					opacity: searchOpen || showSuggestions ? 1 : 0,
 					pointerEvents: searchOpen ? "auto" : "none",
+					background: searchOpen ? "rgba(255, 255, 255, 0.4)" : "rgba(255, 255, 255, 0.25)",
+					backdropFilter: searchOpen ? "blur(16px)" : "blur(10px)",
+					WebkitBackdropFilter: searchOpen ? "blur(16px)" : "blur(10px)",
 				}}
-				onClick={closeSearch}
+				onClick={searchOpen ? closeSearch : undefined}
 			/>
 
 			{searchOpen && result && (
@@ -480,6 +503,30 @@ export function QueryBar({ neurons, disabled, brainRef, onActiveChange }: Props)
 			)}
 
 			<div style={s.wrapper}>
+				{showSuggestions && (
+					<div style={{
+						display: "flex",
+						flexDirection: "column",
+						gap: "0.75rem",
+						padding: "0 0.2rem 0.25rem",
+					}}>
+						{suggestions.ask.length > 0 && (
+							<SuggestionGroup
+								label="ask"
+								items={suggestions.ask}
+								onPick={(q) => { setQuery(q); inputRef.current?.focus() }}
+							/>
+						)}
+						{suggestions.signal.length > 0 && (
+							<SuggestionGroup
+								label="signal"
+								items={suggestions.signal}
+								onPick={(q) => { setQuery(q); inputRef.current?.focus() }}
+							/>
+						)}
+					</div>
+				)}
+
 				<div
 					style={{ ...s.card, position: "relative" }}
 					onBlur={(e) => {
@@ -489,66 +536,71 @@ export function QueryBar({ neurons, disabled, brainRef, onActiveChange }: Props)
 						}
 					}}
 				>
-					{menuOpen && neurons.length > 0 && (
-						<div style={s.menu}>
-							{neurons.map((n) => {
-								const on = selectedIds.has(n.id)
-								return (
-									<button key={n.id} type="button" style={s.menuItem} onClick={() => toggleNeuron(n.id)}>
-										<span style={s.menuCheck}>{on ? "✓" : ""}</span>
-										<span>{n.name}</span>
-									</button>
-								)
-							})}
-						</div>
-					)}
-
 					<div style={s.inputRow}>
-						<input
+						<textarea
 							ref={inputRef}
-							type="text"
 							value={query}
-							placeholder="ask the brain something..."
+							placeholder={disabled ? "waiting for injection to start..." : "ask the brain something..."}
 							style={s.input}
+							disabled={disabled}
 							onFocus={() => setFocused(true)}
 							onChange={(e) => setQuery(e.target.value)}
 							onKeyDown={onKeyDown}
 						/>
 						{focused && (
-							<button
-								type="button"
-								style={{ ...s.menuToggle, color: deepSearch ? "#1a1a1f" : "#9b9ba8" }}
-								onClick={() => setDeepSearch((v) => !v)}
-								title={deepSearch ? "Deep search (agentic)" : "Direct search (fast)"}
-							>
-								{deepSearch ? "deep" : "fast"}
-							</button>
+							<div className="flex items-center gap-1.5 shrink-0">
+								<span className="text-xs text-muted-foreground">fast</span>
+								<Switch
+									checked={deepSearch}
+									onCheckedChange={setDeepSearch}
+								/>
+								<span className="text-xs text-muted-foreground">deep</span>
+							</div>
 						)}
 						{focused && neurons.length > 0 && (
-							<button
-								type="button"
-								style={{ ...s.menuToggle, color: selectedIds.size > 0 ? "#1a1a1f" : "#9b9ba8" }}
-								onClick={() => setMenuOpen((v) => !v)}
-							>
-								{selectedIds.size > 0 ? `${selectedIds.size}↕` : "↕"}
-							</button>
+							<Popover open={menuOpen} onOpenChange={setMenuOpen}>
+								<PopoverTrigger
+									render={<Button variant="outline" size="sm" />}
+								>
+									{selectedIds.size > 0 ? `${selectedIds.size} neurons` : "neurons"}
+								</PopoverTrigger>
+								<PopoverContent side="top" sideOffset={8} className="w-56 p-1">
+									{neurons.map((n) => {
+										const on = selectedIds.has(n.id)
+										return (
+											<button
+												key={n.id}
+												type="button"
+												className="flex w-full items-center gap-2 rounded-md px-2.5 py-2 text-sm hover:bg-muted transition-colors text-left"
+												onClick={() => toggleNeuron(n.id)}
+											>
+												<span className="flex size-4 items-center justify-center">
+													{on && <Check className="size-3.5" />}
+												</span>
+												<span>{n.name}</span>
+											</button>
+										)
+									})}
+								</PopoverContent>
+							</Popover>
 						)}
 						{focused && (
-							<button
-								type="button"
-								style={{ ...s.submitBtn, opacity: loading ? 0.4 : 1, cursor: loading ? "default" : "pointer" }}
-								onClick={submit}
+							<Button
+								size="sm"
 								disabled={loading}
+								onClick={submit}
 							>
 								↵
-							</button>
+							</Button>
 						)}
 					</div>
 
 					{result && !result.intent && result.status && (
 						<div style={s.inlineStatus}>{result.status}</div>
 					)}
+
 				</div>
+
 			</div>
 		</>
 	)

@@ -42,6 +42,11 @@ export interface UseCase {
 	/** Estimated duration label, e.g. "~3 min" */
 	duration?: string
 	dataPaths: string[]
+	/** Suggested queries shown in the search bar */
+	suggestions?: {
+		ask: string[]
+		signal: string[]
+	}
 }
 
 export const USE_CASES: UseCase[] = [
@@ -74,6 +79,17 @@ export const USE_CASES: UseCase[] = [
 			// "/demo/data/daily-standups/2026-03-04.json",
 			// "/demo/data/daily-standups/2026-03-10.json",
 		],
+		suggestions: {
+			ask: [
+				"What projects is the team working on?",
+				"Who is responsible for what?",
+				"What are the main blockers?",
+			],
+			signal: [
+				"Pay more attention to team dynamics",
+				"Focus on engineering principles discussed",
+			],
+		},
 	},
 	{
 		id: "product-feedback",
@@ -103,5 +119,53 @@ export const USE_CASES: UseCase[] = [
 			"/demo/data/product-feedback/support-tickets.json",
 			"/demo/data/product-feedback/app-reviews.json",
 		],
+		suggestions: {
+			ask: [
+				"What are users most frustrated about?",
+				"What do enterprise customers need?",
+			],
+			signal: [
+				"Prioritize tracking sentiment trends",
+				"Start separating feature requests from bug reports",
+			],
+		},
+	},
+	{
+		id: "space-exploration",
+		title: "Space Exploration",
+		description: "Watch a Brain learn from Wikipedia articles about space missions, astronauts, and agencies.",
+		prompt: "You are learning from Wikipedia articles about space exploration. You start knowing nothing — everything must be discovered from the data.\n\nPrioritize specialization over generalization. Create dedicated specialists for each distinct thing you discover — missions, people, agencies, technologies, eras — rather than lumping things together. If two things could be separate specialists, they should be.\n\nLet understanding build incrementally. Follow the data.",
+		model: "google/gemini-3.1-flash-lite-preview",
+		autoSetup: true,
+		ingest: { batchSize: 3 },
+		duration: "~2 min",
+		learning: {
+			understand: {
+				thresholds: {
+					maxObservations: 4,
+					minImportance: 0.1,
+				},
+			},
+		},
+		evolution: {
+			enabled: true,
+			autoEvaluate: true,
+			evaluatorSignalThreshold: 5,
+			model: "x-ai/grok-4.1-fast",
+		},
+		dataPaths: [
+			"/demo/data/space-exploration/missions.json",
+			"/demo/data/space-exploration/pioneers.json",
+		],
+		suggestions: {
+			ask: [
+				"Who was the first person on the Moon?",
+				"What happened during Apollo 13?",
+			],
+			signal: [
+				"Track connections between missions and people",
+				"Focus on how technology evolved over decades",
+			],
+		},
 	},
 ]

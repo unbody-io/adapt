@@ -1,28 +1,16 @@
 "use client"
 
 import { useState, useRef, useEffect, useCallback } from "react"
-import { motion } from "motion/react"
-import { Clock, Activity, MessageSquare, ArrowRight } from "lucide-react"
+import { Clock } from "lucide-react"
 import { USE_CASES, type UseCase, type ModelRef } from "../../lib/demo/use-cases"
+import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
 import { TextReveal } from "./text-reveal"
 
 function modelName(m: string | ModelRef | undefined): string | null {
 	if (!m) return null
 	const id = typeof m === "string" ? m : m.model
 	return id.includes("/") ? id.split("/").pop()! : id
-}
-
-const CARD_META: Record<string, { icon: typeof Activity; color: string; bgColor: string }> = {
-	"daily-standups": {
-		icon: Activity,
-		color: "rgb(45, 122, 79)",
-		bgColor: "rgba(45, 122, 79, 0.1)",
-	},
-	"product-feedback": {
-		icon: MessageSquare,
-		color: "rgb(155, 155, 168)",
-		bgColor: "rgba(155, 155, 168, 0.1)",
-	},
 }
 
 interface Props {
@@ -89,13 +77,10 @@ export function ConversationFlow({ onStart }: Props) {
 				maxWidth: 720,
 				minHeight: 340,
 				padding: "0 2rem",
-				position: "relative",
+				boxSizing: "border-box",
 			}}>
 				{step === "pick" && (
 					<div style={{
-						position: "absolute",
-						inset: 0,
-						padding: "0 2rem",
 						display: "flex",
 						flexDirection: "column",
 						gap: "2rem",
@@ -116,195 +101,125 @@ export function ConversationFlow({ onStart }: Props) {
 								onComplete={() => setRevealDone(true)}
 							/>
 						</div>
-						<div style={{
-							display: "flex",
-							gap: "1rem",
-							opacity: revealDone ? 1 : 0,
-							transform: revealDone ? "translateY(0)" : "translateY(6px)",
-							transition: "opacity 0.3s ease, transform 0.3s ease",
-							pointerEvents: revealDone ? "auto" : "none",
-						}}>
-							{USE_CASES.map((uc, index) => {
-								const meta = CARD_META[uc.id] ?? CARD_META["product-feedback"]
-								const Icon = meta.icon
-								const models = [modelName(uc.model), modelName(uc.evolution?.model)].filter(Boolean).join(" + ")
+						<div
+							className="demo-card-grid"
+							style={{
+								display: "grid",
+								gap: "0.75rem",
+								width: "100%",
+								opacity: revealDone ? 1 : 0,
+								transition: "opacity 0.3s ease",
+								pointerEvents: revealDone ? "auto" : "none",
+							}}
+						>
+							{USE_CASES.map((uc) => {
+								const models = [modelName(uc.model), modelName(uc.evolution?.model)].filter(Boolean)
 
 								return (
-									<motion.button
+									<button
 										key={uc.id}
-										initial={{ opacity: 0, y: 20 }}
-										animate={{ opacity: 1, y: 0 }}
-										transition={{ duration: 0.5, delay: index * 0.12, ease: [0.16, 1, 0.3, 1] }}
-										whileHover={{ y: -4 }}
-										whileTap={{ scale: 0.98 }}
+										type="button"
 										onClick={() => handleSelect(uc)}
 										className="demo-option-card"
 										style={{
-											flex: "1 1 0px",
-											background: "rgba(26, 26, 31, 0.02)",
-											border: "1px solid rgba(155, 155, 168, 0.12)",
-											borderRadius: 20,
-											padding: "1.5rem",
+											background: "#fff",
+											border: "1px solid #e0e0e3",
+											borderRadius: 12,
+											padding: "1.25rem",
 											cursor: "pointer",
 											textAlign: "left",
 											display: "flex",
 											flexDirection: "column",
-											gap: "0.75rem",
-											transition: "border-color 0.3s, box-shadow 0.3s, background 0.3s",
-										}}
-										onMouseEnter={(e) => {
-											e.currentTarget.style.borderColor = "rgba(155, 155, 168, 0.3)"
-											e.currentTarget.style.boxShadow = "0 20px 40px -15px rgba(0,0,0,0.05)"
-											e.currentTarget.style.background = "rgba(26, 26, 31, 0.03)"
-										}}
-										onMouseLeave={(e) => {
-											e.currentTarget.style.borderColor = "rgba(155, 155, 168, 0.12)"
-											e.currentTarget.style.boxShadow = "none"
-											e.currentTarget.style.background = "rgba(26, 26, 31, 0.02)"
+											gap: "0.5rem",
+											minWidth: 0,
+											overflow: "hidden",
 										}}
 									>
-										{/* Header: icon + title | duration */}
-										<div style={{
-											display: "flex",
-											alignItems: "center",
-											justifyContent: "space-between",
-											gap: "0.75rem",
-										}}>
-											<div style={{ display: "flex", alignItems: "center", gap: "0.65rem" }}>
-												<div style={{
-													padding: "0.45rem",
-													borderRadius: 12,
-													backgroundColor: meta.bgColor,
-													color: meta.color,
-													display: "flex",
-													alignItems: "center",
-													justifyContent: "center",
-												}}>
-													<Icon size={18} strokeWidth={1.5} />
-												</div>
-												<span style={{
-													fontSize: "0.95rem",
-													fontWeight: 500,
-													color: "#1a1a1f",
-													fontFamily: mono,
-													letterSpacing: "-0.01em",
-												}}>
-													{uc.title}
-												</span>
-											</div>
-											{uc.duration && (
-												<div style={{
-													display: "flex",
-													alignItems: "center",
-													gap: "0.3rem",
-													padding: "0.2rem 0.55rem",
-													borderRadius: 99,
-													background: "rgba(155, 155, 168, 0.08)",
-													color: "#1a1a1f",
-													opacity: 0.5,
-												}}>
-													<Clock size={12} />
-													<span style={{
-														fontSize: "0.65rem",
-														fontFamily: mono,
-														fontWeight: 500,
-													}}>
-														{uc.duration}
-													</span>
-												</div>
-											)}
-										</div>
-
-										{/* Description */}
-										<p style={{
-											margin: 0,
-											fontSize: "0.82rem",
-											color: "#6b6b78",
-											lineHeight: 1.6,
-											fontFamily: mono,
-											fontWeight: 300,
-											flex: 1,
-										}}>
-											{uc.description}
-										</p>
-
-										{/* Footer: eval + models | arrow */}
 										<div style={{
 											display: "flex",
 											alignItems: "center",
 											justifyContent: "space-between",
 											gap: "0.5rem",
-											paddingTop: "0.75rem",
-											borderTop: "1px solid rgba(155, 155, 168, 0.1)",
 										}}>
-											<div style={{ display: "flex", alignItems: "center", gap: "0.5rem", minWidth: 0 }}>
+											<span style={{
+												fontSize: "0.78rem",
+												fontWeight: 300,
+												color: "#1a1a1f",
+												fontFamily: mono,
+											}}>
+												{uc.title}
+											</span>
+											{uc.duration && (
 												<span style={{
 													display: "inline-flex",
 													alignItems: "center",
-													gap: "0.3rem",
-													fontSize: "0.62rem",
+													gap: "0.25rem",
+													fontSize: "0.65rem",
 													fontFamily: mono,
-													fontWeight: 600,
-													textTransform: "uppercase",
-													letterSpacing: "0.05em",
-													color: uc.evolution?.autoEvaluate ? meta.color : "#9b9ba8",
+													color: "#9b9ba8",
 													flexShrink: 0,
 												}}>
-													<span style={{
-														width: 7,
-														height: 7,
-														borderRadius: "50%",
-														background: uc.evolution?.autoEvaluate ? meta.color : "rgba(155, 155, 168, 0.4)",
-														flexShrink: 0,
-													}} />
-													{uc.evolution?.autoEvaluate ? "auto-eval" : "manual eval"}
+													<Clock size={11} />
+													{uc.duration}
 												</span>
-												{models && (
-													<>
-														<span style={{ color: "rgba(155, 155, 168, 0.3)" }}>·</span>
-														<span style={{
-															fontSize: "0.58rem",
-															fontFamily: mono,
-															color: "#9b9ba8",
-															opacity: 0.8,
-															fontWeight: 300,
-															overflow: "hidden",
-															textOverflow: "ellipsis",
-															whiteSpace: "nowrap",
-														}}>
-															{models}
-														</span>
-													</>
-												)}
-											</div>
-											<div
-												className="demo-card-arrow"
-												style={{
-													width: 26,
-													height: 26,
-													borderRadius: "50%",
-													border: "1px solid rgba(155, 155, 168, 0.2)",
-													display: "flex",
-													alignItems: "center",
-													justifyContent: "center",
-													color: "#1a1a1f",
-													opacity: 0,
-													transform: "translateX(-8px)",
-													transition: "opacity 0.3s, transform 0.3s",
-													flexShrink: 0,
-												}}
-											>
-												<ArrowRight size={13} />
-											</div>
+											)}
 										</div>
-									</motion.button>
+
+										<p style={{
+											margin: 0,
+											fontSize: "0.78rem",
+											color: "#6b6b78",
+											lineHeight: 1.6,
+											fontFamily: mono,
+											fontWeight: 300,
+											flex: 1,
+											paddingBottom: "0.6rem",
+										}}>
+											{uc.description}
+										</p>
+
+										<div style={{
+											display: "flex",
+											flexDirection: "column",
+											gap: "0.4rem",
+											paddingTop: "0.8rem",
+										}}>
+											<div>
+												<Badge variant="secondary" className="text-[0.62rem] font-mono">
+													{uc.evolution?.autoEvaluate ? "auto-eval" : "manual eval"}
+												</Badge>
+											</div>
+											{models.length > 0 && (
+												<div
+													style={{
+														display: "flex",
+														flexDirection: "column",
+														gap: "0.1rem",
+														fontSize: "0.58rem",
+														lineHeight: 1.5,
+														color: "#7b7b86",
+														fontFamily: mono,
+														fontStyle: "italic",
+													}}
+												>
+													{models.map((model) => (
+														<div key={model}>{model}</div>
+													))}
+												</div>
+											)}
+										</div>
+									</button>
 								)
 							})}
 						</div>
 						<style>{`
-							.demo-option-card:hover .demo-card-arrow {
-								opacity: 1 !important;
-								transform: translateX(0) !important;
+							.demo-card-grid {
+								grid-template-columns: repeat(2, 1fr);
+							}
+							@media (max-width: 600px) {
+								.demo-card-grid {
+									grid-template-columns: 1fr;
+								}
 							}
 						`}</style>
 					</div>
@@ -312,9 +227,6 @@ export function ConversationFlow({ onStart }: Props) {
 
 				{step === "prompt" && (
 					<div style={{
-						position: "absolute",
-						inset: 0,
-						padding: "0 2rem",
 						display: "flex",
 						flexDirection: "column",
 						gap: "2.5rem",
@@ -341,8 +253,7 @@ export function ConversationFlow({ onStart }: Props) {
 							flexDirection: "column",
 							gap: "0.5rem",
 							opacity: revealDone ? 1 : 0,
-							transform: revealDone ? "translateY(0)" : "translateY(6px)",
-							transition: "opacity 0.3s ease, transform 0.3s ease",
+							transition: "opacity 0.3s ease",
 							pointerEvents: revealDone ? "auto" : "none",
 						}}>
 							<textarea
@@ -365,59 +276,13 @@ export function ConversationFlow({ onStart }: Props) {
 									padding: 0,
 								}}
 							/>
-							<div style={{
-								display: "flex",
-								justifyContent: "flex-end",
-								alignItems: "center",
-								gap: "0.5rem",
-							}}>
-								<button
-									type="button"
-									onClick={handleBack}
-									style={{
-										background: "none",
-										border: "none",
-										padding: "0.35rem 0.5rem",
-										cursor: "pointer",
-										fontSize: "0.7rem",
-										fontFamily: mono,
-										color: "#9b9ba8",
-										transition: "color 0.15s",
-									}}
-									onMouseEnter={(e) => {
-										e.currentTarget.style.color = "#1a1a1f"
-									}}
-									onMouseLeave={(e) => {
-										e.currentTarget.style.color = "#9b9ba8"
-									}}
-								>
+							<div className="flex justify-end items-center gap-2">
+								<Button variant="ghost" size="sm" onClick={handleBack}>
 									← Back
-								</button>
-								<button
-									type="button"
-									onClick={handleStart}
-									style={{
-										background: "#1a1a1f",
-										border: "1px solid #1a1a1f",
-										borderRadius: 5,
-										padding: "0.35rem 0.9rem",
-										cursor: "pointer",
-										fontSize: "0.7rem",
-										fontFamily: mono,
-										color: "#fff",
-										transition: "background 0.15s, border-color 0.15s",
-									}}
-									onMouseEnter={(e) => {
-										e.currentTarget.style.background = "#000"
-										e.currentTarget.style.borderColor = "#000"
-									}}
-									onMouseLeave={(e) => {
-										e.currentTarget.style.background = "#1a1a1f"
-										e.currentTarget.style.borderColor = "#1a1a1f"
-									}}
-								>
+								</Button>
+								<Button size="sm" onClick={handleStart}>
 									Start
-								</button>
+								</Button>
 							</div>
 						</div>
 					</div>
@@ -425,9 +290,6 @@ export function ConversationFlow({ onStart }: Props) {
 
 				{step === "starting" && (
 					<div style={{
-						position: "absolute",
-						inset: 0,
-						padding: "0 2rem",
 						display: "flex",
 						alignItems: "center",
 						pointerEvents: "none",

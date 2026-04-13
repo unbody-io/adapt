@@ -36,10 +36,13 @@ function createModel(slot?: string | ModelRef, defaultModel = "google/gemini-2.5
 
 export function DemoOrchestrator() {
 	const [live, setLive] = useState(false)
+	const [activeUseCase, setActiveUseCase] = useState<UseCase | null>(null)
 	const { state, brain, start, inject, destroy, downloadLog } = useBrain()
+	const injectionStarted = state.injectionProgress !== null || state.events.some((event) => event.type === "brain:inject:started")
 
 	const handleStart = useCallback(async (useCase: UseCase, prompt: string) => {
 		setLive(true)
+		setActiveUseCase(useCase)
 
 		const model = createModel(useCase.model)
 
@@ -121,13 +124,15 @@ export function DemoOrchestrator() {
 				injectionProgress={state.injectionProgress}
 				evolutionActivity={state.evolutionActivity}
 				evolutionCommentary={state.evolutionCommentary}
+				useCase={activeUseCase}
 			/>
 
 			{/* Query bar + evolution status — bottom center */}
 			<QueryBar
 				neurons={state.neurons}
-				disabled={state.phase !== "ready"}
+				disabled={state.phase !== "ready" || !injectionStarted}
 				brainRef={brain}
+				suggestions={activeUseCase?.suggestions}
 			/>
 		</div>
 	)

@@ -1,0 +1,141 @@
+{
+	"id": "space-missions",
+	"source": "wikipedia",
+	"label": "Major Missions",
+	"summary": "Key space exploration missions from the Space Race to modern Mars exploration.",
+	"description": "Wikipedia articles on landmark space missions",
+	"items": [
+		{
+			"id": "sm-001",
+			"label": "Sputnik 1 — first artificial satellite",
+			"data": {
+				"type": "wiki-article",
+				"title": "Sputnik 1",
+				"text": "Sputnik 1 was the first artificial Earth satellite. The Soviet Union launched it into an elliptical low Earth orbit on 4 October 1957. It orbited for three weeks before its batteries ran out. The satellite travelled at about 29,000 km/h, taking 96.2 minutes to complete each orbit. Its radio signal was easily detectable by amateur radio operators, and the 65° orbital inclination made its flight path cover virtually the entire inhabited Earth. The surprise success precipitated the American Sputnik crisis and triggered the Space Race, a part of the Cold War. The launch was the beginning of a new era of political, military, technological, and scientific developments.",
+				"category": "early-space-age",
+				"year": 1957
+			}
+		},
+		{
+			"id": "sm-002",
+			"label": "Vostok 1 — first human in space",
+			"data": {
+				"type": "wiki-article",
+				"title": "Vostok 1",
+				"text": "Vostok 1 was the first spaceflight of the Vostok programme and the first human spaceflight in history. The Vostok 3KA space capsule was launched from Baikonur Cosmodrome on 12 April 1961, with Soviet cosmonaut Yuri Gagarin aboard, making him the first human to cross into outer space. The orbital spaceflight consisted of a single orbit around Earth which skimmed the upper atmosphere at 169 km at its lowest point. The flight took 108 minutes from launch to landing. Gagarin parachuted to the ground separately from his capsule after ejecting at 7 km altitude. The flight was a triumph for the Soviet space program and opened a new era of human space exploration.",
+				"category": "human-spaceflight",
+				"year": 1961
+			}
+		},
+		{
+			"id": "sm-003",
+			"label": "Apollo 11 — first Moon landing",
+			"data": {
+				"type": "wiki-article",
+				"title": "Apollo 11",
+				"text": "Apollo 11 was the American spaceflight that first landed humans on the Moon. Commander Neil Armstrong and lunar module pilot Buzz Aldrin landed the Apollo Lunar Module Eagle on July 20, 1969. Armstrong became the first person to step onto the lunar surface six hours and 39 minutes later; Aldrin joined him 19 minutes later. They spent about two and a quarter hours together exploring the site they had named Tranquility Base upon landing. Michael Collins flew the Command Module Columbia alone in lunar orbit while they were on the surface. Armstrong and Aldrin collected 21.5 kg of lunar material to bring back to Earth. The event was broadcast on live TV to a worldwide audience of an estimated 600 million people.",
+				"category": "moon-exploration",
+				"year": 1969
+			}
+		},
+		{
+			"id": "sm-004",
+			"label": "Apollo 13 — successful failure",
+			"data": {
+				"type": "wiki-article",
+				"title": "Apollo 13",
+				"text": "Apollo 13 was the seventh crewed mission in the Apollo space program and the third meant to land on the Moon. The craft was launched from Kennedy Space Center on April 11, 1970, but the lunar landing was aborted after an oxygen tank in the service module exploded two days into the mission. The crew — Jim Lovell, Jack Swigert, and Fred Haise — looped around the Moon and returned safely to Earth on April 17. The mission is regarded as a successful failure because the crew was returned safely despite the catastrophic malfunction. Mission Control in Houston and the crew improvised emergency procedures including using the lunar module as a lifeboat and building a CO2 scrubber from available materials.",
+				"category": "moon-exploration",
+				"year": 1970
+			}
+		},
+		{
+			"id": "sm-005",
+			"label": "Voyager 1 — farthest human-made object",
+			"data": {
+				"type": "wiki-article",
+				"title": "Voyager 1",
+				"text": "Voyager 1 is a space probe launched by NASA on September 5, 1977, as part of the Voyager program to study the outer Solar System and interstellar space. It is currently the farthest human-made object from Earth. Voyager 1 completed flybys of Jupiter in 1979 and Saturn in 1980. During the Saturn flyby, the probe photographed Saturn's complex ring system and discovered new moons. On August 25, 2012, it became the first spacecraft to cross the heliopause and enter interstellar space. The probe carries a Golden Record — a phonograph record containing sounds and images of Earth — intended as a message to any extraterrestrial intelligence that might find it. As of 2026, Voyager 1 is over 24 billion km from Earth and still communicating with NASA.",
+				"category": "deep-space",
+				"year": 1977
+			}
+		},
+		{
+			"id": "sm-006",
+			"label": "Space Shuttle Columbia — first shuttle mission",
+			"data": {
+				"type": "wiki-article",
+				"title": "STS-1",
+				"text": "STS-1 was the first orbital spaceflight of NASA's Space Shuttle program. The first orbiter, Columbia, launched on April 12, 1981, from Kennedy Space Center with a crew of two — commander John Young and pilot Robert Crippen. The mission lasted 2 days, 6 hours. It was the first American crewed space mission since the Apollo-Soyuz Test Project in 1975. Columbia orbited the Earth 36 times before landing at Edwards Air Force Base in California. The Space Shuttle was the world's first reusable spacecraft, designed to launch like a rocket and land like an airplane. The program continued for 30 years and 135 missions, deploying satellites, building the ISS, and servicing the Hubble Space Telescope.",
+				"category": "space-shuttle",
+				"year": 1981
+			}
+		},
+		{
+			"id": "sm-007",
+			"label": "Hubble Space Telescope — eye in the sky",
+			"data": {
+				"type": "wiki-article",
+				"title": "Hubble Space Telescope",
+				"text": "The Hubble Space Telescope is a space telescope that was launched into low Earth orbit in 1990 and remains in operation. It was named after astronomer Edwin Hubble. Hubble's mirror had a flaw that produced blurry images — a problem fixed during a 1993 servicing mission by Space Shuttle astronauts who installed corrective optics. Since then, Hubble has made over 1.5 million observations. It has captured images of the birth and death of stars, galaxies billions of light-years away, planets in our solar system, and evidence for black holes. Hubble data has led to breakthroughs in astrophysics including determining the rate of expansion of the universe. Five servicing missions between 1993 and 2009 repaired, upgraded, and replaced systems on the telescope.",
+				"category": "space-science",
+				"year": 1990
+			}
+		},
+		{
+			"id": "sm-008",
+			"label": "ISS — humanity's outpost in orbit",
+			"data": {
+				"type": "wiki-article",
+				"title": "International Space Station",
+				"text": "The International Space Station is a modular space station in low Earth orbit. It is a multinational collaborative project involving NASA (United States), Roscosmos (Russia), JAXA (Japan), ESA (Europe), and CSA (Canada). The first module, Zarya, was launched in 1998. The station has been continuously occupied since November 2000, making it the longest continuous human presence in space. The ISS orbits Earth at an altitude of about 420 km, travelling at 28,000 km/h, completing 15.5 orbits per day. It serves as a microgravity and space environment research laboratory in which scientific research is conducted in astrobiology, astronomy, meteorology, physics, and other fields. Over 270 individuals from 21 countries have visited the station.",
+				"category": "space-station",
+				"year": 1998
+			}
+		},
+		{
+			"id": "sm-009",
+			"label": "Mars Rovers — Spirit, Opportunity, Curiosity",
+			"data": {
+				"type": "wiki-article",
+				"title": "Mars Exploration Rovers",
+				"text": "NASA's Mars Exploration Rover mission included twin rovers Spirit and Opportunity, which landed on Mars in January 2004. Spirit operated until 2010, while Opportunity far exceeded its planned 90-day mission, operating for over 14 years until a planet-wide dust storm ended contact in June 2018. Opportunity travelled over 45 km on the Martian surface — the longest distance driven by any off-Earth wheeled vehicle. Both rovers found evidence that Mars once had liquid water on its surface. NASA's Curiosity rover, part of the Mars Science Laboratory mission, landed in Gale Crater on August 6, 2012. Curiosity is much larger — the size of a small car — and carries an advanced suite of instruments. It confirmed that Mars once had conditions favorable for microbial life.",
+				"category": "mars-exploration",
+				"year": 2004
+			}
+		},
+		{
+			"id": "sm-010",
+			"label": "SpaceX Falcon 9 — reusable rockets",
+			"data": {
+				"type": "wiki-article",
+				"title": "SpaceX Falcon 9 and Reusability",
+				"text": "Falcon 9 is a partially reusable two-stage-to-orbit medium-lift launch vehicle designed and manufactured by SpaceX. On December 21, 2015, the Falcon 9 first stage successfully landed vertically after delivering satellites to orbit — the first time an orbital rocket's first stage had been recovered intact. This breakthrough dramatically reduced the cost of space access. As of 2026, Falcon 9 boosters have been reflown over 300 times collectively. The rocket has become the world's most frequently launched orbital vehicle. SpaceX used Falcon 9 to launch the Crew Dragon spacecraft, restoring American crewed orbital launch capability in 2020. The success of Falcon 9 reusability has influenced the entire launch industry to pursue reusable rocket designs.",
+				"category": "commercial-space",
+				"year": 2015
+			}
+		},
+		{
+			"id": "sm-011",
+			"label": "James Webb Space Telescope — infrared eye",
+			"data": {
+				"type": "wiki-article",
+				"title": "James Webb Space Telescope",
+				"text": "The James Webb Space Telescope is a space telescope designed primarily to conduct infrared astronomy. It was launched on December 25, 2021, and is the largest optical telescope in space. Its high-resolution infrared instruments allow it to view objects too distant and too old for the Hubble Space Telescope. JWST orbits the Sun near the Earth-Sun L2 Lagrange point, approximately 1.5 million km from Earth. Its primary mirror is 6.5 meters in diameter, made of 18 hexagonal gold-plated beryllium segments. Within its first year of operation, JWST captured images of the earliest galaxies formed after the Big Bang, revealed atmospheric compositions of exoplanets, and provided unprecedented detail of star-forming regions. It is considered one of the greatest engineering achievements in space science.",
+				"category": "space-science",
+				"year": 2021
+			}
+		},
+		{
+			"id": "sm-012",
+			"label": "Perseverance & Ingenuity — Mars 2020",
+			"data": {
+				"type": "wiki-article",
+				"title": "Mars 2020 — Perseverance and Ingenuity",
+				"text": "Perseverance is a Mars rover manufactured by NASA's Jet Propulsion Laboratory that landed in Jezero Crater on February 18, 2021. Its goals include seeking signs of ancient life and collecting rock samples for potential return to Earth. The rover carries Ingenuity, a small helicopter that achieved the first powered controlled flight on another planet on April 19, 2021. Ingenuity was designed for five flights over 30 days as a technology demonstration but ultimately completed 72 flights over nearly three years before retiring in January 2024 due to rotor damage. Perseverance has confirmed that Jezero Crater was indeed an ancient lake bed and has cached dozens of sample tubes on the Martian surface for a future sample-return mission.",
+				"category": "mars-exploration",
+				"year": 2021
+			}
+		}
+	]
+}

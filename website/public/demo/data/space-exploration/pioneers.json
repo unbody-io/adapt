@@ -1,0 +1,97 @@
+{
+	"id": "space-pioneers",
+	"source": "wikipedia",
+	"label": "Pioneers & Agencies",
+	"summary": "Key figures and organizations that shaped space exploration.",
+	"description": "Wikipedia articles on space pioneers and agencies",
+	"items": [
+		{
+			"id": "sp-001",
+			"label": "Yuri Gagarin — first human in space",
+			"data": {
+				"type": "wiki-article",
+				"title": "Yuri Gagarin",
+				"text": "Yuri Alekseyevich Gagarin was a Soviet pilot and cosmonaut who, aboard Vostok 1, became the first human to journey into outer space on 12 April 1961. Gagarin became an international celebrity and was awarded many medals and titles, including Hero of the Soviet Union. He toured widely, visiting Italy, Germany, Canada, Brazil, Japan, Egypt, and Finland to promote the Soviet achievement. Gagarin later became deputy training director of the Cosmonaut Training Centre. He died in 1968 when the MiG-15 training jet he was piloting crashed. The cause of the crash remains debated. April 12 is celebrated as Cosmonautics Day in Russia and as the International Day of Human Space Flight by the United Nations.",
+				"category": "cosmonauts",
+				"year": 1961
+			}
+		},
+		{
+			"id": "sp-002",
+			"label": "Neil Armstrong — first person on the Moon",
+			"data": {
+				"type": "wiki-article",
+				"title": "Neil Armstrong",
+				"text": "Neil Alden Armstrong was an American astronaut, aeronautical engineer, and the first person to walk on the Moon. He was the commander of Apollo 11, which landed on the Moon on July 20, 1969. As he stepped onto the lunar surface, he famously said: 'That's one small step for man, one giant leap for mankind.' Before becoming an astronaut, Armstrong was a naval aviator who flew 78 combat missions during the Korean War. He later was a test pilot at Edwards Air Force Base, flying the X-15 rocket plane to the edge of space. After the Moon landing, Armstrong avoided publicity and became a professor of aerospace engineering at the University of Cincinnati. He died on August 25, 2012, at the age of 82.",
+				"category": "astronauts",
+				"year": 1969
+			}
+		},
+		{
+			"id": "sp-003",
+			"label": "Valentina Tereshkova — first woman in space",
+			"data": {
+				"type": "wiki-article",
+				"title": "Valentina Tereshkova",
+				"text": "Valentina Vladimirovna Tereshkova is a Russian engineer, former cosmonaut, and politician. On 16 June 1963, she became the first woman to fly in space, aboard Vostok 6. She orbited the Earth 48 times over nearly three days. Tereshkova was selected from more than 400 applicants and five finalists to pilot Vostok 6. Before her recruitment as a cosmonaut, she was a textile-factory worker and amateur skydiver. After her spaceflight, she studied at the Zhukovsky Air Force Engineering Academy and earned a doctorate in engineering. No other woman flew in space until Svetlana Savitskaya in 1982 — 19 years later. Tereshkova remains the only woman to have flown a solo space mission.",
+				"category": "cosmonauts",
+				"year": 1963
+			}
+		},
+		{
+			"id": "sp-004",
+			"label": "NASA — America's space agency",
+			"data": {
+				"type": "wiki-article",
+				"title": "NASA",
+				"text": "The National Aeronautics and Space Administration is an independent agency of the United States federal government responsible for the civil space program, aeronautics research, and space research. NASA was established in 1958 as a response to the Soviet Union's launch of Sputnik 1. Its major programs have included Mercury, Gemini, and Apollo crewed spaceflight programs, the Space Shuttle, the International Space Station, and numerous robotic missions to every planet in the solar system. NASA's budget peaked at about 4.4% of the federal budget in 1966 during the Apollo program. Key facilities include Kennedy Space Center in Florida, Johnson Space Center in Texas, and the Jet Propulsion Laboratory in California. NASA has conducted over 200 crewed flights and launched hundreds of scientific spacecraft.",
+				"category": "agencies",
+				"year": 1958
+			}
+		},
+		{
+			"id": "sp-005",
+			"label": "Wernher von Braun — architect of Apollo",
+			"data": {
+				"type": "wiki-article",
+				"title": "Wernher von Braun",
+				"text": "Wernher Magnus Maximilian Freiherr von Braun was a German-American aerospace engineer and space architect. He was the leading figure in the development of rocket technology in Germany during World War II and later in the United States. Born in Prussia in 1912, von Braun developed the V-2 rocket for Nazi Germany — the world's first long-range guided ballistic missile. After the war, he was brought to the United States through Operation Paperclip. He became director of NASA's Marshall Space Flight Center and was the chief architect of the Saturn V rocket, which propelled the Apollo spacecraft to the Moon. Von Braun is considered one of the most important rocket engineers of the 20th century. He died in 1977.",
+				"category": "engineers",
+				"year": 1958
+			}
+		},
+		{
+			"id": "sp-006",
+			"label": "Mae Jemison — first African-American woman in space",
+			"data": {
+				"type": "wiki-article",
+				"title": "Mae Jemison",
+				"text": "Mae Carol Jemison is an American engineer, physician, and former NASA astronaut. She became the first African-American woman to travel into space when she served as a mission specialist aboard the Space Shuttle Endeavour on September 12, 1992, during mission STS-47. Before joining NASA, Jemison earned degrees in chemical engineering and medicine from Stanford and Cornell. She served in the Peace Corps in Sierra Leone and Liberia as a medical officer. After leaving NASA in 1993, she founded the Jemison Group, a technology consulting firm, and the Dorothy Jemison Foundation for Excellence, which runs an international science camp for students. She has appeared on television, including a guest role on Star Trek: The Next Generation.",
+				"category": "astronauts",
+				"year": 1992
+			}
+		},
+		{
+			"id": "sp-007",
+			"label": "ESA — Europe's space agency",
+			"data": {
+				"type": "wiki-article",
+				"title": "European Space Agency",
+				"text": "The European Space Agency is an intergovernmental organization of 22 member states dedicated to the exploration of space. Established in 1975 with its headquarters in Paris, ESA has a worldwide staff of about 2,200 and an annual budget of over 7 billion euros. ESA's spaceport in Kourou, French Guiana, is well suited for launches to geostationary orbit due to its location near the equator. ESA has contributed to numerous major missions including the Rosetta comet mission, the Huygens probe that landed on Saturn's moon Titan, the Mars Express orbiter, and the Gaia space observatory mapping over a billion stars. ESA is a major partner in the International Space Station and is developing the Ariane 6 rocket. Its Copernicus programme provides Earth observation data used worldwide.",
+				"category": "agencies",
+				"year": 1975
+			}
+		},
+		{
+			"id": "sp-008",
+			"label": "Chris Hadfield — the singing astronaut",
+			"data": {
+				"type": "wiki-article",
+				"title": "Chris Hadfield",
+				"text": "Chris Austin Hadfield is a retired Canadian astronaut who was the first Canadian to walk in space and commanded the International Space Station during Expedition 35 in 2013. During his time aboard the ISS, Hadfield became famous for his social media posts and educational videos about life in space, reaching millions of people worldwide. His rendition of David Bowie's 'Space Oddity,' filmed aboard the ISS, became one of the most-watched music videos from space, with over 50 million views. Hadfield flew two Space Shuttle missions before his ISS command. Before becoming an astronaut, he was a military pilot who flew over 70 types of aircraft. He has written several books and is considered one of the most effective science communicators in the space community.",
+				"category": "astronauts",
+				"year": 2013
+			}
+		}
+	]
+}

@@ -73,9 +73,13 @@ export function commentaryFromEvent(
 		case "brain:neuron:added": {
 			const name = payload.name as string
 			if (name?.startsWith("__internal")) return null
+			const neuronId = payload.neuronId as string
+			const neuron = brain.getNeuron(neuronId)
+			const desc = neuron?.description
 			const instructions = payload.instructions as string | undefined
+			const detail = desc || instructions?.replace(/[\n\r]+/g, " ").replace(/\s+/g, " ").trim()
 			return {
-				text: `Setting up ${name}${instructions ? ` — ${truncate(instructions, 150)}` : ""}.`,
+				text: `Setting up ${name}${detail ? ` — ${truncate(detail, 150)}` : ""}.`,
 				category: "progress",
 			}
 		}

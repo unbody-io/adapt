@@ -79,7 +79,7 @@ export const USE_CASES: UseCase[] = [
 		id: "product-feedback",
 		title: "Product Feedback",
 		description: "Watch a Brain learn from multi-channel feedback — tweets, support tickets, and app reviews.",
-		prompt: "You are learning from product feedback for a B2B SaaS tool across support tickets, social media, and app reviews. You start knowing nothing.\n\nCreate dedicated specialists for each distinct concern you discover — sentiment patterns, feature requests, recurring issues, user segments. Specialize rather than generalize. Let understanding build incrementally from the data.",
+		prompt: "You are learning from product feedback across multiple channels. You start knowing nothing — let the data guide you.",
 		model: "google/gemini-3.1-flash-lite-preview",
 		autoSetup: true,
 		ingest: { batchSize: 3 },

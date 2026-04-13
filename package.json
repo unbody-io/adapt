@@ -42,6 +42,10 @@
     "neurons",
     "ai"
   ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/unbody-io/adapt.git"
+  },
   "license": "MIT",
   "devDependencies": {
     "@ai-sdk/openai-compatible": "^2.0.35",

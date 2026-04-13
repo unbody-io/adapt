@@ -36,7 +36,7 @@ function createModel(slot?: string | ModelRef, defaultModel = "google/gemini-2.5
 
 export function DemoOrchestrator() {
 	const [live, setLive] = useState(false)
-	const { state, brain, start, inject, destroy } = useBrain()
+	const { state, brain, start, inject, destroy, downloadLog } = useBrain()
 
 	const handleStart = useCallback(async (useCase: UseCase, prompt: string) => {
 		setLive(true)
@@ -82,6 +82,29 @@ export function DemoOrchestrator() {
 	return (
 		<div style={{ width: "100%", height: "100vh", position: "relative", overflow: "hidden" }}>
 			<CloseButton />
+			<button
+				type="button"
+				onClick={downloadLog}
+				title="Download event log"
+				style={{
+					position: "fixed",
+					top: "1rem",
+					right: "3rem",
+					zIndex: 70,
+					background: "none",
+					border: "none",
+					cursor: "pointer",
+					fontSize: "0.9rem",
+					color: "#9b9ba8",
+					padding: "0.25rem 0.5rem",
+					lineHeight: 1,
+					transition: "color 0.15s",
+				}}
+				onMouseEnter={(e) => { e.currentTarget.style.color = "#1a1a1f" }}
+				onMouseLeave={(e) => { e.currentTarget.style.color = "#9b9ba8" }}
+			>
+				↓
+			</button>
 
 			{/* Shader visualization — centered, max 800x600 */}
 			<div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>

@@ -85,6 +85,7 @@ export function useBrain() {
 	const brainRef = useRef<import("@unbody/adapt").Brain | null>(null)
 	const eventIdCounter = useRef(0)
 	const timelineRef = useRef<{ t: number; event: string; payload: Record<string, unknown> }[]>([])
+	const fullLogRef = useRef<string[]>([])
 	const startTimeRef = useRef(0)
 	const narratedInternalSetupRef = useRef(false)
 	const pendingEvolutionRef = useRef(0)
@@ -317,6 +318,16 @@ export function useBrain() {
 				if (comment) {
 					enqueueCommentary(comment.text, comment.priority, comment.category)
 				}
+
+				// Full log
+				const t = ((Date.now() - startTimeRef.current) / 1000).toFixed(1)
+				const lines = [
+					`[${t}s] ${eventType}`,
+					`  payload: ${JSON.stringify(payload, null, 2).replace(/\n/g, "\n  ")}`,
+				]
+				if (activity) lines.push(`  → activity [${activity.category}]: "${activity.text}"`)
+				if (comment) lines.push(`  → commentary [${comment.category}]: "${comment.text}"`)
+				fullLogRef.current.push(lines.join("\n"))
 
 				// Per-neuron tracking
 				const neuronId = payload.neuronId as string | undefined
@@ -553,12 +564,24 @@ export function useBrain() {
 		setState(initialState)
 	}, [])
 
+	const downloadLog = useCallback(() => {
+		const content = fullLogRef.current.join("\n\n")
+		const blob = new Blob([content], { type: "text/plain" })
+		const url = URL.createObjectURL(blob)
+		const a = document.createElement("a")
+		a.href = url
+		a.download = `brain-demo-${new Date().toISOString().replace(/[:.]/g, "-")}.log`
+		a.click()
+		URL.revokeObjectURL(url)
+	}, [])
+
 	return {
 		state,
 		brain: brainRef,
 		start,
 		inject,
 		destroy,
+		downloadLog,
 	}
 }
 

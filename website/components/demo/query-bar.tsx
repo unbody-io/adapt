@@ -132,6 +132,8 @@ const s = {
 		scrollbarWidth: "none",
 		padding: "1.5rem 0 7rem",
 		boxSizing: "border-box",
+		display: "flex",
+		flexDirection: "column",
 	} as CSSProperties,
 
 	resultText: {
@@ -286,6 +288,9 @@ export function QueryBar({ neurons, disabled, brainRef, onActiveChange, suggesti
 	const closeSearch = useCallback(() => {
 		setResult(null)
 		setMenuOpen(false)
+		setFocused(false)
+		setQuery("")
+		setLoading(false)
 		abortRef.current?.abort()
 		onActiveChange?.(false)
 	}, [onActiveChange])
@@ -345,6 +350,7 @@ export function QueryBar({ neurons, disabled, brainRef, onActiveChange, suggesti
 				brain.signal({ source: "user:query-bar", description: q, bypass: true })
 				setQuery("")
 				setResult(null)
+				setFocused(false)
 				return
 			}
 
@@ -453,16 +459,40 @@ export function QueryBar({ neurons, disabled, brainRef, onActiveChange, suggesti
 				style={{
 					...s.backdropBase,
 					opacity: searchOpen || showSuggestions ? 1 : 0,
-					pointerEvents: searchOpen ? "auto" : "none",
+					pointerEvents: searchOpen || showSuggestions ? "auto" : "none",
 					background: searchOpen ? "rgba(255, 255, 255, 0.4)" : "rgba(255, 255, 255, 0.25)",
 					backdropFilter: searchOpen ? "blur(16px)" : "blur(10px)",
 					WebkitBackdropFilter: searchOpen ? "blur(16px)" : "blur(10px)",
 				}}
-				onClick={searchOpen ? closeSearch : undefined}
+				onClick={() => {
+					if (searchOpen) closeSearch()
+					else { setFocused(false); inputRef.current?.blur() }
+				}}
 			/>
 
 			{searchOpen && result && (
 				<div style={s.resultsAnchor}>
+					<button
+						type="button"
+						onClick={closeSearch}
+						style={{
+							position: "sticky",
+							top: 0,
+							alignSelf: "flex-end",
+							background: "rgba(26, 26, 31, 0.06)",
+							border: "1px solid rgba(155, 155, 168, 0.15)",
+							borderRadius: 8,
+							padding: "0.3rem 0.7rem",
+							cursor: "pointer",
+							fontSize: "0.7rem",
+							fontFamily: '"SF Mono", "Fira Code", "Cascadia Code", monospace',
+							color: "#6b6b78",
+							marginBottom: "1rem",
+							zIndex: 1,
+						}}
+					>
+						Close
+					</button>
 					{result.status && (
 						<div style={{ ...s.resultText, color: "#9b9ba8", marginBottom: "0.5rem" }}>
 							{result.status}

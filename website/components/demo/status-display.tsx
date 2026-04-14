@@ -96,17 +96,7 @@ export function StatusDisplay({
 				</>
 			)}
 
-			<div style={{
-				position: "fixed",
-				top: "4.5rem",
-				left: "1rem",
-				zIndex: 50,
-				maxWidth: "min(420px, calc(100% - 2rem))",
-				pointerEvents: "none",
-				display: "flex",
-				flexDirection: "column",
-				gap: "1.25rem",
-			}}>
+			<div className="fixed left-4 z-50 pointer-events-none flex flex-col gap-5 top-[4.5rem] max-w-[min(420px,calc(100%-2rem))]">
 				{/* Mobile-only: inline above status */}
 				{useCase && (
 					<Button

@@ -76,8 +76,8 @@ export const USE_CASES: UseCase[] = [
 		},
 		dataPaths: [
 			"/demo/data/daily-standups/2026-02-25.json",
-			// "/demo/data/daily-standups/2026-03-04.json",
-			// "/demo/data/daily-standups/2026-03-10.json",
+			"/demo/data/daily-standups/2026-03-04.json",
+			"/demo/data/daily-standups/2026-03-10.json",
 		],
 		suggestions: {
 			ask: [

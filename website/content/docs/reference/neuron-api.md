@@ -70,7 +70,9 @@ Discriminated union — check `status` to determine the outcome:
 | Method | Returns | Description |
 |---|---|---|
 | `getBufferState()` | `Promise<{ count, avgImportance, totalTokens }>` | Pending observation metrics |
-| `getBufferedObservations()` | `Promise<Array<{ text, importance }>>` | Pending observations |
+| `getBufferedObservations()` | `Promise<Array<{ text, importance }>>` | Pending observations only — not processed history |
+
+Both methods return only observations with `metadata_status: 'pending'`. Observations are **marked `processed` after synthesis, not deleted** — the full history remains in `neuron.store.observations` and (with `SQLiteNeuronStore`) persists across process restarts. To read or edit processed observations, go through the store collection directly: `neuron.store.observations.list({ metadata_status: 'processed' })`. See [Stores → Observation lifecycle](../stores#observation-lifecycle).
 
 ## Introspection
 

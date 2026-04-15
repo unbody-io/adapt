@@ -108,6 +108,15 @@ interface NeuronStore {
 }
 ```
 
+### Observation lifecycle
+
+Observations are persistent, not ephemeral buffered input. Each `ObservationRecord` carries a `metadata_status` field that moves through two states:
+
+- **`pending`** — written during the observe phase of `learn()`. These are the only rows `getBufferedObservations()` and `getBufferState()` return, and they're what synthesis will consume on the next understand pass.
+- **`processed`** — set after synthesis completes. The record stays in the collection; it's *not* deleted. With `SQLiteNeuronStore`, both pending and processed observations survive process restarts.
+
+This means the full history of what a neuron has seen remains queryable via `neuron.store.observations.list(...)`. If you need only processed history, filter by `{ metadata_status: 'processed' }`. The neuron class itself only exposes the pending buffer today — for anything else, go through the store collection directly.
+
 **BrainStore** — one per brain, holds the brain's state, neuron registry, internal neuron registry, evolution history, and dismissed batches:
 
 ```typescript

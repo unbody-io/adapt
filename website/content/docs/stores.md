@@ -45,6 +45,8 @@ const brain = new Brain({
 
 Persistent via `better-sqlite3`. Restarting and calling `initialize()` with the same paths restores all state — neurons, understanding, evolution history. No LLM calls on restore.
 
+The same guarantee applies to standalone neurons: constructing a `TextNeuron` or `ListNeuron` over a `SQLiteNeuronStore` whose DB already holds prior state (observations, buffer, understanding, evolution, prompts, schemas) restores everything via DB reads alone. Construction itself does no I/O; the restore runs when `init()` is called — either explicitly, or auto-called on the first `learn()`/`query()`. See [Neuron API → Lifecycle](./reference/neuron-api#lifecycle) for the cold-start vs. restore modes.
+
 **Install:**
 
 ```bash

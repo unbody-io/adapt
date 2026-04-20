@@ -13,6 +13,13 @@ Shared API for `TextNeuron` and `ListNeuron` (both extend `BaseNeuron`).
 | `dispose()` | `Promise<void>` | Dispose neuron store |
 | `isInitialized()` | `boolean` | Check if neuron is initialized |
 
+`init()` has two modes, chosen automatically by inspecting the store:
+
+- **Cold start** (empty store) — generates observe/understand identity, system prompts, and schemas via LLM calls, then persists them.
+- **Restore** (store has prior state) — rehydrates identity, prompts, and schemas from the store via DB reads only. **Zero LLM calls.** This is how a `TextNeuron`/`ListNeuron` constructed over a prepopulated `SQLiteNeuronStore` picks up exactly where a previous process left off.
+
+Constructing a neuron does no I/O — the constructor only wires up `id`, `store`, and initial state. Restore happens when `init()` runs, either explicitly or on the first `learn()`/`query()` call via auto-init.
+
 ## Learning
 
 | Method | Returns | Description |
@@ -62,8 +69,15 @@ Discriminated union — check `status` to determine the outcome:
 |---|---|---|
 | `getUnderstanding()` | `Promise<T>` | Current knowledge (`string` for text, `ListItem[]` for list) |
 | `setUnderstanding(value)` | `Promise<void>` | Set knowledge directly |
-| `getSummary()` | `Promise<string>` | Prose summary |
+| `getSummary()` | `Promise<string>` | Prose summary (returns `'(no understanding yet)'` pre-synthesis) |
 | `hasKnowledge()` | `Promise<boolean>` | Has any understanding |
+
+**Pre-synthesis return values.** Before synthesis has produced any understanding (fresh neuron, or enough `learn()` calls buffered but threshold not yet crossed), `getUnderstanding()` resolves to an empty value of `T` — never `undefined`, `null`, or a throw:
+
+- `TextNeuron` → `''` (empty string)
+- `ListNeuron` → `[]` (empty array)
+
+For a clean "is there any understanding yet?" check, prefer `hasKnowledge()` over inspecting the return of `getUnderstanding()`.
 
 ## Buffer
 

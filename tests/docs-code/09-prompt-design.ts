@@ -8,7 +8,7 @@
  *   export $(cat .env.local | xargs) && npx tsx tests/docs-code/09-prompt-design.ts
  */
 
-import { Brain } from '@unbody/adapt'
+import { Brain } from '@unbody-io/adapt'
 import { model } from '../../evals/helpers/provider'
 
 let passed = 0

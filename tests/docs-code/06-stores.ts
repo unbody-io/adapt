@@ -14,13 +14,13 @@ import {
 	MemoryNeuronStore,
 	type NeuronStore,
 	type NeuronCollection,
-} from '@unbody/adapt'
+} from '@unbody-io/adapt'
 import {
 	SQLiteBrainStore,
 	SQLiteNeuronStore,
 	type SQLiteBrainCollection,
 	type SQLiteNeuronCollection,
-} from '@unbody/adapt/sqlite'
+} from '@unbody-io/adapt/sqlite'
 import { model } from '../../evals/helpers/provider'
 import { mkdirSync, rmSync } from 'node:fs'
 import { join, dirname } from 'node:path'

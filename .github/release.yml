@@ -1,0 +1,32 @@
+changelog:
+  exclude:
+    labels:
+      - skip-changelog
+  categories:
+    - title: Features
+      labels:
+        - feat
+        - feature
+        - enhancement
+    - title: Fixes
+      labels:
+        - fix
+        - bug
+    - title: Docs
+      labels:
+        - docs
+    - title: Tests
+      labels:
+        - test
+    - title: Maintenance
+      labels:
+        - chore
+        - refactor
+template: |
+  ## Summary
+
+  $CHANGES
+
+  ## Canonical History
+
+  The canonical release history for Adapt lives in `CHANGELOG.md`.

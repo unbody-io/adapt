@@ -9,7 +9,7 @@
  */
 
 import { describe, it, expect, beforeAll } from 'vitest'
-import { TextNeuron, ListNeuron, MemoryNeuronStore } from '@unbody/adapt'
+import { TextNeuron, ListNeuron, MemoryNeuronStore } from '../src'
 import { createOpenRouter } from '@openrouter/ai-sdk-provider'
 import type { LanguageModel } from 'ai'
 

@@ -1,2 +1,6 @@
-export { MemoryNeuronCollection, MemoryNeuronStore, extractStrings } from './neuron'
 export { MemoryBrainCollection, MemoryBrainStore } from './brain'
+export {
+	extractStrings,
+	MemoryNeuronCollection,
+	MemoryNeuronStore,
+} from './neuron'

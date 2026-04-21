@@ -31,17 +31,23 @@
  *
  * Run (full — init + ingest + query):
  *   export $(cat .env.local | xargs) && npx tsx evals/scripts/usecase-behavior-brain.ts
+ *   export $(cat .env.local | xargs) && bun run evals/scripts/usecase-behavior-brain.ts
  *
  * Run (query only — restores from SQLite, skips ingestion):
  *   export $(cat .env.local | xargs) && QUERY_ONLY=1 npx tsx evals/scripts/usecase-behavior-brain.ts
+ *   export $(cat .env.local | xargs) && QUERY_ONLY=1 bun run evals/scripts/usecase-behavior-brain.ts
  */
 
-import { Brain, type BrainAskResult } from '@unbody/adapt'
-import { SQLiteBrainStore, SQLiteNeuronStore } from '@unbody/adapt/sqlite'
+import { Brain, type BrainAskResult } from '../../src'
 import { createOpenRouter } from '@openrouter/ai-sdk-provider'
 import { readFileSync, mkdirSync } from 'node:fs'
 import { join, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
+
+const isBunRuntime = 'Bun' in globalThis
+const { SQLiteBrainStore, SQLiteNeuronStore } = isBunRuntime
+	? await import('../../src/sqlite/bun')
+	: await import('../../src/sqlite')
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const datasetsDir = join(__dirname, '..', 'datasets')
@@ -77,6 +83,7 @@ async function main() {
 	const events: Array<{ id: string; timestamp: string; type: string; content: string; source: string }> = dataset.events
 
 	console.log('Eval: Personal Behavioral Intelligence — Brain Level')
+	console.log(`Runtime: ${isBunRuntime ? 'bun' : 'node'}`)
 	console.log(`Model: ${MODEL}`)
 	console.log(`Mode: ${QUERY_ONLY ? 'QUERY ONLY (restored from SQLite)' : 'FULL (init + ingest + query)'}`)
 	console.log(`Dataset: ${dataset.metadata.name} (${events.length} events)`)

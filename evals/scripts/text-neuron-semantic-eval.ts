@@ -16,7 +16,7 @@
  *   export $(cat .env.local | xargs) && npx tsx evals/scripts/text-neuron-semantic-eval.ts
  */
 
-import { TextNeuron, MemoryNeuronStore } from '@unbody/adapt'
+import { TextNeuron, MemoryNeuronStore } from '../../src'
 import { createOpenRouter } from '@openrouter/ai-sdk-provider'
 
 const openrouter = createOpenRouter({

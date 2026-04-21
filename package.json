@@ -33,6 +33,7 @@
     "test:store": "vitest run tests/store-standalone.test.ts",
     "test:store:bun": "bun test tests/store-bun.bun.test.ts",
     "test:package-smoke": "node tests/package-smoke.mjs",
+    "test:release:store": "npx tsc --noEmit && npm run build && npm run test:store && npm run test:store:bun && npx vitest run tests/store-persistence.test.ts && bun test tests/store-persistence.bun.test.ts && npx vitest run tests/brain-restore-smoke.test.ts && bun test tests/brain-restore-smoke.bun.test.ts && npm run test:package-smoke",
     "test:docs": "npx tsx tests/docs-code/run-all.ts",
     "docs:dev": "cd website && npm run dev",
     "docs:build": "cd website && npm run build"

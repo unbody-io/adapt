@@ -13,6 +13,10 @@
     "./sqlite": {
       "import": "./dist/sqlite.js",
       "types": "./dist/sqlite.d.ts"
+    },
+    "./sqlite/bun": {
+      "import": "./dist/sqlite/bun.js",
+      "types": "./dist/sqlite/bun.d.ts"
     }
   },
   "scripts": {
@@ -26,7 +30,8 @@
     "eval:text-neuron": "npx tsx evals/scripts/text-neuron-semantic-eval.ts",
     "eval:list-neuron": "npx tsx evals/scripts/list-neuron-semantic-eval.ts",
     "eval:behavior-brain": "npx tsx evals/scripts/usecase-behavior-brain.ts",
-    "test:store": "npx tsx tests/store-standalone.ts",
+    "test:store": "vitest run tests/store-standalone.test.ts",
+    "test:store:bun": "bun test tests/store-bun.bun.test.ts",
     "test:docs": "npx tsx tests/docs-code/run-all.ts",
     "docs:dev": "cd website && npm run dev",
     "docs:build": "cd website && npm run build"

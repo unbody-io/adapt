@@ -101,6 +101,8 @@ for (const neuron of sessionBrain.getNeurons()) {
 }
 ```
 
+On Bun, import the same adapters from `@unbody-io/adapt/sqlite/bun`.
+
 ## Event-Driven Synchronization
 
 **Problem:** `brain.inject()` returns after observation completes, but synthesis may still be running. If you need to guarantee that all neurons have finished processing before continuing (e.g., before querying), you need to wait for the full pipeline.

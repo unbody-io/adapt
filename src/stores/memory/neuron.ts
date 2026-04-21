@@ -5,104 +5,39 @@
  * MemoryNeuronStore assembles 4 collections into a Store.
  */
 
+import { createNeuronStoreCollections } from '../internal/builders'
+import { extractStrings } from '../internal/search'
+import type { StoreCollectionSpec } from '../internal/specs'
 import type {
-	NeuronCollection,
 	EvolutionRecord,
+	NeuronCollection,
+	NeuronStore,
 	ObservationRecord,
 	StateRecord,
-	NeuronStore,
 	UnderstandingRecord,
 } from '../types'
+import { MemoryNeuronCollection } from './collection'
 
-// ── Helpers ─────────────────────────────────────────────────────────────────
-
-/** Recursively extract all string values from an object */
-export function extractStrings(obj: unknown): string[] {
-	if (typeof obj === 'string') return [obj]
-	if (obj === null || obj === undefined) return []
-	if (Array.isArray(obj)) return obj.flatMap(extractStrings)
-	if (typeof obj === 'object') return Object.values(obj).flatMap(extractStrings)
-	return []
-}
-
-// ── MemoryNeuronCollection ────────────────────────────────────────────────────────
-
-export class MemoryNeuronCollection<T extends { id: string }>
-	implements NeuronCollection<T>
-{
-	private items: T[] = []
-
-	async add(item: T): Promise<void> {
-		if (this.items.some((i) => i.id === item.id)) {
-			throw new Error(`Record with id "${item.id}" already exists`)
-		}
-		this.items.push(item)
-	}
-
-	async get(id: string): Promise<T | undefined> {
-		return this.items.find((item) => item.id === id)
-	}
-
-	async list(filter?: Record<string, unknown>): Promise<T[]> {
-		if (!filter) return [...this.items]
-		return this.items.filter((item) =>
-			Object.entries(filter).every(
-				([k, v]) => (item as Record<string, unknown>)[k] === v,
-			),
-		)
-	}
-
-	async update(id: string, changes: Partial<Omit<T, 'id'>>): Promise<void> {
-		const idx = this.items.findIndex((item) => item.id === id)
-		if (idx === -1) {
-			throw new Error(`Record with id "${id}" not found`)
-		}
-		this.items[idx] = { ...this.items[idx], ...changes }
-	}
-
-	async delete(id: string): Promise<void> {
-		const idx = this.items.findIndex((item) => item.id === id)
-		if (idx === -1) {
-			throw new Error(`Record with id "${id}" not found`)
-		}
-		this.items.splice(idx, 1)
-	}
-
-	async clear(): Promise<void> {
-		this.items = []
-	}
-
-	async count(filter?: Record<string, unknown>): Promise<number> {
-		if (!filter) return this.items.length
-		const filtered = this.items.filter((item) =>
-			Object.entries(filter).every(
-				([k, v]) => (item as Record<string, unknown>)[k] === v,
-			),
-		)
-		return filtered.length
-	}
-
-	async search(query: string): Promise<T[]> {
-		const q = query.toLowerCase()
-		return this.items.filter((item) =>
-			extractStrings(item).some((s) => s.toLowerCase().includes(q)),
-		)
-	}
-
-	async addBatch(items: T[]): Promise<void> {
-		for (const item of items) {
-			this.items.push(item)
-		}
-	}
-}
+export { extractStrings, MemoryNeuronCollection }
 
 // ── MemoryNeuronStore ─────────────────────────────────────────────────────────────
 
 export class MemoryNeuronStore implements NeuronStore {
-	observations = new MemoryNeuronCollection<ObservationRecord>()
-	understanding = new MemoryNeuronCollection<UnderstandingRecord>()
-	evolution = new MemoryNeuronCollection<EvolutionRecord>()
-	state = new MemoryNeuronCollection<StateRecord>()
+	observations: NeuronCollection<ObservationRecord>
+	understanding: NeuronCollection<UnderstandingRecord>
+	evolution: NeuronCollection<EvolutionRecord>
+	state: NeuronCollection<StateRecord>
+
+	constructor() {
+		const createCollection = <T extends { id: string }>(
+			spec: StoreCollectionSpec<T>,
+		): NeuronCollection<T> => new MemoryNeuronCollection(spec)
+		const collections = createNeuronStoreCollections(createCollection)
+		this.observations = collections.observations
+		this.understanding = collections.understanding
+		this.evolution = collections.evolution
+		this.state = collections.state
+	}
 
 	async dispose(): Promise<void> {
 		/* no-op for in-memory */

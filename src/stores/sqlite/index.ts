@@ -1,2 +1,2 @@
-export { SQLiteNeuronCollection, SQLiteNeuronStore } from './neuron'
-export { SQLiteBrainCollection, SQLiteBrainStore } from './brain'
+export { SQLiteBrainCollection, SQLiteBrainStore } from './node/brain'
+export { SQLiteNeuronCollection, SQLiteNeuronStore } from './node/neuron'

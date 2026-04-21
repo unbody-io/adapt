@@ -29,6 +29,21 @@ Ephemeral — data lost on process exit. Good for development and testing.
 
 ## SQLite Stores
 
+Adapt ships runtime-specific SQLite adapters. Core Adapt remains runtime-agnostic; only the adapter import changes.
+
+| Adapter | Runtime | Driver |
+|---|---|---|
+| `@unbody-io/adapt/sqlite` | Node.js | `better-sqlite3` |
+| `@unbody-io/adapt/sqlite/bun` | Bun | `bun:sqlite` |
+
+### Node.js
+
+**Install:**
+
+```bash
+npm install better-sqlite3
+```
+
 ```typescript
 import { Brain } from '@unbody-io/adapt'
 import { SQLiteBrainStore, SQLiteNeuronStore } from '@unbody-io/adapt/sqlite'
@@ -45,13 +60,25 @@ const brain = new Brain({
 
 Persistent via `better-sqlite3`. Restarting and calling `initialize()` with the same paths restores all state — neurons, understanding, evolution history. No LLM calls on restore.
 
-The same guarantee applies to standalone neurons: constructing a `TextNeuron` or `ListNeuron` over a `SQLiteNeuronStore` whose DB already holds prior state (observations, buffer, understanding, evolution, prompts, schemas) restores everything via DB reads alone. Construction itself does no I/O; the restore runs when `init()` is called — either explicitly, or auto-called on the first `learn()`/`query()`. See [Neuron API → Lifecycle](./reference/neuron-api#lifecycle) for the cold-start vs. restore modes.
+### Bun
 
-**Install:**
+```typescript
+import { Brain } from '@unbody-io/adapt'
+import { SQLiteBrainStore, SQLiteNeuronStore } from '@unbody-io/adapt/sqlite/bun'
 
-```bash
-npm install better-sqlite3
+const brain = new Brain({
+  prompt: '...',
+  model: openai('gpt-4o'),
+  store: new SQLiteBrainStore('./brain.db'),
+  learning: {
+    store: (neuronId) => new SQLiteNeuronStore(`./neuron-${neuronId}.db`),
+  },
+})
 ```
+
+Persistent via Bun's built-in `bun:sqlite`. The restore behavior is the same as Node: restarting and calling `initialize()` with the same paths restores all state with no LLM calls.
+
+The same guarantee applies to standalone neurons: constructing a `TextNeuron` or `ListNeuron` over a `SQLiteNeuronStore` whose DB already holds prior state (observations, buffer, understanding, evolution, prompts, schemas) restores everything via DB reads alone. Construction itself does no I/O; the restore runs when `init()` is called — either explicitly, or auto-called on the first `learn()`/`query()`. See [Neuron API → Lifecycle](./reference/neuron-api#lifecycle) for the cold-start vs. restore modes.
 
 ### Hierarchical Persistence
 
@@ -145,5 +172,70 @@ interface NeuronCollection<T extends { id: string }> {
   count(filter?: Record<string, unknown>): Promise<number>
   search(query: string): Promise<T[]>
   addBatch(items: T[]): Promise<void>
+}
+```
+
+### Complete custom neuron store example
+
+```typescript
+class MapNeuronCollection<T extends { id: string }> implements NeuronCollection<T> {
+  private items = new Map<string, T>()
+
+  async add(item: T): Promise<void> {
+    if (this.items.has(item.id)) throw new Error(`Record with id "${item.id}" already exists`)
+    this.items.set(item.id, item)
+  }
+
+  async get(id: string): Promise<T | undefined> {
+    return this.items.get(id)
+  }
+
+  async list(filter?: Record<string, unknown>): Promise<T[]> {
+    const values = [...this.items.values()]
+    if (!filter) return values
+    return values.filter((item) =>
+      Object.entries(filter).every(([key, value]) => (item as Record<string, unknown>)[key] === value)
+    )
+  }
+
+  async update(id: string, changes: Partial<Omit<T, 'id'>>): Promise<void> {
+    const existing = this.items.get(id)
+    if (!existing) throw new Error(`Record with id "${id}" not found`)
+    this.items.set(id, { ...existing, ...changes })
+  }
+
+  async delete(id: string): Promise<void> {
+    if (!this.items.delete(id)) throw new Error(`Record with id "${id}" not found`)
+  }
+
+  async clear(): Promise<void> {
+    this.items.clear()
+  }
+
+  async count(filter?: Record<string, unknown>): Promise<number> {
+    return (await this.list(filter)).length
+  }
+
+  async search(query: string): Promise<T[]> {
+    const normalized = query.toLowerCase()
+    return (await this.list()).filter((item) =>
+      JSON.stringify(item).toLowerCase().includes(normalized)
+    )
+  }
+
+  async addBatch(items: T[]): Promise<void> {
+    for (const item of items) await this.add(item)
+  }
+}
+
+class MapNeuronStore implements NeuronStore {
+  observations = new MapNeuronCollection<ObservationRecord>()
+  understanding = new MapNeuronCollection<UnderstandingRecord>()
+  evolution = new MapNeuronCollection<EvolutionRecord>()
+  state = new MapNeuronCollection<StateRecord>()
+
+  async dispose(): Promise<void> {
+    // no-op
+  }
 }
 ```

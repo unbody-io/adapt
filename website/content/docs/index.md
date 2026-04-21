@@ -102,6 +102,8 @@ Both `autoSetup` and `neurons` can coexist — Brain will auto-generate addition
 
 By default, all state is held in memory and lost when the process exits. To persist knowledge across sessions (so a Brain can pick up where it left off), use SQLite:
 
+**Node.js**
+
 ```bash
 npm install better-sqlite3
 ```
@@ -109,6 +111,25 @@ npm install better-sqlite3
 ```typescript
 import { Brain } from '@unbody-io/adapt'
 import { SQLiteBrainStore, SQLiteNeuronStore } from '@unbody-io/adapt/sqlite'
+import { openai } from '@ai-sdk/openai'
+
+const brain = new Brain({
+  prompt: 'Track my coding patterns.',
+  model: openai('gpt-4o'),
+  store: new SQLiteBrainStore('./brain.db'),
+  learning: {
+    store: (neuronId) => new SQLiteNeuronStore(`./neuron-${neuronId}.db`),
+  },
+})
+
+await brain.initialize() // Restores from SQLite if state exists — no LLM calls
+```
+
+**Bun**
+
+```typescript
+import { Brain } from '@unbody-io/adapt'
+import { SQLiteBrainStore, SQLiteNeuronStore } from '@unbody-io/adapt/sqlite/bun'
 import { openai } from '@ai-sdk/openai'
 
 const brain = new Brain({

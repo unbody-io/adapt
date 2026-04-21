@@ -41,6 +41,8 @@ const brain = new Brain({
 })
 ```
 
+For Bun, import the same store classes from `@unbody-io/adapt/sqlite/bun` instead of `@unbody-io/adapt/sqlite`.
+
 See [Configuration](./configuration) for the full config reference.
 
 `initialize()` is called automatically on first `inject()` or `ask()`. Call it explicitly if you want to control timing:

@@ -32,6 +32,7 @@
     "eval:behavior-brain": "npx tsx evals/scripts/usecase-behavior-brain.ts",
     "test:store": "vitest run tests/store-standalone.test.ts",
     "test:store:bun": "bun test tests/store-bun.bun.test.ts",
+    "test:package-smoke": "node tests/package-smoke.mjs",
     "test:docs": "npx tsx tests/docs-code/run-all.ts",
     "docs:dev": "cd website && npm run dev",
     "docs:build": "cd website && npm run build"

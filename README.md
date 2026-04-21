@@ -6,7 +6,7 @@
 
 A memory layer that learns. Instead of storing and retrieving, Adapt observes incoming data, builds understanding, and reshapes its own structure over time. It answers questions that databases and RAG pipelines can't — the ones that require paying attention as data flows in.
 
-**[Documentation](https://adapt.unbody.io)** · **[npm](https://www.npmjs.com/package/@unbody-io/adapt)** · **[Issues](https://github.com/unbody-io/adapt/issues)**
+**[Documentation](https://adapt.unbody.io)** · **[Changelog](https://github.com/unbody-io/adapt/blob/main/CHANGELOG.md)** · **[Releases](https://github.com/unbody-io/adapt/releases)** · **[npm](https://www.npmjs.com/package/@unbody-io/adapt)** · **[Issues](https://github.com/unbody-io/adapt/issues)**
 
 ---
 

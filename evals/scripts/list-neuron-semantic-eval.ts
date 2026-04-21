@@ -21,7 +21,7 @@
  *   export $(cat .env.local | xargs) && npx tsx evals/scripts/list-neuron-semantic-eval.ts
  */
 
-import { ListNeuron, MemoryNeuronStore } from '@unbody/adapt'
+import { ListNeuron, MemoryNeuronStore } from '../../src'
 import { createOpenRouter } from '@openrouter/ai-sdk-provider'
 
 const openrouter = createOpenRouter({
@@ -120,7 +120,7 @@ async function main() {
 	const afterBatch1 = {
 		items: await neuron.getUnderstanding(),
 		itemCount: await neuron.getItemCount(),
-		buffer: neuron.getBufferState(),
+		buffer: await neuron.getBufferState(),
 		metrics: neuron.getMetrics(),
 	}
 
@@ -231,7 +231,7 @@ async function main() {
 	const afterBatch2 = {
 		items: await neuron.getUnderstanding(),
 		itemCount: await neuron.getItemCount(),
-		buffer: neuron.getBufferState(),
+		buffer: await neuron.getBufferState(),
 		metrics: neuron.getMetrics(),
 	}
 

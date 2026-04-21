@@ -8,7 +8,7 @@
  *   export $(cat .env.local | xargs) && npx tsx tests/docs-code/05-configuration.ts
  */
 
-import { Brain, MemoryBrainStore, MemoryNeuronStore } from '@unbody/adapt'
+import { Brain, MemoryBrainStore, MemoryNeuronStore } from '@unbody-io/adapt'
 import { model } from '../../evals/helpers/provider'
 
 let passed = 0

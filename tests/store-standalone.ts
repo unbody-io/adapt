@@ -14,8 +14,8 @@ import {
 	type EvolutionRecord,
 	type StateRecord,
 	type NeuronCollection,
-} from '@unbody/adapt'
-import { SQLiteNeuronStore } from '@unbody/adapt/sqlite'
+} from '../src'
+import { SQLiteNeuronStore } from '../src/sqlite'
 
 let passed = 0
 let failed = 0

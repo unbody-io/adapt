@@ -8,7 +8,7 @@
  *   export $(cat .env.local | xargs) && npx tsx tests/docs-code/04-neurons.ts
  */
 
-import { Brain, TextNeuron, ListNeuron, MemoryNeuronStore } from '@unbody/adapt'
+import { Brain, TextNeuron, ListNeuron, MemoryNeuronStore } from '@unbody-io/adapt'
 import { model } from '../../evals/helpers/provider'
 
 let passed = 0

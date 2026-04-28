@@ -16,7 +16,7 @@ async function run(command, args, cwd) {
 	return { stdout, stderr }
 }
 
-async function createProject(dir, name) {
+async function createProject(dir, name, { type = 'module' } = {}) {
 	await mkdir(dir, { recursive: true })
 	await writeFile(
 		join(dir, 'package.json'),
@@ -24,7 +24,7 @@ async function createProject(dir, name) {
 			{
 				name,
 				private: true,
-				type: 'module',
+				type,
 			},
 			null,
 			2,
@@ -164,6 +164,78 @@ async function runNodeSmoke(tarballPath, tempRoot) {
 	await run('node', ['smoke.mjs'], projectDir)
 }
 
+async function writeNodeCjsSmoke(dir) {
+	await writeFile(
+		join(dir, 'smoke.cjs'),
+		`const assert = require('node:assert/strict')
+const { SQLiteBrainStore, SQLiteNeuronStore } = require('@unbody-io/adapt/sqlite')
+const { Brain, MemoryBrainStore, MemoryNeuronStore, TextNeuron } = require('@unbody-io/adapt')
+
+assert.equal(typeof Brain, 'function')
+assert.equal(typeof MemoryBrainStore, 'function')
+assert.equal(typeof MemoryNeuronStore, 'function')
+assert.equal(typeof TextNeuron, 'function')
+
+const brainPath = './brain.db'
+const neuronPath = './neuron.db'
+
+;(async () => {
+  {
+    const brainStore = new SQLiteBrainStore(brainPath)
+    await brainStore.state.add({
+      id: 'prompt',
+      value: 'Track CJS install smoke.',
+      updated_at: new Date().toISOString(),
+    })
+    await brainStore.neurons.add({ id: 'cjs-smoke', type: 'text' })
+    await brainStore.dispose()
+  }
+
+  {
+    const reopenedBrain = new SQLiteBrainStore(brainPath)
+    const prompt = await reopenedBrain.state.get('prompt')
+    assert.equal(prompt?.value, 'Track CJS install smoke.')
+    assert.equal(await reopenedBrain.neurons.count(), 1)
+    await reopenedBrain.dispose()
+  }
+
+  {
+    const neuronStore = new SQLiteNeuronStore(neuronPath)
+    await neuronStore.understanding.add({
+      id: 'current',
+      data: 'CJS require() can load adapt and persist SQLite data.',
+      metadata_confidence: 0.95,
+      metadata_created_at: new Date().toISOString(),
+      metadata_updated_at: new Date().toISOString(),
+    })
+    await neuronStore.dispose()
+  }
+
+  {
+    const reopenedNeuron = new SQLiteNeuronStore(neuronPath)
+    const understanding = await reopenedNeuron.understanding.get('current')
+    assert.equal(
+      understanding?.data,
+      'CJS require() can load adapt and persist SQLite data.',
+    )
+    await reopenedNeuron.dispose()
+  }
+})().catch((err) => {
+  console.error(err)
+  process.exit(1)
+})
+`,
+	)
+}
+
+async function runNodeCjsSmoke(tarballPath, tempRoot) {
+	const projectDir = join(tempRoot, 'node-cjs-app')
+	await createProject(projectDir, 'adapt-node-cjs-smoke', { type: 'commonjs' })
+	await writeNodeCjsSmoke(projectDir)
+	await run('npm', ['install', tarballPath, 'better-sqlite3'], projectDir)
+	await run('node', ['smoke.cjs'], projectDir)
+}
+
 async function runBunSmoke(tarballPath, tempRoot) {
 	const projectDir = join(tempRoot, 'bun-app')
 	await createProject(projectDir, 'adapt-bun-smoke')
@@ -178,8 +250,9 @@ async function main() {
 
 	try {
 		await runNodeSmoke(tarballPath, tempRoot)
+		await runNodeCjsSmoke(tarballPath, tempRoot)
 		await runBunSmoke(tarballPath, tempRoot)
-		console.log('package smoke: node and bun passed')
+		console.log('package smoke: node (esm + cjs) and bun passed')
 	} finally {
 		await rm(tempRoot, { recursive: true, force: true })
 		await rm(tarballPath, { force: true })

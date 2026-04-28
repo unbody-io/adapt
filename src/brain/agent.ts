@@ -2,7 +2,7 @@ import type { CallSettings, LanguageModel, StreamTextResult, Tool } from 'ai'
 import { tool } from 'ai'
 import { z } from 'zod'
 import type { TokenUsage } from '../neurons/types'
-import { generate, hasToolCall, Output, stepCountIs, streamText } from '../llm'
+import { generate, Output, stepCountIs, streamText } from '../llm'
 import { buildSynthesisSystemPrompt } from './prompts/prompt.synthesis.system'
 import type { BrainAskResult } from './types'
 
@@ -51,7 +51,26 @@ export interface SynthesisResult {
 	gaps: string[]
 	sources: BrainAskResult['sources']
 	usage: TokenUsage
+	/**
+	 * Set when the agent loop didn't reach `answer` cleanly and we had to
+	 * recover (or couldn't). Always means something is off (cap reached,
+	 * model looping, etc) — surface to the caller.
+	 */
+	degraded?: {
+		reason: 'step_budget_recovered_via_fallback' | 'step_budget_exhausted_no_sources'
+		message: string
+	}
 }
+
+/**
+ * Synthesis loop budget. The model is mechanically constrained to the
+ * `answer` tool once stepNumber reaches FORCE_ANSWER_AT_STEP — without this,
+ * weak models can burn the whole budget on querySpecialist calls and
+ * return empty insights (#12). MAX leaves a recovery window after the
+ * force kicks in.
+ */
+const MAX_SYNTHESIS_STEPS = 12
+const FORCE_ANSWER_AT_STEP = 10
 
 /**
  * Tracked specialist query result (for source building)
@@ -84,6 +103,11 @@ export async function synthesize(
 	const specialistMap = new Map(specialists.map((s) => [s.id, s]))
 
 	const queriedSpecialists: SpecialistQueryRecord[] = []
+	// Refuse exact (id, question) repeats — eval showed weak models burning
+	// 30-120 specialist calls against a 10-specialist menu by re-asking the
+	// same questions. The error result nudges the model toward answering
+	// or trying a different angle (#12).
+	const askedKeys = new Set<string>()
 
 	const querySpecialist = tool({
 		description: `Query a specialist. Each sees one dimension of the knowledge.\n\n${specialistMenu}`,
@@ -95,6 +119,13 @@ export async function synthesize(
 			if (!specialistIds.has(id)) {
 				return { error: `Unknown specialist: ${id}. Available: ${[...specialistIds].join(', ')}` }
 			}
+			const key = `${id}|${question.trim().toLowerCase()}`
+			if (askedKeys.has(key)) {
+				return {
+					error: `Already asked "${id}" this exact question. Either ask a sharper follow-up, query a different specialist, or call \`answer\` with what you have.`,
+				}
+			}
+			askedKeys.add(key)
 			const specialist = specialistMap.get(id)!
 			const result = await specialist.query(question, generateOptions)
 			if (result.relevant) {
@@ -116,10 +147,12 @@ export async function synthesize(
 	const hasConsultTools = consultTools && Object.keys(consultTools).length > 0
 	const system = buildSynthesisSystemPrompt(hasConsultTools, synthesisDirective)
 
+	// `answer` has no execute fn — per ai-sdk loop-control docs, calling a
+	// tool without an execute auto-terminates the loop. We pull the call
+	// args from result.toolCalls / onStepFinish below.
 	const answer = tool({
 		description: 'Deliver your final answer and signal completion.',
 		inputSchema: answerSchema,
-		execute: async (params) => params,
 	})
 
 	const allTools: Record<string, Tool> = {
@@ -147,7 +180,19 @@ export async function synthesize(
 		prompt: query,
 		tools: allTools,
 		toolChoice: 'required',
-		stopWhen: [hasToolCall('answer'), stepCountIs(12)],
+		stopWhen: stepCountIs(MAX_SYNTHESIS_STEPS),
+		prepareStep: ({ stepNumber }) => {
+			// Force the model to call `answer` once we approach the cap.
+			// activeTools removes `querySpecialist` from the menu so the
+			// only legal action is to commit to a final answer.
+			if (stepNumber >= FORCE_ANSWER_AT_STEP) {
+				return {
+					toolChoice: { type: 'tool', toolName: 'answer' },
+					activeTools: ['answer'],
+				}
+			}
+			return {}
+		},
 		onStepFinish: ({ text, usage, toolCalls }) => {
 			stepNum++
 			const elapsed = ((Date.now() - t0) / 1000).toFixed(1)
@@ -181,15 +226,63 @@ export async function synthesize(
 		}
 	}
 
+	const sources = queriedSpecialists.map((r) => ({
+		neuronId: r.id,
+		relevance: r.relevance,
+		confidence: r.confidence,
+		insight: r.insight,
+	}))
+
+	// Recovery path: prepareStep should make this nearly impossible, but if
+	// the loop still ended without `answer` (transient error on the forced
+	// step, etc), salvage via synthesizeDirect over the material we already
+	// paid for. Better than returning ''.
+	if (!answerResult) {
+		if (queriedSpecialists.length > 0) {
+			console.log(`[synthesis] step budget exhausted without answer — falling back to synthesizeDirect over ${queriedSpecialists.length} specialist(s)`)
+			const fallback = await synthesizeDirect(model, {
+				...generateOptions,
+				synthesisDirective,
+				query,
+				specialistResults: queriedSpecialists.map((r) => ({
+					id: r.id,
+					relevance: r.relevance,
+					confidence: r.confidence,
+					insight: r.insight,
+					gaps: '',
+				})),
+			})
+			return {
+				insight: fallback.insight,
+				gaps: fallback.gaps,
+				sources,
+				usage: {
+					inputTokens: totalUsage.inputTokens + fallback.usage.inputTokens,
+					outputTokens: totalUsage.outputTokens + fallback.usage.outputTokens,
+					totalTokens: totalUsage.totalTokens + fallback.usage.totalTokens,
+				},
+				degraded: {
+					reason: 'step_budget_recovered_via_fallback',
+					message: `Agent loop ended without calling answer; recovered via direct synthesis over ${queriedSpecialists.length} specialist result(s).`,
+				},
+			}
+		}
+		return {
+			insight: '',
+			gaps: [],
+			sources,
+			usage: totalUsage,
+			degraded: {
+				reason: 'step_budget_exhausted_no_sources',
+				message: 'Agent loop ended without calling answer and no specialists were queried.',
+			},
+		}
+	}
+
 	return {
-		insight: answerResult?.response || '',
-		gaps: answerResult?.gaps ?? [],
-		sources: queriedSpecialists.map((r) => ({
-			neuronId: r.id,
-			relevance: r.relevance,
-			confidence: r.confidence,
-			insight: r.insight,
-		})),
+		insight: answerResult.response,
+		gaps: answerResult.gaps,
+		sources,
 		usage: totalUsage,
 	}
 }
@@ -308,6 +401,8 @@ export function synthesizeStream(
 	const specialistIds = new Set(specialists.map((s) => s.id))
 	const specialistMap = new Map(specialists.map((s) => [s.id, s]))
 
+	const askedKeys = new Set<string>()
+
 	const querySpecialist = tool({
 		description: `Query a specialist. Each sees one dimension of the knowledge.\n\n${specialistMenu}`,
 		inputSchema: z.object({
@@ -318,6 +413,13 @@ export function synthesizeStream(
 			if (!specialistIds.has(id)) {
 				return { error: `Unknown specialist: ${id}. Available: ${[...specialistIds].join(', ')}` }
 			}
+			const key = `${id}|${question.trim().toLowerCase()}`
+			if (askedKeys.has(key)) {
+				return {
+					error: `Already asked "${id}" this exact question. Either ask a sharper follow-up, query a different specialist, or call \`answer\` with what you have.`,
+				}
+			}
+			askedKeys.add(key)
 			const specialist = specialistMap.get(id)!
 			const result = await specialist.query(question, generateOptions)
 			return {
@@ -331,10 +433,10 @@ export function synthesizeStream(
 	const hasConsultTools = consultTools && Object.keys(consultTools).length > 0
 	const system = buildSynthesisSystemPrompt(hasConsultTools, synthesisDirective)
 
+	// No execute fn — see synthesize() above.
 	const answer = tool({
 		description: 'Deliver your final answer and signal completion.',
 		inputSchema: answerSchema,
-		execute: async (params) => params,
 	})
 
 	const allTools: Record<string, Tool> = {
@@ -349,7 +451,16 @@ export function synthesizeStream(
 		prompt: query,
 		tools: allTools,
 		toolChoice: 'required',
-		stopWhen: [hasToolCall('answer'), stepCountIs(12)],
+		stopWhen: stepCountIs(MAX_SYNTHESIS_STEPS),
+		prepareStep: ({ stepNumber }) => {
+			if (stepNumber >= FORCE_ANSWER_AT_STEP) {
+				return {
+					toolChoice: { type: 'tool', toolName: 'answer' },
+					activeTools: ['answer'],
+				}
+			}
+			return {}
+		},
 		...generateOptions,
 	})
 }

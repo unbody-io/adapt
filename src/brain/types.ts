@@ -366,6 +366,11 @@ export interface BrainOwnEventMap {
 		usage: TokenUsage
 	}
 	'brain:ask:failed': { queryId: string; error: string }
+	'brain:ask:degraded': {
+		queryId: string
+		reason: 'step_budget_recovered_via_fallback' | 'step_budget_exhausted_no_sources'
+		message: string
+	}
 
 	// Neuron management
 	'brain:neuron:added': {

@@ -29,7 +29,7 @@ import type {
 	Significance,
 } from '../types'
 import { adjustObserve, initObserve, observe } from '../observer'
-import type { EvolutionRecord, NeuronStore } from '../../stores'
+import type { EvolutionRecord, NeuronStore, ObservationRecord } from '../../stores'
 import type { QueryCallbacks, QueryMethod, QueryOptions, QueryResult } from '../base/query'
 import type {
 	BaseNeuronUpdateInput,
@@ -667,6 +667,32 @@ export abstract class BaseNeuron<
 			text: String(o.data),
 			importance: o.metadata_importance,
 		}))
+	}
+
+	async getObservations(
+		filter?: { status?: 'pending' | 'processed' },
+	): Promise<ObservationRecord[]> {
+		return filter?.status
+			? this.store.observations.list({ metadata_status: filter.status })
+			: this.store.observations.list()
+	}
+
+	async setObservations(observations: ObservationRecord[]): Promise<void> {
+		await this.store.observations.clear()
+		if (observations.length > 0) {
+			await this.store.observations.addBatch(observations)
+		}
+	}
+
+	async updateObservation(
+		id: string,
+		patch: Partial<Omit<ObservationRecord, 'id'>>,
+	): Promise<void> {
+		await this.store.observations.update(id, patch)
+	}
+
+	async removeObservation(id: string): Promise<void> {
+		await this.store.observations.delete(id)
 	}
 
 	protected async shouldUnderstand(

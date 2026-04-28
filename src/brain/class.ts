@@ -257,6 +257,21 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 	 * 3. Persist brain state for future restores
 	 */
 	private async freshInitialize(): Promise<void> {
+		// Heal orphans from a previous crashed init.
+		// We're here because loadState() returned false, so any rows in
+		// store.neurons / store.internalNeurons are leftovers from a prior
+		// freshInitialize() that threw before reaching the final setState().
+		// Without this, the next add() hits UNIQUE constraint on the same id
+		// and the store stays poisoned for every retry. See issue #6.
+		const orphanNeurons = await this.store.neurons.list()
+		for (const record of orphanNeurons) {
+			await this.store.neurons.delete(record.id)
+		}
+		const orphanInternal = await this.store.internalNeurons.list()
+		for (const record of orphanInternal) {
+			await this.store.internalNeurons.delete(record.id)
+		}
+
 		// 1. Create explicit neurons if provided
 		if (this.configNeurons?.length) {
 			for (const config of this.configNeurons) {

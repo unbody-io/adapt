@@ -352,7 +352,11 @@ export class Evaluator extends TypedEmitter<EvaluatorEventMap> {
 	 * Build context object for evaluation
 	 */
 	private async buildContext() {
-		const neurons = Array.from(this.brain.neurons.values()).map((neuron) => {
+		// Inactive neurons aren't producing signals; exclude them from the
+		// evaluation pass so the evaluator doesn't propose changes about them.
+		const neurons = Array.from(this.brain.neurons.values())
+			.filter((neuron) => this.brain.getNeuronStatus(neuron.id) === 'active')
+			.map((neuron) => {
 			const health = neuron.getHealth()
 			const metrics = neuron.getMetrics()
 			return {

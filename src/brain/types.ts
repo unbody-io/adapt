@@ -2,7 +2,7 @@ import type { LanguageModel } from 'ai'
 import type { GeneratedNeuronConfig } from '../neurons/schema.config'
 import type { Strategy } from '../neurons/text/strategies'
 import type { SharedNeuronEventMap } from '../neurons/base/types'
-import type { NeuronStore } from '../stores'
+import type { NeuronStatus, NeuronStore } from '../stores'
 import type { TokenUsage } from '../neurons/types'
 import type { LearnOutput } from '../neurons/base/class'
 import type {
@@ -375,6 +375,11 @@ export interface BrainOwnEventMap {
 	}
 	'brain:neuron:removed': {
 		neuronId: string
+	}
+	'brain:neuron:status:changed': {
+		neuronId: string
+		previousStatus: NeuronStatus
+		newStatus: NeuronStatus
 	}
 
 	// Signal events (Living Brain)

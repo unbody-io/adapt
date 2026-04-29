@@ -17,6 +17,7 @@ export type {
 	DismissedBatchRecord,
 	EvolutionRecord,
 	NeuronCollection,
+	NeuronStatus,
 	NeuronStore,
 	ObservationRecord,
 	StateRecord,

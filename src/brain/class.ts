@@ -26,7 +26,7 @@ import type { AggregatedEvolutionResult } from './evolution/types'
 import { rootDecompositionPrompt } from './prompts/prompt.template.root-decomposition'
 import { brainDecompositionSchema } from './schemas/schema.brain-decomposition'
 import { MemoryBrainStore } from '../stores'
-import type { BrainStore } from '../stores'
+import type { BrainStore, NeuronStatus } from '../stores'
 import type {
 	BrainAskResult,
 	BrainConfig,
@@ -79,6 +79,7 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 	readonly internalNeurons: Map<string, BaseNeuron<unknown>> = new Map()
 	readonly neuronTypes: Map<string, NeuronTypeDescriptor>
 	private neuronNames: Map<string, string> = new Map()
+	private neuronStatus: Map<string, NeuronStatus> = new Map()
 	private initialized = false
 	private evaluator?: Evaluator
 	private evolutionOrchestrator?: EvolutionOrchestrator
@@ -383,6 +384,7 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 
 			this.neurons.set(record.id, neuron)
 			this.neuronNames.set(record.id, neuron.name)
+			this.neuronStatus.set(record.id, record.status ?? 'active')
 		}
 	}
 
@@ -651,11 +653,13 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 
 		this.neurons.set(config.id, neuron)
 		this.neuronNames.set(config.id, config.name)
+		this.neuronStatus.set(config.id, 'active')
 
 		// Persist neuron ref (neuron's own store has everything else)
 		await this.store.neurons.add({
 			id: config.id,
 			type: config.type,
+			status: 'active',
 		})
 
 		this.emit('brain:neuron:added', {
@@ -726,6 +730,49 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 	}
 
 	/**
+	 * Get the lifecycle status of a neuron. Defaults to 'active' for any
+	 * record that predates the status field.
+	 */
+	getNeuronStatus(id: string): NeuronStatus | undefined {
+		if (!this.neurons.has(id)) return undefined
+		return this.neuronStatus.get(id) ?? 'active'
+	}
+
+	/**
+	 * Pause a neuron. Inject fan-out skips paused neurons; ask/query still
+	 * hits them (their knowledge stays consultable). Survives restarts via
+	 * the BrainNeuronRecord.status field.
+	 */
+	async pauseNeuron(id: string): Promise<void> {
+		await this.setNeuronStatus(id, 'inactive')
+	}
+
+	/**
+	 * Resume a previously paused neuron.
+	 */
+	async resumeNeuron(id: string): Promise<void> {
+		await this.setNeuronStatus(id, 'active')
+	}
+
+	private async setNeuronStatus(id: string, newStatus: NeuronStatus): Promise<void> {
+		await this.ensureInitialized()
+		if (!this.neurons.has(id)) {
+			throw new Error(`Unknown neuron: ${id}`)
+		}
+		const previousStatus = this.neuronStatus.get(id) ?? 'active'
+		if (previousStatus === newStatus) return
+
+		this.neuronStatus.set(id, newStatus)
+		await this.store.neurons.update(id, { status: newStatus })
+
+		this.emit('brain:neuron:status:changed', {
+			neuronId: id,
+			previousStatus,
+			newStatus,
+		})
+	}
+
+	/**
 	 * Get a specific internal neuron by ID
 	 */
 	getInternalNeuron(id: string): BaseNeuron<unknown> | undefined {
@@ -746,7 +793,12 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 
 		const injectId = options?.id ?? `inject_${nanoid()}`
 		const items = Array.isArray(data) ? data : [data]
-		const neuronArray = this.getNeurons()
+		// Skip inactive neurons — pause is brain-level fan-out gating, not
+		// per-neuron concern. Query path (ask) is unaffected; their knowledge
+		// stays consultable.
+		const neuronArray = this.getNeurons().filter(
+			(n) => (this.neuronStatus.get(n.id) ?? 'active') === 'active',
+		)
 
 		// Split items into batches by batchSize
 		const batchSize = this.state.ingest.batchSize
@@ -1638,6 +1690,7 @@ ${neuronMenu.map((l) => `- ${l.id}: ${l.name} — ${l.description}`).join('\n')}
 		}
 		this.neurons.delete(neuronId)
 		this.neuronNames.delete(neuronId)
+		this.neuronStatus.delete(neuronId)
 		await this.store.neurons.delete(neuronId)
 		this.emit('brain:neuron:removed', { neuronId })
 	}
@@ -2091,6 +2144,7 @@ ${neuronMenu.map((l) => `- ${l.id}: ${l.name} — ${l.description}`).join('\n')}
 		this.neurons.clear()
 		this.internalNeurons.clear()
 		this.neuronNames.clear()
+		this.neuronStatus.clear()
 		await this.store.dispose()
 	}
 }

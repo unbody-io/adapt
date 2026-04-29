@@ -841,14 +841,6 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 				? await this.askDirect(query, synthesisModel, generateOptions)
 				: await this.askDeep(query, synthesisModel, generateOptions)
 
-			if (result.degraded) {
-				this.emit('brain:ask:degraded', {
-					queryId,
-					reason: result.degraded.reason,
-					message: result.degraded.message,
-				})
-			}
-
 			this.feedAskToInternalNeurons(query, result.sources.map((s) => ({
 				neuronId: s.neuronId,
 				relevance: s.relevance,

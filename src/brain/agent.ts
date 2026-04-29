@@ -7,16 +7,6 @@ import { buildSynthesisSystemPrompt } from './prompts/prompt.synthesis.system'
 import type { BrainAskResult } from './types'
 
 /**
- * Schema for the answer tool — delivers response + metadata in one call
- */
-const answerSchema = z.object({
-	response: z.string().describe('Your full answer to the question'),
-	gaps: z.array(z.string()).describe('Knowledge gaps that could not be answered'),
-})
-
-type AnswerParams = z.infer<typeof answerSchema>
-
-/**
  * A specialist the synthesis agent can query
  */
 export interface SpecialistDef {
@@ -51,26 +41,55 @@ export interface SynthesisResult {
 	gaps: string[]
 	sources: BrainAskResult['sources']
 	usage: TokenUsage
-	/**
-	 * Set when the agent loop didn't reach `answer` cleanly and we had to
-	 * recover (or couldn't). Always means something is off (cap reached,
-	 * model looping, etc) — surface to the caller.
-	 */
-	degraded?: {
-		reason: 'step_budget_recovered_via_fallback' | 'step_budget_exhausted_no_sources'
-		message: string
-	}
 }
 
 /**
- * Synthesis loop budget. The model is mechanically constrained to the
- * `answer` tool once stepNumber reaches FORCE_ANSWER_AT_STEP — without this,
- * weak models can burn the whole budget on querySpecialist calls and
- * return empty insights (#12). MAX leaves a recovery window after the
- * force kicks in.
+ * Hard upper bound on phase-1 (gathering) loop. The model is expected to
+ * stop calling tools well before this — it's a safety cap, not the primary
+ * termination signal. With toolChoice: 'auto' and no answer tool, the loop
+ * ends naturally when the model produces text instead of a tool call.
  */
 const MAX_SYNTHESIS_STEPS = 12
-const FORCE_ANSWER_AT_STEP = 10
+
+/**
+ * Hard cap on total tool calls across the gathering loop. Backstop for
+ * misbehaving models that loop on tool calls without ever stopping.
+ */
+const MAX_TOTAL_TOOL_CALLS = 15
+
+/**
+ * Disables per-step parallel tool calls at the model level. Without this,
+ * weak models emit hundreds of tool calls in a single output, burning huge
+ * output tokens before the SDK can intervene. These are documented standard
+ * provider options:
+ *
+ * - OpenAI:    providerOptions.openai.parallelToolCalls    (default true)
+ * - Anthropic: providerOptions.anthropic.disableParallelToolUse  (default false)
+ * - Google:    no equivalent option exposed by ai-sdk
+ *
+ * Foreign blocks are ignored by each provider, so passing both is safe.
+ */
+const SYNTHESIS_PROVIDER_OPTIONS = {
+	openai: { parallelToolCalls: false },
+	anthropic: { disableParallelToolUse: true },
+}
+
+/**
+ * Custom stop condition: terminate the loop once aggregate tool calls
+ * across all steps cross MAX_TOTAL_TOOL_CALLS. Documented standard pattern
+ * — see ai-sdk loop-control docs.
+ */
+const totalToolCallsExceeded = ({
+	steps,
+}: {
+	steps: Array<{ toolCalls?: Array<unknown> }>
+}): boolean => {
+	const total = steps.reduce(
+		(count, step) => count + (step.toolCalls?.length ?? 0),
+		0,
+	)
+	return total >= MAX_TOTAL_TOOL_CALLS
+}
 
 /**
  * Tracked specialist query result (for source building)
@@ -83,31 +102,37 @@ interface SpecialistQueryRecord {
 }
 
 /**
- * Synthesize an answer by querying specialists on demand.
- *
- * The LLM decides which specialists to query, what to ask each,
- * and when it has enough to answer. No pre-fetching.
+ * Tracked consult-tool call output (for forwarding to phase 2)
  */
-export async function synthesize(
-	model: LanguageModel,
-	options: SynthesisOptions,
-): Promise<SynthesisResult> {
-	const { synthesisDirective, query, specialists, consultTools, ...generateOptions } = options
+interface ConsultRecord {
+	tool: string
+	question: string
+	output: string
+}
 
-	// Build specialist menu for tool description
+/**
+ * Build the gathering-phase tool set.
+ *
+ * Wraps consultTools so their outputs are captured into `consultResults`
+ * and forwarded to phase 2 as `globalUnderstanding`. Specialist queries
+ * are tracked in `queriedSpecialists` (with (id, question) dedup to refuse
+ * exact repeats).
+ */
+function buildGatheringTools(args: {
+	specialists: SpecialistDef[]
+	consultTools: Record<string, Tool> | undefined
+	generateOptions: CallSettings
+	queriedSpecialists: SpecialistQueryRecord[]
+	consultResults: ConsultRecord[]
+	askedKeys: Set<string>
+}): Record<string, Tool> {
+	const { specialists, consultTools, generateOptions, queriedSpecialists, consultResults, askedKeys } = args
+
 	const specialistMenu = specialists
 		.map((s) => `- ${s.id}: ${s.description || s.name}`)
 		.join('\n')
-
 	const specialistIds = new Set(specialists.map((s) => s.id))
 	const specialistMap = new Map(specialists.map((s) => [s.id, s]))
-
-	const queriedSpecialists: SpecialistQueryRecord[] = []
-	// Refuse exact (id, question) repeats — eval showed weak models burning
-	// 30-120 specialist calls against a 10-specialist menu by re-asking the
-	// same questions. The error result nudges the model toward answering
-	// or trying a different angle (#12).
-	const askedKeys = new Set<string>()
 
 	const querySpecialist = tool({
 		description: `Query a specialist. Each sees one dimension of the knowledge.\n\n${specialistMenu}`,
@@ -122,7 +147,7 @@ export async function synthesize(
 			const key = `${id}|${question.trim().toLowerCase()}`
 			if (askedKeys.has(key)) {
 				return {
-					error: `Already asked "${id}" this exact question. Either ask a sharper follow-up, query a different specialist, or call \`answer\` with what you have.`,
+					error: `Already asked "${id}" this exact question. Ask a sharper follow-up or query a different specialist.`,
 				}
 			}
 			askedKeys.add(key)
@@ -144,146 +169,155 @@ export async function synthesize(
 		},
 	})
 
+	// Wrap each consult tool so its output is captured for phase 2.
+	const wrappedConsultTools: Record<string, Tool> = {}
+	if (consultTools) {
+		for (const [name, originalTool] of Object.entries(consultTools)) {
+			const inputSchema = (originalTool as { inputSchema: z.ZodTypeAny }).inputSchema
+			const description = (originalTool as { description?: string }).description ?? ''
+			const originalExecute = (originalTool as {
+				execute?: (input: unknown, opts: unknown) => Promise<unknown>
+			}).execute
+
+			wrappedConsultTools[name] = tool({
+				description,
+				inputSchema,
+				execute: async (input, opts) => {
+					const out = originalExecute ? await originalExecute(input, opts) : null
+					consultResults.push({
+						tool: name,
+						question: String((input as { question?: string }).question ?? ''),
+						output: typeof out === 'string' ? out : JSON.stringify(out),
+					})
+					return out
+				},
+			})
+		}
+	}
+
+	return {
+		querySpecialist,
+		...wrappedConsultTools,
+	}
+}
+
+/**
+ * Format consult-tool results into a `globalUnderstanding` string for phase 2.
+ */
+function formatConsultResults(results: ConsultRecord[]): string | undefined {
+	if (results.length === 0) return undefined
+	return results
+		.map((r) => `### ${r.tool} (asked: "${r.question}")\n${r.output}`)
+		.join('\n\n')
+}
+
+/**
+ * Synthesize an answer using a two-phase pattern:
+ *
+ *   Phase 1 (gather): agent loop with `querySpecialist` + wrapped consult
+ *   tools. toolChoice: 'auto' lets the model stop calling tools when it
+ *   has enough; loop ends when the model produces plain text instead of
+ *   a tool call. No `answer` tool, no Output.object — these strict-schema
+ *   completion paths trigger Gemini's known tool-call loop bug (Google
+ *   acknowledged: "endless loop behavior with Gemini 2.5 Flash is a known
+ *   edge case when strict JSON schemas interact with function calling").
+ *
+ *   Phase 2 (synthesize): single LLM call via synthesizeDirect. No tools
+ *   active, structured output via Output.object. Receives gathered
+ *   specialist results + consult-tool outputs.
+ *
+ * The agent's adaptive specialist selection is preserved — model picks
+ * which specialists to query based on prior responses. What's removed is
+ * the trigger pattern (multiple strict-schema tools + required tool
+ * choice + answer tool) that causes Gemini Flash to loop.
+ */
+export async function synthesize(
+	model: LanguageModel,
+	options: SynthesisOptions,
+): Promise<SynthesisResult> {
+	const { synthesisDirective, query, specialists, consultTools, ...generateOptions } = options
+
+	const queriedSpecialists: SpecialistQueryRecord[] = []
+	const consultResults: ConsultRecord[] = []
+	const askedKeys = new Set<string>()
+
+	const tools = buildGatheringTools({
+		specialists,
+		consultTools,
+		generateOptions,
+		queriedSpecialists,
+		consultResults,
+		askedKeys,
+	})
+
 	const hasConsultTools = consultTools && Object.keys(consultTools).length > 0
 	const system = buildSynthesisSystemPrompt(hasConsultTools, synthesisDirective)
 
-	// `answer` has no execute fn — per ai-sdk loop-control docs, calling a
-	// tool without an execute auto-terminates the loop. We pull the call
-	// args from result.toolCalls / onStepFinish below.
-	const answer = tool({
-		description: 'Deliver your final answer and signal completion.',
-		inputSchema: answerSchema,
-	})
-
-	const allTools: Record<string, Tool> = {
-		querySpecialist,
-		answer,
-		...(hasConsultTools ? consultTools : {}),
-	}
-
-	const totalUsage: TokenUsage = {
-		inputTokens: 0,
-		outputTokens: 0,
-		totalTokens: 0,
-	}
-
-	let answerResult: AnswerParams | null = null
+	const phase1Usage: TokenUsage = { inputTokens: 0, outputTokens: 0, totalTokens: 0 }
 	let stepNum = 0
 
-	console.log(`[synthesis] query: "${query.slice(0, 80)}"`)
+	console.log(`[synthesis] phase 1: gather`)
 	console.log(`[synthesis] specialists: ${specialists.map((s) => s.id).join(', ')}`)
 	const t0 = Date.now()
 
-	const result = await generate({
+	await generate({
 		model,
 		system,
 		prompt: query,
-		tools: allTools,
-		toolChoice: 'required',
-		stopWhen: stepCountIs(MAX_SYNTHESIS_STEPS),
-		prepareStep: ({ stepNumber }) => {
-			// Force the model to call `answer` once we approach the cap.
-			// activeTools removes `querySpecialist` from the menu so the
-			// only legal action is to commit to a final answer.
-			if (stepNumber >= FORCE_ANSWER_AT_STEP) {
-				return {
-					toolChoice: { type: 'tool', toolName: 'answer' },
-					activeTools: ['answer'],
-				}
-			}
-			return {}
-		},
+		tools,
+		toolChoice: 'auto',
+		providerOptions: SYNTHESIS_PROVIDER_OPTIONS,
+		stopWhen: [stepCountIs(MAX_SYNTHESIS_STEPS), totalToolCallsExceeded],
 		onStepFinish: ({ text, usage, toolCalls }) => {
 			stepNum++
 			const elapsed = ((Date.now() - t0) / 1000).toFixed(1)
 			if (usage?.inputTokens != null && usage?.outputTokens != null) {
-				totalUsage.inputTokens += usage.inputTokens
-				totalUsage.outputTokens += usage.outputTokens
-				totalUsage.totalTokens += usage.totalTokens ?? 0
+				phase1Usage.inputTokens += usage.inputTokens
+				phase1Usage.outputTokens += usage.outputTokens
+				phase1Usage.totalTokens += usage.totalTokens ?? 0
 			}
-			// Log reasoning/text if present
 			if (text) {
 				console.log(`[synthesis] step ${stepNum} (${elapsed}s) reasoning: ${text.slice(0, 200)}${text.length > 200 ? '...' : ''}`)
 			}
 			if (toolCalls) {
 				for (const tc of toolCalls) {
 					console.log(`[synthesis] step ${stepNum} (${elapsed}s) tool: ${tc.toolName}${tc.toolName === 'querySpecialist' ? ` → ${(tc.input as { id: string }).id}: "${(tc.input as { question: string }).question.slice(0, 100)}"` : ''}`)
-					if (tc.toolName === 'answer') {
-						answerResult = tc.input as AnswerParams
-					}
 				}
 			}
 		},
 		...generateOptions,
 	})
 
-	console.log(`[synthesis] done in ${((Date.now() - t0) / 1000).toFixed(1)}s — ${stepNum} steps, ${totalUsage.totalTokens} tokens`)
+	console.log(`[synthesis] phase 1 done in ${((Date.now() - t0) / 1000).toFixed(1)}s — ${stepNum} steps, ${queriedSpecialists.length} specialists, ${phase1Usage.totalTokens} tokens`)
 
-	// Check final step for tool calls
-	for (const tc of result.toolCalls) {
-		if (tc.toolName === 'answer' && 'input' in tc) {
-			answerResult = tc.input as AnswerParams
-		}
-	}
-
-	const sources = queriedSpecialists.map((r) => ({
-		neuronId: r.id,
-		relevance: r.relevance,
-		confidence: r.confidence,
-		insight: r.insight,
-	}))
-
-	// Recovery path: prepareStep should make this nearly impossible, but if
-	// the loop still ended without `answer` (transient error on the forced
-	// step, etc), salvage via synthesizeDirect over the material we already
-	// paid for. Better than returning ''.
-	if (!answerResult) {
-		if (queriedSpecialists.length > 0) {
-			console.log(`[synthesis] step budget exhausted without answer — falling back to synthesizeDirect over ${queriedSpecialists.length} specialist(s)`)
-			const fallback = await synthesizeDirect(model, {
-				...generateOptions,
-				synthesisDirective,
-				query,
-				specialistResults: queriedSpecialists.map((r) => ({
-					id: r.id,
-					relevance: r.relevance,
-					confidence: r.confidence,
-					insight: r.insight,
-					gaps: '',
-				})),
-			})
-			return {
-				insight: fallback.insight,
-				gaps: fallback.gaps,
-				sources,
-				usage: {
-					inputTokens: totalUsage.inputTokens + fallback.usage.inputTokens,
-					outputTokens: totalUsage.outputTokens + fallback.usage.outputTokens,
-					totalTokens: totalUsage.totalTokens + fallback.usage.totalTokens,
-				},
-				degraded: {
-					reason: 'step_budget_recovered_via_fallback',
-					message: `Agent loop ended without calling answer; recovered via direct synthesis over ${queriedSpecialists.length} specialist result(s).`,
-				},
-			}
-		}
-		return {
-			insight: '',
-			gaps: [],
-			sources,
-			usage: totalUsage,
-			degraded: {
-				reason: 'step_budget_exhausted_no_sources',
-				message: 'Agent loop ended without calling answer and no specialists were queried.',
-			},
-		}
-	}
+	const phase2 = await synthesizeDirect(model, {
+		...generateOptions,
+		synthesisDirective,
+		query,
+		specialistResults: queriedSpecialists.map((r) => ({
+			id: r.id,
+			relevance: r.relevance,
+			confidence: r.confidence,
+			insight: r.insight,
+			gaps: '',
+		})),
+		globalUnderstanding: formatConsultResults(consultResults),
+	})
 
 	return {
-		insight: answerResult.response,
-		gaps: answerResult.gaps,
-		sources,
-		usage: totalUsage,
+		insight: phase2.insight,
+		gaps: phase2.gaps,
+		sources: queriedSpecialists.map((r) => ({
+			neuronId: r.id,
+			relevance: r.relevance,
+			confidence: r.confidence,
+			insight: r.insight,
+		})),
+		usage: {
+			inputTokens: phase1Usage.inputTokens + phase2.usage.inputTokens,
+			outputTokens: phase1Usage.outputTokens + phase2.usage.outputTokens,
+			totalTokens: phase1Usage.totalTokens + phase2.usage.totalTokens,
+		},
 	}
 }
 
@@ -385,83 +419,60 @@ ${specialistSections}${globalSection}`
 // ── Streaming synthesis (deep mode) ─────────────────────────────────────
 
 /**
- * Stream an agentic synthesis — same tools as synthesize(), returns raw StreamTextResult.
- * Consumer sees querySpecialist tool-call/tool-result events in fullStream.
+ * Stream a deep synthesis. Same two-phase pattern as synthesize():
+ * phase 1 gathers specialists (await), phase 2 streams the synthesized
+ * answer text. Consumers reading textStream get the final answer; the
+ * gathering phase is internal.
  */
-export function synthesizeStream(
+export async function synthesizeStream(
 	model: LanguageModel,
 	options: SynthesisOptions,
-): StreamTextResult<any, any> {
+): Promise<StreamTextResult<any, any>> {
 	const { synthesisDirective, query, specialists, consultTools, ...generateOptions } = options
 
-	const specialistMenu = specialists
-		.map((s) => `- ${s.id}: ${s.description || s.name}`)
-		.join('\n')
-
-	const specialistIds = new Set(specialists.map((s) => s.id))
-	const specialistMap = new Map(specialists.map((s) => [s.id, s]))
-
+	const queriedSpecialists: SpecialistQueryRecord[] = []
+	const consultResults: ConsultRecord[] = []
 	const askedKeys = new Set<string>()
 
-	const querySpecialist = tool({
-		description: `Query a specialist. Each sees one dimension of the knowledge.\n\n${specialistMenu}`,
-		inputSchema: z.object({
-			id: z.string().describe('Specialist ID to query'),
-			question: z.string().describe('What to ask this specialist'),
-		}),
-		execute: async ({ id, question }) => {
-			if (!specialistIds.has(id)) {
-				return { error: `Unknown specialist: ${id}. Available: ${[...specialistIds].join(', ')}` }
-			}
-			const key = `${id}|${question.trim().toLowerCase()}`
-			if (askedKeys.has(key)) {
-				return {
-					error: `Already asked "${id}" this exact question. Either ask a sharper follow-up, query a different specialist, or call \`answer\` with what you have.`,
-				}
-			}
-			askedKeys.add(key)
-			const specialist = specialistMap.get(id)!
-			const result = await specialist.query(question, generateOptions)
-			return {
-				relevant: result.relevant,
-				insight: result.insight,
-				gaps: result.gaps || undefined,
-			}
-		},
+	const tools = buildGatheringTools({
+		specialists,
+		consultTools,
+		generateOptions,
+		queriedSpecialists,
+		consultResults,
+		askedKeys,
 	})
 
 	const hasConsultTools = consultTools && Object.keys(consultTools).length > 0
 	const system = buildSynthesisSystemPrompt(hasConsultTools, synthesisDirective)
 
-	// No execute fn — see synthesize() above.
-	const answer = tool({
-		description: 'Deliver your final answer and signal completion.',
-		inputSchema: answerSchema,
-	})
+	console.log(`[synthesis:stream] phase 1: gather`)
 
-	const allTools: Record<string, Tool> = {
-		querySpecialist,
-		answer,
-		...(hasConsultTools ? consultTools : {}),
-	}
-
-	return streamText({
+	await generate({
 		model,
 		system,
 		prompt: query,
-		tools: allTools,
-		toolChoice: 'required',
-		stopWhen: stepCountIs(MAX_SYNTHESIS_STEPS),
-		prepareStep: ({ stepNumber }) => {
-			if (stepNumber >= FORCE_ANSWER_AT_STEP) {
-				return {
-					toolChoice: { type: 'tool', toolName: 'answer' },
-					activeTools: ['answer'],
-				}
-			}
-			return {}
-		},
+		tools,
+		toolChoice: 'auto',
+		providerOptions: SYNTHESIS_PROVIDER_OPTIONS,
+		stopWhen: [stepCountIs(MAX_SYNTHESIS_STEPS), totalToolCallsExceeded],
 		...generateOptions,
+	})
+
+	console.log(`[synthesis:stream] phase 1 done — ${queriedSpecialists.length} specialists`)
+
+	return synthesizeDirectStream(model, {
+		...generateOptions,
+		synthesisDirective,
+		query,
+		specialistResults: queriedSpecialists.map((r) => ({
+			id: r.id,
+			relevance: r.relevance,
+			confidence: r.confidence,
+			insight: r.insight,
+			gaps: '',
+		})),
+		globalUnderstanding: formatConsultResults(consultResults),
 	})
 }
 

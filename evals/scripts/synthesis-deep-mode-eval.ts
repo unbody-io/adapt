@@ -92,7 +92,6 @@ async function main() {
 
 	let totalRuns = 0
 	let emptyInsightCount = 0
-	let degradedCount = 0
 	let totalQueriedSpecialists = 0
 	let totalTokens = 0
 
@@ -111,14 +110,10 @@ async function main() {
 
 				totalRuns++
 				if (!result.insight) emptyInsightCount++
-				if (result.degraded) degradedCount++
 				totalQueriedSpecialists += result.sources.length
 				totalTokens += result.usage.totalTokens
 
 				console.log(`  [${elapsed}s] insight: ${result.insight.length} chars, sources: ${result.sources.length}, gaps: ${result.gaps.length}, tokens: ${result.usage.totalTokens}`)
-				if (result.degraded) {
-					console.log(`  ⚠ DEGRADED — ${result.degraded.reason}: ${result.degraded.message}`)
-				}
 				if (!result.insight) {
 					console.log(`  ❗ EMPTY INSIGHT — agent burned ${result.usage.totalTokens} tokens, queried ${result.sources.length} specialists, returned nothing.`)
 				} else {
@@ -134,7 +129,6 @@ async function main() {
 	console.log('\n━━━ Summary ━━━')
 	console.log(`Total runs:                 ${totalRuns}`)
 	console.log(`Empty-insight failures:     ${emptyInsightCount} / ${totalRuns}`)
-	console.log(`Degraded (recovered/empty): ${degradedCount} / ${totalRuns}`)
 	console.log(`Total specialists queried:  ${totalQueriedSpecialists}`)
 	console.log(`Avg specialists per run:    ${(totalQueriedSpecialists / Math.max(totalRuns, 1)).toFixed(1)}`)
 	console.log(`Total tokens:               ${totalTokens}`)

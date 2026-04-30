@@ -6,7 +6,7 @@ import type {
 	LanguageModelV3GenerateResult,
 } from '@ai-sdk/provider'
 import { Brain } from '../src/brain'
-import { MemoryBrainStore, MemoryNeuronStore } from '../src/stores'
+import { MemoryBrainStore } from '../src/stores'
 
 function createQueuedJsonModel(responses: unknown[]) {
 	let callCount = 0
@@ -73,7 +73,7 @@ describe('Brain init recovery from partial state (issue #6)', () => {
 			},
 		])
 
-		const brain = new Brain({
+		const brain = await Brain.create({
 			prompt: 'Track coding patterns and preferences.',
 			model,
 			autoSetup: false,
@@ -87,7 +87,6 @@ describe('Brain init recovery from partial state (issue #6)', () => {
 					instructions: 'Track coding patterns and preferences.',
 				},
 			],
-			learning: { store: () => new MemoryNeuronStore() },
 			internalNeurons: {
 				globalUnderstanding: false,
 				globalQueryUnderstanding: false,
@@ -97,7 +96,7 @@ describe('Brain init recovery from partial state (issue #6)', () => {
 			evolution: { enabled: false },
 		})
 
-		await expect(brain.initialize()).resolves.toBeUndefined()
+		expect(brain).toBeDefined()
 
 		const neurons = await brainStore.neurons.list()
 		expect(neurons).toHaveLength(1)

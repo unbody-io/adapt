@@ -32,22 +32,20 @@ async function main() {
 	// ── TextNeuron — Methods ─────────────────────────────────────────────
 	section('TextNeuron — Lifecycle')
 
-	const textNeuron = new TextNeuron({
+	const textNeuron = await TextNeuron.create({
 		model,
 		instructions: 'Track API test patterns.',
 		store: new MemoryNeuronStore(),
 	})
 
 	// Lifecycle
-	assert(typeof textNeuron.init === 'function', 'textNeuron.init() exists')
+	assert(typeof TextNeuron.create === 'function', 'TextNeuron.create() exists')
+	assert(typeof TextNeuron.restore === 'function', 'TextNeuron.restore() exists')
 	assert(typeof textNeuron.dispose === 'function', 'textNeuron.dispose() exists')
 	assert(typeof textNeuron.isInitialized === 'function', 'textNeuron.isInitialized() exists')
-	assert(textNeuron.isInitialized() === false, 'isInitialized() returns false before init')
-
-	const initResult = await textNeuron.init()
-	assert('observeSystemPrompt' in initResult, 'init() returns observeSystemPrompt')
-	assert('understandSystemPrompt' in initResult, 'init() returns understandSystemPrompt')
-	assert(textNeuron.isInitialized() === true, 'isInitialized() returns true after init')
+	assert(textNeuron.isInitialized() === true, 'isInitialized() returns true after create()')
+	assert(typeof textNeuron.getObserveSystemPrompt() === 'string', 'getObserveSystemPrompt() returns string after create()')
+	assert(typeof textNeuron.getUnderstandSystemPrompt() === 'string', 'getUnderstandSystemPrompt() returns string after create()')
 
 	// ── Learning ─────────────────────────────────────────────────────────
 	section('TextNeuron — Learning')
@@ -184,14 +182,15 @@ async function main() {
 	// ── ListNeuron — Verify Same API ─────────────────────────────────────
 	section('ListNeuron — API Parity')
 
-	const listNeuron = new ListNeuron({
+	const listNeuron = await ListNeuron.create({
 		model,
 		instructions: 'Track items for API ref test.',
 		store: new MemoryNeuronStore(),
 	})
 
 	// Lifecycle
-	assert(typeof listNeuron.init === 'function', 'listNeuron.init() exists')
+	assert(typeof ListNeuron.create === 'function', 'ListNeuron.create() exists')
+	assert(typeof ListNeuron.restore === 'function', 'ListNeuron.restore() exists')
 	assert(typeof listNeuron.dispose === 'function', 'listNeuron.dispose() exists')
 	assert(typeof listNeuron.isInitialized === 'function', 'listNeuron.isInitialized() exists')
 

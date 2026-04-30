@@ -2,15 +2,17 @@
  * Tool for consulting the network's self-knowledge (internal neurons)
  */
 
-import { tool } from 'ai'
 import { z } from 'zod'
+import { tool } from '../../../llm'
 import type { Brain } from '../../class'
 
 const consultSystemKnowledgeParams = z.object({
-	question: z.string().describe('What to ask the network\'s self-knowledge'),
+	question: z.string().describe("What to ask the network's self-knowledge"),
 })
 
-export type ConsultSystemKnowledgeParams = z.infer<typeof consultSystemKnowledgeParams>
+export type ConsultSystemKnowledgeParams = z.infer<
+	typeof consultSystemKnowledgeParams
+>
 
 /**
  * Create consultSystemKnowledge tool with brain context.
@@ -22,7 +24,7 @@ export type ConsultSystemKnowledgeParams = z.infer<typeof consultSystemKnowledge
 export function createConsultSystemKnowledgeTool(brain: Brain) {
 	return tool({
 		description:
-			'Ask the network\'s self-knowledge — what patterns, gaps, or tensions exist across the whole system.',
+			"Ask the network's self-knowledge — what patterns, gaps, or tensions exist across the whole system.",
 		inputSchema: consultSystemKnowledgeParams,
 		execute: async ({ question }) => {
 			return brain.consult(question)

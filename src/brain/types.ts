@@ -1,17 +1,16 @@
 import type { LanguageModel } from 'ai'
+import type { LearnOutput } from '../neurons/base/class'
+import type { SharedNeuronEventMap } from '../neurons/base/types'
 import type { GeneratedNeuronConfig } from '../neurons/schema.config'
 import type { Strategy } from '../neurons/text/strategies'
-import type { SharedNeuronEventMap } from '../neurons/base/types'
-import type { NeuronStatus, NeuronStore } from '../stores'
 import type { TokenUsage } from '../neurons/types'
-import type { LearnOutput } from '../neurons/base/class'
+import type { BrainStore, NeuronStatus } from '../stores'
 import type {
 	CascadableConfig,
 	ResolvedCascadableConfig,
 } from '../types/config'
 import type { EventsFromMap } from '../types/events'
 import type { EvolutionDecision } from './evaluator/types'
-import type { BrainStore } from '../stores'
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Learning Config (passed to neurons)
@@ -65,8 +64,6 @@ export interface LearningConfig extends CascadableConfig {
 	understand?: UnderstandPhaseConfig
 	query?: QueryPhaseConfig
 	governance?: GovernanceConfig
-	/** Factory for creating per-neuron stores. Receives neuronId for restore routing. */
-	store?: (neuronId: string) => NeuronStore
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

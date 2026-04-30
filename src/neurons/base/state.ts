@@ -110,7 +110,10 @@ export function toStoredModelRef(model: LanguageModel): StoredModelRef {
 		// String format: "provider:modelId" or just a model name
 		const colonIdx = model.indexOf(':')
 		if (colonIdx > 0) {
-			return { provider: model.slice(0, colonIdx), modelId: model.slice(colonIdx + 1) }
+			return {
+				provider: model.slice(0, colonIdx),
+				modelId: model.slice(colonIdx + 1),
+			}
 		}
 		return { provider: 'unknown', modelId: model }
 	}
@@ -129,4 +132,20 @@ export function serializeModelSlots(
 			toStoredModelRef(model),
 		]),
 	)
+}
+
+/**
+ * Rehydrate model slots from a stored Record<string, StoredModelRef> into
+ * AI SDK's `"provider:modelId"` string form. AI SDK then routes through Vercel
+ * AI Gateway. Users who need a direct provider call `neuron.update({ model })`
+ * post-restore.
+ */
+export function deserializeModelSlots(
+	stored: Record<string, StoredModelRef>,
+): ModelSlots {
+	const out: Record<string, LanguageModel> = {}
+	for (const [key, ref] of Object.entries(stored)) {
+		out[key] = `${ref.provider}:${ref.modelId}` as LanguageModel
+	}
+	return out as unknown as ModelSlots
 }

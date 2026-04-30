@@ -32,7 +32,7 @@ async function main() {
 	// ── Evolution Config ──────────────────────────────────────────────────
 	section('Evolution Config')
 
-	const brain = new Brain({
+	const brain = await Brain.create({
 		prompt: 'Track evolution patterns.',
 		model,
 		evolution: {
@@ -47,7 +47,6 @@ async function main() {
 			},
 		},
 	})
-	await brain.initialize()
 	assert(true, 'Brain with full evolution config initialized')
 
 	// ── Manual Control — Signals ─────────────────────────────────────────
@@ -103,7 +102,7 @@ async function main() {
 	section('Enable / Disable Evolution')
 
 	// Long-term brain: let it evolve
-	const clientBrain = new Brain({
+	const clientBrain = await Brain.create({
 		prompt: 'Long-term tracking.',
 		model,
 		evolution: { enabled: true },
@@ -112,7 +111,7 @@ async function main() {
 	await clientBrain.dispose()
 
 	// Session brain: fixed structure
-	const sessionBrain = new Brain({
+	const sessionBrain = await Brain.create({
 		prompt: 'Session-scoped extraction.',
 		model,
 		evolution: { enabled: false },

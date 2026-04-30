@@ -41,7 +41,7 @@ async function main() {
 	// ━━━ 1. CREATE STANDALONE TEXT NEURON ━━━
 	console.log('\n━━━ 1. Create standalone TextNeuron ━━━')
 
-	const neuron = new TextNeuron({
+	const neuron = await TextNeuron.create({
 		model,
 		id: 'coffee-expert',
 		name: 'Coffee Knowledge',
@@ -94,10 +94,9 @@ async function main() {
 	}, null, 2))
 
 	// ━━━ 2. INIT ━━━
-	console.log('\n━━━ 2. Initialize neuron ━━━')
-	const initResult = await neuron.init()
-	console.log(`  Observe prompt generated: ${initResult.observeSystemPrompt.length} chars`)
-	console.log(`  Understand prompt generated: ${initResult.understandSystemPrompt.length} chars`)
+	console.log('\n━━━ 2. Initialized via TextNeuron.create ━━━')
+	console.log(`  Observe prompt generated: ${neuron.getObserveSystemPrompt()?.length ?? 0} chars`)
+	console.log(`  Understand prompt generated: ${neuron.getUnderstandSystemPrompt()?.length ?? 0} chars`)
 
 	// ━━━ 3. INGEST DATA (batch 1) ━━━
 	console.log('\n━━━ 3. Ingest batch 1 — coffee brewing basics ━━━')

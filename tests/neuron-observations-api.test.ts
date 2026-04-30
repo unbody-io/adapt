@@ -1,20 +1,42 @@
 import { describe, expect, it } from 'vitest'
 import type { LanguageModel } from 'ai'
-import type { LanguageModelV3 } from '@ai-sdk/provider'
+import type {
+	LanguageModelV3,
+	LanguageModelV3CallOptions,
+	LanguageModelV3GenerateResult,
+} from '@ai-sdk/provider'
 import { TextNeuron, MemoryNeuronStore } from '../src'
 import type { ObservationRecord } from '../src/stores'
 
-function unusedModel(): LanguageModel {
+function initOnlyModel(): LanguageModel {
+	const responses = [
+		{ identity: 'You observe test data.', domain: 'test' },
+		{ identity: 'You synthesize test data.', skills: [], dynamicsSkills: [] },
+	]
+	let callCount = 0
+	const usage: LanguageModelV3GenerateResult['usage'] = {
+		inputTokens: { total: 0, noCache: 0, cacheRead: 0, cacheWrite: 0 },
+		outputTokens: { total: 0, text: 0, reasoning: 0 },
+	}
 	const model: LanguageModelV3 = {
 		specificationVersion: 'v3',
 		provider: 'test',
-		modelId: 'unused',
+		modelId: 'init-only',
 		supportedUrls: {},
-		async doGenerate() {
-			throw new Error('model should not be called by observation API tests')
+		async doGenerate(_opts: LanguageModelV3CallOptions): Promise<LanguageModelV3GenerateResult> {
+			const response = responses[callCount++]
+			if (!response) throw new Error(`No queued response for call ${callCount}`)
+			return {
+				content: [{ type: 'text', text: JSON.stringify(response) }],
+				finishReason: { unified: 'stop', raw: 'stop' },
+				usage,
+				warnings: [],
+				request: {},
+				response: { id: `r-${callCount}`, timestamp: new Date(), modelId: 'init-only' },
+			}
 		},
 		async doStream() {
-			throw new Error('model should not be called by observation API tests')
+			throw new Error('not used')
 		},
 	}
 	return model as unknown as LanguageModel
@@ -32,21 +54,23 @@ function makeObservation(id: string, status: 'pending' | 'processed', text: stri
 }
 
 describe('Neuron observations API (issue #7)', () => {
-	function makeNeuron() {
-		return new TextNeuron({
+	async function makeNeuron() {
+		const store = new MemoryNeuronStore()
+		const neuron = await TextNeuron.create({
 			id: 'test',
 			name: 'Test',
 			description: 'Test neuron',
 			instructions: 'Track test data.',
-			model: unusedModel(),
-			store: new MemoryNeuronStore(),
+			model: initOnlyModel(),
+			store,
 		})
+		return { neuron, store }
 	}
 
 	it('getObservations returns all records when no filter is given', async () => {
-		const neuron = makeNeuron()
-		await neuron.store.observations.add(makeObservation('a', 'pending', 'one'))
-		await neuron.store.observations.add(makeObservation('b', 'processed', 'two'))
+		const { neuron, store } = await makeNeuron()
+		await store.observations.add(makeObservation('a', 'pending', 'one'))
+		await store.observations.add(makeObservation('b', 'processed', 'two'))
 
 		const all = await neuron.getObservations()
 		expect(all).toHaveLength(2)
@@ -54,10 +78,10 @@ describe('Neuron observations API (issue #7)', () => {
 	})
 
 	it('getObservations filters by status', async () => {
-		const neuron = makeNeuron()
-		await neuron.store.observations.add(makeObservation('a', 'pending', 'one'))
-		await neuron.store.observations.add(makeObservation('b', 'processed', 'two'))
-		await neuron.store.observations.add(makeObservation('c', 'pending', 'three'))
+		const { neuron, store } = await makeNeuron()
+		await store.observations.add(makeObservation('a', 'pending', 'one'))
+		await store.observations.add(makeObservation('b', 'processed', 'two'))
+		await store.observations.add(makeObservation('c', 'pending', 'three'))
 
 		const pending = await neuron.getObservations({ status: 'pending' })
 		expect(pending.map((o) => o.id).sort()).toEqual(['a', 'c'])
@@ -67,9 +91,9 @@ describe('Neuron observations API (issue #7)', () => {
 	})
 
 	it('setObservations replaces the entire collection', async () => {
-		const neuron = makeNeuron()
-		await neuron.store.observations.add(makeObservation('old-1', 'pending', 'old'))
-		await neuron.store.observations.add(makeObservation('old-2', 'processed', 'older'))
+		const { neuron, store } = await makeNeuron()
+		await store.observations.add(makeObservation('old-1', 'pending', 'old'))
+		await store.observations.add(makeObservation('old-2', 'processed', 'older'))
 
 		await neuron.setObservations([
 			makeObservation('new-1', 'pending', 'fresh'),
@@ -81,8 +105,8 @@ describe('Neuron observations API (issue #7)', () => {
 	})
 
 	it('setObservations with empty array clears the collection', async () => {
-		const neuron = makeNeuron()
-		await neuron.store.observations.add(makeObservation('a', 'pending', 'one'))
+		const { neuron, store } = await makeNeuron()
+		await store.observations.add(makeObservation('a', 'pending', 'one'))
 
 		await neuron.setObservations([])
 
@@ -91,21 +115,21 @@ describe('Neuron observations API (issue #7)', () => {
 	})
 
 	it('updateObservation patches a single record', async () => {
-		const neuron = makeNeuron()
-		await neuron.store.observations.add(makeObservation('a', 'pending', 'before'))
+		const { neuron, store } = await makeNeuron()
+		await store.observations.add(makeObservation('a', 'pending', 'before'))
 
 		await neuron.updateObservation('a', { data: 'after', metadata_importance: 0.9 })
 
-		const updated = await neuron.store.observations.get('a')
+		const updated = await store.observations.get('a')
 		expect(updated?.data).toBe('after')
 		expect(updated?.metadata_importance).toBe(0.9)
 		expect(updated?.metadata_status).toBe('pending')
 	})
 
 	it('removeObservation deletes a record by id', async () => {
-		const neuron = makeNeuron()
-		await neuron.store.observations.add(makeObservation('a', 'pending', 'one'))
-		await neuron.store.observations.add(makeObservation('b', 'pending', 'two'))
+		const { neuron, store } = await makeNeuron()
+		await store.observations.add(makeObservation('a', 'pending', 'one'))
+		await store.observations.add(makeObservation('b', 'pending', 'two'))
 
 		await neuron.removeObservation('a')
 

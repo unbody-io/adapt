@@ -9,7 +9,7 @@
  */
 
 import { Brain, TextNeuron, MemoryNeuronStore } from '@unbody-io/adapt'
-import { SQLiteBrainStore, SQLiteNeuronStore } from '@unbody-io/adapt/sqlite'
+import { SQLiteBrainStore } from '@unbody-io/adapt/sqlite'
 import { model } from '../../evals/helpers/provider'
 import { mkdirSync, rmSync } from 'node:fs'
 import { join, dirname } from 'node:path'
@@ -42,7 +42,7 @@ async function main() {
 		// ── 01-getting-started.md: Brain Quick Start ─────────────────────────
 		section('Brain Quick Start')
 
-		const brain = new Brain({
+		const brain = await Brain.create({
 			prompt: 'Track my coding patterns and development philosophy.',
 			model,
 		})
@@ -61,7 +61,7 @@ async function main() {
 		// ── 01-getting-started.md: Standalone Neuron ─────────────────────────
 		section('Standalone Neuron')
 
-		const neuron = new TextNeuron({
+		const neuron = await TextNeuron.create({
 			model,
 			instructions: 'Track product design principles and philosophy.',
 			store: new MemoryNeuronStore(),
@@ -81,7 +81,7 @@ async function main() {
 		// ── 01-getting-started.md: Explicit Neurons ──────────────────────────
 		section('Explicit Neurons')
 
-		const explicitBrain = new Brain({
+		const explicitBrain = await Brain.create({
 			prompt: 'Track cooking knowledge.',
 			model,
 			autoSetup: false,
@@ -103,7 +103,6 @@ async function main() {
 			],
 		})
 
-		await explicitBrain.initialize()
 		const neurons = explicitBrain.getNeurons()
 		assert(neurons.length === 2, 'explicit neurons: 2 neurons created')
 		assert(neurons.some(n => n.id === 'techniques'), 'explicit neurons: techniques neuron exists')
@@ -114,16 +113,12 @@ async function main() {
 		// ── 01-getting-started.md: SQLite Persistence ────────────────────────
 		section('SQLite Persistence')
 
-		const sqliteBrain = new Brain({
+		const sqliteBrain = await Brain.create({
 			prompt: 'Track my coding patterns.',
 			model,
 			store: new SQLiteBrainStore(join(tmpDir, 'brain.db')),
-			learning: {
-				store: (neuronId: string) => new SQLiteNeuronStore(join(tmpDir, `neuron-${neuronId}.db`)),
-			},
 		})
 
-		await sqliteBrain.initialize()
 		assert(true, 'SQLite brain initialized successfully')
 
 		await sqliteBrain.dispose()

@@ -45,7 +45,7 @@ import { join, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const isBunRuntime = 'Bun' in globalThis
-const { SQLiteBrainStore, SQLiteNeuronStore } = isBunRuntime
+const { SQLiteBrainStore } = isBunRuntime
 	? await import('../../src/sqlite/bun')
 	: await import('../../src/sqlite')
 
@@ -94,7 +94,8 @@ async function main() {
 
 	console.log('\n━━━ 1. Create & initialize brain ━━━')
 
-	const brain = new Brain({
+	const brainStore = new SQLiteBrainStore(BRAIN_DB)
+	const freshConfig = {
 		prompt: [
 			"Learn about a person's behavioral patterns from their digital activity stream.",
 			'You start knowing nothing about this person. Everything must be discovered from the data as it arrives.',
@@ -116,10 +117,9 @@ async function main() {
 			'Flag frustration or hostility moments prominently when detected.',
 		].join('\n'),
 		model,
-		store: new SQLiteBrainStore(BRAIN_DB),
+		store: brainStore,
 		learning: {
-			store: (neuronId: string) => new SQLiteNeuronStore(join(dbDir, `behavior-brain-${neuronId}.db`)),
-			governance: { strategy: 'continuous' },
+			governance: { strategy: 'continuous' as const },
 			understand: {
 				thresholds: {
 					minImportance: 0.2,
@@ -132,7 +132,11 @@ async function main() {
 			autoEvaluate: false,
 		},
 		ingest: { batchSize: 6 },
-	})
+	}
+
+	const brain = QUERY_ONLY
+		? await Brain.restore(brainStore)
+		: await Brain.create(freshConfig)
 
 	// Wire up brain-level event logging
 	brain.on((event) => {
@@ -180,7 +184,6 @@ async function main() {
 		}
 	})
 
-	await brain.initialize()
 	console.log(`  [${elapsed()}s] Brain initialized`)
 
 	// ── 2. Log decomposition details ────────────────────────────────────────

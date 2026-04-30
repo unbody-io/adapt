@@ -7,10 +7,9 @@
  */
 
 import type { CallSettings, LanguageModel, Tool } from 'ai'
-import { tool } from 'ai'
 import { z } from 'zod'
+import { generate, hasToolCall, stepCountIs, tool } from '../llm'
 import type { TokenUsage } from '../neurons/types'
-import { generate, hasToolCall, stepCountIs } from '../llm'
 import type { Brain } from './class'
 
 const MAX_STEPS = 12

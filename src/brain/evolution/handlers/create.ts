@@ -2,13 +2,12 @@
  * Create action handler - generates new neurons from guidance
  */
 
-import { Output } from 'ai'
-import { EvolutionActionHandler } from '../base-handler'
+import { generate, Output } from '../../../llm'
 import type { EvolutionDecision } from '../../evaluator/types'
-import type { CreateActionResult } from '../types'
-import { generate } from '../../../llm'
 import { neuronConfigsSchema } from '../../schemas/schema.neuron-configs'
+import { EvolutionActionHandler } from '../base-handler'
 import { createPromptTemplate } from '../prompt.template.create'
+import type { CreateActionResult } from '../types'
 
 /**
  * Handler for 'create' evolution action
@@ -27,7 +26,11 @@ export class CreateHandler extends EvolutionActionHandler<CreateActionResult> {
 
 			const result = await generate({
 				model: this.brain.config.model,
-				prompt: createPromptTemplate(guidance, this.brain.promptContext?.purpose ?? this.brain.prompt, Array.from(this.brain.neuronTypes.values())),
+				prompt: createPromptTemplate(
+					guidance,
+					this.brain.promptContext?.purpose ?? this.brain.prompt,
+					Array.from(this.brain.neuronTypes.values()),
+				),
 				output: Output.object({ schema: neuronConfigsSchema }),
 				repairSchema: neuronConfigsSchema,
 			})

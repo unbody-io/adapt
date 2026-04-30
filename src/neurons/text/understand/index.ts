@@ -6,9 +6,8 @@
  */
 
 import type { LanguageModel } from 'ai'
-import { tool } from 'ai'
 import { z } from 'zod'
-import { generate, Output, stepCountIs } from '../../../llm'
+import { generate, Output, stepCountIs, tool } from '../../../llm'
 import type { Significance } from '../../types'
 import type { Strategy } from '../strategies'
 import { understandAdjustPromptTemplate } from './prompts/adjust'
@@ -180,7 +179,8 @@ export async function adjustUnderstandingContent(
 		}),
 
 		searchUnderstanding: tool({
-			description: 'Search for passages in the understanding. Returns exact text snippets that can be passed directly to removeSection or replaceSection.',
+			description:
+				'Search for passages in the understanding. Returns exact text snippets that can be passed directly to removeSection or replaceSection.',
 			inputSchema: z.object({
 				query: z.string().describe('Text or pattern to search for'),
 			}),
@@ -236,20 +236,34 @@ export async function adjustUnderstandingContent(
 		}),
 
 		insertSection: tool({
-			description: 'Insert text relative to an anchor point in the understanding.',
+			description:
+				'Insert text relative to an anchor point in the understanding.',
 			inputSchema: z.object({
-				position: z.enum(['before', 'after']).describe('Insert before or after the anchor'),
-				anchor: z.string().describe('The existing text to position relative to'),
+				position: z
+					.enum(['before', 'after'])
+					.describe('Insert before or after the anchor'),
+				anchor: z
+					.string()
+					.describe('The existing text to position relative to'),
 				newText: z.string().describe('The text to insert'),
 			}),
 			execute: async (params) => {
 				if (!buffer.includes(params.anchor)) {
-					return { success: false, error: 'Anchor text not found in understanding' }
+					return {
+						success: false,
+						error: 'Anchor text not found in understanding',
+					}
 				}
 				if (params.position === 'before') {
-					buffer = buffer.replace(params.anchor, `${params.newText}\n${params.anchor}`)
+					buffer = buffer.replace(
+						params.anchor,
+						`${params.newText}\n${params.anchor}`,
+					)
 				} else {
-					buffer = buffer.replace(params.anchor, `${params.anchor}\n${params.newText}`)
+					buffer = buffer.replace(
+						params.anchor,
+						`${params.anchor}\n${params.newText}`,
+					)
 				}
 				return { success: true }
 			},
@@ -258,7 +272,9 @@ export async function adjustUnderstandingContent(
 		complete: tool({
 			description: 'Call when done adjusting. Summarize what changed.',
 			inputSchema: z.object({
-				evolution: z.string().describe('Brief description of what changed and why'),
+				evolution: z
+					.string()
+					.describe('Brief description of what changed and why'),
 				significance: z
 					.enum(['routine', 'notable', 'critical'])
 					.describe('How significant are these changes'),

@@ -25,7 +25,7 @@
  */
 
 import { Brain } from '../../src'
-import { SQLiteBrainStore, SQLiteNeuronStore } from '../../src/sqlite'
+import { SQLiteBrainStore } from '../../src/sqlite'
 import { createOpenRouter } from '@openrouter/ai-sdk-provider'
 import type { LanguageModel } from 'ai'
 import type {
@@ -112,17 +112,13 @@ const neuronConfigs = [
 const BRAIN_PROMPT =
 	'Track culinary knowledge across coffee, cooking, and baking. Decompose into specialists.'
 
-function makeBrain(model: LanguageModel) {
-	return new Brain({
+function brainConfig(model: LanguageModel) {
+	return {
 		prompt: BRAIN_PROMPT,
 		model,
 		autoSetup: false,
 		store: new SQLiteBrainStore(join(dbDir, 'brain.db')),
 		neurons: neuronConfigs,
-		learning: {
-			store: (neuronId: string) =>
-				new SQLiteNeuronStore(join(dbDir, `neuron-${neuronId}.db`)),
-		},
 		internalNeurons: {
 			globalUnderstanding: false,
 			globalQueryUnderstanding: false,
@@ -130,7 +126,7 @@ function makeBrain(model: LanguageModel) {
 			queryGaps: false,
 		},
 		evolution: { enabled: false },
-	})
+	}
 }
 
 async function listOrphans(brainDbPath: string) {
@@ -161,29 +157,14 @@ async function main() {
 	console.log('Failing on call 5 → neurons 1+2 persist, neuron 3 dies on its first LLM call.')
 
 	const { model: failingModel, getCallCount: getFailCalls } = wrapWithFailureOnCall(5)
-	const brain1 = makeBrain(failingModel)
-
-	brain1.on((event) => {
-		if (
-			event.type === 'brain:init:started' ||
-			event.type === 'brain:neuron:added' ||
-			event.type === 'neuron:init:started' ||
-			event.type === 'neuron:init:completed' ||
-			event.type === 'neuron:init:failed' ||
-			event.type === 'brain:init:failed'
-		) {
-			const p = event.payload as Record<string, unknown>
-			console.log(`  [${elapsed()}s] ${event.type}`, JSON.stringify(p))
-		}
-	})
 
 	let phase1Error: Error | null = null
 	try {
-		await brain1.initialize()
-		console.log('  [unexpected] brain1.initialize() did not throw')
+		await Brain.create(brainConfig(failingModel))
+		console.log('  [unexpected] Brain.create() did not throw')
 	} catch (err) {
 		phase1Error = err instanceof Error ? err : new Error(String(err))
-		console.log(`\n  [${elapsed()}s] brain1.initialize() threw as expected:`)
+		console.log(`\n  [${elapsed()}s] Brain.create() threw as expected:`)
 		console.log(`    ${phase1Error.message}`)
 	}
 	console.log(`  Total LLM calls before failure: ${getFailCalls()}`)
@@ -199,30 +180,14 @@ async function main() {
 	// ─── Phase 2: recovery on a fresh Brain ───────────────────────────────────
 	console.log('\n━━━ 2. Recovery with fresh Brain on the same store ━━━')
 
-	const brain2 = makeBrain(realModel as unknown as LanguageModel)
-
-	brain2.on((event) => {
-		if (
-			event.type === 'brain:init:started' ||
-			event.type === 'brain:neuron:added' ||
-			event.type === 'neuron:init:started' ||
-			event.type === 'neuron:init:completed' ||
-			event.type === 'neuron:init:failed' ||
-			event.type === 'brain:init:completed' ||
-			event.type === 'brain:init:failed'
-		) {
-			const p = event.payload as Record<string, unknown>
-			console.log(`  [${elapsed()}s] ${event.type}`, JSON.stringify(p))
-		}
-	})
-
 	let phase2Error: Error | null = null
+	let brain2: Brain | undefined
 	try {
-		await brain2.initialize()
-		console.log(`  [${elapsed()}s] brain2.initialize() resolved`)
+		brain2 = await Brain.create(brainConfig(realModel as unknown as LanguageModel))
+		console.log(`  [${elapsed()}s] Brain.create() resolved`)
 	} catch (err) {
 		phase2Error = err instanceof Error ? err : new Error(String(err))
-		console.log(`  [${elapsed()}s] brain2.initialize() threw:`)
+		console.log(`  [${elapsed()}s] Brain.create() threw:`)
 		console.log(`    ${phase2Error.message}`)
 	}
 
@@ -232,16 +197,18 @@ async function main() {
 	console.log(`    internalNeurons table: ${after2.internal.length} rows → [${after2.internal.map((r) => r.id).join(', ')}]`)
 	console.log(`    state table:           ${after2.state.length} rows`)
 
-	const brainNeurons = brain2.getNeurons()
-	console.log(`  Brain in-memory neuron count: ${brainNeurons.length}`)
-	for (const n of brainNeurons) {
-		console.log(`    - ${n.id}`)
+	if (brain2) {
+		const brainNeurons = brain2.getNeurons()
+		console.log(`  Brain in-memory neuron count: ${brainNeurons.length}`)
+		for (const n of brainNeurons) {
+			console.log(`    - ${n.id}`)
+		}
 	}
 
 	// ─── Phase 3: functional verification ─────────────────────────────────────
-	if (phase2Error) {
+	if (phase2Error || !brain2) {
 		console.log('\n━━━ 3. Functional verification — SKIPPED (recovery failed) ━━━')
-		await brain2.dispose()
+		await brain2?.dispose()
 		return
 	}
 

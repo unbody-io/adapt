@@ -1,5 +1,9 @@
-import { generateText, NoObjectGeneratedError } from 'ai'
-import { z, type ZodSchema } from 'zod'
+import {
+	streamText as aiStreamText,
+	generateText,
+	NoObjectGeneratedError,
+} from 'ai'
+import { type ZodSchema, z } from 'zod'
 
 /**
  * Thin wrapper over ai-sdk's generateText
@@ -21,7 +25,17 @@ export type {
 	TextStreamPart,
 } from 'ai'
 // Re-export for convenience
-export { Output, stepCountIs, hasToolCall, streamText } from 'ai'
+export { hasToolCall, Output, stepCountIs, tool } from 'ai'
+
+/**
+ * Thin wrapper over ai-sdk's streamText. Pass-through today; the wrapper exists
+ * so consumers go through one seam if we ever need to swap the LLM call surface.
+ */
+export function streamText(
+	params: Parameters<typeof aiStreamText>[0],
+): ReturnType<typeof aiStreamText> {
+	return aiStreamText(params)
+}
 
 /**
  * Extended params that accept a repair schema
@@ -55,12 +69,12 @@ export async function generate(
 		return await generateText(generateParams)
 	} catch (error) {
 		// JSON repair fallback for structured output
-		if (
-			error instanceof NoObjectGeneratedError &&
-			error.text &&
-			repairSchema
-		) {
-			console.error('[LLM] NoObjectGeneratedError — raw text (%d chars):', error.text.length, error.text.slice(0, 500))
+		if (error instanceof NoObjectGeneratedError && error.text && repairSchema) {
+			console.error(
+				'[LLM] NoObjectGeneratedError — raw text (%d chars):',
+				error.text.length,
+				error.text.slice(0, 500),
+			)
 			const repaired = repairJson(error.text)
 
 			try {
@@ -105,7 +119,10 @@ export async function generate(
 					providerMetadata: undefined,
 				} as unknown as GenerateTextResult
 			} catch (repairError) {
-				console.error('[LLM] JSON repair failed:', repairError instanceof Error ? repairError.message : repairError)
+				console.error(
+					'[LLM] JSON repair failed:',
+					repairError instanceof Error ? repairError.message : repairError,
+				)
 				// Fall through to throw original error
 			}
 		}
@@ -136,21 +153,28 @@ function clampNumericFields(obj: unknown, schema: ZodSchema): unknown {
 	return clampWithJsonSchema(obj, jsonSchema)
 }
 
-function clampWithJsonSchema(obj: unknown, schema: Record<string, unknown>): unknown {
+function clampWithJsonSchema(
+	obj: unknown,
+	schema: Record<string, unknown>,
+): unknown {
 	if (obj == null) return obj
 
 	// Clamp numbers
 	if (typeof obj === 'number' && schema.type === 'number') {
 		let value = obj
-		if (typeof schema.minimum === 'number' && value < schema.minimum) value = schema.minimum
-		if (typeof schema.maximum === 'number' && value > schema.maximum) value = schema.maximum
+		if (typeof schema.minimum === 'number' && value < schema.minimum)
+			value = schema.minimum
+		if (typeof schema.maximum === 'number' && value > schema.maximum)
+			value = schema.maximum
 		return value
 	}
 
 	// Recurse into objects
 	if (typeof obj === 'object' && !Array.isArray(obj) && schema.properties) {
 		const props = schema.properties as Record<string, Record<string, unknown>>
-		const result: Record<string, unknown> = { ...(obj as Record<string, unknown>) }
+		const result: Record<string, unknown> = {
+			...(obj as Record<string, unknown>),
+		}
 		for (const [key, fieldSchema] of Object.entries(props)) {
 			if (key in result) {
 				result[key] = clampWithJsonSchema(result[key], fieldSchema)

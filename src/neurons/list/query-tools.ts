@@ -7,17 +7,15 @@
  * - getItem: get a single item by ID
  */
 
-import { tool } from 'ai'
 import { z } from 'zod'
+import { tool } from '../../llm'
 import type { QueryContext } from '../base/query'
 import type { ListItem } from './types'
 
 /**
  * Create list-specific query tools that close over neuron state
  */
-export function createListQueryTools(
-	getItems: () => Promise<ListItem[]>,
-) {
+export function createListQueryTools(getItems: () => Promise<ListItem[]>) {
 	return {
 		getItems: tool({
 			description:

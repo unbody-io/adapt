@@ -30,7 +30,7 @@ beforeAll(() => {
 
 describe('TextNeuron lifecycle', () => {
 	it('learn → builds understanding → query returns relevant answer', async () => {
-		const neuron = new TextNeuron({
+		const neuron = await TextNeuron.create({
 			model,
 			id: 'test-text',
 			instructions: 'Track knowledge about coffee brewing methods and techniques.',
@@ -60,7 +60,7 @@ describe('TextNeuron lifecycle', () => {
 	}, 60_000)
 
 	it('learn with low-relevance data returns dismissed', async () => {
-		const neuron = new TextNeuron({
+		const neuron = await TextNeuron.create({
 			model,
 			id: 'test-dismiss',
 			instructions: 'Track only information about quantum physics.',
@@ -81,7 +81,7 @@ describe('TextNeuron lifecycle', () => {
 
 describe('ListNeuron lifecycle', () => {
 	it('learn → builds structured items → query returns relevant answer', async () => {
-		const neuron = new ListNeuron({
+		const neuron = await ListNeuron.create({
 			model,
 			id: 'test-list',
 			instructions: 'Track restaurants with cuisine type, location, and price range.',
@@ -121,7 +121,7 @@ describe('ListNeuron lifecycle', () => {
 
 describe('TextNeuron update', () => {
 	it('changing instructions triggers prompt regeneration', async () => {
-		const neuron = new TextNeuron({
+		const neuron = await TextNeuron.create({
 			model,
 			id: 'test-update',
 			instructions: 'Track coffee brewing methods.',
@@ -152,7 +152,7 @@ describe('TextNeuron update', () => {
 	}, 60_000)
 
 	it('passive updates (name, description) do not trigger regen', async () => {
-		const neuron = new TextNeuron({
+		const neuron = await TextNeuron.create({
 			model,
 			id: 'test-passive',
 			instructions: 'Track tea varieties.',
@@ -176,7 +176,7 @@ describe('TextNeuron update', () => {
 
 describe('cumulative strategy compression', () => {
 	it('compresses understanding when exceeding maxTokens', async () => {
-		const neuron = new TextNeuron({
+		const neuron = await TextNeuron.create({
 			model,
 			id: 'test-compress',
 			instructions: 'Track everything about software engineering practices.',
@@ -214,7 +214,7 @@ describe('cumulative strategy compression', () => {
 
 describe('decay strategy compression', () => {
 	it('compresses when approaching 80% of maxTokens', async () => {
-		const neuron = new TextNeuron({
+		const neuron = await TextNeuron.create({
 			model,
 			id: 'test-decay',
 			instructions: 'Track notes about programming languages.',

@@ -2,8 +2,8 @@
  * Done tool for finalizing evolution decisions
  */
 
-import { tool } from 'ai'
 import { z } from 'zod'
+import { tool } from '../../../llm'
 import { EVOLUTION_ACTIONS } from '../types'
 
 const evolutionDecisionSchema = z.object({
@@ -16,9 +16,7 @@ const evolutionDecisionSchema = z.object({
 			EVOLUTION_ACTIONS.delete,
 		])
 		.describe('The evolution action to take'),
-	reasoning: z
-		.string()
-		.describe('Why this decision is needed (1-2 sentences)'),
+	reasoning: z.string().describe('Why this decision is needed (1-2 sentences)'),
 	guidance: z
 		.string()
 		.describe(

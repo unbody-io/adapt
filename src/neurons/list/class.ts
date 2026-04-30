@@ -1,20 +1,25 @@
 import type { LanguageModel } from 'ai'
+import type { NeuronStore } from '../../stores'
 import type { ParentModels } from '../../types/config'
-import { BaseNeuron } from '../base/class'
 import type { UnderstandCallResult } from '../base/class'
-import { DirectMethod, ToolBasedMethod } from '../base/query'
+import { BaseNeuron } from '../base/class'
 import type { QueryMethod } from '../base/query'
+import { DirectMethod, ToolBasedMethod } from '../base/query'
+import type { Significance } from '../types'
 import { resolveListNeuronConfig } from './config.resolver'
 import { applyListGovernance } from './governance'
-import type { Significance } from '../types'
-import { adjustUnderstand, adjustUnderstandingContent, initUnderstand, understand } from './understand'
 import { buildListQueryPrompt, createListQueryTools } from './query-tools'
 import { generateObservationSchema } from './schema'
-import type {
-	ListItem,
-	ListNeuronConfig,
-	ListNeuronState,
-} from './types'
+import type { ListItem, ListNeuronConfig, ListNeuronState } from './types'
+import {
+	adjustUnderstand,
+	adjustUnderstandingContent,
+	initUnderstand,
+	understand,
+} from './understand'
+
+const RESTORE_PLACEHOLDER_MODEL =
+	'unknown:placeholder' as unknown as LanguageModel
 
 /**
  * ListNeuron - A learning agent that maintains understanding as a collection of items
@@ -29,7 +34,8 @@ export class ListNeuron extends BaseNeuron<ListItem[], ListNeuronState> {
 
 	constructor(rawConfig: ListNeuronConfig, parentModels?: ParentModels) {
 		const config = resolveListNeuronConfig(rawConfig, parentModels)
-		const maxObsForStagnation = 3 * (config.understand.thresholds.maxObservations ?? 10)
+		const maxObsForStagnation =
+			3 * (config.understand.thresholds.maxObservations ?? 10)
 
 		const initialState: ListNeuronState = {
 			instructions: config.instructions,
@@ -180,9 +186,8 @@ export class ListNeuron extends BaseNeuron<ListItem[], ListNeuronState> {
 			return { evolution: result.evolution, significance: result.significance }
 		}
 
-		const evolution = result.status === 'dismissed'
-			? result.output
-			: 'No changes needed'
+		const evolution =
+			result.status === 'dismissed' ? result.output : 'No changes needed'
 		return { evolution, significance: 'routine' }
 	}
 
@@ -242,7 +247,11 @@ export class ListNeuron extends BaseNeuron<ListItem[], ListNeuronState> {
 			getUnderstanding: async () => {
 				const items = await this.getUnderstanding()
 				if (items.length === 0) return '(empty — no items yet)'
-				return JSON.stringify(items.map((item) => item.data), null, 2)
+				return JSON.stringify(
+					items.map((item) => item.data),
+					null,
+					2,
+				)
 			},
 			buildPrompt: (ctx, understanding) =>
 				`You are a specialist tracking a collection. Your domain:\n"${ctx.instructions}"\n\n# Your Data (${understanding === '(empty — no items yet)' ? '0' : 'JSON array of'} items)\n${understanding}\n\nAnswer from your data. Be specific — reference items, quantify where possible. Don't fabricate.`,
@@ -252,8 +261,13 @@ export class ListNeuron extends BaseNeuron<ListItem[], ListNeuronState> {
 	// ── Schema generation (LLM-generated for list) ──────────────────────────────
 
 	protected async generateSchemas(model: LanguageModel, instructions: string) {
-		const observeIdentity = this.state.observe_identity?.identity ?? instructions
-		const observationSchema = await generateObservationSchema(model, instructions, observeIdentity)
+		const observeIdentity =
+			this.state.observe_identity?.identity ?? instructions
+		const observationSchema = await generateObservationSchema(
+			model,
+			instructions,
+			observeIdentity,
+		)
 		return { observationSchema, understandingSchema: observationSchema }
 	}
 
@@ -295,4 +309,45 @@ export class ListNeuron extends BaseNeuron<ListItem[], ListNeuronState> {
 	): Promise<{ changedFields: string[] }> {
 		return super.update(updates as Record<string, unknown>)
 	}
+
+	/**
+	 * Construct a fresh ListNeuron and persist its config to the store.
+	 * Throws if the store already contains a neuron — use {@link restore}.
+	 */
+	static async create(
+		config: ListNeuronConfig,
+		parentModels?: ParentModels,
+	): Promise<ListNeuron> {
+		const neuron = new ListNeuron(config, parentModels)
+		await neuron.init({ expect: 'fresh' })
+		return neuron
+	}
+
+	/**
+	 * Restore a previously-persisted ListNeuron from a store.
+	 * `input` may be a path string (sugar for SQLiteNeuronStore) or a NeuronStore.
+	 * Throws if the store is empty — use {@link create}.
+	 */
+	static async restore(
+		input: string | NeuronStore,
+		opts?: { id?: string },
+	): Promise<ListNeuron> {
+		const store = await resolveNeuronStore(input)
+		const neuron = new ListNeuron({
+			store,
+			model: RESTORE_PLACEHOLDER_MODEL,
+			instructions: '',
+			id: opts?.id,
+		})
+		await neuron.init({ expect: 'restore' })
+		return neuron
+	}
+}
+
+async function resolveNeuronStore(
+	input: string | NeuronStore,
+): Promise<NeuronStore> {
+	if (typeof input !== 'string') return input
+	const { SQLiteNeuronStore } = await import('../../stores/sqlite/node/neuron')
+	return new SQLiteNeuronStore(input)
 }

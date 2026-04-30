@@ -29,7 +29,7 @@ function section(title: string) {
 }
 
 async function main() {
-	const brain = new Brain({
+	const brain = await Brain.create({
 		prompt: 'Track patterns for API reference test.',
 		model,
 		evolution: { enabled: true },
@@ -38,10 +38,9 @@ async function main() {
 	// ── Lifecycle Methods ────────────────────────────────────────────────
 	section('Lifecycle Methods')
 
-	assert(typeof brain.initialize === 'function', 'brain.initialize() exists')
+	assert(typeof Brain.create === 'function', 'Brain.create() exists')
+	assert(typeof Brain.restore === 'function', 'Brain.restore() exists')
 	assert(typeof brain.dispose === 'function', 'brain.dispose() exists')
-
-	await brain.initialize()
 
 	// ── Data Methods ─────────────────────────────────────────────────────
 	section('Data Methods')

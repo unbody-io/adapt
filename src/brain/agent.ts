@@ -1,8 +1,7 @@
 import type { CallSettings, LanguageModel, StreamTextResult, Tool } from 'ai'
-import { tool } from 'ai'
 import { z } from 'zod'
+import { generate, Output, stepCountIs, streamText, tool } from '../llm'
 import type { TokenUsage } from '../neurons/types'
-import { generate, Output, stepCountIs, streamText } from '../llm'
 import { buildSynthesisSystemPrompt } from './prompts/prompt.synthesis.system'
 import type { BrainAskResult } from './types'
 
@@ -13,7 +12,10 @@ export interface SpecialistDef {
 	id: string
 	name: string
 	description: string
-	query: (question: string, options?: CallSettings) => Promise<{
+	query: (
+		question: string,
+		options?: CallSettings,
+	) => Promise<{
 		relevant: boolean
 		relevance: number
 		confidence: number
@@ -126,7 +128,14 @@ function buildGatheringTools(args: {
 	consultResults: ConsultRecord[]
 	askedKeys: Set<string>
 }): Record<string, Tool> {
-	const { specialists, consultTools, generateOptions, queriedSpecialists, consultResults, askedKeys } = args
+	const {
+		specialists,
+		consultTools,
+		generateOptions,
+		queriedSpecialists,
+		consultResults,
+		askedKeys,
+	} = args
 
 	const specialistMenu = specialists
 		.map((s) => `- ${s.id}: ${s.description || s.name}`)
@@ -142,7 +151,9 @@ function buildGatheringTools(args: {
 		}),
 		execute: async ({ id, question }) => {
 			if (!specialistIds.has(id)) {
-				return { error: `Unknown specialist: ${id}. Available: ${[...specialistIds].join(', ')}` }
+				return {
+					error: `Unknown specialist: ${id}. Available: ${[...specialistIds].join(', ')}`,
+				}
 			}
 			const key = `${id}|${question.trim().toLowerCase()}`
 			if (askedKeys.has(key)) {
@@ -173,17 +184,23 @@ function buildGatheringTools(args: {
 	const wrappedConsultTools: Record<string, Tool> = {}
 	if (consultTools) {
 		for (const [name, originalTool] of Object.entries(consultTools)) {
-			const inputSchema = (originalTool as { inputSchema: z.ZodTypeAny }).inputSchema
-			const description = (originalTool as { description?: string }).description ?? ''
-			const originalExecute = (originalTool as {
-				execute?: (input: unknown, opts: unknown) => Promise<unknown>
-			}).execute
+			const inputSchema = (originalTool as { inputSchema: z.ZodTypeAny })
+				.inputSchema
+			const description =
+				(originalTool as { description?: string }).description ?? ''
+			const originalExecute = (
+				originalTool as {
+					execute?: (input: unknown, opts: unknown) => Promise<unknown>
+				}
+			).execute
 
 			wrappedConsultTools[name] = tool({
 				description,
 				inputSchema,
 				execute: async (input, opts) => {
-					const out = originalExecute ? await originalExecute(input, opts) : null
+					const out = originalExecute
+						? await originalExecute(input, opts)
+						: null
 					consultResults.push({
 						tool: name,
 						question: String((input as { question?: string }).question ?? ''),
@@ -235,7 +252,13 @@ export async function synthesize(
 	model: LanguageModel,
 	options: SynthesisOptions,
 ): Promise<SynthesisResult> {
-	const { synthesisDirective, query, specialists, consultTools, ...generateOptions } = options
+	const {
+		synthesisDirective,
+		query,
+		specialists,
+		consultTools,
+		...generateOptions
+	} = options
 
 	const queriedSpecialists: SpecialistQueryRecord[] = []
 	const consultResults: ConsultRecord[] = []
@@ -253,11 +276,17 @@ export async function synthesize(
 	const hasConsultTools = consultTools && Object.keys(consultTools).length > 0
 	const system = buildSynthesisSystemPrompt(hasConsultTools, synthesisDirective)
 
-	const phase1Usage: TokenUsage = { inputTokens: 0, outputTokens: 0, totalTokens: 0 }
+	const phase1Usage: TokenUsage = {
+		inputTokens: 0,
+		outputTokens: 0,
+		totalTokens: 0,
+	}
 	let stepNum = 0
 
 	console.log(`[synthesis] phase 1: gather`)
-	console.log(`[synthesis] specialists: ${specialists.map((s) => s.id).join(', ')}`)
+	console.log(
+		`[synthesis] specialists: ${specialists.map((s) => s.id).join(', ')}`,
+	)
 	const t0 = Date.now()
 
 	await generate({
@@ -277,18 +306,24 @@ export async function synthesize(
 				phase1Usage.totalTokens += usage.totalTokens ?? 0
 			}
 			if (text) {
-				console.log(`[synthesis] step ${stepNum} (${elapsed}s) reasoning: ${text.slice(0, 200)}${text.length > 200 ? '...' : ''}`)
+				console.log(
+					`[synthesis] step ${stepNum} (${elapsed}s) reasoning: ${text.slice(0, 200)}${text.length > 200 ? '...' : ''}`,
+				)
 			}
 			if (toolCalls) {
 				for (const tc of toolCalls) {
-					console.log(`[synthesis] step ${stepNum} (${elapsed}s) tool: ${tc.toolName}${tc.toolName === 'querySpecialist' ? ` → ${(tc.input as { id: string }).id}: "${(tc.input as { question: string }).question.slice(0, 100)}"` : ''}`)
+					console.log(
+						`[synthesis] step ${stepNum} (${elapsed}s) tool: ${tc.toolName}${tc.toolName === 'querySpecialist' ? ` → ${(tc.input as { id: string }).id}: "${(tc.input as { question: string }).question.slice(0, 100)}"` : ''}`,
+					)
 				}
 			}
 		},
 		...generateOptions,
 	})
 
-	console.log(`[synthesis] phase 1 done in ${((Date.now() - t0) / 1000).toFixed(1)}s — ${stepNum} steps, ${queriedSpecialists.length} specialists, ${phase1Usage.totalTokens} tokens`)
+	console.log(
+		`[synthesis] phase 1 done in ${((Date.now() - t0) / 1000).toFixed(1)}s — ${stepNum} steps, ${queriedSpecialists.length} specialists, ${phase1Usage.totalTokens} tokens`,
+	)
 
 	const phase2 = await synthesizeDirect(model, {
 		...generateOptions,
@@ -343,7 +378,9 @@ export interface DirectSynthesisOptions extends CallSettings {
 
 const directAnswerSchema = z.object({
 	response: z.string().describe('Your full answer to the question'),
-	gaps: z.array(z.string()).describe('Knowledge gaps that could not be answered'),
+	gaps: z
+		.array(z.string())
+		.describe('Knowledge gaps that could not be answered'),
 })
 
 /**
@@ -354,26 +391,35 @@ export async function synthesizeDirect(
 	model: LanguageModel,
 	options: DirectSynthesisOptions,
 ): Promise<SynthesisResult> {
-	const { synthesisDirective, query, specialistResults, globalUnderstanding, ...generateOptions } = options
+	const {
+		synthesisDirective,
+		query,
+		specialistResults,
+		globalUnderstanding,
+		...generateOptions
+	} = options
 
 	const t0 = Date.now()
 
 	// Build context from pre-queried specialists
 	const relevant = specialistResults.filter((s) => s.relevance > 0.1)
 	console.log(`[synthesis:direct] query: "${query.slice(0, 80)}"`)
-	console.log(`[synthesis:direct] ${relevant.length}/${specialistResults.length} relevant specialists`)
+	console.log(
+		`[synthesis:direct] ${relevant.length}/${specialistResults.length} relevant specialists`,
+	)
 
 	const specialistSections = relevant
-		.map((s) => `## ${s.id} (relevance: ${s.relevance}, confidence: ${s.confidence})\n${s.insight}${s.gaps ? `\n\nGaps: ${s.gaps}` : ''}`)
+		.map(
+			(s) =>
+				`## ${s.id} (relevance: ${s.relevance}, confidence: ${s.confidence})\n${s.insight}${s.gaps ? `\n\nGaps: ${s.gaps}` : ''}`,
+		)
 		.join('\n\n')
 
 	const globalSection = globalUnderstanding
 		? `\n\n## Global Context\n${globalUnderstanding}`
 		: ''
 
-	const directiveSection = synthesisDirective
-		? `\n\n${synthesisDirective}`
-		: ''
+	const directiveSection = synthesisDirective ? `\n\n${synthesisDirective}` : ''
 
 	const system = `You have specialist knowledge below. Synthesize an answer.
 
@@ -401,7 +447,9 @@ ${specialistSections}${globalSection}`
 		totalTokens: result.usage?.totalTokens ?? 0,
 	}
 
-	console.log(`[synthesis:direct] done in ${((Date.now() - t0) / 1000).toFixed(1)}s — ${usage.totalTokens} tokens`)
+	console.log(
+		`[synthesis:direct] done in ${((Date.now() - t0) / 1000).toFixed(1)}s — ${usage.totalTokens} tokens`,
+	)
 
 	return {
 		insight: output.response,
@@ -428,7 +476,13 @@ export async function synthesizeStream(
 	model: LanguageModel,
 	options: SynthesisOptions,
 ): Promise<StreamTextResult<any, any>> {
-	const { synthesisDirective, query, specialists, consultTools, ...generateOptions } = options
+	const {
+		synthesisDirective,
+		query,
+		specialists,
+		consultTools,
+		...generateOptions
+	} = options
 
 	const queriedSpecialists: SpecialistQueryRecord[] = []
 	const consultResults: ConsultRecord[] = []
@@ -459,7 +513,9 @@ export async function synthesizeStream(
 		...generateOptions,
 	})
 
-	console.log(`[synthesis:stream] phase 1 done — ${queriedSpecialists.length} specialists`)
+	console.log(
+		`[synthesis:stream] phase 1 done — ${queriedSpecialists.length} specialists`,
+	)
 
 	return synthesizeDirectStream(model, {
 		...generateOptions,
@@ -486,21 +542,28 @@ export function synthesizeDirectStream(
 	model: LanguageModel,
 	options: DirectSynthesisOptions,
 ): StreamTextResult<any, any> {
-	const { synthesisDirective, query, specialistResults, globalUnderstanding, ...generateOptions } = options
+	const {
+		synthesisDirective,
+		query,
+		specialistResults,
+		globalUnderstanding,
+		...generateOptions
+	} = options
 
 	const relevant = specialistResults.filter((s) => s.relevance > 0.1)
 
 	const specialistSections = relevant
-		.map((s) => `## ${s.id} (relevance: ${s.relevance}, confidence: ${s.confidence})\n${s.insight}${s.gaps ? `\n\nGaps: ${s.gaps}` : ''}`)
+		.map(
+			(s) =>
+				`## ${s.id} (relevance: ${s.relevance}, confidence: ${s.confidence})\n${s.insight}${s.gaps ? `\n\nGaps: ${s.gaps}` : ''}`,
+		)
 		.join('\n\n')
 
 	const globalSection = globalUnderstanding
 		? `\n\n## Global Context\n${globalUnderstanding}`
 		: ''
 
-	const directiveSection = synthesisDirective
-		? `\n\n${synthesisDirective}`
-		: ''
+	const directiveSection = synthesisDirective ? `\n\n${synthesisDirective}` : ''
 
 	const system = `You have specialist knowledge below. Synthesize an answer.
 

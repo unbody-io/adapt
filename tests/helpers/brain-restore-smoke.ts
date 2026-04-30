@@ -1,14 +1,13 @@
 import type { LanguageModel } from 'ai'
 import { MockLanguageModelV3 } from 'ai/test'
 import { Brain, type BrainAskResult } from '../../src'
-import type { BrainStore, NeuronStore } from '../../src/stores'
+import type { BrainStore } from '../../src/stores'
 import type { LanguageModelV3CallOptions } from '@ai-sdk/provider'
 import type { JSONValue } from '@ai-sdk/provider/internal'
 import { join } from 'node:path'
 
 interface StoreFactories {
 	createBrainStore: (dbPath: string) => BrainStore
-	createNeuronStore: (dbPath: string) => NeuronStore
 }
 
 export interface BrainRestoreSmokeResult {
@@ -249,8 +248,6 @@ function createBrainConfig(
 			queryGaps: false,
 		},
 		learning: {
-			store: (neuronId: string) =>
-				factories.createNeuronStore(join(dir, `neuron-${neuronId}.db`)),
 			understand: {
 				thresholds: {
 					maxObservations: 1,
@@ -280,9 +277,9 @@ export async function runBrainRestoreSmoke(
 	factories: StoreFactories,
 ): Promise<BrainRestoreSmokeResult> {
 	const firstModel = createScriptedBrainModel()
-	const firstBrain = new Brain(createBrainConfig(dir, firstModel.model, factories))
-
-	await firstBrain.initialize()
+	const firstBrain = await Brain.create(
+		createBrainConfig(dir, firstModel.model, factories),
+	)
 
 	const injectResult = await firstBrain.inject([
 		'We chose runtime-specific SQLite adapters so Adapt core stays runtime-agnostic.',
@@ -293,12 +290,21 @@ export async function runBrainRestoreSmoke(
 	await firstBrain.dispose()
 
 	const restoredModel = createScriptedBrainModel()
-	const restoredBrain = new Brain(
-		createBrainConfig(dir, restoredModel.model, factories),
-	)
-
 	const callsBeforeRestoreInitialize = restoredModel.getCallCount()
-	await restoredBrain.initialize()
+	const restoredBrain = await Brain.restore(
+		factories.createBrainStore(join(dir, 'brain.db')),
+	)
+	// Replace gateway-string models with the scripted one across the slots
+	// actually used by the second ask: brain-level query model + per-neuron
+	// query model. We avoid changing *blueprint slots (which would trigger
+	// observe/understand prompt regen and a needless LLM call).
+	await restoredBrain.update({
+		model: restoredModel.model,
+		query: { model: restoredModel.model },
+		learning: {
+			query: { model: restoredModel.model },
+		},
+	})
 	const callsAfterRestoreInitialize = restoredModel.getCallCount()
 	const restoredNeuronCount = restoredBrain.getNeurons().length
 	const secondAsk = await restoredBrain.ask('What engineering decision was made?')

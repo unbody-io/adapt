@@ -29,7 +29,7 @@ function section(title: string) {
 }
 
 async function main() {
-	const brain = new Brain({
+	const brain = await Brain.create({
 		prompt: 'Track event test patterns.',
 		model,
 		evolution: { enabled: false },

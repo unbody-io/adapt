@@ -32,7 +32,7 @@ async function main() {
 	// ── Adjust Directives ────────────────────────────────────────────────
 	section('Adjust Directives')
 
-	const brain = new Brain({
+	const brain = await Brain.create({
 		prompt: 'Track coding and design patterns.',
 		model,
 		autoSetup: false,
@@ -43,7 +43,6 @@ async function main() {
 			{ id: 'trends', type: 'text', name: 'Trends', description: 'Trend tracking', instructions: 'Track trends.' },
 		],
 	})
-	await brain.initialize()
 
 	// Expand scope
 	await brain.adjustNeuron('design', 'Also track accessibility patterns')

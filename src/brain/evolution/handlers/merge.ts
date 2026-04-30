@@ -5,15 +5,14 @@
  * uses descriptor's mergeUnderstandingSchema for LLM output.
  */
 
-import { Output } from 'ai'
 import { z } from 'zod'
-import { EvolutionActionHandler } from '../base-handler'
-import type { EvolutionDecision } from '../../evaluator/types'
-import type { MergeActionResult } from '../types'
+import { generate, Output } from '../../../llm'
 import type { BaseNeuron } from '../../../neurons/base/class'
-import { generate } from '../../../llm'
+import type { EvolutionDecision } from '../../evaluator/types'
+import { EvolutionActionHandler } from '../base-handler'
 import { mergeSystemPrompt } from '../prompt.system.merge'
 import { mergePromptTemplate } from '../prompt.template.merge'
+import type { MergeActionResult } from '../types'
 import { createCompleteConfig } from '../utils'
 
 export class MergeHandler extends EvolutionActionHandler<MergeActionResult> {
@@ -56,8 +55,14 @@ export class MergeHandler extends EvolutionActionHandler<MergeActionResult> {
 				const mergeSchema = z.object({
 					config: z.object({
 						name: z.string().describe('Name for the merged neuron'),
-						description: z.string().describe('Description of the merged neuron purpose'),
-						instructions: z.string().describe('Combined instructions defining scope and responsibilities'),
+						description: z
+							.string()
+							.describe('Description of the merged neuron purpose'),
+						instructions: z
+							.string()
+							.describe(
+								'Combined instructions defining scope and responsibilities',
+							),
 					}),
 					understanding: descriptor.mergeUnderstandingSchema,
 				})
@@ -101,7 +106,6 @@ export class MergeHandler extends EvolutionActionHandler<MergeActionResult> {
 			} catch (error) {
 				const err = error instanceof Error ? error : new Error(String(error))
 				this.emitActionFailed(decision, err)
-				continue
 			}
 		}
 

@@ -116,6 +116,12 @@ export interface BrainStore {
 	internalNeurons: BrainCollection<BrainNeuronRecord>
 	evolution: BrainCollection<BrainEvolutionRecord>
 	dismissedBatches: BrainCollection<DismissedBatchRecord>
+	/**
+	 * Resolve the persistence store for a given neuron id. Same code path on
+	 * Brain.create and Brain.restore so the two cannot disagree on where the
+	 * neuron's data lives.
+	 */
+	getNeuronStore(neuronId: string): NeuronStore
 	dispose(): Promise<void>
 }
 

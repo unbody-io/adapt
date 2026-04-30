@@ -13,14 +13,8 @@ import {
 	MemoryBrainStore,
 	MemoryNeuronStore,
 	type NeuronStore,
-	type NeuronCollection,
 } from '@unbody-io/adapt'
-import {
-	SQLiteBrainStore,
-	SQLiteNeuronStore,
-	type SQLiteBrainCollection,
-	type SQLiteNeuronCollection,
-} from '@unbody-io/adapt/sqlite'
+import { SQLiteBrainStore } from '@unbody-io/adapt/sqlite'
 import { model } from '../../evals/helpers/provider'
 import { mkdirSync, rmSync } from 'node:fs'
 import { join, dirname } from 'node:path'
@@ -53,13 +47,10 @@ async function main() {
 		// ── Memory Stores (default) ───────────────────────────────────────
 		section('Memory Stores')
 
-		const memBrain = new Brain({
+		const memBrain = await Brain.create({
 			prompt: 'Test memory stores.',
 			model,
 			store: new MemoryBrainStore(),
-			learning: {
-				store: () => new MemoryNeuronStore(),
-			},
 		})
 		assert(memBrain instanceof Brain, 'Brain with MemoryBrainStore + MemoryNeuronStore created')
 		await memBrain.dispose()
@@ -67,15 +58,12 @@ async function main() {
 		// ── SQLite Stores ────────────────────────────────────────────────
 		section('SQLite Stores')
 
-		const sqlBrain = new Brain({
+		const sqlBrain = await Brain.create({
 			prompt: 'Test SQLite stores.',
 			model,
 			store: new SQLiteBrainStore(join(tmpDir, 'brain.db')),
-			learning: {
-				store: (neuronId: string) => new SQLiteNeuronStore(join(tmpDir, `neuron-${neuronId}.db`)),
-			},
 		})
-		assert(sqlBrain instanceof Brain, 'Brain with SQLiteBrainStore + SQLiteNeuronStore created')
+		assert(sqlBrain instanceof Brain, 'Brain with SQLiteBrainStore + sibling neuron stores created')
 		await sqlBrain.dispose()
 
 		// ── Hierarchical Persistence ─────────────────────────────────────
@@ -85,13 +73,10 @@ async function main() {
 		const entityDir = join(tmpDir, entityId)
 		mkdirSync(entityDir, { recursive: true })
 
-		const hierBrain = new Brain({
+		const hierBrain = await Brain.create({
 			prompt: 'Test hierarchical persistence.',
 			model,
 			store: new SQLiteBrainStore(join(entityDir, 'brain.db')),
-			learning: {
-				store: (neuronId: string) => new SQLiteNeuronStore(join(entityDir, `neuron-${neuronId}.db`)),
-			},
 		})
 		assert(hierBrain instanceof Brain, 'Hierarchical persistence Brain created')
 		await hierBrain.dispose()
@@ -100,28 +85,19 @@ async function main() {
 		section('Persistence Across Sessions')
 
 		const brainDb = join(tmpDir, 'persist-brain.db')
-		const neuronDbFactory = (id: string) => new SQLiteNeuronStore(join(tmpDir, `persist-neuron-${id}.db`))
 
 		// Session 1: create and learn
-		const brain1 = new Brain({
+		const brain1 = await Brain.create({
 			prompt: 'Track session persistence test.',
 			model,
 			store: new SQLiteBrainStore(brainDb),
-			learning: { store: neuronDbFactory },
 		})
-		await brain1.initialize()
 		await brain1.inject([{ note: 'Session 1 data — persistence test' }])
 		assert(true, 'Session 1: brain initialized and data injected')
 		await brain1.dispose()
 
 		// Session 2: restore and continue
-		const brain2 = new Brain({
-			prompt: 'Track session persistence test.',
-			model,
-			store: new SQLiteBrainStore(brainDb),
-			learning: { store: (id: string) => new SQLiteNeuronStore(join(tmpDir, `persist-neuron-${id}.db`)) },
-		})
-		await brain2.initialize() // Restores from SQLite — no LLM calls
+		const brain2 = await Brain.restore(brainDb)
 		const answer = await brain2.ask('What do you know?')
 		assert(typeof answer.insight === 'string', 'Session 2: brain restored and can answer')
 		console.log(`  Session 2 insight: ${answer.insight.slice(0, 80)}...`)

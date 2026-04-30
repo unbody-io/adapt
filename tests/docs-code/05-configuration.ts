@@ -8,7 +8,7 @@
  *   export $(cat .env.local | xargs) && npx tsx tests/docs-code/05-configuration.ts
  */
 
-import { Brain, MemoryBrainStore, MemoryNeuronStore } from '@unbody-io/adapt'
+import { Brain, MemoryBrainStore } from '@unbody-io/adapt'
 import { model } from '../../evals/helpers/provider'
 
 let passed = 0
@@ -33,7 +33,7 @@ async function main() {
 	section('BrainConfig — Full Interface')
 
 	// Verify all config fields are accepted without error
-	const fullConfigBrain = new Brain({
+	const fullConfigBrain = await Brain.create({
 		prompt: 'Test full config.',
 		model,
 		blueprintModel: model,
@@ -46,7 +46,6 @@ async function main() {
 		ingest: { batchSize: 20 },
 
 		learning: {
-			store: (id: string) => new MemoryNeuronStore(),
 			observer: {
 				model,
 				blueprintModel: model,
@@ -101,7 +100,7 @@ async function main() {
 	const fast = model
 	const smart = model
 
-	const costBrain = new Brain({
+	const costBrain = await Brain.create({
 		prompt: 'Cost optimized.',
 		model: fast,
 		blueprintModel: smart,
@@ -123,7 +122,7 @@ async function main() {
 	// Docs show: openai, anthropic, google, openrouter
 	// We verify the openrouter pattern (which is what we use)
 	// The other providers follow the same LanguageModel interface
-	const providerBrain = new Brain({ model, prompt: 'Provider test.' })
+	const providerBrain = await Brain.create({ model, prompt: 'Provider test.' })
 	assert(providerBrain instanceof Brain, 'Brain accepts LanguageModel from openrouter')
 	await providerBrain.dispose()
 
@@ -131,7 +130,7 @@ async function main() {
 	section('Governance Strategies')
 
 	for (const strategy of ['continuous', 'cumulative', 'decay'] as const) {
-		const brain = new Brain({
+		const brain = await Brain.create({
 			prompt: `Test ${strategy} governance.`,
 			model,
 			learning: {

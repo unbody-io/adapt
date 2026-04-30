@@ -5,14 +5,13 @@
  * uses descriptor's splitUnderstandingSchema for LLM output.
  */
 
-import { Output } from 'ai'
 import { z } from 'zod'
-import { EvolutionActionHandler } from '../base-handler'
+import { generate, Output } from '../../../llm'
 import type { EvolutionDecision } from '../../evaluator/types'
-import type { SplitActionResult } from '../types'
-import { generate } from '../../../llm'
+import { EvolutionActionHandler } from '../base-handler'
 import { splitSystemPrompt } from '../prompt.system.split'
 import { splitPromptTemplate } from '../prompt.template.split'
+import type { SplitActionResult } from '../types'
 import { createCompleteConfig } from '../utils'
 
 export class SplitHandler extends EvolutionActionHandler<SplitActionResult> {
@@ -48,8 +47,14 @@ export class SplitHandler extends EvolutionActionHandler<SplitActionResult> {
 						.array(
 							z.object({
 								name: z.string().describe('Name for the split neuron'),
-								description: z.string().describe('Description of this split neuron purpose'),
-								instructions: z.string().describe('Focused instructions defining scope and responsibilities'),
+								description: z
+									.string()
+									.describe('Description of this split neuron purpose'),
+								instructions: z
+									.string()
+									.describe(
+										'Focused instructions defining scope and responsibilities',
+									),
 								understanding: descriptor.splitUnderstandingSchema,
 							}),
 						)
@@ -102,7 +107,6 @@ export class SplitHandler extends EvolutionActionHandler<SplitActionResult> {
 			} catch (error) {
 				const err = error instanceof Error ? error : new Error(String(error))
 				this.emitActionFailed(decision, err)
-				continue
 			}
 		}
 

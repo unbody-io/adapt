@@ -1,18 +1,27 @@
 import type { LanguageModel } from 'ai'
+import type { NeuronStore } from '../../stores'
 import type { ParentModels } from '../../types/config'
-import type { Significance } from '../types'
-import { BaseNeuron } from '../base/class'
 import type { UnderstandCallResult } from '../base/class'
-import { DirectMethod, ToolBasedMethod } from '../base/query'
+import { BaseNeuron } from '../base/class'
 import type { QueryMethod } from '../base/query'
+import { DirectMethod, ToolBasedMethod } from '../base/query'
+import type { Significance } from '../types'
 import { resolveTextNeuronConfig } from './config.resolver'
+import {
+	buildTextQueryPrompt,
+	createReadUnderstandingTool,
+} from './query-tools'
 import { applyStrategy } from './strategies'
-import { adjustUnderstand, adjustUnderstandingContent, initUnderstand, understand } from './understand'
-import { buildTextQueryPrompt, createReadUnderstandingTool } from './query-tools'
-import type {
-	TextNeuronConfig,
-	TextNeuronState,
-} from './types'
+import type { TextNeuronConfig, TextNeuronState } from './types'
+import {
+	adjustUnderstand,
+	adjustUnderstandingContent,
+	initUnderstand,
+	understand,
+} from './understand'
+
+const RESTORE_PLACEHOLDER_MODEL =
+	'unknown:placeholder' as unknown as LanguageModel
 
 /**
  * TextNeuron - A learning agent that maintains understanding as narrative text
@@ -27,7 +36,8 @@ export class TextNeuron extends BaseNeuron<string, TextNeuronState> {
 
 	constructor(rawConfig: TextNeuronConfig, parentModels?: ParentModels) {
 		const config = resolveTextNeuronConfig(rawConfig, parentModels)
-		const maxObsForStagnation = 3 * (config.understand.thresholds.maxObservations ?? 10)
+		const maxObsForStagnation =
+			3 * (config.understand.thresholds.maxObservations ?? 10)
 
 		const initialState: TextNeuronState = {
 			instructions: config.instructions,
@@ -178,7 +188,9 @@ export class TextNeuron extends BaseNeuron<string, TextNeuronState> {
 		)
 
 		if (result.status === 'synthesized') {
-			const processed = await this.postProcessUnderstanding(result.newUnderstanding)
+			const processed = await this.postProcessUnderstanding(
+				result.newUnderstanding,
+			)
 			await this.setUnderstanding(processed)
 			return { evolution: result.evolution, significance: result.significance }
 		}
@@ -265,7 +277,8 @@ export class TextNeuron extends BaseNeuron<string, TextNeuronState> {
 			},
 			understandingSchema: {
 				type: 'string',
-				description: 'Comprehensive prose synthesis. Well-structured narrative.',
+				description:
+					'Comprehensive prose synthesis. Well-structured narrative.',
 				minLength: 100,
 				maxLength: 5000,
 			},
@@ -328,4 +341,45 @@ export class TextNeuron extends BaseNeuron<string, TextNeuronState> {
 	): Promise<{ changedFields: string[] }> {
 		return super.update(updates as Record<string, unknown>)
 	}
+
+	/**
+	 * Construct a fresh TextNeuron and persist its config to the store.
+	 * Throws if the store already contains a neuron — use {@link restore}.
+	 */
+	static async create(
+		config: TextNeuronConfig,
+		parentModels?: ParentModels,
+	): Promise<TextNeuron> {
+		const neuron = new TextNeuron(config, parentModels)
+		await neuron.init({ expect: 'fresh' })
+		return neuron
+	}
+
+	/**
+	 * Restore a previously-persisted TextNeuron from a store.
+	 * `input` may be a path string (sugar for SQLiteNeuronStore) or a NeuronStore.
+	 * Throws if the store is empty — use {@link create}.
+	 */
+	static async restore(
+		input: string | NeuronStore,
+		opts?: { id?: string },
+	): Promise<TextNeuron> {
+		const store = await resolveNeuronStore(input)
+		const neuron = new TextNeuron({
+			store,
+			model: RESTORE_PLACEHOLDER_MODEL,
+			instructions: '',
+			id: opts?.id,
+		})
+		await neuron.init({ expect: 'restore' })
+		return neuron
+	}
+}
+
+async function resolveNeuronStore(
+	input: string | NeuronStore,
+): Promise<NeuronStore> {
+	if (typeof input !== 'string') return input
+	const { SQLiteNeuronStore } = await import('../../stores/sqlite/node/neuron')
+	return new SQLiteNeuronStore(input)
 }

@@ -79,7 +79,6 @@ export interface BrainState {
 			windowSize: number
 		}
 	}
-
 }
 
 // ── Transform types ─────────────────────────────────────────────────────────
@@ -102,7 +101,10 @@ export function toBrainModelRef(model: LanguageModel): StoredBrainModelRef {
 	if (typeof model === 'string') {
 		const colonIdx = model.indexOf(':')
 		if (colonIdx > 0) {
-			return { provider: model.slice(0, colonIdx), modelId: model.slice(colonIdx + 1) }
+			return {
+				provider: model.slice(0, colonIdx),
+				modelId: model.slice(colonIdx + 1),
+			}
 		}
 		return { provider: 'unknown', modelId: model }
 	}
@@ -116,11 +118,23 @@ export function serializeBrainModelSlots(
 	models: BrainModelSlots,
 ): Record<string, StoredBrainModelRef> {
 	return Object.fromEntries(
-		Object.entries(models).map(([key, model]) => [
-			key,
-			toBrainModelRef(model),
-		]),
+		Object.entries(models).map(([key, model]) => [key, toBrainModelRef(model)]),
 	)
+}
+
+/**
+ * Rehydrate brain model slots into AI SDK's `"provider:modelId"` string form,
+ * which routes through Vercel AI Gateway by default. Users who want a direct
+ * provider call `brain.update({ model: openai("gpt-4o") })` post-restore.
+ */
+export function deserializeBrainModelSlots(
+	stored: Record<string, StoredBrainModelRef>,
+): BrainModelSlots {
+	const out: Record<string, LanguageModel> = {}
+	for (const [key, ref] of Object.entries(stored)) {
+		out[key] = `${ref.provider}:${ref.modelId}` as LanguageModel
+	}
+	return out as unknown as BrainModelSlots
 }
 
 /**

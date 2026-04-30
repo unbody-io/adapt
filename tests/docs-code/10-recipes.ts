@@ -9,7 +9,7 @@
  */
 
 import { Brain } from '@unbody-io/adapt'
-import { SQLiteBrainStore, SQLiteNeuronStore } from '@unbody-io/adapt/sqlite'
+import { SQLiteBrainStore } from '@unbody-io/adapt/sqlite'
 import { model } from '../../evals/helpers/provider'
 import { mkdirSync, rmSync } from 'node:fs'
 import { join, dirname } from 'node:path'
@@ -42,7 +42,7 @@ async function main() {
 		// ── Proactive Insights ────────────────────────────────────────────
 		section('Proactive Insights')
 
-		const brain = new Brain({
+		const brain = await Brain.create({
 			prompt: 'Track patterns for recipe testing.',
 			model,
 			evolution: { enabled: false },
@@ -92,7 +92,7 @@ async function main() {
 		// ── User-Steerable Taxonomy ──────────────────────────────────────
 		section('User-Steerable Taxonomy')
 
-		const taxonomyBrain = new Brain({
+		const taxonomyBrain = await Brain.create({
 			prompt: 'Track bookmarks and categories.',
 			model,
 			evolution: { enabled: true },
@@ -104,7 +104,6 @@ async function main() {
 				{ id: 'categories', type: 'text', name: 'Categories', description: 'Categories', instructions: 'Track categories.' },
 			],
 		})
-		await taxonomyBrain.initialize()
 
 		await taxonomyBrain.mergeNeurons(['eink', 'paper-displays'], 'Combine under hardware')
 		assert(true, 'mergeNeurons() in taxonomy context works')
@@ -121,13 +120,10 @@ async function main() {
 		section('Dual-Brain Architecture')
 
 		// Long-term brain: evolves over time, persists everything
-		const longTermBrain = new Brain({
+		const longTermBrain = await Brain.create({
 			prompt: 'Track patterns across all interactions.',
 			model,
 			store: new SQLiteBrainStore(join(tmpDir, 'long-term.brain.db')),
-			learning: {
-				store: (id: string) => new SQLiteNeuronStore(join(tmpDir, `long-term.neuron-${id}.db`)),
-			},
 			evolution: { enabled: false },
 			autoSetup: false,
 			neurons: [
@@ -139,16 +135,13 @@ async function main() {
 		const sessionNeuronDefs = [
 			{ id: 'obs', type: 'text' as const, name: 'Observations', description: 'Session observations', instructions: 'Extract observations from this session.' },
 		]
-		const sessionBrain = new Brain({
+		const sessionBrain = await Brain.create({
 			prompt: 'Extract observations from this session.',
 			model,
 			autoSetup: false,
 			neurons: sessionNeuronDefs,
 			evolution: { enabled: false },
 		})
-
-		await sessionBrain.initialize()
-		await longTermBrain.initialize()
 
 		// Process data through the session brain
 		const sessionData = [{ event: 'user clicked dark mode toggle 5 times' }]
@@ -170,7 +163,7 @@ async function main() {
 		// ── Event-Driven Synchronization ─────────────────────────────────
 		section('Event-Driven Synchronization')
 
-		const syncBrain = new Brain({
+		const syncBrain = await Brain.create({
 			prompt: 'Event sync test.',
 			model,
 			evolution: { enabled: false },
@@ -193,7 +186,7 @@ async function main() {
 		// ── SSE Event Broadcasting ───────────────────────────────────────
 		section('SSE Event Broadcasting')
 
-		const sseBrain = new Brain({
+		const sseBrain = await Brain.create({
 			prompt: 'SSE test.',
 			model,
 			evolution: { enabled: false },

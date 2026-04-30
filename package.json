@@ -1,26 +1,31 @@
 {
   "name": "@unbody-io/adapt",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "A self-evolving memory layer for AI applications",
   "type": "module",
-  "main": "dist/index.js",
+  "main": "dist-cjs/index.js",
+  "module": "dist/index.js",
   "types": "dist/index.d.ts",
   "exports": {
     ".": {
+      "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
-      "types": "./dist/index.d.ts"
+      "require": "./dist-cjs/index.js"
     },
     "./sqlite": {
+      "types": "./dist/sqlite.d.ts",
       "import": "./dist/sqlite.js",
-      "types": "./dist/sqlite.d.ts"
+      "require": "./dist-cjs/sqlite.js"
     },
     "./sqlite/bun": {
-      "import": "./dist/sqlite/bun.js",
-      "types": "./dist/sqlite/bun.d.ts"
+      "types": "./dist/sqlite/bun.d.ts",
+      "import": "./dist/sqlite/bun.js"
     }
   },
   "scripts": {
-    "build": "tsc && tsc-alias -f",
+    "build": "npm run build:esm && npm run build:cjs",
+    "build:esm": "tsc && tsc-alias -f",
+    "build:cjs": "tsc -p tsconfig.cjs.json && tsc-alias -f -p tsconfig.cjs.json && node -e \"require('fs').writeFileSync('dist-cjs/package.json', JSON.stringify({type:'commonjs'}, null, 2) + '\\n')\"",
     "dev": "tsc --watch",
     "test": "vitest",
     "test:run": "vitest run",
@@ -41,7 +46,9 @@
   },
   "files": [
     "dist/**/*.js",
-    "dist/**/*.d.ts"
+    "dist/**/*.d.ts",
+    "dist-cjs/**/*.js",
+    "dist-cjs/package.json"
   ],
   "keywords": [
     "unbody",

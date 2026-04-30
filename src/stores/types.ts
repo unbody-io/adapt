@@ -116,6 +116,12 @@ export interface BrainStore {
 	internalNeurons: BrainCollection<BrainNeuronRecord>
 	evolution: BrainCollection<BrainEvolutionRecord>
 	dismissedBatches: BrainCollection<DismissedBatchRecord>
+	/**
+	 * Resolve the persistence store for a given neuron id. Same code path on
+	 * Brain.create and Brain.restore so the two cannot disagree on where the
+	 * neuron's data lives.
+	 */
+	getNeuronStore(neuronId: string): NeuronStore
 	dispose(): Promise<void>
 }
 
@@ -128,10 +134,22 @@ export interface BrainStateRecord {
 	updated_at: string
 }
 
+/**
+ * Lifecycle status for a Brain-managed neuron.
+ * - 'active': fully participating in inject fan-out and evolution evaluation
+ * - 'inactive': skipped during inject and evolution; queries still hit it
+ *
+ * Open enum: future states (archived, frozen, etc.) can be added without
+ * breaking persisted records. Missing/undefined is treated as 'active' so
+ * pre-existing records continue to work.
+ */
+export type NeuronStatus = 'active' | 'inactive'
+
 /** One record per neuron — minimal ref, neuron's own store has everything else */
 export interface BrainNeuronRecord {
 	id: string // neuron ID
 	type: string // 'text' | 'list' | future types
+	status?: NeuronStatus // defaults to 'active' when missing
 }
 
 /** Evaluator decisions history */

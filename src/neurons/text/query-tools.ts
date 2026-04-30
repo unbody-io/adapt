@@ -5,8 +5,8 @@
  * and the text-specific query prompt builder.
  */
 
-import { tool } from 'ai'
 import { z } from 'zod'
+import { tool } from '../../llm'
 import type { QueryContext } from '../base/query'
 
 /**
@@ -17,11 +17,13 @@ import type { QueryContext } from '../base/query'
  */
 export function createReadUnderstandingTool(
 	getUnderstanding: () => Promise<string>,
-	getBufferedObservations: () => Promise<Array<{ text: string; importance: number }>>,
+	getBufferedObservations: () => Promise<
+		Array<{ text: string; importance: number }>
+	>,
 ) {
 	return tool({
 		description:
-			'Read the neuron\'s current understanding. Call this first to access your knowledge before answering.',
+			"Read the neuron's current understanding. Call this first to access your knowledge before answering.",
 		inputSchema: z.object({}),
 		execute: async () => {
 			const understanding = await getUnderstanding()

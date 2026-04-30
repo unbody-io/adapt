@@ -16,10 +16,22 @@
  */
 
 import type { LanguageModel, StreamTextResult } from 'ai'
-import { z } from 'zod'
 import { nanoid } from 'nanoid'
+import { z } from 'zod'
 import { generate, Output } from '../../llm'
+import type {
+	EvolutionRecord,
+	NeuronStore,
+	ObservationRecord,
+} from '../../stores'
 import { TypedEmitter } from '../../types/events'
+import type {
+	QueryCallbacks,
+	QueryMethod,
+	QueryOptions,
+	QueryResult,
+} from '../base/query'
+import { adjustObserve, initObserve, observe } from '../observer'
 import type {
 	Neuron,
 	NeuronHealth,
@@ -28,22 +40,38 @@ import type {
 	NeuronOrigin,
 	Significance,
 } from '../types'
-import { adjustObserve, initObserve, observe } from '../observer'
-import type { EvolutionRecord, NeuronStore } from '../../stores'
-import type { QueryCallbacks, QueryMethod, QueryOptions, QueryResult } from '../base/query'
 import type {
-	BaseNeuronUpdateInput,
-	SharedNeuronEventMap,
-} from './types'
-import type { BaseNeuronState, ModelSlots, StateTransform } from './state'
-import { serializeModelSlots } from './state'
+	BaseNeuronState,
+	ModelSlots,
+	StateTransform,
+	StoredModelRef,
+} from './state'
+import { deserializeModelSlots, serializeModelSlots } from './state'
+import type { BaseNeuronUpdateInput, SharedNeuronEventMap } from './types'
 
 /**
  * Output from learn() - discriminated union of all possible outcomes
  */
 export type LearnOutput =
-	| { status: 'observed'; output: unknown[]; usage?: { inputTokens?: number; outputTokens?: number; totalTokens?: number } }
-	| { status: 'observe:dismissed'; output: unknown[]; gaps: string[]; usage?: { inputTokens?: number; outputTokens?: number; totalTokens?: number } }
+	| {
+			status: 'observed'
+			output: unknown[]
+			usage?: {
+				inputTokens?: number
+				outputTokens?: number
+				totalTokens?: number
+			}
+	  }
+	| {
+			status: 'observe:dismissed'
+			output: unknown[]
+			gaps: string[]
+			usage?: {
+				inputTokens?: number
+				outputTokens?: number
+				totalTokens?: number
+			}
+	  }
 	| { status: 'observe:error'; error: unknown }
 	| {
 			status: 'synthesized'
@@ -51,9 +79,21 @@ export type LearnOutput =
 			significance: Significance
 			evolution: string
 			reasoning?: string
-			usage?: { inputTokens?: number; outputTokens?: number; totalTokens?: number }
+			usage?: {
+				inputTokens?: number
+				outputTokens?: number
+				totalTokens?: number
+			}
 	  }
-	| { status: 'synthesize:dismissed'; output: string; usage?: { inputTokens?: number; outputTokens?: number; totalTokens?: number } }
+	| {
+			status: 'synthesize:dismissed'
+			output: string
+			usage?: {
+				inputTokens?: number
+				outputTokens?: number
+				totalTokens?: number
+			}
+	  }
 	| { status: 'synthesize:error'; error: unknown }
 
 /**
@@ -83,9 +123,21 @@ export type UnderstandCallResult =
 			significance: Significance
 			evolution: string
 			reasoning?: string
-			usage?: { inputTokens?: number; outputTokens?: number; totalTokens?: number }
+			usage?: {
+				inputTokens?: number
+				outputTokens?: number
+				totalTokens?: number
+			}
 	  }
-	| { status: 'dismissed'; output: string; usage?: { inputTokens?: number; outputTokens?: number; totalTokens?: number } }
+	| {
+			status: 'dismissed'
+			output: string
+			usage?: {
+				inputTokens?: number
+				outputTokens?: number
+				totalTokens?: number
+			}
+	  }
 	| { status: 'error'; error: unknown }
 
 /**
@@ -100,7 +152,7 @@ const adjustClassificationSchema = z.object({
 	adjustUnderstanding: z
 		.boolean()
 		.describe(
-			'Whether the directive changes, corrects, or removes something in the node\'s accumulated knowledge',
+			"Whether the directive changes, corrects, or removes something in the node's accumulated knowledge",
 		),
 	reasoning: z.string().describe('Brief explanation of the classification'),
 })
@@ -115,9 +167,9 @@ export interface AdjustResult {
 }
 
 export abstract class BaseNeuron<
-	TUnderstanding,
-	TState extends BaseNeuronState = BaseNeuronState,
->
+		TUnderstanding,
+		TState extends BaseNeuronState = BaseNeuronState,
+	>
 	extends TypedEmitter<SharedNeuronEventMap>
 	implements Neuron<TUnderstanding>
 {
@@ -128,7 +180,10 @@ export abstract class BaseNeuron<
 	protected directQueryMethod?: QueryMethod
 
 	// Lazy init promise (for ensureInit)
-	private initPromise: Promise<{ observeSystemPrompt: string; understandSystemPrompt: string }> | null = null
+	private initPromise: Promise<{
+		observeSystemPrompt: string
+		understandSystemPrompt: string
+	}> | null = null
 
 	/**
 	 * Transform registry for store ↔ cache boundary.
@@ -138,8 +193,8 @@ export abstract class BaseNeuron<
 	protected stateTransforms: Record<string, StateTransform> = {
 		models: {
 			serialize: (v) => serializeModelSlots(v as ModelSlots),
-			// On load, keep live models from constructor — store only has refs
-			deserialize: (_stored) => this.state.models,
+			deserialize: (stored) =>
+				deserializeModelSlots(stored as Record<string, StoredModelRef>),
 		},
 		health: {
 			serialize: (v) => {
@@ -159,11 +214,7 @@ export abstract class BaseNeuron<
 		},
 	}
 
-	constructor(
-		id: string,
-		store: NeuronStore,
-		initialState: TState,
-	) {
+	constructor(id: string, store: NeuronStore, initialState: TState) {
 		super()
 		this.id = id
 		this.store = store
@@ -271,9 +322,16 @@ export abstract class BaseNeuron<
 			const serialized = transform ? transform.serialize(value) : value
 			const existing = await this.store.state.get(key)
 			if (existing) {
-				await this.store.state.update(key, { value: serialized, updated_at: now })
+				await this.store.state.update(key, {
+					value: serialized,
+					updated_at: now,
+				})
 			} else {
-				await this.store.state.add({ id: key, value: serialized, updated_at: now })
+				await this.store.state.add({
+					id: key,
+					value: serialized,
+					updated_at: now,
+				})
 			}
 		}
 	}
@@ -287,15 +345,16 @@ export abstract class BaseNeuron<
 		if (records.length === 0) return false
 		for (const record of records) {
 			const transform = this.stateTransforms[record.id]
-			;(this.state as Record<string, unknown>)[record.id] =
-				transform ? transform.deserialize(record.value) : record.value
+			;(this.state as Record<string, unknown>)[record.id] = transform
+				? transform.deserialize(record.value)
+				: record.value
 		}
 		return true
 	}
 
 	// ── Init ────────────────────────────────────────────────────────────────
 
-	async init(): Promise<{
+	async init(opts?: { expect?: 'fresh' | 'restore' }): Promise<{
 		observeSystemPrompt: string
 		understandSystemPrompt: string
 	}> {
@@ -312,9 +371,18 @@ export abstract class BaseNeuron<
 			// Try restoring state from store (skip LLM calls)
 			const restored = await this.loadState()
 
-			if (!restored) {
-				let observeArtifacts: Record<string, unknown> = {}
+			if (opts?.expect === 'fresh' && restored) {
+				throw new Error(
+					'Neuron already exists in this store. Use restore() to load it, or use a fresh store.',
+				)
+			}
+			if (opts?.expect === 'restore' && !restored) {
+				throw new Error(
+					'No neuron found in this store. Use create() to create one.',
+				)
+			}
 
+			if (!restored) {
 				if (!this.state.skipObservation) {
 					// Generate observe identity + prompt via LLM
 					const observeResult = await initObserve(
@@ -322,10 +390,8 @@ export abstract class BaseNeuron<
 						this.state.instructions,
 						this.state.focus || undefined,
 					)
-					observeArtifacts = {
-						observe_identity: observeResult.identity,
-						observe_prompt: observeResult.systemPrompt,
-					}
+					this.state.observe_identity = observeResult.identity
+					this.state.observe_prompt = observeResult.systemPrompt
 				}
 
 				// Generate understand identity + prompt (type-specific)
@@ -335,30 +401,29 @@ export abstract class BaseNeuron<
 				)
 
 				// Generate schemas only if not already provided via config
-				const schemaUpdates: Record<string, unknown> = {}
-				if (this.state.observation_schema === null || this.state.understanding_schema === null) {
+				if (
+					this.state.observation_schema === null ||
+					this.state.understanding_schema === null
+				) {
 					const schemas = await this.generateSchemas(
 						this.state.models.blueprint,
 						this.state.instructions,
 					)
 					if (this.state.observation_schema === null) {
-						schemaUpdates.observation_schema = schemas.observationSchema
+						this.state.observation_schema = schemas.observationSchema as Record<
+							string,
+							unknown
+						>
 					}
 					if (this.state.understanding_schema === null) {
-						schemaUpdates.understanding_schema = schemas.understandingSchema
+						this.state.understanding_schema =
+							schemas.understandingSchema as Record<string, unknown>
 					}
 				}
 
-				// Persist all generated artifacts + identity fields to store
-				await this.setState({
-					name: this.state.name,
-					description: this.state.description,
-					instructions: this.state.instructions,
-					focus: this.state.focus,
-					origin: this.state.origin,
-					...observeArtifacts,
-					...schemaUpdates,
-				} as Partial<TState>)
+				// Persist the entire state — every field that lives in BaseNeuronState
+				// is data and must round-trip through the store.
+				await this.setState({ ...this.state } as Partial<TState>)
 			}
 
 			// Create query methods
@@ -389,12 +454,14 @@ export abstract class BaseNeuron<
 
 	protected validateObservationData(data: unknown): boolean {
 		if (!this.state.observation_schema) return true
-		return z.fromJSONSchema(this.state.observation_schema).safeParse(data).success
+		return z.fromJSONSchema(this.state.observation_schema).safeParse(data)
+			.success
 	}
 
 	protected validateUnderstandingData(data: unknown): boolean {
 		if (!this.state.understanding_schema) return true
-		return z.fromJSONSchema(this.state.understanding_schema).safeParse(data).success
+		return z.fromJSONSchema(this.state.understanding_schema).safeParse(data)
+			.success
 	}
 
 	// ── Identity ────────────────────────────────────────────────────────────
@@ -420,7 +487,9 @@ export abstract class BaseNeuron<
 	}
 
 	isInitialized(): boolean {
-		return this.state.observe_prompt !== null
+		// Use understand_prompt as the readiness signal — it is always set after
+		// init, even for skipObservation neurons (which leave observe_prompt null).
+		return this.state.understand_prompt !== null
 	}
 
 	private async ensureInit(): Promise<void> {
@@ -459,7 +528,9 @@ export abstract class BaseNeuron<
 		try {
 			// Handle forceSynthesize with empty data
 			if (options?.forceSynthesize && batch.length === 0) {
-				const pendingCount = await this.store.observations.count({ metadata_status: 'pending' })
+				const pendingCount = await this.store.observations.count({
+					metadata_status: 'pending',
+				})
 				if (pendingCount > 0) {
 					return this.understandFromStore(this.state.models.understand)
 				}
@@ -473,7 +544,9 @@ export abstract class BaseNeuron<
 
 			let observations: unknown[]
 			let importance: number
-			let observeUsage: { inputTokens?: number; outputTokens?: number; totalTokens?: number } | undefined
+			let observeUsage:
+				| { inputTokens?: number; outputTokens?: number; totalTokens?: number }
+				| undefined
 
 			if (this.state.skipObservation) {
 				// Skip observe — store raw batch directly
@@ -483,7 +556,11 @@ export abstract class BaseNeuron<
 				const observeResult = await observe(
 					this.state.models.observer,
 					this.state.observe_prompt!,
-					{ neuronId: this.id, instructions: this.state.instructions, data: batch },
+					{
+						neuronId: this.id,
+						instructions: this.state.instructions,
+						data: batch,
+					},
 					this.state.observation_schema ?? undefined,
 					{
 						onThinking: (thoughts) => {
@@ -497,7 +574,10 @@ export abstract class BaseNeuron<
 				)
 
 				if (observeResult.status === 'error') {
-					const result: LearnOutput = { status: 'observe:error', error: observeResult.error }
+					const result: LearnOutput = {
+						status: 'observe:error',
+						error: observeResult.error,
+					}
 					await this.handleLearnResult(result)
 					return result
 				}
@@ -515,7 +595,10 @@ export abstract class BaseNeuron<
 
 				// Filter by importance threshold
 				const minImportance = this.state.thresholds.minImportance
-				if (minImportance !== undefined && observeResult.importance < minImportance) {
+				if (
+					minImportance !== undefined &&
+					observeResult.importance < minImportance
+				) {
 					const result: LearnOutput = {
 						status: 'observe:dismissed',
 						output: observeResult.output,
@@ -533,11 +616,15 @@ export abstract class BaseNeuron<
 
 			// Store observations as pending
 			for (const item of observations) {
-				if (!this.state.skipObservation && !this.validateObservationData(item)) {
+				if (
+					!this.state.skipObservation &&
+					!this.validateObservationData(item)
+				) {
 					console.error(`[${this.id}] Skipping invalid observation:`, item)
 					continue
 				}
-				const serialized = typeof item === 'string' ? item : JSON.stringify(item)
+				const serialized =
+					typeof item === 'string' ? item : JSON.stringify(item)
 				await this.store.observations.add({
 					id: `obs_${nanoid()}`,
 					data: item,
@@ -565,7 +652,9 @@ export abstract class BaseNeuron<
 			}
 
 			// Phase 2: Understand
-			const understandResult = await this.understandFromStore(this.state.models.understand)
+			const understandResult = await this.understandFromStore(
+				this.state.models.understand,
+			)
 			return understandResult
 		} catch (err) {
 			const error = err instanceof Error ? err : new Error(String(err))
@@ -577,8 +666,12 @@ export abstract class BaseNeuron<
 		}
 	}
 
-	private async understandFromStore(model: LanguageModel): Promise<LearnOutput> {
-		const pending = await this.store.observations.list({ metadata_status: 'pending' })
+	private async understandFromStore(
+		model: LanguageModel,
+	): Promise<LearnOutput> {
+		const pending = await this.store.observations.list({
+			metadata_status: 'pending',
+		})
 		const observations = pending.map((o) =>
 			typeof o.data === 'string' ? o.data : JSON.stringify(o.data),
 		)
@@ -612,7 +705,10 @@ export abstract class BaseNeuron<
 		}
 
 		if (understandResult.status === 'error') {
-			const result: LearnOutput = { status: 'synthesize:error', error: understandResult.error }
+			const result: LearnOutput = {
+				status: 'synthesize:error',
+				error: understandResult.error,
+			}
 			await this.handleLearnResult(result)
 			return result
 		}
@@ -650,30 +746,66 @@ export abstract class BaseNeuron<
 		avgImportance: number
 		totalTokens: number
 	}> {
-		const pending = await this.store.observations.list({ metadata_status: 'pending' })
+		const pending = await this.store.observations.list({
+			metadata_status: 'pending',
+		})
 		const count = pending.length
-		const avgImportance = count > 0
-			? pending.reduce((sum, o) => sum + o.metadata_importance, 0) / count
-			: 0
+		const avgImportance =
+			count > 0
+				? pending.reduce((sum, o) => sum + o.metadata_importance, 0) / count
+				: 0
 		const totalTokens = Math.ceil(
 			pending.reduce((sum, o) => sum + JSON.stringify(o.data).length, 0) / 4,
 		)
 		return { count, avgImportance, totalTokens }
 	}
 
-	async getBufferedObservations(): Promise<Array<{ text: string; importance: number }>> {
-		const pending = await this.store.observations.list({ metadata_status: 'pending' })
+	async getBufferedObservations(): Promise<
+		Array<{ text: string; importance: number }>
+	> {
+		const pending = await this.store.observations.list({
+			metadata_status: 'pending',
+		})
 		return pending.map((o) => ({
 			text: String(o.data),
 			importance: o.metadata_importance,
 		}))
 	}
 
-	protected async shouldUnderstand(
-		thresholds: { maxObservations: number; maxTokens: number },
-	): Promise<boolean> {
+	async getObservations(filter?: {
+		status?: 'pending' | 'processed'
+	}): Promise<ObservationRecord[]> {
+		return filter?.status
+			? this.store.observations.list({ metadata_status: filter.status })
+			: this.store.observations.list()
+	}
+
+	async setObservations(observations: ObservationRecord[]): Promise<void> {
+		await this.store.observations.clear()
+		if (observations.length > 0) {
+			await this.store.observations.addBatch(observations)
+		}
+	}
+
+	async updateObservation(
+		id: string,
+		patch: Partial<Omit<ObservationRecord, 'id'>>,
+	): Promise<void> {
+		await this.store.observations.update(id, patch)
+	}
+
+	async removeObservation(id: string): Promise<void> {
+		await this.store.observations.delete(id)
+	}
+
+	protected async shouldUnderstand(thresholds: {
+		maxObservations: number
+		maxTokens: number
+	}): Promise<boolean> {
 		const { count, totalTokens } = await this.getBufferState()
-		return count >= thresholds.maxObservations || totalTokens >= thresholds.maxTokens
+		return (
+			count >= thresholds.maxObservations || totalTokens >= thresholds.maxTokens
+		)
 	}
 
 	// ── Query (concrete — delegates to queryMethod) ────────────────────────
@@ -712,9 +844,10 @@ export abstract class BaseNeuron<
 		}
 
 		try {
-			const method = options?.mode === 'direct' && this.directQueryMethod
-				? this.directQueryMethod
-				: this.queryMethod
+			const method =
+				options?.mode === 'direct' && this.directQueryMethod
+					? this.directQueryMethod
+					: this.queryMethod
 			const result = await method.query(
 				{
 					neuronId: this.id,
@@ -773,12 +906,15 @@ export abstract class BaseNeuron<
 			query: question,
 		})
 
-		const method = options?.mode === 'direct' && this.directQueryMethod
-			? this.directQueryMethod
-			: this.queryMethod
+		const method =
+			options?.mode === 'direct' && this.directQueryMethod
+				? this.directQueryMethod
+				: this.queryMethod
 
 		if (!method.queryStream) {
-			throw new Error(`Query method "${method.name}" does not support streaming`)
+			throw new Error(
+				`Query method "${method.name}" does not support streaming`,
+			)
 		}
 
 		return method.queryStream(
@@ -815,8 +951,12 @@ export abstract class BaseNeuron<
 			changedFields.push('name')
 		}
 
-		if (updates.description !== undefined && updates.description !== this.state.description) {
-			;(stateUpdates as Record<string, unknown>).description = updates.description
+		if (
+			updates.description !== undefined &&
+			updates.description !== this.state.description
+		) {
+			;(stateUpdates as Record<string, unknown>).description =
+				updates.description
 			changedFields.push('description')
 		}
 
@@ -827,11 +967,15 @@ export abstract class BaseNeuron<
 
 		// ── Models (reactive) ──
 
-		if (updates.model !== undefined || updates.blueprintModel !== undefined ||
-			updates.observer?.model !== undefined || updates.observer?.blueprintModel !== undefined ||
-			updates.understand?.model !== undefined || updates.understand?.blueprintModel !== undefined ||
-			updates.query?.model !== undefined) {
-
+		if (
+			updates.model !== undefined ||
+			updates.blueprintModel !== undefined ||
+			updates.observer?.model !== undefined ||
+			updates.observer?.blueprintModel !== undefined ||
+			updates.understand?.model !== undefined ||
+			updates.understand?.blueprintModel !== undefined ||
+			updates.query?.model !== undefined
+		) {
 			const newModels = { ...this.state.models }
 			if (updates.model !== undefined) {
 				newModels.default = updates.model
@@ -863,6 +1007,7 @@ export abstract class BaseNeuron<
 				newModels.query = updates.query.model
 				changedFields.push('query.model')
 				this.queryMethod.update({ model: updates.query.model })
+				this.directQueryMethod?.update({ model: updates.query.model })
 			}
 
 			;(stateUpdates as Record<string, unknown>).models = newModels
@@ -870,8 +1015,12 @@ export abstract class BaseNeuron<
 
 		// ── Instructions (reactive) ──
 
-		if (updates.instructions !== undefined && updates.instructions !== this.state.instructions) {
-			;(stateUpdates as Record<string, unknown>).instructions = updates.instructions
+		if (
+			updates.instructions !== undefined &&
+			updates.instructions !== this.state.instructions
+		) {
+			;(stateUpdates as Record<string, unknown>).instructions =
+				updates.instructions
 			changedFields.push('instructions')
 			needsObserveRegen = true
 			needsUnderstandRegen = true
@@ -889,7 +1038,10 @@ export abstract class BaseNeuron<
 		// ── Thresholds ──
 
 		if (updates.understand?.thresholds) {
-			const newThresholds = { ...this.state.thresholds, ...updates.understand.thresholds }
+			const newThresholds = {
+				...this.state.thresholds,
+				...updates.understand.thresholds,
+			}
 			;(stateUpdates as Record<string, unknown>).thresholds = newThresholds
 			changedFields.push('understand.thresholds')
 		}
@@ -916,7 +1068,9 @@ export abstract class BaseNeuron<
 				if (st.maxObservationsWithoutSynthesis !== undefined) {
 					newHealth.signalThresholds.maxObservationsWithoutSynthesis =
 						st.maxObservationsWithoutSynthesis
-					changedFields.push('health.signalThresholds.maxObservationsWithoutSynthesis')
+					changedFields.push(
+						'health.signalThresholds.maxObservationsWithoutSynthesis',
+					)
 				}
 			}
 			;(stateUpdates as Record<string, unknown>).health = newHealth
@@ -924,12 +1078,17 @@ export abstract class BaseNeuron<
 
 		// ── Type-specific updates (subclass implements) ──
 
-		const typeSpecificUpdates = this.applyTypeSpecificUpdates(updates, changedFields)
+		const typeSpecificUpdates = this.applyTypeSpecificUpdates(
+			updates,
+			changedFields,
+		)
 		Object.assign(stateUpdates, typeSpecificUpdates)
 
 		// ── Force regen if prompts don't exist yet (first init) ──
+		// Skip-observation neurons intentionally leave observe_prompt null.
 
-		if (this.state.observe_prompt === null) needsObserveRegen = true
+		if (!this.state.skipObservation && this.state.observe_prompt === null)
+			needsObserveRegen = true
 		if (this.state.understand_prompt === null) needsUnderstandRegen = true
 		if (this.state.observation_schema === null) needsSchemaRegen = true
 
@@ -939,6 +1098,9 @@ export abstract class BaseNeuron<
 		if (Object.keys(stateUpdates).length > 0) {
 			await this.setState(stateUpdates)
 		}
+
+		// Skip-observation neurons never run the observe phase; never regen its prompt.
+		if (this.state.skipObservation) needsObserveRegen = false
 
 		if (needsObserveRegen || needsUnderstandRegen || needsSchemaRegen) {
 			const promises: Promise<void>[] = []
@@ -951,8 +1113,10 @@ export abstract class BaseNeuron<
 						this.state.instructions,
 						this.state.focus || undefined,
 					).then((result) => {
-						;(regenUpdates as Record<string, unknown>).observe_identity = result.identity
-						;(regenUpdates as Record<string, unknown>).observe_prompt = result.systemPrompt
+						;(regenUpdates as Record<string, unknown>).observe_identity =
+							result.identity
+						;(regenUpdates as Record<string, unknown>).observe_prompt =
+							result.systemPrompt
 					}),
 				)
 			}
@@ -974,8 +1138,10 @@ export abstract class BaseNeuron<
 					this.state.models.blueprint,
 					this.state.instructions,
 				)
-				;(regenUpdates as Record<string, unknown>).observation_schema = schemas.observationSchema
-				;(regenUpdates as Record<string, unknown>).understanding_schema = schemas.understandingSchema
+				;(regenUpdates as Record<string, unknown>).observation_schema =
+					schemas.observationSchema
+				;(regenUpdates as Record<string, unknown>).understanding_schema =
+					schemas.understandingSchema
 			}
 
 			// Persist regenerated state
@@ -1254,7 +1420,11 @@ What does this directive touch?`,
 				: 0
 	}
 
-	protected trackQueryMetrics(result: { relevance: number; confidence: number; gaps: string }): void {
+	protected trackQueryMetrics(result: {
+		relevance: number
+		confidence: number
+		gaps: string
+	}): void {
 		const WINDOW_SIZE = 10
 		const MAX_GAPS = 50
 
@@ -1272,7 +1442,9 @@ What does this directive touch?`,
 			const gaps = result.gaps.split('\n').filter(Boolean)
 			this.state.metrics.query.gaps.push(...gaps)
 			if (this.state.metrics.query.gaps.length > MAX_GAPS) {
-				this.state.metrics.query.gaps = this.state.metrics.query.gaps.slice(-MAX_GAPS)
+				this.state.metrics.query.gaps = this.state.metrics.query.gaps.slice(
+					-MAX_GAPS,
+				)
 			}
 		}
 	}
@@ -1294,7 +1466,9 @@ What does this directive touch?`,
 			activation: this.state.health.activation,
 			status: this.state.health.status,
 			previousStatus:
-				previousStatus !== this.state.health.status ? previousStatus : undefined,
+				previousStatus !== this.state.health.status
+					? previousStatus
+					: undefined,
 		})
 	}
 

@@ -2,13 +2,15 @@
  * Tool for reviewing dismissed data sitting in the buffer
  */
 
-import { tool } from 'ai'
 import { z } from 'zod'
+import { tool } from '../../../llm'
 import type { Brain } from '../../class'
 
 const reviewDismissedDataParams = z.object({})
 
-export type ReviewDismissedDataParams = z.infer<typeof reviewDismissedDataParams>
+export type ReviewDismissedDataParams = z.infer<
+	typeof reviewDismissedDataParams
+>
 
 /**
  * Create reviewDismissedData tool with brain context.
@@ -18,7 +20,7 @@ export type ReviewDismissedDataParams = z.infer<typeof reviewDismissedDataParams
 export function createReviewDismissedDataTool(brain: Brain) {
 	return tool({
 		description:
-			'See what data is sitting unprocessed — topics and how long they\'ve been waiting.',
+			"See what data is sitting unprocessed — topics and how long they've been waiting.",
 		inputSchema: reviewDismissedDataParams,
 		execute: async () => {
 			const records = await brain.store.dismissedBatches.list()

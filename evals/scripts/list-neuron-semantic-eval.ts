@@ -46,7 +46,7 @@ async function main() {
 	// ━━━ 1. CREATE STANDALONE LIST NEURON ━━━
 	console.log('\n━━━ 1. Create standalone ListNeuron ━━━')
 
-	const neuron = new ListNeuron({
+	const neuron = await ListNeuron.create({
 		model,
 		id: 'restaurant-tracker',
 		name: 'Restaurant Tracker',
@@ -103,10 +103,9 @@ async function main() {
 	}, null, 2))
 
 	// ━━━ 2. INIT ━━━
-	console.log('\n━━━ 2. Initialize neuron ━━━')
-	const initResult = await neuron.init()
-	console.log(`  Observe prompt generated: ${initResult.observeSystemPrompt.length} chars`)
-	console.log(`  Understand prompt initialized: ${initResult.understandSystemPrompt.length} chars`)
+	console.log('\n━━━ 2. Initialized via ListNeuron.create ━━━')
+	console.log(`  Observe prompt generated: ${neuron.getObserveSystemPrompt()?.length ?? 0} chars`)
+	console.log(`  Understand prompt initialized: ${neuron.getUnderstandSystemPrompt()?.length ?? 0} chars`)
 
 	// ━━━ 3. INGEST BATCH 1 — restaurant data ━━━
 	console.log('\n━━━ 3. Ingest batch 1 — NYC restaurants ━━━')

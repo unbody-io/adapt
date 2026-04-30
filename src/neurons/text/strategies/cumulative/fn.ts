@@ -1,4 +1,4 @@
-import { generateText } from 'ai'
+import { generate } from '../../../../llm'
 import type { StrategyFn } from '../types'
 import { estimateTokens } from '../utils'
 import { cumulativeSeedPromptTemplate } from './prompt.template.compress'
@@ -19,7 +19,7 @@ export const cumulative: StrategyFn = async ({
 		return { understanding, modified: false }
 	}
 
-	const result = await generateText({
+	const result = await generate({
 		model,
 		prompt: cumulativeSeedPromptTemplate(understanding, maxTokens),
 	})

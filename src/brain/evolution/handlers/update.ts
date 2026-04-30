@@ -6,14 +6,13 @@
  * - neuron.update({...}) for mechanical config (name, description, thresholds)
  */
 
-import { Output } from 'ai'
-import { EvolutionActionHandler } from '../base-handler'
+import { generate, Output } from '../../../llm'
 import type { EvolutionDecision } from '../../evaluator/types'
-import type { UpdateActionResult } from '../types'
-import { generate } from '../../../llm'
-import { updateOutputSchema } from '../schemas/update'
+import { EvolutionActionHandler } from '../base-handler'
 import { updateSystemPrompt } from '../prompt.system.update'
 import { updatePromptTemplate } from '../prompt.template.update'
+import { updateOutputSchema } from '../schemas/update'
+import type { UpdateActionResult } from '../types'
 
 export class UpdateHandler extends EvolutionActionHandler<UpdateActionResult> {
 	async execute(decisions: EvolutionDecision[]): Promise<UpdateActionResult> {
@@ -51,8 +50,7 @@ export class UpdateHandler extends EvolutionActionHandler<UpdateActionResult> {
 
 					// Mechanical config via update() — specific field values
 					const { thresholds, ...rest } = mechanical
-					const hasMechanical =
-						rest.name || rest.description || thresholds
+					const hasMechanical = rest.name || rest.description || thresholds
 					if (hasMechanical) {
 						const adapted = {
 							...rest,
@@ -76,7 +74,6 @@ export class UpdateHandler extends EvolutionActionHandler<UpdateActionResult> {
 			} catch (error) {
 				const err = error instanceof Error ? error : new Error(String(error))
 				this.emitActionFailed(decision, err)
-				continue
 			}
 		}
 

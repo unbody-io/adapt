@@ -2,8 +2,8 @@
  * Tool for asking a specialist a direct question
  */
 
-import { tool } from 'ai'
 import { z } from 'zod'
+import { tool } from '../../../llm'
 import type { Brain } from '../../class'
 
 const querySpecialistParams = z.object({

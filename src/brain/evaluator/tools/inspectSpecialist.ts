@@ -2,8 +2,8 @@
  * Tool for inspecting a specialist's knowledge, health, metrics, and evolution history
  */
 
-import { tool } from 'ai'
 import { z } from 'zod'
+import { tool } from '../../../llm'
 import type { Brain } from '../../class'
 
 const inspectSpecialistParams = z.object({

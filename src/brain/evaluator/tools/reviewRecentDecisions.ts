@@ -2,13 +2,15 @@
  * Tool for reviewing recent evolution decisions
  */
 
-import { tool } from 'ai'
 import { z } from 'zod'
+import { tool } from '../../../llm'
 import type { EvolutionHistoryEntry } from '../types'
 
 const reviewRecentDecisionsParams = z.object({})
 
-export type ReviewRecentDecisionsParams = z.infer<typeof reviewRecentDecisionsParams>
+export type ReviewRecentDecisionsParams = z.infer<
+	typeof reviewRecentDecisionsParams
+>
 
 /**
  * Create reviewRecentDecisions tool with evaluator history context.

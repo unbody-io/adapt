@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it } from 'vitest'
 import { mkdtempSync, rmSync } from 'node:fs'
 import { join } from 'node:path'
 import { tmpdir } from 'node:os'
-import { SQLiteBrainStore, SQLiteNeuronStore } from '../src/sqlite'
+import { SQLiteBrainStore } from '../src/sqlite'
 import { runBrainRestoreSmoke } from './helpers/brain-restore-smoke'
 
 const tmpDirs: string[] = []
@@ -26,7 +26,6 @@ describe('Brain SQLite restore smoke (node)', () => {
 	it('restores a brain from SQLite and answers the same question after reopening', async () => {
 		const result = await runBrainRestoreSmoke(createTmpDir(), {
 			createBrainStore: (dbPath) => new SQLiteBrainStore(dbPath),
-			createNeuronStore: (dbPath) => new SQLiteNeuronStore(dbPath),
 		})
 
 		expect(result.injectStatus).toBe('synthesized')

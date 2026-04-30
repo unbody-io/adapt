@@ -1,6 +1,7 @@
 node_modules/
 bun.lock
 dist/
+dist-cjs/
 .env
 .env.*
 !.env.example

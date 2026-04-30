@@ -32,7 +32,7 @@ async function main() {
 	// ── TextNeuron — Basic ────────────────────────────────────────────────
 	section('TextNeuron — Basic')
 
-	const textNeuron = new TextNeuron({
+	const textNeuron = await TextNeuron.create({
 		model,
 		instructions: 'Track product design principles and user research insights.',
 		store: new MemoryNeuronStore(),
@@ -52,7 +52,7 @@ async function main() {
 	// ── TextNeuron — Governance Config ────────────────────────────────────
 	section('TextNeuron — Governance Config')
 
-	const govNeuron = new TextNeuron({
+	const govNeuron = await TextNeuron.create({
 		model,
 		instructions: 'Track product design principles and user research insights.',
 		store: new MemoryNeuronStore(),
@@ -65,7 +65,7 @@ async function main() {
 	// ── ListNeuron — Basic ───────────────────────────────────────────────
 	section('ListNeuron — Basic')
 
-	const listNeuron = new ListNeuron({
+	const listNeuron = await ListNeuron.create({
 		model,
 		instructions: 'Track restaurants with cuisine type, location, price range, and rating.',
 		store: new MemoryNeuronStore(),
@@ -82,7 +82,7 @@ async function main() {
 	// ── Custom Schemas via Brain ─────────────────────────────────────────
 	section('Custom Schemas via Brain')
 
-	const customSchemaBrain = new Brain({
+	const customSchemaBrain = await Brain.create({
 		prompt: 'Track therapy sessions.',
 		model,
 		autoSetup: false,
@@ -116,7 +116,6 @@ async function main() {
 		}],
 	})
 
-	await customSchemaBrain.initialize()
 	const relNeuron = customSchemaBrain.getNeuron('relationships')
 	assert(relNeuron !== undefined, 'custom schema neuron created')
 	assert(relNeuron!.type === 'list', 'custom schema neuron is list type')
@@ -126,7 +125,7 @@ async function main() {
 	// ── Common Neuron API ────────────────────────────────────────────────
 	section('Common Neuron API')
 
-	const apiNeuron = new TextNeuron({
+	const apiNeuron = await TextNeuron.create({
 		model,
 		instructions: 'Track coding patterns.',
 		store: new MemoryNeuronStore(),
@@ -208,7 +207,7 @@ async function main() {
 	// ── Learn Output — Discriminated Union ────────────────────────────────
 	section('Learn Output — Discriminated Union')
 
-	const learnNeuron = new TextNeuron({
+	const learnNeuron = await TextNeuron.create({
 		model,
 		instructions: 'Track test patterns.',
 		store: new MemoryNeuronStore(),

@@ -8,11 +8,13 @@
  */
 
 import type { LanguageModel } from 'ai'
-import { tool } from 'ai'
-import { z } from 'zod'
 import { nanoid } from 'nanoid'
-import { generate, Output, stepCountIs } from '../../../llm'
-import type { NeuronCollection, UnderstandingRecord } from '../../../stores/types'
+import { z } from 'zod'
+import { generate, Output, stepCountIs, tool } from '../../../llm'
+import type {
+	NeuronCollection,
+	UnderstandingRecord,
+} from '../../../stores/types'
 import type { Significance } from '../../types'
 import type { ListItem } from '../types'
 import type {
@@ -95,7 +97,11 @@ function createUnderstandTools(
 					count: records.length,
 					items: records.map((r) => {
 						const item = r.data as ListItem
-						return { id: r.id, data: item.data, confidence: r.metadata_confidence }
+						return {
+							id: r.id,
+							data: item.data,
+							confidence: r.metadata_confidence,
+						}
 					}),
 				}
 			},
@@ -113,7 +119,11 @@ function createUnderstandTools(
 					count: matches.length,
 					items: matches.map((r) => {
 						const item = r.data as ListItem
-						return { id: r.id, data: item.data, confidence: r.metadata_confidence }
+						return {
+							id: r.id,
+							data: item.data,
+							confidence: r.metadata_confidence,
+						}
 					}),
 				}
 			},
@@ -142,7 +152,9 @@ function createUnderstandTools(
 			description:
 				'Add a new item to the collection. Automatically checks for duplicates — if similar items exist, returns them so you can use updateItem instead.',
 			inputSchema: z.object({
-				data: dataSchema.describe('The item data matching the collection schema'),
+				data: dataSchema.describe(
+					'The item data matching the collection schema',
+				),
 				signals: z
 					.array(z.string())
 					.optional()
@@ -169,7 +181,8 @@ function createUnderstandTools(
 					if (seen.size > 0) {
 						return {
 							success: false,
-							reason: 'Similar items already exist. Use updateItem to merge new data instead of creating a duplicate.',
+							reason:
+								'Similar items already exist. Use updateItem to merge new data instead of creating a duplicate.',
 							existingItems: [...seen.values()].map((r) => {
 								const item = r.data as ListItem
 								return { id: r.id, data: item.data }
@@ -212,7 +225,9 @@ function createUnderstandTools(
 				'Update an existing item. Merges data fields with existing data (does not replace). Returns success.',
 			inputSchema: z.object({
 				id: z.string().describe('ID of the item to update'),
-				data: dataSchema.optional().describe('Fields to update/add in the item data'),
+				data: dataSchema
+					.optional()
+					.describe('Fields to update/add in the item data'),
 				signals: z
 					.array(z.string())
 					.optional()
@@ -355,7 +370,11 @@ export async function adjustUnderstand(
 	newInstructions: string,
 	currentIdentity: UnderstandIdentity,
 ): Promise<UnderstandInitResult> {
-	const prompt = adjustIdentityPrompt(directive, newInstructions, currentIdentity)
+	const prompt = adjustIdentityPrompt(
+		directive,
+		newInstructions,
+		currentIdentity,
+	)
 
 	const { output: identity } = await generate({
 		model,
@@ -381,7 +400,11 @@ export async function adjustUnderstandingContent(
 ): Promise<UnderstandOutput> {
 	try {
 		const changes: ChangeRecord[] = []
-		const tools = createUnderstandTools(collection, understandingSchema, changes)
+		const tools = createUnderstandTools(
+			collection,
+			understandingSchema,
+			changes,
+		)
 
 		const system = systemPrompt(identity)
 		const prompt = `Adjustment directive: "${directive}"
@@ -431,8 +454,14 @@ Preserve items the directive doesn't address.`
 
 		// Normalize confidence: relative to max touchCount across collection
 		const records = await collection.list()
-		const allItems = records.map((r) => ({ record: r, item: r.data as ListItem }))
-		const maxTouches = Math.max(1, ...allItems.map((x) => x.item.metadata.touchCount ?? 1))
+		const allItems = records.map((r) => ({
+			record: r,
+			item: r.data as ListItem,
+		}))
+		const maxTouches = Math.max(
+			1,
+			...allItems.map((x) => x.item.metadata.touchCount ?? 1),
+		)
 
 		for (const { record, item } of allItems) {
 			const newConfidence = (item.metadata.touchCount ?? 1) / maxTouches
@@ -453,7 +482,8 @@ Preserve items the directive doesn't address.`
 			status: 'synthesized',
 			newItems,
 			significance: (completeResult?.significance as Significance) ?? 'routine',
-			evolution: completeResult?.evolution ?? `${changes.length} operations applied`,
+			evolution:
+				completeResult?.evolution ?? `${changes.length} operations applied`,
 			reasoning: completeResult?.reasoning,
 			usage: result.usage,
 		}
@@ -472,7 +502,11 @@ export async function understand(
 ): Promise<UnderstandOutput> {
 	try {
 		const changes: ChangeRecord[] = []
-		const tools = createUnderstandTools(collection, understandingSchema, changes)
+		const tools = createUnderstandTools(
+			collection,
+			understandingSchema,
+			changes,
+		)
 
 		const system = systemPrompt(identity)
 		const prompt = `New observations to integrate:\n\n${context.observations.map((o, i) => `${i + 1}. ${o}`).join('\n')}\n\nProcess these observations using your tools.`
@@ -506,9 +540,7 @@ export async function understand(
 		})
 
 		// Check final step for complete tool call
-		const completeCall = result.toolCalls.find(
-			(c) => c.toolName === 'complete',
-		)
+		const completeCall = result.toolCalls.find((c) => c.toolName === 'complete')
 		if (completeCall && 'input' in completeCall) {
 			completeResult = completeCall.input as CompleteResult
 		}
@@ -524,8 +556,14 @@ export async function understand(
 
 		// Normalize confidence: relative to max touchCount across collection
 		const records = await collection.list()
-		const allItems = records.map((r) => ({ record: r, item: r.data as ListItem }))
-		const maxTouches = Math.max(1, ...allItems.map((x) => x.item.metadata.touchCount ?? 1))
+		const allItems = records.map((r) => ({
+			record: r,
+			item: r.data as ListItem,
+		}))
+		const maxTouches = Math.max(
+			1,
+			...allItems.map((x) => x.item.metadata.touchCount ?? 1),
+		)
 
 		for (const { record, item } of allItems) {
 			const newConfidence = (item.metadata.touchCount ?? 1) / maxTouches
@@ -546,7 +584,8 @@ export async function understand(
 			status: 'synthesized',
 			newItems,
 			significance: (completeResult?.significance as Significance) ?? 'routine',
-			evolution: completeResult?.evolution ?? `${changes.length} operations applied`,
+			evolution:
+				completeResult?.evolution ?? `${changes.length} operations applied`,
 			reasoning: completeResult?.reasoning,
 			usage: result.usage,
 		}

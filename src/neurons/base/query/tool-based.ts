@@ -6,9 +6,14 @@
  */
 
 import type { LanguageModel, Tool } from 'ai'
-import { tool } from 'ai'
 import { z } from 'zod'
-import { generate, stepCountIs, streamText, type StreamTextResult } from '../../../llm'
+import {
+	generate,
+	type StreamTextResult,
+	stepCountIs,
+	streamText,
+	tool,
+} from '../../../llm'
 import type { TokenUsage } from '../../types'
 import type {
 	QueryCallbacks,
@@ -51,23 +56,17 @@ const cognitiveTools = {
 		description:
 			'Formulate an answer based on your understanding. Be specific, cite what you know, express appropriate confidence, acknowledge uncertainty.',
 		inputSchema: z.object({
-			response: z
-				.string()
-				.describe('The generated response to the query'),
+			response: z.string().describe('The generated response to the query'),
 			relevance: z
 				.number()
 				.min(0)
 				.max(1)
-				.describe(
-					'How related is this query to your domain/purpose?',
-				),
+				.describe('How related is this query to your domain/purpose?'),
 			confidence: z
 				.number()
 				.min(0)
 				.max(1)
-				.describe(
-					'How well could you answer from your understanding?',
-				),
+				.describe('How well could you answer from your understanding?'),
 		}),
 		execute: async (params) => params,
 	}),

@@ -1,32 +1,52 @@
-import { tool } from 'ai'
 import type { CallSettings, StreamTextResult } from 'ai'
-import { z } from 'zod'
 import { nanoid } from 'nanoid'
+import { z } from 'zod'
+import { generate, Output, tool } from '../llm'
 import {
 	type AdjustResult,
-	BaseNeuron,
+	type BaseNeuron,
 	type GeneratedNeuronConfig,
+	listNeuronDescriptor,
 	type NeuronHealth,
 	type NeuronTypeDescriptor,
-	MemoryNeuronStore,
-	type NeuronStore,
 	type TokenUsage,
 	textNeuronDescriptor,
-	listNeuronDescriptor,
 } from '../neurons'
-import { generate, Output } from '../llm'
+import type { BrainStore, NeuronStatus } from '../stores'
+import { MemoryBrainStore } from '../stores'
 import { TypedEmitter } from '../types/events'
-import { synthesize, synthesizeDirect, synthesizeStream, synthesizeDirectStream, type SpecialistDef } from './agent'
-import { inspect as runInspect, type InspectResult } from './inspect'
+import {
+	type SpecialistDef,
+	synthesize,
+	synthesizeDirect,
+	synthesizeDirectStream,
+	synthesizeStream,
+} from './agent'
 import { BRAIN_DEFAULTS } from './config.defaults'
 import { Evaluator } from './evaluator/class'
 import { EVOLUTION_ACTIONS, type EvolutionDecision } from './evaluator/types'
 import { EvolutionOrchestrator } from './evolution/orchestrator'
 import type { AggregatedEvolutionResult } from './evolution/types'
+import { type InspectResult, inspect as runInspect } from './inspect'
+import {
+	getInternalNeuronConfigs,
+	INTERNAL_NEURON_IDS,
+} from './internal-neurons'
+import {
+	decomposeBrainPromptTemplate,
+	promptContextSchema,
+} from './prompts/prompt.decompose-brain-prompt'
 import { rootDecompositionPrompt } from './prompts/prompt.template.root-decomposition'
 import { brainDecompositionSchema } from './schemas/schema.brain-decomposition'
-import { MemoryBrainStore } from '../stores'
-import type { BrainStore } from '../stores'
+import {
+	type BrainModelSlots,
+	type BrainState,
+	type BrainStateTransform,
+	createInitialBrainState,
+	deserializeBrainModelSlots,
+	type StoredBrainModelRef,
+	serializeBrainModelSlots,
+} from './state'
 import type {
 	BrainAskResult,
 	BrainConfig,
@@ -36,19 +56,10 @@ import type {
 	BrainUpdateResult,
 	ConsultOptions,
 	ConsultResult,
-	NeuronBatchResult,
 	LearningConfig,
+	NeuronBatchResult,
 	ResolvedBrainConfig,
 } from './types'
-import {
-	type BrainModelSlots,
-	type BrainState,
-	type BrainStateTransform,
-	createInitialBrainState,
-	serializeBrainModelSlots,
-} from './state'
-import { getInternalNeuronConfigs, INTERNAL_NEURON_IDS } from './internal-neurons'
-import { decomposeBrainPromptTemplate, promptContextSchema } from './prompts/prompt.decompose-brain-prompt'
 
 /**
  * Brain - A learning system that auto-generates and coordinates multiple neurons
@@ -70,7 +81,10 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 		models: {
 			serialize: (value: unknown) =>
 				serializeBrainModelSlots(value as BrainModelSlots),
-			deserialize: () => this.state.models,
+			deserialize: (stored: unknown) =>
+				deserializeBrainModelSlots(
+					stored as Record<string, StoredBrainModelRef>,
+				),
 		},
 	}
 
@@ -79,12 +93,11 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 	readonly internalNeurons: Map<string, BaseNeuron<unknown>> = new Map()
 	readonly neuronTypes: Map<string, NeuronTypeDescriptor>
 	private neuronNames: Map<string, string> = new Map()
-	private initialized = false
+	private neuronStatus: Map<string, NeuronStatus> = new Map()
 	private evaluator?: Evaluator
 	private evolutionOrchestrator?: EvolutionOrchestrator
 
 	// Constructor config (not persisted, used during init only)
-	private readonly neuronStoreFactory: (neuronId: string) => NeuronStore
 	private readonly learningConfig?: LearningConfig
 	private readonly autoSetup: boolean
 	private readonly configNeurons?: GeneratedNeuronConfig[]
@@ -93,7 +106,7 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 	private reinjectTimer: ReturnType<typeof setTimeout> | null = null
 	private pendingReinjectNeuronIds: Set<string> = new Set()
 
-	constructor(rawConfig: BrainConfig) {
+	private constructor(rawConfig: BrainConfig) {
 		super()
 
 		const model = rawConfig.model
@@ -108,26 +121,31 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 			evolutionModel: rawConfig.evolution?.model ?? model,
 			batchSize: rawConfig.ingest?.batchSize ?? BRAIN_DEFAULTS.ingest.batchSize,
 			evolution: {
-				enabled: rawConfig.evolution?.enabled ?? BRAIN_DEFAULTS.evolution.enabled,
+				enabled:
+					rawConfig.evolution?.enabled ?? BRAIN_DEFAULTS.evolution.enabled,
 				evaluatorSignalThreshold:
 					rawConfig.evolution?.evaluatorSignalThreshold ??
 					BRAIN_DEFAULTS.evolution.evaluatorSignalThreshold,
 				autoEvaluate:
-					rawConfig.evolution?.autoEvaluate ?? BRAIN_DEFAULTS.evolution.autoEvaluate,
+					rawConfig.evolution?.autoEvaluate ??
+					BRAIN_DEFAULTS.evolution.autoEvaluate,
 				coverageGap: {
-					relevanceThreshold: rawConfig.evolution?.coverageGap?.relevanceThreshold ?? 0.3,
-					gapCountThreshold: rawConfig.evolution?.coverageGap?.gapCountThreshold ?? 5,
+					relevanceThreshold:
+						rawConfig.evolution?.coverageGap?.relevanceThreshold ?? 0.3,
+					gapCountThreshold:
+						rawConfig.evolution?.coverageGap?.gapCountThreshold ?? 5,
 					windowSize: rawConfig.evolution?.coverageGap?.windowSize ?? 20,
 				},
 			},
 		})
 		this.store = rawConfig.store ?? new MemoryBrainStore()
-		this.neuronStoreFactory = rawConfig.learning?.store ?? (() => new MemoryNeuronStore())
 		this.learningConfig = rawConfig.learning
 		this.autoSetup = rawConfig.autoSetup ?? true
 		this.configNeurons = rawConfig.neurons
 		this.internalNeuronsConfig = rawConfig.internalNeurons
-		this.dismissedBatchMaxSize = rawConfig.dismissedBatchBuffer?.maxSize ?? BRAIN_DEFAULTS.dismissedBatchBuffer.maxSize
+		this.dismissedBatchMaxSize =
+			rawConfig.dismissedBatchBuffer?.maxSize ??
+			BRAIN_DEFAULTS.dismissedBatchBuffer.maxSize
 
 		// Register neuron type descriptors (default: text + list)
 		this.neuronTypes = new Map([
@@ -186,9 +204,16 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 			const serialized = transform ? transform.serialize(value) : value
 			const existing = await this.store.state.get(key)
 			if (existing) {
-				await this.store.state.update(key, { value: serialized, updated_at: now })
+				await this.store.state.update(key, {
+					value: serialized,
+					updated_at: now,
+				})
 			} else {
-				await this.store.state.add({ id: key, value: serialized, updated_at: now })
+				await this.store.state.add({
+					id: key,
+					value: serialized,
+					updated_at: now,
+				})
 			}
 		}
 	}
@@ -203,28 +228,37 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 
 		for (const record of records) {
 			const transform = this.stateTransforms[record.id]
-			const deserialized = transform ? transform.deserialize(record.value) : record.value
-			;(this.state as unknown as Record<string, unknown>)[record.id] = deserialized
+			const deserialized = transform
+				? transform.deserialize(record.value)
+				: record.value
+			;(this.state as unknown as Record<string, unknown>)[record.id] =
+				deserialized
 		}
 
 		return true
 	}
 
 	/**
-	 * Explicitly initialize the Brain (parse prompt and generate neurons)
-	 * Called automatically on first inject() or ask() if not called explicitly.
-	 *
-	 * Tries restore-from-store first. If state exists, recreates neurons from
-	 * store.neurons list (no LLM call). Otherwise, does fresh LLM decomposition.
+	 * Internal init dispatcher. `expect: 'fresh'` runs LLM decomposition and
+	 * persists; `expect: 'restore'` loads state and rebuilds neurons. Throws
+	 * if the store contradicts the expected mode.
 	 */
-	async initialize(): Promise<void> {
-		if (this.initialized) return
-
+	private async initialize(expect: 'fresh' | 'restore'): Promise<void> {
 		this.emit('brain:init:started', {})
 
 		try {
-			// Try restore from store first
 			const restored = await this.loadState()
+
+			if (expect === 'fresh' && restored) {
+				throw new Error(
+					'Brain already exists in this store. Use Brain.restore() to load it, or use a fresh store.',
+				)
+			}
+			if (expect === 'restore' && !restored) {
+				throw new Error(
+					'No brain found in this store. Use Brain.create() to create one.',
+				)
+			}
 
 			if (restored) {
 				await this.restoreNeurons()
@@ -236,7 +270,6 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 			// Initialize Evaluator and EvolutionOrchestrator if evolution is enabled
 			this.initEvolution()
 
-			this.initialized = true
 			this.emit('brain:init:completed', {
 				neuronIds: Array.from(this.neurons.keys()),
 			})
@@ -249,6 +282,36 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 	}
 
 	/**
+	 * Construct a fresh Brain and persist its config to the store.
+	 * Throws if the store already contains a brain — use {@link restore}.
+	 */
+	static async create(rawConfig: BrainConfig): Promise<Brain> {
+		const brain = new Brain(rawConfig)
+		await brain.initialize('fresh')
+		return brain
+	}
+
+	/**
+	 * Restore a previously-persisted Brain from a store.
+	 * `input` may be a path string (sugar for SQLiteBrainStore) or a BrainStore.
+	 * Throws if the store is empty — use {@link create}.
+	 *
+	 * Models rehydrate as `"provider:modelId"` strings routed through Vercel
+	 * AI Gateway. To use a direct provider after restore, call
+	 * `await brain.update({ model: yourModel })`.
+	 */
+	static async restore(input: string | BrainStore): Promise<Brain> {
+		const store = await resolveBrainStore(input)
+		const brain = new Brain({
+			store,
+			prompt: '',
+			model: 'unknown:placeholder' as unknown as import('ai').LanguageModel,
+		})
+		await brain.initialize('restore')
+		return brain
+	}
+
+	/**
 	 * Fresh initialization: create explicit neurons + LLM decomposition → persist state
 	 *
 	 * Flow:
@@ -257,6 +320,21 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 	 * 3. Persist brain state for future restores
 	 */
 	private async freshInitialize(): Promise<void> {
+		// Heal orphans from a previous crashed init.
+		// We're here because loadState() returned false, so any rows in
+		// store.neurons / store.internalNeurons are leftovers from a prior
+		// freshInitialize() that threw before reaching the final setState().
+		// Without this, the next add() hits UNIQUE constraint on the same id
+		// and the store stays poisoned for every retry. See issue #6.
+		const orphanNeurons = await this.store.neurons.list()
+		for (const record of orphanNeurons) {
+			await this.store.neurons.delete(record.id)
+		}
+		const orphanInternal = await this.store.internalNeurons.list()
+		for (const record of orphanInternal) {
+			await this.store.internalNeurons.delete(record.id)
+		}
+
 		// 1. Create explicit neurons if provided
 		if (this.configNeurons?.length) {
 			for (const config of this.configNeurons) {
@@ -345,7 +423,7 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 				name: '',
 				description: '',
 				origin: 'prompt' as const,
-				store: this.neuronStoreFactory(record.id),
+				store: this.store.getNeuronStore(record.id),
 			})
 
 			// Forward all neuron events through Brain
@@ -363,11 +441,12 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 			// Feed synthesis events to global injection understanding
 			this.wireExternalNeuronSynthesisEvents(neuron)
 
-			// init() → loadState() restores everything from the neuron's own store
-			await neuron.init()
+			// init({ expect: 'restore' }) → loadState() must succeed
+			await neuron.init({ expect: 'restore' })
 
 			this.neurons.set(record.id, neuron)
 			this.neuronNames.set(record.id, neuron.name)
+			this.neuronStatus.set(record.id, record.status ?? 'active')
 		}
 	}
 
@@ -393,7 +472,7 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 				name: '',
 				description: '',
 				origin: 'prompt' as const,
-				store: this.neuronStoreFactory(record.id),
+				store: this.store.getNeuronStore(record.id),
 			})
 
 			// Forward events through Brain but do NOT forward signals to evaluator
@@ -404,7 +483,7 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 			// Wire synthesis events to evaluator as "system knowledge updated" signals
 			this.wireInternalNeuronSignals(neuron)
 
-			await neuron.init()
+			await neuron.init({ expect: 'restore' })
 
 			this.internalNeurons.set(record.id, neuron)
 		}
@@ -421,9 +500,13 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 			const descriptor = this.neuronTypes.get(config.type)
 			if (!descriptor) continue
 
-			const governance = config.type === 'text' && !config.governance
-				? { strategy: BRAIN_DEFAULTS.learning.governance.strategy, maxTokens: BRAIN_DEFAULTS.learning.governance.maxTokens }
-				: config.governance
+			const governance =
+				config.type === 'text' && !config.governance
+					? {
+							strategy: BRAIN_DEFAULTS.learning.governance.strategy,
+							maxTokens: BRAIN_DEFAULTS.learning.governance.maxTokens,
+						}
+					: config.governance
 
 			const neuron = descriptor.factory({
 				id: config.id,
@@ -433,7 +516,7 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 				origin: 'prompt' as const,
 				name: config.name,
 				description: config.description,
-				store: this.neuronStoreFactory(config.id),
+				store: this.store.getNeuronStore(config.id),
 				governance,
 				skipObservation: config.skipObservation,
 				understand: {
@@ -453,7 +536,7 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 			// Wire synthesis events to evaluator as "system knowledge updated" signals
 			this.wireInternalNeuronSignals(neuron)
 
-			await neuron.init()
+			await neuron.init({ expect: 'fresh' })
 
 			this.internalNeurons.set(config.id, neuron)
 			await this.store.internalNeurons.add({
@@ -508,7 +591,9 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 
 		// Feed gap neuron resolution observations after evolution actions
 		this.on('evolution:action:executed', (event) => {
-			const gapNeuron = this.internalNeurons.get(INTERNAL_NEURON_IDS.injectionGaps)
+			const gapNeuron = this.internalNeurons.get(
+				INTERNAL_NEURON_IDS.injectionGaps,
+			)
 			if (!gapNeuron) return
 
 			const { action, guidance } = event
@@ -524,7 +609,10 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 
 			if (text) {
 				gapNeuron.learn([text]).catch((err) => {
-					console.error(`[brain] gap resolution feed error:`, err?.message ?? err)
+					console.error(
+						`[brain] gap resolution feed error:`,
+						err?.message ?? err,
+					)
 				})
 			}
 		})
@@ -559,7 +647,10 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 	private async generateNeuronConfigs() {
 		return generate({
 			model: this.state.models.init,
-			prompt: rootDecompositionPrompt(this.prompt, Array.from(this.neuronTypes.values())),
+			prompt: rootDecompositionPrompt(
+				this.prompt,
+				Array.from(this.neuronTypes.values()),
+			),
 			output: Output.object({ schema: brainDecompositionSchema }),
 			repairSchema: brainDecompositionSchema,
 		})
@@ -585,9 +676,11 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 			health: config.health,
 			understand: {
 				thresholds: {
-					maxObservations: BRAIN_DEFAULTS.learning.understand.thresholds.maxObservations,
+					maxObservations:
+						BRAIN_DEFAULTS.learning.understand.thresholds.maxObservations,
 					maxTokens: BRAIN_DEFAULTS.learning.understand.thresholds.maxTokens,
-					minImportance: BRAIN_DEFAULTS.learning.understand.thresholds.minImportance,
+					minImportance:
+						BRAIN_DEFAULTS.learning.understand.thresholds.minImportance,
 					...this.learningConfig?.understand?.thresholds,
 					...config.thresholds,
 				},
@@ -600,13 +693,17 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 		}
 
 		// Apply default governance for text neurons if not provided
-		const governance = config.type === 'text' && !config.governance
-			? { strategy: BRAIN_DEFAULTS.learning.governance.strategy, maxTokens: BRAIN_DEFAULTS.learning.governance.maxTokens }
-			: config.governance
+		const governance =
+			config.type === 'text' && !config.governance
+				? {
+						strategy: BRAIN_DEFAULTS.learning.governance.strategy,
+						maxTokens: BRAIN_DEFAULTS.learning.governance.maxTokens,
+					}
+				: config.governance
 
 		const neuron = descriptor.factory({
 			...shared,
-			store: this.neuronStoreFactory(config.id),
+			store: this.store.getNeuronStore(config.id),
 			governance,
 			skipObservation: config.skipObservation,
 			observationSchema: config.observationSchema,
@@ -632,15 +729,17 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 		this.wireExternalNeuronSynthesisEvents(neuron)
 
 		// Initialize the neuron (generates observe/synthesize prompts)
-		await neuron.init()
+		await neuron.init({ expect: 'fresh' })
 
 		this.neurons.set(config.id, neuron)
 		this.neuronNames.set(config.id, config.name)
+		this.neuronStatus.set(config.id, 'active')
 
 		// Persist neuron ref (neuron's own store has everything else)
 		await this.store.neurons.add({
 			id: config.id,
 			type: config.type,
+			status: 'active',
 		})
 
 		this.emit('brain:neuron:added', {
@@ -650,15 +749,6 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 		})
 
 		return neuron
-	}
-
-	/**
-	 * Ensure Brain is initialized before operations
-	 */
-	private async ensureInitialized(): Promise<void> {
-		if (!this.initialized) {
-			await this.initialize()
-		}
 	}
 
 	/**
@@ -687,7 +777,10 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 	 * Pass-through to neuron.adjust(directive). A classification step determines
 	 * whether to adjust config, understanding content, or both.
 	 */
-	async adjustNeuron(id: string, directive: string): Promise<{ neuron: BaseNeuron<unknown>; result: AdjustResult }> {
+	async adjustNeuron(
+		id: string,
+		directive: string,
+	): Promise<{ neuron: BaseNeuron<unknown>; result: AdjustResult }> {
 		const neuron = this.neurons.get(id)
 		if (!neuron) {
 			throw new Error(`Neuron ${id} not found`)
@@ -711,6 +804,51 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 	}
 
 	/**
+	 * Get the lifecycle status of a neuron. Defaults to 'active' for any
+	 * record that predates the status field.
+	 */
+	getNeuronStatus(id: string): NeuronStatus | undefined {
+		if (!this.neurons.has(id)) return undefined
+		return this.neuronStatus.get(id) ?? 'active'
+	}
+
+	/**
+	 * Pause a neuron. Inject fan-out skips paused neurons; ask/query still
+	 * hits them (their knowledge stays consultable). Survives restarts via
+	 * the BrainNeuronRecord.status field.
+	 */
+	async pauseNeuron(id: string): Promise<void> {
+		await this.setNeuronStatus(id, 'inactive')
+	}
+
+	/**
+	 * Resume a previously paused neuron.
+	 */
+	async resumeNeuron(id: string): Promise<void> {
+		await this.setNeuronStatus(id, 'active')
+	}
+
+	private async setNeuronStatus(
+		id: string,
+		newStatus: NeuronStatus,
+	): Promise<void> {
+		if (!this.neurons.has(id)) {
+			throw new Error(`Unknown neuron: ${id}`)
+		}
+		const previousStatus = this.neuronStatus.get(id) ?? 'active'
+		if (previousStatus === newStatus) return
+
+		this.neuronStatus.set(id, newStatus)
+		await this.store.neurons.update(id, { status: newStatus })
+
+		this.emit('brain:neuron:status:changed', {
+			neuronId: id,
+			previousStatus,
+			newStatus,
+		})
+	}
+
+	/**
 	 * Get a specific internal neuron by ID
 	 */
 	getInternalNeuron(id: string): BaseNeuron<unknown> | undefined {
@@ -727,11 +865,14 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 		data: unknown | unknown[],
 		options?: BrainInjectOptions,
 	): Promise<BrainInjectResult> {
-		await this.ensureInitialized()
-
 		const injectId = options?.id ?? `inject_${nanoid()}`
 		const items = Array.isArray(data) ? data : [data]
-		const neuronArray = this.getNeurons()
+		// Skip inactive neurons — pause is brain-level fan-out gating, not
+		// per-neuron concern. Query path (ask) is unaffected; their knowledge
+		// stays consultable.
+		const neuronArray = this.getNeurons().filter(
+			(n) => (this.neuronStatus.get(n.id) ?? 'active') === 'active',
+		)
 
 		// Split items into batches by batchSize
 		const batchSize = this.state.ingest.batchSize
@@ -810,27 +951,36 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 	 */
 	async ask(
 		query: string,
-		options?: CallSettings & { model?: import('ai').LanguageModel; mode?: 'direct' | 'deep' },
+		options?: CallSettings & {
+			model?: import('ai').LanguageModel
+			mode?: 'direct' | 'deep'
+		},
 	): Promise<BrainAskResult> {
-		await this.ensureInitialized()
-
 		const mode = options?.mode ?? 'direct'
 		const queryId = `query_${nanoid()}`
 		this.emit('brain:ask:started', { queryId, query })
 
 		try {
-			const { model: modelOverride, mode: _mode, ...generateOptions } = options ?? {}
+			const {
+				model: modelOverride,
+				mode: _mode,
+				...generateOptions
+			} = options ?? {}
 			const synthesisModel = modelOverride ?? this.state.models.query
 
-			const result = mode === 'direct'
-				? await this.askDirect(query, synthesisModel, generateOptions)
-				: await this.askDeep(query, synthesisModel, generateOptions)
+			const result =
+				mode === 'direct'
+					? await this.askDirect(query, synthesisModel, generateOptions)
+					: await this.askDeep(query, synthesisModel, generateOptions)
 
-			this.feedAskToInternalNeurons(query, result.sources.map((s) => ({
-				neuronId: s.neuronId,
-				relevance: s.relevance,
-				gaps: [],
-			})))
+			this.feedAskToInternalNeurons(
+				query,
+				result.sources.map((s) => ({
+					neuronId: s.neuronId,
+					relevance: s.relevance,
+					gaps: [],
+				})),
+			)
 
 			this.emit('brain:ask:completed', {
 				queryId,
@@ -861,15 +1011,20 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 	 */
 	async askStream(
 		query: string,
-		options?: CallSettings & { model?: import('ai').LanguageModel; mode?: 'direct' | 'deep' },
+		options?: CallSettings & {
+			model?: import('ai').LanguageModel
+			mode?: 'direct' | 'deep'
+		},
 	): Promise<StreamTextResult<any, any>> {
-		await this.ensureInitialized()
-
 		const mode = options?.mode ?? 'direct'
 		const queryId = `query_${nanoid()}`
 		this.emit('brain:ask:started', { queryId, query })
 
-		const { model: modelOverride, mode: _mode, ...generateOptions } = options ?? {}
+		const {
+			model: modelOverride,
+			mode: _mode,
+			...generateOptions
+		} = options ?? {}
 		const synthesisModel = modelOverride ?? this.state.models.query
 
 		if (mode === 'direct') {
@@ -889,39 +1044,56 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 		const allNeurons = this.getNeurons()
 
 		// Filter to neurons that have knowledge
-		const neuronsWithKnowledge = (await Promise.all(
-			allNeurons.map(async (neuron) => {
-				const [understanding, buffer] = await Promise.all([
-					neuron.getUnderstanding(),
-					neuron.getBufferState(),
-				])
-				return (understanding || buffer.count > 0) ? neuron : null
-			}),
-		)).filter((l): l is BaseNeuron<unknown> => l !== null)
+		const neuronsWithKnowledge = (
+			await Promise.all(
+				allNeurons.map(async (neuron) => {
+					const [understanding, buffer] = await Promise.all([
+						neuron.getUnderstanding(),
+						neuron.getBufferState(),
+					])
+					return understanding || buffer.count > 0 ? neuron : null
+				}),
+			)
+		).filter((l): l is BaseNeuron<unknown> => l !== null)
 
 		// Pre-select relevant neurons via LLM
 		const relevantNeurons = await this.selectRelevantNeurons(
-			query, neuronsWithKnowledge, model, generateOptions,
+			query,
+			neuronsWithKnowledge,
+			model,
+			generateOptions,
 		)
 
 		const neuronQueries = await Promise.all(
 			relevantNeurons.map(async (neuron) => {
-				const result = await neuron.query(query, { mode: 'direct', ...generateOptions })
+				const result = await neuron.query(query, {
+					mode: 'direct',
+					...generateOptions,
+				})
 				return { id: neuron.id, ...result }
 			}),
 		)
 
 		const specialistResults = neuronQueries
 			.filter((r): r is NonNullable<typeof r> => r !== null && r.relevant)
-			.map((r) => ({ id: r.id, relevance: r.relevance, confidence: r.confidence, insight: r.insight, gaps: r.gaps }))
+			.map((r) => ({
+				id: r.id,
+				relevance: r.relevance,
+				confidence: r.confidence,
+				insight: r.insight,
+				gaps: r.gaps,
+			}))
 
-		const globalNeuron = this.internalNeurons.get('__internal_global_understanding')
+		const globalNeuron = this.internalNeurons.get(
+			'__internal_global_understanding',
+		)
 		const globalUnderstanding = globalNeuron
-			? await globalNeuron.getUnderstanding() as string
+			? ((await globalNeuron.getUnderstanding()) as string)
 			: undefined
 
 		return synthesizeDirectStream(model, {
-			synthesisDirective: this.state.promptContext?.synthesisDirective ?? undefined,
+			synthesisDirective:
+				this.state.promptContext?.synthesisDirective ?? undefined,
 			query,
 			specialistResults,
 			globalUnderstanding: globalUnderstanding || undefined,
@@ -949,14 +1121,17 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 			specialists.push({
 				id: neuron.id,
 				name: this.neuronNames.get(neuron.id) ?? neuron.id,
-				description: neuron.description || this.neuronNames.get(neuron.id) || neuron.id,
-				query: (question, queryOptions) => neuron.query(question, { ...generateOptions, ...queryOptions }),
+				description:
+					neuron.description || this.neuronNames.get(neuron.id) || neuron.id,
+				query: (question, queryOptions) =>
+					neuron.query(question, { ...generateOptions, ...queryOptions }),
 			})
 		}
 
 		const consultTools = await this.buildConsultTools()
 		return synthesizeStream(model, {
-			synthesisDirective: this.state.promptContext?.synthesisDirective ?? undefined,
+			synthesisDirective:
+				this.state.promptContext?.synthesisDirective ?? undefined,
 			query,
 			specialists,
 			consultTools,
@@ -1000,7 +1175,9 @@ ${neuronMenu.map((l) => `- ${l.id}: ${l.name} — ${l.description}`).join('\n')}
 			...generateOptions,
 		})
 
-		const selectedIds = new Set((result.output as z.infer<typeof selectionSchema>).ids)
+		const selectedIds = new Set(
+			(result.output as z.infer<typeof selectionSchema>).ids,
+		)
 		const selected = neurons.filter((l) => selectedIds.has(l.id))
 
 		// Fallback: if LLM selected nothing, query all (don't silently drop everything)
@@ -1018,39 +1195,56 @@ ${neuronMenu.map((l) => `- ${l.id}: ${l.name} — ${l.description}`).join('\n')}
 		const allNeurons = this.getNeurons()
 
 		// Filter to neurons that have knowledge
-		const neuronsWithKnowledge = (await Promise.all(
-			allNeurons.map(async (neuron) => {
-				const [understanding, buffer] = await Promise.all([
-					neuron.getUnderstanding(),
-					neuron.getBufferState(),
-				])
-				return (understanding || buffer.count > 0) ? neuron : null
-			}),
-		)).filter((l): l is BaseNeuron<unknown> => l !== null)
+		const neuronsWithKnowledge = (
+			await Promise.all(
+				allNeurons.map(async (neuron) => {
+					const [understanding, buffer] = await Promise.all([
+						neuron.getUnderstanding(),
+						neuron.getBufferState(),
+					])
+					return understanding || buffer.count > 0 ? neuron : null
+				}),
+			)
+		).filter((l): l is BaseNeuron<unknown> => l !== null)
 
 		// Pre-select relevant neurons via LLM
 		const relevantNeurons = await this.selectRelevantNeurons(
-			query, neuronsWithKnowledge, model, generateOptions,
+			query,
+			neuronsWithKnowledge,
+			model,
+			generateOptions,
 		)
 
 		const neuronQueries = await Promise.all(
 			relevantNeurons.map(async (neuron) => {
-				const result = await neuron.query(query, { mode: 'direct', ...generateOptions })
+				const result = await neuron.query(query, {
+					mode: 'direct',
+					...generateOptions,
+				})
 				return { id: neuron.id, ...result }
 			}),
 		)
 
 		const specialistResults = neuronQueries
 			.filter((r): r is NonNullable<typeof r> => r !== null && r.relevant)
-			.map((r) => ({ id: r.id, relevance: r.relevance, confidence: r.confidence, insight: r.insight, gaps: r.gaps }))
+			.map((r) => ({
+				id: r.id,
+				relevance: r.relevance,
+				confidence: r.confidence,
+				insight: r.insight,
+				gaps: r.gaps,
+			}))
 
-		const globalNeuron = this.internalNeurons.get('__internal_global_understanding')
+		const globalNeuron = this.internalNeurons.get(
+			'__internal_global_understanding',
+		)
 		const globalUnderstanding = globalNeuron
-			? await globalNeuron.getUnderstanding() as string
+			? ((await globalNeuron.getUnderstanding()) as string)
 			: undefined
 
 		return synthesizeDirect(model, {
-			synthesisDirective: this.state.promptContext?.synthesisDirective ?? undefined,
+			synthesisDirective:
+				this.state.promptContext?.synthesisDirective ?? undefined,
 			query,
 			specialistResults,
 			globalUnderstanding: globalUnderstanding || undefined,
@@ -1078,8 +1272,10 @@ ${neuronMenu.map((l) => `- ${l.id}: ${l.name} — ${l.description}`).join('\n')}
 			specialists.push({
 				id: neuron.id,
 				name: this.neuronNames.get(neuron.id) ?? neuron.id,
-				description: neuron.description || this.neuronNames.get(neuron.id) || neuron.id,
-				query: (question, queryOptions) => neuron.query(question, { ...generateOptions, ...queryOptions }),
+				description:
+					neuron.description || this.neuronNames.get(neuron.id) || neuron.id,
+				query: (question, queryOptions) =>
+					neuron.query(question, { ...generateOptions, ...queryOptions }),
 			})
 		}
 
@@ -1090,7 +1286,8 @@ ${neuronMenu.map((l) => `- ${l.id}: ${l.name} — ${l.description}`).join('\n')}
 
 		const consultTools = await this.buildConsultTools()
 		return synthesize(model, {
-			synthesisDirective: this.state.promptContext?.synthesisDirective ?? undefined,
+			synthesisDirective:
+				this.state.promptContext?.synthesisDirective ?? undefined,
 			query,
 			specialists,
 			consultTools,
@@ -1104,9 +1301,10 @@ ${neuronMenu.map((l) => `- ${l.id}: ${l.name} — ${l.description}`).join('\n')}
 	 * @param query - Question to ask internal neurons
 	 * @param options - Optional: target a specific internal neuron by ID
 	 */
-	async consult(query: string, options?: ConsultOptions): Promise<ConsultResult> {
-		await this.ensureInitialized()
-
+	async consult(
+		query: string,
+		options?: ConsultOptions,
+	): Promise<ConsultResult> {
 		// Target a specific internal neuron
 		if (options?.neuron) {
 			const neuron = this.internalNeurons.get(options.neuron)
@@ -1116,12 +1314,14 @@ ${neuronMenu.map((l) => `- ${l.id}: ${l.name} — ${l.description}`).join('\n')}
 			const result = await neuron.query(query)
 			return {
 				insight: result.insight,
-				sources: [{
-					neuronId: neuron.id,
-					relevance: result.relevance,
-					confidence: result.confidence,
-					insight: result.insight,
-				}],
+				sources: [
+					{
+						neuronId: neuron.id,
+						relevance: result.relevance,
+						confidence: result.confidence,
+						insight: result.insight,
+					},
+				],
 				gaps: result.gaps ? result.gaps.split('\n').filter(Boolean) : [],
 			}
 		}
@@ -1139,7 +1339,9 @@ ${neuronMenu.map((l) => `- ${l.id}: ${l.name} — ${l.description}`).join('\n')}
 				hasKnowledge: await l.hasKnowledge(),
 			})),
 		)
-		const withKnowledge = queryable.filter((q) => q.hasKnowledge).map((q) => q.neuron)
+		const withKnowledge = queryable
+			.filter((q) => q.hasKnowledge)
+			.map((q) => q.neuron)
 
 		if (withKnowledge.length === 0) {
 			return { insight: '', sources: [], gaps: [] }
@@ -1153,14 +1355,12 @@ ${neuronMenu.map((l) => `- ${l.id}: ${l.name} — ${l.description}`).join('\n')}
 			query: (question: string) => neuron.query(question),
 		}))
 
-		const result = await synthesize(
-			this.state.models.query,
-			{
-				synthesisDirective: this.state.promptContext?.synthesisDirective ?? undefined,
-				query,
-				specialists,
-			},
-		)
+		const result = await synthesize(this.state.models.query, {
+			synthesisDirective:
+				this.state.promptContext?.synthesisDirective ?? undefined,
+			query,
+			specialists,
+		})
 
 		return {
 			insight: result.insight,
@@ -1180,7 +1380,6 @@ ${neuronMenu.map((l) => `- ${l.id}: ${l.name} — ${l.description}`).join('\n')}
 		query: string,
 		options?: CallSettings & { model?: import('ai').LanguageModel },
 	): Promise<InspectResult> {
-		await this.ensureInitialized()
 		const { model: modelOverride, ...generateOptions } = options ?? {}
 		const model = modelOverride ?? this.state.models.query
 		return runInspect(model, this, query, generateOptions)
@@ -1191,7 +1390,11 @@ ${neuronMenu.map((l) => `- ${l.id}: ${l.name} — ${l.description}`).join('\n')}
 	 *
 	 * @param signal - Signal with source and description
 	 */
-	signal(signal: { source: string; description: string; bypass?: boolean }): void {
+	signal(signal: {
+		source: string
+		description: string
+		bypass?: boolean
+	}): void {
 		const signalEvent = {
 			source: signal.source,
 			description: signal.description,
@@ -1211,7 +1414,10 @@ ${neuronMenu.map((l) => `- ${l.id}: ${l.name} — ${l.description}`).join('\n')}
 	 * Trigger evolution directly, bypassing the signal buffer.
 	 * Sends the signal as a bypass signal to the evaluator for immediate evaluation.
 	 */
-	async triggerEvolution(signal: { source: string; description: string }): Promise<void> {
+	async triggerEvolution(signal: {
+		source: string
+		description: string
+	}): Promise<void> {
 		if (!this.evaluator) return
 
 		this.signal({
@@ -1224,28 +1430,35 @@ ${neuronMenu.map((l) => `- ${l.id}: ${l.name} — ${l.description}`).join('\n')}
 	/**
 	 * Build consult tools for ask() synthesis — one tool per internal neuron with knowledge.
 	 */
-	private async buildConsultTools(): Promise<Record<string, import('ai').Tool> | undefined> {
+	private async buildConsultTools(): Promise<
+		Record<string, import('ai').Tool> | undefined
+	> {
 		if (this.internalNeurons.size === 0) return undefined
 
 		const consultInputSchema = z.object({
-			question: z.string().describe('The question to ask this knowledge source'),
+			question: z
+				.string()
+				.describe('The question to ask this knowledge source'),
 		})
 
 		const toolDefs: Array<{ id: string; name: string; description: string }> = [
 			{
 				id: INTERNAL_NEURON_IDS.globalUnderstanding,
 				name: 'consultGlobalUnderstanding',
-				description: 'The system\'s cross-cutting narrative — causal connections, meta-patterns, and temporal arcs that no single knowledge section captures alone. Useful when the question asks about root causes, overall trajectory, or how different areas interact.',
+				description:
+					"The system's cross-cutting narrative — causal connections, meta-patterns, and temporal arcs that no single knowledge section captures alone. Useful when the question asks about root causes, overall trajectory, or how different areas interact.",
 			},
 			{
 				id: INTERNAL_NEURON_IDS.injectionGaps,
 				name: 'consultCoverageGaps',
-				description: 'What the system has been unable to absorb — topics and data that fell outside all specialists\' scope.',
+				description:
+					"What the system has been unable to absorb — topics and data that fell outside all specialists' scope.",
 			},
 			{
 				id: INTERNAL_NEURON_IDS.queryGaps,
 				name: 'consultAnswerGaps',
-				description: 'Questions the system has struggled to answer well in the past.',
+				description:
+					'Questions the system has struggled to answer well in the past.',
 			},
 		]
 
@@ -1279,9 +1492,13 @@ ${neuronMenu.map((l) => `- ${l.id}: ${l.name} — ${l.description}`).join('\n')}
 	 * Re-inject pending dismissed batches into newly created neurons.
 	 * If accepted → remove from buffer. If dismissed again → increment retryCount.
 	 */
-	private async reinjectDismissedBatches(newNeuronIds: string[]): Promise<void> {
+	private async reinjectDismissedBatches(
+		newNeuronIds: string[],
+	): Promise<void> {
 		const all = await this.store.dismissedBatches.list()
-		const unresolved = all.filter(b => b.status === 'pending' || b.status === 'retried')
+		const unresolved = all.filter(
+			(b) => b.status === 'pending' || b.status === 'retried',
+		)
 		if (unresolved.length === 0) return
 
 		const newNeurons = newNeuronIds
@@ -1317,7 +1534,9 @@ ${neuronMenu.map((l) => `- ${l.id}: ${l.name} — ${l.description}`).join('\n')}
 
 		// Notify gap neuron that these gaps are now covered
 		if (resolvedGaps.length > 0) {
-			const gapNeuron = this.internalNeurons.get(INTERNAL_NEURON_IDS.injectionGaps)
+			const gapNeuron = this.internalNeurons.get(
+				INTERNAL_NEURON_IDS.injectionGaps,
+			)
 			if (gapNeuron) {
 				const resolvedText = `Previously dismissed data has now been absorbed by a new specialist. Topics now covered: ${resolvedGaps.join(', ')}.`
 				gapNeuron.learn([resolvedText]).catch((err) => {
@@ -1335,7 +1554,11 @@ ${neuronMenu.map((l) => `- ${l.id}: ${l.name} — ${l.description}`).join('\n')}
 	 */
 	private async feedAskToInternalNeurons(
 		query: string,
-		neuronResults: Array<{ neuronId: string; relevance: number; gaps: string[] }>,
+		neuronResults: Array<{
+			neuronId: string
+			relevance: number
+			gaps: string[]
+		}>,
 	): Promise<void> {
 		const now = new Date().toISOString()
 		const { relevanceThreshold } = this.state.evolution.coverageGap
@@ -1351,12 +1574,14 @@ ${neuronMenu.map((l) => `- ${l.id}: ${l.name} — ${l.description}`).join('\n')}
 			const allGaps = neuronResults.flatMap((r) => r.gaps)
 
 			try {
-				await queryNeuron.learn([{
-					question: query,
-					relevantNeurons,
-					gaps: allGaps,
-					timestamp: now,
-				}])
+				await queryNeuron.learn([
+					{
+						question: query,
+						relevantNeurons,
+						gaps: allGaps,
+						timestamp: now,
+					},
+				])
 			} catch (err) {
 				const msg = err instanceof Error ? err.message : String(err)
 				console.error(`[internal-neuron] query feed error:`, msg)
@@ -1368,17 +1593,17 @@ ${neuronMenu.map((l) => `- ${l.id}: ${l.name} — ${l.description}`).join('\n')}
 			(r) => r.relevance < relevanceThreshold,
 		)
 		if (allLowRelevance) {
-			const gapNeuron = this.internalNeurons.get(
-				INTERNAL_NEURON_IDS.queryGaps,
-			)
+			const gapNeuron = this.internalNeurons.get(INTERNAL_NEURON_IDS.queryGaps)
 			if (gapNeuron) {
 				const allGaps = neuronResults.flatMap((r) => r.gaps)
 				try {
-					await gapNeuron.learn([{
-						question: query,
-						gaps: allGaps,
-						timestamp: now,
-					}])
+					await gapNeuron.learn([
+						{
+							question: query,
+							gaps: allGaps,
+							timestamp: now,
+						},
+					])
 				} catch (err) {
 					const msg = err instanceof Error ? err.message : String(err)
 					console.error(`[internal-neuron] query gap feed error:`, msg)
@@ -1392,9 +1617,13 @@ ${neuronMenu.map((l) => `- ${l.id}: ${l.name} — ${l.description}`).join('\n')}
 	 */
 	private guidanceMentionsGaps(guidance: string): boolean {
 		const lower = guidance.toLowerCase()
-		return lower.includes('gap') || lower.includes('uncovered')
-			|| lower.includes('missing') || lower.includes('not covered')
-			|| lower.includes('dismissed')
+		return (
+			lower.includes('gap') ||
+			lower.includes('uncovered') ||
+			lower.includes('missing') ||
+			lower.includes('not covered') ||
+			lower.includes('dismissed')
+		)
 	}
 
 	/**
@@ -1421,14 +1650,18 @@ ${neuronMenu.map((l) => `- ${l.id}: ${l.name} — ${l.description}`).join('\n')}
 			if (!globalNeuron) return
 
 			const feedGlobal = (understanding: string) => {
-				globalNeuron.learn([{
-					neuronId: event.neuronId,
-					understanding,
-					significance: event.significance,
-					evolution: event.evolution,
-				}]).catch((err) => {
-					console.error(`[internal-neuron] feed error:`, err?.message ?? err)
-				})
+				globalNeuron
+					.learn([
+						{
+							neuronId: event.neuronId,
+							understanding,
+							significance: event.significance,
+							evolution: event.evolution,
+						},
+					])
+					.catch((err) => {
+						console.error(`[internal-neuron] feed error:`, err?.message ?? err)
+					})
 			}
 
 			if (typeof event.newUnderstanding === 'string') {
@@ -1436,11 +1669,17 @@ ${neuronMenu.map((l) => `- ${l.id}: ${l.name} — ${l.description}`).join('\n')}
 				feedGlobal(event.newUnderstanding)
 			} else {
 				// List neuron — query for a prose compilation
-				neuron.query('Compile everything you know into a comprehensive summary.').then((result) => {
-					feedGlobal(result.insight || JSON.stringify(event.newUnderstanding))
-				}).catch((err) => {
-					console.error(`[internal-neuron] list summary query error:`, err?.message ?? err)
-				})
+				neuron
+					.query('Compile everything you know into a comprehensive summary.')
+					.then((result) => {
+						feedGlobal(result.insight || JSON.stringify(event.newUnderstanding))
+					})
+					.catch((err) => {
+						console.error(
+							`[internal-neuron] list summary query error:`,
+							err?.message ?? err,
+						)
+					})
 			}
 		})
 	}
@@ -1508,19 +1747,21 @@ ${neuronMenu.map((l) => `- ${l.id}: ${l.name} — ${l.description}`).join('\n')}
 		}
 
 		// Feed injection gap neuron (awaited so observations are stored before we continue)
-		const gapNeuron = this.internalNeurons.get(INTERNAL_NEURON_IDS.injectionGaps)
+		const gapNeuron = this.internalNeurons.get(
+			INTERNAL_NEURON_IDS.injectionGaps,
+		)
 		if (gapNeuron) {
 			try {
-				const gapText = gaps.length > 0
-					? `Data arrived that no specialist could absorb. Topics identified: ${gaps.join(', ')}. This content has been set aside for now.`
-					: `Data arrived that no specialist could absorb. No topics could be identified from this content. It has been set aside for now.`
+				const gapText =
+					gaps.length > 0
+						? `Data arrived that no specialist could absorb. Topics identified: ${gaps.join(', ')}. This content has been set aside for now.`
+						: `Data arrived that no specialist could absorb. No topics could be identified from this content. It has been set aside for now.`
 				await gapNeuron.learn([gapText])
 			} catch (err) {
 				const msg = err instanceof Error ? err.message : String(err)
 				console.error(`[internal-neuron] injection gap feed error:`, msg)
 			}
 		}
-
 	}
 
 	/**
@@ -1548,7 +1789,13 @@ ${neuronMenu.map((l) => `- ${l.id}: ${l.name} — ${l.description}`).join('\n')}
 		if (options?.dryRun) {
 			return {
 				decisions,
-				results: { created: [], updated: [], deleted: [], merged: [], split: [] },
+				results: {
+					created: [],
+					updated: [],
+					deleted: [],
+					merged: [],
+					split: [],
+				},
 			}
 		}
 
@@ -1585,7 +1832,13 @@ ${neuronMenu.map((l) => `- ${l.id}: ${l.name} — ${l.description}`).join('\n')}
 			if (options?.dryRun || decisions.length === 0) {
 				return {
 					decisions,
-					results: { created: [], updated: [], deleted: [], merged: [], split: [] } as AggregatedEvolutionResult,
+					results: {
+						created: [],
+						updated: [],
+						deleted: [],
+						merged: [],
+						split: [],
+					} as AggregatedEvolutionResult,
 				}
 			}
 			const results = await this.executeEvolutionDecisions(decisions)
@@ -1623,6 +1876,7 @@ ${neuronMenu.map((l) => `- ${l.id}: ${l.name} — ${l.description}`).join('\n')}
 		}
 		this.neurons.delete(neuronId)
 		this.neuronNames.delete(neuronId)
+		this.neuronStatus.delete(neuronId)
 		await this.store.neurons.delete(neuronId)
 		this.emit('brain:neuron:removed', { neuronId })
 	}
@@ -1631,10 +1885,7 @@ ${neuronMenu.map((l) => `- ${l.id}: ${l.name} — ${l.description}`).join('\n')}
 	 * Internal: Emit evolution event (used by evolution handlers)
 	 * @internal
 	 */
-	__emitEvolutionEvent(
-		eventName: keyof BrainEventMap,
-		payload: any,
-	): void {
+	__emitEvolutionEvent(eventName: keyof BrainEventMap, payload: any): void {
 		this.emit(eventName as any, payload as never)
 	}
 
@@ -1676,9 +1927,8 @@ ${neuronMenu.map((l) => `- ${l.id}: ${l.name} — ${l.description}`).join('\n')}
 			targets: [],
 		}
 
-		const result = await this.evolutionOrchestrator.executeSingleDecision(
-			decision,
-		)
+		const result =
+			await this.evolutionOrchestrator.executeSingleDecision(decision)
 		const neuronId = result.newNeuronIds[0]
 		return this.neurons.get(neuronId)!
 	}
@@ -1716,9 +1966,8 @@ ${neuronMenu.map((l) => `- ${l.id}: ${l.name} — ${l.description}`).join('\n')}
 			targets: neuronIds,
 		}
 
-		const result = await this.evolutionOrchestrator.executeSingleDecision(
-			decision,
-		)
+		const result =
+			await this.evolutionOrchestrator.executeSingleDecision(decision)
 		const neuronId = result.newNeuronIds[0]
 		return this.neurons.get(neuronId)!
 	}
@@ -1756,9 +2005,8 @@ ${neuronMenu.map((l) => `- ${l.id}: ${l.name} — ${l.description}`).join('\n')}
 			targets: [neuronId],
 		}
 
-		const result = await this.evolutionOrchestrator.executeSingleDecision(
-			decision,
-		)
+		const result =
+			await this.evolutionOrchestrator.executeSingleDecision(decision)
 		return result.newNeuronIds.map((id: string) => this.neurons.get(id)!)
 	}
 
@@ -1909,7 +2157,8 @@ ${neuronMenu.map((l) => `- ${l.id}: ${l.name} — ${l.description}`).join('\n')}
 				updates.evolution.evaluatorSignalThreshold !==
 					this.state.evolution.evaluatorSignalThreshold
 			) {
-				evo.evaluatorSignalThreshold = updates.evolution.evaluatorSignalThreshold
+				evo.evaluatorSignalThreshold =
+					updates.evolution.evaluatorSignalThreshold
 				evoChanged = true
 				changedFields.push('evolution.evaluatorSignalThreshold')
 			}
@@ -1937,15 +2186,15 @@ ${neuronMenu.map((l) => `- ${l.id}: ${l.name} — ${l.description}`).join('\n')}
 			changedFields.push('prompt')
 			semanticChanges.push(
 				`Brain purpose has been updated by the user.\n` +
-				`Previous purpose: ${oldPrompt}\n` +
-				`New purpose: ${updates.prompt}\n\n` +
-				`IMPORTANT: This update does NOT necessarily mean all existing neurons should be deleted and recreated. ` +
-				`Consider the relationship between the old and new purpose:\n` +
-				`- If the new purpose is a REFINEMENT or NARROWING of the old one, ADJUST existing neurons to match.\n` +
-				`- If the new purpose OVERLAPS with the old one, keep neurons whose knowledge is still relevant (check "What it has learned so far"), adjust their instructions, and only create new ones for gaps.\n` +
-				`- If the new purpose ADDS a new dimension, create new neurons for the new area while keeping existing ones.\n` +
-				`- Only DELETE a neuron if its accumulated knowledge is genuinely irrelevant to the new purpose.\n` +
-				`- Prefer ADJUST over DELETE+CREATE — adjusting preserves accumulated understanding, deleting destroys it.`
+					`Previous purpose: ${oldPrompt}\n` +
+					`New purpose: ${updates.prompt}\n\n` +
+					`IMPORTANT: This update does NOT necessarily mean all existing neurons should be deleted and recreated. ` +
+					`Consider the relationship between the old and new purpose:\n` +
+					`- If the new purpose is a REFINEMENT or NARROWING of the old one, ADJUST existing neurons to match.\n` +
+					`- If the new purpose OVERLAPS with the old one, keep neurons whose knowledge is still relevant (check "What it has learned so far"), adjust their instructions, and only create new ones for gaps.\n` +
+					`- If the new purpose ADDS a new dimension, create new neurons for the new area while keeping existing ones.\n` +
+					`- Only DELETE a neuron if its accumulated knowledge is genuinely irrelevant to the new purpose.\n` +
+					`- Prefer ADJUST over DELETE+CREATE — adjusting preserves accumulated understanding, deleting destroys it.`,
 			)
 		}
 
@@ -1965,12 +2214,16 @@ ${neuronMenu.map((l) => `- ${l.id}: ${l.name} — ${l.description}`).join('\n')}
 
 		if (
 			changedFields.includes('evolution.enabled') &&
-			this.state.evolution.enabled && !this.evaluator && this.initialized
+			this.state.evolution.enabled &&
+			!this.evaluator
 		) {
 			this.initEvolution()
 		}
 
-		if (changedFields.includes('evolution.evaluatorSignalThreshold') && this.evaluator) {
+		if (
+			changedFields.includes('evolution.evaluatorSignalThreshold') &&
+			this.evaluator
+		) {
 			this.evaluator = new Evaluator(
 				this,
 				this.state.evolution.evaluatorSignalThreshold,
@@ -1993,7 +2246,8 @@ ${neuronMenu.map((l) => `- ${l.id}: ${l.name} — ${l.description}`).join('\n')}
 
 		// Map learning.* mechanical fields to neuronUpdate shape
 		if (updates.learning?.model) neuronUpdate.model ??= updates.learning.model
-		if (updates.learning?.blueprintModel) neuronUpdate.blueprintModel ??= updates.learning.blueprintModel
+		if (updates.learning?.blueprintModel)
+			neuronUpdate.blueprintModel ??= updates.learning.blueprintModel
 		if (updates.learning?.observer) {
 			neuronUpdate.observer = updates.learning.observer
 		}
@@ -2016,20 +2270,29 @@ ${neuronMenu.map((l) => `- ${l.id}: ${l.name} — ${l.description}`).join('\n')}
 		if (Object.keys(neuronUpdate).length > 0) {
 			for (const neuron of this.neurons.values()) {
 				const result = await neuron.update(neuronUpdate)
-				neuronResults.push({ neuronId: neuron.id, changedFields: result.changedFields })
+				neuronResults.push({
+					neuronId: neuron.id,
+					changedFields: result.changedFields,
+				})
 			}
 		}
 
 		// ── 3. Signal-driven (semantic changes) ──
 
 		if (updates.learning?.instructions) {
-			semanticChanges.push(`Neuron instructions update requested: ${updates.learning.instructions}`)
+			semanticChanges.push(
+				`Neuron instructions update requested: ${updates.learning.instructions}`,
+			)
 		}
 		if (updates.learning?.name) {
-			semanticChanges.push(`Neuron name update requested: ${updates.learning.name}`)
+			semanticChanges.push(
+				`Neuron name update requested: ${updates.learning.name}`,
+			)
 		}
 		if (updates.learning?.description) {
-			semanticChanges.push(`Neuron description update requested: ${updates.learning.description}`)
+			semanticChanges.push(
+				`Neuron description update requested: ${updates.learning.description}`,
+			)
 		}
 
 		if (semanticChanges.length > 0) {
@@ -2076,6 +2339,15 @@ ${neuronMenu.map((l) => `- ${l.id}: ${l.name} — ${l.description}`).join('\n')}
 		this.neurons.clear()
 		this.internalNeurons.clear()
 		this.neuronNames.clear()
+		this.neuronStatus.clear()
 		await this.store.dispose()
 	}
+}
+
+async function resolveBrainStore(
+	input: string | BrainStore,
+): Promise<BrainStore> {
+	if (typeof input !== 'string') return input
+	const { SQLiteBrainStore } = await import('../stores/sqlite/node/brain')
+	return new SQLiteBrainStore(input)
 }

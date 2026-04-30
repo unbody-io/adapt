@@ -1,4 +1,4 @@
-import { tool } from 'ai'
+import { tool } from '../../../../llm'
 import { dismissParams } from './schema'
 
 /**

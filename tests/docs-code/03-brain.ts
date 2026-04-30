@@ -8,8 +8,8 @@
  *   export $(cat .env.local | xargs) && npx tsx tests/docs-code/03-brain.ts
  */
 
-import { Brain, MemoryBrainStore, MemoryNeuronStore, TextNeuron } from '@unbody-io/adapt'
-import { SQLiteBrainStore, SQLiteNeuronStore } from '@unbody-io/adapt/sqlite'
+import { Brain, MemoryNeuronStore, TextNeuron } from '@unbody-io/adapt'
+import { SQLiteBrainStore } from '@unbody-io/adapt/sqlite'
 import { model } from '../../evals/helpers/provider'
 import { mkdirSync, rmSync } from 'node:fs'
 import { join, dirname } from 'node:path'
@@ -43,28 +43,25 @@ async function main() {
 		section('Creating a Brain')
 
 		// Minimal — only prompt and model required
-		const brain1 = new Brain({
+		const brain1 = await Brain.create({
 			prompt: 'Track user coding patterns and development philosophy.',
 			model,
 		})
 		assert(brain1 instanceof Brain, 'Brain created with minimal config')
+		await brain1.dispose()
 
 		// Full config with SQLite
-		const brain2 = new Brain({
+		const brain2 = await Brain.create({
 			prompt: 'Track user coding patterns and development philosophy.',
 			model,
 			store: new SQLiteBrainStore(join(tmpDir, 'brain.db')),
 			learning: {
-				store: (id: string) => new SQLiteNeuronStore(join(tmpDir, `neuron-${id}.db`)),
 				understand: { thresholds: { maxObservations: 5 } },
 			},
 			evolution: { enabled: true },
 		})
 		assert(brain2 instanceof Brain, 'Brain created with full config')
-
-		// Explicit initialize
-		await brain2.initialize()
-		assert(true, 'brain.initialize() succeeds')
+		assert(true, 'Brain.create() succeeds')
 
 		await brain2.dispose()
 
@@ -72,7 +69,7 @@ async function main() {
 		section('Injecting Data')
 
 		// Use explicit neurons to keep neuron count low and reduce concurrent LLM calls
-		const brain = new Brain({
+		const brain = await Brain.create({
 			prompt: 'Track user coding patterns and development philosophy.',
 			model,
 			evolution: { enabled: false },
@@ -174,7 +171,7 @@ async function main() {
 		assert(typeof gaps.insight === 'string', 'consult() with specific neuron works')
 
 		// Internal neuron config
-		const brainWithInternalConfig = new Brain({
+		const brainWithInternalConfig = await Brain.create({
 			prompt: 'Test internal neuron config.',
 			model,
 			internalNeurons: {
@@ -224,7 +221,7 @@ async function main() {
 		// ── Managing Neurons — Evolution ──────────────────────────────────────
 		section('Managing Neurons — Evolution')
 
-		const evoBrain = new Brain({
+		const evoBrain = await Brain.create({
 			prompt: 'Track frontend and backend patterns.',
 			model,
 			evolution: { enabled: true },
@@ -237,7 +234,6 @@ async function main() {
 				{ id: 'neuron-y', type: 'text', name: 'Y', description: 'Y patterns', instructions: 'Track Y patterns.' },
 			],
 		})
-		await evoBrain.initialize()
 
 		// LLM designs the neuron from guidance
 		const created = await evoBrain.createNeuron('Track emerging frontend frameworks')
@@ -271,12 +267,11 @@ async function main() {
 		// ── Update vs Adjust ─────────────────────────────────────────────────
 		section('Update vs Adjust')
 
-		const updateBrain = new Brain({
+		const updateBrain = await Brain.create({
 			prompt: 'Track coding patterns.',
 			model,
 			evolution: { enabled: true },
 		})
-		await updateBrain.initialize()
 
 		// adjustNeuron — natural language steering
 		const adjustableNeurons = updateBrain.getNeurons()
@@ -300,7 +295,7 @@ async function main() {
 		// ── Standalone neuron equivalents ─────────────────────────────────────
 		section('Standalone Neuron — adjust and update')
 
-		const standaloneNeuron = new TextNeuron({
+		const standaloneNeuron = await TextNeuron.create({
 			model,
 			instructions: 'Track coding patterns.',
 			store: new MemoryNeuronStore(),

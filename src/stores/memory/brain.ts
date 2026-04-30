@@ -14,8 +14,10 @@ import type {
 	BrainStateRecord,
 	BrainStore,
 	DismissedBatchRecord,
+	NeuronStore,
 } from '../types'
 import { MemoryBrainCollection } from './collection'
+import { MemoryNeuronStore } from './neuron'
 
 export { MemoryBrainCollection }
 
@@ -28,6 +30,11 @@ export class MemoryBrainStore implements BrainStore {
 	evolution: BrainCollection<BrainEvolutionRecord>
 	dismissedBatches: BrainCollection<DismissedBatchRecord>
 
+	// Cached per id — the cache IS the persistence layer for memory: a Brain
+	// disposed and restored against the same MemoryBrainStore must see the
+	// same neuron data on restore.
+	private readonly neuronStores = new Map<string, NeuronStore>()
+
 	constructor() {
 		const createCollection = <T extends { id: string }>(
 			spec: StoreCollectionSpec<T>,
@@ -38,6 +45,15 @@ export class MemoryBrainStore implements BrainStore {
 		this.internalNeurons = collections.internalNeurons
 		this.evolution = collections.evolution
 		this.dismissedBatches = collections.dismissedBatches
+	}
+
+	getNeuronStore(neuronId: string): NeuronStore {
+		let store = this.neuronStores.get(neuronId)
+		if (!store) {
+			store = new MemoryNeuronStore()
+			this.neuronStores.set(neuronId, store)
+		}
+		return store
 	}
 
 	async dispose(): Promise<void> {

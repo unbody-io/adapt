@@ -8,7 +8,8 @@ All notable changes to this project will be documented in this file.
 
 ### Changed
 
-- **Breaking:** `Brain.create(config)` / `Brain.restore(pathOrStore)` replace `new Brain(...) + initialize()`. Same on `TextNeuron` / `ListNeuron`. Constructors are private.
+- **Breaking:** `Brain.create(config)` / `Brain.restore(pathOrStore)` replace `new Brain(...) + initialize()`. Constructors are private.
+- **Breaking:** Standalone neurons get the same shape: `TextNeuron.create(config)` / `TextNeuron.restore(pathOrStore, {id?})` and `ListNeuron.create(config)` / `ListNeuron.restore(pathOrStore, {id?})` replace `new TextNeuron(...) + init()` / `new ListNeuron(...) + init()`. Constructors are private.
 - **Breaking:** Per-neuron persistence resolves through `BrainStore.getNeuronStore(neuronId)`. The `BrainConfig.learning.store` factory is removed. Stores from prior versions are not compatible.
 - Models persist as `{provider, modelId}` refs and rehydrate as gateway strings. Direct provider override via `brain.update({ model })` after restore.
 - Deep-mode synthesis split into two phases (gather → synthesize) to avoid the Gemini Flash strict-schema tool-call loop.

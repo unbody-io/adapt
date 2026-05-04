@@ -1,4 +1,5 @@
-import type { LanguageModel } from 'ai'
+import type { AdaptLLMPlugin, LanguageModel } from '../../llm'
+import { resolveRuntimeLLM } from '../../llm'
 import type { NeuronStore } from '../../stores'
 import type { ParentModels } from '../../types/config'
 import type { UnderstandCallResult } from '../base/class'
@@ -34,10 +35,25 @@ export class TextNeuron extends BaseNeuron<string, TextNeuronState> {
 		return 'text'
 	}
 
-	constructor(rawConfig: TextNeuronConfig, parentModels?: ParentModels) {
+	constructor(
+		rawConfig: TextNeuronConfig & { llm?: AdaptLLMPlugin },
+		parentModels?: ParentModels,
+	) {
 		const config = resolveTextNeuronConfig(rawConfig, parentModels)
 		const maxObsForStagnation =
 			3 * (config.understand.thresholds.maxObservations ?? 10)
+		const llm = resolveRuntimeLLM({
+			llm: rawConfig.llm,
+			models: [
+				config.model,
+				config.blueprintModel,
+				config.observer.model,
+				config.observer.blueprintModel,
+				config.understand.model,
+				config.understand.blueprintModel,
+				config.query.model,
+			],
+		})
 
 		const initialState: TextNeuronState = {
 			instructions: config.instructions,
@@ -99,7 +115,7 @@ export class TextNeuron extends BaseNeuron<string, TextNeuronState> {
 			skipObservation: rawConfig.skipObservation ?? false,
 		}
 
-		super(config.id, rawConfig.store, initialState)
+		super(config.id, llm, rawConfig.store, initialState)
 	}
 
 	// ── Abstract implementations ───────────────────────────────────────────────
@@ -147,6 +163,7 @@ export class TextNeuron extends BaseNeuron<string, TextNeuronState> {
 		instructions: string,
 	): Promise<void> {
 		const result = await initUnderstand(
+			this.llm,
 			model,
 			instructions,
 			this.state.governance.strategy,
@@ -163,6 +180,7 @@ export class TextNeuron extends BaseNeuron<string, TextNeuronState> {
 		newInstructions: string,
 	): Promise<void> {
 		const result = await adjustUnderstand(
+			this.llm,
 			model,
 			directive,
 			newInstructions,
@@ -181,6 +199,7 @@ export class TextNeuron extends BaseNeuron<string, TextNeuronState> {
 	): Promise<{ evolution: string; significance: Significance }> {
 		const currentUnderstanding = await this.getUnderstanding()
 		const result = await adjustUnderstandingContent(
+			this.llm,
 			model,
 			directive,
 			currentUnderstanding,
@@ -205,6 +224,7 @@ export class TextNeuron extends BaseNeuron<string, TextNeuronState> {
 		callbacks?: { onThinking?: (thoughts: string[]) => void },
 	): Promise<UnderstandCallResult> {
 		const result = await understand(
+			this.llm,
 			model,
 			this.state.understand_prompt!,
 			{
@@ -239,6 +259,7 @@ export class TextNeuron extends BaseNeuron<string, TextNeuronState> {
 	protected async postProcessUnderstanding(raw: string): Promise<string> {
 		const result = await applyStrategy({
 			understanding: raw,
+			llm: this.llm,
 			model: this.state.models.default,
 			config: this.state.governance,
 		})
@@ -246,7 +267,7 @@ export class TextNeuron extends BaseNeuron<string, TextNeuronState> {
 	}
 
 	protected createQueryMethod(): QueryMethod {
-		return new ToolBasedMethod(this.state.models.query, {
+		return new ToolBasedMethod(this.llm, this.state.models.query, {
 			tools: {
 				readUnderstanding: createReadUnderstandingTool(
 					() => this.getUnderstanding(),
@@ -258,7 +279,7 @@ export class TextNeuron extends BaseNeuron<string, TextNeuronState> {
 	}
 
 	protected createDirectQueryMethod(): QueryMethod {
-		return new DirectMethod(this.state.models.query, {
+		return new DirectMethod(this.llm, this.state.models.query, {
 			getUnderstanding: () => this.getUnderstanding(),
 			buildPrompt: (ctx, understanding) =>
 				`You are a specialist. Your domain:\n"${ctx.instructions}"\n\n# Your Understanding\n${understanding || '(empty — no knowledge yet)'}\n\nAnswer from your understanding. Be specific — cite data points, counts, dates. If you don't have enough, say so. Don't fabricate.`,
@@ -347,7 +368,7 @@ export class TextNeuron extends BaseNeuron<string, TextNeuronState> {
 	 * Throws if the store already contains a neuron — use {@link restore}.
 	 */
 	static async create(
-		config: TextNeuronConfig,
+		config: TextNeuronConfig & { llm?: AdaptLLMPlugin },
 		parentModels?: ParentModels,
 	): Promise<TextNeuron> {
 		const neuron = new TextNeuron(config, parentModels)
@@ -359,17 +380,24 @@ export class TextNeuron extends BaseNeuron<string, TextNeuronState> {
 	 * Restore a previously-persisted TextNeuron from a store.
 	 * `input` may be a path string (sugar for SQLiteNeuronStore) or a NeuronStore.
 	 * Throws if the store is empty — use {@link create}.
+	 *
+	 * `runtime` supplies the LLM context the brain needs after restore.
+	 *  - `model`: a live AI SDK model (e.g. `openai('gpt-4o')`); covers the common case.
+	 *  - `llm`: a full plugin instance — for BYO custom runtimes.
+	 *  Both optional. Pass nothing if the same process already cached the live
+	 *  model from a prior `create` call (in-memory restore).
 	 */
 	static async restore(
 		input: string | NeuronStore,
-		opts?: { id?: string },
+		runtime?: { id?: string; model?: LanguageModel; llm?: AdaptLLMPlugin },
 	): Promise<TextNeuron> {
 		const store = await resolveNeuronStore(input)
 		const neuron = new TextNeuron({
 			store,
-			model: RESTORE_PLACEHOLDER_MODEL,
+			model: runtime?.model ?? RESTORE_PLACEHOLDER_MODEL,
+			llm: runtime?.llm,
 			instructions: '',
-			id: opts?.id,
+			id: runtime?.id,
 		})
 		await neuron.init({ expect: 'restore' })
 		return neuron

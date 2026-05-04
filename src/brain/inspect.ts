@@ -6,9 +6,17 @@
  * or mature (has accumulated knowledge).
  */
 
-import type { CallSettings, LanguageModel, Tool } from 'ai'
+import type { CallSettings } from 'ai'
 import { z } from 'zod'
-import { generate, hasToolCall, stepCountIs, tool } from '../llm'
+import {
+	type AdaptLLMPlugin,
+	generate,
+	hasToolCall,
+	type LanguageModel,
+	stepCountIs,
+	type Tool,
+	tool,
+} from '../llm'
 import type { TokenUsage } from '../neurons/types'
 import type { Brain } from './class'
 
@@ -147,6 +155,7 @@ Never reference tool names, internal IDs, or your reasoning process in your answ
 // ── Entry point ─────────────────────────────────────────────────────────────
 
 export async function inspect(
+	llm: AdaptLLMPlugin,
 	model: LanguageModel,
 	brain: Brain,
 	query: string,
@@ -166,6 +175,7 @@ export async function inspect(
 	const allTools: Record<string, Tool> = { ...tools }
 
 	const result = await generate({
+		llm,
 		model,
 		system: SYSTEM_PROMPT,
 		prompt: query,

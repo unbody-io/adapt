@@ -5,9 +5,15 @@
  * Uses identity generation + system prompt pattern.
  */
 
-import type { LanguageModel } from 'ai'
 import { z } from 'zod'
-import { generate, Output, stepCountIs, tool } from '../../../llm'
+import {
+	type AdaptLLMPlugin,
+	generate,
+	type LanguageModel,
+	Output,
+	stepCountIs,
+	tool,
+} from '../../../llm'
 import type { Significance } from '../../types'
 import type { Strategy } from '../strategies'
 import { understandAdjustPromptTemplate } from './prompts/adjust'
@@ -35,6 +41,7 @@ export interface UnderstandInitResult {
  * Initialize text understand phase - generates identity and system prompt
  */
 export async function initUnderstand(
+	llm: AdaptLLMPlugin,
 	model: LanguageModel,
 	instructions: string,
 	strategy: Strategy,
@@ -42,6 +49,7 @@ export async function initUnderstand(
 	const prompt = understandIdentityPromptTemplate(instructions)
 
 	const { output: identity } = await generate({
+		llm,
 		model,
 		prompt,
 		output: Output.object({ schema: understandIdentitySchema }),
@@ -67,6 +75,7 @@ export async function initUnderstand(
  * @returns Adjusted identity and system prompt
  */
 export async function adjustUnderstand(
+	llm: AdaptLLMPlugin,
 	model: LanguageModel,
 	directive: string,
 	newInstructions: string,
@@ -80,6 +89,7 @@ export async function adjustUnderstand(
 	)
 
 	const { output: identity } = await generate({
+		llm,
 		model,
 		prompt,
 		output: Output.object({ schema: understandIdentitySchema }),
@@ -95,6 +105,7 @@ export async function adjustUnderstand(
  * Execute text understand phase
  */
 export async function understand(
+	llm: AdaptLLMPlugin,
 	model: LanguageModel,
 	systemPrompt: string,
 	context: UnderstandContext,
@@ -107,6 +118,7 @@ export async function understand(
 		)
 
 		const result = await generate({
+			llm,
 			model,
 			system: systemPrompt,
 			prompt,
@@ -163,6 +175,7 @@ interface AdjustUnderstandingResult {
  * to make surgical edits — or rewrites entirely for major restructuring.
  */
 export async function adjustUnderstandingContent(
+	llm: AdaptLLMPlugin,
 	model: LanguageModel,
 	directive: string,
 	currentUnderstanding: string,
@@ -280,8 +293,8 @@ export async function adjustUnderstandingContent(
 					.describe('How significant are these changes'),
 				reasoning: z
 					.string()
-					.optional()
-					.describe('Key reasoning behind the decisions'),
+					.nullable()
+					.describe('Key reasoning behind the decisions (null if none)'),
 			}),
 			// No execute — terminal tool
 		}),
@@ -295,6 +308,7 @@ export async function adjustUnderstandingContent(
 	let completeResult: CompleteInput | null = null
 
 	const result = await generate({
+		llm,
 		model,
 		system: `You are the memory of a node that tracks "${instructions}".
 

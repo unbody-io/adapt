@@ -10,28 +10,28 @@ import { z } from 'zod'
 
 export const updateOutputSchema = z.object({
 	mechanical: z.object({
-		name: z.string().optional().describe('Updated name (if needed)'),
+		name: z.string().nullable().describe('Updated name (null if not changing)'),
 		description: z
 			.string()
-			.optional()
-			.describe('Updated description (if needed)'),
+			.nullable()
+			.describe('Updated description (null if not changing)'),
 		thresholds: z
 			.object({
 				minImportance: z
 					.number()
 					.min(0)
 					.max(1)
-					.optional()
-					.describe('Updated importance threshold'),
+					.nullable()
+					.describe('Updated importance threshold (null if not changing)'),
 				maxObservations: z
 					.number()
 					.int()
 					.min(1)
-					.optional()
-					.describe('Updated max buffer size'),
+					.nullable()
+					.describe('Updated max buffer size (null if not changing)'),
 			})
-			.optional()
-			.describe('Updated synthesis thresholds (if needed)'),
+			.nullable()
+			.describe('Updated synthesis thresholds (null if not changing)'),
 	}).describe('Mechanical config changes — specific field values'),
 	behavioral: z
 		.string()

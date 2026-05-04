@@ -124,6 +124,7 @@ export class Evaluator extends TypedEmitter<EvaluatorEventMap> {
 			// Call LLM with tools
 			const prompt = this.formatEvaluationPrompt(context)
 			const result = await generate({
+				llm: this.brain.llm,
 				model: this.brain.config.evolution.model,
 				system: evaluatorSystemPrompt,
 				prompt,
@@ -253,6 +254,7 @@ export class Evaluator extends TypedEmitter<EvaluatorEventMap> {
 		})
 
 		const stream = streamText({
+			llm: this.brain.llm,
 			model: this.brain.config.evolution.model,
 			system: evaluatorSystemPrompt,
 			prompt,

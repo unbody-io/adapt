@@ -5,9 +5,15 @@
  * Fast path: one call vs ToolBasedMethod's agentic loop.
  */
 
-import type { LanguageModel } from 'ai'
 import { z } from 'zod'
-import { generate, Output, streamText, type StreamTextResult } from '../../../llm'
+import {
+	type AdaptLLMPlugin,
+	generate,
+	type LanguageModel,
+	Output,
+	streamText,
+	type StreamTextResult,
+} from '../../../llm'
 import type { TokenUsage } from '../../types'
 import type {
 	QueryContext,
@@ -42,10 +48,12 @@ export interface DirectConfig {
 
 export class DirectMethod implements QueryMethod {
 	readonly name = 'direct'
+	private llm: AdaptLLMPlugin
 	private model: LanguageModel
 	private config: DirectConfig
 
-	constructor(model: LanguageModel, config: DirectConfig) {
+	constructor(llm: AdaptLLMPlugin, model: LanguageModel, config: DirectConfig) {
+		this.llm = llm
 		this.model = model
 		this.config = config
 	}
@@ -53,6 +61,9 @@ export class DirectMethod implements QueryMethod {
 	update(config: QueryMethodUpdateConfig): void {
 		if (config.model !== undefined) {
 			this.model = config.model
+		}
+		if (config.llm !== undefined) {
+			this.llm = config.llm
 		}
 	}
 
@@ -66,6 +77,7 @@ export class DirectMethod implements QueryMethod {
 		const system = this.config.buildPrompt(context, understanding)
 
 		const result = await generate({
+			llm: this.llm,
 			model: modelOverride ?? this.model,
 			system,
 			prompt: context.question,
@@ -100,6 +112,7 @@ export class DirectMethod implements QueryMethod {
 		const system = this.config.buildPrompt(context, understanding)
 
 		return streamText({
+			llm: this.llm,
 			model: modelOverride ?? this.model,
 			system,
 			prompt: context.question,

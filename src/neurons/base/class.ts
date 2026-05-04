@@ -15,10 +15,10 @@
  * - createQueryMethod, applyTypeSpecificUpdates
  */
 
-import type { LanguageModel, StreamTextResult } from 'ai'
+import type { StreamTextResult } from 'ai'
 import { nanoid } from 'nanoid'
 import { z } from 'zod'
-import { generate, Output } from '../../llm'
+import { type AdaptLLMPlugin, generate, type LanguageModel, Output } from '../../llm'
 import type {
 	EvolutionRecord,
 	NeuronStore,
@@ -190,35 +190,48 @@ export abstract class BaseNeuron<
 	 * Keys not in the registry pass through as-is (identity transform).
 	 * Subclasses can extend this in their constructor.
 	 */
-	protected stateTransforms: Record<string, StateTransform> = {
-		models: {
-			serialize: (v) => serializeModelSlots(v as ModelSlots),
-			deserialize: (stored) =>
-				deserializeModelSlots(stored as Record<string, StoredModelRef>),
-		},
-		health: {
-			serialize: (v) => {
-				const h = v as NeuronHealth
-				return {
-					...h,
-					lastAccessed: h.lastAccessed.toISOString(),
-				}
-			},
-			deserialize: (v) => {
-				const h = v as Record<string, unknown>
-				return {
-					...h,
-					lastAccessed: new Date(h.lastAccessed as string),
-				}
-			},
-		},
-	}
+	protected stateTransforms: Record<string, StateTransform>
 
-	constructor(id: string, store: NeuronStore, initialState: TState) {
+	/**
+	 * The LLM plugin this neuron uses for runtime LLM calls. Each instance
+	 * holds its own plugin — there is no global registry. Set at construction.
+	 */
+	protected llm: AdaptLLMPlugin
+
+	constructor(
+		id: string,
+		llm: AdaptLLMPlugin,
+		store: NeuronStore,
+		initialState: TState,
+	) {
 		super()
 		this.id = id
+		this.llm = llm
 		this.store = store
 		this.state = initialState
+		this.stateTransforms = {
+			models: {
+				serialize: (v) => serializeModelSlots(v as ModelSlots, this.llm),
+				deserialize: (stored) =>
+					deserializeModelSlots(stored as Record<string, StoredModelRef>),
+			},
+			health: {
+				serialize: (v) => {
+					const h = v as NeuronHealth
+					return {
+						...h,
+						lastAccessed: h.lastAccessed.toISOString(),
+					}
+				},
+				deserialize: (v) => {
+					const h = v as Record<string, unknown>
+					return {
+						...h,
+						lastAccessed: new Date(h.lastAccessed as string),
+					}
+				},
+			},
+		}
 	}
 
 	// ── Abstract — each subclass implements ─────────────────────────────────
@@ -386,6 +399,7 @@ export abstract class BaseNeuron<
 				if (!this.state.skipObservation) {
 					// Generate observe identity + prompt via LLM
 					const observeResult = await initObserve(
+						this.llm,
 						this.state.models.observer_blueprint,
 						this.state.instructions,
 						this.state.focus || undefined,
@@ -554,6 +568,7 @@ export abstract class BaseNeuron<
 				importance = 1.0
 			} else {
 				const observeResult = await observe(
+					this.llm,
 					this.state.models.observer,
 					this.state.observe_prompt!,
 					{
@@ -1109,6 +1124,7 @@ export abstract class BaseNeuron<
 			if (needsObserveRegen) {
 				promises.push(
 					initObserve(
+						this.llm,
 						this.state.models.observer_blueprint,
 						this.state.instructions,
 						this.state.focus || undefined,
@@ -1183,6 +1199,7 @@ export abstract class BaseNeuron<
 
 		// 1. Classify what the directive touches
 		const { output: classification } = await generate({
+			llm: this.llm,
 			model: this.state.models.blueprint,
 			prompt: `You sense what a directive is asking to change about a learning node.
 
@@ -1207,6 +1224,7 @@ What does this directive touch?`,
 		// 2. Config adjustment (existing logic)
 		if (classification.adjustConfig) {
 			const observeResult = await adjustObserve(
+				this.llm,
 				this.state.models.observer_blueprint,
 				directive,
 				this.state.instructions,

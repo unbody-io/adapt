@@ -23,12 +23,12 @@ export function createListQueryTools(getItems: () => Promise<ListItem[]>) {
 			inputSchema: z.object({
 				filterKey: z
 					.string()
-					.optional()
-					.describe('Data field name to filter by'),
+					.nullable()
+					.describe('Data field name to filter by (null for no filter)'),
 				filterValue: z
 					.string()
-					.optional()
-					.describe('Value to match (case-insensitive substring)'),
+					.nullable()
+					.describe('Value to match, case-insensitive substring (null for no filter)'),
 			}),
 			execute: async (params) => {
 				const items = await getItems()

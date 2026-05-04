@@ -3,27 +3,38 @@
  *
  * @example
  * ```typescript
- * import { Brain } from '@unbody/adapt'
+ * import { Brain } from '@unbody-io/adapt'
  * import { openai } from '@ai-sdk/openai'
  *
- * // First run — fresh brain, persists to the store.
+ * // First run — fresh brain.
  * const brain = await Brain.create({
- *   prompt: `
- *     Track my coding patterns and learning interests.
- *     I'll be feeding you conversations with AI coding assistants,
- *     code commits, and notes from technical articles.
- *   `,
+ *   prompt: 'Track coding patterns and learning interests.',
  *   model: openai('gpt-4o'),
  * })
  *
- * await brain.inject({ type: 'commit', message: 'refactor to functional style' })
+ * await brain.inject([{ type: 'commit', message: 'refactor to functional style' }])
  * const result = await brain.ask('What is my coding philosophy?')
  *
- * // Subsequent runs — restore from the same store, no LLM decomposition.
- * // const brain = await Brain.restore("brain.db")
- * // await brain.update({ model: openai('gpt-4o') }) // direct provider override
+ * // Subsequent runs (different process / restart) — restore from disk and
+ * // hand the runtime back via the second arg. The brain holds its own
+ * // plugin reference; there is no global state.
+ * //
+ * // const brain = await Brain.restore('brain.db', { model: openai('gpt-4o') })
+ * // await brain.ask('What is my coding philosophy?')
+ * //
+ * // For BYO custom runtimes (Effect, in-house clients):
+ * // const brain = await Brain.restore('brain.db', { llm: myCustomPlugin })
  * ```
  */
 
 export * from './brain'
+export {
+	type AdaptLLMPlugin,
+	type AdaptModelConfig,
+	type AdaptModelTurnRequest,
+	type AdaptModelTurnResult,
+	type AiSdkLLMOptions,
+	type AiSdkProviderFactory,
+	createAiSdkLLM,
+} from './llm'
 export * from './neurons'

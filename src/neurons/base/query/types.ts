@@ -5,8 +5,11 @@
  * understanding-access tools to the QueryMethod instead.
  */
 
-import type { LanguageModel } from 'ai'
-import type { StreamTextResult } from '../../../llm'
+import type {
+	AdaptLLMPlugin,
+	LanguageModel,
+	StreamTextResult,
+} from '../../../llm'
 import type { TokenUsage } from '../../types'
 
 /**
@@ -70,6 +73,7 @@ export interface QueryCallbacks {
  */
 export interface QueryMethodUpdateConfig {
 	model?: LanguageModel
+	llm?: AdaptLLMPlugin
 }
 
 /**

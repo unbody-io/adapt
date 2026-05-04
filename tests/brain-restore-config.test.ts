@@ -9,6 +9,7 @@ import type {
 	LanguageModelV3GenerateResult,
 } from '@ai-sdk/provider'
 import { Brain } from '../src/brain'
+import { createAiSdkLLM } from '../src/llm'
 import { MemoryBrainStore } from '../src/stores'
 import { SQLiteBrainStore } from '../src/sqlite'
 import type { BrainStore } from '../src/stores'
@@ -221,6 +222,211 @@ describe.each(scenarios)('Brain restore config precedence ($name)', ({ factory }
 		const brain2 = await Brain.restore(scenario.openStore())
 		expect(brain2.getNeuron('coding')?.getObservationSchema()).toEqual(customObservation)
 		expect(brain2.getNeuron('coding')?.getUnderstandingSchema()).toEqual(customUnderstanding)
+		await brain2.dispose()
+	})
+
+	it('Brain.restore resolves persisted models via registered plugin (no model re-attach needed)', async () => {
+		const scenario = factory()
+
+		// Mock that introspects the prompt and returns a schema-shaped response
+		// per known phase. Only used for the fresh-create LLM calls; the actual
+		// restore-and-resolve assertion below does not depend on LLM output.
+		const calls: { phase: string }[] = []
+		const buildModel = (): LanguageModel => {
+			const usage: LanguageModelV3GenerateResult['usage'] = {
+				inputTokens: { total: 0, noCache: 0, cacheRead: 0, cacheWrite: 0 },
+				outputTokens: { total: 0, text: 0, reasoning: 0 },
+			}
+			const m: LanguageModelV3 = {
+				specificationVersion: 'v3',
+				provider: 'fake',
+				modelId: 'fake-1',
+				supportedUrls: {},
+				async doGenerate(opts): Promise<LanguageModelV3GenerateResult> {
+					const promptText = JSON.stringify(opts.prompt)
+					let body: unknown = {}
+					let phase = 'unknown'
+					if (
+						promptText.includes('You are generating the identity for a Synthesizer')
+					) {
+						body = {
+							identity: 'You synthesize coding preferences.',
+							skills: [],
+							dynamicsSkills: [],
+						}
+						phase = 'understand-identity'
+					} else if (
+						promptText.includes('You are analyzing a user-authored prompt')
+					) {
+						body = {
+							purpose: 'Track coding preferences and patterns.',
+							evolutionGuidance: null,
+							synthesisDirective: null,
+						}
+						phase = 'prompt-decomposition'
+					}
+					calls.push({ phase })
+					return {
+						content: [{ type: 'text', text: JSON.stringify(body) }],
+						finishReason: { unified: 'stop', raw: 'stop' },
+						usage,
+						warnings: [],
+						request: {},
+						response: {
+							id: `r-${calls.length}`,
+							timestamp: new Date(),
+							modelId: 'fake-1',
+						},
+					}
+				},
+				async doStream(): Promise<never> {
+					throw new Error('not implemented')
+				},
+			}
+			return m as unknown as LanguageModel
+		}
+
+		// Per-call form: pass `llm` to Brain.create and Brain.restore. No global.
+		const llm = createAiSdkLLM({
+			providers: { fake: () => buildModel() as never },
+		})
+
+		const brain1 = await Brain.create({
+			prompt: 'Track coding patterns and preferences.',
+			model: buildModel(),
+			llm,
+			autoSetup: false,
+			store: scenario.openStore(),
+			neurons: [
+				{
+					id: 'coding',
+					type: 'text' as const,
+					name: 'Coding',
+					description: 'Tracks coding patterns',
+					instructions: 'Track coding patterns.',
+					skipObservation: true,
+					observationSchema: { type: 'string' },
+					understandingSchema: { type: 'string' },
+				},
+			],
+			internalNeurons: {
+				globalUnderstanding: false,
+				globalQueryUnderstanding: false,
+				injectionGaps: false,
+				queryGaps: false,
+			},
+			evolution: { enabled: false },
+		})
+		await brain1.dispose()
+
+		// Restore + a brain.update() that does NOT re-pass model. The brain
+		// has its own plugin (passed via `llm` here) — no global state, no
+		// provider-resolution surprise.
+		const brain2 = await Brain.restore(scenario.openStore(), {
+			llm: createAiSdkLLM({
+				providers: { fake: () => buildModel() as never },
+			}),
+		})
+		await brain2.update({ ingest: { batchSize: 99 } })
+		expect(brain2.config.ingest.batchSize).toBe(99)
+		expect(brain2.config.model).toMatchObject({
+			plugin: 'ai-sdk',
+			provider: 'fake',
+			id: 'fake-1',
+		})
+		await brain2.dispose()
+	})
+
+	it('Brain.restore + ask throws actionable error when no provider is registered', async () => {
+		const scenario = factory()
+		// Phase 1: fresh create with a real-looking provider so persistence captures it.
+		const buildScriptedModel = (): LanguageModel => {
+			const usage: LanguageModelV3GenerateResult['usage'] = {
+				inputTokens: { total: 0, noCache: 0, cacheRead: 0, cacheWrite: 0 },
+				outputTokens: { total: 0, text: 0, reasoning: 0 },
+			}
+			let i = 0
+			const m: LanguageModelV3 = {
+				specificationVersion: 'v3',
+				provider: 'unregistered',
+				modelId: 'foo',
+				supportedUrls: {},
+				async doGenerate(opts): Promise<LanguageModelV3GenerateResult> {
+					const promptText = JSON.stringify(opts.prompt)
+					let body: unknown = {}
+					if (
+						promptText.includes(
+							'You are generating the identity for a Synthesizer',
+						)
+					) {
+						body = {
+							identity: 'You synthesize coding preferences.',
+							skills: [],
+							dynamicsSkills: [],
+						}
+					} else if (
+						promptText.includes('You are analyzing a user-authored prompt')
+					) {
+						body = {
+							purpose: 'p',
+							evolutionGuidance: null,
+							synthesisDirective: null,
+						}
+					}
+					i++
+					return {
+						content: [{ type: 'text', text: JSON.stringify(body) }],
+						finishReason: { unified: 'stop', raw: 'stop' },
+						usage,
+						warnings: [],
+						request: {},
+						response: { id: `r-${i}`, timestamp: new Date(), modelId: 'foo' },
+					}
+				},
+				async doStream(): Promise<never> {
+					throw new Error('not implemented')
+				},
+			}
+			return m as unknown as LanguageModel
+		}
+
+		const brain1 = await Brain.create({
+			prompt: 'p',
+			model: buildScriptedModel(),
+			llm: createAiSdkLLM({
+				providers: { unregistered: () => buildScriptedModel() as never },
+			}),
+			autoSetup: false,
+			store: scenario.openStore(),
+			neurons: [
+				{
+					id: 'coding',
+					type: 'text' as const,
+					name: 'Coding',
+					description: 'Tracks coding patterns',
+					instructions: 'Track coding patterns.',
+					skipObservation: true,
+					observationSchema: { type: 'string' },
+					understandingSchema: { type: 'string' },
+				},
+			],
+			internalNeurons: {
+				globalUnderstanding: false,
+				globalQueryUnderstanding: false,
+				injectionGaps: false,
+				queryGaps: false,
+			},
+			evolution: { enabled: false },
+		})
+		await brain1.dispose()
+
+		// Phase 2: restore with the AI SDK plugin WITHOUT any providers.
+		// The first LLM call must throw a clear, actionable error
+		// (not a Gateway 401).
+		const brain2 = await Brain.restore(scenario.openStore(), {
+			llm: createAiSdkLLM(),
+		})
+		await expect(brain2.ask('q')).rejects.toThrow(/cannot resolve provider|cannot run model/i)
 		await brain2.dispose()
 	})
 })

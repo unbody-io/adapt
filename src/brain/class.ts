@@ -1,7 +1,14 @@
 import type { CallSettings, StreamTextResult } from 'ai'
 import { nanoid } from 'nanoid'
 import { z } from 'zod'
-import { generate, Output, tool } from '../llm'
+import {
+	type AdaptLLMPlugin,
+	generate,
+	type LanguageModel,
+	Output,
+	resolveRuntimeLLM,
+	tool,
+} from '../llm'
 import {
 	type AdjustResult,
 	type BaseNeuron,
@@ -53,6 +60,7 @@ import type {
 	BrainEventMap,
 	BrainInjectOptions,
 	BrainInjectResult,
+	BrainRuntimeOptions,
 	BrainUpdateResult,
 	ConsultOptions,
 	ConsultResult,
@@ -77,16 +85,13 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 	readonly store: BrainStore
 
 	// State transforms (serialize/deserialize for non-serializable fields)
-	private readonly stateTransforms: Record<string, BrainStateTransform> = {
-		models: {
-			serialize: (value: unknown) =>
-				serializeBrainModelSlots(value as BrainModelSlots),
-			deserialize: (stored: unknown) =>
-				deserializeBrainModelSlots(
-					stored as Record<string, StoredBrainModelRef>,
-				),
-		},
-	}
+	private readonly stateTransforms: Record<string, BrainStateTransform>
+
+	/**
+	 * The LLM plugin this brain uses for runtime LLM calls. Each Brain instance
+	 * holds its own plugin — there is no global registry. Set at construction.
+	 */
+	readonly llm: AdaptLLMPlugin
 
 	// Runtime (rebuilt on init)
 	readonly neurons: Map<string, BaseNeuron<unknown>> = new Map()
@@ -106,11 +111,38 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 	private reinjectTimer: ReturnType<typeof setTimeout> | null = null
 	private pendingReinjectNeuronIds: Set<string> = new Set()
 
-	private constructor(rawConfig: BrainConfig) {
+	private constructor(rawConfig: BrainConfig & { llm?: AdaptLLMPlugin }) {
 		super()
 
 		const model = rawConfig.model
 		const blueprintModel = rawConfig.blueprintModel ?? model
+
+		this.llm = resolveRuntimeLLM({
+			llm: rawConfig.llm,
+			models: [
+				model,
+				blueprintModel,
+				rawConfig.init?.model,
+				rawConfig.query?.model,
+				rawConfig.evolution?.model,
+				rawConfig.learning?.observer?.model,
+				rawConfig.learning?.observer?.blueprintModel,
+				rawConfig.learning?.understand?.model,
+				rawConfig.learning?.understand?.blueprintModel,
+				rawConfig.learning?.query?.model,
+			],
+		})
+
+		this.stateTransforms = {
+			models: {
+				serialize: (value: unknown) =>
+					serializeBrainModelSlots(value as BrainModelSlots, this.llm),
+				deserialize: (stored: unknown) =>
+					deserializeBrainModelSlots(
+						stored as Record<string, StoredBrainModelRef>,
+					),
+			},
+		}
 
 		this.state = createInitialBrainState({
 			prompt: rawConfig.prompt,
@@ -285,7 +317,9 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 	 * Construct a fresh Brain and persist its config to the store.
 	 * Throws if the store already contains a brain — use {@link restore}.
 	 */
-	static async create(rawConfig: BrainConfig): Promise<Brain> {
+	static async create(
+		rawConfig: BrainConfig & { llm?: AdaptLLMPlugin },
+	): Promise<Brain> {
 		const brain = new Brain(rawConfig)
 		await brain.initialize('fresh')
 		return brain
@@ -294,18 +328,27 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 	/**
 	 * Restore a previously-persisted Brain from a store.
 	 * `input` may be a path string (sugar for SQLiteBrainStore) or a BrainStore.
-	 * Throws if the store is empty — use {@link create}.
-	 *
-	 * Models rehydrate as `"provider:modelId"` strings routed through Vercel
-	 * AI Gateway. To use a direct provider after restore, call
-	 * `await brain.update({ model: yourModel })`.
+	 * `runtime` supplies the LLM context the brain needs after restore. Pass
+	 * `model` (a live AI SDK model — covers 90% of cases), or `llm` (a full
+	 * plugin instance — for BYO custom runtimes), or both. Throws if the store
+	 * is empty — use {@link create}.
 	 */
-	static async restore(input: string | BrainStore): Promise<Brain> {
+	static async restore(
+		input: string | BrainStore,
+		runtime?: BrainRuntimeOptions,
+	): Promise<Brain> {
 		const store = await resolveBrainStore(input)
 		const brain = new Brain({
 			store,
 			prompt: '',
-			model: 'unknown:placeholder' as unknown as import('ai').LanguageModel,
+			model:
+				runtime?.model ?? ('unknown:placeholder' as unknown as LanguageModel),
+			blueprintModel: runtime?.blueprintModel,
+			...(runtime?.init ? { init: runtime.init } : {}),
+			...(runtime?.query ? { query: runtime.query } : {}),
+			...(runtime?.evolution ? { evolution: runtime.evolution } : {}),
+			...(runtime?.learning ? { learning: runtime.learning } : {}),
+			llm: runtime?.llm,
 		})
 		await brain.initialize('restore')
 		return brain
@@ -391,6 +434,7 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 		const prompt = decomposeBrainPromptTemplate(this.state.prompt)
 
 		const { output } = await generate({
+			llm: this.llm,
 			model: this.state.models.blueprint,
 			prompt,
 			output: Output.object({ schema: promptContextSchema }),
@@ -418,6 +462,7 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 				id: record.id,
 				model: this.state.models.default,
 				blueprintModel: this.state.models.blueprint,
+				llm: this.llm,
 				// Placeholder values — init() → loadState() overwrites from neuron's own store
 				instructions: '',
 				name: '',
@@ -468,6 +513,7 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 				id: record.id,
 				model: this.state.models.default,
 				blueprintModel: this.state.models.blueprint,
+				llm: this.llm,
 				instructions: '',
 				name: '',
 				description: '',
@@ -512,6 +558,7 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 				id: config.id,
 				model: this.state.models.default,
 				blueprintModel: this.state.models.blueprint,
+				llm: this.llm,
 				instructions: config.instructions,
 				origin: 'prompt' as const,
 				name: config.name,
@@ -646,6 +693,7 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 	 */
 	private async generateNeuronConfigs() {
 		return generate({
+			llm: this.llm,
 			model: this.state.models.init,
 			prompt: rootDecompositionPrompt(
 				this.prompt,
@@ -669,6 +717,7 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 			id: config.id,
 			model: this.state.models.default,
 			blueprintModel: this.state.models.blueprint,
+			llm: this.llm,
 			instructions: config.instructions,
 			origin: 'prompt' as const,
 			name: config.name,
@@ -952,7 +1001,7 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 	async ask(
 		query: string,
 		options?: CallSettings & {
-			model?: import('ai').LanguageModel
+			model?: LanguageModel
 			mode?: 'direct' | 'deep'
 		},
 	): Promise<BrainAskResult> {
@@ -1012,7 +1061,7 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 	async askStream(
 		query: string,
 		options?: CallSettings & {
-			model?: import('ai').LanguageModel
+			model?: LanguageModel
 			mode?: 'direct' | 'deep'
 		},
 	): Promise<StreamTextResult<any, any>> {
@@ -1038,7 +1087,7 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 	 */
 	private async askDirectStream(
 		query: string,
-		model: import('ai').LanguageModel,
+		model: LanguageModel,
 		generateOptions: CallSettings,
 	): Promise<StreamTextResult<any, any>> {
 		const allNeurons = this.getNeurons()
@@ -1091,7 +1140,7 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 			? ((await globalNeuron.getUnderstanding()) as string)
 			: undefined
 
-		return synthesizeDirectStream(model, {
+		return synthesizeDirectStream(this.llm, model, {
 			synthesisDirective:
 				this.state.promptContext?.synthesisDirective ?? undefined,
 			query,
@@ -1106,7 +1155,7 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 	 */
 	private async askDeepStream(
 		query: string,
-		model: import('ai').LanguageModel,
+		model: LanguageModel,
 		generateOptions: CallSettings,
 	): Promise<StreamTextResult<any, any>> {
 		const neuronArray = this.getNeurons()
@@ -1129,7 +1178,7 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 		}
 
 		const consultTools = await this.buildConsultTools()
-		return synthesizeStream(model, {
+		return synthesizeStream(this.llm, model, {
 			synthesisDirective:
 				this.state.promptContext?.synthesisDirective ?? undefined,
 			query,
@@ -1146,7 +1195,7 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 	private async selectRelevantNeurons(
 		query: string,
 		neurons: BaseNeuron<unknown>[],
-		model: import('ai').LanguageModel,
+		model: LanguageModel,
 		generateOptions: CallSettings,
 	): Promise<BaseNeuron<unknown>[]> {
 		if (neurons.length <= 1) return neurons
@@ -1162,6 +1211,7 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 		})
 
 		const result = await generate({
+			llm: this.llm,
 			model,
 			system: `You select which specialist neurons are relevant to a user query.
 
@@ -1189,7 +1239,7 @@ ${neuronMenu.map((l) => `- ${l.id}: ${l.name} — ${l.description}`).join('\n')}
 	 */
 	private async askDirect(
 		query: string,
-		model: import('ai').LanguageModel,
+		model: LanguageModel,
 		generateOptions: CallSettings,
 	) {
 		const allNeurons = this.getNeurons()
@@ -1242,7 +1292,7 @@ ${neuronMenu.map((l) => `- ${l.id}: ${l.name} — ${l.description}`).join('\n')}
 			? ((await globalNeuron.getUnderstanding()) as string)
 			: undefined
 
-		return synthesizeDirect(model, {
+		return synthesizeDirect(this.llm, model, {
 			synthesisDirective:
 				this.state.promptContext?.synthesisDirective ?? undefined,
 			query,
@@ -1257,7 +1307,7 @@ ${neuronMenu.map((l) => `- ${l.id}: ${l.name} — ${l.description}`).join('\n')}
 	 */
 	private async askDeep(
 		query: string,
-		model: import('ai').LanguageModel,
+		model: LanguageModel,
 		generateOptions: CallSettings,
 	) {
 		const neuronArray = this.getNeurons()
@@ -1285,7 +1335,7 @@ ${neuronMenu.map((l) => `- ${l.id}: ${l.name} — ${l.description}`).join('\n')}
 		})
 
 		const consultTools = await this.buildConsultTools()
-		return synthesize(model, {
+		return synthesize(this.llm, model, {
 			synthesisDirective:
 				this.state.promptContext?.synthesisDirective ?? undefined,
 			query,
@@ -1355,7 +1405,7 @@ ${neuronMenu.map((l) => `- ${l.id}: ${l.name} — ${l.description}`).join('\n')}
 			query: (question: string) => neuron.query(question),
 		}))
 
-		const result = await synthesize(this.state.models.query, {
+		const result = await synthesize(this.llm, this.state.models.query, {
 			synthesisDirective:
 				this.state.promptContext?.synthesisDirective ?? undefined,
 			query,
@@ -1378,11 +1428,11 @@ ${neuronMenu.map((l) => `- ${l.id}: ${l.name} — ${l.description}`).join('\n')}
 	 */
 	async inspect(
 		query: string,
-		options?: CallSettings & { model?: import('ai').LanguageModel },
+		options?: CallSettings & { model?: LanguageModel },
 	): Promise<InspectResult> {
 		const { model: modelOverride, ...generateOptions } = options ?? {}
 		const model = modelOverride ?? this.state.models.query
-		return runInspect(model, this, query, generateOptions)
+		return runInspect(this.llm, model, this, query, generateOptions)
 	}
 
 	/**

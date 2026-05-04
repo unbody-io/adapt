@@ -4,11 +4,12 @@
  * The state object is the single source of truth for all neuron config and runtime data.
  * Cached in memory as `this.state`, backed by `store.state`.
  *
- * Models are stored as { provider, modelId } in the store and resolved to live
- * LanguageModel instances in the cache via the transform layer.
+ * Models are stored as JSON model configs. Runtime plugins interpret those
+ * configs when an LLM call is made.
  */
 
-import type { LanguageModel } from 'ai'
+import type { AdaptLLMPlugin, AdaptModelConfig, LanguageModel } from '../../llm'
+import { toModelConfig } from '../../llm'
 import type { ObserveIdentity } from '../observer'
 import type { NeuronHealth, NeuronMetrics, NeuronOrigin } from '../types'
 
@@ -16,17 +17,16 @@ import type { NeuronHealth, NeuronMetrics, NeuronOrigin } from '../types'
 
 /**
  * Model reference as stored in the store (serializable).
- * Extracted from LanguageModel.provider and LanguageModel.modelId.
  */
-export interface StoredModelRef {
-	provider: string
-	modelId: string
+export type StoredModelRef = AdaptModelConfig & {
+	/** Legacy 0.0.5 shape. Deserialized into `id`. */
+	modelId?: string
 }
 
 /**
  * All model slots a neuron uses.
- * In the cache: live LanguageModel instances.
- * In the store: serialized as Record<string, StoredModelRef>.
+ * In the cache: live model inputs or restored AdaptModelConfig values.
+ * In the store: serialized AdaptModelConfig values.
  */
 export interface ModelSlots {
 	default: LanguageModel
@@ -60,7 +60,7 @@ export interface BaseNeuronState {
 	focus: string | null
 	origin: NeuronOrigin
 
-	// Models (live LanguageModel in cache; StoredModelRef in store)
+	// Models (model inputs in cache; StoredModelRef in store)
 	models: ModelSlots
 
 	// LLM-generated artifacts (null before init)
@@ -102,22 +102,13 @@ export interface StateTransform {
 // ── Serialization helpers ───────────────────────────────────────────────────
 
 /**
- * Extract a StoredModelRef from a LanguageModel.
- * Handles both object models (V2/V3 with provider + modelId) and string models.
+ * Extract a serializable model config from a model input.
  */
-export function toStoredModelRef(model: LanguageModel): StoredModelRef {
-	if (typeof model === 'string') {
-		// String format: "provider:modelId" or just a model name
-		const colonIdx = model.indexOf(':')
-		if (colonIdx > 0) {
-			return {
-				provider: model.slice(0, colonIdx),
-				modelId: model.slice(colonIdx + 1),
-			}
-		}
-		return { provider: 'unknown', modelId: model }
-	}
-	return { provider: model.provider, modelId: model.modelId }
+export function toStoredModelRef(
+	model: LanguageModel,
+	plugin: AdaptLLMPlugin,
+): StoredModelRef {
+	return toModelConfig(model, plugin) as StoredModelRef
 }
 
 /**
@@ -125,27 +116,35 @@ export function toStoredModelRef(model: LanguageModel): StoredModelRef {
  */
 export function serializeModelSlots(
 	models: ModelSlots,
+	plugin: AdaptLLMPlugin,
 ): Record<string, StoredModelRef> {
 	return Object.fromEntries(
 		Object.entries(models).map(([key, model]) => [
 			key,
-			toStoredModelRef(model),
+			toStoredModelRef(model, plugin),
 		]),
 	)
 }
 
 /**
- * Rehydrate model slots from a stored Record<string, StoredModelRef> into
- * AI SDK's `"provider:modelId"` string form. AI SDK then routes through Vercel
- * AI Gateway. Users who need a direct provider call `neuron.update({ model })`
- * post-restore.
+ * Rehydrate model slots into persisted model configs. Runtime plugins resolve
+ * those configs at call time.
  */
 export function deserializeModelSlots(
 	stored: Record<string, StoredModelRef>,
 ): ModelSlots {
 	const out: Record<string, LanguageModel> = {}
 	for (const [key, ref] of Object.entries(stored)) {
-		out[key] = `${ref.provider}:${ref.modelId}` as LanguageModel
+		out[key] = normalizeStoredModelRef(ref)
 	}
 	return out as unknown as ModelSlots
+}
+
+function normalizeStoredModelRef(ref: StoredModelRef): AdaptModelConfig {
+	return {
+		plugin: ref.plugin ?? 'ai-sdk',
+		...(ref.provider ? { provider: ref.provider } : {}),
+		id: ref.id ?? ref.modelId ?? 'unknown',
+		...(ref.options ? { options: ref.options } : {}),
+	}
 }

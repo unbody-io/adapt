@@ -1,4 +1,4 @@
-import type { LanguageModel } from 'ai'
+import type { AdaptLLMPlugin, LanguageModel } from '../../../llm'
 
 /**
  * Understanding management strategies
@@ -19,6 +19,7 @@ export interface GovernanceConfig {
  */
 export interface StrategyContext {
 	understanding: string
+	llm: AdaptLLMPlugin
 	model: LanguageModel
 	config: GovernanceConfig
 }

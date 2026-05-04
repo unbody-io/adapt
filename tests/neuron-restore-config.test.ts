@@ -9,6 +9,7 @@ import type {
 	LanguageModelV3GenerateResult,
 } from '@ai-sdk/provider'
 import { TextNeuron, MemoryNeuronStore } from '../src'
+import { createAiSdkLLM } from '../src/llm'
 import { SQLiteNeuronStore } from '../src/sqlite'
 import type { NeuronStore } from '../src/stores'
 
@@ -149,5 +150,31 @@ describe.each(scenarios)('Standalone neuron restore config precedence ($name)', 
 		const restored2 = await TextNeuron.restore(scenario.openStore())
 		expect(restored2.getUnderstandThresholds().maxObservations).toBe(12)
 		await restored2.dispose()
+	})
+
+	it('TextNeuron.restore resolves persisted models via per-call plugin', async () => {
+		const scenario = factory()
+
+		const first = await TextNeuron.create({
+			id: 'coding',
+			instructions: 'Track coding patterns and preferences.',
+			model: initOnlyModel(),
+			llm: createAiSdkLLM({
+				providers: { test: () => initOnlyModel() as never },
+			}),
+			store: scenario.openStore(),
+			understand: { thresholds: { maxObservations: 7 } },
+		})
+		await first.dispose()
+
+		// Restore — pass a plugin so persisted model refs resolve.
+		const restored = await TextNeuron.restore(scenario.openStore(), {
+			llm: createAiSdkLLM({
+				providers: { test: () => initOnlyModel() as never },
+			}),
+		})
+		// Persisted model is now an AdaptModelConfig, resolvable through the plugin.
+		expect(restored.getUnderstandThresholds().maxObservations).toBe(7)
+		await restored.dispose()
 	})
 })

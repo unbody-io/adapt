@@ -68,6 +68,7 @@ export class MergeHandler extends EvolutionActionHandler<MergeActionResult> {
 				})
 
 				const result = await generate({
+					llm: this.brain.llm,
 					model: this.brain.config.model,
 					system: mergeSystemPrompt,
 					prompt: await mergePromptTemplate(

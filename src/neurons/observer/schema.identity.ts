@@ -21,9 +21,9 @@ export const observeIdentitySchema = z.object({
 		),
 	domain: z
 		.string()
-		.optional()
+		.nullable()
 		.describe(
-			'The broad subject area this observer covers, if applicable. Omit if the observer is cross-domain or general-purpose.',
+			'The broad subject area this observer covers, if applicable. Null if the observer is cross-domain or general-purpose.',
 		),
 })
 

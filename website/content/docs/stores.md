@@ -10,22 +10,21 @@ Brain has two independent storage layers:
 | **Brain Store** | `BrainStore` | Brain state, neuron registry, evolution history, dismissed batches |
 | **Neuron Store** | `NeuronStore` | Per-neuron observations, understanding, evolution, state |
 
+You only configure the brain store directly. Per-neuron stores are derived from it through `BrainStore.getNeuronStore(neuronId)` — same code path on `Brain.create` and `Brain.restore`, so the two cannot disagree on where each neuron's data lives.
+
 ## Memory Stores (default)
 
 ```typescript
-import { Brain, MemoryBrainStore, MemoryNeuronStore } from '@unbody-io/adapt'
+import { Brain, MemoryBrainStore } from '@unbody-io/adapt'
 
-const brain = new Brain({
+const brain = await Brain.create({
   prompt: '...',
   model: openai('gpt-4o'),
   store: new MemoryBrainStore(),
-  learning: {
-    store: () => new MemoryNeuronStore(),
-  },
 })
 ```
 
-Ephemeral — data lost on process exit. Good for development and testing.
+Ephemeral — data lost on process exit. Good for development and testing. `MemoryBrainStore` caches a `MemoryNeuronStore` per neuron id internally.
 
 ## SQLite Stores
 
@@ -46,52 +45,51 @@ npm install better-sqlite3
 
 ```typescript
 import { Brain } from '@unbody-io/adapt'
-import { SQLiteBrainStore, SQLiteNeuronStore } from '@unbody-io/adapt/sqlite'
+import { SQLiteBrainStore } from '@unbody-io/adapt/sqlite'
 
-const brain = new Brain({
+const brain = await Brain.create({
   prompt: '...',
   model: openai('gpt-4o'),
   store: new SQLiteBrainStore('./brain.db'),
-  learning: {
-    store: (neuronId) => new SQLiteNeuronStore(`./neuron-${neuronId}.db`),
-  },
 })
 ```
 
-Persistent via `better-sqlite3`. Restarting and calling `initialize()` with the same paths restores all state — neurons, understanding, evolution history. No LLM calls on restore.
+Persistent via `better-sqlite3`. Each neuron's data is written to a sibling file derived from the brain DB path (e.g. `./brain.db` → `./brain.<neuron-id>.db`). On the next session, restore with `Brain.restore('./brain.db')` — no LLM calls on restore.
 
 ### Bun
 
 ```typescript
 import { Brain } from '@unbody-io/adapt'
-import { SQLiteBrainStore, SQLiteNeuronStore } from '@unbody-io/adapt/sqlite/bun'
+import { SQLiteBrainStore } from '@unbody-io/adapt/sqlite/bun'
 
-const brain = new Brain({
+const brain = await Brain.create({
   prompt: '...',
   model: openai('gpt-4o'),
   store: new SQLiteBrainStore('./brain.db'),
-  learning: {
-    store: (neuronId) => new SQLiteNeuronStore(`./neuron-${neuronId}.db`),
-  },
 })
 ```
 
-Persistent via Bun's built-in `bun:sqlite`. The restore behavior is the same as Node: restarting and calling `initialize()` with the same paths restores all state with no LLM calls.
+Persistent via Bun's built-in `bun:sqlite`. Restore behavior matches Node — pass a `SQLiteBrainStore` instance to `Brain.restore()`:
 
-The same guarantee applies to standalone neurons: constructing a `TextNeuron` or `ListNeuron` over a `SQLiteNeuronStore` whose DB already holds prior state (observations, buffer, understanding, evolution, prompts, schemas) restores everything via DB reads alone. Construction itself does no I/O; the restore runs when `init()` is called — either explicitly, or auto-called on the first `learn()`/`query()`. See [Neuron API → Lifecycle](./reference/neuron-api#lifecycle) for the cold-start vs. restore modes.
+```typescript
+import { SQLiteBrainStore } from '@unbody-io/adapt/sqlite/bun'
+
+const brain = await Brain.restore(new SQLiteBrainStore('./brain.db'))
+```
+
+(The path-string sugar `Brain.restore('./brain.db')` always uses the Node SQLite adapter via dynamic import, so Bun callers must pass an explicit store instance.)
+
+Standalone neurons follow the same shape: `TextNeuron.create(config)` writes to the configured store; `TextNeuron.restore(pathOrStore)` reads it back. See [Neuron API → Lifecycle](./reference/neuron-api#lifecycle).
 
 ### Hierarchical Persistence
 
-For apps with multiple entities, use the neuron store factory to organize files per entity:
+For apps with multiple entities, scope a brain DB path per entity. Per-neuron files are derived as siblings of that brain DB automatically:
 
 ```typescript
-const brain = new Brain({
+const brain = await Brain.create({
   prompt: '...',
   model,
   store: new SQLiteBrainStore(`./${entityId}/brain.db`),
-  learning: {
-    store: (neuronId) => new SQLiteNeuronStore(`./${entityId}/neuron-${neuronId}.db`),
-  },
 })
 ```
 
@@ -100,26 +98,25 @@ This lets you cleanly delete all data for a single entity by removing its direct
 ## Persistence Across Sessions
 
 ```typescript
+import { Brain } from '@unbody-io/adapt'
+import { SQLiteBrainStore } from '@unbody-io/adapt/sqlite'
+
 // Session 1: create and learn
-const brain = new Brain({
+const brain = await Brain.create({
   prompt: '...',
   model: openai('gpt-4o'),
   store: new SQLiteBrainStore('./brain.db'),
-  learning: { store: (id) => new SQLiteNeuronStore(`./neuron-${id}.db`) },
 })
-await brain.initialize()
 await brain.inject(data)
+await brain.dispose()
 
 // Session 2: restore and continue
-const brain2 = new Brain({
-  prompt: '...',
-  model: openai('gpt-4o'),
-  store: new SQLiteBrainStore('./brain.db'),
-  learning: { store: (id) => new SQLiteNeuronStore(`./neuron-${id}.db`) },
-})
-await brain2.initialize() // Restores from SQLite — no LLM calls
-await brain2.ask('What do you know?') // Has full knowledge from session 1
+const brain2 = await Brain.restore('./brain.db')        // path-string sugar (Node)
+await brain2.update({ model: openai('gpt-4o') })        // required for non-Gateway users
+await brain2.ask('What do you know?')                   // full knowledge from session 1
 ```
+
+> **Required after `Brain.restore` (non-Gateway users):** Restored models rehydrate as Vercel AI Gateway strings (e.g. `"openai:gpt-4o"`). If you don't have `AI_GATEWAY_API_KEY` set — most users on direct providers like OpenAI / Anthropic / OpenRouter — you **must** call `await brain.update({ model })` before any LLM operation, otherwise calls fail with `GatewayAuthenticationError`. For multi-model cascades (different models per stage), re-pass the full model config in `update`. Issue [#9](https://github.com/unbody-io/adapt/issues/9) — BYO LLM call function — will remove this step in 0.0.6.
 
 ## Custom Stores
 
@@ -146,7 +143,7 @@ Observations are persistent, not ephemeral buffered input. Each `ObservationReco
 
 This means the full history of what a neuron has seen remains queryable via `neuron.store.observations.list(...)`. If you need only processed history, filter by `{ metadata_status: 'processed' }`. The neuron class itself only exposes the pending buffer today — for anything else, go through the store collection directly.
 
-**BrainStore** — one per brain, holds the brain's state, neuron registry, internal neuron registry, evolution history, and dismissed batches:
+**BrainStore** — one per brain, holds the brain's state, neuron registry, internal neuron registry, evolution history, and dismissed batches. Also resolves per-neuron stores via `getNeuronStore(id)`:
 
 ```typescript
 interface BrainStore {
@@ -155,9 +152,12 @@ interface BrainStore {
   internalNeurons: BrainCollection<BrainNeuronRecord>
   evolution: BrainCollection<BrainEvolutionRecord>
   dismissedBatches: BrainCollection<DismissedBatchRecord>
+  getNeuronStore(neuronId: string): NeuronStore
   dispose(): Promise<void>
 }
 ```
+
+`getNeuronStore(neuronId)` is the single seam for per-neuron persistence — Brain calls into it on both `create` and `restore`, so the two paths cannot disagree on where a neuron's data lives. A custom `BrainStore` implementation must return a `NeuronStore` for any neuron id (typical strategy: cache one per id, derive a path/key from the id for persistent backends).
 
 Both `NeuronCollection` and `BrainCollection` implement the same CRUD interface. Each method does what you'd expect — the important one to note is `search()`, which should support full-text search (used by ListNeuron's deduplication during synthesis):
 

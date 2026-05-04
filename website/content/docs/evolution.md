@@ -95,14 +95,14 @@ The evaluator is an LLM agent with tools to inspect neurons, query their knowled
 
 ```typescript
 // Long-term brain: let it evolve
-const clientBrain = new Brain({
+const clientBrain = await Brain.create({
   prompt: '...',
   model,
   evolution: { enabled: true },
 })
 
 // Session brain: fixed structure
-const sessionBrain = new Brain({
+const sessionBrain = await Brain.create({
   prompt: '...',
   model,
   evolution: { enabled: false },

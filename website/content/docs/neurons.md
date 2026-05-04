@@ -15,7 +15,7 @@ Only `model`, `instructions`, and `store` are required:
 import { TextNeuron, MemoryNeuronStore } from '@unbody-io/adapt'
 import { openai } from '@ai-sdk/openai'
 
-const neuron = new TextNeuron({
+const neuron = await TextNeuron.create({
   model: openai('gpt-4o'),
   instructions: 'Track product design principles and user research insights.',
   store: new MemoryNeuronStore(),
@@ -33,7 +33,7 @@ const result = await neuron.query('What are the key design principles?')
 You can control how the neuron grows and when it synthesizes. **Governance** determines how understanding evolves over time (see [Governance Strategies](#governance-strategies) below). **Thresholds** control how many observations accumulate before synthesis triggers:
 
 ```typescript
-const neuron = new TextNeuron({
+const neuron = await TextNeuron.create({
   model: openai('gpt-4o'),
   instructions: 'Track product design principles and user research insights.',
   store: new MemoryNeuronStore(),
@@ -41,6 +41,24 @@ const neuron = new TextNeuron({
   understand: { thresholds: { maxObservations: 5, minImportance: 0.3 } },
 })
 ```
+
+To restore a previously persisted neuron from disk, use `TextNeuron.restore`:
+
+```typescript
+import { SQLiteNeuronStore } from '@unbody-io/adapt/sqlite'
+
+// Path-string sugar (Node SQLite)
+const neuron = await TextNeuron.restore('./neuron.db')
+await neuron.update({ model: openai('gpt-4o') })   // required for non-Gateway users
+
+// Or pass an explicit NeuronStore instance
+const neuron = await TextNeuron.restore(new SQLiteNeuronStore('./neuron.db'))
+await neuron.update({ model: openai('gpt-4o') })
+```
+
+> **Required after `restore` (non-Gateway users):** Restored models rehydrate as Vercel AI Gateway strings. If you don't have `AI_GATEWAY_API_KEY` set, you **must** call `await neuron.update({ model })` before any LLM operation, otherwise calls fail with `GatewayAuthenticationError`. Issue [#9](https://github.com/unbody-io/adapt/issues/9) — BYO LLM call function — will remove this step in 0.0.6.
+
+`ListNeuron` exposes the same `create` / `restore` shape (and the same restore-then-update requirement). Constructors are private — `create` and `restore` are the only public entry points, and both fully initialize the neuron (no separate `init()` call).
 
 ### Cognitive Skills
 
@@ -75,7 +93,7 @@ Same required fields — `model`, `instructions`, `store`:
 import { ListNeuron, MemoryNeuronStore } from '@unbody-io/adapt'
 import { openai } from '@ai-sdk/openai'
 
-const neuron = new ListNeuron({
+const neuron = await ListNeuron.create({
   model: openai('gpt-4o'),
   instructions: 'Track restaurants with cuisine type, location, price range, and rating.',
   store: new MemoryNeuronStore(),
@@ -100,7 +118,7 @@ During synthesis, the LLM works like an agent with tools: it reads the buffered 
 You can bypass LLM schema generation entirely by providing `observationSchema` and/or `understandingSchema` in the neuron config:
 
 ```typescript
-const brain = new Brain({
+const brain = await Brain.create({
   prompt: 'Track therapy sessions.',
   model: openai('gpt-4o'),
   autoSetup: false,
@@ -194,7 +212,15 @@ neuron.getMetadata()                         // NeuronMetadata
 
 // Buffer
 await neuron.getBufferState()               // { count, avgImportance, totalTokens }
-await neuron.getBufferedObservations()       // Array<{ text, importance }>
+await neuron.getBufferedObservations()       // Array<{ text, importance }> — pending only, condensed
+
+// Observations (full history, full ObservationRecord shape)
+await neuron.getObservations()               // ObservationRecord[]
+await neuron.getObservations({ status: 'pending' })   // filter
+await neuron.getObservations({ status: 'processed' })
+await neuron.setObservations(records)        // bulk replace
+await neuron.updateObservation(id, patch)
+await neuron.removeObservation(id)
 
 // Config
 await neuron.adjust('natural language directive')

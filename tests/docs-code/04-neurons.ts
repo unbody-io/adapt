@@ -9,7 +9,14 @@
  */
 
 import { Brain, TextNeuron, ListNeuron, MemoryNeuronStore } from '@unbody-io/adapt'
+import { SQLiteNeuronStore } from '@unbody-io/adapt/sqlite'
 import { model } from '../../evals/helpers/provider'
+import { mkdirSync, rmSync } from 'node:fs'
+import { join, dirname } from 'node:path'
+import { fileURLToPath } from 'node:url'
+
+const __dirname = dirname(fileURLToPath(import.meta.url))
+const tmpDir = join(__dirname, '..', '.tmp-docs-04')
 
 let passed = 0
 let failed = 0
@@ -29,6 +36,8 @@ function section(title: string) {
 }
 
 async function main() {
+	mkdirSync(tmpDir, { recursive: true })
+	try {
 	// ── TextNeuron — Basic ────────────────────────────────────────────────
 	section('TextNeuron — Basic')
 
@@ -61,6 +70,29 @@ async function main() {
 	})
 	assert(govNeuron instanceof TextNeuron, 'TextNeuron with governance config created')
 	await govNeuron.dispose()
+
+	// ── TextNeuron — Restore ──────────────────────────────────────────────
+	section('TextNeuron — Restore')
+
+	const restorePath = join(tmpDir, 'text-neuron.db')
+
+	// Persist a neuron first
+	const seed = await TextNeuron.create({
+		model,
+		instructions: 'Track restore-roundtrip patterns.',
+		store: new SQLiteNeuronStore(restorePath),
+	})
+	await seed.dispose()
+
+	// Restore via path string
+	const restoredFromPath = await TextNeuron.restore(restorePath)
+	assert(restoredFromPath instanceof TextNeuron, 'TextNeuron.restore(path) succeeds')
+	await restoredFromPath.dispose()
+
+	// Restore via explicit store
+	const restoredFromStore = await TextNeuron.restore(new SQLiteNeuronStore(restorePath))
+	assert(restoredFromStore instanceof TextNeuron, 'TextNeuron.restore(store) succeeds')
+	await restoredFromStore.dispose()
 
 	// ── ListNeuron — Basic ───────────────────────────────────────────────
 	section('ListNeuron — Basic')
@@ -188,6 +220,30 @@ async function main() {
 	const buffered = await apiNeuron.getBufferedObservations()
 	assert(Array.isArray(buffered), 'getBufferedObservations() returns array')
 
+	// Observations API (full history)
+	const allObs = await apiNeuron.getObservations()
+	assert(Array.isArray(allObs), 'getObservations() returns array')
+
+	const pendingObs = await apiNeuron.getObservations({ status: 'pending' })
+	assert(Array.isArray(pendingObs), 'getObservations({status:pending}) returns array')
+
+	const processedObs = await apiNeuron.getObservations({ status: 'processed' })
+	assert(Array.isArray(processedObs), 'getObservations({status:processed}) returns array')
+
+	if (allObs.length > 0) {
+		const first = allObs[0]
+		await apiNeuron.updateObservation(first.id, { metadata_importance: 0.9 })
+		assert(true, 'updateObservation() succeeds')
+	}
+
+	await apiNeuron.setObservations([])
+	const afterClear = await apiNeuron.getObservations()
+	assert(afterClear.length === 0, 'setObservations([]) clears the collection')
+
+	// removeObservation needs an id; verify it accepts the call signature
+	await apiNeuron.removeObservation('non-existent-id').catch(() => {})
+	assert(true, 'removeObservation() accepts id')
+
 	// Config
 	await apiNeuron.adjust('natural language directive')
 	assert(true, 'adjust() succeeds')
@@ -240,6 +296,9 @@ async function main() {
 	await apiNeuron.dispose()
 	await textNeuron.dispose()
 	await listNeuron.dispose()
+	} finally {
+		rmSync(tmpDir, { recursive: true, force: true })
+	}
 
 	// ── Summary ──────────────────────────────────────────────────────────
 	console.log(`\n${'═'.repeat(60)}`)

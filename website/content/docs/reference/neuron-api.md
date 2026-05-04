@@ -9,16 +9,16 @@ Shared API for `TextNeuron` and `ListNeuron` (both extend `BaseNeuron`).
 
 | Method | Returns | Description |
 |---|---|---|
-| `init()` | `Promise<{ observeSystemPrompt, understandSystemPrompt }>` | Initialize neuron (auto-called on first `learn`/`query`) |
-| `dispose()` | `Promise<void>` | Dispose neuron store |
-| `isInitialized()` | `boolean` | Check if neuron is initialized |
+| `TextNeuron.create(config, parentModels?)` | `Promise<TextNeuron>` | Construct a fresh TextNeuron and persist its config. Throws if the store already contains a neuron. |
+| `TextNeuron.restore(pathOrStore, opts?)` | `Promise<TextNeuron>` | Restore a previously persisted TextNeuron. Path-string sugar uses Node SQLite via dynamic import. `opts.id` lets you pin the neuron id. Throws if the store is empty. |
+| `ListNeuron.create(config, parentModels?)` | `Promise<ListNeuron>` | Same shape — fresh ListNeuron. |
+| `ListNeuron.restore(pathOrStore, opts?)` | `Promise<ListNeuron>` | Same shape — restored ListNeuron. |
+| `dispose()` | `Promise<void>` | Close the neuron's own store. |
+| `isInitialized()` | `boolean` | True once the neuron's `understand_prompt` has been generated/restored (works for `skipObservation` neurons too). |
 
-`init()` has two modes, chosen automatically by inspecting the store:
+Constructors are private — the static `create` / `restore` methods are the only public entry points. Both fully initialize the neuron; there is no separate `init()` step on the public surface. `create` runs prompt + schema generation via LLM and persists everything. `restore` rehydrates identity, prompts, and schemas from the store via DB reads only — zero LLM calls during init.
 
-- **Cold start** (empty store) — generates observe/understand identity, system prompts, and schemas via LLM calls, then persists them.
-- **Restore** (store has prior state) — rehydrates identity, prompts, and schemas from the store via DB reads only. **Zero LLM calls.** This is how a `TextNeuron`/`ListNeuron` constructed over a prepopulated `SQLiteNeuronStore` picks up exactly where a previous process left off.
-
-Constructing a neuron does no I/O — the constructor only wires up `id`, `store`, and initial state. Restore happens when `init()` runs, either explicitly or on the first `learn()`/`query()` call via auto-init.
+> **Required after `restore` (non-Gateway users):** Restored models rehydrate as Vercel AI Gateway strings. If you don't have `AI_GATEWAY_API_KEY` set, you **must** call `await neuron.update({ model })` before any LLM operation, otherwise calls fail with `GatewayAuthenticationError`. Issue [#9](https://github.com/unbody-io/adapt/issues/9) — BYO LLM call function — will remove this step in 0.0.6.
 
 ## Learning
 
@@ -84,7 +84,18 @@ For a clean "is there any understanding yet?" check, prefer `hasKnowledge()` ove
 | Method | Returns | Description |
 |---|---|---|
 | `getBufferState()` | `Promise<{ count, avgImportance, totalTokens }>` | Pending observation metrics |
-| `getBufferedObservations()` | `Promise<Array<{ text, importance }>>` | Pending observations only — for processed history see [Stores → Observation lifecycle](../stores#observation-lifecycle) |
+| `getBufferedObservations()` | `Promise<Array<{ text, importance }>>` | Pending observations only, condensed shape |
+
+## Observations
+
+Full-history access to the underlying observation collection. Returns full `ObservationRecord` shape (id, data, importance, status, tokens, created_at).
+
+| Method | Returns | Description |
+|---|---|---|
+| `getObservations(filter?)` | `Promise<ObservationRecord[]>` | All observations. Optional `{ status: 'pending' \| 'processed' }` filter. |
+| `setObservations(records)` | `Promise<void>` | Bulk-replace the entire observation collection. |
+| `updateObservation(id, patch)` | `Promise<void>` | Patch a single observation's fields. |
+| `removeObservation(id)` | `Promise<void>` | Delete a single observation. |
 
 ## Introspection
 

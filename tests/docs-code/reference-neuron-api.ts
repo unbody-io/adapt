@@ -122,6 +122,23 @@ async function main() {
 	const buffered = await textNeuron.getBufferedObservations()
 	assert(Array.isArray(buffered), 'getBufferedObservations() returns array')
 
+	// ── Observations API ─────────────────────────────────────────────────
+	section('TextNeuron — Observations API')
+
+	assert(typeof textNeuron.getObservations === 'function', 'getObservations() exists')
+	assert(typeof textNeuron.setObservations === 'function', 'setObservations() exists')
+	assert(typeof textNeuron.updateObservation === 'function', 'updateObservation() exists')
+	assert(typeof textNeuron.removeObservation === 'function', 'removeObservation() exists')
+
+	const allObs = await textNeuron.getObservations()
+	assert(Array.isArray(allObs), 'getObservations() returns array')
+
+	const pendingObs = await textNeuron.getObservations({ status: 'pending' })
+	assert(Array.isArray(pendingObs), 'getObservations({status:pending}) returns array')
+
+	const processedObs = await textNeuron.getObservations({ status: 'processed' })
+	assert(Array.isArray(processedObs), 'getObservations({status:processed}) returns array')
+
 	// ── Introspection ────────────────────────────────────────────────────
 	section('TextNeuron — Introspection')
 
@@ -210,6 +227,12 @@ async function main() {
 	// Buffer
 	assert(typeof listNeuron.getBufferState === 'function', 'listNeuron.getBufferState() exists')
 	assert(typeof listNeuron.getBufferedObservations === 'function', 'listNeuron.getBufferedObservations() exists')
+
+	// Observations API
+	assert(typeof listNeuron.getObservations === 'function', 'listNeuron.getObservations() exists')
+	assert(typeof listNeuron.setObservations === 'function', 'listNeuron.setObservations() exists')
+	assert(typeof listNeuron.updateObservation === 'function', 'listNeuron.updateObservation() exists')
+	assert(typeof listNeuron.removeObservation === 'function', 'listNeuron.removeObservation() exists')
 
 	// Introspection
 	assert(typeof listNeuron.getHealth === 'function', 'listNeuron.getHealth() exists')

@@ -67,21 +67,18 @@ await brain.adjustNeuron('categories', 'Stop categorizing things as inspiration'
 
 ```typescript
 import { Brain } from '@unbody-io/adapt'
-import { SQLiteBrainStore, SQLiteNeuronStore } from '@unbody-io/adapt/sqlite'
+import { SQLiteBrainStore } from '@unbody-io/adapt/sqlite'
 
 // Long-term brain: evolves over time, persists everything
-const longTermBrain = new Brain({
+const longTermBrain = await Brain.create({
   prompt: 'Track patterns across all interactions.',
   model,
   store: new SQLiteBrainStore('./long-term.brain.db'),
-  learning: {
-    store: (id) => new SQLiteNeuronStore(`./long-term.neuron-${id}.db`),
-  },
   evolution: { enabled: true },
 })
 
 // Session brain: fixed structure, short-lived
-const sessionBrain = new Brain({
+const sessionBrain = await Brain.create({
   prompt: 'Extract observations from this session.',
   model,
   autoSetup: false,
@@ -133,7 +130,7 @@ const local = createOpenAICompatible({
   name: 'ollama',
 })
 
-const brain = new Brain({
+const brain = await Brain.create({
   prompt: '...',
   model: local('llama3.1'),
   blueprintModel: openai('gpt-4o'),

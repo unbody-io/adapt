@@ -113,15 +113,31 @@ async function main() {
 		// ── 01-getting-started.md: SQLite Persistence ────────────────────────
 		section('SQLite Persistence')
 
+		const sqlitePath = join(tmpDir, 'brain.db')
+
+		// First run — fresh
 		const sqliteBrain = await Brain.create({
 			prompt: 'Track my coding patterns.',
 			model,
-			store: new SQLiteBrainStore(join(tmpDir, 'brain.db')),
+			store: new SQLiteBrainStore(sqlitePath),
 		})
-
-		assert(true, 'SQLite brain initialized successfully')
-
+		assert(true, 'Brain.create() persists to disk')
 		await sqliteBrain.dispose()
+
+		// Subsequent run — restore (path-string sugar uses Node SQLite)
+		const restoredBrain = await Brain.restore(sqlitePath)
+		assert(true, 'Brain.restore(path) succeeds')
+
+		// Optional direct provider override after restore
+		await restoredBrain.update({ model })
+		assert(true, 'brain.update({ model }) after restore succeeds')
+
+		await restoredBrain.dispose()
+
+		// Bun callers pass an explicit BrainStore instance — verify the shape works
+		const restoredViaStore = await Brain.restore(new SQLiteBrainStore(sqlitePath))
+		assert(true, 'Brain.restore(store) succeeds')
+		await restoredViaStore.dispose()
 	} finally {
 		rmSync(tmpDir, { recursive: true, force: true })
 	}

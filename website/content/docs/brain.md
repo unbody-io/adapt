@@ -13,7 +13,7 @@ Only two things are required — `prompt` (what to learn about) and `model` (whi
 import { Brain } from '@unbody-io/adapt'
 import { openai } from '@ai-sdk/openai'
 
-const brain = new Brain({
+const brain = await Brain.create({
   prompt: 'Track user coding patterns and development philosophy.',
   model: openai('gpt-4o'),
 })
@@ -23,16 +23,16 @@ With just these two fields, the Brain will auto-decompose the prompt into neuron
 
 ```typescript
 import { Brain } from '@unbody-io/adapt'
-import { SQLiteBrainStore, SQLiteNeuronStore } from '@unbody-io/adapt/sqlite'
+import { SQLiteBrainStore } from '@unbody-io/adapt/sqlite'
 
-const brain = new Brain({
+const brain = await Brain.create({
   prompt: 'Track user coding patterns and development philosophy.',
   model: openai('gpt-4o'),
-  // Persist state to disk (default: in-memory, lost on exit)
+  // Persist state to disk (default: in-memory, lost on exit).
+  // Per-neuron data is derived from this store automatically
+  // (e.g. ./brain.db → sibling files for each neuron).
   store: new SQLiteBrainStore('./brain.db'),
   learning: {
-    // Each neuron gets its own SQLite store
-    store: (id) => new SQLiteNeuronStore(`./neuron-${id}.db`),
     // Synthesize understanding after every 5 observations instead of the default 10
     understand: { thresholds: { maxObservations: 5 } },
   },
@@ -41,17 +41,32 @@ const brain = new Brain({
 })
 ```
 
-For Bun, import the same store classes from `@unbody-io/adapt/sqlite/bun` instead of `@unbody-io/adapt/sqlite`.
+For Bun, import `SQLiteBrainStore` from `@unbody-io/adapt/sqlite/bun` instead of `@unbody-io/adapt/sqlite`.
 
 See [Configuration](./configuration) for the full config reference.
 
-`initialize()` is called automatically on first `inject()` or `ask()`. Call it explicitly if you want to control timing:
+## Fresh vs Restored
+
+Brain has two construction verbs that map to two distinct intents:
 
 ```typescript
-await brain.initialize()
+// Fresh — runs LLM decomposition, persists to the store.
+// Throws if the store already contains a brain.
+const brain = await Brain.create({ prompt, model, store })
+
+// Restore — loads the previously persisted brain. Throws if the store is empty.
+const brain = await Brain.restore('./brain.db')   // path-string sugar (Node SQLite)
+const brain = await Brain.restore(myBrainStore)   // explicit BrainStore instance
 ```
 
-On init, Brain tries to restore from the store first (no LLM call). If no state exists, it runs fresh LLM decomposition.
+```typescript
+const brain = await Brain.restore('./brain.db')
+await brain.update({ model: openai('gpt-4o') })   // required for non-Gateway users
+```
+
+> **Required after `Brain.restore` (non-Gateway users):** Restored models rehydrate as Vercel AI Gateway strings (e.g. `"openai:gpt-4o"`). If you don't have `AI_GATEWAY_API_KEY` set — most users on direct providers like OpenAI / Anthropic / OpenRouter — you **must** call `await brain.update({ model })` before any LLM operation, otherwise calls fail with `GatewayAuthenticationError`. For multi-model cascades (different models per stage), re-pass the full model config in `update`. Issue [#9](https://github.com/unbody-io/adapt/issues/9) — BYO LLM call function — will remove this step in 0.0.6.
+
+`Brain.create` and `Brain.restore` are the only public entry points — the constructor is private. Both methods fully initialize the brain (no separate `init()` call required).
 
 ## Injecting Data
 
@@ -172,7 +187,7 @@ const gaps = await brain.consult('What knowledge gaps exist?', {
 All internal neurons are enabled by default. Toggle them:
 
 ```typescript
-const brain = new Brain({
+const brain = await Brain.create({
   // ...
   internalNeurons: {
     globalUnderstanding: true,                    // enabled (default)
@@ -249,6 +264,20 @@ await brain.updateNeuron('neuron-x', 'Narrow scope to React hooks only')
 // Delete via evolution
 await brain.deleteNeuron('neuron-y')
 ```
+
+## Pausing Neurons
+
+Pause a neuron to stop including it in `inject()` fan-out without losing its accumulated knowledge. Paused neurons stay queryable via `ask()` and `consult()` — pause is about ingestion, not visibility.
+
+```typescript
+await brain.pauseNeuron('ui-patterns')
+brain.getNeuronStatus('ui-patterns') // 'inactive'
+
+await brain.resumeNeuron('ui-patterns')
+brain.getNeuronStatus('ui-patterns') // 'active'
+```
+
+Status survives restarts via the brain store. Every transition emits a `brain:neuron:status:changed` event with `previousStatus` and `newStatus`.
 
 ## Update vs Adjust
 

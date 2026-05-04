@@ -3,7 +3,9 @@ title: Lifecycle
 description: How Brain executes from initialization through learning — the event flow, phases, and timing.
 ---
 
-When you call `brain.init()` followed by `brain.inject()`, a predictable sequence of events unfolds. This page describes that sequence — what happens, in what order, and why. Understanding the lifecycle is especially useful if you're building real-time UIs on top of Brain events, debugging timing issues, or reasoning about performance.
+When you call `Brain.create(...)` followed by `brain.inject()`, a predictable sequence of events unfolds. This page describes that sequence — what happens, in what order, and why. Understanding the lifecycle is especially useful if you're building real-time UIs on top of Brain events, debugging timing issues, or reasoning about performance.
+
+> Internal event names still use the `brain:init:*` / `neuron:init:*` prefixes (the semantic phase is still "init"). What changed in 0.0.5 is the public callsite: `Brain.create(config)` runs the fresh-init flow, `Brain.restore(pathOrStore)` runs the restore flow. There is no separate `brain.init()` step.
 
 For the full list of events and their payloads, see [Events](./events). This page focuses on *flow*, not individual event shapes.
 
@@ -24,7 +26,7 @@ Birth happens once. Learning repeats every time you call `inject()`.
 
 ## Birth
 
-When you call `brain.init()`, the Brain goes through three stages:
+When you call `Brain.create()`, the Brain goes through three stages (these stages are skipped on `Brain.restore()`, which loads everything from the store with no LLM calls):
 
 ### 1. Config generation
 
@@ -36,7 +38,7 @@ brain:init:config:generating
 brain:init:config:generated          → N neuron configs
 ```
 
-This typically takes 2–4 seconds. If you provide explicit neuron configs via `learners` in your BrainConfig, this step is skipped.
+This typically takes 2–4 seconds. If you provide explicit neuron configs via `neurons` in your BrainConfig, this step is skipped.
 
 ### 2. Neuron setup
 

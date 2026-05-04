@@ -21,7 +21,8 @@ interface BrainConfig {
   ingest?: { batchSize?: number }           // Items per batch (default: 20)
 
   learning?: {
-    store?: (id: string) => NeuronStore     // Per-neuron store factory
+    // Per-neuron stores are derived from `store` automatically via
+    // BrainStore.getNeuronStore(neuronId). No factory required.
     observer?: {
       model?: LanguageModel                 // Observe phase model
       blueprintModel?: LanguageModel        // Observer prompt generation model
@@ -93,7 +94,7 @@ import { openai } from '@ai-sdk/openai'
 const fast = openai('gpt-4o-mini')
 const smart = openai('gpt-4o')
 
-const brain = new Brain({
+const brain = await Brain.create({
   prompt: '...',
   model: fast,                      // Default: cheap model
   blueprintModel: smart,            // Schema generation: smart model
@@ -131,7 +132,7 @@ N = number of neurons, B = number of batches.
 
 | Operation | LLM Calls | Model Slot | Notes |
 |---|---|---|---|
-| **`initialize()`** | | | |
+| **`Brain.create()`** | | | |
 | → Decomposition | `1` | `init` | Only with `autoSetup: true`. Determines neuron structure |
 | → Prompt parsing | `1` | `blueprintModel` | Extracts purpose and synthesis directives |
 | → Neuron init | `2 × N` | `blueprintModel` | Per neuron: 1 observe identity + 1 understand identity |
@@ -173,13 +174,13 @@ import { google } from '@ai-sdk/google'
 import { createOpenRouter } from '@openrouter/ai-sdk-provider'
 
 // Direct providers
-new Brain({ model: openai('gpt-4o'), ... })
-new Brain({ model: anthropic('claude-sonnet-4-20250514'), ... })
-new Brain({ model: google('gemini-2.0-flash'), ... })
+await Brain.create({ model: openai('gpt-4o'), ... })
+await Brain.create({ model: anthropic('claude-sonnet-4-20250514'), ... })
+await Brain.create({ model: google('gemini-2.0-flash'), ... })
 
 // OpenRouter (multi-provider gateway)
 const openrouter = createOpenRouter({ apiKey: process.env.OPENROUTER_API_KEY })
-new Brain({ model: openrouter('google/gemini-2.0-flash-001'), ... })
+await Brain.create({ model: openrouter('google/gemini-2.0-flash-001'), ... })
 ```
 
 Any `LanguageModel` from any `@ai-sdk/*` provider works. See [Vercel AI SDK providers](https://sdk.vercel.ai/providers) for the full list.

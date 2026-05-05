@@ -138,7 +138,7 @@ const result = await brain.ask('...', { model: openai('gpt-4o') })
 
 ## Streaming
 
-All query and evaluation methods have streaming variants that return raw AI SDK `StreamTextResult` objects.
+All query and evaluation methods have streaming variants that return an Adapt-shaped `AdaptStreamResult` — the same surface area regardless of which LLM plugin is active.
 
 ```typescript
 // Stream a brain query
@@ -153,13 +153,13 @@ const stream = await brain.askStream('What patterns?', { mode: 'deep' })
 
 for await (const part of stream.fullStream) {
   if (part.type === 'text-delta') process.stdout.write(part.text)
-  if (part.type === 'tool-call') console.log(`Tool: ${part.toolName}`)
-  if (part.type === 'tool-result') console.log(`Result: ${part.output}`)
+  if (part.type === 'tool-call') console.log(`Tool: ${part.toolCall.toolName}`)
 }
 
 // Resolved promises available after stream completes
 const text = await stream.text
 const usage = await stream.usage
+const toolCalls = await stream.toolCalls
 ```
 
 ## Consulting Internal Neurons

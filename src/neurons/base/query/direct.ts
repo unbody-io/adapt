@@ -12,7 +12,7 @@ import {
 	type LanguageModel,
 	Output,
 	streamText,
-	type StreamTextResult,
+	type AdaptStreamResult,
 } from '../../../llm'
 import type { TokenUsage } from '../../types'
 import type {
@@ -106,7 +106,7 @@ export class DirectMethod implements QueryMethod {
 	async queryStream(
 		context: QueryContext,
 		options?: QueryOptions,
-	): Promise<StreamTextResult<any, any>> {
+	): Promise<AdaptStreamResult> {
 		const understanding = await this.config.getUnderstanding()
 		const { model: modelOverride, ...generateOptions } = options ?? {}
 		const system = this.config.buildPrompt(context, understanding)

@@ -194,7 +194,7 @@ await neuron.learn(batch, { forceSynthesize: true }) // Force understand phase
 
 // Querying
 const result = await neuron.query('...')     // QueryResult
-const stream = await neuron.queryStream('...') // StreamTextResult
+const stream = await neuron.queryStream('...') // AdaptStreamResult
 
 // Understanding
 await neuron.getUnderstanding()              // string (text) or ListItem[] (list)

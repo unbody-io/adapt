@@ -15,10 +15,15 @@
  * - createQueryMethod, applyTypeSpecificUpdates
  */
 
-import type { StreamTextResult } from 'ai'
 import { nanoid } from 'nanoid'
 import { z } from 'zod'
-import { type AdaptLLMPlugin, generate, type LanguageModel, Output } from '../../llm'
+import {
+	type AdaptLLMPlugin,
+	type AdaptStreamResult,
+	generate,
+	type LanguageModel,
+	Output,
+} from '../../llm'
 import type {
 	EvolutionRecord,
 	NeuronStore,
@@ -911,7 +916,7 @@ export abstract class BaseNeuron<
 	async queryStream(
 		question: string,
 		options?: QueryOptions,
-	): Promise<StreamTextResult<any, any>> {
+	): Promise<AdaptStreamResult> {
 		await this.ensureInit()
 		this.state.health.lastAccessed = new Date()
 		this.state.metrics.query.count++

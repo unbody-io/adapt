@@ -30,7 +30,7 @@ import {
 } from './_presets'
 
 // ─── Eval A: kitchen-sink structured output schema ─────────────────────────
-const kitchenSinkSchema = z.object({
+export const kitchenSinkSchema = z.object({
 	id: z.string().describe('Unique identifier'),
 	score: z.number().min(0).max(1).describe('Score between 0 and 1'),
 	count: z.number().int().min(1).describe('Positive integer count'),
@@ -57,7 +57,7 @@ const kitchenSinkSchema = z.object({
 })
 
 // ─── Eval B: kitchen-sink tool-calling ─────────────────────────────────────
-function buildTools() {
+export function buildTools() {
 	const log: string[] = []
 	const tools = {
 		ping: tool({
@@ -106,7 +106,7 @@ function buildTools() {
 // long `instructions` strings. Catches providers (e.g. Together DeepSeek-V3.1)
 // that accept a schema in principle but truncate output once the payload grows.
 
-const sizedSchema = z.object({
+export const sizedSchema = z.object({
 	neurons: z
 		.array(
 			z.object({
@@ -140,7 +140,7 @@ const sizedSchema = z.object({
 // If the model skips generateResponse and goes straight to complete, the host
 // has no answer. This catches the gpt-4o-mini case the pipeline eval surfaced.
 
-function buildStatefulTools() {
+export function buildStatefulTools() {
 	let captured: string | null = null
 	const tools = {
 		generateResponse: tool({
@@ -363,6 +363,10 @@ async function main() {
 	}
 }
 
-main().catch((err) => {
-	console.error('Eval crashed:', err)
-})
+// Only run when invoked directly — this file is also imported by
+// llm-plugin-stream-smoke-eval.ts for shared schemas/tools.
+if (import.meta.url === `file://${process.argv[1]}`) {
+	main().catch((err) => {
+		console.error('Eval crashed:', err)
+	})
+}

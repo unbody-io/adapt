@@ -31,8 +31,10 @@ export * from './brain'
 export {
 	type AdaptLLMPlugin,
 	type AdaptModelConfig,
+	type AdaptModelStreamEvent,
 	type AdaptModelTurnRequest,
 	type AdaptModelTurnResult,
+	type AdaptStreamResult,
 	type AiSdkLLMOptions,
 	type AiSdkProviderFactory,
 	createAiSdkLLM,

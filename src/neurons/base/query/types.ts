@@ -7,8 +7,8 @@
 
 import type {
 	AdaptLLMPlugin,
+	AdaptStreamResult,
 	LanguageModel,
-	StreamTextResult,
 } from '../../../llm'
 import type { TokenUsage } from '../../types'
 
@@ -90,11 +90,11 @@ export interface QueryMethod {
 		callbacks?: QueryCallbacks,
 	): Promise<QueryResult>
 
-	/** Stream a query — returns raw ai-sdk StreamTextResult */
+	/** Stream a query — returns an Adapt-shaped stream result */
 	queryStream?(
 		context: QueryContext,
 		options?: QueryOptions,
-	): Promise<StreamTextResult<any, any>>
+	): Promise<AdaptStreamResult>
 
 	/** Update the method's config (e.g. swap model) */
 	update(config: QueryMethodUpdateConfig): void

@@ -4,7 +4,6 @@ import {
 	type LanguageModel as AiLanguageModel,
 	type ModelMessage,
 	Output as AiOutput,
-	type StreamTextResult,
 	type ToolChoice,
 	generateText,
 	streamText as aiStreamText,
@@ -12,12 +11,7 @@ import {
 } from 'ai'
 import { type ZodSchema, z } from 'zod'
 
-export type {
-	CallSettings,
-	LanguageModelUsage,
-	StreamTextResult,
-	TextStreamPart,
-} from 'ai'
+export type { CallSettings, LanguageModelUsage } from 'ai'
 
 // ── JSON + model config ────────────────────────────────────────────────────
 
@@ -173,7 +167,7 @@ export type AdaptModelTurnRequest<
 	system?: string
 	messages: AdaptMessage[]
 	output?: AdaptOutputSpec
-	tools?: Record<string, AdaptToolSpec>
+	tools?: Record<string, AdaptTool>
 	toolChoice?: ToolChoice<Record<string, never>>
 	settings?: AdaptCallSettings
 	metadata?: AdaptCallMetadata
@@ -213,6 +207,23 @@ export type AdaptModelStreamEvent<TRaw = unknown> =
 	| { type: 'finish'; finishReason: AdaptFinishReason; raw?: TRaw }
 	| { type: 'error'; error: unknown; raw?: TRaw }
 
+/**
+ * The streaming counterpart of {@link AdaptModelTurnResult}.
+ *
+ * Plugin's `streamCall` returns this; Adapt's public `streamText` returns this
+ * unchanged. Mirror's `plugin.call`'s contract — same input ({@link AdaptModelTurnRequest}),
+ * full result instead of a partial — so AI SDK is one plugin among many, not
+ * privileged.
+ */
+export type AdaptStreamResult<TRaw = unknown> = {
+	textStream: AsyncIterable<string>
+	fullStream: AsyncIterable<AdaptModelStreamEvent<TRaw>>
+	text: Promise<string>
+	usage: Promise<AdaptUsage>
+	toolCalls: Promise<AdaptToolCall[]>
+	steps: Promise<AdaptStepResult[]>
+}
+
 export interface AdaptLLMPlugin<
 	TModel extends AdaptModelConfig = AdaptModelConfig,
 	TPluginOptions = unknown,
@@ -229,7 +240,7 @@ export interface AdaptLLMPlugin<
 	): Promise<AdaptModelTurnResult<TJson, TRaw>>
 	streamCall?(
 		request: AdaptModelTurnRequest<TModel, TPluginOptions>,
-	): AsyncIterable<AdaptModelStreamEvent<TRaw>>
+	): Promise<AdaptStreamResult<TRaw>>
 }
 
 export type AdaptGenerateRequest<
@@ -253,8 +264,6 @@ export type AdaptGenerateRequest<
 	stopWhen?: StopCondition | StopCondition[]
 	maxSteps?: number
 	onStepFinish?: (step: AdaptStepResult) => void | Promise<void>
-	onFinish?: (event: any) => void | PromiseLike<void>
-	onError?: (event: any) => void | PromiseLike<void>
 	metadata?: AdaptCallMetadata
 	pluginOptions?: TPluginOptions
 	abortSignal?: AbortSignal
@@ -525,6 +534,113 @@ export function createAiSdkLLM(options: AiSdkLLMOptions = {}): AdaptLLMPlugin {
 				raw: result,
 			}
 		},
+		async streamCall(request) {
+			// Streaming path: tools get their execute fns wired through to AI
+			// SDK so it can auto-execute mid-stream. Non-streaming `call` above
+			// strips execute by going through `toAiTools`; here we want it.
+			const aiTools = request.tools
+				? Object.fromEntries(
+						Object.entries(request.tools).map(([name, t]) => [
+							name,
+							aiTool({
+								description: t.description,
+								inputSchema: t.inputSchema as never,
+								...(t.execute ? { execute: t.execute as never } : {}),
+							}),
+						]),
+					)
+				: undefined
+
+			const aiResult = aiStreamText({
+				model: resolveModel(request.model),
+				...(request.system ? { system: request.system } : {}),
+				messages: toAiMessages(request.messages),
+				output: toAiOutput(request.output),
+				tools: aiTools as never,
+				toolChoice: request.toolChoice as never,
+				abortSignal: request.signal,
+				...(request.settings ?? {}),
+			} as Parameters<typeof aiStreamText>[0])
+
+			const fullStream: AsyncIterable<AdaptModelStreamEvent> = (async function* () {
+				for await (const part of aiResult.fullStream) {
+					if (part.type === 'text-delta') {
+						yield { type: 'text-delta', text: part.text, raw: part }
+					} else if (part.type === 'tool-call') {
+						yield {
+							type: 'tool-call',
+							toolCall: {
+								type: 'tool-call',
+								toolCallId: part.toolCallId,
+								toolName: part.toolName,
+								input: 'input' in part ? part.input : undefined,
+								providerMetadata: part.providerMetadata,
+							},
+							raw: part,
+						}
+					} else if (part.type === 'finish') {
+						yield {
+							type: 'usage',
+							usage: {
+								inputTokens: part.totalUsage?.inputTokens,
+								outputTokens: part.totalUsage?.outputTokens,
+								totalTokens: part.totalUsage?.totalTokens,
+							},
+							raw: part,
+						}
+						yield {
+							type: 'finish',
+							finishReason: normalizeFinishReason(part.finishReason),
+							raw: part,
+						}
+					}
+				}
+			})()
+
+			return {
+				textStream: aiResult.textStream,
+				fullStream,
+				text: Promise.resolve(aiResult.text),
+				usage: Promise.resolve(aiResult.totalUsage).then((u) => ({
+					inputTokens: u?.inputTokens,
+					outputTokens: u?.outputTokens,
+					totalTokens: u?.totalTokens,
+				})),
+				toolCalls: Promise.resolve(aiResult.toolCalls).then((calls) =>
+					calls.map((toolCall) => ({
+						type: 'tool-call' as const,
+						toolCallId: toolCall.toolCallId,
+						toolName: toolCall.toolName,
+						input: 'input' in toolCall ? toolCall.input : undefined,
+						providerMetadata: toolCall.providerMetadata,
+					})),
+				),
+				steps: Promise.resolve(aiResult.steps).then((aiSteps) =>
+					aiSteps.map((s) => ({
+						text: s.text ?? '',
+						output: undefined,
+						toolCalls: (s.toolCalls ?? []).map((toolCall) => ({
+							type: 'tool-call' as const,
+							toolCallId: toolCall.toolCallId,
+							toolName: toolCall.toolName,
+							input: 'input' in toolCall ? toolCall.input : undefined,
+							providerMetadata: toolCall.providerMetadata,
+						})),
+						toolResults: (s.toolResults ?? []).map((r) => ({
+							type: 'tool-result' as const,
+							toolCallId: r.toolCallId,
+							toolName: r.toolName,
+							output: 'output' in r ? r.output : undefined,
+						})),
+						usage: {
+							inputTokens: s.usage?.inputTokens,
+							outputTokens: s.usage?.outputTokens,
+							totalTokens: s.usage?.totalTokens,
+						},
+					})),
+				),
+			}
+		},
 	}
 
 	return plugin
@@ -617,7 +733,7 @@ export async function generate<TJson = any>(
 				system,
 				messages,
 				output,
-				tools: stripToolExecutors(tools),
+				tools,
 				toolChoice,
 				settings,
 				metadata,
@@ -717,53 +833,59 @@ export async function generate<TJson = any>(
 	}
 }
 
-export function streamText(
+export async function streamText(
 	params: AdaptGenerateRequest,
-): StreamTextResult<any, any> {
-	const { llm, model, output, tools, abortSignal, messages, prompt, ...rest } = params
-	const plugin = llm
+): Promise<AdaptStreamResult> {
+	const {
+		llm,
+		model,
+		system,
+		prompt,
+		messages: initialMessages,
+		output,
+		tools,
+		toolChoice,
+		stopWhen,
+		maxSteps,
+		metadata,
+		pluginOptions,
+		abortSignal,
+		repairSchema: _repairSchema,
+		onStepFinish: _onStepFinish,
+		...settings
+	} = params
+
+	if (!llm.streamCall) {
+		throw new Error(
+			`Plugin "${llm.id}" does not implement streamCall. Streaming requires a plugin with a streamCall method.`,
+		)
+	}
+
 	const modelConfig = isAdaptModelConfig(model)
 		? (model as AdaptModelConfig)
-		: plugin.model.toConfig(model)
+		: llm.model.toConfig(model)
+	llm.model.validateConfig?.(modelConfig)
 
-	if (plugin.id !== DEFAULT_PLUGIN_ID) {
-		throw new Error(
-			`Plugin "${plugin.id}" does not expose an AI SDK-compatible stream. Adapt stream events are not implemented yet.`,
-		)
-	}
+	// Pass through AI-SDK-shaped loop control via settings — same shape as the
+	// non-streaming `generate` path, just unstripped (streaming wants stopWhen).
+	const streamSettings: AdaptCallSettings = {
+		...(settings as AdaptCallSettings),
+		...(stopWhen !== undefined ? { stopWhen } : {}),
+		...(maxSteps !== undefined ? { maxSteps } : {}),
+		...(toolChoice !== undefined ? { toolChoice } : {}),
+	} as AdaptCallSettings
 
-	const aiSdkPlugin = plugin as ReturnType<typeof createAiSdkLLM> & {
-		resolveModel?: (config: AdaptModelConfig) => AiLanguageModel
-	}
-	if (!aiSdkPlugin.resolveModel) {
-		throw new Error(
-			'streamText: the active LLM plugin is not the default AI SDK plugin and cannot stream.',
-		)
-	}
-	const resolved = aiSdkPlugin.resolveModel(modelConfig)
-
-	return aiStreamText({
-		model: resolved,
-		...(rest.system ? { system: rest.system } : {}),
-		messages: toAiSdkMessagesForStream(normalizeMessages(prompt, messages)),
-		output:
-			output?.type === 'object'
-				? AiOutput.object({ schema: output.schema })
-				: undefined,
-		tools: tools
-			? (Object.fromEntries(
-					Object.entries(tools).map(([name, spec]) => [
-						name,
-						aiTool({
-							description: spec.description,
-							inputSchema: spec.inputSchema as never,
-							execute: spec.execute as never,
-						}),
-					]),
-				) as never)
-			: undefined,
-		abortSignal,
-		...(rest as CallSettings),
+	return llm.streamCall({
+		model: modelConfig,
+		system,
+		messages: normalizeMessages(prompt, initialMessages),
+		output,
+		tools,
+		toolChoice,
+		settings: streamSettings,
+		metadata,
+		pluginOptions,
+		signal: abortSignal,
 	})
 }
 
@@ -776,21 +898,6 @@ function normalizeMessages(
 		return [{ role: 'user', content: [{ type: 'text', text: prompt }] }]
 	}
 	return [{ role: 'user', content: [{ type: 'text', text: '' }] }]
-}
-
-function stripToolExecutors(
-	tools: Record<string, AdaptTool> | undefined,
-): Record<string, AdaptToolSpec> | undefined {
-	if (!tools) return undefined
-	return Object.fromEntries(
-		Object.entries(tools).map(([name, toolDef]) => [
-			name,
-			{
-				description: toolDef.description,
-				inputSchema: toolDef.inputSchema,
-			},
-		]),
-	)
 }
 
 async function executeToolCalls(
@@ -922,31 +1029,6 @@ function firstJsonContent(content: AdaptContent[]): unknown {
 function jsonSafe(value: unknown): JsonValue {
 	if (value === undefined) return null
 	return JSON.parse(JSON.stringify(value)) as JsonValue
-}
-
-function toAiSdkMessagesForStream(messages: AdaptMessage[]): ModelMessage[] {
-	return messages.map((message) => {
-		if (message.role === 'user') {
-			return { role: 'user', content: contentToText(message.content) }
-		}
-		if (message.role === 'assistant') {
-			return {
-				role: 'assistant',
-				content: contentToText(message.content),
-			}
-		}
-		return {
-			role: 'tool',
-			content: [
-				{
-					type: 'tool-result',
-					toolCallId: message.toolCallId,
-					toolName: message.toolName,
-					output: { type: 'json', value: jsonSafe(message.content) },
-				},
-			],
-		} as ModelMessage
-	})
 }
 
 // ============================================================================

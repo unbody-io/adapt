@@ -1,4 +1,5 @@
-import type { CallSettings, StreamTextResult } from 'ai'
+import type { CallSettings } from 'ai'
+import type { AdaptStreamResult } from '../llm'
 import { nanoid } from 'nanoid'
 import { z } from 'zod'
 import {
@@ -1064,7 +1065,7 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 			model?: LanguageModel
 			mode?: 'direct' | 'deep'
 		},
-	): Promise<StreamTextResult<any, any>> {
+	): Promise<AdaptStreamResult> {
 		const mode = options?.mode ?? 'direct'
 		const queryId = `query_${nanoid()}`
 		this.emit('brain:ask:started', { queryId, query })
@@ -1089,7 +1090,7 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 		query: string,
 		model: LanguageModel,
 		generateOptions: CallSettings,
-	): Promise<StreamTextResult<any, any>> {
+	): Promise<AdaptStreamResult> {
 		const allNeurons = this.getNeurons()
 
 		// Filter to neurons that have knowledge
@@ -1157,7 +1158,7 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 		query: string,
 		model: LanguageModel,
 		generateOptions: CallSettings,
-	): Promise<StreamTextResult<any, any>> {
+	): Promise<AdaptStreamResult> {
 		const neuronArray = this.getNeurons()
 
 		const specialists: SpecialistDef[] = []
@@ -1863,7 +1864,7 @@ ${neuronMenu.map((l) => `- ${l.id}: ${l.name} — ${l.description}`).join('\n')}
 	 * resolves after the stream finishes and decisions are optionally executed.
 	 */
 	async evaluateEvolutionStream(options?: { dryRun?: boolean }): Promise<{
-		stream: StreamTextResult<any, any>
+		stream: AdaptStreamResult
 		decisions: Promise<{
 			decisions: EvolutionDecision[]
 			results: AggregatedEvolutionResult

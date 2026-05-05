@@ -23,7 +23,7 @@ Constructors are private — `Brain.create` and `Brain.restore` are the only pub
 |---|---|---|
 | `inject(data, options?)` | `Promise<BrainInjectResult>` | Route data to all neurons |
 | `ask(query, options?)` | `Promise<BrainAskResult>` | Query all neurons, synthesize response |
-| `askStream(query, options?)` | `Promise<StreamTextResult>` | Streaming variant of `ask()` |
+| `askStream(query, options?)` | `Promise<AdaptStreamResult>` | Streaming variant of `ask()` |
 | `consult(query, options?)` | `Promise<ConsultResult>` | Query internal neurons |
 | `inspect(query, options?)` | `Promise<InspectResult>` | Agentic read-only introspection |
 

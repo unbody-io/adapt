@@ -1,4 +1,5 @@
-import type { CallSettings, StreamTextResult } from 'ai'
+import type { CallSettings } from 'ai'
+import type { AdaptStreamResult } from '../llm'
 import { z } from 'zod'
 import {
 	type AdaptLLMPlugin,
@@ -489,7 +490,7 @@ export async function synthesizeStream(
 	llm: AdaptLLMPlugin,
 	model: LanguageModel,
 	options: SynthesisOptions,
-): Promise<StreamTextResult<any, any>> {
+): Promise<AdaptStreamResult> {
 	const {
 		synthesisDirective,
 		query,
@@ -553,11 +554,11 @@ export async function synthesizeStream(
  * Stream a single-shot synthesis — all specialist results already collected.
  * Plain text output (no structured JSON) so textStream gives the consumer raw answer text.
  */
-export function synthesizeDirectStream(
+export async function synthesizeDirectStream(
 	llm: AdaptLLMPlugin,
 	model: LanguageModel,
 	options: DirectSynthesisOptions,
-): StreamTextResult<any, any> {
+): Promise<AdaptStreamResult> {
 	const {
 		synthesisDirective,
 		query,

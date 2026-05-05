@@ -48,7 +48,7 @@ Discriminated union — check `status` to determine the outcome:
 | Method | Returns | Description |
 |---|---|---|
 | `query(question, options?)` | `Promise<QueryResult>` | Query neuron knowledge |
-| `queryStream(question, options?)` | `Promise<StreamTextResult>` | Streaming variant |
+| `queryStream(question, options?)` | `Promise<AdaptStreamResult>` | Streaming variant |
 
 ### QueryResult
 

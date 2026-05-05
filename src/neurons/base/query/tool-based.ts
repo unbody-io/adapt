@@ -8,9 +8,9 @@
 import { z } from 'zod'
 import {
 	type AdaptLLMPlugin,
+	type AdaptStreamResult,
 	generate,
 	type LanguageModel,
-	type StreamTextResult,
 	stepCountIs,
 	streamText,
 	type Tool,
@@ -230,7 +230,7 @@ export class ToolBasedMethod implements QueryMethod {
 	async queryStream(
 		context: QueryContext,
 		options?: QueryOptions,
-	): Promise<StreamTextResult<any, any>> {
+	): Promise<AdaptStreamResult> {
 		const system = this.config.buildPrompt(context)
 		const allTools = { ...this.config.tools, ...cognitiveTools }
 		const { model: modelOverride, ...generateOptions } = options ?? {}

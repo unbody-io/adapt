@@ -7,10 +7,16 @@
  * After the agent loop, final state is read from the store.
  */
 
-import type { LanguageModel } from 'ai'
 import { nanoid } from 'nanoid'
 import { z } from 'zod'
-import { generate, Output, stepCountIs, tool } from '../../../llm'
+import {
+	type AdaptLLMPlugin,
+	generate,
+	type LanguageModel,
+	Output,
+	stepCountIs,
+	tool,
+} from '../../../llm'
 import type {
 	NeuronCollection,
 	UnderstandingRecord,
@@ -157,8 +163,8 @@ function createUnderstandTools(
 				),
 				signals: z
 					.array(z.string())
-					.optional()
-					.describe('Tags or signals for this item'),
+					.nullable()
+					.describe('Tags or signals for this item (null if none)'),
 			}),
 			execute: async (params) => {
 				const data = params.data as Record<string, unknown>
@@ -226,12 +232,12 @@ function createUnderstandTools(
 			inputSchema: z.object({
 				id: z.string().describe('ID of the item to update'),
 				data: dataSchema
-					.optional()
-					.describe('Fields to update/add in the item data'),
+					.nullable()
+					.describe('Fields to update/add in the item data (null if no data update)'),
 				signals: z
 					.array(z.string())
-					.optional()
-					.describe('Signals to add (merged with existing)'),
+					.nullable()
+					.describe('Signals to add, merged with existing (null if none)'),
 			}),
 			execute: async (params) => {
 				const existing = await collection.get(params.id)
@@ -304,8 +310,8 @@ function createUnderstandTools(
 					.describe('How significant are these changes'),
 				reasoning: z
 					.string()
-					.optional()
-					.describe('Key reasoning behind the decisions'),
+					.nullable()
+					.describe('Key reasoning behind the decisions (null if none)'),
 			}),
 			// No execute — terminal tool
 		}),
@@ -320,12 +326,14 @@ export interface UnderstandInitResult {
 }
 
 export async function initUnderstand(
+	llm: AdaptLLMPlugin,
 	model: LanguageModel,
 	instructions: string,
 ): Promise<UnderstandInitResult> {
 	const prompt = identityPrompt(instructions)
 
 	const { output: identity } = await generate({
+		llm,
 		model,
 		prompt,
 		output: Output.object({ schema: understandIdentitySchema }),
@@ -365,6 +373,7 @@ Respond with JSON only:
  * Adjust list understand phase — evolves identity from a directive
  */
 export async function adjustUnderstand(
+	llm: AdaptLLMPlugin,
 	model: LanguageModel,
 	directive: string,
 	newInstructions: string,
@@ -377,6 +386,7 @@ export async function adjustUnderstand(
 	)
 
 	const { output: identity } = await generate({
+		llm,
 		model,
 		prompt,
 		output: Output.object({ schema: understandIdentitySchema }),
@@ -392,6 +402,7 @@ export async function adjustUnderstand(
  * to make the requested modifications.
  */
 export async function adjustUnderstandingContent(
+	llm: AdaptLLMPlugin,
 	model: LanguageModel,
 	identity: UnderstandIdentity,
 	directive: string,
@@ -420,12 +431,19 @@ Preserve items the directive doesn't address.`
 		let completeResult: CompleteResult | null = null
 
 		const result = await generate({
+			llm,
 			model,
 			system,
 			prompt,
 			tools,
 			toolChoice: 'required' as const,
 			stopWhen: stepCountIs(MAX_STEPS),
+			// addItem/updateItem fall back to z.record(string, unknown) when no
+			// user understandingSchema — OpenAI strict mode rejects propertyNames.
+			// Disable strict for that path; other providers ignore the option.
+			...(understandingSchema
+				? {}
+				: { providerOptions: { openai: { strictJsonSchema: false } } }),
 			onStepFinish: ({ toolCalls }) => {
 				if (toolCalls) {
 					for (const tc of toolCalls) {
@@ -493,6 +511,7 @@ Preserve items the directive doesn't address.`
 }
 
 export async function understand(
+	llm: AdaptLLMPlugin,
 	model: LanguageModel,
 	identity: UnderstandIdentity,
 	context: UnderstandContext,
@@ -519,12 +538,19 @@ export async function understand(
 		let completeResult: CompleteResult | null = null
 
 		const result = await generate({
+			llm,
 			model,
 			system,
 			prompt,
 			tools,
 			toolChoice: 'required' as const,
 			stopWhen: stepCountIs(MAX_STEPS),
+			// addItem/updateItem fall back to z.record(string, unknown) when no
+			// user understandingSchema — OpenAI strict mode rejects propertyNames.
+			// Disable strict for that path; other providers ignore the option.
+			...(understandingSchema
+				? {}
+				: { providerOptions: { openai: { strictJsonSchema: false } } }),
 			onStepFinish: ({ text, toolCalls }) => {
 				if (text && callbacks?.onThinking) {
 					callbacks.onThinking([text])

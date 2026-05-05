@@ -4,7 +4,7 @@
  * Any component that supports model cascading should extend these interfaces.
  */
 
-import type { LanguageModel } from 'ai'
+import type { LanguageModel } from '../llm'
 
 /**
  * Base interface for any config that supports model cascading

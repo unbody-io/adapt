@@ -96,8 +96,11 @@ async function main() {
 		assert(true, 'Session 1: brain initialized and data injected')
 		await brain1.dispose()
 
-		// Session 2: restore and continue
+		// Session 2: restore and continue.
+		// After restore, models rehydrate as gateway strings — override with a
+		// direct provider before issuing LLM calls (matches the docs example).
 		const brain2 = await Brain.restore(brainDb)
+		await brain2.update({ model })
 		const answer = await brain2.ask('What do you know?')
 		assert(typeof answer.insight === 'string', 'Session 2: brain restored and can answer')
 		console.log(`  Session 2 insight: ${answer.insight.slice(0, 80)}...`)
@@ -135,7 +138,14 @@ async function main() {
 		assert('internalNeurons' in brainStore, 'BrainStore has internalNeurons namespace')
 		assert('evolution' in brainStore, 'BrainStore has evolution namespace')
 		assert('dismissedBatches' in brainStore, 'BrainStore has dismissedBatches namespace')
+		assert(typeof brainStore.getNeuronStore === 'function', 'BrainStore has getNeuronStore()')
 		assert(typeof brainStore.dispose === 'function', 'BrainStore has dispose()')
+
+		// getNeuronStore returns a usable NeuronStore and caches per id
+		const ns1 = brainStore.getNeuronStore('neuron-a')
+		const ns2 = brainStore.getNeuronStore('neuron-a')
+		assert(ns1 === ns2, 'getNeuronStore() caches per neuron id')
+		assert('observations' in ns1, 'derived NeuronStore has observations namespace')
 
 		await brainStore.dispose()
 	} finally {

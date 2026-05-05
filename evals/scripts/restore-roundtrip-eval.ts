@@ -1,71 +1,69 @@
 /**
- * Eval: Brain & Neuron restore round-trip (issue #8 / brain-construction-persistence-redesign)
+ * Eval: Brain & Neuron restore round-trip
  *
- * Fast, focused real-LLM check that the new construction/persistence API works:
- *   1. Brain.create({...}) on a fresh SQLite path persists everything.
- *   2. Brain.create on a populated path THROWS.
- *   3. Brain.restore("path.db") rehydrates models as gateway strings, restores
- *      neurons via getNeuronStore sibling files, and answers the same question
- *      with knowledge that references the injected data.
- *   4. TextNeuron.create({...}) standalone → dispose → TextNeuron.restore("path.db")
- *      survives the round-trip and queries against the restored understanding.
- *
- * This complements:
- *   - tests/brain-restore-config.test.ts (mocked, contract-only)
- *   - tests/neuron-restore-config.test.ts (mocked, contract-only)
- *   - evals/scripts/usecase-behavior-brain.ts (full real-LLM, but heavy ~85 events)
+ * Per selected preset, exercises:
+ *   1. Brain.create({...}) on a fresh SQLite path.
+ *   2. Brain.create on a populated path — must throw "already exists".
+ *   3. Brain.restore("path") + ask works WITHOUT re-passing a model.
+ *   4. Brain.restore on an empty path — must throw "no brain found".
+ *   5. TextNeuron standalone create → dispose → restore → query.
  *
  * Run:
  *   export $(cat .env.local | xargs) && npx tsx evals/scripts/restore-roundtrip-eval.ts
+ *   MODELS=openai-gpt-4o-mini npx tsx evals/scripts/restore-roundtrip-eval.ts
+ *
+ * Filter / list / add presets — see evals/scripts/_presets.ts.
  */
 
-import { Brain, TextNeuron } from '../../src'
-import { SQLiteBrainStore, SQLiteNeuronStore } from '../../src/sqlite'
-import { createOpenRouter } from '@openrouter/ai-sdk-provider'
-import { mkdtempSync, rmSync, existsSync } from 'node:fs'
-import { join } from 'node:path'
+import { existsSync, mkdtempSync, rmSync } from 'node:fs'
 import { tmpdir } from 'node:os'
+import { join } from 'node:path'
+import { Brain, TextNeuron, createAiSdkLLM } from '../../src'
+import { SQLiteBrainStore, SQLiteNeuronStore } from '../../src/sqlite'
+import { type Preset, handleListMode, selectPresets } from './_presets'
 
-const apiKey = process.env.OPENROUTER_API_KEY
-if (!apiKey) {
-	console.error('OPENROUTER_API_KEY required.')
-	process.exit(1)
-}
-const openrouter = createOpenRouter({ apiKey })
-const MODEL = process.env.MODEL ?? 'google/gemini-2.0-flash-001'
-const model = openrouter(MODEL)
+let totalPassed = 0
+let totalFailed = 0
 
-const tmp = mkdtempSync(join(tmpdir(), 'adapt-restore-roundtrip-'))
-const brainPath = join(tmp, 'brain.db')
-const neuronPath = join(tmp, 'standalone-neuron.db')
-
-const startTime = Date.now()
-const elapsed = () => ((Date.now() - startTime) / 1000).toFixed(1)
-
-let passed = 0
-let failed = 0
 function check(cond: boolean, label: string) {
 	if (cond) {
-		passed++
+		totalPassed++
 		console.log(`  ✓ ${label}`)
 	} else {
-		failed++
+		totalFailed++
 		console.log(`  ✗ ${label}`)
 	}
 }
 
-async function main() {
-	console.log('Eval: Brain & Neuron restore round-trip')
-	console.log(`Model: ${MODEL}`)
-	console.log(`Tmp: ${tmp}`)
+function safeId(id: string): string {
+	return id.replace(/[^a-zA-Z0-9_-]/g, '_')
+}
+
+async function runForPreset(preset: Preset) {
+	const apiKey = process.env[preset.envVar]
+	if (!apiKey) return
+
+	const start = Date.now()
+	const elapsed = () => ((Date.now() - start) / 1000).toFixed(1)
+
+	console.log(`\n${'━'.repeat(72)}`)
+	console.log(`Preset: ${preset.id}`)
+	console.log(`${'━'.repeat(72)}`)
+
+	const built = await preset.build(apiKey)
+	const llm = createAiSdkLLM({ providers: { [built.providerKey]: built.factory } })
+
+	const tmp = mkdtempSync(join(tmpdir(), `adapt-restore-${safeId(preset.id)}-`))
+	const brainPath = join(tmp, 'brain.db')
+	const neuronPath = join(tmp, 'standalone-neuron.db')
 
 	try {
-		// ── 1. Brain.create on fresh path ─────────────────────────────────────
-		console.log('\n━━━ 1. Brain.create — fresh ━━━')
+		// ── 1. Brain.create on fresh path ─────────────────────────────────
+		console.log('\n[1] Brain.create — fresh')
 		const brain = await Brain.create({
-			prompt:
-				'Track engineering decisions and the rationale behind technical choices.',
-			model,
+			prompt: 'Track engineering decisions and the rationale behind technical choices.',
+			model: built.model,
+			llm,
 			autoSetup: false,
 			store: new SQLiteBrainStore(brainPath),
 			neurons: [
@@ -76,9 +74,6 @@ async function main() {
 					description: 'Tracks technical decisions and tradeoffs.',
 					instructions:
 						'Track engineering decisions, runtime tradeoffs, and rationale for technical changes.',
-					// skipObservation makes the test deterministic: data goes straight to
-					// the understanding pipeline, so we don't depend on the observe LLM
-					// returning well-formed JSON for a single short input.
 					skipObservation: true,
 					observationSchema: { type: 'string' },
 					understandingSchema: { type: 'string' },
@@ -105,26 +100,25 @@ async function main() {
 		console.log(`  [${elapsed()}s] first ask: ${firstAnswer.insight.slice(0, 120)}...`)
 		check(
 			decisionRefs.test(firstAnswer.insight),
-			'first ask references the actual injected decision (not generic SQLite trivia)',
+			'first ask references the actual injected decision',
 		)
 
 		await brain.dispose()
 		console.log(`  [${elapsed()}s] disposed`)
 
-		// Verify sibling neuron file exists (proves getNeuronStore wrote there).
 		const expectedNeuronFile = join(tmp, 'brain.engineering-decisions.db')
 		check(
 			existsSync(expectedNeuronFile),
 			`getNeuronStore created sibling file: ${expectedNeuronFile}`,
 		)
 
-		// ── 2. Brain.create on populated store throws ─────────────────────────
-		console.log('\n━━━ 2. Brain.create on populated store throws ━━━')
+		// ── 2. Brain.create on populated store throws ─────────────────────
+		console.log('\n[2] Brain.create on populated store throws')
 		let createOnPopulatedThrew = false
 		try {
 			await Brain.create({
 				prompt: 'whatever',
-				model,
+				model: built.model,
 				autoSetup: false,
 				store: new SQLiteBrainStore(brainPath),
 				neurons: [],
@@ -136,9 +130,9 @@ async function main() {
 		}
 		check(createOnPopulatedThrew, 'Brain.create on populated store throws "already exists"')
 
-		// ── 3. Brain.restore via path-string sugar ────────────────────────────
-		console.log('\n━━━ 3. Brain.restore("path") — path-string sugar ━━━')
-		const restored = await Brain.restore(brainPath)
+		// ── 3. Brain.restore via path-string sugar ────────────────────────
+		console.log('\n[3] Brain.restore("path") — path-string sugar')
+		const restored = await Brain.restore(brainPath, { llm })
 		console.log(`  [${elapsed()}s] restored`)
 
 		check(
@@ -150,26 +144,17 @@ async function main() {
 			'restored neuron id matches',
 		)
 
-		// Models rehydrated as gateway strings — swap back to the live provider so
-		// the second ask uses a direct provider (avoids unauthenticated-gateway
-		// errors when AI_GATEWAY_API_KEY isn't set in CI).
-		await restored.update({
-			model,
-			query: { model },
-			learning: { query: { model } },
-		})
-
 		const secondAnswer = await restored.ask('What engineering decision was made about SQLite?')
 		console.log(`  [${elapsed()}s] second ask: ${secondAnswer.insight.slice(0, 120)}...`)
 		check(
 			decisionRefs.test(secondAnswer.insight),
-			'restored brain references the actual persisted decision (not generic trivia)',
+			'restored brain references the actual persisted decision',
 		)
 
 		await restored.dispose()
 
-		// ── 4. Brain.restore on empty store throws ────────────────────────────
-		console.log('\n━━━ 4. Brain.restore on empty store throws ━━━')
+		// ── 4. Brain.restore on empty store throws ────────────────────────
+		console.log('\n[4] Brain.restore on empty store throws')
 		const emptyDir = mkdtempSync(join(tmpdir(), 'adapt-empty-'))
 		const emptyPath = join(emptyDir, 'empty.db')
 		let restoreOnEmptyThrew = false
@@ -183,13 +168,14 @@ async function main() {
 		rmSync(emptyDir, { recursive: true, force: true })
 		check(restoreOnEmptyThrew, 'Brain.restore on empty store throws "no brain found"')
 
-		// ── 5. Standalone neuron restore round-trip ───────────────────────────
-		console.log('\n━━━ 5. TextNeuron.create → restore ━━━')
+		// ── 5. Standalone neuron restore round-trip ───────────────────────
+		console.log('\n[5] TextNeuron.create → restore')
 		const neuron = await TextNeuron.create({
 			id: 'sqlite-decisions',
 			name: 'SQLite Decisions',
 			instructions: 'Track engineering decisions about SQLite usage.',
-			model,
+			model: built.model,
+			llm,
 			store: new SQLiteNeuronStore(neuronPath),
 			understand: { thresholds: { maxObservations: 1 } },
 		})
@@ -207,30 +193,55 @@ async function main() {
 
 		await neuron.dispose()
 
-		const restoredNeuron = await TextNeuron.restore(neuronPath, { id: 'sqlite-decisions' })
+		const restoredNeuron = await TextNeuron.restore(neuronPath, {
+			id: 'sqlite-decisions',
+			llm,
+		})
 		console.log(`  [${elapsed()}s] standalone neuron restored`)
-		await restoredNeuron.update({ model, query: { model } })
-
-		const neuronSecondAnswer = await restoredNeuron.query('Which SQLite library did we pick and why?')
+		const neuronSecondAnswer = await restoredNeuron.query(
+			'Which SQLite library did we pick and why?',
+		)
 		console.log(`  [${elapsed()}s] neuron second query: ${neuronSecondAnswer.insight.slice(0, 120)}...`)
 		check(
 			/better[-\s]?sqlite3/i.test(neuronSecondAnswer.insight),
-			'restored standalone neuron answers same question against persisted understanding',
+			'restored standalone neuron answers same question',
 		)
 
 		await restoredNeuron.dispose()
 
-		// ── Summary ───────────────────────────────────────────────────────────
-		console.log(`\n${'═'.repeat(60)}`)
-		console.log(`restore-roundtrip: ${passed} passed, ${failed} failed (${elapsed()}s total)`)
-		if (failed > 0) process.exit(1)
+		console.log(`\n[done] ${preset.id} total elapsed: ${elapsed()}s`)
+	} catch (err) {
+		console.log(`\n[error] ${preset.id} crashed at t=${elapsed()}s:`)
+		console.log(err instanceof Error ? `${err.message}\n${err.stack}` : String(err))
+		totalFailed++
 	} finally {
 		rmSync(tmp, { recursive: true, force: true })
 	}
 }
 
+async function main() {
+	if (handleListMode()) return
+
+	const presets = selectPresets()
+	if (presets.length === 0) {
+		console.log('No presets selected. Set provider env keys or use MODELS=list.')
+		return
+	}
+
+	console.log('Eval: Brain & Neuron restore round-trip')
+	console.log(`Time: ${new Date().toISOString()}`)
+	console.log(`Selected: ${presets.map((p) => p.id).join(', ')}`)
+
+	for (const preset of presets) {
+		await runForPreset(preset)
+	}
+
+	console.log(`\n${'═'.repeat(72)}`)
+	console.log(`restore-roundtrip: ${totalPassed} passed, ${totalFailed} failed`)
+	if (totalFailed > 0) process.exit(1)
+}
+
 main().catch((err) => {
 	console.error('Eval crashed:', err)
-	rmSync(tmp, { recursive: true, force: true })
 	process.exit(1)
 })

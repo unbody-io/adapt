@@ -30,6 +30,7 @@ export class UpdateHandler extends EvolutionActionHandler<UpdateActionResult> {
 					}
 
 					const result = await generate({
+						llm: this.brain.llm,
 						model: this.brain.config.model,
 						system: updateSystemPrompt,
 						prompt: await updatePromptTemplate(
@@ -48,19 +49,37 @@ export class UpdateHandler extends EvolutionActionHandler<UpdateActionResult> {
 						await neuron.adjust(behavioral)
 					}
 
-					// Mechanical config via update() — specific field values
-					const { thresholds, ...rest } = mechanical
-					const hasMechanical = rest.name || rest.description || thresholds
+					// Mechanical config via update() — specific field values.
+					// LLM emits null for "no change"; drop nulls so neuron.update
+					// only sees fields the LLM actually wants to change.
+					const { thresholds, name, description } = mechanical
+					const cleanThresholds =
+						thresholds &&
+						(thresholds.minImportance !== null ||
+							thresholds.maxObservations !== null)
+							? {
+									...(thresholds.minImportance !== null
+										? { minImportance: thresholds.minImportance }
+										: {}),
+									...(thresholds.maxObservations !== null
+										? { maxObservations: thresholds.maxObservations }
+										: {}),
+								}
+							: null
+					const hasMechanical = name || description || cleanThresholds
 					if (hasMechanical) {
 						const adapted = {
-							...rest,
-							...(thresholds ? { understand: { thresholds } } : {}),
+							...(name ? { name } : {}),
+							...(description ? { description } : {}),
+							...(cleanThresholds
+								? { understand: { thresholds: cleanThresholds } }
+								: {}),
 						}
 						await neuron.update(adapted)
 					}
 
-					if (mechanical.name) {
-						this.brain.__updateNeuronName(neuronId, mechanical.name)
+					if (name) {
+						this.brain.__updateNeuronName(neuronId, name)
 					}
 
 					allUpdatedNeuronIds.push(neuronId)

@@ -6,7 +6,7 @@
  * has a different understanding shape (string, ListItem[], etc.).
  */
 
-import type { LanguageModel } from 'ai'
+import type { LanguageModel } from '../../llm'
 import type { ResolvedCascadableConfig } from '../../types/config'
 import type {
 	NeuronHealth,

@@ -9,6 +9,7 @@ import { cumulativeSeedPromptTemplate } from './prompt.template.compress'
  */
 export const cumulative: StrategyFn = async ({
 	understanding,
+	llm,
 	model,
 	config,
 }) => {
@@ -20,6 +21,7 @@ export const cumulative: StrategyFn = async ({
 	}
 
 	const result = await generate({
+		llm,
 		model,
 		prompt: cumulativeSeedPromptTemplate(understanding, maxTokens),
 	})

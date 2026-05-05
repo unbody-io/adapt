@@ -6,7 +6,12 @@ import { decayCompressPromptTemplate } from './prompt.template.compress'
 /**
  * Decay strategy - older stuff fades, recent stays detailed
  */
-export const decay: StrategyFn = async ({ understanding, model, config }) => {
+export const decay: StrategyFn = async ({
+	understanding,
+	llm,
+	model,
+	config,
+}) => {
 	const maxTokens = config.maxTokens ?? 4000
 	const currentTokens = estimateTokens(understanding)
 
@@ -16,6 +21,7 @@ export const decay: StrategyFn = async ({ understanding, model, config }) => {
 	}
 
 	const result = await generate({
+		llm,
 		model,
 		prompt: decayCompressPromptTemplate(understanding, maxTokens),
 	})

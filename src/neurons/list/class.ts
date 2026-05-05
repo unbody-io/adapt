@@ -1,4 +1,5 @@
-import type { LanguageModel } from 'ai'
+import type { AdaptLLMPlugin, LanguageModel } from '../../llm'
+import { resolveRuntimeLLM } from '../../llm'
 import type { NeuronStore } from '../../stores'
 import type { ParentModels } from '../../types/config'
 import type { UnderstandCallResult } from '../base/class'
@@ -32,10 +33,25 @@ export class ListNeuron extends BaseNeuron<ListItem[], ListNeuronState> {
 		return 'list'
 	}
 
-	constructor(rawConfig: ListNeuronConfig, parentModels?: ParentModels) {
+	constructor(
+		rawConfig: ListNeuronConfig & { llm?: AdaptLLMPlugin },
+		parentModels?: ParentModels,
+	) {
 		const config = resolveListNeuronConfig(rawConfig, parentModels)
 		const maxObsForStagnation =
 			3 * (config.understand.thresholds.maxObservations ?? 10)
+		const llm = resolveRuntimeLLM({
+			llm: rawConfig.llm,
+			models: [
+				config.model,
+				config.blueprintModel,
+				config.observer.model,
+				config.observer.blueprintModel,
+				config.understand.model,
+				config.understand.blueprintModel,
+				config.query.model,
+			],
+		})
 
 		const initialState: ListNeuronState = {
 			instructions: config.instructions,
@@ -97,7 +113,7 @@ export class ListNeuron extends BaseNeuron<ListItem[], ListNeuronState> {
 			skipObservation: rawConfig.skipObservation ?? false,
 		}
 
-		super(config.id, rawConfig.store, initialState)
+		super(config.id, llm, rawConfig.store, initialState)
 	}
 
 	// ── Abstract implementations ───────────────────────────────────────────────
@@ -143,7 +159,7 @@ export class ListNeuron extends BaseNeuron<ListItem[], ListNeuronState> {
 		model: LanguageModel,
 		instructions: string,
 	): Promise<void> {
-		const result = await initUnderstand(model, instructions)
+		const result = await initUnderstand(this.llm, model, instructions)
 		await this.setState({
 			understand_identity: result.identity,
 			// For list, the system prompt is generated per call (includes current items)
@@ -157,6 +173,7 @@ export class ListNeuron extends BaseNeuron<ListItem[], ListNeuronState> {
 		newInstructions: string,
 	): Promise<void> {
 		const result = await adjustUnderstand(
+			this.llm,
 			model,
 			directive,
 			newInstructions,
@@ -173,6 +190,7 @@ export class ListNeuron extends BaseNeuron<ListItem[], ListNeuronState> {
 		directive: string,
 	): Promise<{ evolution: string; significance: Significance }> {
 		const result = await adjustUnderstandingContent(
+			this.llm,
 			model,
 			this.state.understand_identity!,
 			directive,
@@ -198,6 +216,7 @@ export class ListNeuron extends BaseNeuron<ListItem[], ListNeuronState> {
 		callbacks?: { onThinking?: (thoughts: string[]) => void },
 	): Promise<UnderstandCallResult> {
 		const result = await understand(
+			this.llm,
 			model,
 			this.state.understand_identity!,
 			{
@@ -236,14 +255,14 @@ export class ListNeuron extends BaseNeuron<ListItem[], ListNeuronState> {
 
 	protected createQueryMethod(): QueryMethod {
 		const schema = this.state.understanding_schema
-		return new ToolBasedMethod(this.state.models.query, {
+		return new ToolBasedMethod(this.llm, this.state.models.query, {
 			tools: createListQueryTools(() => this.getUnderstanding()),
 			buildPrompt: (ctx) => buildListQueryPrompt(ctx, schema ?? undefined),
 		})
 	}
 
 	protected createDirectQueryMethod(): QueryMethod {
-		return new DirectMethod(this.state.models.query, {
+		return new DirectMethod(this.llm, this.state.models.query, {
 			getUnderstanding: async () => {
 				const items = await this.getUnderstanding()
 				if (items.length === 0) return '(empty — no items yet)'
@@ -264,6 +283,7 @@ export class ListNeuron extends BaseNeuron<ListItem[], ListNeuronState> {
 		const observeIdentity =
 			this.state.observe_identity?.identity ?? instructions
 		const observationSchema = await generateObservationSchema(
+			this.llm,
 			model,
 			instructions,
 			observeIdentity,
@@ -315,7 +335,7 @@ export class ListNeuron extends BaseNeuron<ListItem[], ListNeuronState> {
 	 * Throws if the store already contains a neuron — use {@link restore}.
 	 */
 	static async create(
-		config: ListNeuronConfig,
+		config: ListNeuronConfig & { llm?: AdaptLLMPlugin },
 		parentModels?: ParentModels,
 	): Promise<ListNeuron> {
 		const neuron = new ListNeuron(config, parentModels)
@@ -327,17 +347,20 @@ export class ListNeuron extends BaseNeuron<ListItem[], ListNeuronState> {
 	 * Restore a previously-persisted ListNeuron from a store.
 	 * `input` may be a path string (sugar for SQLiteNeuronStore) or a NeuronStore.
 	 * Throws if the store is empty — use {@link create}.
+	 *
+	 * `runtime` supplies the LLM context the neuron needs after restore.
 	 */
 	static async restore(
 		input: string | NeuronStore,
-		opts?: { id?: string },
+		runtime?: { id?: string; model?: LanguageModel; llm?: AdaptLLMPlugin },
 	): Promise<ListNeuron> {
 		const store = await resolveNeuronStore(input)
 		const neuron = new ListNeuron({
 			store,
-			model: RESTORE_PLACEHOLDER_MODEL,
+			model: runtime?.model ?? RESTORE_PLACEHOLDER_MODEL,
+			llm: runtime?.llm,
 			instructions: '',
-			id: opts?.id,
+			id: runtime?.id,
 		})
 		await neuron.init({ expect: 'restore' })
 		return neuron

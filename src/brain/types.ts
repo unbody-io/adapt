@@ -1,4 +1,4 @@
-import type { LanguageModel } from 'ai'
+import type { AdaptLLMPlugin, LanguageModel } from '../llm'
 import type { LearnOutput } from '../neurons/base/class'
 import type { SharedNeuronEventMap } from '../neurons/base/types'
 import type { GeneratedNeuronConfig } from '../neurons/schema.config'
@@ -145,6 +145,11 @@ export interface BrainConfig extends CascadableConfig {
 	prompt: string
 	/** Default model - cascades to all operations */
 	model: LanguageModel
+	/**
+	 * Custom LLM plugin for BYO runtimes (Effect, in-house clients, etc.).
+	 * Defaults to the AI SDK plugin which uses the live `model` you passed.
+	 */
+	llm?: AdaptLLMPlugin
 	/** Init phase config (decomposition) */
 	init?: InitPhaseConfig
 	/** Query config (brain.ask synthesis) */
@@ -169,6 +174,31 @@ export interface BrainConfig extends CascadableConfig {
 	internalNeurons?: InternalNeuronsConfig
 	/** Dismissed batch buffer config */
 	dismissedBatchBuffer?: DismissedBatchBufferConfig
+}
+
+/**
+ * Per-call runtime override accepted by `Brain.restore(input, runtime?)`.
+ * Carries the LLM context the brain needs to interpret persisted model
+ * configs after the process has restarted (or otherwise lost the in-memory
+ * cache from `Brain.create`).
+ *
+ * Pick exactly one form:
+ *  - `model: openai('gpt-4o')` — covers the 90% case (single AI SDK provider).
+ *  - per-slot `init/query/etc.` — when the brain was created with multi-slot
+ *    model overrides.
+ *  - `llm: customPlugin` — for BYO runtimes (Effect, in-house clients, etc.).
+ *
+ * All optional. Pass nothing if the same process already cached the live
+ * model from a prior `Brain.create` call (in-memory restore).
+ */
+export interface BrainRuntimeOptions {
+	model?: LanguageModel
+	blueprintModel?: LanguageModel
+	init?: { model?: LanguageModel }
+	query?: { model?: LanguageModel }
+	evolution?: { model?: LanguageModel }
+	learning?: LearningConfig
+	llm?: AdaptLLMPlugin
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

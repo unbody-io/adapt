@@ -5,21 +5,28 @@ import {
 	serializeBrainModelSlots,
 } from '../src/brain/state'
 import { BRAIN_DEFAULTS } from '../src/brain/config.defaults'
+import { createAiSdkLLM } from '../src/llm'
 import { mockModel } from './helpers'
+
+const llm = createAiSdkLLM()
 
 // ── toBrainModelRef ───────────────────────────────────────────────────────────
 
 describe('toBrainModelRef', () => {
-	it('extracts provider and modelId from LanguageModel', () => {
+	it('normalizes a LanguageModel into AdaptModelConfig', () => {
 		const model = mockModel('openai', 'gpt-4o')
-		const ref = toBrainModelRef(model)
-		expect(ref).toEqual({ provider: 'openai', modelId: 'gpt-4o' })
+		const ref = toBrainModelRef(model, llm)
+		expect(ref).toEqual({ plugin: 'ai-sdk', provider: 'openai', id: 'gpt-4o' })
 	})
 
 	it('handles different provider/model combos', () => {
 		const model = mockModel('anthropic', 'claude-3-opus')
-		const ref = toBrainModelRef(model)
-		expect(ref).toEqual({ provider: 'anthropic', modelId: 'claude-3-opus' })
+		const ref = toBrainModelRef(model, llm)
+		expect(ref).toEqual({
+			plugin: 'ai-sdk',
+			provider: 'anthropic',
+			id: 'claude-3-opus',
+		})
 	})
 })
 
@@ -38,12 +45,32 @@ describe('serializeBrainModelSlots', () => {
 			evolution: defaultModel,
 		}
 
-		const serialized = serializeBrainModelSlots(slots)
-		expect(serialized.default).toEqual({ provider: 'openai', modelId: 'gpt-4o' })
-		expect(serialized.blueprint).toEqual({ provider: 'openai', modelId: 'gpt-4o-mini' })
-		expect(serialized.init).toEqual({ provider: 'openai', modelId: 'gpt-4o' })
-		expect(serialized.query).toEqual({ provider: 'openai', modelId: 'gpt-4o' })
-		expect(serialized.evolution).toEqual({ provider: 'openai', modelId: 'gpt-4o' })
+		const serialized = serializeBrainModelSlots(slots, llm)
+		expect(serialized.default).toEqual({
+			plugin: 'ai-sdk',
+			provider: 'openai',
+			id: 'gpt-4o',
+		})
+		expect(serialized.blueprint).toEqual({
+			plugin: 'ai-sdk',
+			provider: 'openai',
+			id: 'gpt-4o-mini',
+		})
+		expect(serialized.init).toEqual({
+			plugin: 'ai-sdk',
+			provider: 'openai',
+			id: 'gpt-4o',
+		})
+		expect(serialized.query).toEqual({
+			plugin: 'ai-sdk',
+			provider: 'openai',
+			id: 'gpt-4o',
+		})
+		expect(serialized.evolution).toEqual({
+			plugin: 'ai-sdk',
+			provider: 'openai',
+			id: 'gpt-4o',
+		})
 	})
 })
 

@@ -1,6 +1,16 @@
-import type { CallSettings, LanguageModel, StreamTextResult, Tool } from 'ai'
+import type { CallSettings } from 'ai'
+import type { AdaptStreamResult } from '../llm'
 import { z } from 'zod'
-import { generate, Output, stepCountIs, streamText, tool } from '../llm'
+import {
+	type AdaptLLMPlugin,
+	generate,
+	type LanguageModel,
+	Output,
+	stepCountIs,
+	streamText,
+	type Tool,
+	tool,
+} from '../llm'
 import type { TokenUsage } from '../neurons/types'
 import { buildSynthesisSystemPrompt } from './prompts/prompt.synthesis.system'
 import type { BrainAskResult } from './types'
@@ -249,6 +259,7 @@ function formatConsultResults(results: ConsultRecord[]): string | undefined {
  * choice + answer tool) that causes Gemini Flash to loop.
  */
 export async function synthesize(
+	llm: AdaptLLMPlugin,
 	model: LanguageModel,
 	options: SynthesisOptions,
 ): Promise<SynthesisResult> {
@@ -290,6 +301,7 @@ export async function synthesize(
 	const t0 = Date.now()
 
 	await generate({
+		llm,
 		model,
 		system,
 		prompt: query,
@@ -325,7 +337,7 @@ export async function synthesize(
 		`[synthesis] phase 1 done in ${((Date.now() - t0) / 1000).toFixed(1)}s — ${stepNum} steps, ${queriedSpecialists.length} specialists, ${phase1Usage.totalTokens} tokens`,
 	)
 
-	const phase2 = await synthesizeDirect(model, {
+	const phase2 = await synthesizeDirect(llm, model, {
 		...generateOptions,
 		synthesisDirective,
 		query,
@@ -388,6 +400,7 @@ const directAnswerSchema = z.object({
  * One LLM call, no tools, no agentic loop.
  */
 export async function synthesizeDirect(
+	llm: AdaptLLMPlugin,
 	model: LanguageModel,
 	options: DirectSynthesisOptions,
 ): Promise<SynthesisResult> {
@@ -432,6 +445,7 @@ Never reference your internal structure, sources, confidence scores, or how you 
 ${specialistSections}${globalSection}`
 
 	const result = await generate({
+		llm,
 		model,
 		system,
 		prompt: query,
@@ -473,9 +487,10 @@ ${specialistSections}${globalSection}`
  * gathering phase is internal.
  */
 export async function synthesizeStream(
+	llm: AdaptLLMPlugin,
 	model: LanguageModel,
 	options: SynthesisOptions,
-): Promise<StreamTextResult<any, any>> {
+): Promise<AdaptStreamResult> {
 	const {
 		synthesisDirective,
 		query,
@@ -503,6 +518,7 @@ export async function synthesizeStream(
 	console.log(`[synthesis:stream] phase 1: gather`)
 
 	await generate({
+		llm,
 		model,
 		system,
 		prompt: query,
@@ -517,7 +533,7 @@ export async function synthesizeStream(
 		`[synthesis:stream] phase 1 done — ${queriedSpecialists.length} specialists`,
 	)
 
-	return synthesizeDirectStream(model, {
+	return synthesizeDirectStream(llm, model, {
 		...generateOptions,
 		synthesisDirective,
 		query,
@@ -538,10 +554,11 @@ export async function synthesizeStream(
  * Stream a single-shot synthesis — all specialist results already collected.
  * Plain text output (no structured JSON) so textStream gives the consumer raw answer text.
  */
-export function synthesizeDirectStream(
+export async function synthesizeDirectStream(
+	llm: AdaptLLMPlugin,
 	model: LanguageModel,
 	options: DirectSynthesisOptions,
-): StreamTextResult<any, any> {
+): Promise<AdaptStreamResult> {
 	const {
 		synthesisDirective,
 		query,
@@ -576,6 +593,7 @@ Never reference your internal structure, sources, confidence scores, or how you 
 ${specialistSections}${globalSection}`
 
 	return streamText({
+		llm,
 		model,
 		system,
 		prompt: query,

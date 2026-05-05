@@ -5,13 +5,15 @@
  * Cognitive tools (generateResponse, identifyGaps, complete) are built-in.
  */
 
-import type { LanguageModel, Tool } from 'ai'
 import { z } from 'zod'
 import {
+	type AdaptLLMPlugin,
+	type AdaptStreamResult,
 	generate,
-	type StreamTextResult,
+	type LanguageModel,
 	stepCountIs,
 	streamText,
+	type Tool,
 	tool,
 } from '../../../llm'
 import type { TokenUsage } from '../../types'
@@ -99,10 +101,16 @@ export interface ToolBasedConfig {
 
 export class ToolBasedMethod implements QueryMethod {
 	readonly name = 'tool-based'
+	private llm: AdaptLLMPlugin
 	private model: LanguageModel
 	private config: ToolBasedConfig
 
-	constructor(model: LanguageModel, config: ToolBasedConfig) {
+	constructor(
+		llm: AdaptLLMPlugin,
+		model: LanguageModel,
+		config: ToolBasedConfig,
+	) {
+		this.llm = llm
 		this.model = model
 		this.config = config
 	}
@@ -110,6 +118,9 @@ export class ToolBasedMethod implements QueryMethod {
 	update(config: QueryMethodUpdateConfig): void {
 		if (config.model !== undefined) {
 			this.model = config.model
+		}
+		if (config.llm !== undefined) {
+			this.llm = config.llm
 		}
 	}
 
@@ -172,6 +183,7 @@ export class ToolBasedMethod implements QueryMethod {
 		const { model: modelOverride, ...generateOptions } = options ?? {}
 
 		const result = await generate({
+			llm: this.llm,
 			model: modelOverride ?? this.model,
 			system,
 			prompt: 'Answer the query based on your understanding.',
@@ -218,12 +230,13 @@ export class ToolBasedMethod implements QueryMethod {
 	async queryStream(
 		context: QueryContext,
 		options?: QueryOptions,
-	): Promise<StreamTextResult<any, any>> {
+	): Promise<AdaptStreamResult> {
 		const system = this.config.buildPrompt(context)
 		const allTools = { ...this.config.tools, ...cognitiveTools }
 		const { model: modelOverride, ...generateOptions } = options ?? {}
 
 		return streamText({
+			llm: this.llm,
 			model: modelOverride ?? this.model,
 			system,
 			prompt: 'Answer the query based on your understanding.',

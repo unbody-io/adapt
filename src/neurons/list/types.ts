@@ -4,7 +4,7 @@
  * A neuron that maintains understanding as a structured collection of items.
  */
 
-import type { LanguageModel } from 'ai'
+import type { LanguageModel } from '../../llm'
 import type { CascadableConfig } from '../../types/config'
 import type { BaseNeuronState } from '../base/state'
 import type { BaseResolvedConfig, UnderstandThresholds } from '../base/types'

@@ -9,9 +9,8 @@
  * properties — can't be described ahead of time in a Zod schema.
  */
 
-import type { LanguageModel } from 'ai'
 import { z } from 'zod'
-import { generate } from '../../llm'
+import { type AdaptLLMPlugin, generate, type LanguageModel } from '../../llm'
 
 // ── Validation schema for parsing LLM text output ────────────────────────────
 
@@ -115,11 +114,13 @@ function extractJson(text: string): string {
 // ── Public API ──────────────────────────────────────────────────────────────
 
 export async function generateObservationSchema(
+	llm: AdaptLLMPlugin,
 	model: LanguageModel,
 	instructions: string,
 	identity: string,
 ): Promise<Record<string, unknown>> {
 	const result = await generate({
+		llm,
 		model,
 		prompt: observationSchemaPrompt(instructions, identity),
 	})
@@ -128,11 +129,13 @@ export async function generateObservationSchema(
 }
 
 export async function generateUnderstandingSchema(
+	llm: AdaptLLMPlugin,
 	model: LanguageModel,
 	instructions: string,
 	identity: string,
 ): Promise<Record<string, unknown>> {
 	const result = await generate({
+		llm,
 		model,
 		prompt: understandingSchemaPrompt(instructions, identity),
 	})

@@ -65,6 +65,35 @@ async function main() {
 
 		await brain2.dispose()
 
+		// ── Fresh vs Restored ────────────────────────────────────────────────
+		section('Fresh vs Restored')
+
+		const restorePath = join(tmpDir, 'restore.db')
+
+		// Fresh — runs LLM decomposition, persists to the store
+		const fresh = await Brain.create({
+			prompt: 'Track restore-roundtrip patterns.',
+			model,
+			store: new SQLiteBrainStore(restorePath),
+		})
+		assert(fresh instanceof Brain, 'Brain.create() persists to disk')
+		await fresh.dispose()
+
+		// Restore — path-string sugar
+		const restoredFromPath = await Brain.restore(restorePath)
+		assert(restoredFromPath instanceof Brain, 'Brain.restore(path) succeeds')
+		await restoredFromPath.dispose()
+
+		// Restore — explicit BrainStore instance
+		const restoredFromStore = await Brain.restore(new SQLiteBrainStore(restorePath))
+		assert(restoredFromStore instanceof Brain, 'Brain.restore(store) succeeds')
+
+		// Direct provider override after restore
+		await restoredFromStore.update({ model })
+		assert(true, 'brain.update({ model }) after restore succeeds')
+
+		await restoredFromStore.dispose()
+
 		// ── Injecting Data ───────────────────────────────────────────────────
 		section('Injecting Data')
 
@@ -217,6 +246,15 @@ async function main() {
 		// Inspect
 		const allNeurons = brain.getNeurons()
 		assert(Array.isArray(allNeurons), 'getNeurons() returns array')
+
+		// ── Pausing Neurons ───────────────────────────────────────────────────
+		section('Pausing Neurons')
+
+		await brain.pauseNeuron('coding')
+		assert(brain.getNeuronStatus('coding') === 'inactive', 'pauseNeuron sets status to inactive')
+
+		await brain.resumeNeuron('coding')
+		assert(brain.getNeuronStatus('coding') === 'active', 'resumeNeuron sets status to active')
 
 		// ── Managing Neurons — Evolution ──────────────────────────────────────
 		section('Managing Neurons — Evolution')

@@ -28,8 +28,8 @@ Track answers to:
 - [Question 2]`),
 	focus: z
 		.string()
-		.optional()
-		.describe('Optional focus areas to narrow observation filtering'),
+		.nullable()
+		.describe('Optional focus areas to narrow observation filtering (null if none)'),
 	type: z
 		.enum(['text', 'list'])
 		.describe(

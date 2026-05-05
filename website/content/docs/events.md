@@ -48,7 +48,7 @@ Events are grouped by phase. The most commonly used events are `neuron:synthesiz
 | **Init** | `brain:init:started`, `brain:init:config:generating`, `brain:init:config:generated`, `brain:init:completed`, `brain:init:failed` | `configs[]`, `neuronIds[]`, `usage` |
 | **Inject** | `brain:inject:started`, `brain:inject:batch:started`, `brain:inject:batch:completed`, `brain:inject:completed`, `brain:inject:failed` | `injectId`, `itemCount`, `batchCount`, `results[]` |
 | **Ask** | `brain:ask:started`, `brain:ask:synthesis:started`, `brain:ask:completed`, `brain:ask:failed` | `queryId`, `query`, `insight`, `sources[]`, `gaps[]`, `usage` |
-| **Neuron Mgmt** | `brain:neuron:added`, `brain:neuron:removed` | `neuronId`, `name`, `instructions` |
+| **Neuron Mgmt** | `brain:neuron:added`, `brain:neuron:removed`, `brain:neuron:status:changed` | `neuronId`, `name`, `instructions`, `previousStatus`, `newStatus` |
 | **Signals** | `brain:signal:received` | `source`, `description`, `timestamp` |
 | **Evaluator** | `evaluator:evaluation:started`, `evaluator:evaluation:completed`, `evaluator:evaluation:failed` | `signalCount`, `decisions[]`, `reasoning` |
 | **Evolution** | `evolution:action:started`, `evolution:action:executed`, `evolution:action:failed` | `action`, `targets[]`, `reasoning`, `result` |

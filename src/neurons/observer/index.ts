@@ -6,9 +6,13 @@
  * Shared across all neuron types (text, list, etc.).
  */
 
-import type { LanguageModel } from 'ai'
 import { z } from 'zod'
-import { generate, Output } from '../../llm'
+import {
+	type AdaptLLMPlugin,
+	generate,
+	type LanguageModel,
+	Output,
+} from '../../llm'
 import { observeAdjustPromptTemplate } from './prompts/adjust'
 import { observeIdentityPromptTemplate } from './prompts/identity'
 import { observeSystemPromptTemplate } from './prompts/system'
@@ -44,6 +48,7 @@ export interface ObserveInitResult {
  * @returns Generated identity and system prompt
  */
 export async function initObserve(
+	llm: AdaptLLMPlugin,
 	model: LanguageModel,
 	instructions: string,
 	focus?: string,
@@ -51,6 +56,7 @@ export async function initObserve(
 	const prompt = observeIdentityPromptTemplate(instructions, focus)
 
 	const { output: identity } = await generate({
+		llm,
 		model,
 		prompt,
 		output: Output.object({ schema: observeIdentitySchema }),
@@ -85,6 +91,7 @@ export interface AdjustObserveResult {
  * @returns New instructions, adjusted identity, and system prompt
  */
 export async function adjustObserve(
+	llm: AdaptLLMPlugin,
 	model: LanguageModel,
 	directive: string,
 	currentInstructions: string,
@@ -99,6 +106,7 @@ export async function adjustObserve(
 	)
 
 	const { output } = await generate({
+		llm,
 		model,
 		prompt,
 		output: Output.object({ schema: adjustObserveOutputSchema }),
@@ -127,6 +135,7 @@ export async function adjustObserve(
  * @returns Observe output
  */
 export async function observe(
+	llm: AdaptLLMPlugin,
 	model: LanguageModel,
 	systemPrompt: string,
 	context: ObserveContext,
@@ -140,6 +149,7 @@ export async function observe(
 			: observeOutputSchema
 
 		const result = await generate({
+			llm,
 			model,
 			system: systemPrompt,
 			prompt,

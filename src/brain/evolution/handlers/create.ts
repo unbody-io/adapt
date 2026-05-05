@@ -25,6 +25,7 @@ export class CreateHandler extends EvolutionActionHandler<CreateActionResult> {
 			const guidance = decisions.map((d) => d.guidance).join('\n')
 
 			const result = await generate({
+				llm: this.brain.llm,
 				model: this.brain.config.model,
 				prompt: createPromptTemplate(
 					guidance,

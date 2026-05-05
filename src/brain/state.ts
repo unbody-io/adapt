@@ -8,7 +8,7 @@
  *
  * What lives in state (persisted):
  * - prompt — brain identity/purpose
- * - models — all model slots (live LanguageModel in cache; { provider, modelId } in store)
+ * - models — all model slots (live model inputs on fresh create; model configs in store)
  * - ingest — batch size config
  * - evolution — evolution system config + runtime counters
  *
@@ -21,7 +21,8 @@
  * - configNeurons — constructor config, only affects first init
  */
 
-import type { LanguageModel } from 'ai'
+import type { AdaptLLMPlugin, AdaptModelConfig, LanguageModel } from '../llm'
+import { toModelConfig } from '../llm'
 import type { PromptContext } from './prompts/prompt.decompose-brain-prompt'
 
 // ── Model types ─────────────────────────────────────────────────────────────
@@ -29,15 +30,15 @@ import type { PromptContext } from './prompts/prompt.decompose-brain-prompt'
 /**
  * Model reference as stored in the store (serializable).
  */
-export interface StoredBrainModelRef {
-	provider: string
-	modelId: string
+export type StoredBrainModelRef = AdaptModelConfig & {
+	/** Legacy 0.0.5 shape. Deserialized into `id`. */
+	modelId?: string
 }
 
 /**
  * All model slots a Brain uses.
- * In the cache: live LanguageModel instances.
- * In the store: serialized as Record<string, StoredBrainModelRef>.
+ * In the cache: live LanguageModel inputs or restored AdaptModelConfig values.
+ * In the store: serialized AdaptModelConfig values.
  */
 export interface BrainModelSlots {
 	default: LanguageModel
@@ -95,20 +96,13 @@ export interface BrainStateTransform {
 // ── Serialization helpers ───────────────────────────────────────────────────
 
 /**
- * Extract a StoredBrainModelRef from a LanguageModel.
+ * Extract a serializable model config from a model input.
  */
-export function toBrainModelRef(model: LanguageModel): StoredBrainModelRef {
-	if (typeof model === 'string') {
-		const colonIdx = model.indexOf(':')
-		if (colonIdx > 0) {
-			return {
-				provider: model.slice(0, colonIdx),
-				modelId: model.slice(colonIdx + 1),
-			}
-		}
-		return { provider: 'unknown', modelId: model }
-	}
-	return { provider: model.provider, modelId: model.modelId }
+export function toBrainModelRef(
+	model: LanguageModel,
+	plugin: AdaptLLMPlugin,
+): StoredBrainModelRef {
+	return toModelConfig(model, plugin) as StoredBrainModelRef
 }
 
 /**
@@ -116,25 +110,38 @@ export function toBrainModelRef(model: LanguageModel): StoredBrainModelRef {
  */
 export function serializeBrainModelSlots(
 	models: BrainModelSlots,
+	plugin: AdaptLLMPlugin,
 ): Record<string, StoredBrainModelRef> {
 	return Object.fromEntries(
-		Object.entries(models).map(([key, model]) => [key, toBrainModelRef(model)]),
+		Object.entries(models).map(([key, model]) => [
+			key,
+			toBrainModelRef(model, plugin),
+		]),
 	)
 }
 
 /**
- * Rehydrate brain model slots into AI SDK's `"provider:modelId"` string form,
- * which routes through Vercel AI Gateway by default. Users who want a direct
- * provider call `brain.update({ model: openai("gpt-4o") })` post-restore.
+ * Rehydrate brain model slots into persisted model configs. Do not synthesize
+ * AI SDK Gateway strings here; the active LLM plugin interprets the config at
+ * call time.
  */
 export function deserializeBrainModelSlots(
 	stored: Record<string, StoredBrainModelRef>,
 ): BrainModelSlots {
 	const out: Record<string, LanguageModel> = {}
 	for (const [key, ref] of Object.entries(stored)) {
-		out[key] = `${ref.provider}:${ref.modelId}` as LanguageModel
+		out[key] = normalizeStoredBrainModelRef(ref)
 	}
 	return out as unknown as BrainModelSlots
+}
+
+function normalizeStoredBrainModelRef(ref: StoredBrainModelRef): AdaptModelConfig {
+	return {
+		plugin: ref.plugin ?? 'ai-sdk',
+		...(ref.provider ? { provider: ref.provider } : {}),
+		id: ref.id ?? ref.modelId ?? 'unknown',
+		...(ref.options ? { options: ref.options } : {}),
+	}
 }
 
 /**

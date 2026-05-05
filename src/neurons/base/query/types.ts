@@ -5,8 +5,11 @@
  * understanding-access tools to the QueryMethod instead.
  */
 
-import type { LanguageModel } from 'ai'
-import type { StreamTextResult } from '../../../llm'
+import type {
+	AdaptLLMPlugin,
+	AdaptStreamResult,
+	LanguageModel,
+} from '../../../llm'
 import type { TokenUsage } from '../../types'
 
 /**
@@ -70,6 +73,7 @@ export interface QueryCallbacks {
  */
 export interface QueryMethodUpdateConfig {
 	model?: LanguageModel
+	llm?: AdaptLLMPlugin
 }
 
 /**
@@ -86,11 +90,11 @@ export interface QueryMethod {
 		callbacks?: QueryCallbacks,
 	): Promise<QueryResult>
 
-	/** Stream a query — returns raw ai-sdk StreamTextResult */
+	/** Stream a query — returns an Adapt-shaped stream result */
 	queryStream?(
 		context: QueryContext,
 		options?: QueryOptions,
-	): Promise<StreamTextResult<any, any>>
+	): Promise<AdaptStreamResult>
 
 	/** Update the method's config (e.g. swap model) */
 	update(config: QueryMethodUpdateConfig): void

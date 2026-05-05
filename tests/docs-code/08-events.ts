@@ -92,6 +92,25 @@ async function main() {
 	await brain.inject([{ type: 'forward-test' }])
 	assert(forwarded.length > 0, 'Events forwarded to simulated UI')
 
+	// ── Neuron Mgmt — status:changed event ───────────────────────────────
+	section('Neuron Mgmt status:changed Event')
+
+	let statusChangedPayload: { neuronId: string; previousStatus: string; newStatus: string } | null = null
+	brain.on('brain:neuron:status:changed', (payload) => {
+		statusChangedPayload = payload
+	})
+
+	await brain.pauseNeuron('events')
+	assert(statusChangedPayload !== null, 'brain:neuron:status:changed fired on pauseNeuron')
+	const captured = statusChangedPayload as { neuronId: string; previousStatus: string; newStatus: string } | null
+	if (captured) {
+		assert(captured.neuronId === 'events', 'status:changed payload has neuronId')
+		assert(captured.previousStatus === 'active', 'status:changed payload has previousStatus')
+		assert(captured.newStatus === 'inactive', 'status:changed payload has newStatus')
+	}
+
+	await brain.resumeNeuron('events')
+
 	await brain.dispose()
 
 	// ── Summary ──────────────────────────────────────────────────────────

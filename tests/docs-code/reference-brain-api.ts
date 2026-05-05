@@ -99,9 +99,21 @@ async function main() {
 	assert(typeof brain.getNeuron === 'function', 'brain.getNeuron() exists')
 	assert(typeof brain.getNeurons === 'function', 'brain.getNeurons() exists')
 	assert(typeof brain.getInternalNeuron === 'function', 'brain.getInternalNeuron() exists')
+	assert(typeof brain.pauseNeuron === 'function', 'brain.pauseNeuron() exists')
+	assert(typeof brain.resumeNeuron === 'function', 'brain.resumeNeuron() exists')
+	assert(typeof brain.getNeuronStatus === 'function', 'brain.getNeuronStatus() exists')
 
 	const neurons = brain.getNeurons()
 	assert(Array.isArray(neurons), 'getNeurons() returns array')
+
+	// Pause/resume round-trip on the first available neuron
+	if (neurons.length > 0) {
+		const targetId = neurons[0].id
+		await brain.pauseNeuron(targetId)
+		assert(brain.getNeuronStatus(targetId) === 'inactive', 'pauseNeuron sets status to inactive')
+		await brain.resumeNeuron(targetId)
+		assert(brain.getNeuronStatus(targetId) === 'active', 'resumeNeuron sets status to active')
+	}
 
 	// ── Evolution Methods ────────────────────────────────────────────────
 	section('Evolution Methods')

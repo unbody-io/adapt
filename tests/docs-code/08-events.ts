@@ -1,8 +1,9 @@
 /**
- * Docs code test: 08-events.md
+ * Docs code test: events.md (Events & Lifecycle)
  *
- * Verifies every TypeScript code block from the Events guide
- * compiles and runs correctly.
+ * Verifies every TypeScript code block from the Events & Lifecycle guide
+ * compiles and runs correctly. The lifecycle content is prose/diagrams only —
+ * the executable assertions all come from the event subscription patterns.
  *
  * Run:
  *   export $(cat .env.local | xargs) && npx tsx tests/docs-code/08-events.ts

@@ -11,29 +11,40 @@
  * - LLM calls finalizeDecisions() when done investigating
  */
 
-import { TypedEmitter } from '../../types/events'
-import { generate, stepCountIs, streamText } from '../../llm'
 import type { AdaptStreamResult } from '../../llm'
+import { generate, stepCountIs, streamText } from '../../llm'
+import { TypedEmitter } from '../../types/events'
+import type { Brain } from '../class'
 import { evaluatorSystemPrompt } from './prompt.system'
 import { evaluationPromptTemplate } from './prompt.template.evaluation'
 import {
+	createConsultSystemKnowledgeTool,
 	createInspectSpecialistTool,
 	createQuerySpecialistTool,
-	createConsultSystemKnowledgeTool,
 	createReviewDismissedDataTool,
 	createReviewRecentDecisionsTool,
-	finalizeDecisions,
 	type FinalizeDecisionsParams,
+	finalizeDecisions,
 } from './tools'
 import type {
-	Signal,
+	EvaluatorEventMap,
 	EvolutionDecision,
 	EvolutionHistoryEntry,
-	EvaluatorEventMap,
+	Signal,
 } from './types'
-import type { Brain } from '../class'
 
 const MAX_EVALUATION_STEPS = 10
+
+function emptyStreamResult(): AdaptStreamResult {
+	return {
+		textStream: (async function* () {})(),
+		fullStream: (async function* () {})(),
+		text: Promise.resolve(''),
+		usage: Promise.resolve({}),
+		toolCalls: Promise.resolve([]),
+		steps: Promise.resolve([]),
+	}
+}
 
 export class Evaluator extends TypedEmitter<EvaluatorEventMap> {
 	private signals: Signal[] = []
@@ -94,7 +105,9 @@ export class Evaluator extends TypedEmitter<EvaluatorEventMap> {
 	 *
 	 * @returns Array of evolution decisions (can be empty)
 	 */
-	async evaluate(source: 'auto' | 'manual' = 'manual'): Promise<EvolutionDecision[]> {
+	async evaluate(
+		source: 'auto' | 'manual' = 'manual',
+	): Promise<EvolutionDecision[]> {
 		if (this.signals.length === 0) {
 			return []
 		}
@@ -131,6 +144,7 @@ export class Evaluator extends TypedEmitter<EvaluatorEventMap> {
 				tools,
 				toolChoice: 'auto',
 				stopWhen: stepCountIs(MAX_EVALUATION_STEPS),
+				...this.brain.llmRepairOptions,
 			})
 
 			// Extract decisions from finalizeDecisions tool call
@@ -214,15 +228,13 @@ export class Evaluator extends TypedEmitter<EvaluatorEventMap> {
 	 * resolves after the stream finishes and bookkeeping (history, store,
 	 * signal splice) completes.
 	 */
-	async evaluateStream(
-		source: 'auto' | 'manual' = 'manual',
-	): Promise<{
+	async evaluateStream(source: 'auto' | 'manual' = 'manual'): Promise<{
 		stream: AdaptStreamResult
 		decisions: Promise<EvolutionDecision[]>
 	}> {
 		if (this.signals.length === 0) {
 			return {
-				stream: null as any,
+				stream: emptyStreamResult(),
 				decisions: Promise.resolve([]),
 			}
 		}
@@ -254,6 +266,7 @@ export class Evaluator extends TypedEmitter<EvaluatorEventMap> {
 			tools,
 			toolChoice: 'auto',
 			stopWhen: stepCountIs(MAX_EVALUATION_STEPS),
+			...this.brain.llmRepairOptions,
 		})
 
 		// Bookkeeping resolves after the stream finishes (post-iteration).
@@ -358,25 +371,25 @@ export class Evaluator extends TypedEmitter<EvaluatorEventMap> {
 		const neurons = Array.from(this.brain.neurons.values())
 			.filter((neuron) => this.brain.getNeuronStatus(neuron.id) === 'active')
 			.map((neuron) => {
-			const health = neuron.getHealth()
-			const metrics = neuron.getMetrics()
-			return {
-				id: neuron.id,
-				name: neuron.name,
-				type: neuron.type,
-				instructions: neuron.instructions,
-				health: {
-					activation: health.activation,
-					status: health.status,
-				},
-				metrics: {
-					observationCount: metrics.ingestion.observationCount,
-					synthesisCount: metrics.ingestion.synthesisCount,
-					dismissalRate: metrics.ingestion.dismissalRate,
-					queryCount: metrics.query.count,
-				},
-			}
-		})
+				const health = neuron.getHealth()
+				const metrics = neuron.getMetrics()
+				return {
+					id: neuron.id,
+					name: neuron.name,
+					type: neuron.type,
+					instructions: neuron.instructions,
+					health: {
+						activation: health.activation,
+						status: health.status,
+					},
+					metrics: {
+						observationCount: metrics.ingestion.observationCount,
+						synthesisCount: metrics.ingestion.synthesisCount,
+						dismissalRate: metrics.ingestion.dismissalRate,
+						queryCount: metrics.query.count,
+					},
+				}
+			})
 
 		const dismissedBatchCount = await this.brain.store.dismissedBatches.count()
 

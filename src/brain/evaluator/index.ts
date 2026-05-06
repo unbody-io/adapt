@@ -3,12 +3,12 @@
  */
 
 export { Evaluator } from './class'
+export type { EvolutionDecisionsOutput } from './schema'
+export { evolutionDecisionsSchema } from './schema'
 export {
 	EVOLUTION_ACTIONS,
-	type EvolutionAction,
-	type Signal,
-	type EvolutionDecision,
 	type EvaluatorEventMap,
+	type EvolutionAction,
+	type EvolutionDecision,
+	type Signal,
 } from './types'
-export { evolutionDecisionsSchema } from './schema'
-export type { EvolutionDecisionsOutput } from './schema'

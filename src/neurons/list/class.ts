@@ -113,7 +113,10 @@ export class ListNeuron extends BaseNeuron<ListItem[], ListNeuronState> {
 			skipObservation: rawConfig.skipObservation ?? false,
 		}
 
-		super(config.id, llm, rawConfig.store, initialState)
+		super(config.id, llm, rawConfig.store, initialState, {
+			repairWithFeedback: rawConfig.repairWithFeedback,
+			maxRepairAttempts: rawConfig.maxRepairAttempts,
+		})
 	}
 
 	// ── Abstract implementations ───────────────────────────────────────────────
@@ -159,7 +162,12 @@ export class ListNeuron extends BaseNeuron<ListItem[], ListNeuronState> {
 		model: LanguageModel,
 		instructions: string,
 	): Promise<void> {
-		const result = await initUnderstand(this.llm, model, instructions)
+		const result = await initUnderstand(
+			this.llm,
+			model,
+			instructions,
+			this.llmRepairOptions,
+		)
 		await this.setState({
 			understand_identity: result.identity,
 			// For list, the system prompt is generated per call (includes current items)
@@ -178,6 +186,7 @@ export class ListNeuron extends BaseNeuron<ListItem[], ListNeuronState> {
 			directive,
 			newInstructions,
 			this.state.understand_identity!,
+			this.llmRepairOptions,
 		)
 		await this.setState({
 			understand_identity: result.identity,
@@ -196,6 +205,7 @@ export class ListNeuron extends BaseNeuron<ListItem[], ListNeuronState> {
 			directive,
 			this.store.understanding,
 			this.state.understanding_schema ?? undefined,
+			this.llmRepairOptions,
 		)
 
 		if (result.status === 'synthesized') {
@@ -227,6 +237,7 @@ export class ListNeuron extends BaseNeuron<ListItem[], ListNeuronState> {
 			this.store.understanding,
 			this.state.understanding_schema ?? undefined,
 			callbacks,
+			this.llmRepairOptions,
 		)
 
 		if (result.status === 'error') {
@@ -287,6 +298,7 @@ export class ListNeuron extends BaseNeuron<ListItem[], ListNeuronState> {
 			model,
 			instructions,
 			observeIdentity,
+			this.llmRepairOptions,
 		)
 		return { observationSchema, understandingSchema: observationSchema }
 	}
@@ -352,13 +364,21 @@ export class ListNeuron extends BaseNeuron<ListItem[], ListNeuronState> {
 	 */
 	static async restore(
 		input: string | NeuronStore,
-		runtime?: { id?: string; model?: LanguageModel; llm?: AdaptLLMPlugin },
+		runtime?: {
+			id?: string
+			model?: LanguageModel
+			llm?: AdaptLLMPlugin
+			repairWithFeedback?: ListNeuronConfig['repairWithFeedback']
+			maxRepairAttempts?: number
+		},
 	): Promise<ListNeuron> {
 		const store = await resolveNeuronStore(input)
 		const neuron = new ListNeuron({
 			store,
 			model: runtime?.model ?? RESTORE_PLACEHOLDER_MODEL,
 			llm: runtime?.llm,
+			repairWithFeedback: runtime?.repairWithFeedback,
+			maxRepairAttempts: runtime?.maxRepairAttempts,
 			instructions: '',
 			id: runtime?.id,
 		})

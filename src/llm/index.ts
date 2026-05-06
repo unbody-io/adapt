@@ -1,15 +1,16 @@
 import {
-	NoObjectGeneratedError,
-	type CallSettings,
 	type LanguageModel as AiLanguageModel,
-	type ModelMessage,
 	Output as AiOutput,
-	type ToolChoice,
-	generateText,
 	streamText as aiStreamText,
 	tool as aiTool,
+	type CallSettings,
+	generateText,
+	type ModelMessage,
+	NoObjectGeneratedError,
+	type ToolChoice,
 } from 'ai'
-import { type ZodSchema, z } from 'zod'
+import { jsonrepair } from 'jsonrepair'
+import { type ZodError, type ZodSchema, z } from 'zod'
 
 export type { CallSettings, LanguageModelUsage } from 'ai'
 
@@ -105,16 +106,26 @@ export type AdaptToolContext = {
 
 export type AdaptToolSpec = {
 	description?: string
+	// biome-ignore lint/suspicious/noExplicitAny: Tool schema types are inferred by provider/runtime-specific adapters.
 	inputSchema: any
 }
 
+// biome-ignore lint/suspicious/noExplicitAny: Defaults keep callback params inferable for unannotated tools.
 export type Tool<INPUT = any, OUTPUT = any> = AdaptTool<INPUT, OUTPUT>
 
+// biome-ignore lint/suspicious/noExplicitAny: Defaults keep callback params inferable for unannotated tools.
 export type AdaptTool<INPUT = any, OUTPUT = any> = AdaptToolSpec & {
-	execute?: (input: INPUT, context: any) => OUTPUT | Promise<OUTPUT>
+	execute?: (
+		input: INPUT,
+		// biome-ignore lint/suspicious/noExplicitAny: Tool context is adapter-shaped until plugins normalize provider callbacks.
+		context: any,
+	) => OUTPUT | Promise<OUTPUT>
 }
 
-export function tool(definition: AdaptTool<any, any>): AdaptTool<any, any> {
+// biome-ignore lint/suspicious/noExplicitAny: Defaults keep callback params inferable for unannotated tools.
+export function tool<INPUT = any, OUTPUT = any>(
+	definition: AdaptTool<INPUT, OUTPUT>,
+): AdaptTool<INPUT, OUTPUT> {
 	return definition
 }
 
@@ -189,6 +200,7 @@ export type AdaptCallMetadata = {
 	operationId?: string
 }
 
+// biome-ignore lint/suspicious/noExplicitAny: The default mirrors legacy behavior; callers can provide TJson for stricter output.
 export type AdaptModelTurnResult<TJson = any, TRaw = unknown> = {
 	text?: string
 	json?: TJson
@@ -215,15 +227,48 @@ export type AdaptModelStreamEvent<TRaw = unknown> =
  * full result instead of a partial — so AI SDK is one plugin among many, not
  * privileged.
  */
-export type AdaptStreamResult<TRaw = unknown> = {
+export type AdaptStreamResult<TRaw = unknown, TJson = unknown> = {
 	textStream: AsyncIterable<string>
 	fullStream: AsyncIterable<AdaptModelStreamEvent<TRaw>>
 	text: Promise<string>
 	usage: Promise<AdaptUsage>
 	toolCalls: Promise<AdaptToolCall[]>
 	steps: Promise<AdaptStepResult[]>
+	/**
+	 * Resolved structured output — present only when the request specified an
+	 * `output` schema. Resolves *after* the stream finalizes by running the
+	 * repair pipeline on the full `text` (markdown fences, syntactic recovery,
+	 * schema validation). If the request opted into `repairWithFeedback`, that
+	 * retry happens after finalization too. Rejects if repair or validation
+	 * fails. Plugins may leave this undefined; core's `streamText` populates it
+	 * when needed.
+	 */
+	output?: Promise<TJson>
 }
 
+/**
+ * Contract for a runtime plugin that Adapt uses to talk to a language model.
+ *
+ * ## Error contract
+ *
+ * Plugins must distinguish between two failure modes:
+ *
+ * 1. **Structured-output failures** — the model produced output but it did not
+ *    fit the requested schema (e.g. malformed JSON, missing fields, raw text
+ *    instead of a JSON object). These are *not* exceptional — return them as
+ *    `{ text: rawText, json: undefined, finishReason: 'error' }`. Adapt's core
+ *    runs a repair pipeline (markdown fences, syntactic recovery, schema
+ *    validation) on `text` whenever `json` is undefined and the request asked
+ *    for structured output.
+ *
+ * 2. **System failures** — transport errors, auth errors, rate limits,
+ *    provider 5xx, abort signals, etc. Throw these. They propagate out of
+ *    `generate()` / `streamText()` and the caller decides what to do.
+ *
+ * The same rule applies to `streamCall`: structured-output recovery happens
+ * after the stream finalizes, by core inspecting the resolved `text`. If the
+ * stream itself cannot start (auth, transport), throw.
+ */
 export interface AdaptLLMPlugin<
 	TModel extends AdaptModelConfig = AdaptModelConfig,
 	TPluginOptions = unknown,
@@ -235,18 +280,67 @@ export interface AdaptLLMPlugin<
 		toConfig(input: unknown): TModel
 		validateConfig?(config: TModel): void
 	}
+	/**
+	 * Run a single model turn. See the interface JSDoc for the error contract
+	 * — return `{ text, json: undefined }` on structured-output failures
+	 * rather than throwing.
+	 */
 	call<TJson = unknown>(
 		request: AdaptModelTurnRequest<TModel, TPluginOptions>,
 	): Promise<AdaptModelTurnResult<TJson, TRaw>>
+	/**
+	 * Optional streaming counterpart of `call`. If absent, `streamText()`
+	 * will throw on use. Same error contract as `call` — system failures
+	 * throw, structured-output failures surface in the resolved `text`
+	 * promise so core can repair after finalization.
+	 */
 	streamCall?(
 		request: AdaptModelTurnRequest<TModel, TPluginOptions>,
 	): Promise<AdaptStreamResult<TRaw>>
 }
 
+export type AdaptRepairAttempt = {
+	/** Raw model text that failed the repair pipeline + schema validation. */
+	text: string
+	/** Zod validation error from the repaired JSON candidate. */
+	error: ZodError
+	/** Expected schema for the structured output. */
+	schema: ZodSchema
+	/** 1-indexed retry counter. */
+	attempt: number
+	/** Runtime plugin for callers that want to ask the same model to repair. */
+	llm: AdaptLLMPlugin
+	/** Normalized model config used by the failed request. */
+	model: AdaptModelConfig
+	/** Original model-turn request that produced the failed text. */
+	request: AdaptModelTurnRequest
+}
+
+export type AdaptRepairWithFeedback = (
+	attempt: AdaptRepairAttempt,
+) => string | Promise<string>
+
+export type AdaptRepairOptions = {
+	/**
+	 * Opt-in structured-output retry hook. Core runs the normal repair pipeline
+	 * first; this hook is called only if repaired JSON still fails schema
+	 * validation. Return replacement text and core will repair + validate it
+	 * again. Defaults to no retry.
+	 */
+	repairWithFeedback?: AdaptRepairWithFeedback
+	/**
+	 * Maximum feedback-repair attempts when `repairWithFeedback` is provided.
+	 * Defaults to 1 and is capped at 3.
+	 */
+	maxRepairAttempts?: number
+}
+
+export type AdaptGenerateOptions = AdaptCallSettings & AdaptRepairOptions
+
 export type AdaptGenerateRequest<
 	TModel extends LanguageModel = LanguageModel,
 	TPluginOptions = unknown,
-> = AdaptCallSettings & {
+> = AdaptGenerateOptions & {
 	/**
 	 * The LLM plugin that owns the runtime for this call. Required.
 	 * Each Brain/Neuron instance holds its own plugin and threads it through
@@ -270,6 +364,7 @@ export type AdaptGenerateRequest<
 	[key: string]: unknown
 }
 
+// biome-ignore lint/suspicious/noExplicitAny: The default mirrors legacy behavior; callers can provide TJson for stricter output.
 export type AdaptGenerateResult<TJson = any> = {
 	text: string
 	output: TJson
@@ -465,7 +560,10 @@ export function createAiSdkLLM(options: AiSdkLLMOptions = {}): AdaptLLMPlugin {
 						toolName: message.toolName,
 						output: {
 							type: 'json',
-							value: jsonSafe(firstJsonContent(message.content) ?? contentToText(message.content)),
+							value: jsonSafe(
+								firstJsonContent(message.content) ??
+									contentToText(message.content),
+							),
 						},
 					},
 				],
@@ -479,6 +577,7 @@ export function createAiSdkLLM(options: AiSdkLLMOptions = {}): AdaptLLMPlugin {
 		id: DEFAULT_PLUGIN_ID,
 		model: { toConfig },
 		resolveModel,
+		// biome-ignore lint/suspicious/noExplicitAny: The default mirrors the plugin result contract.
 		async call<TJson = any>(
 			request: AdaptModelTurnRequest<AdaptModelConfig<'ai-sdk'>>,
 		): Promise<AdaptModelTurnResult<TJson>> {
@@ -491,16 +590,38 @@ export function createAiSdkLLM(options: AiSdkLLMOptions = {}): AdaptLLMPlugin {
 				maxSteps: _maxSteps,
 				...settings
 			} = (request.settings ?? {}) as Record<string, unknown>
-			const result = await generateText({
-				model: resolveModel(request.model),
-				...(request.system ? { system: request.system } : {}),
-				messages: toAiMessages(request.messages),
-				output: toAiOutput(request.output),
-				tools: toAiTools(request.tools) as never,
-				toolChoice: request.toolChoice as never,
-				abortSignal: request.signal,
-				...settings,
-			} as any)
+			let result: Awaited<ReturnType<typeof generateText>>
+			try {
+				result = await generateText({
+					model: resolveModel(request.model),
+					...(request.system ? { system: request.system } : {}),
+					messages: toAiMessages(request.messages),
+					output: toAiOutput(request.output),
+					tools: toAiTools(request.tools) as never,
+					toolChoice: request.toolChoice as never,
+					abortSignal: request.signal,
+					...settings,
+				} as never)
+			} catch (error) {
+				// Plugin contract: structured-output failures are returned as
+				// `{ text, json: undefined }` so core's repair pipeline can
+				// recover. Throws are reserved for transport / auth / system
+				// errors — those propagate.
+				if (error instanceof NoObjectGeneratedError && error.text) {
+					return {
+						text: error.text,
+						json: undefined,
+						toolCalls: [],
+						usage: {
+							inputTokens: error.usage?.inputTokens,
+							outputTokens: error.usage?.outputTokens,
+							totalTokens: error.usage?.totalTokens,
+						},
+						finishReason: 'error',
+					}
+				}
+				throw error
+			}
 
 			// `result.output` is a getter that throws `NoOutputGeneratedError`
 			// when no `output: Output.object(...)` was requested — guard against
@@ -562,40 +683,41 @@ export function createAiSdkLLM(options: AiSdkLLMOptions = {}): AdaptLLMPlugin {
 				...(request.settings ?? {}),
 			} as Parameters<typeof aiStreamText>[0])
 
-			const fullStream: AsyncIterable<AdaptModelStreamEvent> = (async function* () {
-				for await (const part of aiResult.fullStream) {
-					if (part.type === 'text-delta') {
-						yield { type: 'text-delta', text: part.text, raw: part }
-					} else if (part.type === 'tool-call') {
-						yield {
-							type: 'tool-call',
-							toolCall: {
+			const fullStream: AsyncIterable<AdaptModelStreamEvent> =
+				(async function* () {
+					for await (const part of aiResult.fullStream) {
+						if (part.type === 'text-delta') {
+							yield { type: 'text-delta', text: part.text, raw: part }
+						} else if (part.type === 'tool-call') {
+							yield {
 								type: 'tool-call',
-								toolCallId: part.toolCallId,
-								toolName: part.toolName,
-								input: 'input' in part ? part.input : undefined,
-								providerMetadata: part.providerMetadata,
-							},
-							raw: part,
-						}
-					} else if (part.type === 'finish') {
-						yield {
-							type: 'usage',
-							usage: {
-								inputTokens: part.totalUsage?.inputTokens,
-								outputTokens: part.totalUsage?.outputTokens,
-								totalTokens: part.totalUsage?.totalTokens,
-							},
-							raw: part,
-						}
-						yield {
-							type: 'finish',
-							finishReason: normalizeFinishReason(part.finishReason),
-							raw: part,
+								toolCall: {
+									type: 'tool-call',
+									toolCallId: part.toolCallId,
+									toolName: part.toolName,
+									input: 'input' in part ? part.input : undefined,
+									providerMetadata: part.providerMetadata,
+								},
+								raw: part,
+							}
+						} else if (part.type === 'finish') {
+							yield {
+								type: 'usage',
+								usage: {
+									inputTokens: part.totalUsage?.inputTokens,
+									outputTokens: part.totalUsage?.outputTokens,
+									totalTokens: part.totalUsage?.totalTokens,
+								},
+								raw: part,
+							}
+							yield {
+								type: 'finish',
+								finishReason: normalizeFinishReason(part.finishReason),
+								raw: part,
+							}
 						}
 					}
-				}
-			})()
+				})()
 
 			return {
 				textStream: aiResult.textStream,
@@ -680,6 +802,7 @@ export function resolveRuntimeLLM(opts: {
 
 // ── Adapt semantic pipeline ────────────────────────────────────────────────
 
+// biome-ignore lint/suspicious/noExplicitAny: The default preserves existing API inference behavior.
 export async function generate<TJson = any>(
 	params: AdaptGenerateRequest,
 ): Promise<AdaptGenerateResult<TJson>> {
@@ -691,6 +814,8 @@ export async function generate<TJson = any>(
 		messages: initialMessages,
 		output,
 		repairSchema,
+		repairWithFeedback,
+		maxRepairAttempts,
 		tools,
 		toolChoice,
 		stopWhen,
@@ -726,35 +851,33 @@ export async function generate<TJson = any>(
 	let raw: unknown
 
 	while (true) {
-		let turn: AdaptModelTurnResult<unknown>
-		try {
-			turn = await plugin.call({
-				model: modelConfig,
-				system,
-				messages,
-				output,
-				tools,
-				toolChoice,
-				settings,
-				metadata,
-				pluginOptions,
-				signal: abortSignal,
-			})
-		} catch (error) {
-			const repaired = tryRepairStructuredError(error, output, repairSchema)
-			if (!repaired.repaired) throw error
-			turn = {
-				text: '',
-				json: repaired.output,
-				toolCalls: [],
-				usage: { inputTokens: 0, outputTokens: 0, totalTokens: 0 },
-				finishReason: 'stop',
-			}
+		// Plugin contract: structured-output failures come back as
+		// `{ text, json: undefined }`. Throws are transport / auth / system
+		// errors — let them propagate. validateOutput() runs the repair
+		// pipeline below for any plugin that funnels failures into text.
+		const turnRequest: AdaptModelTurnRequest = {
+			model: modelConfig,
+			system,
+			messages,
+			output,
+			tools,
+			toolChoice,
+			settings,
+			metadata,
+			pluginOptions,
+			signal: abortSignal,
 		}
+		const turn: AdaptModelTurnResult<unknown> = await plugin.call(turnRequest)
 
 		const toolCalls = turn.toolCalls ?? []
 		const toolResults = await executeToolCalls(toolCalls, tools, messages)
-		const outputValue = validateOutput(turn, output, repairSchema)
+		const outputValue = await validateOutput(turn, output, repairSchema, {
+			repairWithFeedback,
+			maxRepairAttempts,
+			llm: plugin,
+			model: modelConfig,
+			request: turnRequest,
+		})
 		const step: AdaptStepResult = {
 			text: turn.text ?? '',
 			output: outputValue,
@@ -850,7 +973,9 @@ export async function streamText(
 		metadata,
 		pluginOptions,
 		abortSignal,
-		repairSchema: _repairSchema,
+		repairSchema,
+		repairWithFeedback,
+		maxRepairAttempts,
 		onStepFinish: _onStepFinish,
 		...settings
 	} = params
@@ -875,7 +1000,7 @@ export async function streamText(
 		...(toolChoice !== undefined ? { toolChoice } : {}),
 	} as AdaptCallSettings
 
-	return llm.streamCall({
+	const streamRequest: AdaptModelTurnRequest = {
 		model: modelConfig,
 		system,
 		messages: normalizeMessages(prompt, initialMessages),
@@ -886,7 +1011,37 @@ export async function streamText(
 		metadata,
 		pluginOptions,
 		signal: abortSignal,
-	})
+	}
+
+	const result = await llm.streamCall(streamRequest)
+
+	// End-of-stream repair pass: when the caller asked for a structured output,
+	// run the repair pipeline on the resolved text and expose it as `output`.
+	// Mid-stream JSON is partial and can't be repaired safely, so this is a
+	// one-shot pass at finalization, not per-delta.
+	const wantsStructured = output?.type === 'object'
+	if (!wantsStructured) {
+		return result
+	}
+
+	const outputPromise: Promise<unknown> = result.text.then((text) =>
+		validateOutput(
+			{ text, json: undefined, toolCalls: [] },
+			output,
+			repairSchema,
+			{
+				repairWithFeedback,
+				maxRepairAttempts,
+				llm,
+				model: modelConfig,
+				request: streamRequest,
+			},
+		),
+	)
+	// Swallow unhandled-rejection if the consumer never awaits `output`.
+	outputPromise.catch(() => {})
+
+	return { ...result, output: outputPromise }
 }
 
 function normalizeMessages(
@@ -943,54 +1098,103 @@ async function isStop(
 	return false
 }
 
-function validateOutput(
+type ValidateOutputOptions = {
+	repairWithFeedback?: AdaptRepairWithFeedback
+	maxRepairAttempts?: number
+	llm: AdaptLLMPlugin
+	model: AdaptModelConfig
+	request: AdaptModelTurnRequest
+}
+
+async function validateOutput(
 	turn: AdaptModelTurnResult,
 	output: AdaptOutputSpec | undefined,
 	repairSchema: ZodSchema | undefined,
-): unknown {
+	options: ValidateOutputOptions,
+): Promise<unknown> {
 	if (!output || output.type === 'text') return undefined
 	const schema = output.schema ?? repairSchema
-	if (turn.json !== undefined) {
-		return schema.parse(turn.json)
-	}
-	if (turn.text) {
-		const repaired = repairJson(turn.text)
-		const parsed = JSON.parse(repaired)
-		const clamped = clampNumericFields(parsed, schema)
-		return schema.parse(clamped)
-	}
-	return undefined
-}
-
-function tryRepairStructuredError(
-	error: unknown,
-	output: AdaptOutputSpec | undefined,
-	repairSchema: ZodSchema | undefined,
-): { repaired: true; output: unknown } | { repaired: false } {
-	const schema = output?.type === 'object' ? output.schema : repairSchema
-	if (!schema) return { repaired: false }
-	if (!(error instanceof NoObjectGeneratedError) || !error.text) {
-		return { repaired: false }
-	}
-
-	console.error(
-		'[LLM] NoObjectGeneratedError — raw text (%d chars):',
-		error.text.length,
-		error.text.slice(0, 500),
-	)
+	const text = turn.text ?? stringifyJsonCandidate(turn.json)
 
 	try {
-		const repaired = repairJson(error.text)
-		const parsed = JSON.parse(repaired)
-		const clamped = clampNumericFields(parsed, schema)
-		return { repaired: true, output: schema.parse(clamped) }
-	} catch (repairError) {
-		console.error(
-			'[LLM] JSON repair failed:',
-			repairError instanceof Error ? repairError.message : repairError,
-		)
-		return { repaired: false }
+		return turn.json !== undefined
+			? validateJsonCandidate(turn.json, schema)
+			: validateTextCandidate(text, schema)
+	} catch (error) {
+		if (!isRepairableValidationError(error, text, options)) throw error
+		return runRepairWithFeedback(text, error, schema, options)
 	}
+}
+
+async function runRepairWithFeedback(
+	initialText: string,
+	initialError: ZodError,
+	schema: ZodSchema,
+	options: ValidateOutputOptions,
+): Promise<unknown> {
+	const maxAttempts = normalizeRepairAttemptLimit(options.maxRepairAttempts)
+	let text = initialText
+	let error = initialError
+	const repairWithFeedback = options.repairWithFeedback
+	if (!repairWithFeedback) throw error
+
+	for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+		text = await repairWithFeedback({
+			text,
+			error,
+			schema,
+			attempt,
+			llm: options.llm,
+			model: options.model,
+			request: options.request,
+		})
+
+		try {
+			return validateTextCandidate(text, schema)
+		} catch (nextError) {
+			if (!(nextError instanceof z.ZodError)) throw nextError
+			error = nextError
+		}
+	}
+
+	throw error
+}
+
+function validateTextCandidate(text: string, schema: ZodSchema): unknown {
+	const repaired = repairJson(text)
+	const parsed = JSON.parse(repaired) as unknown
+	return validateJsonCandidate(parsed, schema)
+}
+
+function validateJsonCandidate(value: unknown, schema: ZodSchema): unknown {
+	const clamped = clampNumericFields(value, schema)
+	const result = schema.safeParse(clamped)
+	if (!result.success) throw result.error
+	return result.data
+}
+
+function stringifyJsonCandidate(value: unknown): string {
+	if (value === undefined) return ''
+	return JSON.stringify(value)
+}
+
+function isRepairableValidationError(
+	error: unknown,
+	text: string,
+	options: ValidateOutputOptions,
+): error is ZodError {
+	return (
+		error instanceof z.ZodError &&
+		text.length > 0 &&
+		options.repairWithFeedback !== undefined &&
+		normalizeRepairAttemptLimit(options.maxRepairAttempts) > 0
+	)
+}
+
+function normalizeRepairAttemptLimit(maxRepairAttempts: number | undefined) {
+	if (maxRepairAttempts === undefined) return 1
+	if (!Number.isFinite(maxRepairAttempts)) return 1
+	return Math.min(3, Math.max(0, Math.floor(maxRepairAttempts)))
 }
 
 function addUsage(total: Required<AdaptUsage>, usage: AdaptUsage | undefined) {
@@ -1086,25 +1290,26 @@ function clampWithJsonSchema(
 
 // ============================================================================
 // JSON Repair Pipeline
+//
+// Layered repair: our envelope-cleaning steps first (chain-of-thought
+// preambles, double opening braces — things `jsonrepair` doesn't handle),
+// then `jsonrepair` for syntactic recovery (single quotes, trailing commas,
+// missing braces, comments, markdown fences, raw newlines in strings).
+//
+// Rationale + per-sample comparison: evals/scripts/json-repair-comparison.ts
 // ============================================================================
 
 function repairJson(text: string): string {
 	let repaired = text
-	repaired = stripMarkdownCodeBlock(repaired)
 	repaired = stripGarbagePrefix(repaired)
 	repaired = fixDoubleBrace(repaired)
-	repaired = fixQuotedObjectPrefix(repaired)
-	repaired = repairJsonNewlines(repaired)
+	repaired = jsonrepair(repaired)
 	return repaired
 }
 
-function stripMarkdownCodeBlock(text: string): string {
-	return text
-		.replace(/^```(?:json)?\s*\n?/i, '')
-		.replace(/\n?```\s*$/i, '')
-		.trim()
-}
-
+// Slice off any text before the first `{`-shaped JSON start. Catches
+// chain-of-thought preambles ("Here is your JSON: { ... }") that jsonrepair
+// preserves as part of the input and parses as plain string.
 function stripGarbagePrefix(text: string): string {
 	const jsonStartPattern = /\{\s*"[a-zA-Z_]/
 	const match = text.match(jsonStartPattern)
@@ -1122,50 +1327,8 @@ function stripGarbagePrefix(text: string): string {
 	return text
 }
 
+// Some models double the opening brace: `{{"a": 1}` → `{"a": 1}`.
+// Not handled by jsonrepair (it treats the inner object as a key).
 function fixDoubleBrace(text: string): string {
 	return text.replace(/^\{\s*\{/, '{')
-}
-
-function fixQuotedObjectPrefix(text: string): string {
-	const quotedObjectPattern = /^"\s*\{/
-	if (quotedObjectPattern.test(text)) {
-		return text.replace(/^"\s*/, '')
-	}
-	return text
-}
-
-function repairJsonNewlines(text: string): string {
-	let result = ''
-	let inString = false
-	let escaped = false
-
-	for (let i = 0; i < text.length; i++) {
-		const char = text[i]
-
-		if (escaped) {
-			result += char
-			escaped = false
-			continue
-		}
-
-		if (char === '\\') {
-			result += char
-			escaped = true
-			continue
-		}
-
-		if (char === '"') {
-			inString = !inString
-			result += char
-			continue
-		}
-
-		if (inString && (char === '\n' || char === '\r')) {
-			result += '\\n'
-		} else {
-			result += char
-		}
-	}
-
-	return result
 }

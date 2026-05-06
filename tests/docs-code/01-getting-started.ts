@@ -36,6 +36,7 @@ function section(title: string) {
 }
 
 async function main() {
+	rmSync(tmpDir, { recursive: true, force: true })
 	mkdirSync(tmpDir, { recursive: true })
 
 	try {
@@ -124,19 +125,17 @@ async function main() {
 		assert(true, 'Brain.create() persists to disk')
 		await sqliteBrain.dispose()
 
-		// Subsequent run — restore (path-string sugar uses Node SQLite)
-		const restoredBrain = await Brain.restore(sqlitePath)
-		assert(true, 'Brain.restore(path) succeeds')
-
-		// Optional direct provider override after restore
-		await restoredBrain.update({ model })
-		assert(true, 'brain.update({ model }) after restore succeeds')
-
+		// Subsequent run — restore with runtime so persisted model refs rehydrate
+		const restoredBrain = await Brain.restore(sqlitePath, { model })
+		assert(true, 'Brain.restore(path, { model }) succeeds')
 		await restoredBrain.dispose()
 
-		// Bun callers pass an explicit BrainStore instance — verify the shape works
-		const restoredViaStore = await Brain.restore(new SQLiteBrainStore(sqlitePath))
-		assert(true, 'Brain.restore(store) succeeds')
+		// Bun callers pass an explicit BrainStore instance — same runtime shape
+		const restoredViaStore = await Brain.restore(
+			new SQLiteBrainStore(sqlitePath),
+			{ model },
+		)
+		assert(true, 'Brain.restore(store, { model }) succeeds')
 		await restoredViaStore.dispose()
 	} finally {
 		rmSync(tmpDir, { recursive: true, force: true })

@@ -10,7 +10,12 @@
  */
 
 import { z } from 'zod'
-import { type AdaptLLMPlugin, generate, type LanguageModel } from '../../llm'
+import {
+	type AdaptLLMPlugin,
+	type AdaptRepairOptions,
+	generate,
+	type LanguageModel,
+} from '../../llm'
 
 // ── Validation schema for parsing LLM text output ────────────────────────────
 
@@ -22,7 +27,10 @@ const jsonSchemaOutputSchema = z.object({
 
 // ── Prompts ─────────────────────────────────────────────────────────────────
 
-function observationSchemaPrompt(instructions: string, identity: string): string {
+function observationSchemaPrompt(
+	instructions: string,
+	identity: string,
+): string {
 	return `You are designing a data schema for an observation agent. This is a schema DESIGN task — reason about what structure best captures this domain before producing the schema.
 
 The agent's purpose:
@@ -63,7 +71,10 @@ Respond with your reasoning first, then the JSON schema in this exact format:
 { "schema": { "type": "object", "properties": { ... }, "required": [ ... ] } }`
 }
 
-function understandingSchemaPrompt(instructions: string, identity: string): string {
+function understandingSchemaPrompt(
+	instructions: string,
+	identity: string,
+): string {
 	return `You are generating a JSON Schema that defines the structure of a curated collection item.
 
 The agent's purpose:
@@ -91,7 +102,10 @@ Respond with JSON only: { "schema": { ... } }`
 
 function extractJson(text: string): string {
 	// Strip markdown code fences
-	let cleaned = text.replace(/^```(?:json)?\s*\n?/i, '').replace(/\n?```\s*$/i, '').trim()
+	let cleaned = text
+		.replace(/^```(?:json)?\s*\n?/i, '')
+		.replace(/\n?```\s*$/i, '')
+		.trim()
 	// Find first { to last }
 	const start = cleaned.indexOf('{')
 	const end = cleaned.lastIndexOf('}')
@@ -102,12 +116,18 @@ function extractJson(text: string): string {
 	cleaned = cleaned.replace(/Math\.pow\(([^)]+)\)/g, (_match, args) => {
 		const parts = args.split(',').map((s: string) => Number(s.trim()))
 		return parts.length === 2 && parts.every(Number.isFinite)
-			? String(Math.pow(parts[0], parts[1]))
+			? String(parts[0] ** parts[1])
 			: '0'
 	})
 	// Replace Number.MAX_SAFE_INTEGER and similar constants
-	cleaned = cleaned.replace(/Number\.MAX_SAFE_INTEGER/g, String(Number.MAX_SAFE_INTEGER))
-	cleaned = cleaned.replace(/Number\.MIN_SAFE_INTEGER/g, String(Number.MIN_SAFE_INTEGER))
+	cleaned = cleaned.replace(
+		/Number\.MAX_SAFE_INTEGER/g,
+		String(Number.MAX_SAFE_INTEGER),
+	)
+	cleaned = cleaned.replace(
+		/Number\.MIN_SAFE_INTEGER/g,
+		String(Number.MIN_SAFE_INTEGER),
+	)
 	return cleaned
 }
 
@@ -118,13 +138,17 @@ export async function generateObservationSchema(
 	model: LanguageModel,
 	instructions: string,
 	identity: string,
+	repairOptions?: AdaptRepairOptions,
 ): Promise<Record<string, unknown>> {
 	const result = await generate({
 		llm,
 		model,
 		prompt: observationSchemaPrompt(instructions, identity),
+		...repairOptions,
 	})
-	const parsed = jsonSchemaOutputSchema.parse(JSON.parse(extractJson(result.text)))
+	const parsed = jsonSchemaOutputSchema.parse(
+		JSON.parse(extractJson(result.text)),
+	)
 	return parsed.schema
 }
 
@@ -133,12 +157,16 @@ export async function generateUnderstandingSchema(
 	model: LanguageModel,
 	instructions: string,
 	identity: string,
+	repairOptions?: AdaptRepairOptions,
 ): Promise<Record<string, unknown>> {
 	const result = await generate({
 		llm,
 		model,
 		prompt: understandingSchemaPrompt(instructions, identity),
+		...repairOptions,
 	})
-	const parsed = jsonSchemaOutputSchema.parse(JSON.parse(extractJson(result.text)))
+	const parsed = jsonSchemaOutputSchema.parse(
+		JSON.parse(extractJson(result.text)),
+	)
 	return parsed.schema
 }

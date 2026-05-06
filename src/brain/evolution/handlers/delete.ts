@@ -2,8 +2,8 @@
  * Delete action handler - removes neuron from Brain
  */
 
-import { EvolutionActionHandler } from '../base-handler'
 import type { EvolutionDecision } from '../../evaluator/types'
+import { EvolutionActionHandler } from '../base-handler'
 import type { DeleteActionResult } from '../types'
 
 /**
@@ -25,9 +25,7 @@ export class DeleteHandler extends EvolutionActionHandler<DeleteActionResult> {
 					const neuron = this.brain.neurons.get(neuronId)
 
 					if (!neuron) {
-						console.warn(
-							`Delete: Neuron ${neuronId} not found, skipping`,
-						)
+						console.warn(`Delete: Neuron ${neuronId} not found, skipping`)
 						continue
 					}
 
@@ -46,7 +44,6 @@ export class DeleteHandler extends EvolutionActionHandler<DeleteActionResult> {
 			} catch (error) {
 				const err = error instanceof Error ? error : new Error(String(error))
 				this.emitActionFailed(decision, err)
-				continue
 			}
 		}
 

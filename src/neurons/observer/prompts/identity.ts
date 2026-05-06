@@ -8,7 +8,10 @@
  * @param instructions - The neuron's purpose/instructions
  * @param focus - Optional focus areas to narrow observation filtering
  */
-export function observeIdentityPromptTemplate(instructions: string, focus?: string): string {
+export function observeIdentityPromptTemplate(
+	instructions: string,
+	focus?: string,
+): string {
 	const focusSection = focus
 		? `\n\nAdditional focus areas:\n"${focus}"\n\nNarrow the identity and domain to incorporate these focus areas.`
 		: ''

@@ -1,4 +1,8 @@
-import type { AdaptLLMPlugin, LanguageModel } from '../../../llm'
+import type {
+	AdaptLLMPlugin,
+	AdaptRepairOptions,
+	LanguageModel,
+} from '../../../llm'
 
 /**
  * Understanding management strategies
@@ -17,7 +21,7 @@ export interface GovernanceConfig {
 /**
  * Context passed to strategy functions
  */
-export interface StrategyContext {
+export interface StrategyContext extends AdaptRepairOptions {
 	understanding: string
 	llm: AdaptLLMPlugin
 	model: LanguageModel

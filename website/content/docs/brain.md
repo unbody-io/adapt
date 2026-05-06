@@ -3,7 +3,7 @@ title: Brain
 description: Creating, configuring, and querying a Brain.
 ---
 
-A Brain is the top-level orchestrator — it takes a prompt describing what to learn, decomposes it into specialized neurons, and coordinates them through data ingestion, querying, and evolution.
+API guide for the `Brain` class. For the role Brain plays in the system, see [Concepts — Architecture](./concepts#architecture).
 
 ## Creating a Brain
 
@@ -55,18 +55,66 @@ Brain has two construction verbs that map to two distinct intents:
 const brain = await Brain.create({ prompt, model, store })
 
 // Restore — loads the previously persisted brain. Throws if the store is empty.
-const brain = await Brain.restore('./brain.db')   // path-string sugar (Node SQLite)
-const brain = await Brain.restore(myBrainStore)   // explicit BrainStore instance
+// Pass a runtime so persisted models can be rehydrated.
+const brain = await Brain.restore('./brain.db', { model: openai('gpt-4o') })
+const brain = await Brain.restore(myBrainStore, { model: openai('gpt-4o') })
 ```
 
-```typescript
-const brain = await Brain.restore('./brain.db')
-await brain.update({ model: openai('gpt-4o') })   // required for non-Gateway users
-```
-
-> **Required after `Brain.restore` (non-Gateway users):** Restored models rehydrate as Vercel AI Gateway strings (e.g. `"openai:gpt-4o"`). If you don't have `AI_GATEWAY_API_KEY` set — most users on direct providers like OpenAI / Anthropic / OpenRouter — you **must** call `await brain.update({ model })` before any LLM operation, otherwise calls fail with `GatewayAuthenticationError`. For multi-model cascades (different models per stage), re-pass the full model config in `update`. Issue [#9](https://github.com/unbody-io/adapt/issues/9) — BYO LLM call function — will remove this step in 0.0.6.
+> **Pass a runtime to `Brain.restore`:** persisted models are stored as `{provider, modelId}` refs and rehydrate through the LLM plugin you supply at restore time. Pick one form:
+>
+> - `model: openai('gpt-4o')` — covers the 90% case (single AI SDK provider).
+> - per-slot overrides — `init: { model }`, `query: { model }`, `evolution: { model }`, `learning: { ... }` — when the brain was created with multi-slot model config.
+> - `llm: customPlugin` — for BYO custom runtimes (Effect, in-house clients, etc.).
+>
+> Skipping the runtime is only safe for in-memory restores within the same process that already cached the live model from a prior `Brain.create` call. There is no Gateway-string fallback — calls will throw a clear "register a provider" error if no usable runtime is wired up.
 
 `Brain.create` and `Brain.restore` are the only public entry points — the constructor is private. Both methods fully initialize the brain (no separate `init()` call required).
+
+### BYO LLM runtime
+
+The default plugin (`createAiSdkLLM`) wraps the AI SDK and is wired up automatically when you pass `model: openai(...)` (or any other AI SDK model). For runtimes outside the AI SDK — Effect, in-house clients, anything implementing the `AdaptLLMPlugin` contract — pass `llm` instead:
+
+```typescript
+import { Brain, createAiSdkLLM } from '@unbody-io/adapt'
+import { openai } from '@ai-sdk/openai'
+
+// Custom AI SDK plugin with explicit provider registration (lets the
+// plugin resolve persisted model refs back to live models on restore).
+const llm = createAiSdkLLM({ providers: { openai } })
+
+const brain = await Brain.create({
+  prompt: '...',
+  model: openai('gpt-4o'),
+  llm,
+})
+
+const restored = await Brain.restore('./brain.db', { llm })
+```
+
+#### Plugin error contract
+
+If you're implementing your own `AdaptLLMPlugin`, there's one rule that's easy to miss and breaks repair behavior when violated: **structured-output failures must be returned, not thrown.**
+
+When the model produces output that doesn't fit the requested schema (malformed JSON, missing fields, raw text where an object was asked for), your plugin's `call` should return:
+
+```typescript
+{
+  text: rawTextFromModel,
+  json: undefined,
+  finishReason: 'error',
+  // ...usage, toolCalls, etc.
+}
+```
+
+Adapt's core then runs its repair pipeline (markdown-fence stripping, syntactic recovery via `jsonrepair`, schema validation) on the `text` and produces a usable structured value. If you throw instead, repair never gets a chance and the call fails outright.
+
+Throws are reserved for **system errors** — transport failures, auth errors, rate limits, provider 5xx, abort signals. Those propagate out of `generate()` / `streamText()` and the caller decides what to do.
+
+The same rule applies to `streamCall`: structured-output recovery happens after the stream finalizes via the optional `output: Promise<TJson>` on `AdaptStreamResult` (populated by core, not the plugin). Throw only when the stream itself can't start.
+
+The default `createAiSdkLLM` follows this contract: it catches the AI SDK's `NoObjectGeneratedError` internally and surfaces `error.text` as the result — no AI-SDK-specific error types leak into Adapt's core.
+
+For stubborn structured-output failures, Adapt also supports an opt-in `repairWithFeedback` hook on `generate()` / `streamText()` calls and as a `Brain.create()` / restore runtime default. Core runs the normal repair pipeline first; the hook only runs if the repaired JSON still fails schema validation. In streaming, the extra feedback repair happens after the stream finalizes, through `AdaptStreamResult.output`.
 
 ## Injecting Data
 
@@ -81,9 +129,7 @@ await brain.inject([
 await brain.inject(data, { id: 'session-42' })
 ```
 
-Data is sent to **all** neurons in parallel. Each neuron independently decides what's relevant to its domain and ignores the rest (this is the "observe" phase from the [learning pipeline](./concepts#learning-pipeline)). Items are batched by `ingest.batchSize` (default: 20).
-
-When *every* neuron dismisses a batch — meaning nothing in the batch was relevant to any neuron — it gets tracked as a coverage gap. These gaps feed into the [evolution system](./evolution), helping the Brain detect domains it's not yet equipped to handle.
+Items are batched by `ingest.batchSize` (default: 20). Routing is parallel — every neuron sees every item. Batches dismissed by *all* neurons get tracked as coverage gaps for [evolution](./evolution).
 
 ### What observers see
 
@@ -164,7 +210,7 @@ const toolCalls = await stream.toolCalls
 
 ## Consulting Internal Neurons
 
-Beyond the neurons that learn from your data, Brain maintains **internal neurons** that track how the system itself is performing. This gives you (and the evolution system) visibility into coverage gaps, query patterns, and cross-domain connections.
+The four internal neurons (introduced in [Concepts — Evolution](./concepts#evolution)) are queryable via `brain.consult()`. The table below is the practical "when to consult which" reference.
 
 | Internal Neuron | Type | What it tracks | When to consult it |
 |---|---|---|---|

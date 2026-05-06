@@ -2,10 +2,10 @@
  * Base class for evolution action handlers
  */
 
+import { TypedEmitter } from '../../types/events'
 import type { Brain } from '../class'
 import type { EvolutionDecision } from '../evaluator/types'
 import type { EvolutionActionResult } from './types'
-import { TypedEmitter } from '../../types/events'
 
 /**
  * Abstract base class for all evolution action handlers
@@ -15,7 +15,7 @@ import { TypedEmitter } from '../../types/events'
  */
 export abstract class EvolutionActionHandler<
 	TResult extends EvolutionActionResult = EvolutionActionResult,
-> extends TypedEmitter<{}> {
+> extends TypedEmitter<Record<string, never>> {
 	protected brain: Brain
 
 	constructor(brain: Brain) {

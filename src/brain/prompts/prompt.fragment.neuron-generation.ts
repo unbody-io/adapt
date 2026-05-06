@@ -112,7 +112,10 @@ For each neuron, provide:
 function buildTypeSection(descriptors: NeuronTypeDescriptor[]): string {
 	const typeNames = descriptors.map((d) => `"${d.type}"`).join(' or ')
 	const typeDescriptions = descriptors
-		.map((d) => `  ${d.type.toUpperCase()} neurons (type: "${d.type}") — ${d.description}`)
+		.map(
+			(d) =>
+				`  ${d.type.toUpperCase()} neurons (type: "${d.type}") — ${d.description}`,
+		)
 		.join('\n\n')
 
 	return `

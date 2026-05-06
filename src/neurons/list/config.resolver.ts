@@ -32,10 +32,7 @@ export function resolveListNeuronConfig(
 		origin: config.origin ?? LIST_NEURON_DEFAULTS.origin,
 		observer: {
 			model: cascade(config.observer?.model, model),
-			blueprintModel: cascade(
-				config.observer?.blueprintModel,
-				blueprintModel,
-			),
+			blueprintModel: cascade(config.observer?.blueprintModel, blueprintModel),
 		},
 		understand: {
 			model: cascade(config.understand?.model, model),
@@ -63,11 +60,9 @@ export function resolveListNeuronConfig(
 				config.governance?.deduplication ??
 				LIST_NEURON_DEFAULTS.governance.deduplication,
 			maxItems:
-				config.governance?.maxItems ??
-				LIST_NEURON_DEFAULTS.governance.maxItems,
+				config.governance?.maxItems ?? LIST_NEURON_DEFAULTS.governance.maxItems,
 			pruning:
-				config.governance?.pruning ??
-				LIST_NEURON_DEFAULTS.governance.pruning,
+				config.governance?.pruning ?? LIST_NEURON_DEFAULTS.governance.pruning,
 		},
 	}
 }

@@ -34,6 +34,7 @@ export class CreateHandler extends EvolutionActionHandler<CreateActionResult> {
 				),
 				output: Output.object({ schema: neuronConfigsSchema }),
 				repairSchema: neuronConfigsSchema,
+				...this.brain.llmRepairOptions,
 			})
 
 			const newNeuronIds: string[] = []

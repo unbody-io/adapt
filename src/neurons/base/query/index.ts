@@ -1,7 +1,7 @@
-export { DirectMethod } from './direct'
 export type { DirectConfig } from './direct'
-export { ToolBasedMethod } from './tool-based'
+export { DirectMethod } from './direct'
 export type { ToolBasedConfig } from './tool-based'
+export { ToolBasedMethod } from './tool-based'
 export type {
 	QueryCallbacks,
 	QueryContext,

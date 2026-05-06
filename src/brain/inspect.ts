@@ -6,9 +6,9 @@
  * or mature (has accumulated knowledge).
  */
 
-import type { CallSettings } from 'ai'
 import { z } from 'zod'
 import {
+	type AdaptGenerateOptions,
 	type AdaptLLMPlugin,
 	generate,
 	hasToolCall,
@@ -159,7 +159,7 @@ export async function inspect(
 	model: LanguageModel,
 	brain: Brain,
 	query: string,
-	options?: CallSettings,
+	options?: AdaptGenerateOptions,
 ): Promise<InspectResult> {
 	const tools = createInspectTools(brain)
 	const { ...generateOptions } = options ?? {}

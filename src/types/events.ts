@@ -35,7 +35,7 @@ export type UnifiedHandler<E> = (event: E) => void
  * failed events (type ending in ':failed').
  */
 export class TypedEmitter<M extends object> {
-	private listeners: Map<string, Function[]> = new Map()
+	private listeners: Map<string, Array<(payload: unknown) => void>> = new Map()
 	private wildcardListeners: UnifiedHandler<EventsFromMap<M>>[] = []
 
 	/**
@@ -55,9 +55,12 @@ export class TypedEmitter<M extends object> {
 		if (typeof typeOrHandler === 'function') {
 			this.wildcardListeners.push(typeOrHandler)
 		} else {
+			if (!handler) {
+				throw new Error('Typed event handler is required')
+			}
 			const type = typeOrHandler as string
 			const listeners = this.listeners.get(type) || []
-			listeners.push(handler!)
+			listeners.push(handler as (payload: unknown) => void)
 			this.listeners.set(type, listeners)
 		}
 		return this

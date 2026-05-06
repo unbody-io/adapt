@@ -48,7 +48,9 @@ export type ObserveSchemaOutput = z.infer<typeof observeOutputSchema>
  * When an observationSchema is provided, observation items match that schema
  * instead of being plain strings.
  */
-export function buildObserveOutputSchema(observationSchema: Record<string, unknown>) {
+export function buildObserveOutputSchema(
+	observationSchema: Record<string, unknown>,
+) {
 	const itemSchema = z.fromJSONSchema(observationSchema)
 
 	return z.object({

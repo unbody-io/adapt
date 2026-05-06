@@ -5,14 +5,15 @@
  * carry the domain context — the brain's raw prompt was already decomposed
  * into those specialists during init.
  */
-export function buildSynthesisSystemPrompt(hasConsultTools?: boolean, synthesisDirective?: string): string {
+export function buildSynthesisSystemPrompt(
+	hasConsultTools?: boolean,
+	synthesisDirective?: string,
+): string {
 	const consultSection = hasConsultTools
 		? ` You also have access to the system's connective tissue — cross-cutting patterns, coverage gaps, and past struggles that no single specialist sees.`
 		: ''
 
-	const directiveSection = synthesisDirective
-		? `\n\n${synthesisDirective}`
-		: ''
+	const directiveSection = synthesisDirective ? `\n\n${synthesisDirective}` : ''
 
 	return `You have specialists — each sees one dimension. Query 1-3 that are most relevant. If one gives a thin answer, ask it a sharper question or try one more specialist — but don't poll them all. Answer from what you have.${consultSection}
 

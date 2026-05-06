@@ -19,6 +19,7 @@ import { nanoid } from 'nanoid'
 import { z } from 'zod'
 import {
 	type AdaptLLMPlugin,
+	type AdaptRepairOptions,
 	type AdaptStreamResult,
 	generate,
 	type LanguageModel,
@@ -202,16 +203,21 @@ export abstract class BaseNeuron<
 	 * holds its own plugin — there is no global registry. Set at construction.
 	 */
 	protected llm: AdaptLLMPlugin
+	protected repairWithFeedback?: AdaptRepairOptions['repairWithFeedback']
+	protected maxRepairAttempts?: number
 
 	constructor(
 		id: string,
 		llm: AdaptLLMPlugin,
 		store: NeuronStore,
 		initialState: TState,
+		repairOptions?: AdaptRepairOptions,
 	) {
 		super()
 		this.id = id
 		this.llm = llm
+		this.repairWithFeedback = repairOptions?.repairWithFeedback
+		this.maxRepairAttempts = repairOptions?.maxRepairAttempts
 		this.store = store
 		this.state = initialState
 		this.stateTransforms = {
@@ -236,6 +242,17 @@ export abstract class BaseNeuron<
 					}
 				},
 			},
+		}
+	}
+
+	protected get llmRepairOptions(): AdaptRepairOptions {
+		return {
+			...(this.repairWithFeedback
+				? { repairWithFeedback: this.repairWithFeedback }
+				: {}),
+			...(this.maxRepairAttempts !== undefined
+				? { maxRepairAttempts: this.maxRepairAttempts }
+				: {}),
 		}
 	}
 
@@ -408,6 +425,7 @@ export abstract class BaseNeuron<
 						this.state.models.observer_blueprint,
 						this.state.instructions,
 						this.state.focus || undefined,
+						this.llmRepairOptions,
 					)
 					this.state.observe_identity = observeResult.identity
 					this.state.observe_prompt = observeResult.systemPrompt
@@ -591,6 +609,7 @@ export abstract class BaseNeuron<
 							})
 						},
 					},
+					this.llmRepairOptions,
 				)
 
 				if (observeResult.status === 'error') {
@@ -864,8 +883,12 @@ export abstract class BaseNeuron<
 		}
 
 		try {
+			const queryOptions = {
+				...this.llmRepairOptions,
+				...options,
+			}
 			const method =
-				options?.mode === 'direct' && this.directQueryMethod
+				queryOptions.mode === 'direct' && this.directQueryMethod
 					? this.directQueryMethod
 					: this.queryMethod
 			const result = await method.query(
@@ -874,7 +897,7 @@ export abstract class BaseNeuron<
 					instructions: this.state.instructions,
 					question,
 				},
-				options,
+				queryOptions,
 				{
 					onThinking: (thoughts, usage) => {
 						this.emit('neuron:query:thinking', {
@@ -927,7 +950,7 @@ export abstract class BaseNeuron<
 		})
 
 		const method =
-			options?.mode === 'direct' && this.directQueryMethod
+			(options?.mode ?? undefined) === 'direct' && this.directQueryMethod
 				? this.directQueryMethod
 				: this.queryMethod
 
@@ -943,7 +966,10 @@ export abstract class BaseNeuron<
 				instructions: this.state.instructions,
 				question,
 			},
-			options,
+			{
+				...this.llmRepairOptions,
+				...options,
+			},
 		)
 	}
 
@@ -1133,6 +1159,7 @@ export abstract class BaseNeuron<
 						this.state.models.observer_blueprint,
 						this.state.instructions,
 						this.state.focus || undefined,
+						this.llmRepairOptions,
 					).then((result) => {
 						;(regenUpdates as Record<string, unknown>).observe_identity =
 							result.identity
@@ -1220,6 +1247,7 @@ The directive: "${directive}"
 What does this directive touch?`,
 			output: Output.object({ schema: adjustClassificationSchema }),
 			repairSchema: adjustClassificationSchema,
+			...this.llmRepairOptions,
 		})
 
 		const changedFields: string[] = []
@@ -1235,6 +1263,7 @@ What does this directive touch?`,
 				this.state.instructions,
 				this.state.observe_identity!,
 				this.state.focus || undefined,
+				this.llmRepairOptions,
 			)
 
 			await this.setState({

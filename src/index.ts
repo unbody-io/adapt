@@ -29,11 +29,15 @@
 
 export * from './brain'
 export {
+	type AdaptGenerateOptions,
 	type AdaptLLMPlugin,
 	type AdaptModelConfig,
 	type AdaptModelStreamEvent,
 	type AdaptModelTurnRequest,
 	type AdaptModelTurnResult,
+	type AdaptRepairAttempt,
+	type AdaptRepairOptions,
+	type AdaptRepairWithFeedback,
 	type AdaptStreamResult,
 	type AiSdkLLMOptions,
 	type AiSdkProviderFactory,

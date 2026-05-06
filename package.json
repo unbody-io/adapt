@@ -29,9 +29,9 @@
     "dev": "tsc --watch",
     "test": "vitest",
     "test:run": "vitest run",
-    "lint": "biome check .",
-    "lint:fix": "biome check --write .",
-    "format": "biome format --write .",
+    "lint": "biome check src",
+    "lint:fix": "biome check --write src",
+    "format": "biome format --write src",
     "eval:text-neuron": "npx tsx evals/scripts/text-neuron-semantic-eval.ts",
     "eval:list-neuron": "npx tsx evals/scripts/list-neuron-semantic-eval.ts",
     "eval:behavior-brain": "npx tsx evals/scripts/usecase-behavior-brain.ts",
@@ -59,7 +59,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/unbody-io/adapt.git"
+    "url": "git+https://github.com/unbody-io/adapt.git"
   },
   "homepage": "https://adapt.unbody.io",
   "bugs": "https://github.com/unbody-io/adapt/issues",
@@ -82,6 +82,7 @@
   },
   "dependencies": {
     "ai": "^6.0.0",
+    "jsonrepair": "^3.14.0",
     "nanoid": "^5.1.6",
     "zod": "^4.3.6"
   },

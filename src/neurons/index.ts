@@ -1,57 +1,66 @@
 // Base
-export { BaseNeuron } from './base'
+
+// Store (re-exported from stores/)
+export type {
+	EvolutionRecord,
+	NeuronCollection,
+	NeuronStore,
+	ObservationRecord,
+	StateRecord,
+	UnderstandingRecord,
+} from '../stores'
+export { MemoryNeuronCollection, MemoryNeuronStore } from '../stores'
 export type {
 	AdjustResult,
+	BaseNeuronState,
+	BaseNeuronUpdateInput,
+	BaseResolvedConfig,
+	EventUsage,
 	LearnCallbacks,
 	LearnOptions,
 	LearnOutput,
-	UnderstandCallResult,
-} from './base'
-export type {
-	BaseNeuronState,
 	ModelSlots,
-	StoredModelRef,
-	StateTransform,
-} from './base'
-export type {
 	SharedNeuronEventMap,
-	EventUsage,
-	BaseResolvedConfig,
-	BaseNeuronUpdateInput,
+	StateTransform,
+	StoredModelRef,
+	UnderstandCallResult,
 	UnderstandThresholds,
 } from './base'
+export { BaseNeuron } from './base'
 export type { QueryOptions, QueryResult } from './base/query'
 export { ToolBasedMethod } from './base/query'
-
+export type {
+	ListGovernanceConfig,
+	ListItem,
+	ListNeuronConfig,
+	ListNeuronEvent,
+	ListNeuronEventMap,
+	ListNeuronUpdateResult,
+	ListOperation,
+	ResolvedListGovernanceConfig,
+	ResolvedListNeuronConfig,
+} from './list'
+// ListNeuron
+export { ListNeuron } from './list'
+export { listNeuronDescriptor } from './list/descriptor'
 // Schemas
 export {
 	type GeneratedNeuronConfig,
 	neuronConfigSchema,
 } from './schema.config'
-
-// Store (re-exported from stores/)
 export type {
-	NeuronStore,
-	NeuronCollection,
-	ObservationRecord,
-	UnderstandingRecord,
-	EvolutionRecord,
-	StateRecord,
-} from '../stores'
-export { MemoryNeuronStore, MemoryNeuronCollection } from '../stores'
-
-// TextNeuron
-export { TextNeuron } from './text'
-export type {
+	ResolvedGovernanceConfig,
+	ResolvedTextNeuronConfig,
+	TextGovernanceConfig,
 	TextNeuronConfig,
 	TextNeuronEvent,
 	TextNeuronEventMap,
-	TextGovernanceConfig,
-	ResolvedGovernanceConfig,
-	ResolvedTextNeuronConfig,
 	TextNeuronUpdateResult,
 } from './text'
-
+// TextNeuron
+export { TextNeuron } from './text'
+// Descriptors
+export { textNeuronDescriptor } from './text/descriptor'
 export type {
 	GovernanceConfig,
 	Strategy,
@@ -65,32 +74,13 @@ export {
 	strategyFunctions,
 	strategyPrompts,
 } from './text/strategies'
-
-// ListNeuron
-export { ListNeuron } from './list'
-export type {
-	ListItem,
-	ListNeuronConfig,
-	ListNeuronEvent,
-	ListNeuronEventMap,
-	ListNeuronUpdateResult,
-	ListGovernanceConfig,
-	ListOperation,
-	ResolvedListNeuronConfig,
-	ResolvedListGovernanceConfig,
-} from './list'
-
 export type {
 	Neuron,
 	NeuronHealth,
 	NeuronMetadata,
 	NeuronOrigin,
 	NeuronStatus,
+	NeuronTypeDescriptor,
 	Significance,
 	TokenUsage,
-	NeuronTypeDescriptor,
 } from './types'
-
-// Descriptors
-export { textNeuronDescriptor } from './text/descriptor'
-export { listNeuronDescriptor } from './list/descriptor'

@@ -1,14 +1,14 @@
-import type { LanguageModel } from '../../llm'
-import type { CascadableConfig } from '../../types/config'
-import type { BaseNeuronState } from '../base/state'
-import type { BaseResolvedConfig, UnderstandThresholds } from '../base/types'
-import type { EventsFromMap } from '../../types/events'
-import type {
-	NeuronOrigin,
-	Significance,
-} from '../types'
-import type { SharedNeuronEventMap } from '../base/types'
+import type { AdaptRepairOptions, LanguageModel } from '../../llm'
 import type { NeuronStore } from '../../stores'
+import type { CascadableConfig } from '../../types/config'
+import type { EventsFromMap } from '../../types/events'
+import type { BaseNeuronState } from '../base/state'
+import type {
+	BaseResolvedConfig,
+	SharedNeuronEventMap,
+	UnderstandThresholds,
+} from '../base/types'
+import type { NeuronOrigin, Significance } from '../types'
 import type { Strategy } from './strategies'
 import type { UnderstandIdentity } from './understand'
 
@@ -24,7 +24,11 @@ export interface TextNeuronEventMap extends SharedNeuronEventMap {
 		previousUnderstanding: string
 		significance: Significance
 		evolution: string
-		usage?: { inputTokens?: number; outputTokens?: number; totalTokens?: number }
+		usage?: {
+			inputTokens?: number
+			outputTokens?: number
+			totalTokens?: number
+		}
 	}
 	'neuron:config:updated': {
 		neuronId: string
@@ -62,7 +66,7 @@ export interface QueryConfig {
 
 // ── TextNeuron Config (input) ──────────────────────────────────────────────
 
-export interface TextNeuronConfig extends CascadableConfig {
+export interface TextNeuronConfig extends CascadableConfig, AdaptRepairOptions {
 	/** Default model for all operations */
 	model: LanguageModel
 	/** Natural language instructions for what this neuron tracks and watches for */

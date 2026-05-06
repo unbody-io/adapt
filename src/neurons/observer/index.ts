@@ -9,6 +9,7 @@
 import { z } from 'zod'
 import {
 	type AdaptLLMPlugin,
+	type AdaptRepairOptions,
 	generate,
 	type LanguageModel,
 	Output,
@@ -19,7 +20,7 @@ import { observeSystemPromptTemplate } from './prompts/system'
 import { observeUserPromptTemplate } from './prompts/user'
 import type { ObserveIdentity } from './schema.identity'
 import { observeIdentitySchema } from './schema.identity'
-import { observeOutputSchema, buildObserveOutputSchema } from './schema.output'
+import { buildObserveOutputSchema, observeOutputSchema } from './schema.output'
 import type { ObserveCallbacks, ObserveContext, ObserveOutput } from './types'
 
 /**
@@ -52,6 +53,7 @@ export async function initObserve(
 	model: LanguageModel,
 	instructions: string,
 	focus?: string,
+	repairOptions?: AdaptRepairOptions,
 ): Promise<ObserveInitResult> {
 	const prompt = observeIdentityPromptTemplate(instructions, focus)
 
@@ -61,6 +63,7 @@ export async function initObserve(
 		prompt,
 		output: Output.object({ schema: observeIdentitySchema }),
 		repairSchema: observeIdentitySchema,
+		...repairOptions,
 	})
 
 	const systemPrompt = observeSystemPromptTemplate(identity)
@@ -97,6 +100,7 @@ export async function adjustObserve(
 	currentInstructions: string,
 	currentIdentity: ObserveIdentity,
 	focus?: string,
+	repairOptions?: AdaptRepairOptions,
 ): Promise<AdjustObserveResult> {
 	const prompt = observeAdjustPromptTemplate(
 		directive,
@@ -111,6 +115,7 @@ export async function adjustObserve(
 		prompt,
 		output: Output.object({ schema: adjustObserveOutputSchema }),
 		repairSchema: adjustObserveOutputSchema,
+		...repairOptions,
 	})
 
 	const newInstructions = output.instructions
@@ -141,6 +146,7 @@ export async function observe(
 	context: ObserveContext,
 	observationSchema?: Record<string, unknown>,
 	callbacks?: ObserveCallbacks,
+	repairOptions?: AdaptRepairOptions,
 ): Promise<ObserveOutput> {
 	try {
 		const prompt = observeUserPromptTemplate(context.data)
@@ -156,6 +162,7 @@ export async function observe(
 			output: Output.object({ schema: outputSchema }),
 			repairSchema: outputSchema,
 			temperature: 0.2,
+			...repairOptions,
 		})
 
 		// Emit thinking if available
@@ -194,4 +201,9 @@ export async function observe(
 export type { ObserveIdentity } from './schema.identity'
 export { observeIdentitySchema } from './schema.identity'
 export { observeOutputSchema } from './schema.output'
-export type { ObserveOutput, ObserveContext, ObserveCallbacks, Usage } from './types'
+export type {
+	ObserveCallbacks,
+	ObserveContext,
+	ObserveOutput,
+	Usage,
+} from './types'

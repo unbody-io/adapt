@@ -29,7 +29,9 @@ Track answers to:
 	focus: z
 		.string()
 		.nullable()
-		.describe('Optional focus areas to narrow observation filtering (null if none)'),
+		.describe(
+			'Optional focus areas to narrow observation filtering (null if none)',
+		),
 	type: z
 		.enum(['text', 'list'])
 		.describe(

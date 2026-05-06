@@ -15,9 +15,7 @@ export type DynamicsSkill = z.infer<typeof dynamicsSkillEnum>
  */
 export const dynamicsGuidanceSchema = z.object({
 	recurs: z.string().describe('Domain-specific guidance for RECURS'),
-	intensifies: z
-		.string()
-		.describe('Domain-specific guidance for INTENSIFIES'),
+	intensifies: z.string().describe('Domain-specific guidance for INTENSIFIES'),
 	fades: z.string().describe('Domain-specific guidance for FADES'),
 	shifts: z.string().describe('Domain-specific guidance for SHIFTS'),
 	avoids: z.string().describe('Domain-specific guidance for AVOIDS'),

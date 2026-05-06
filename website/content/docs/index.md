@@ -121,13 +121,10 @@ const brain = await Brain.create({
 })
 
 // Subsequent runs — restore from disk, no LLM calls during init
-const brain = await Brain.restore('./brain.db')
-await brain.update({ model: openai('gpt-4o') })   // required for non-Gateway users
+const brain = await Brain.restore('./brain.db', { model: openai('gpt-4o') })
 ```
 
-Per-neuron data is written to sibling files derived from the brain DB path automatically (e.g. `./brain.db` → `./brain.<neuron-id>.db`).
-
-> **Required after `Brain.restore` (non-Gateway users):** Restored models rehydrate as Vercel AI Gateway strings (e.g. `"openai:gpt-4o"`). If you don't have `AI_GATEWAY_API_KEY` set — most users on direct providers like OpenAI / Anthropic / OpenRouter — you **must** call `await brain.update({ model })` before any LLM operation, otherwise calls fail with `GatewayAuthenticationError`. For multi-model cascades (different models per stage), re-pass the full model config in `update`. Issue [#9](https://github.com/unbody-io/adapt/issues/9) — BYO LLM call function — will remove this step in 0.0.6.
+Per-neuron data is written to sibling files derived from the brain DB path automatically (e.g. `./brain.db` → `./brain.<neuron-id>.db`). The `model` argument rehydrates persisted model refs through the LLM plugin — see [Brain — Fresh vs Restored](./brain#fresh-vs-restored) for runtime options including custom plugins and per-slot model overrides.
 
 **Bun**
 
@@ -144,15 +141,17 @@ const brain = await Brain.create({
 })
 
 // Subsequent runs — Bun callers must pass an explicit store instance
-const brain = await Brain.restore(new SQLiteBrainStore('./brain.db'))
-await brain.update({ model: openai('gpt-4o') })   // required for non-Gateway users
+const brain = await Brain.restore(
+  new SQLiteBrainStore('./brain.db'),
+  { model: openai('gpt-4o') },
+)
 ```
 
-The path-string sugar `Brain.restore('./brain.db')` always uses the Node SQLite adapter; Bun callers pass a `SQLiteBrainStore` from `@unbody-io/adapt/sqlite/bun` instead. The same restore-then-update requirement applies (see callout above).
+The path-string sugar `Brain.restore('./brain.db', ...)` always uses the Node SQLite adapter via dynamic import; Bun callers construct `SQLiteBrainStore` from `@unbody-io/adapt/sqlite/bun` and pass the instance instead.
 
 ## Next Steps
 
-- [Concepts](./concepts) — architecture, pipeline, neuron types
+- [Concepts](./concepts) — architecture and mental model
 - [Brain](./brain) — full Brain API guide
 - [Neurons](./neurons) — TextNeuron and ListNeuron in depth
 - [Prompt Design](./prompt-design) — the most important input to a neuron

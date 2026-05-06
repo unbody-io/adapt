@@ -111,12 +111,11 @@ await brain.inject(data)
 await brain.dispose()
 
 // Session 2: restore and continue
-const brain2 = await Brain.restore('./brain.db')        // path-string sugar (Node)
-await brain2.update({ model: openai('gpt-4o') })        // required for non-Gateway users
+const brain2 = await Brain.restore('./brain.db', { model: openai('gpt-4o') })
 await brain2.ask('What do you know?')                   // full knowledge from session 1
 ```
 
-> **Required after `Brain.restore` (non-Gateway users):** Restored models rehydrate as Vercel AI Gateway strings (e.g. `"openai:gpt-4o"`). If you don't have `AI_GATEWAY_API_KEY` set — most users on direct providers like OpenAI / Anthropic / OpenRouter — you **must** call `await brain.update({ model })` before any LLM operation, otherwise calls fail with `GatewayAuthenticationError`. For multi-model cascades (different models per stage), re-pass the full model config in `update`. Issue [#9](https://github.com/unbody-io/adapt/issues/9) — BYO LLM call function — will remove this step in 0.0.6.
+The `model` argument rehydrates persisted model refs through the LLM plugin. See [Brain — Fresh vs Restored](./brain#fresh-vs-restored) for the full runtime options (custom plugins, per-slot overrides).
 
 ## Custom Stores
 

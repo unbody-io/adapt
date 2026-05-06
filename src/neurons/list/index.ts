@@ -1,12 +1,12 @@
 export { ListNeuron } from './class'
 export type {
+	ListGovernanceConfig,
 	ListItem,
 	ListNeuronConfig,
 	ListNeuronEvent,
 	ListNeuronEventMap,
 	ListNeuronUpdateResult,
-	ListGovernanceConfig,
 	ListOperation,
-	ResolvedListNeuronConfig,
 	ResolvedListGovernanceConfig,
+	ResolvedListNeuronConfig,
 } from './types'

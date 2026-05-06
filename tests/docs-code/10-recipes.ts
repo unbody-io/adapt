@@ -36,6 +36,7 @@ function section(title: string) {
 }
 
 async function main() {
+	rmSync(tmpDir, { recursive: true, force: true })
 	mkdirSync(tmpDir, { recursive: true })
 
 	try {

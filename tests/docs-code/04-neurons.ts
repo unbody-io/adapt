@@ -36,6 +36,7 @@ function section(title: string) {
 }
 
 async function main() {
+	rmSync(tmpDir, { recursive: true, force: true })
 	mkdirSync(tmpDir, { recursive: true })
 	try {
 	// ── TextNeuron — Basic ────────────────────────────────────────────────
@@ -84,15 +85,26 @@ async function main() {
 	})
 	await seed.dispose()
 
-	// Restore via path string
-	const restoredFromPath = await TextNeuron.restore(restorePath)
-	assert(restoredFromPath instanceof TextNeuron, 'TextNeuron.restore(path) succeeds')
+	// Restore via path string with runtime model
+	const restoredFromPath = await TextNeuron.restore(restorePath, { model })
+	assert(restoredFromPath instanceof TextNeuron, 'TextNeuron.restore(path, { model }) succeeds')
 	await restoredFromPath.dispose()
 
-	// Restore via explicit store
-	const restoredFromStore = await TextNeuron.restore(new SQLiteNeuronStore(restorePath))
-	assert(restoredFromStore instanceof TextNeuron, 'TextNeuron.restore(store) succeeds')
+	// Restore via explicit store with runtime model
+	const restoredFromStore = await TextNeuron.restore(
+		new SQLiteNeuronStore(restorePath),
+		{ model },
+	)
+	assert(restoredFromStore instanceof TextNeuron, 'TextNeuron.restore(store, { model }) succeeds')
 	await restoredFromStore.dispose()
+
+	// Restore with id pinning (matches doc example)
+	const restoredWithId = await TextNeuron.restore(restorePath, {
+		id: 'design-principles',
+		model,
+	})
+	assert(restoredWithId instanceof TextNeuron, 'TextNeuron.restore(path, { id, model }) succeeds')
+	await restoredWithId.dispose()
 
 	// ── ListNeuron — Basic ───────────────────────────────────────────────
 	section('ListNeuron — Basic')

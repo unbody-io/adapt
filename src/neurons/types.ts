@@ -89,10 +89,11 @@ export interface NeuronTypeDescriptor {
 	/** When to use this type (for evaluator/decomposition prompts) */
 	description: string
 	/** Instantiate the right class from config + store */
-	factory(config: Record<string, unknown>): import('./base/class').BaseNeuron<unknown>
+	factory(
+		config: Record<string, unknown>,
+	): import('./base/class').BaseNeuron<unknown>
 	/** Zod schema for merge LLM output (e.g., z.string() for text, z.array() for list) */
 	mergeUnderstandingSchema: import('zod').ZodType
 	/** Zod schema for split LLM output */
 	splitUnderstandingSchema: import('zod').ZodType
 }
-

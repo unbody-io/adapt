@@ -18,9 +18,7 @@ export function observeAdjustPromptTemplate(
 	currentIdentity: ObserveIdentity,
 	focus?: string,
 ): string {
-	const focusSection = focus
-		? `\n**Focus areas**: "${focus}"`
-		: ''
+	const focusSection = focus ? `\n**Focus areas**: "${focus}"` : ''
 
 	const domainSection = currentIdentity.domain
 		? `\n**Domain**: ${currentIdentity.domain}`

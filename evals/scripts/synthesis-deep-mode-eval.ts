@@ -26,10 +26,20 @@
  *   export $(cat .env.local | xargs) && RUNS=5 npx tsx evals/scripts/synthesis-deep-mode-eval.ts
  */
 
+import {
+	type AiSdkProviderFactory,
+	createAiSdkLLM,
+} from '../../src'
 import { synthesize, type SpecialistDef } from '../../src/brain/agent'
 import { createOpenRouter } from '@openrouter/ai-sdk-provider'
 
 const openrouter = createOpenRouter({ apiKey: process.env.OPENROUTER_API_KEY })
+const llm = createAiSdkLLM({
+	providers: {
+		openrouter: ((id: string) =>
+			openrouter(id) as unknown as ReturnType<AiSdkProviderFactory>) as AiSdkProviderFactory,
+	},
+})
 const MODEL = process.env.MODEL ?? 'google/gemini-2.5-flash'
 const model = openrouter(MODEL)
 const RUNS = Number(process.env.RUNS ?? '3')
@@ -102,7 +112,7 @@ async function main() {
 			console.log(`\n--- Run ${run}/${RUNS} ---`)
 			const t0 = Date.now()
 			try {
-				const result = await synthesize(model, {
+				const result = await synthesize(llm, model, {
 					query,
 					specialists,
 				})

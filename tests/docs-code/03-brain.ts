@@ -8,7 +8,7 @@
  *   export $(cat .env.local | xargs) && npx tsx tests/docs-code/03-brain.ts
  */
 
-import { Brain, MemoryNeuronStore, TextNeuron } from '@unbody-io/adapt'
+import { Brain, MemoryNeuronStore, TextNeuron, createAiSdkLLM } from '@unbody-io/adapt'
 import { SQLiteBrainStore } from '@unbody-io/adapt/sqlite'
 import { model } from '../../evals/helpers/provider'
 import { mkdirSync, rmSync } from 'node:fs'
@@ -36,6 +36,7 @@ function section(title: string) {
 }
 
 async function main() {
+	rmSync(tmpDir, { recursive: true, force: true })
 	mkdirSync(tmpDir, { recursive: true })
 
 	try {
@@ -79,20 +80,54 @@ async function main() {
 		assert(fresh instanceof Brain, 'Brain.create() persists to disk')
 		await fresh.dispose()
 
-		// Restore — path-string sugar
-		const restoredFromPath = await Brain.restore(restorePath)
-		assert(restoredFromPath instanceof Brain, 'Brain.restore(path) succeeds')
+		// Restore — path-string sugar with runtime model
+		const restoredFromPath = await Brain.restore(restorePath, { model })
+		assert(restoredFromPath instanceof Brain, 'Brain.restore(path, { model }) succeeds')
 		await restoredFromPath.dispose()
 
-		// Restore — explicit BrainStore instance
-		const restoredFromStore = await Brain.restore(new SQLiteBrainStore(restorePath))
-		assert(restoredFromStore instanceof Brain, 'Brain.restore(store) succeeds')
-
-		// Direct provider override after restore
-		await restoredFromStore.update({ model })
-		assert(true, 'brain.update({ model }) after restore succeeds')
-
+		// Restore — explicit BrainStore instance with runtime model
+		const restoredFromStore = await Brain.restore(
+			new SQLiteBrainStore(restorePath),
+			{ model },
+		)
+		assert(restoredFromStore instanceof Brain, 'Brain.restore(store, { model }) succeeds')
 		await restoredFromStore.dispose()
+
+		// ── BYO LLM runtime ──────────────────────────────────────────────────
+		section('BYO LLM runtime')
+
+		const llm = createAiSdkLLM()
+		const byoBrain = await Brain.create({
+			prompt: 'BYO LLM smoke test.',
+			model,
+			llm,
+			autoSetup: false,
+			neurons: [
+				{ id: 'byo', type: 'text', name: 'BYO', description: 'Smoke', instructions: 'Track patterns.' },
+			],
+			evolution: { enabled: false },
+		})
+		assert(byoBrain instanceof Brain, 'Brain.create({ llm }) succeeds')
+		const byoPath = join(tmpDir, 'byo.db')
+		await byoBrain.dispose()
+
+		// Restore with the same llm plugin
+		const byoFresh = await Brain.create({
+			prompt: 'BYO LLM restore test.',
+			model,
+			llm,
+			store: new SQLiteBrainStore(byoPath),
+			autoSetup: false,
+			neurons: [
+				{ id: 'byo', type: 'text', name: 'BYO', description: 'Smoke', instructions: 'Track patterns.' },
+			],
+			evolution: { enabled: false },
+		})
+		await byoFresh.dispose()
+
+		const byoRestored = await Brain.restore(byoPath, { llm })
+		assert(byoRestored instanceof Brain, 'Brain.restore(path, { llm }) succeeds')
+		await byoRestored.dispose()
 
 		// ── Injecting Data ───────────────────────────────────────────────────
 		section('Injecting Data')

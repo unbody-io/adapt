@@ -52,12 +52,19 @@ function dedup(items: ListItem[]): ListItem[] {
 			...winner,
 			metadata: {
 				...winner.metadata,
-				touchCount: (existing.metadata.touchCount ?? 1) + (item.metadata.touchCount ?? 1),
-				confidence: Math.max(existing.metadata.confidence, item.metadata.confidence),
-				firstSeen: existing.metadata.firstSeen < item.metadata.firstSeen
-					? existing.metadata.firstSeen
-					: item.metadata.firstSeen,
-				signals: [...new Set([...existing.metadata.signals, ...item.metadata.signals])],
+				touchCount:
+					(existing.metadata.touchCount ?? 1) + (item.metadata.touchCount ?? 1),
+				confidence: Math.max(
+					existing.metadata.confidence,
+					item.metadata.confidence,
+				),
+				firstSeen:
+					existing.metadata.firstSeen < item.metadata.firstSeen
+						? existing.metadata.firstSeen
+						: item.metadata.firstSeen,
+				signals: [
+					...new Set([...existing.metadata.signals, ...item.metadata.signals]),
+				],
 			},
 		})
 	}

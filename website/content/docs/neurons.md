@@ -3,11 +3,9 @@ title: Neurons
 description: TextNeuron and ListNeuron — learning, querying, governance, and schemas.
 ---
 
-Neurons are the individual learning units inside a Brain. Each neuron specializes in one domain, processes data through an observe-then-understand pipeline, and answers queries with tool-based reasoning. Adapt ships two types: TextNeuron for narrative knowledge and ListNeuron for structured collections.
+API guide for `TextNeuron` and `ListNeuron`. For when to pick each, see [Concepts — Neuron Types](./concepts#neuron-types).
 
 ## TextNeuron
-
-Builds narrative understanding — a single body of prose that evolves over time.
 
 Only `model`, `instructions`, and `store` are required:
 
@@ -48,34 +46,39 @@ To restore a previously persisted neuron from disk, use `TextNeuron.restore`:
 import { SQLiteNeuronStore } from '@unbody-io/adapt/sqlite'
 
 // Path-string sugar (Node SQLite)
-const neuron = await TextNeuron.restore('./neuron.db')
-await neuron.update({ model: openai('gpt-4o') })   // required for non-Gateway users
+const neuron = await TextNeuron.restore('./neuron.db', { model: openai('gpt-4o') })
 
 // Or pass an explicit NeuronStore instance
-const neuron = await TextNeuron.restore(new SQLiteNeuronStore('./neuron.db'))
-await neuron.update({ model: openai('gpt-4o') })
+const neuron = await TextNeuron.restore(
+  new SQLiteNeuronStore('./neuron.db'),
+  { model: openai('gpt-4o') },
+)
+
+// Standalone neurons can carry their own id when restoring from a shared store
+const neuron = await TextNeuron.restore('./neuron.db', {
+  id: 'design-principles',
+  model: openai('gpt-4o'),
+})
 ```
 
-> **Required after `restore` (non-Gateway users):** Restored models rehydrate as Vercel AI Gateway strings. If you don't have `AI_GATEWAY_API_KEY` set, you **must** call `await neuron.update({ model })` before any LLM operation, otherwise calls fail with `GatewayAuthenticationError`. Issue [#9](https://github.com/unbody-io/adapt/issues/9) — BYO LLM call function — will remove this step in 0.0.6.
+The `model` argument rehydrates persisted model refs through the LLM plugin. See [Brain — Fresh vs Restored](./brain#fresh-vs-restored) for the full runtime semantics — it applies identically to neuron `restore`.
 
-`ListNeuron` exposes the same `create` / `restore` shape (and the same restore-then-update requirement). Constructors are private — `create` and `restore` are the only public entry points, and both fully initialize the neuron (no separate `init()` call).
+`ListNeuron` exposes the same `create` / `restore` shape. Constructors are private — `create` and `restore` are the only public entry points, and both fully initialize the neuron (no separate `init()` call).
 
 ### Cognitive Skills
 
-When a TextNeuron synthesizes new observations into its understanding, it doesn't just append information — it actively reasons about how each observation relates to what it already knows. It does this through two built-in skill sets:
+A TextNeuron's synthesizer applies two built-in skill sets when integrating observations — automatic, not configurable. Instructions influence *what domain* the skills are applied to (see [Prompt Design](./prompt-design)).
 
 | Skill Set | Skills | What the neuron asks itself |
 |---|---|---|
 | **Compare** | `confirms`, `contradicts`, `extends`, `new` | "Does this observation reinforce, challenge, add to, or introduce something new relative to what I already know?" |
 | **Dynamics** | `recurs`, `intensifies`, `fades`, `shifts`, `avoids` | "Is this pattern repeating? Getting stronger? Declining? Changing direction? Being avoided?" |
 
-For example, when the neuron applies `recurs`, it asks itself: "This keeps appearing — how many times? Over what timespan? In what contexts?" This produces grounded observations like "cancelled gym 6 times in 3 weeks" rather than vague summaries like "sometimes skips gym."
-
-These skills are automatic — you don't configure them. Your neuron instructions influence *what domain* the skills are applied to. See [Prompt Design](./prompt-design) for how to write instructions that get the most out of these skills.
+These skills produce grounded output ("cancelled gym 6 times in 3 weeks") rather than vague summaries ("sometimes skips gym").
 
 ### Governance Strategies
 
-A neuron's understanding grows over time as it synthesizes observations. Governance strategies control what happens when it gets too large — because if understanding becomes too long, the LLM loses focus when answering queries.
+`governance.strategy` controls what happens when accumulated understanding gets large enough to risk losing the LLM's focus during queries.
 
 | Strategy | How it works | Good for |
 |---|---|---|
@@ -85,9 +88,7 @@ A neuron's understanding grows over time as it synthesizes observations. Governa
 
 ## ListNeuron
 
-Maintains a structured collection with LLM-generated schemas.
-
-Same required fields — `model`, `instructions`, `store`:
+Same required fields as TextNeuron — `model`, `instructions`, `store`:
 
 ```typescript
 import { ListNeuron, MemoryNeuronStore } from '@unbody-io/adapt'

@@ -15,7 +15,10 @@ export function buildSynthesisUserPrompt(
 	let knowledgeText: string
 	if (relevant.length > 0) {
 		knowledgeText = relevant
-			.map((r, i) => `KNOWLEDGE ${i + 1}:\n${r.insight}${r.gaps.length > 0 ? `\nGaps: ${r.gaps.join(', ')}` : ''}`)
+			.map(
+				(r, i) =>
+					`KNOWLEDGE ${i + 1}:\n${r.insight}${r.gaps.length > 0 ? `\nGaps: ${r.gaps.join(', ')}` : ''}`,
+			)
 			.join('\n\n')
 	} else {
 		knowledgeText = '(No relevant knowledge available)'

@@ -135,7 +135,9 @@ export function deserializeBrainModelSlots(
 	return out as unknown as BrainModelSlots
 }
 
-function normalizeStoredBrainModelRef(ref: StoredBrainModelRef): AdaptModelConfig {
+function normalizeStoredBrainModelRef(
+	ref: StoredBrainModelRef,
+): AdaptModelConfig {
 	return {
 		plugin: ref.plugin ?? 'ai-sdk',
 		...(ref.provider ? { provider: ref.provider } : {}),

@@ -1,28 +1,17 @@
 ---
 title: Evolution
-description: Signal-driven self-organization — how Brain adapts its neuron structure.
+description: Configuring and steering the signal → evaluate → act loop.
 ---
 
-As a Brain processes data and answers queries, its initial neuron structure may not be the right one forever. Some neurons get overloaded, some overlap, some domains emerge that no neuron covers. Evolution is how the Brain detects these problems and restructures itself — creating, merging, splitting, updating, or deleting neurons as needed.
+Configuration and manual-control reference for evolution. For the conceptual overview, see [Concepts — Evolution](./concepts#evolution).
 
-For an overview of the concepts, see [Concepts — Evolution](./concepts#evolution). This page covers configuration and manual control.
+## Signal triggers
 
-## Signal Flow
+Default firing conditions for the three signal sources:
 
-```text
-Signal Sources                  Evaluator              Orchestrator
-─────────────────              ─────────              ────────────
-Neuron health signals      ───►  Buffer signals    ───►  Execute decisions
-Coverage gaps              ───►  (threshold: 5)    ───►  create / merge /
-Developer signals          ───►  LLM evaluates     ───►  split / update /
-System events              ───►  with tools        ───►  delete neurons
-```
-
-**Signal sources:**
-
-- **Automatic** — Neurons emit signals on: high dismissal rate (>80%), low query relevance (avg < 0.3), low confidence (avg < 0.3), observation stagnation.
-- **Coverage gaps** — Queries where all neurons score low relevance. Also: injection batches dismissed by all neurons.
-- **Developer** — `brain.signal({ source, description })` with custom signals from your application.
+- **Automatic** — neuron emits when dismissal rate >80%, query relevance avg <0.3, confidence avg <0.3, or observation stagnation.
+- **Coverage gaps** — query where all neurons score below `coverageGap.relevanceThreshold`, or injection batches dismissed by all neurons.
+- **Developer** — `brain.signal({ source, description })` from application logic. Pass `bypass: true` to force immediate evaluation regardless of threshold.
 
 ## Evolution Config
 

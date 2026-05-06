@@ -35,10 +35,7 @@ export function resolveTextNeuronConfig(
 		origin: config.origin ?? TEXT_NEURON_DEFAULTS.origin,
 		observer: {
 			model: cascade(config.observer?.model, model),
-			blueprintModel: cascade(
-				config.observer?.blueprintModel,
-				blueprintModel,
-			),
+			blueprintModel: cascade(config.observer?.blueprintModel, blueprintModel),
 		},
 		understand: {
 			model: cascade(config.understand?.model, model),
@@ -63,8 +60,7 @@ export function resolveTextNeuronConfig(
 		},
 		governance: {
 			strategy:
-				config.governance?.strategy ??
-				TEXT_NEURON_DEFAULTS.governance.strategy,
+				config.governance?.strategy ?? TEXT_NEURON_DEFAULTS.governance.strategy,
 			maxTokens:
 				config.governance?.maxTokens ??
 				TEXT_NEURON_DEFAULTS.governance.maxTokens,

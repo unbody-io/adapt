@@ -123,7 +123,7 @@ async function main() {
 	assert(sessionBrain instanceof Brain, 'Brain with evolution disabled created')
 	await sessionBrain.dispose()
 
-	// ── Developer Signals (from 02-concepts.md) ──────────────────────────
+	// ── Developer Signals (from concepts.md — Steering) ──────────────────
 	section('Developer Signals')
 
 	// Tell the brain about a domain shift

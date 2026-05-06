@@ -73,6 +73,7 @@ export class SplitHandler extends EvolutionActionHandler<SplitActionResult> {
 					),
 					output: Output.object({ schema: splitSchema }),
 					repairSchema: splitSchema,
+					...this.brain.llmRepairOptions,
 				})
 
 				const { neurons: splitConfigs } = result.output

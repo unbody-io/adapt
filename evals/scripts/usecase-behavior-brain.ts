@@ -38,11 +38,17 @@
  *   export $(cat .env.local | xargs) && QUERY_ONLY=1 bun run evals/scripts/usecase-behavior-brain.ts
  */
 
-import { Brain, type BrainAskResult } from '../../src'
+import {
+	type AiSdkProviderFactory,
+	Brain,
+	type BrainAskResult,
+	createAiSdkLLM,
+} from '../../src'
 import { createOpenRouter } from '@openrouter/ai-sdk-provider'
 import { readFileSync, mkdirSync } from 'node:fs'
 import { join, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { createEvalRepairWithFeedback } from '../helpers/repair-with-feedback'
 
 const isBunRuntime = 'Bun' in globalThis
 const { SQLiteBrainStore } = isBunRuntime
@@ -54,6 +60,12 @@ const datasetsDir = join(__dirname, '..', 'datasets')
 const dataset = JSON.parse(readFileSync(join(datasetsDir, 'personal-behavior.json'), 'utf-8'))
 
 const openrouter = createOpenRouter({ apiKey: process.env.OPENROUTER_API_KEY })
+const llm = createAiSdkLLM({
+	providers: {
+		openrouter: ((id: string) =>
+			openrouter(id) as unknown as ReturnType<AiSdkProviderFactory>) as AiSdkProviderFactory,
+	},
+})
 const MODEL = process.env.MODEL ?? 'google/gemini-2.0-flash-001'
 const model = openrouter(MODEL)
 const QUERY_ONLY = process.env.QUERY_ONLY === '1'
@@ -66,6 +78,8 @@ const startTime = Date.now()
 function elapsed() {
 	return ((Date.now() - startTime) / 1000).toFixed(1)
 }
+
+const repairWithFeedback = createEvalRepairWithFeedback()
 
 function printAskResult(result: BrainAskResult) {
 	console.log(`\nSynthesized insight:\n${result.insight}`)
@@ -117,6 +131,7 @@ async function main() {
 			'Flag frustration or hostility moments prominently when detected.',
 		].join('\n'),
 		model,
+		llm,
 		store: brainStore,
 		learning: {
 			governance: { strategy: 'continuous' as const },
@@ -132,10 +147,16 @@ async function main() {
 			autoEvaluate: false,
 		},
 		ingest: { batchSize: 6 },
+		repairWithFeedback,
+		maxRepairAttempts: 2,
 	}
 
 	const brain = QUERY_ONLY
-		? await Brain.restore(brainStore)
+		? await Brain.restore(brainStore, {
+				llm,
+				repairWithFeedback,
+				maxRepairAttempts: 2,
+			})
 		: await Brain.create(freshConfig)
 
 	// Wire up brain-level event logging

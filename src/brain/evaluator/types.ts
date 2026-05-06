@@ -72,7 +72,6 @@ export interface EvaluationContext {
 	dismissedBatchCount: number
 }
 
-
 /**
  * Record of past evaluation decisions (in-memory, capped)
  */

@@ -8,11 +8,11 @@
 import { z } from 'zod'
 import {
 	type AdaptLLMPlugin,
+	type AdaptStreamResult,
 	generate,
 	type LanguageModel,
 	Output,
 	streamText,
-	type AdaptStreamResult,
 } from '../../../llm'
 import type { TokenUsage } from '../../types'
 import type {
@@ -24,18 +24,26 @@ import type {
 } from './types'
 
 const responseSchema = z.object({
-	relevant: z.boolean().describe('Is this query within your area of expertise?'),
+	relevant: z
+		.boolean()
+		.describe('Is this query within your area of expertise?'),
 	relevance: z
 		.number()
 		.min(0)
 		.max(1)
-		.describe('How related is this query to your domain? 0 = outside scope, 1 = core'),
+		.describe(
+			'How related is this query to your domain? 0 = outside scope, 1 = core',
+		),
 	confidence: z
 		.number()
 		.min(0)
 		.max(1)
-		.describe('How well could you answer? 0 = nothing on this, 1 = fully answered'),
-	response: z.string().describe('Your answer — be specific, cite what you know'),
+		.describe(
+			'How well could you answer? 0 = nothing on this, 1 = fully answered',
+		),
+	response: z
+		.string()
+		.describe('Your answer — be specific, cite what you know'),
 	gaps: z.array(z.string()).describe('What could not be answered'),
 })
 

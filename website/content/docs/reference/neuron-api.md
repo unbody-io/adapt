@@ -10,15 +10,25 @@ Shared API for `TextNeuron` and `ListNeuron` (both extend `BaseNeuron`).
 | Method | Returns | Description |
 |---|---|---|
 | `TextNeuron.create(config, parentModels?)` | `Promise<TextNeuron>` | Construct a fresh TextNeuron and persist its config. Throws if the store already contains a neuron. |
-| `TextNeuron.restore(pathOrStore, opts?)` | `Promise<TextNeuron>` | Restore a previously persisted TextNeuron. Path-string sugar uses Node SQLite via dynamic import. `opts.id` lets you pin the neuron id. Throws if the store is empty. |
+| `TextNeuron.restore(pathOrStore, runtime?)` | `Promise<TextNeuron>` | Restore a previously persisted TextNeuron. Path-string sugar uses Node SQLite via dynamic import. Throws if the store is empty. |
 | `ListNeuron.create(config, parentModels?)` | `Promise<ListNeuron>` | Same shape — fresh ListNeuron. |
-| `ListNeuron.restore(pathOrStore, opts?)` | `Promise<ListNeuron>` | Same shape — restored ListNeuron. |
+| `ListNeuron.restore(pathOrStore, runtime?)` | `Promise<ListNeuron>` | Same shape — restored ListNeuron. |
 | `dispose()` | `Promise<void>` | Close the neuron's own store. |
 | `isInitialized()` | `boolean` | True once the neuron's `understand_prompt` has been generated/restored (works for `skipObservation` neurons too). |
 
 Constructors are private — the static `create` / `restore` methods are the only public entry points. Both fully initialize the neuron; there is no separate `init()` step on the public surface. `create` runs prompt + schema generation via LLM and persists everything. `restore` rehydrates identity, prompts, and schemas from the store via DB reads only — zero LLM calls during init.
 
-> **Required after `restore` (non-Gateway users):** Restored models rehydrate as Vercel AI Gateway strings. If you don't have `AI_GATEWAY_API_KEY` set, you **must** call `await neuron.update({ model })` before any LLM operation, otherwise calls fail with `GatewayAuthenticationError`. Issue [#9](https://github.com/unbody-io/adapt/issues/9) — BYO LLM call function — will remove this step in 0.0.6.
+**`restore()` runtime options:**
+
+```typescript
+{
+  id?: string                  // Pin the neuron id (useful when the store holds multiple)
+  model?: LanguageModel        // Live AI SDK model — covers the common case
+  llm?: AdaptLLMPlugin         // Custom plugin — for BYO runtimes
+}
+```
+
+All fields are optional. See [Brain — Fresh vs Restored](../brain#fresh-vs-restored) for the canonical write-up — the same semantics apply to neuron `restore`.
 
 ## Learning
 

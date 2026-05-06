@@ -4,18 +4,17 @@
  * A neuron that maintains understanding as a structured collection of items.
  */
 
-import type { LanguageModel } from '../../llm'
-import type { CascadableConfig } from '../../types/config'
-import type { BaseNeuronState } from '../base/state'
-import type { BaseResolvedConfig, UnderstandThresholds } from '../base/types'
-import type { EventsFromMap } from '../../types/events'
-import type {
-	NeuronHealth,
-	NeuronOrigin,
-	Significance,
-} from '../types'
-import type { SharedNeuronEventMap } from '../base/types'
+import type { AdaptRepairOptions, LanguageModel } from '../../llm'
 import type { NeuronStore } from '../../stores'
+import type { CascadableConfig } from '../../types/config'
+import type { EventsFromMap } from '../../types/events'
+import type { BaseNeuronState } from '../base/state'
+import type {
+	BaseResolvedConfig,
+	SharedNeuronEventMap,
+	UnderstandThresholds,
+} from '../base/types'
+import type { NeuronHealth, NeuronOrigin, Significance } from '../types'
 import type { UnderstandIdentity } from './understand'
 
 // ── Core types ─────────────────────────────────────────────────────────────
@@ -101,7 +100,7 @@ export type ListNeuronEvent = EventsFromMap<ListNeuronEventMap>
 
 // ── Config ─────────────────────────────────────────────────────────────────
 
-export interface ListNeuronConfig extends CascadableConfig {
+export interface ListNeuronConfig extends CascadableConfig, AdaptRepairOptions {
 	/** Default model for all operations */
 	model: LanguageModel
 	/** Natural language instructions for what items this neuron tracks */

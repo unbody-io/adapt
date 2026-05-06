@@ -8,7 +8,7 @@
  *   export $(cat .env.local | xargs) && npx tsx tests/docs-code/05-configuration.ts
  */
 
-import { Brain, MemoryBrainStore } from '@unbody-io/adapt'
+import { Brain, MemoryBrainStore, createAiSdkLLM } from '@unbody-io/adapt'
 import { model } from '../../evals/helpers/provider'
 
 let passed = 0
@@ -125,6 +125,20 @@ async function main() {
 	const providerBrain = await Brain.create({ model, prompt: 'Provider test.' })
 	assert(providerBrain instanceof Brain, 'Brain accepts LanguageModel from openrouter')
 	await providerBrain.dispose()
+
+	// ── Custom LLM Runtimes ──────────────────────────────────────────────
+	section('Custom LLM Runtimes')
+
+	// Default plugin is auto-wired, but you can pass an explicit one.
+	// (createAiSdkLLM with `gateway: true` opts into AI Gateway fallback.)
+	const llm = createAiSdkLLM()
+	const llmBrain = await Brain.create({
+		prompt: 'Custom LLM plugin.',
+		model,
+		llm,
+	})
+	assert(llmBrain instanceof Brain, 'Brain.create({ llm }) succeeds')
+	await llmBrain.dispose()
 
 	// ── Governance Strategies ────────────────────────────────────────────
 	section('Governance Strategies')

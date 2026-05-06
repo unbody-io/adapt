@@ -39,7 +39,8 @@ const definitions: InternalNeuronDef[] = [
 		config: {
 			id: INTERNAL_NEURON_IDS.globalUnderstanding,
 			name: 'Global Understanding',
-			description: 'Synthesizes understanding across all specialists into a unified picture',
+			description:
+				'Synthesizes understanding across all specialists into a unified picture',
 			type: 'text',
 			focus: null,
 			instructions: `You receive understanding updates from every specialist in the network. Each update tells you what a specialist now knows — its current understanding after processing new data.
@@ -64,7 +65,8 @@ Track answers to:
 		config: {
 			id: INTERNAL_NEURON_IDS.globalQueryUnderstanding,
 			name: 'Global Query Understanding',
-			description: 'Tracks what users ask — query topics, frequency, clusters, and coverage gaps',
+			description:
+				'Tracks what users ask — query topics, frequency, clusters, and coverage gaps',
 			type: 'list',
 			focus: null,
 			instructions: `Track and categorize all user queries to understand what information users need.
@@ -87,7 +89,8 @@ Track answers to:
 		config: {
 			id: INTERNAL_NEURON_IDS.injectionGaps,
 			name: 'Injection Gap Neuron',
-			description: 'Tracks data that no external neuron could process — injection gaps',
+			description:
+				'Tracks data that no external neuron could process — injection gaps',
 			type: 'text',
 			focus: null,
 			instructions: `You are a cross-domain, general-purpose gap tracker. You are NOT limited to any specific subject area — you track gaps from ALL topics and domains.
@@ -112,7 +115,8 @@ Drop topics that haven't appeared recently — if a gap stops being reported, it
 		config: {
 			id: INTERNAL_NEURON_IDS.queryGaps,
 			name: 'Query Gap Neuron',
-			description: 'Tracks questions that external neurons could not answer well',
+			description:
+				'Tracks questions that external neurons could not answer well',
 			type: 'text',
 			focus: null,
 			instructions: `Accumulate and reason about query gaps — questions that users ask but no neuron can answer well.

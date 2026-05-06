@@ -40,6 +40,7 @@ export class UpdateHandler extends EvolutionActionHandler<UpdateActionResult> {
 						),
 						output: Output.object({ schema: updateOutputSchema }),
 						repairSchema: updateOutputSchema,
+						...this.brain.llmRepairOptions,
 					})
 
 					const { mechanical, behavioral } = result.output

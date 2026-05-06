@@ -12,6 +12,8 @@ export const cumulative: StrategyFn = async ({
 	llm,
 	model,
 	config,
+	repairWithFeedback,
+	maxRepairAttempts,
 }) => {
 	const maxTokens = config.maxTokens ?? 4000
 	const currentTokens = estimateTokens(understanding)
@@ -24,6 +26,8 @@ export const cumulative: StrategyFn = async ({
 		llm,
 		model,
 		prompt: cumulativeSeedPromptTemplate(understanding, maxTokens),
+		repairWithFeedback,
+		maxRepairAttempts,
 	})
 
 	return {

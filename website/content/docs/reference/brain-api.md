@@ -10,12 +10,26 @@ Complete API reference for the `Brain` class, covering lifecycle management, dat
 | Method | Returns | Description |
 |---|---|---|
 | `Brain.create(config)` | `Promise<Brain>` | Construct a fresh brain. Throws if the store already contains a brain. |
-| `Brain.restore(pathOrStore)` | `Promise<Brain>` | Restore an existing brain. Path-string sugar uses Node SQLite via dynamic import; Bun callers pass an explicit `BrainStore`. Throws if the store is empty. |
+| `Brain.restore(pathOrStore, runtime?)` | `Promise<Brain>` | Restore an existing brain. Path-string sugar uses Node SQLite via dynamic import; Bun callers pass an explicit `BrainStore`. `runtime` carries the LLM context the brain needs after restore. Throws if the store is empty. |
 | `dispose()` | `Promise<void>` | Walk neuron stores and close the brain store. |
 
 Constructors are private — `Brain.create` and `Brain.restore` are the only public entry points. Both fully initialize the brain; there is no separate `init()` step.
 
-> **Required after `Brain.restore` (non-Gateway users):** Restored models rehydrate as Vercel AI Gateway strings (e.g. `"openai:gpt-4o"`). If you don't have `AI_GATEWAY_API_KEY` set, you **must** call `await brain.update({ model })` before any LLM operation, otherwise calls fail with `GatewayAuthenticationError`. For multi-model cascades, re-pass the full model config in `update`. Issue [#9](https://github.com/unbody-io/adapt/issues/9) — BYO LLM call function — will remove this step in 0.0.6.
+**`Brain.restore()` runtime options:**
+
+```typescript
+interface BrainRuntimeOptions {
+  model?: LanguageModel                  // Live AI SDK model — covers the 90% case
+  blueprintModel?: LanguageModel
+  init?: { model?: LanguageModel }
+  query?: { model?: LanguageModel }
+  evolution?: { model?: LanguageModel }
+  learning?: LearningConfig
+  llm?: AdaptLLMPlugin                   // Custom plugin — for BYO runtimes
+}
+```
+
+All fields are optional. See [Brain — Fresh vs Restored](../brain#fresh-vs-restored) for the canonical write-up of when to use each form.
 
 ## Data
 

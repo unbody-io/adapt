@@ -1,9 +1,9 @@
 ---
 title: Configuration
-description: Full BrainConfig reference, model cascade, LLM call costs, and tuning guidance.
+description: Full BrainConfig reference, model cascade, providers, thresholds, and governance.
 ---
 
-Every aspect of a Brain's behavior can be configured — from which models to use at each pipeline stage, to learning thresholds, persistence, and evolution triggers. This page covers all available options.
+Reference for `BrainConfig` and the model cascade. For per-operation LLM call counts, see [Cost & Performance](./cost).
 
 ## BrainConfig
 
@@ -12,6 +12,7 @@ interface BrainConfig {
   prompt: string                            // What to track and learn
   model: LanguageModel                      // Default model for all operations
   blueprintModel?: LanguageModel            // Schema/config generation (falls back to model)
+  llm?: AdaptLLMPlugin                      // BYO LLM runtime (default: AI SDK plugin)
   autoSetup?: boolean                       // LLM decomposition on init (default: true)
   neurons?: GeneratedNeuronConfig[]         // Explicit neuron definitions
   store?: BrainStore                        // Brain persistence (default: MemoryBrainStore)
@@ -108,62 +109,7 @@ const brain = await Brain.create({
 })
 ```
 
-## LLM Call Cost Model
-
-To help you estimate cost and latency, here's how many LLM calls each operation makes. As a rough guide: a typical brain with 5 neurons costs about 5 calls per inject (observation only) and 7 calls per ask. The tables below give exact formulas.
-
-N = number of neurons, B = number of batches.
-
-### Core Operations
-
-| Operation | LLM Calls | Model Slot | Notes |
-|---|---|---|---|
-| **`inject(data)`** | | | |
-| → Observe | `N × B` | `learning.observer` | 1 call per neuron per batch. Skipped if `skipObservation: true` |
-| → Understand | `0 – N` | `learning.understand` | Only triggers when buffer exceeds `maxObservations` or `maxTokens` |
-| **`ask(question)`** | | | |
-| → Neuron selection | `1` | `query` | Skipped if only 1 neuron has knowledge |
-| → Neuron queries | `N` | `learning.query` | Parallel. N = relevant neurons, not all |
-| → Synthesis | `1` | `query` | Combines neuron results into final answer |
-| **`ask(question, { mode: 'deep' })`** | `2–12` | `query` | Agentic — LLM decides which neurons to query and when to stop |
-| **`query(question)`** | `1` | `learning.query` | Standalone neuron query (single call) |
-
-### Lifecycle Operations
-
-| Operation | LLM Calls | Model Slot | Notes |
-|---|---|---|---|
-| **`Brain.create()`** | | | |
-| → Decomposition | `1` | `init` | Only with `autoSetup: true`. Determines neuron structure |
-| → Prompt parsing | `1` | `blueprintModel` | Extracts purpose and synthesis directives |
-| → Neuron init | `2 × N` | `blueprintModel` | Per neuron: 1 observe identity + 1 understand identity |
-| **`adjust(directive)`** | `1–4` | `blueprintModel` | 1 classify + up to 3 identity regenerations |
-| → + Understanding rewrite | `+1–15` | `learning.understand` | Only if directive changes what the neuron knows, not just how it behaves |
-| **`update(config)`** | `0–1` | `blueprintModel` | 0 if mechanical (model/threshold changes). 1 if prompt changed |
-
-### Evolution Operations
-
-| Operation | LLM Calls | Model Slot | Notes |
-|---|---|---|---|
-| **`signal()`** | `0` | — | Buffers only. No immediate LLM call |
-| **Evaluator trigger** | `1–12` | `evolution` | Agentic — inspects neurons, reviews gaps, makes decisions |
-| → Create N neurons | `1 + 2N` | `blueprintModel` | 1 generation + 2 per neuron init |
-| → Merge neurons | `1` | `blueprintModel` | Single generation call |
-| → Split into N | `1 + 2(N-1)` | `blueprintModel` | 1 generation + init for new neurons |
-| → Update neuron | `1–15` | `blueprintModel` | 1 guidance + optional adjust cascade |
-| → Delete neuron | `0` | — | Mechanical removal |
-
-### Quick Reference
-
-Typical cost for common workflows:
-
-| Scenario | Neurons | Calls per `inject` | Calls per `ask` |
-|---|---|---|---|
-| Simple (3 neurons, no understand trigger) | 3 | 3 | 5 |
-| Medium (5 neurons, understand triggers on 1) | 5 | 6 | 7 |
-| Large (10 neurons, understand triggers on 3) | 10 | 13 | 12 |
-| Deep mode ask (5 neurons) | 5 | — | 2–12 |
-
-> **Cost tip:** The observe phase runs on every inject and scales linearly with neurons. This is where a fast/cheap model pays off the most. Understand and query run less frequently but need higher quality — use a smarter model there. See the cost-optimized setup above.
+For a per-operation breakdown of how many LLM calls each method makes — and where to spend a smarter model vs a cheaper one — see [Cost & Performance](./cost).
 
 ## Using Different Providers
 
@@ -184,6 +130,26 @@ await Brain.create({ model: openrouter('google/gemini-2.0-flash-001'), ... })
 ```
 
 Any `LanguageModel` from any `@ai-sdk/*` provider works. See [Vercel AI SDK providers](https://sdk.vercel.ai/providers) for the full list.
+
+### Custom LLM Runtimes
+
+If you need a runtime outside the AI SDK — Effect, an in-house client, or anything implementing the `AdaptLLMPlugin` contract — pass `llm` in `BrainConfig` (or to `Brain.restore` / `TextNeuron.create` / `ListNeuron.create`):
+
+```typescript
+import { Brain, createAiSdkLLM } from '@unbody-io/adapt'
+import { openai } from '@ai-sdk/openai'
+
+// Pre-register providers so the plugin can rehydrate persisted model refs.
+const llm = createAiSdkLLM({ providers: { openai } })
+
+const brain = await Brain.create({
+  prompt: '...',
+  model: openai('gpt-4o'),
+  llm,
+})
+```
+
+The default plugin (`createAiSdkLLM`) is wired up automatically when you pass any AI SDK model in `model` — you only need to set `llm` explicitly if you want a non-default plugin or to opt into AI Gateway via `createAiSdkLLM({ gateway: true })`. See [Brain — BYO LLM runtime](./brain#byo-llm-runtime).
 
 ## Model Requirements
 

@@ -1,7 +1,7 @@
-import type { CallSettings } from 'ai'
-import type { AdaptStreamResult } from '../llm'
 import { z } from 'zod'
+import type { AdaptStreamResult } from '../llm'
 import {
+	type AdaptGenerateOptions,
 	type AdaptLLMPlugin,
 	generate,
 	type LanguageModel,
@@ -24,7 +24,7 @@ export interface SpecialistDef {
 	description: string
 	query: (
 		question: string,
-		options?: CallSettings,
+		options?: AdaptGenerateOptions,
 	) => Promise<{
 		relevant: boolean
 		relevance: number
@@ -37,7 +37,7 @@ export interface SpecialistDef {
 /**
  * Options for synthesis
  */
-export interface SynthesisOptions extends CallSettings {
+export interface SynthesisOptions extends AdaptGenerateOptions {
 	synthesisDirective?: string
 	query: string
 	specialists: SpecialistDef[]
@@ -133,7 +133,7 @@ interface ConsultRecord {
 function buildGatheringTools(args: {
 	specialists: SpecialistDef[]
 	consultTools: Record<string, Tool> | undefined
-	generateOptions: CallSettings
+	generateOptions: AdaptGenerateOptions
 	queriedSpecialists: SpecialistQueryRecord[]
 	consultResults: ConsultRecord[]
 	askedKeys: Set<string>
@@ -172,7 +172,12 @@ function buildGatheringTools(args: {
 				}
 			}
 			askedKeys.add(key)
-			const specialist = specialistMap.get(id)!
+			const specialist = specialistMap.get(id)
+			if (!specialist) {
+				return {
+					error: `Unknown specialist: ${id}. Available: ${[...specialistIds].join(', ')}`,
+				}
+			}
 			const result = await specialist.query(question, generateOptions)
 			if (result.relevant) {
 				queriedSpecialists.push({
@@ -373,7 +378,7 @@ export async function synthesize(
 /**
  * Options for direct synthesis
  */
-export interface DirectSynthesisOptions extends CallSettings {
+export interface DirectSynthesisOptions extends AdaptGenerateOptions {
 	synthesisDirective?: string
 	query: string
 	/** Pre-queried specialist results (already resolved) */

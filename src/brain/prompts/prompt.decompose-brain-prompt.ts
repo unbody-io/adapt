@@ -10,15 +10,21 @@ import { z } from 'zod'
 export const promptContextSchema = z.object({
 	purpose: z
 		.string()
-		.describe('1-2 sentence summary of what this network is about — domain, data, questions it answers'),
+		.describe(
+			'1-2 sentence summary of what this network is about — domain, data, questions it answers',
+		),
 	evolutionGuidance: z
 		.string()
 		.nullable()
-		.describe('How specialists should be organized — granularity, when to grow vs consolidate. Null if the prompt says nothing about this.'),
+		.describe(
+			'How specialists should be organized — granularity, when to grow vs consolidate. Null if the prompt says nothing about this.',
+		),
 	synthesisDirective: z
 		.string()
 		.nullable()
-		.describe('How to present answers — tone, audience, what to emphasize or flag. Null if the prompt has no such instructions.'),
+		.describe(
+			'How to present answers — tone, audience, what to emphasize or flag. Null if the prompt has no such instructions.',
+		),
 })
 
 export type PromptContext = z.infer<typeof promptContextSchema>

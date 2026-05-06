@@ -93,6 +93,16 @@ export const PRESETS: Preset[] = [
 		},
 	},
 	{
+		id: 'openrouter-gemini-3.1-flash-lite-preview',
+		envVar: 'OPENROUTER_API_KEY',
+		async build(apiKey) {
+			const { createOpenRouter } = await import('@openrouter/ai-sdk-provider')
+			const provider = createOpenRouter({ apiKey })
+			const model = provider('google/gemini-3.1-flash-lite-preview')
+			return { model, providerKey: providerKeyOf(model), factory: asFactory(provider) }
+		},
+	},
+	{
 		id: 'openrouter-gemma-4-31b',
 		envVar: 'OPENROUTER_API_KEY',
 		async build(apiKey) {

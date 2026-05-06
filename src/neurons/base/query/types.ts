@@ -6,6 +6,7 @@
  */
 
 import type {
+	AdaptGenerateOptions,
 	AdaptLLMPlugin,
 	AdaptStreamResult,
 	LanguageModel,
@@ -17,16 +18,9 @@ import type { TokenUsage } from '../../types'
  */
 export type QueryMode = 'direct' | 'tool-based'
 
-export interface QueryOptions {
+export interface QueryOptions extends AdaptGenerateOptions {
 	mode?: QueryMode
 	model?: LanguageModel
-	temperature?: number
-	maxOutputTokens?: number
-	topP?: number
-	topK?: number
-	presencePenalty?: number
-	frequencyPenalty?: number
-	seed?: number
 }
 
 /**

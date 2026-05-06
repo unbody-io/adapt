@@ -11,6 +11,7 @@ import { nanoid } from 'nanoid'
 import { z } from 'zod'
 import {
 	type AdaptLLMPlugin,
+	type AdaptRepairOptions,
 	generate,
 	type LanguageModel,
 	Output,
@@ -233,7 +234,9 @@ function createUnderstandTools(
 				id: z.string().describe('ID of the item to update'),
 				data: dataSchema
 					.nullable()
-					.describe('Fields to update/add in the item data (null if no data update)'),
+					.describe(
+						'Fields to update/add in the item data (null if no data update)',
+					),
 				signals: z
 					.array(z.string())
 					.nullable()
@@ -329,6 +332,7 @@ export async function initUnderstand(
 	llm: AdaptLLMPlugin,
 	model: LanguageModel,
 	instructions: string,
+	repairOptions?: AdaptRepairOptions,
 ): Promise<UnderstandInitResult> {
 	const prompt = identityPrompt(instructions)
 
@@ -338,6 +342,7 @@ export async function initUnderstand(
 		prompt,
 		output: Output.object({ schema: understandIdentitySchema }),
 		repairSchema: understandIdentitySchema,
+		...repairOptions,
 	})
 
 	return { identity, systemPrompt: '' }
@@ -378,6 +383,7 @@ export async function adjustUnderstand(
 	directive: string,
 	newInstructions: string,
 	currentIdentity: UnderstandIdentity,
+	repairOptions?: AdaptRepairOptions,
 ): Promise<UnderstandInitResult> {
 	const prompt = adjustIdentityPrompt(
 		directive,
@@ -391,6 +397,7 @@ export async function adjustUnderstand(
 		prompt,
 		output: Output.object({ schema: understandIdentitySchema }),
 		repairSchema: understandIdentitySchema,
+		...repairOptions,
 	})
 
 	return { identity, systemPrompt: '' }
@@ -408,6 +415,7 @@ export async function adjustUnderstandingContent(
 	directive: string,
 	collection: NeuronCollection<UnderstandingRecord>,
 	understandingSchema?: Record<string, unknown>,
+	repairOptions?: AdaptRepairOptions,
 ): Promise<UnderstandOutput> {
 	try {
 		const changes: ChangeRecord[] = []
@@ -444,6 +452,7 @@ Preserve items the directive doesn't address.`
 			...(understandingSchema
 				? {}
 				: { providerOptions: { openai: { strictJsonSchema: false } } }),
+			...repairOptions,
 			onStepFinish: ({ toolCalls }) => {
 				if (toolCalls) {
 					for (const tc of toolCalls) {
@@ -518,6 +527,7 @@ export async function understand(
 	collection: NeuronCollection<UnderstandingRecord>,
 	understandingSchema?: Record<string, unknown>,
 	callbacks?: UnderstandCallbacks,
+	repairOptions?: AdaptRepairOptions,
 ): Promise<UnderstandOutput> {
 	try {
 		const changes: ChangeRecord[] = []
@@ -551,6 +561,7 @@ export async function understand(
 			...(understandingSchema
 				? {}
 				: { providerOptions: { openai: { strictJsonSchema: false } } }),
+			...repairOptions,
 			onStepFinish: ({ text, toolCalls }) => {
 				if (text && callbacks?.onThinking) {
 					callbacks.onThinking([text])

@@ -115,7 +115,10 @@ export class TextNeuron extends BaseNeuron<string, TextNeuronState> {
 			skipObservation: rawConfig.skipObservation ?? false,
 		}
 
-		super(config.id, llm, rawConfig.store, initialState)
+		super(config.id, llm, rawConfig.store, initialState, {
+			repairWithFeedback: rawConfig.repairWithFeedback,
+			maxRepairAttempts: rawConfig.maxRepairAttempts,
+		})
 	}
 
 	// ── Abstract implementations ───────────────────────────────────────────────
@@ -167,6 +170,7 @@ export class TextNeuron extends BaseNeuron<string, TextNeuronState> {
 			model,
 			instructions,
 			this.state.governance.strategy,
+			this.llmRepairOptions,
 		)
 		await this.setState({
 			understand_identity: result.identity,
@@ -186,6 +190,7 @@ export class TextNeuron extends BaseNeuron<string, TextNeuronState> {
 			newInstructions,
 			this.state.understand_identity!,
 			this.state.governance.strategy,
+			this.llmRepairOptions,
 		)
 		await this.setState({
 			understand_identity: result.identity,
@@ -204,6 +209,7 @@ export class TextNeuron extends BaseNeuron<string, TextNeuronState> {
 			directive,
 			currentUnderstanding,
 			this.state.instructions,
+			this.llmRepairOptions,
 		)
 
 		if (result.status === 'synthesized') {
@@ -234,6 +240,7 @@ export class TextNeuron extends BaseNeuron<string, TextNeuronState> {
 				observations,
 			},
 			callbacks,
+			this.llmRepairOptions,
 		)
 
 		if (result.status === 'error') {
@@ -262,6 +269,7 @@ export class TextNeuron extends BaseNeuron<string, TextNeuronState> {
 			llm: this.llm,
 			model: this.state.models.default,
 			config: this.state.governance,
+			...this.llmRepairOptions,
 		})
 		return result.understanding
 	}
@@ -389,13 +397,21 @@ export class TextNeuron extends BaseNeuron<string, TextNeuronState> {
 	 */
 	static async restore(
 		input: string | NeuronStore,
-		runtime?: { id?: string; model?: LanguageModel; llm?: AdaptLLMPlugin },
+		runtime?: {
+			id?: string
+			model?: LanguageModel
+			llm?: AdaptLLMPlugin
+			repairWithFeedback?: TextNeuronConfig['repairWithFeedback']
+			maxRepairAttempts?: number
+		},
 	): Promise<TextNeuron> {
 		const store = await resolveNeuronStore(input)
 		const neuron = new TextNeuron({
 			store,
 			model: runtime?.model ?? RESTORE_PLACEHOLDER_MODEL,
 			llm: runtime?.llm,
+			repairWithFeedback: runtime?.repairWithFeedback,
+			maxRepairAttempts: runtime?.maxRepairAttempts,
 			instructions: '',
 			id: runtime?.id,
 		})

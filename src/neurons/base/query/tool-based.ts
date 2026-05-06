@@ -94,6 +94,7 @@ const cognitiveTools = {
 
 export interface ToolBasedConfig {
 	/** Neuron-specific understanding-access tools */
+	// biome-ignore lint/suspicious/noExplicitAny: Query tools preserve schema-derived callback parameter types.
 	tools: Record<string, Tool<any, any>>
 	/** Builds the system prompt for the query (neuron-specific) */
 	buildPrompt: (context: QueryContext) => string

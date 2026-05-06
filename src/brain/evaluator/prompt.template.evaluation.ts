@@ -5,7 +5,7 @@
  * the system prompt's root question and AI SDK tool schemas handle that.
  */
 
-import type { Signal, EvaluationContext } from './types'
+import type { EvaluationContext, Signal } from './types'
 
 /**
  * Format the evaluation prompt with signals and context.
@@ -21,7 +21,8 @@ export function evaluationPromptTemplate(
 		? `\n${context.brain.evolutionContext}\n`
 		: ''
 
-	sections.push(`# Context
+	sections.push(
+		`# Context
 ${contextLine}
 **Active Specialists**: ${context.brain.neuronCount}
 **Dismissed Data Waiting**: ${context.dismissedBatchCount} batches
@@ -38,7 +39,8 @@ ${context.neurons
 - **Dismissal Rate**: ${(l.metrics.dismissalRate * 100).toFixed(0)}%, **Queries**: ${l.metrics.queryCount}
 - **Activation**: ${l.health.activation.toFixed(2)} (${l.health.status})`,
 	)
-	.join('\n\n')}`.trim())
+	.join('\n\n')}`.trim(),
+	)
 
 	// 2. Signals
 	sections.push(`# Signals (${signals.length})

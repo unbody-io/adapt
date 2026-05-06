@@ -1,4 +1,13 @@
+export type {
+	BrainCollection,
+	BrainEvolutionRecord,
+	BrainNeuronRecord,
+	BrainStateRecord,
+	BrainStore,
+} from '../stores'
+export { MemoryBrainStore } from '../stores'
 export { Brain } from './class'
+export type { InspectResult } from './inspect'
 export type {
 	BatchResult,
 	BrainAskResult,
@@ -11,12 +20,3 @@ export type {
 	NeuronBatchResult,
 	NeuronResponse,
 } from './types'
-export type {
-	BrainStore,
-	BrainCollection,
-	BrainStateRecord,
-	BrainNeuronRecord,
-	BrainEvolutionRecord,
-} from '../stores'
-export { MemoryBrainStore } from '../stores'
-export type { InspectResult } from './inspect'

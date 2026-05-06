@@ -1,4 +1,3 @@
-export { BaseNeuron } from './class'
 export type {
 	AdjustResult,
 	LearnCallbacks,
@@ -6,20 +5,7 @@ export type {
 	LearnOutput,
 	UnderstandCallResult,
 } from './class'
-export type {
-	SharedNeuronEventMap,
-	EventUsage,
-	BaseResolvedConfig,
-	BaseNeuronUpdateInput,
-	UnderstandThresholds,
-} from './types'
-export type {
-	BaseNeuronState,
-	ModelSlots,
-	StoredModelRef,
-	StateTransform,
-} from './state'
-export { ToolBasedMethod } from './query'
+export { BaseNeuron } from './class'
 export type {
 	QueryCallbacks,
 	QueryContext,
@@ -29,3 +15,17 @@ export type {
 	QueryResult,
 	ToolBasedConfig,
 } from './query'
+export { ToolBasedMethod } from './query'
+export type {
+	BaseNeuronState,
+	ModelSlots,
+	StateTransform,
+	StoredModelRef,
+} from './state'
+export type {
+	BaseNeuronUpdateInput,
+	BaseResolvedConfig,
+	EventUsage,
+	SharedNeuronEventMap,
+	UnderstandThresholds,
+} from './types'

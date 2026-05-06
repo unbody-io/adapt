@@ -1,4 +1,4 @@
-import type { AdaptLLMPlugin, LanguageModel } from '../llm'
+import type { AdaptLLMPlugin, AdaptRepairOptions, LanguageModel } from '../llm'
 import type { LearnOutput } from '../neurons/base/class'
 import type { SharedNeuronEventMap } from '../neurons/base/types'
 import type { GeneratedNeuronConfig } from '../neurons/schema.config'
@@ -140,7 +140,7 @@ export interface DismissedBatchBufferConfig {
 /**
  * Configuration for creating a Brain
  */
-export interface BrainConfig extends CascadableConfig {
+export interface BrainConfig extends CascadableConfig, AdaptRepairOptions {
 	/** Natural language prompt describing what to track and learn */
 	prompt: string
 	/** Default model - cascades to all operations */
@@ -191,7 +191,7 @@ export interface BrainConfig extends CascadableConfig {
  * All optional. Pass nothing if the same process already cached the live
  * model from a prior `Brain.create` call (in-memory restore).
  */
-export interface BrainRuntimeOptions {
+export interface BrainRuntimeOptions extends AdaptRepairOptions {
 	model?: LanguageModel
 	blueprintModel?: LanguageModel
 	init?: { model?: LanguageModel }

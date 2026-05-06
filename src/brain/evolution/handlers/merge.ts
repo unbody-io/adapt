@@ -78,6 +78,7 @@ export class MergeHandler extends EvolutionActionHandler<MergeActionResult> {
 					),
 					output: Output.object({ schema: mergeSchema }),
 					repairSchema: mergeSchema,
+					...this.brain.llmRepairOptions,
 				})
 
 				const { config, understanding } = result.output

@@ -22,7 +22,13 @@ export interface Usage {
  * - error: LLM failure
  */
 export type ObserveOutput =
-	| { status: 'observed'; output: unknown[]; importance: number; gaps: string[]; usage?: Usage }
+	| {
+			status: 'observed'
+			output: unknown[]
+			importance: number
+			gaps: string[]
+			usage?: Usage
+	  }
 	| { status: 'dismissed'; output: unknown[]; gaps: string[]; usage?: Usage }
 	| { status: 'error'; output: null; error: unknown }
 

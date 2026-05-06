@@ -45,6 +45,7 @@ export function createCompleteConfig(partial: {
  */
 export function stringifyUnderstanding(understanding: unknown): string {
 	if (!understanding) return '(No understanding yet)'
-	if (typeof understanding === 'string') return understanding || '(No understanding yet)'
+	if (typeof understanding === 'string')
+		return understanding || '(No understanding yet)'
 	return JSON.stringify(understanding, null, 2)
 }

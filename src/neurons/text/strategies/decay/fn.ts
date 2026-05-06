@@ -11,6 +11,8 @@ export const decay: StrategyFn = async ({
 	llm,
 	model,
 	config,
+	repairWithFeedback,
+	maxRepairAttempts,
 }) => {
 	const maxTokens = config.maxTokens ?? 4000
 	const currentTokens = estimateTokens(understanding)
@@ -24,6 +26,8 @@ export const decay: StrategyFn = async ({
 		llm,
 		model,
 		prompt: decayCompressPromptTemplate(understanding, maxTokens),
+		repairWithFeedback,
+		maxRepairAttempts,
 	})
 
 	return {

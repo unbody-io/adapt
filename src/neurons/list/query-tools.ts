@@ -28,7 +28,9 @@ export function createListQueryTools(getItems: () => Promise<ListItem[]>) {
 				filterValue: z
 					.string()
 					.nullable()
-					.describe('Value to match, case-insensitive substring (null for no filter)'),
+					.describe(
+						'Value to match, case-insensitive substring (null for no filter)',
+					),
 			}),
 			execute: async (params) => {
 				const items = await getItems()
@@ -38,12 +40,11 @@ export function createListQueryTools(getItems: () => Promise<ListItem[]>) {
 						items: items.map(summarizeItem),
 					}
 				}
+				const { filterKey, filterValue } = params
 				const filtered = items.filter((item) => {
-					const val = item.data[params.filterKey!]
+					const val = item.data[filterKey]
 					if (val === undefined) return false
-					return String(val)
-						.toLowerCase()
-						.includes(params.filterValue!.toLowerCase())
+					return String(val).toLowerCase().includes(filterValue.toLowerCase())
 				})
 				return {
 					count: filtered.length,

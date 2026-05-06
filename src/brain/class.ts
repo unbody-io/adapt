@@ -1,9 +1,10 @@
-import type { CallSettings } from 'ai'
-import type { AdaptStreamResult } from '../llm'
 import { nanoid } from 'nanoid'
 import { z } from 'zod'
+import type { AdaptStreamResult } from '../llm'
 import {
+	type AdaptGenerateOptions,
 	type AdaptLLMPlugin,
+	type AdaptRepairOptions,
 	generate,
 	type LanguageModel,
 	Output,
@@ -34,7 +35,10 @@ import { BRAIN_DEFAULTS } from './config.defaults'
 import { Evaluator } from './evaluator/class'
 import { EVOLUTION_ACTIONS, type EvolutionDecision } from './evaluator/types'
 import { EvolutionOrchestrator } from './evolution/orchestrator'
-import type { AggregatedEvolutionResult } from './evolution/types'
+import type {
+	AggregatedEvolutionResult,
+	EvolutionActionResult,
+} from './evolution/types'
 import { type InspectResult, inspect as runInspect } from './inspect'
 import {
 	getInternalNeuronConfigs,
@@ -93,6 +97,8 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 	 * holds its own plugin — there is no global registry. Set at construction.
 	 */
 	readonly llm: AdaptLLMPlugin
+	private readonly repairWithFeedback?: AdaptRepairOptions['repairWithFeedback']
+	private readonly maxRepairAttempts?: number
 
 	// Runtime (rebuilt on init)
 	readonly neurons: Map<string, BaseNeuron<unknown>> = new Map()
@@ -173,6 +179,8 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 		})
 		this.store = rawConfig.store ?? new MemoryBrainStore()
 		this.learningConfig = rawConfig.learning
+		this.repairWithFeedback = rawConfig.repairWithFeedback
+		this.maxRepairAttempts = rawConfig.maxRepairAttempts
 		this.autoSetup = rawConfig.autoSetup ?? true
 		this.configNeurons = rawConfig.neurons
 		this.internalNeuronsConfig = rawConfig.internalNeurons
@@ -218,6 +226,17 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 				...this.state.evolution,
 				model: this.state.models.evolution,
 			},
+		}
+	}
+
+	get llmRepairOptions(): AdaptRepairOptions {
+		return {
+			...(this.repairWithFeedback
+				? { repairWithFeedback: this.repairWithFeedback }
+				: {}),
+			...(this.maxRepairAttempts !== undefined
+				? { maxRepairAttempts: this.maxRepairAttempts }
+				: {}),
 		}
 	}
 
@@ -349,6 +368,8 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 			...(runtime?.query ? { query: runtime.query } : {}),
 			...(runtime?.evolution ? { evolution: runtime.evolution } : {}),
 			...(runtime?.learning ? { learning: runtime.learning } : {}),
+			repairWithFeedback: runtime?.repairWithFeedback,
+			maxRepairAttempts: runtime?.maxRepairAttempts,
 			llm: runtime?.llm,
 		})
 		await brain.initialize('restore')
@@ -372,10 +393,12 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 		// and the store stays poisoned for every retry. See issue #6.
 		const orphanNeurons = await this.store.neurons.list()
 		for (const record of orphanNeurons) {
+			await this.clearNeuronStore(record.id)
 			await this.store.neurons.delete(record.id)
 		}
 		const orphanInternal = await this.store.internalNeurons.list()
 		for (const record of orphanInternal) {
+			await this.clearNeuronStore(record.id)
 			await this.store.internalNeurons.delete(record.id)
 		}
 
@@ -426,6 +449,16 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 		await this.setState({ ...this.state })
 	}
 
+	private async clearNeuronStore(neuronId: string): Promise<void> {
+		const store = this.store.getNeuronStore(neuronId)
+		await Promise.all([
+			store.observations.clear(),
+			store.understanding.clear(),
+			store.evolution.clear(),
+			store.state.clear(),
+		])
+	}
+
 	/**
 	 * Decompose brain prompt into reusable context via LLM.
 	 * Extracts purpose, evolution guidance, and synthesis directive.
@@ -440,6 +473,7 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 			prompt,
 			output: Output.object({ schema: promptContextSchema }),
 			repairSchema: promptContextSchema,
+			...this.llmRepairOptions,
 		})
 
 		this.state.promptContext = output
@@ -464,6 +498,7 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 				model: this.state.models.default,
 				blueprintModel: this.state.models.blueprint,
 				llm: this.llm,
+				...this.llmRepairOptions,
 				// Placeholder values — init() → loadState() overwrites from neuron's own store
 				instructions: '',
 				name: '',
@@ -515,6 +550,7 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 				model: this.state.models.default,
 				blueprintModel: this.state.models.blueprint,
 				llm: this.llm,
+				...this.llmRepairOptions,
 				instructions: '',
 				name: '',
 				description: '',
@@ -560,6 +596,7 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 				model: this.state.models.default,
 				blueprintModel: this.state.models.blueprint,
 				llm: this.llm,
+				...this.llmRepairOptions,
 				instructions: config.instructions,
 				origin: 'prompt' as const,
 				name: config.name,
@@ -702,6 +739,7 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 			),
 			output: Output.object({ schema: brainDecompositionSchema }),
 			repairSchema: brainDecompositionSchema,
+			...this.llmRepairOptions,
 		})
 	}
 
@@ -719,6 +757,7 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 			model: this.state.models.default,
 			blueprintModel: this.state.models.blueprint,
 			llm: this.llm,
+			...this.llmRepairOptions,
 			instructions: config.instructions,
 			origin: 'prompt' as const,
 			name: config.name,
@@ -1001,7 +1040,7 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 	 */
 	async ask(
 		query: string,
-		options?: CallSettings & {
+		options?: AdaptGenerateOptions & {
 			model?: LanguageModel
 			mode?: 'direct' | 'deep'
 		},
@@ -1014,8 +1053,12 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 			const {
 				model: modelOverride,
 				mode: _mode,
-				...generateOptions
+				...rawGenerateOptions
 			} = options ?? {}
+			const generateOptions = {
+				...this.llmRepairOptions,
+				...rawGenerateOptions,
+			}
 			const synthesisModel = modelOverride ?? this.state.models.query
 
 			const result =
@@ -1061,7 +1104,7 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 	 */
 	async askStream(
 		query: string,
-		options?: CallSettings & {
+		options?: AdaptGenerateOptions & {
 			model?: LanguageModel
 			mode?: 'direct' | 'deep'
 		},
@@ -1073,8 +1116,12 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 		const {
 			model: modelOverride,
 			mode: _mode,
-			...generateOptions
+			...rawGenerateOptions
 		} = options ?? {}
+		const generateOptions = {
+			...this.llmRepairOptions,
+			...rawGenerateOptions,
+		}
 		const synthesisModel = modelOverride ?? this.state.models.query
 
 		if (mode === 'direct') {
@@ -1089,7 +1136,7 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 	private async askDirectStream(
 		query: string,
 		model: LanguageModel,
-		generateOptions: CallSettings,
+		generateOptions: AdaptGenerateOptions,
 	): Promise<AdaptStreamResult> {
 		const allNeurons = this.getNeurons()
 
@@ -1125,7 +1172,7 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 		)
 
 		const specialistResults = neuronQueries
-			.filter((r): r is NonNullable<typeof r> => r !== null && r.relevant)
+			.filter((r): r is NonNullable<typeof r> => r?.relevant)
 			.map((r) => ({
 				id: r.id,
 				relevance: r.relevance,
@@ -1157,7 +1204,7 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 	private async askDeepStream(
 		query: string,
 		model: LanguageModel,
-		generateOptions: CallSettings,
+		generateOptions: AdaptGenerateOptions,
 	): Promise<AdaptStreamResult> {
 		const neuronArray = this.getNeurons()
 
@@ -1197,7 +1244,7 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 		query: string,
 		neurons: BaseNeuron<unknown>[],
 		model: LanguageModel,
-		generateOptions: CallSettings,
+		generateOptions: AdaptGenerateOptions,
 	): Promise<BaseNeuron<unknown>[]> {
 		if (neurons.length <= 1) return neurons
 
@@ -1241,7 +1288,7 @@ ${neuronMenu.map((l) => `- ${l.id}: ${l.name} — ${l.description}`).join('\n')}
 	private async askDirect(
 		query: string,
 		model: LanguageModel,
-		generateOptions: CallSettings,
+		generateOptions: AdaptGenerateOptions,
 	) {
 		const allNeurons = this.getNeurons()
 
@@ -1277,7 +1324,7 @@ ${neuronMenu.map((l) => `- ${l.id}: ${l.name} — ${l.description}`).join('\n')}
 		)
 
 		const specialistResults = neuronQueries
-			.filter((r): r is NonNullable<typeof r> => r !== null && r.relevant)
+			.filter((r): r is NonNullable<typeof r> => r?.relevant)
 			.map((r) => ({
 				id: r.id,
 				relevance: r.relevance,
@@ -1309,7 +1356,7 @@ ${neuronMenu.map((l) => `- ${l.id}: ${l.name} — ${l.description}`).join('\n')}
 	private async askDeep(
 		query: string,
 		model: LanguageModel,
-		generateOptions: CallSettings,
+		generateOptions: AdaptGenerateOptions,
 	) {
 		const neuronArray = this.getNeurons()
 
@@ -1362,7 +1409,7 @@ ${neuronMenu.map((l) => `- ${l.id}: ${l.name} — ${l.description}`).join('\n')}
 			if (!neuron) {
 				throw new Error(`Internal neuron ${options.neuron} not found`)
 			}
-			const result = await neuron.query(query)
+			const result = await neuron.query(query, this.llmRepairOptions)
 			return {
 				insight: result.insight,
 				sources: [
@@ -1403,7 +1450,8 @@ ${neuronMenu.map((l) => `- ${l.id}: ${l.name} — ${l.description}`).join('\n')}
 			id: neuron.id,
 			name: neuron.name,
 			description: neuron.description || neuron.name,
-			query: (question: string) => neuron.query(question),
+			query: (question: string) =>
+				neuron.query(question, this.llmRepairOptions),
 		}))
 
 		const result = await synthesize(this.llm, this.state.models.query, {
@@ -1411,6 +1459,7 @@ ${neuronMenu.map((l) => `- ${l.id}: ${l.name} — ${l.description}`).join('\n')}
 				this.state.promptContext?.synthesisDirective ?? undefined,
 			query,
 			specialists,
+			...this.llmRepairOptions,
 		})
 
 		return {
@@ -1429,9 +1478,13 @@ ${neuronMenu.map((l) => `- ${l.id}: ${l.name} — ${l.description}`).join('\n')}
 	 */
 	async inspect(
 		query: string,
-		options?: CallSettings & { model?: LanguageModel },
+		options?: AdaptGenerateOptions & { model?: LanguageModel },
 	): Promise<InspectResult> {
-		const { model: modelOverride, ...generateOptions } = options ?? {}
+		const { model: modelOverride, ...rawGenerateOptions } = options ?? {}
+		const generateOptions = {
+			...this.llmRepairOptions,
+			...rawGenerateOptions,
+		}
 		const model = modelOverride ?? this.state.models.query
 		return runInspect(this.llm, model, this, query, generateOptions)
 	}
@@ -1526,7 +1579,7 @@ ${neuronMenu.map((l) => `- ${l.id}: ${l.name} — ${l.description}`).join('\n')}
 				description: def.description,
 				inputSchema: consultInputSchema,
 				execute: async ({ question }: { question: string }) => {
-					const result = await neuron.query(question)
+					const result = await neuron.query(question, this.llmRepairOptions)
 					return {
 						relevant: result.relevant,
 						insight: result.insight,
@@ -1936,8 +1989,11 @@ ${neuronMenu.map((l) => `- ${l.id}: ${l.name} — ${l.description}`).join('\n')}
 	 * Internal: Emit evolution event (used by evolution handlers)
 	 * @internal
 	 */
-	__emitEvolutionEvent(eventName: keyof BrainEventMap, payload: any): void {
-		this.emit(eventName as any, payload as never)
+	__emitEvolutionEvent<K extends keyof BrainEventMap>(
+		eventName: K,
+		payload: BrainEventMap[K],
+	): void {
+		this.emit(eventName, payload)
 	}
 
 	/**
@@ -1946,6 +2002,21 @@ ${neuronMenu.map((l) => `- ${l.id}: ${l.name} — ${l.description}`).join('\n')}
 	 */
 	__updateNeuronName(neuronId: string, newName: string): void {
 		this.neuronNames.set(neuronId, newName)
+	}
+
+	private getNeuronOrThrow(neuronId: string): BaseNeuron<unknown> {
+		const neuron = this.neurons.get(neuronId)
+		if (!neuron) {
+			throw new Error(`Neuron not found after evolution action: ${neuronId}`)
+		}
+		return neuron
+	}
+
+	private getNewNeuronIdsOrThrow(result: EvolutionActionResult): string[] {
+		if (!('newNeuronIds' in result)) {
+			throw new Error('Evolution action did not create a neuron')
+		}
+		return result.newNeuronIds
 	}
 
 	// ─────────────────────────────────────────────────────────────────────────
@@ -1980,8 +2051,8 @@ ${neuronMenu.map((l) => `- ${l.id}: ${l.name} — ${l.description}`).join('\n')}
 
 		const result =
 			await this.evolutionOrchestrator.executeSingleDecision(decision)
-		const neuronId = result.newNeuronIds[0]
-		return this.neurons.get(neuronId)!
+		const neuronId = this.getNewNeuronIdsOrThrow(result)[0]
+		return this.getNeuronOrThrow(neuronId)
 	}
 
 	/**
@@ -2019,8 +2090,8 @@ ${neuronMenu.map((l) => `- ${l.id}: ${l.name} — ${l.description}`).join('\n')}
 
 		const result =
 			await this.evolutionOrchestrator.executeSingleDecision(decision)
-		const neuronId = result.newNeuronIds[0]
-		return this.neurons.get(neuronId)!
+		const neuronId = this.getNewNeuronIdsOrThrow(result)[0]
+		return this.getNeuronOrThrow(neuronId)
 	}
 
 	/**
@@ -2058,7 +2129,9 @@ ${neuronMenu.map((l) => `- ${l.id}: ${l.name} — ${l.description}`).join('\n')}
 
 		const result =
 			await this.evolutionOrchestrator.executeSingleDecision(decision)
-		return result.newNeuronIds.map((id: string) => this.neurons.get(id)!)
+		return this.getNewNeuronIdsOrThrow(result).map((id: string) =>
+			this.getNeuronOrThrow(id),
+		)
 	}
 
 	/**
@@ -2095,7 +2168,7 @@ ${neuronMenu.map((l) => `- ${l.id}: ${l.name} — ${l.description}`).join('\n')}
 		}
 
 		await this.evolutionOrchestrator.executeSingleDecision(decision)
-		return this.neurons.get(neuronId)!
+		return this.getNeuronOrThrow(neuronId)
 	}
 
 	/**

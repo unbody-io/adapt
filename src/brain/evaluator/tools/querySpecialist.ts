@@ -27,7 +27,7 @@ export function createQuerySpecialistTool(brain: Brain) {
 				throw new Error(`Specialist "${id}" not found`)
 			}
 
-			const result = await neuron.query(question)
+			const result = await neuron.query(question, brain.llmRepairOptions)
 			return {
 				relevant: result.relevant,
 				relevance: result.relevance,

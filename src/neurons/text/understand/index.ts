@@ -8,6 +8,7 @@
 import { z } from 'zod'
 import {
 	type AdaptLLMPlugin,
+	type AdaptRepairOptions,
 	generate,
 	type LanguageModel,
 	Output,
@@ -45,6 +46,7 @@ export async function initUnderstand(
 	model: LanguageModel,
 	instructions: string,
 	strategy: Strategy,
+	repairOptions?: AdaptRepairOptions,
 ): Promise<UnderstandInitResult> {
 	const prompt = understandIdentityPromptTemplate(instructions)
 
@@ -54,6 +56,7 @@ export async function initUnderstand(
 		prompt,
 		output: Output.object({ schema: understandIdentitySchema }),
 		repairSchema: understandIdentitySchema,
+		...repairOptions,
 	})
 
 	const systemPrompt = understandSystemPromptTemplate(identity, strategy)
@@ -81,6 +84,7 @@ export async function adjustUnderstand(
 	newInstructions: string,
 	currentIdentity: UnderstandIdentity,
 	strategy: Strategy,
+	repairOptions?: AdaptRepairOptions,
 ): Promise<UnderstandInitResult> {
 	const prompt = understandAdjustPromptTemplate(
 		directive,
@@ -94,6 +98,7 @@ export async function adjustUnderstand(
 		prompt,
 		output: Output.object({ schema: understandIdentitySchema }),
 		repairSchema: understandIdentitySchema,
+		...repairOptions,
 	})
 
 	const systemPrompt = understandSystemPromptTemplate(identity, strategy)
@@ -110,6 +115,7 @@ export async function understand(
 	systemPrompt: string,
 	context: UnderstandContext,
 	callbacks?: UnderstandCallbacks,
+	repairOptions?: AdaptRepairOptions,
 ): Promise<UnderstandOutput> {
 	try {
 		const prompt = understandUserPromptTemplate(
@@ -124,6 +130,7 @@ export async function understand(
 			prompt,
 			output: Output.object({ schema: understandOutputSchema }),
 			repairSchema: understandOutputSchema,
+			...repairOptions,
 		})
 
 		// Emit thinking if available
@@ -180,6 +187,7 @@ export async function adjustUnderstandingContent(
 	directive: string,
 	currentUnderstanding: string,
 	instructions: string,
+	repairOptions?: AdaptRepairOptions,
 ): Promise<AdjustUnderstandingResult> {
 	// In-memory buffer the tools operate on
 	let buffer = currentUnderstanding
@@ -328,6 +336,7 @@ ${currentUnderstanding}
 		tools,
 		toolChoice: 'required' as const,
 		stopWhen: stepCountIs(ADJUST_MAX_STEPS),
+		...repairOptions,
 		onStepFinish: ({ toolCalls }) => {
 			if (toolCalls) {
 				for (const tc of toolCalls) {

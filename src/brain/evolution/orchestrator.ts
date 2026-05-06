@@ -6,12 +6,12 @@ import type { Brain } from '../class'
 import type { EvolutionDecision } from '../evaluator/types'
 import { EVOLUTION_ACTIONS } from '../evaluator/types'
 import { isInternalNeuronId } from '../internal-neurons'
+import type { EvolutionActionHandler } from './base-handler'
 import { CreateHandler } from './handlers/create'
+import { DeleteHandler } from './handlers/delete'
 import { MergeHandler } from './handlers/merge'
 import { SplitHandler } from './handlers/split'
 import { UpdateHandler } from './handlers/update'
-import { DeleteHandler } from './handlers/delete'
-import type { EvolutionActionHandler } from './base-handler'
 import type { AggregatedEvolutionResult, EvolutionActionResult } from './types'
 
 /**
@@ -38,7 +38,9 @@ export class EvolutionOrchestrator {
 	 * @param decisions - Array of evolution decisions from Evaluator
 	 * @returns Aggregated results from all handlers
 	 */
-	async executeDecisions(decisions: EvolutionDecision[]): Promise<AggregatedEvolutionResult> {
+	async executeDecisions(
+		decisions: EvolutionDecision[],
+	): Promise<AggregatedEvolutionResult> {
 		// Filter out decisions targeting internal neurons (protected from evolution)
 		const filtered = decisions.filter(
 			(d) => !d.targets.some(isInternalNeuronId),
@@ -81,7 +83,9 @@ export class EvolutionOrchestrator {
 	 * @param decision - Evolution decision to execute
 	 * @returns Result of the action execution
 	 */
-	async executeSingleDecision(decision: EvolutionDecision): Promise<any> {
+	async executeSingleDecision(
+		decision: EvolutionDecision,
+	): Promise<EvolutionActionResult> {
 		// Protect internal neurons from evolution
 		if (decision.targets.some(isInternalNeuronId)) {
 			throw new Error('Cannot evolve internal neurons')

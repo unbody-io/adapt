@@ -41,6 +41,7 @@ function section(title: string) {
 }
 
 async function main() {
+	rmSync(tmpDir, { recursive: true, force: true })
 	mkdirSync(tmpDir, { recursive: true })
 
 	try {
@@ -96,11 +97,9 @@ async function main() {
 		assert(true, 'Session 1: brain initialized and data injected')
 		await brain1.dispose()
 
-		// Session 2: restore and continue.
-		// After restore, models rehydrate as gateway strings — override with a
-		// direct provider before issuing LLM calls (matches the docs example).
-		const brain2 = await Brain.restore(brainDb)
-		await brain2.update({ model })
+		// Session 2: restore and continue. The runtime arg rehydrates persisted
+		// model refs through the LLM plugin (matches the docs example).
+		const brain2 = await Brain.restore(brainDb, { model })
 		const answer = await brain2.ask('What do you know?')
 		assert(typeof answer.insight === 'string', 'Session 2: brain restored and can answer')
 		console.log(`  Session 2 insight: ${answer.insight.slice(0, 80)}...`)

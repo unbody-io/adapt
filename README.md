@@ -28,7 +28,7 @@ npm install @ai-sdk/openai    # or @ai-sdk/anthropic, @ai-sdk/google, etc.
 import { Brain } from '@unbody-io/adapt'
 import { openai } from '@ai-sdk/openai'
 
-const brain = new Brain({
+const brain = await Brain.create({
   prompt: 'Track my coding patterns and development philosophy.',
   model: openai('gpt-4o'),
 })
@@ -45,9 +45,11 @@ console.log(result.insight)
 ### Features
 
 - **Self-evolving** — creates, merges, splits, and removes Neurons based on usage
-- **Any LLM** — cloud or local via Vercel AI SDK
+- **Any LLM** — AI SDK by default, BYO runtime via the `AdaptLLMPlugin` contract
 - **Pluggable stores** — in-memory or SQLite
-- **Modular** — use the Brain orchestrator or individual Neurons standalone
+- **Modular** — use the `Brain` orchestrator or `TextNeuron` / `ListNeuron` standalone
+- **Persistent** — `Brain.restore(path)` rehydrates from SQLite; same for standalone neurons
+- **Runs anywhere** — Node, Bun, and Electron (ESM + CJS builds)
 
 ### Limitations
 

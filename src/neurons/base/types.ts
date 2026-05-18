@@ -70,6 +70,7 @@ export interface BaseNeuronUpdateInput {
 	}
 	query?: { model?: LanguageModel }
 	health?: Partial<NeuronHealth>
+	skipUnderstand?: boolean
 }
 
 /**

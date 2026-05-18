@@ -9,7 +9,7 @@ import type {
 	CascadableConfig,
 	ResolvedCascadableConfig,
 } from '../types/config'
-import type { EventsFromMap } from '../types/events'
+import type { EventsFromMap, UnifiedHandler } from '../types/events'
 import type { EvolutionDecision } from './evaluator/types'
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -174,6 +174,8 @@ export interface BrainConfig extends CascadableConfig, AdaptRepairOptions {
 	internalNeurons?: InternalNeuronsConfig
 	/** Dismissed batch buffer config */
 	dismissedBatchBuffer?: DismissedBatchBufferConfig
+	/** Subscribe before initialization starts, so init events can be observed. */
+	onEvent?: UnifiedHandler<BrainEvent>
 }
 
 /**
@@ -199,6 +201,8 @@ export interface BrainRuntimeOptions extends AdaptRepairOptions {
 	evolution?: { model?: LanguageModel }
 	learning?: LearningConfig
 	llm?: AdaptLLMPlugin
+	/** Subscribe before restore initialization starts, so init events can be observed. */
+	onEvent?: UnifiedHandler<BrainEvent>
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

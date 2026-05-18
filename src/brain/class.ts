@@ -341,6 +341,7 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 		rawConfig: BrainConfig & { llm?: AdaptLLMPlugin },
 	): Promise<Brain> {
 		const brain = new Brain(rawConfig)
+		if (rawConfig.onEvent) brain.on(rawConfig.onEvent)
 		await brain.initialize('fresh')
 		return brain
 	}
@@ -372,6 +373,7 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 			maxRepairAttempts: runtime?.maxRepairAttempts,
 			llm: runtime?.llm,
 		})
+		if (runtime?.onEvent) brain.on(runtime.onEvent)
 		await brain.initialize('restore')
 		return brain
 	}
@@ -606,6 +608,7 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 				store: this.store.getNeuronStore(config.id),
 				governance,
 				skipObservation: config.skipObservation,
+				skipUnderstand: config.skipUnderstand,
 				understand: {
 					thresholds: {
 						maxObservations: 3,
@@ -799,6 +802,7 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 			store: this.store.getNeuronStore(config.id),
 			governance,
 			skipObservation: config.skipObservation,
+			skipUnderstand: config.skipUnderstand,
 			observationSchema: config.observationSchema,
 			understandingSchema: config.understandingSchema,
 		})

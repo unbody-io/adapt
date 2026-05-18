@@ -116,6 +116,7 @@ export class TextNeuron extends BaseNeuron<string, TextNeuronState> {
 			dismissal_signal_fired: false,
 			governance: config.governance,
 			skipObservation: rawConfig.skipObservation ?? false,
+			skipUnderstand: rawConfig.skipUnderstand ?? false,
 		}
 
 		super(config.id, llm, rawConfig.store, initialState, {
@@ -387,6 +388,7 @@ export class TextNeuron extends BaseNeuron<string, TextNeuronState> {
 		parentModels?: ParentModels,
 	): Promise<TextNeuron> {
 		const neuron = new TextNeuron(config, parentModels)
+		if (config.onEvent) neuron.on(config.onEvent)
 		await neuron.init({ expect: 'fresh' })
 		return neuron
 	}
@@ -410,6 +412,7 @@ export class TextNeuron extends BaseNeuron<string, TextNeuronState> {
 			llm?: AdaptLLMPlugin
 			repairWithFeedback?: TextNeuronConfig['repairWithFeedback']
 			maxRepairAttempts?: number
+			onEvent?: TextNeuronConfig['onEvent']
 		},
 	): Promise<TextNeuron> {
 		const store = await resolveNeuronStore(input)
@@ -422,6 +425,7 @@ export class TextNeuron extends BaseNeuron<string, TextNeuronState> {
 			instructions: '',
 			id: runtime?.id,
 		})
+		if (runtime?.onEvent) neuron.on(runtime.onEvent)
 		await neuron.init({ expect: 'restore' })
 		return neuron
 	}

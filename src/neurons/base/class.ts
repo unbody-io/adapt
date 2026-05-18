@@ -1276,6 +1276,7 @@ export abstract class BaseNeuron<
 
 		// Skip-observation neurons never run the observe phase; never regen its prompt.
 		if (this.state.skipObservation) needsObserveRegen = false
+		if (this.state.skipUnderstand) needsUnderstandRegen = false
 
 		if (needsObserveRegen || needsUnderstandRegen || needsSchemaRegen) {
 			const promises: Promise<void>[] = []

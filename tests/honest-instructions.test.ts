@@ -274,6 +274,35 @@ describe('honest neuron instructions', () => {
 		)
 	})
 
+	it('does not rebuild understand prompts when updating skipUnderstand neurons', async () => {
+		const queued = createQueuedJsonModel([
+			{
+				status: 'observed',
+				output: ['Customer requested dark mode.'],
+				importance: 1,
+				gaps: [],
+			},
+		])
+
+		const neuron = await TextNeuron.create({
+			id: 'observer-only-update',
+			model: queued.model,
+			store: new MemoryNeuronStore(),
+			instructions: 'Keep feature requests as observations.',
+			skipUnderstand: true,
+			observationSchema: { type: 'string' },
+		})
+
+		await neuron.update({
+			instructions: 'Keep product requests as observations.',
+			understandInstructions: 'Never synthesize product requests.',
+		})
+		await neuron.learn(['Please add dark mode.'], { forceSynthesize: true })
+
+		expect(neuron.getUnderstandSystemPrompt()).toBeNull()
+		expect(queued.getCallCount()).toBe(1)
+	})
+
 	it('allows subscribing before TextNeuron create and restore init events fire', async () => {
 		const store = new MemoryNeuronStore()
 		const createEvents: string[] = []

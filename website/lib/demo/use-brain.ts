@@ -223,32 +223,32 @@ export function useBrain() {
 	}, [])
 
 	const start = useCallback(async (options: UseBrainOptions) => {
-		const { Brain, MemoryBrainStore, MemoryNeuronStore } = await import("@unbody-io/adapt")
+		const { Brain, MemoryBrainStore } = await import("@unbody-io/adapt")
 
 		startTimeRef.current = Date.now()
 		timelineRef.current = []
 		narratedInternalSetupRef.current = false
 		setState({ ...initialState, phase: "initializing", activity: "Creating brain..." })
 
-		const brain = new Brain({
-			prompt: options.prompt,
-			autoSetup: options.autoSetup ?? true,
-			model: options.model,
-			blueprintModel: options.blueprintModel ?? options.model,
-			store: new MemoryBrainStore(),
-			ingest: options.ingest,
-			learning: {
-				store: () => new MemoryNeuronStore(),
-				understand: options.learning?.understand,
-				governance: options.learning?.governance,
-			},
-			evolution: options.evolution ? {
-				enabled: options.evolution.enabled,
-				autoEvaluate: options.evolution.autoEvaluate,
-				evaluatorSignalThreshold: options.evolution.evaluatorSignalThreshold,
-				model: options.evolution.model ?? options.model,
-			} : undefined,
-		})
+		const brain = await retryAsync(() =>
+			Brain.create({
+				prompt: options.prompt,
+				autoSetup: options.autoSetup ?? true,
+				model: options.model,
+				init: { model: options.blueprintModel ?? options.model },
+				store: new MemoryBrainStore(),
+				ingest: options.ingest,
+				learning: {
+					understand: options.learning?.understand,
+					governance: options.learning?.governance,
+				},
+				evolution: options.evolution ? {
+					enabled: options.evolution.enabled,
+					autoEvaluate: options.evolution.autoEvaluate,
+					evaluatorSignalThreshold: options.evolution.evaluatorSignalThreshold,
+					model: options.evolution.model ?? options.model,
+				} : undefined,
+			}), 3)
 
 		brainRef.current = brain
 
@@ -451,15 +451,8 @@ export function useBrain() {
 			})
 		}
 
-		// Initialize
-		try {
-			await retryAsync(() => brain.initialize(), 3)
-			syncNeurons(brain)
-			setState((prev) => ({ ...prev, phase: "ready" }))
-		} catch (err) {
-			console.error("[useBrain] Init failed:", err)
-			setState((prev) => ({ ...prev, phase: "error", activity: String(err) }))
-		}
+		syncNeurons(brain)
+		setState((prev) => ({ ...prev, phase: "ready", activity: "Brain ready" }))
 	}, [addEvent, patchNeuron, incrementMetric, enqueueCommentary])
 
 	const syncNeurons = (brain: import("@unbody-io/adapt").Brain) => {

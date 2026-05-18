@@ -7,7 +7,7 @@
 import type { AdaptRepairOptions, LanguageModel } from '../../llm'
 import type { NeuronStore } from '../../stores'
 import type { CascadableConfig } from '../../types/config'
-import type { EventsFromMap } from '../../types/events'
+import type { EventsFromMap, UnifiedHandler } from '../../types/events'
 import type { BaseNeuronState } from '../base/state'
 import type {
 	BaseResolvedConfig,
@@ -142,6 +142,8 @@ export interface ListNeuronConfig extends CascadableConfig, AdaptRepairOptions {
 	observationSchema?: Record<string, unknown>
 	/** Custom understanding schema — skips LLM generation when provided */
 	understandingSchema?: Record<string, unknown>
+	/** Subscribe before initialization starts, so init events can be observed. */
+	onEvent?: UnifiedHandler<EventsFromMap<SharedNeuronEventMap>>
 }
 
 // ── Resolved config ────────────────────────────────────────────────────────

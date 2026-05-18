@@ -339,6 +339,7 @@ export class ListNeuron extends BaseNeuron<ListItem[], ListNeuronState> {
 		parentModels?: ParentModels,
 	): Promise<ListNeuron> {
 		const neuron = new ListNeuron(config, parentModels)
+		if (config.onEvent) neuron.on(config.onEvent)
 		await neuron.init({ expect: 'fresh' })
 		return neuron
 	}
@@ -358,6 +359,7 @@ export class ListNeuron extends BaseNeuron<ListItem[], ListNeuronState> {
 			llm?: AdaptLLMPlugin
 			repairWithFeedback?: ListNeuronConfig['repairWithFeedback']
 			maxRepairAttempts?: number
+			onEvent?: ListNeuronConfig['onEvent']
 		},
 	): Promise<ListNeuron> {
 		const store = await resolveNeuronStore(input)
@@ -370,6 +372,7 @@ export class ListNeuron extends BaseNeuron<ListItem[], ListNeuronState> {
 			instructions: '',
 			id: runtime?.id,
 		})
+		if (runtime?.onEvent) neuron.on(runtime.onEvent)
 		await neuron.init({ expect: 'restore' })
 		return neuron
 	}

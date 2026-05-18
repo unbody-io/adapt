@@ -274,4 +274,28 @@ describe('honest neuron instructions', () => {
 		)
 	})
 
+	it('allows subscribing before TextNeuron create and restore init events fire', async () => {
+		const store = new MemoryNeuronStore()
+		const createEvents: string[] = []
+
+		const neuron = await TextNeuron.create({
+			id: 'eventful',
+			model: createQueuedJsonModel([skillsResponse()]).model,
+			store,
+			instructions: 'Track init events.',
+			onEvent: (event) => createEvents.push(event.type),
+		})
+
+		expect(createEvents).toContain('neuron:init:started')
+		expect(createEvents).toContain('neuron:init:completed')
+		await neuron.dispose()
+
+		const restoreEvents: string[] = []
+		await TextNeuron.restore(store, {
+			onEvent: (event) => restoreEvents.push(event.type),
+		})
+
+		expect(restoreEvents).toContain('neuron:init:started')
+		expect(restoreEvents).toContain('neuron:init:completed')
+	})
 })

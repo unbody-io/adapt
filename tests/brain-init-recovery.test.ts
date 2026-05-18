@@ -49,6 +49,54 @@ function createQueuedJsonModel(responses: unknown[]) {
 }
 
 describe('Brain init recovery from partial state (issue #6)', () => {
+	it('allows subscribing before Brain.create init events fire', async () => {
+		const events: string[] = []
+		const store = new MemoryBrainStore()
+		const { model } = createQueuedJsonModel([
+			{ skills: [], dynamicsSkills: [] },
+			{
+				purpose: 'Track coding preferences.',
+				evolutionGuidance: null,
+				synthesisDirective: null,
+			},
+		])
+
+		await Brain.create({
+			prompt: 'Track coding patterns and preferences.',
+			model,
+			autoSetup: false,
+			store,
+			onEvent: (event) => events.push(event.type),
+			neurons: [
+				{
+					id: 'coding',
+					type: 'text',
+					name: 'Coding',
+					description: 'Tracks coding patterns',
+					instructions: 'Track coding patterns and preferences.',
+				},
+			],
+			internalNeurons: {
+				globalUnderstanding: false,
+				globalQueryUnderstanding: false,
+				injectionGaps: false,
+				queryGaps: false,
+			},
+			evolution: { enabled: false },
+		})
+
+		expect(events).toContain('brain:init:started')
+		expect(events).toContain('brain:init:completed')
+		expect(events).toContain('neuron:init:started')
+
+		const restoreEvents: string[] = []
+		await Brain.restore(store, {
+			onEvent: (event) => restoreEvents.push(event.type),
+		})
+		expect(restoreEvents).toContain('brain:init:started')
+		expect(restoreEvents).toContain('brain:init:completed')
+	})
+
 	it('clears orphan neuron rows from a previously-failed init', async () => {
 		const brainStore = new MemoryBrainStore()
 

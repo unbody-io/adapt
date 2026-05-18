@@ -212,6 +212,7 @@ export abstract class BaseNeuron<
 	protected state: TState
 	protected queryMethod!: QueryMethod
 	protected directQueryMethod?: QueryMethod
+	private initialized = false
 
 	// Lazy init promise (for ensureInit)
 	private initPromise: Promise<{
@@ -442,15 +443,17 @@ export abstract class BaseNeuron<
 			await this.setState(updates)
 		}
 
-		const instructions = resolveUnderstandInstructions(this.state)
-		const prompt = this.rebuildUnderstandPromptFromState(instructions)
-		if (prompt !== null) {
-			await this.setState({ understand_prompt: prompt } as Partial<TState>)
-		} else {
-			await this.regenUnderstandPrompt(
-				this.state.models.understand_blueprint,
-				instructions,
-			)
+		if (!this.state.skipUnderstand) {
+			const instructions = resolveUnderstandInstructions(this.state)
+			const prompt = this.rebuildUnderstandPromptFromState(instructions)
+			if (prompt !== null) {
+				await this.setState({ understand_prompt: prompt } as Partial<TState>)
+			} else {
+				await this.regenUnderstandPrompt(
+					this.state.models.understand_blueprint,
+					instructions,
+				)
+			}
 		}
 	}
 
@@ -493,11 +496,13 @@ export abstract class BaseNeuron<
 					this.state.observe_prompt = observeResult.systemPrompt
 				}
 
-				// Generate understand prompt (type-specific)
-				await this.regenUnderstandPrompt(
-					this.state.models.understand_blueprint,
-					resolveUnderstandInstructions(this.state),
-				)
+				if (!this.state.skipUnderstand) {
+					// Generate understand prompt (type-specific)
+					await this.regenUnderstandPrompt(
+						this.state.models.understand_blueprint,
+						resolveUnderstandInstructions(this.state),
+					)
+				}
 
 				// Generate schemas only if not already provided via config
 				if (
@@ -530,6 +535,7 @@ export abstract class BaseNeuron<
 			// Create query methods
 			this.queryMethod = this.createQueryMethod()
 			this.directQueryMethod = this.createDirectQueryMethod()
+			this.initialized = true
 
 			this.emit('neuron:init:completed', {
 				neuronId: this.id,
@@ -596,9 +602,9 @@ export abstract class BaseNeuron<
 	}
 
 	isInitialized(): boolean {
-		// Use understand_prompt as the readiness signal — it is always set after
-		// init, even for skipObservation neurons (which leave observe_prompt null).
-		return this.state.understand_prompt !== null
+		// Legacy restored neurons use understand_prompt as a persisted readiness
+		// signal. skipUnderstand neurons are marked ready after init completes.
+		return this.initialized || this.state.understand_prompt !== null
 	}
 
 	private async ensureInit(): Promise<void> {
@@ -644,7 +650,11 @@ export abstract class BaseNeuron<
 
 		try {
 			// Handle forceSynthesize with empty data
-			if (options?.forceSynthesize && batch.length === 0) {
+			if (
+				!this.state.skipUnderstand &&
+				options?.forceSynthesize &&
+				batch.length === 0
+			) {
 				const pendingCount = await this.store.observations.count({
 					metadata_status: 'pending',
 				})
@@ -756,8 +766,9 @@ export abstract class BaseNeuron<
 
 			// Check if understand should happen
 			const shouldUnderstand =
-				options?.forceSynthesize ||
-				(await this.shouldUnderstand(this.state.thresholds))
+				!this.state.skipUnderstand &&
+				(options?.forceSynthesize ||
+					(await this.shouldUnderstand(this.state.thresholds)))
 
 			if (!shouldUnderstand) {
 				const bufferState = await this.getBufferState()
@@ -1225,6 +1236,19 @@ export abstract class BaseNeuron<
 			;(stateUpdates as Record<string, unknown>).health = newHealth
 		}
 
+		if (
+			updates.skipUnderstand !== undefined &&
+			updates.skipUnderstand !== this.state.skipUnderstand
+		) {
+			;(stateUpdates as Record<string, unknown>).skipUnderstand =
+				updates.skipUnderstand
+			if (updates.skipUnderstand) {
+				;(stateUpdates as Record<string, unknown>).understand_prompt = null
+			}
+			changedFields.push('skipUnderstand')
+			if (!updates.skipUnderstand) needsUnderstandRegen = true
+		}
+
 		// ── Type-specific updates (subclass implements) ──
 
 		const typeSpecificUpdates = this.applyTypeSpecificUpdates(
@@ -1238,7 +1262,9 @@ export abstract class BaseNeuron<
 
 		if (!this.state.skipObservation && this.state.observe_prompt === null)
 			needsObserveRegen = true
-		if (this.state.understand_prompt === null) needsUnderstandRegen = true
+		if (!this.state.skipUnderstand && this.state.understand_prompt === null) {
+			needsUnderstandRegen = true
+		}
 		if (this.state.observation_schema === null) needsSchemaRegen = true
 
 		// ── Regenerate prompts ──
@@ -1392,11 +1418,13 @@ Return the updated raw fields. Use null for a phase-specific field when it shoul
 				} as Partial<TState>)
 			}
 
-			await this.adjustUnderstandPrompt(
-				this.state.models.understand_blueprint,
-				directive,
-				resolveUnderstandInstructions(this.state),
-			)
+			if (!this.state.skipUnderstand) {
+				await this.adjustUnderstandPrompt(
+					this.state.models.understand_blueprint,
+					directive,
+					resolveUnderstandInstructions(this.state),
+				)
+			}
 
 			const schemas = await this.generateSchemas(
 				this.state.models.blueprint,
@@ -1413,10 +1441,10 @@ Return the updated raw fields. Use null for a phase-specific field when it shoul
 				'understandInstructions',
 				'focus',
 				'observe_prompt',
-				'understand_prompt',
 				'observation_schema',
 				'understanding_schema',
 			)
+			if (!this.state.skipUnderstand) changedFields.push('understand_prompt')
 			adjustedConfig = true
 
 			this.emit('neuron:prompts:regenerated', {
@@ -1696,6 +1724,7 @@ Return the updated raw fields. Use null for a phase-specific field when it shoul
 		}
 
 		if (
+			!this.state.skipUnderstand &&
 			!this.state.stagnation_signal_fired &&
 			ingestion.observationsSinceLastSynthesis >
 				signalThresholds.maxObservationsWithoutSynthesis

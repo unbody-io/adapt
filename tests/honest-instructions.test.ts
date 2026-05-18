@@ -239,4 +239,39 @@ describe('honest neuron instructions', () => {
 			'list-understand: identity initialized',
 		)
 	})
+
+	it('supports observer-only neurons with skipUnderstand', async () => {
+		const queued = createQueuedJsonModel([
+			{
+				status: 'observed',
+				output: ['Customer requested dark mode.'],
+				importance: 1,
+				gaps: [],
+			},
+		])
+		const store = new MemoryNeuronStore()
+
+		const neuron = await TextNeuron.create({
+			id: 'observer-only',
+			model: queued.model,
+			store,
+			instructions: 'Keep feature requests as observations.',
+			skipUnderstand: true,
+			observationSchema: { type: 'string' },
+			understand: { thresholds: { maxObservations: 1 } },
+		})
+
+		const result = await neuron.learn(['Please add dark mode.'], {
+			forceSynthesize: true,
+		})
+
+		expect(result.status).toBe('observed')
+		expect(queued.getCallCount()).toBe(1)
+		expect(await neuron.getUnderstanding()).toBe('')
+		expect(await store.observations.count({ metadata_status: 'pending' })).toBe(1)
+		expect(await store.observations.count({ metadata_status: 'processed' })).toBe(
+			0,
+		)
+	})
+
 })

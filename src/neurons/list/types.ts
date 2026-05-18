@@ -136,6 +136,8 @@ export interface ListNeuronConfig extends CascadableConfig, AdaptRepairOptions {
 	health?: Partial<NeuronHealth>
 	/** Skip observation phase — data goes directly to understanding buffer */
 	skipObservation?: boolean
+	/** Skip understand phase — observations are retained but never synthesized */
+	skipUnderstand?: boolean
 	/** Custom observation schema — skips LLM generation when provided */
 	observationSchema?: Record<string, unknown>
 	/** Custom understanding schema — skips LLM generation when provided */

@@ -116,6 +116,7 @@ export class TextNeuron extends BaseNeuron<string, TextNeuronState> {
 			dismissal_signal_fired: false,
 			governance: config.governance,
 			skipObservation: rawConfig.skipObservation ?? false,
+			skipUnderstand: rawConfig.skipUnderstand ?? false,
 		}
 
 		super(config.id, llm, rawConfig.store, initialState, {

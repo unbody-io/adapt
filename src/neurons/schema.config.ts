@@ -65,6 +65,7 @@ export type GeneratedNeuronConfig = Omit<
 	understandInstructions?: string | null
 	governance?: Record<string, unknown>
 	skipObservation?: boolean
+	skipUnderstand?: boolean
 	/** Custom observation schema — skips LLM generation when provided */
 	observationSchema?: Record<string, unknown>
 	/** Custom understanding schema — skips LLM generation when provided */

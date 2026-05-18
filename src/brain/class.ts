@@ -606,6 +606,7 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 				store: this.store.getNeuronStore(config.id),
 				governance,
 				skipObservation: config.skipObservation,
+				skipUnderstand: config.skipUnderstand,
 				understand: {
 					thresholds: {
 						maxObservations: 3,
@@ -799,6 +800,7 @@ export class Brain extends TypedEmitter<BrainEventMap> {
 			store: this.store.getNeuronStore(config.id),
 			governance,
 			skipObservation: config.skipObservation,
+			skipUnderstand: config.skipUnderstand,
 			observationSchema: config.observationSchema,
 			understandingSchema: config.understandingSchema,
 		})

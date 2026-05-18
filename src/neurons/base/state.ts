@@ -85,6 +85,9 @@ export interface BaseNeuronState {
 
 	// Skip observation phase — data goes directly to buffer
 	skipObservation: boolean
+
+	// Skip understand phase — observations are retained but never synthesized
+	skipUnderstand: boolean
 }
 
 // ── Transform types ─────────────────────────────────────────────────────────

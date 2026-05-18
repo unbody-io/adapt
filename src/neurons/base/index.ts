@@ -6,11 +6,11 @@ export type {
 	UnderstandCallResult,
 } from './class'
 export { BaseNeuron } from './class'
+export type { PhaseInstructionState } from './instructions'
 export {
 	resolveObserveInstructions,
 	resolveUnderstandInstructions,
 } from './instructions'
-export type { PhaseInstructionState } from './instructions'
 export type {
 	QueryCallbacks,
 	QueryContext,

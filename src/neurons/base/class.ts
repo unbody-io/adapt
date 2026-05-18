@@ -46,6 +46,10 @@ import type {
 	NeuronOrigin,
 	Significance,
 } from '../types'
+import {
+	resolveObserveInstructions,
+	resolveUnderstandInstructions,
+} from './instructions'
 import type {
 	BaseNeuronState,
 	ModelSlots,
@@ -53,10 +57,6 @@ import type {
 	StoredModelRef,
 } from './state'
 import { deserializeModelSlots, serializeModelSlots } from './state'
-import {
-	resolveObserveInstructions,
-	resolveUnderstandInstructions,
-} from './instructions'
 import type { BaseNeuronUpdateInput, SharedNeuronEventMap } from './types'
 
 /**
@@ -170,7 +170,9 @@ const adjustClassificationSchema = z.object({
 const adjustConfigSchema = z.object({
 	instructions: z
 		.string()
-		.describe('Updated shared developer instructions after applying the directive'),
+		.describe(
+			'Updated shared developer instructions after applying the directive',
+		),
 	observeInstructions: z
 		.string()
 		.nullable()
@@ -308,6 +310,17 @@ export abstract class BaseNeuron<
 	): Promise<void>
 
 	/**
+	 * Rebuild a persisted understand prompt from already-loaded state without
+	 * making an LLM call. Subclasses return null when they cannot rebuild
+	 * deterministically and BaseNeuron should fall back to regenUnderstandPrompt.
+	 */
+	protected rebuildUnderstandPromptFromState(
+		_instructions: string,
+	): string | null {
+		return null
+	}
+
+	/**
 	 * Adjust understand prompt from a directive (type-specific)
 	 * Unlike regen (stateless), this passes current identity so the LLM can evolve it.
 	 */
@@ -417,6 +430,30 @@ export abstract class BaseNeuron<
 		return true
 	}
 
+	private async rebuildRestoredPrompts(): Promise<void> {
+		const updates: Partial<TState> = {} as Partial<TState>
+
+		if (!this.state.skipObservation) {
+			const result = initObserve(resolveObserveInstructions(this.state))
+			;(updates as Record<string, unknown>).observe_prompt = result.systemPrompt
+		}
+
+		if (Object.keys(updates).length > 0) {
+			await this.setState(updates)
+		}
+
+		const instructions = resolveUnderstandInstructions(this.state)
+		const prompt = this.rebuildUnderstandPromptFromState(instructions)
+		if (prompt !== null) {
+			await this.setState({ understand_prompt: prompt } as Partial<TState>)
+		} else {
+			await this.regenUnderstandPrompt(
+				this.state.models.understand_blueprint,
+				instructions,
+			)
+		}
+	}
+
 	// ── Init ────────────────────────────────────────────────────────────────
 
 	async init(opts?: { expect?: 'fresh' | 'restore' }): Promise<{
@@ -486,6 +523,8 @@ export abstract class BaseNeuron<
 				// Persist the entire state — every field that lives in BaseNeuronState
 				// is data and must round-trip through the store.
 				await this.setState({ ...this.state } as Partial<TState>)
+			} else {
+				await this.rebuildRestoredPrompts()
 			}
 
 			// Create query methods
@@ -1345,7 +1384,9 @@ Return the updated raw fields. Use null for a phase-specific field when it shoul
 			} as Partial<TState>)
 
 			if (!this.state.skipObservation) {
-				const observeResult = initObserve(resolveObserveInstructions(this.state))
+				const observeResult = initObserve(
+					resolveObserveInstructions(this.state),
+				)
 				await this.setState({
 					observe_prompt: observeResult.systemPrompt,
 				} as Partial<TState>)

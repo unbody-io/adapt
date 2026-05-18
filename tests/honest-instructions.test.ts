@@ -5,7 +5,7 @@ import type {
 	LanguageModelV3CallOptions,
 	LanguageModelV3GenerateResult,
 } from '@ai-sdk/provider'
-import { MemoryNeuronStore, TextNeuron } from '../src'
+import { ListNeuron, MemoryNeuronStore, TextNeuron } from '../src'
 
 function createQueuedJsonModel(responses: unknown[]) {
 	let callCount = 0
@@ -59,6 +59,10 @@ function createQueuedJsonModel(responses: unknown[]) {
 
 function skillsResponse() {
 	return { skills: [], dynamicsSkills: [] }
+}
+
+function makeState(id: string, value: unknown) {
+	return { id, value, updated_at: new Date().toISOString() }
 }
 
 describe('honest neuron instructions', () => {
@@ -187,5 +191,52 @@ describe('honest neuron instructions', () => {
 		expect(neuron.getObserveSystemPrompt()).toContain('Focus v2 R3.')
 		expect(neuron.getUnderstandSystemPrompt()).toContain('Understand v2 R2.')
 		expect(neuron.getObserveSystemPrompt()).not.toContain('identity')
+	})
+
+	it('migrates legacy restored prompts to the deterministic instruction prompts', async () => {
+		const store = new MemoryNeuronStore()
+		const instructions = 'Track incidents. ALWAYS keep feature requests as P3.'
+
+		await store.state.add(makeState('instructions', instructions))
+		await store.state.add(makeState('observe_prompt', 'LEGACY OBSERVE PROMPT'))
+		await store.state.add(makeState('understand_prompt', 'LEGACY UNDERSTAND PROMPT'))
+
+		const neuron = await TextNeuron.restore(store, { id: 'legacy' })
+
+		expect(neuron.getObserveSystemPrompt()).toContain(
+			'You are the observe phase of a neuron.',
+		)
+		expect(neuron.getObserveSystemPrompt()).toContain(instructions)
+		expect(neuron.getObserveSystemPrompt()).not.toContain('LEGACY OBSERVE PROMPT')
+		expect(neuron.getUnderstandSystemPrompt()).toContain(
+			'You are the understand phase of a text neuron.',
+		)
+		expect(neuron.getUnderstandSystemPrompt()).toContain(instructions)
+		expect(neuron.getUnderstandSystemPrompt()).not.toContain(
+			'LEGACY UNDERSTAND PROMPT',
+		)
+	})
+
+	it('migrates legacy list-neuron understand placeholders on restore', async () => {
+		const store = new MemoryNeuronStore()
+		const instructions = 'Track feature requests as collection items.'
+
+		await store.state.add(makeState('instructions', instructions))
+		await store.state.add(makeState('observe_prompt', 'LEGACY OBSERVE PROMPT'))
+		await store.state.add(
+			makeState('understand_prompt', '(list-understand: identity initialized)'),
+		)
+
+		const neuron = await ListNeuron.restore(store, { id: 'legacy-list' })
+
+		expect(neuron.getObserveSystemPrompt()).toContain(instructions)
+		expect(neuron.getObserveSystemPrompt()).not.toContain('LEGACY OBSERVE PROMPT')
+		expect(neuron.getUnderstandSystemPrompt()).toContain(
+			'You are the understand phase of a list neuron.',
+		)
+		expect(neuron.getUnderstandSystemPrompt()).toContain(instructions)
+		expect(neuron.getUnderstandSystemPrompt()).not.toContain(
+			'list-understand: identity initialized',
+		)
 	})
 })

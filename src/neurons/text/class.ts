@@ -21,6 +21,7 @@ import {
 	initUnderstand,
 	understand,
 } from './understand'
+import { understandSystemPromptTemplate } from './understand/prompts/system'
 
 const RESTORE_PLACEHOLDER_MODEL =
 	'unknown:placeholder' as unknown as LanguageModel
@@ -178,6 +179,14 @@ export class TextNeuron extends BaseNeuron<string, TextNeuronState> {
 			understand_identity: result.identity,
 			understand_prompt: result.systemPrompt,
 		} as Partial<TextNeuronState>)
+	}
+
+	protected rebuildUnderstandPromptFromState(instructions: string): string {
+		return understandSystemPromptTemplate(
+			instructions,
+			this.state.understand_identity ?? { skills: [], dynamicsSkills: [] },
+			this.state.governance.strategy,
+		)
 	}
 
 	protected async adjustUnderstandPrompt(

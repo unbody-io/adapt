@@ -168,6 +168,10 @@ export class ListNeuron extends BaseNeuron<ListItem[], ListNeuronState> {
 		} as Partial<ListNeuronState>)
 	}
 
+	protected rebuildUnderstandPromptFromState(instructions: string): string {
+		return initUnderstand(instructions).systemPrompt
+	}
+
 	protected async adjustUnderstandPrompt(
 		_model: LanguageModel,
 		_directive: string,

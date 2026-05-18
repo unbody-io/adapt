@@ -16,6 +16,7 @@ interface BrainConfig {
   autoSetup?: boolean                       // LLM decomposition on init (default: true)
   neurons?: GeneratedNeuronConfig[]         // Explicit neuron definitions
   store?: BrainStore                        // Brain persistence (default: MemoryBrainStore)
+  onEvent?: UnifiedHandler<BrainEvent>      // Pre-init event subscription (catches init events)
 
   init?: { model?: LanguageModel }          // Decomposition model
   query?: { model?: LanguageModel }         // ask() synthesis model
@@ -166,7 +167,7 @@ Adapt requires models that support **structured output** and **tool calling**. N
 | Brain synthesis (deep) | No | **Yes** (specialist query tools) |
 | Evaluator | No | **Yes** (inspect, query, review tools) |
 | Brain inspect | No | **Yes** (introspection tools) |
-| Identity/schema generation | Yes | No |
+| Skill/schema generation (neuron init) | Yes | No |
 | Evolution handlers | Yes | No |
 | Governance compression | No | No (plain text) |
 

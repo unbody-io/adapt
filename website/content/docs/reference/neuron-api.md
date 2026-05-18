@@ -14,7 +14,7 @@ Shared API for `TextNeuron` and `ListNeuron` (both extend `BaseNeuron`).
 | `ListNeuron.create(config, parentModels?)` | `Promise<ListNeuron>` | Same shape — fresh ListNeuron. |
 | `ListNeuron.restore(pathOrStore, runtime?)` | `Promise<ListNeuron>` | Same shape — restored ListNeuron. |
 | `dispose()` | `Promise<void>` | Close the neuron's own store. |
-| `isInitialized()` | `boolean` | True once the neuron's `understand_prompt` has been generated/restored (works for `skipObservation` neurons too). |
+| `isInitialized()` | `boolean` | True once `init` has completed (an explicit internal `initialized` flag is set at the end of init). For legacy persisted neurons that predate the flag, it also returns true when `understand_prompt` is present. Works for `skipObservation` and `skipUnderstand` neurons. |
 
 Constructors are private — the static `create` / `restore` methods are the only public entry points. Both fully initialize the neuron; there is no separate `init()` step on the public surface. `create` runs prompt + schema generation via LLM and persists everything. `restore` rehydrates identity, prompts, and schemas from the store via DB reads only — zero LLM calls during init.
 
@@ -25,6 +25,7 @@ Constructors are private — the static `create` / `restore` methods are the onl
   id?: string                  // Pin the neuron id (useful when the store holds multiple)
   model?: LanguageModel        // Live AI SDK model — covers the common case
   llm?: AdaptLLMPlugin         // Custom plugin — for BYO runtimes
+  onEvent?: UnifiedHandler     // Subscribed before restore init runs — catches neuron:init:* events
 }
 ```
 
@@ -146,6 +147,25 @@ Full-history access to the underlying observation collection. Returns full `Obse
 | `type` | `string` | `'text'` or `'list'` |
 | `name` | `string` | Display name |
 | `description` | `string` | What this neuron tracks |
-| `instructions` | `string` | Neuron instructions |
-| `focus` | `string \| null` | Narrowed focus (from adjust) |
+| `instructions` | `string` | Shared verbatim instructions (feed both observe and understand) |
+| `observeInstructions` | `string \| null` | Observe-phase instruction override (`null` = inherit `instructions`) |
+| `understandInstructions` | `string \| null` | Understand-phase instruction override (`null` = inherit `instructions`) |
+| `focus` | `string \| null` | Observe-only focus narrowing |
 | `origin` | `NeuronOrigin` | `'prompt'`, `'developer'`, or `'emergent'` |
+
+## Config Fields
+
+Accepted by `TextNeuron.create()` / `ListNeuron.create()` (and, where noted, by Brain explicit-neuron configs). Required: `model`, `instructions`, `store`.
+
+| Field | Type | Description |
+|---|---|---|
+| `model` | `LanguageModel` | Default model for all phases. |
+| `instructions` | `string` | Shared verbatim instructions. Inserted directly into the observe and understand prompts — not paraphrased. |
+| `observeInstructions` | `string \| null` | Optional. Overrides the verbatim instructions for the observe prompt only. |
+| `understandInstructions` | `string \| null` | Optional. Overrides the verbatim instructions for the understand prompt only. |
+| `focus` | `string \| null` | Optional. Observe-only — narrows what data is kept. |
+| `skipObservation` | `boolean` | Optional. Skip the observe phase — data goes straight to the understanding buffer. |
+| `skipUnderstand` | `boolean` | Optional. Retain observations but never synthesize understanding — not on threshold, not on `forceSynthesize`. No understand prompt is built. Symmetric counterpart of `skipObservation`. |
+| `observationSchema` | `Record<string, unknown>` | Optional. Custom observation JSON Schema — skips LLM schema generation. |
+| `understandingSchema` | `Record<string, unknown>` | Optional. Custom understanding JSON Schema — skips LLM schema generation. |
+| `onEvent` | `UnifiedHandler<NeuronEvent>` | Optional. Subscribed via `.on(...)` before `init()` runs, so `neuron:init:*` events are observable. Also accepted in `restore()` runtime options. |

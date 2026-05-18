@@ -72,6 +72,31 @@ async function main() {
 	assert(govNeuron instanceof TextNeuron, 'TextNeuron with governance config created')
 	await govNeuron.dispose()
 
+	// ── TextNeuron — Phase Instructions ───────────────────────────────────
+	section('TextNeuron — Phase Instructions')
+
+	const phaseNeuron = await TextNeuron.create({
+		model,
+		instructions: 'Track product design principles and user research insights.',
+		store: new MemoryNeuronStore(),
+		observeInstructions: 'Keep any data about design decisions, user research, or accessibility.',
+		understandInstructions: 'Synthesize into a coherent set of design principles with evidence.',
+		focus: 'design systems and component libraries',
+	})
+	assert(phaseNeuron.observeInstructions !== null, 'observeInstructions accessor set')
+	assert(phaseNeuron.understandInstructions !== null, 'understandInstructions accessor set')
+	await phaseNeuron.dispose()
+
+	// skipUnderstand neuron — observes but never synthesizes
+	const skipUnderstandNeuron = await TextNeuron.create({
+		model,
+		instructions: 'Collect raw design feedback.',
+		store: new MemoryNeuronStore(),
+		skipUnderstand: true,
+	})
+	assert(skipUnderstandNeuron instanceof TextNeuron, 'skipUnderstand neuron created')
+	await skipUnderstandNeuron.dispose()
+
 	// ── TextNeuron — Restore ──────────────────────────────────────────────
 	section('TextNeuron — Restore')
 
@@ -267,6 +292,8 @@ async function main() {
 	assert(typeof apiNeuron.id === 'string', 'neuron.id is string')
 	assert(typeof apiNeuron.name === 'string', 'neuron.name is string')
 	assert(typeof apiNeuron.instructions === 'string', 'neuron.instructions is string')
+	assert(apiNeuron.observeInstructions === null || typeof apiNeuron.observeInstructions === 'string', 'neuron.observeInstructions is string or null')
+	assert(apiNeuron.understandInstructions === null || typeof apiNeuron.understandInstructions === 'string', 'neuron.understandInstructions is string or null')
 	assert(typeof apiNeuron.description === 'string', 'neuron.description is string')
 	assert(apiNeuron.type === 'text', 'neuron.type is text')
 	assert(apiNeuron.focus === null || typeof apiNeuron.focus === 'string', 'neuron.focus is string or null')

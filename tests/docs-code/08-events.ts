@@ -114,6 +114,24 @@ async function main() {
 
 	await brain.dispose()
 
+	// ── Catching init events (onEvent) ───────────────────────────────────
+	section('Catching init events (onEvent)')
+
+	const initEvents: string[] = []
+	const initBrain = await Brain.create({
+		prompt: 'Track init event patterns.',
+		model,
+		evolution: { enabled: false },
+		autoSetup: false,
+		neurons: [
+			{ id: 'init-events', type: 'text', name: 'Init Events', description: 'Init event patterns', instructions: 'Track init event patterns.' },
+		],
+		onEvent: (event) => { initEvents.push(event.type) },
+	})
+	assert(initEvents.includes('brain:init:started'), 'onEvent caught brain:init:started')
+	assert(initEvents.includes('brain:init:completed'), 'onEvent caught brain:init:completed')
+	await initBrain.dispose()
+
 	// ── Summary ──────────────────────────────────────────────────────────
 	console.log(`\n${'═'.repeat(60)}`)
 	console.log(`08-events: ${passed} passed, ${failed} failed`)

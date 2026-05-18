@@ -28,7 +28,7 @@ N = number of neurons, B = number of batches.
 |---|---|---|---|
 | **`inject(data)`** | | | |
 | → Observe | `N × B` | `learning.observer` | 1 call per neuron per batch. Skipped if `skipObservation: true` |
-| → Understand | `0 – N` | `learning.understand` | Only triggers when buffer exceeds `maxObservations` or `maxTokens` |
+| → Understand | `0 – N` | `learning.understand` | Only triggers when buffer exceeds `maxObservations` or `maxTokens`. Always skipped if `skipUnderstand: true` |
 | **`ask(question)`** | | | |
 | → Neuron selection | `1` | `query` | Skipped if only 1 neuron has knowledge |
 | → Neuron queries | `N` | `learning.query` | Parallel. N = relevant neurons, not all |
@@ -43,10 +43,10 @@ N = number of neurons, B = number of batches.
 | **`Brain.create()`** | | | |
 | → Decomposition | `1` | `init` | Only with `autoSetup: true`. Determines neuron structure |
 | → Prompt parsing | `1` | `blueprintModel` | Extracts purpose and synthesis directives |
-| → Neuron init | `2 × N` | `blueprintModel` | Per neuron: 1 observe identity + 1 understand identity |
-| **`adjust(directive)`** | `1–4` | `blueprintModel` | 1 classify + up to 3 identity regenerations |
+| → Neuron init | `0 – N` | `blueprintModel` | Up to 1 call per neuron. TextNeuron: cognitive-skill customization — always, unless `skipUnderstand` (then `0`). ListNeuron: schema generation — `0` when a custom `observationSchema` is supplied. Observe and understand prompts are assembled deterministically — no LLM call. |
+| **`adjust(directive)`** | `1–3` | `blueprintModel` | 1 classify + (if config changes) 1 instruction-rewrite + 1 prompt/schema regen. Observe and understand prompts are re-assembled deterministically — TextNeuron spends the extra call on skill regen, ListNeuron on schema regen |
 | → + Understanding rewrite | `+1–15` | `learning.understand` | Only if directive changes what the neuron knows, not just how it behaves |
-| **`update(config)`** | `0–1` | `blueprintModel` | 0 if mechanical (model/threshold changes). 1 if prompt changed |
+| **`update(config)`** | `0–1` | `blueprintModel` | 0 if mechanical (model/threshold changes). 1 if instructions changed (schema/skill regen — the observe/understand prompts themselves regenerate without an LLM call) |
 
 ### Evolution Operations
 
@@ -54,9 +54,9 @@ N = number of neurons, B = number of batches.
 |---|---|---|---|
 | **`signal()`** | `0` | — | Buffers only. No immediate LLM call |
 | **Evaluator trigger** | `1–12` | `evolution` | Agentic — inspects neurons, reviews gaps, makes decisions |
-| → Create N neurons | `1 + 2N` | `blueprintModel` | 1 generation + 2 per neuron init |
+| → Create N neurons | `1 + N` | `blueprintModel` | 1 generation + 1 per neuron init |
 | → Merge neurons | `1` | `blueprintModel` | Single generation call |
-| → Split into N | `1 + 2(N-1)` | `blueprintModel` | 1 generation + init for new neurons |
+| → Split into N | `1 + (N-1)` | `blueprintModel` | 1 generation + 1 init per new neuron |
 | → Update neuron | `1–15` | `blueprintModel` | 1 guidance + optional adjust cascade |
 | → Delete neuron | `0` | — | Mechanical removal |
 
@@ -68,7 +68,7 @@ Routing the right model to the right slot is the cheapest performance win. Some 
 - **`learning.understand`** — runs less often but is what determines knowledge quality. Use a smart model.
 - **`learning.query`** — runs once per ask per neuron. Smart model recommended; the answer the user sees is shaped here.
 - **`query` (brain ask synthesis)** — final integration step. Smart model.
-- **`init` / `blueprintModel`** — one-time and rare (decomposition, identity regen). Smart model. Cost is amortized.
+- **`init` / `blueprintModel`** — one-time and rare (decomposition, per-neuron skill/schema generation). Smart model. Cost is amortized.
 - **`evolution`** — runs when signals accumulate. Smart model with tool-calling support is required.
 
 See [Configuration — Model Cascade](./configuration#model-cascade) for the full cascade and the `Cost-optimized setup` example.

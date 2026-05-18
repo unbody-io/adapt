@@ -33,6 +33,20 @@ brain.on((event) => {
 
 See [Recipes — SSE Event Broadcasting](./recipes#sse-event-broadcasting) for a server-sent events example.
 
+### Catching init events
+
+`brain.on(...)` can only see events fired *after* it runs. But `brain:init:*` and `neuron:init:*` events fire *during* `Brain.create()` / `Brain.restore()` — before you hold a `brain` reference to subscribe on. To observe the init sequence, pass an `onEvent` handler in the config (or restore runtime options). It is attached via `.on(...)` before initialization starts:
+
+```typescript
+const brain = await Brain.create({
+  prompt: '...',
+  model: openai('gpt-4o'),
+  onEvent: (event) => console.log(`[${event.type}]`),  // sees brain:init:started onward
+})
+```
+
+`onEvent` is also accepted by `Brain.restore()` runtime options, and by `TextNeuron`/`ListNeuron` `create` configs and `restore` options for standalone-neuron `neuron:init:*` events.
+
 ## Lifecycle
 
 A Brain's lifecycle has two phases:
@@ -62,7 +76,7 @@ brain:init:config:generating
 brain:init:config:generated          → N neuron configs
 ```
 
-**2. Neuron setup** — each neuron is initialized **sequentially**. Each generates its own system prompt and cognitive tools (one LLM call per phase).
+**2. Neuron setup** — each neuron is initialized **sequentially**. The observe and understand system prompts are assembled deterministically from the verbatim instructions (no LLM call). Each neuron makes one init LLM call — a TextNeuron for cognitive-skill customization, a ListNeuron for schema generation (skipped when a custom schema is supplied).
 
 ```text
 neuron:init:started                  → neuron 1

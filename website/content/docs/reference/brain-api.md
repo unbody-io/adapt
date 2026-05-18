@@ -26,10 +26,23 @@ interface BrainRuntimeOptions {
   evolution?: { model?: LanguageModel }
   learning?: LearningConfig
   llm?: AdaptLLMPlugin                   // Custom plugin — for BYO runtimes
+  onEvent?: UnifiedHandler<BrainEvent>   // Subscribed before restore init runs
 }
 ```
 
 All fields are optional. See [Brain — Fresh vs Restored](../brain#fresh-vs-restored) for the canonical write-up of when to use each form.
+
+### Pre-init event subscription (`onEvent`)
+
+`BrainConfig.onEvent` (for `Brain.create`) and `BrainRuntimeOptions.onEvent` (for `Brain.restore`) register an event handler via `.on(...)` **before** initialization runs. Without it, the first events you can observe are post-init — `brain:init:*` events fire during `Brain.create` / `Brain.restore` and would be missed by a handler attached afterward. Pass `onEvent` to capture the full init sequence:
+
+```typescript
+const brain = await Brain.create({
+  prompt: '...',
+  model: openai('gpt-4o'),
+  onEvent: (event) => console.log(`[${event.type}]`),  // sees brain:init:started, neuron:init:*, ...
+})
+```
 
 ## Data
 

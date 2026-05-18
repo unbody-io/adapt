@@ -71,8 +71,12 @@ export interface TextNeuronConfig extends CascadableConfig, AdaptRepairOptions {
 	model: LanguageModel
 	/** Natural language instructions for what this neuron tracks and watches for */
 	instructions: string
+	/** Optional observe-phase-only instructions */
+	observeInstructions?: string | null
+	/** Optional understand-phase-only instructions */
+	understandInstructions?: string | null
 	/** Optional focus areas to narrow observation filtering */
-	focus?: string
+	focus?: string | null
 	/** Optional unique identifier */
 	id?: string
 	/** Optional display name */

@@ -4,6 +4,7 @@ import type { NeuronStore } from '../../stores'
 import type { ParentModels } from '../../types/config'
 import type { UnderstandCallResult } from '../base/class'
 import { BaseNeuron } from '../base/class'
+import { resolveUnderstandInstructions } from '../base/instructions'
 import type { QueryMethod } from '../base/query'
 import { DirectMethod, ToolBasedMethod } from '../base/query'
 import type { Significance } from '../types'
@@ -13,7 +14,6 @@ import { buildListQueryPrompt, createListQueryTools } from './query-tools'
 import { generateObservationSchema } from './schema'
 import type { ListItem, ListNeuronConfig, ListNeuronState } from './types'
 import {
-	adjustUnderstand,
 	adjustUnderstandingContent,
 	initUnderstand,
 	understand,
@@ -55,6 +55,8 @@ export class ListNeuron extends BaseNeuron<ListItem[], ListNeuronState> {
 
 		const initialState: ListNeuronState = {
 			instructions: config.instructions,
+			observeInstructions: config.observeInstructions,
+			understandInstructions: config.understandInstructions,
 			name: rawConfig.name || config.id,
 			description: rawConfig.description ?? '',
 			focus: rawConfig.focus ?? null,
@@ -68,10 +70,8 @@ export class ListNeuron extends BaseNeuron<ListItem[], ListNeuronState> {
 				understand_blueprint: config.understand.blueprintModel,
 				query: config.query.model,
 			},
-			observe_identity: null,
 			observe_prompt: null,
 			understand_prompt: null,
-			understand_identity: null,
 			observation_schema: rawConfig.observationSchema ?? null,
 			understanding_schema: rawConfig.understandingSchema ?? null,
 			thresholds: {
@@ -159,38 +159,27 @@ export class ListNeuron extends BaseNeuron<ListItem[], ListNeuronState> {
 	}
 
 	protected async regenUnderstandPrompt(
-		model: LanguageModel,
+		_model: LanguageModel,
 		instructions: string,
 	): Promise<void> {
-		const result = await initUnderstand(
-			this.llm,
-			model,
-			instructions,
-			this.llmRepairOptions,
-		)
+		const result = initUnderstand(instructions)
 		await this.setState({
-			understand_identity: result.identity,
-			// For list, the system prompt is generated per call (includes current items)
-			understand_prompt: '(list-understand: identity initialized)',
+			understand_prompt: result.systemPrompt,
 		} as Partial<ListNeuronState>)
 	}
 
+	protected rebuildUnderstandPromptFromState(instructions: string): string {
+		return initUnderstand(instructions).systemPrompt
+	}
+
 	protected async adjustUnderstandPrompt(
-		model: LanguageModel,
-		directive: string,
+		_model: LanguageModel,
+		_directive: string,
 		newInstructions: string,
 	): Promise<void> {
-		const result = await adjustUnderstand(
-			this.llm,
-			model,
-			directive,
-			newInstructions,
-			this.state.understand_identity!,
-			this.llmRepairOptions,
-		)
+		const result = initUnderstand(newInstructions)
 		await this.setState({
-			understand_identity: result.identity,
-			understand_prompt: '(list-understand: identity adjusted)',
+			understand_prompt: result.systemPrompt,
 		} as Partial<ListNeuronState>)
 	}
 
@@ -201,7 +190,7 @@ export class ListNeuron extends BaseNeuron<ListItem[], ListNeuronState> {
 		const result = await adjustUnderstandingContent(
 			this.llm,
 			model,
-			this.state.understand_identity!,
+			resolveUnderstandInstructions(this.state),
 			directive,
 			this.store.understanding,
 			this.state.understanding_schema ?? undefined,
@@ -228,7 +217,7 @@ export class ListNeuron extends BaseNeuron<ListItem[], ListNeuronState> {
 		const result = await understand(
 			this.llm,
 			model,
-			this.state.understand_identity!,
+			resolveUnderstandInstructions(this.state),
 			{
 				neuronId: this.id,
 				instructions: this.state.instructions,
@@ -291,13 +280,11 @@ export class ListNeuron extends BaseNeuron<ListItem[], ListNeuronState> {
 	// ── Schema generation (LLM-generated for list) ──────────────────────────────
 
 	protected async generateSchemas(model: LanguageModel, instructions: string) {
-		const observeIdentity =
-			this.state.observe_identity?.identity ?? instructions
 		const observationSchema = await generateObservationSchema(
 			this.llm,
 			model,
 			instructions,
-			observeIdentity,
+			instructions,
 			this.llmRepairOptions,
 		)
 		return { observationSchema, understandingSchema: observationSchema }

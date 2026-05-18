@@ -14,10 +14,7 @@ import { SQLiteNeuronStore } from '../src/sqlite'
 import type { NeuronStore } from '../src/stores'
 
 function initOnlyModel(): LanguageModel {
-	const responses = [
-		{ identity: 'You observe restore-test data.', domain: 'restore' },
-		{ identity: 'You synthesize restore-test data.', skills: [], dynamicsSkills: [] },
-	]
+	const responses = [{ skills: [], dynamicsSkills: [] }]
 	let callCount = 0
 	const usage: LanguageModelV3GenerateResult['usage'] = {
 		inputTokens: { total: 0, noCache: 0, cacheRead: 0, cacheWrite: 0 },

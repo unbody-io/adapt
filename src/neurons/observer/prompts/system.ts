@@ -1,34 +1,33 @@
 /**
  * System prompt template for observe phase (shared across all neuron types)
  *
- * Combines generated identity with concise observation framework.
+ * Builds a deterministic 3-layer observe prompt.
  */
-
-import type { ObserveIdentity } from '../schema.identity'
 
 /**
- * Build system prompt from generated identity
- *
- * @param identity - Generated observe identity
+ * Build observe system prompt from resolved developer instructions.
  */
-export function observeSystemPromptTemplate(identity: ObserveIdentity): string {
-	const domainRef = identity.domain ? 'domain' : 'purpose'
-	const domainSection = identity.domain
-		? `Your domain: ${identity.domain}\n\nBe literal — if the data isn't directly about your domain, dismiss it. No abstract parallels.`
-		: `Be literal — if the data isn't directly relevant to your purpose, dismiss it. No abstract parallels.`
+export function observeSystemPromptTemplate(instructions: string): string {
+	const instructionsSection = instructions
+		? `\n\n## Developer Instructions\n\n${instructions}`
+		: ''
 
-	return `${identity.identity}
+	return `You are the observe phase of a neuron. Your job right now is to decide what incoming data is worth keeping for the operator's instructions.
 
-${domainSection}
+Synthesis happens in a later phase. Ignore instructions about merging, updating, or summarizing except when they define what evidence is relevant to keep.
 
-Your root question: "Is this worth remembering for my purpose?"
+Be literal. If the data is not directly relevant to the operator's instructions, dismiss it. No abstract parallels.${instructionsSection}
 
-Rate importance 0.0-1.0 based on signal strength for your ${domainRef}.
+Your root question: "Is this worth remembering for the operator's instructions?"
+
+Treat every category, rubric entry, exception, ALWAYS/NEVER rule, and example named in the operator's instructions as relevance criteria. If the instructions say to track or classify a kind of data, keep matching data even when it is routine, low severity, cosmetic, or phrased as a request.
+
+Rate importance 0.0-1.0 based on signal strength for the operator's instructions.
 
 Respond with JSON only. ALL fields required.
 
 If relevant: { "status": "observed", "output": ["observation 1", "observation 2"], "importance": 0.0-1.0, "gaps": [] }
 If not: { "status": "dismissed", "output": [], "importance": 0.5, "gaps": ["topic encountered but not relevant"] }
 
-Gaps: briefly note topics you encountered but couldn't claim as relevant to your ${domainRef}.`
+Gaps: briefly note topics you encountered but couldn't claim as relevant to the operator's instructions.`
 }

@@ -28,12 +28,11 @@ export function understandAdjustPromptTemplate(
 		.map((s) => `- **${s.skill}**: ${s.description}`)
 		.join('\n')
 
-	return `You are adjusting a Synthesizer's identity.
+	return `You are adjusting a Synthesizer's cognitive skill prompts.
 
 ## Current State
 
 **Instructions**: "${newInstructions}"
-**Identity**: "${currentIdentity.identity}"
 **Content Skills**:
 ${currentSkills}
 **Dynamics Skills**:
@@ -51,12 +50,11 @@ ${compareSkillsText}
 ### Dynamics
 ${dynamicsSkillsText}
 
-Adjust incrementally — preserve skills that still apply, update focus and significance for the new scope. If the directive is ambiguous, preserve more rather than less.
+Adjust incrementally — preserve skills that still apply, update only the skill questions needed for the new scope. If the directive is ambiguous, preserve more rather than less.
 
 Respond with JSON only:
 
 {
-  "identity": "You track...",
   "skills": [
     { "skill": "confirms", "description": "..." },
     { "skill": "contradicts", "description": "..." },

@@ -40,9 +40,8 @@ function createQueuedJsonModel(responses: unknown[]) {
 }
 
 const initResponses = [
-	// neuron 'coding' init: observe + understand identity
-	{ identity: 'Track coding patterns.', domain: 'coding' },
-	{ identity: 'Synthesize coding learnings.', skills: [], dynamicsSkills: [] },
+	// neuron 'coding' init: text understand skill customization
+	{ skills: [], dynamicsSkills: [] },
 	// brain prompt decomposition
 	{ purpose: 'Track coding.', evolutionGuidance: null, synthesisDirective: null },
 ]

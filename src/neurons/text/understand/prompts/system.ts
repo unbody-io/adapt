@@ -7,6 +7,7 @@ import { type Strategy, strategyPrompts } from '../../strategies'
 import type { UnderstandIdentity } from '../schema.identity'
 
 export function understandSystemPromptTemplate(
+	instructions: string,
 	identity: UnderstandIdentity,
 	strategy: Strategy,
 ): string {
@@ -27,8 +28,13 @@ export function understandSystemPromptTemplate(
 	)
 
 	const strategyGuidance = strategyPrompts[strategy]
+	const instructionsSection = instructions
+		? `\n\n## Developer Instructions\n\n${instructions}`
+		: ''
 
-	return `${identity.identity}
+	return `You are the understand phase of a text neuron. Your job right now is to integrate observed evidence into durable understanding for the operator's instructions.
+
+Observation filtering already happened in an earlier phase. Focus on synthesis: merge, update, reconcile, retain grounded specifics, or dismiss observations that add nothing.${instructionsSection}
 
 ## Cognitive Skills
 

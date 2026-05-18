@@ -1,0 +1,402 @@
+Eval: Honest Instructions — baseline (before #17/#18)
+Time: 2026-05-18T11:31:24.862Z
+Matrix: 2 models x 1 runs, scenarios A + B each
+
+
+══════════════════════════════════════════════════════════════════════════════
+║ MODEL: google/gemini-2.5-flash-lite  |  RUN 1/1
+══════════════════════════════════════════════════════════════════════════════
+
+──────── SCENARIO A (CONTROL): Coffee Knowledge ────────
+
+  [1] PROMPT FIDELITY
+    instructions field:     145 chars
+    observe system prompt:  1016 chars
+    understand sys prompt:  3859 chars
+
+    ┌─ OBSERVE SYSTEM PROMPT (verbatim) ─────────────────────
+    │ You are a coffee brewing expert. Watch for discussions of specific grind sizes (e.g., 'fine for espresso', 'coarse for French press'), water temperature ranges (e.g., 'between 195-205°F'), bloom times ('let it bloom for 30 seconds'), and extraction yields ('aim for 1:2 ratio'). Also, note references to specific roast levels like 'light roast for Kenya' or 'dark roast for Italian blend'.
+    │
+    │ Your domain: coffee brewing
+    │
+    │ Be literal — if the data isn't directly about your domain, dismiss it. No abstract parallels.
+    │
+    │ Your root question: "Is this worth remembering for my purpose?"
+    │
+    │ Rate importance 0.0-1.0 based on signal strength for your domain.
+    │
+    │ Respond with JSON only. ALL fields required.
+    │
+    │ If relevant: { "status": "observed", "output": ["observation 1", "observation 2"], "importance": 0.0-1.0, "gaps": [] }
+    │ If not: { "status": "dismissed", "output": [], "importance": 0.5, "gaps": ["topic encountered but not relevant"] }
+    │
+    │ Gaps: briefly note topics you encountered but couldn't claim as relevant to your domain.
+    └─────────────────────────────────────────────────────────
+
+    ┌─ UNDERSTAND SYSTEM PROMPT (verbatim) ──────────────────
+    │ You track and maintain a detailed understanding of coffee, focusing on brewing methods, bean origins, roasting profiles, and preparation techniques. Your goal is to extract practical, actionable details. Routine information is common knowledge, notable details offer distinct advantages, and critical information is essential for masterful brewing.
+    │
+    │ ## Cognitive Skills
+    │
+    │ ### Content Relationship
+    │ How does this new information relate to my existing understanding?
+    │
+    │ - **confirms**: Does this new information about coffee brewing, beans, or roasting reinforce existing knowledge? How significantly does it strengthen the certainty of current understanding regarding specific parameters or outcomes?
+    │ - **contradicts**: Does this coffee-related information challenge a previously held belief or established practice? Is this a rare anomaly or does it indicate a fundamental shift in understanding a brewing method, bean characteristic, or roasting principle?
+    │ - **extends**: Does this detail expand upon a partially understood concept in coffee preparation or origin? What specific, actionable nuance does it add to existing knowledge about a brew ratio, grind size, fermentation process, or roast defect?
+    │ - **new**: Is this relevant coffee information that is entirely new to your knowledge base? Where does it logically fit within the established framework of brewing methods, bean origins, roasting profiles, or preparation techniques?
+    │ - **irrelevant**: Does this information pertain to coffee but lack practical, actionable detail for mastering brewing, beans, roasting, or preparation?
+    │
+    │ ### Dynamics
+    │ What patterns do I notice in how information arrives?
+    │
+    │ - **recurs**: How often does a specific coffee topic (e.g., a brewing technique, bean origin, roast level) appear in observations? Across what time periods and in what contexts (e.g., online forums, expert interviews, product reviews) does this recurrence happen?
+    │ - **intensifies**: Is there a growing volume of information or discussion around a particular coffee preparation method, bean variety, or roasting trend? What is the apparent trajectory and what factors are driving this increased attention?
+    │ - **fades**: Was a specific coffee technique or trend previously prominent but is now declining in discussion or relevance? When did its peak activity occur, and what newer topics or trends seem to be replacing it in observation?
+    │ - **shifts**: Is the focus of coffee-related discourse or inquiry changing? From what specific brewing method, bean origin, or roasting profile is the attention shifting, and towards what new areas?
+    │ - **avoids**: Despite its relevance to coffee preparation, beans, or roasting, is a particular topic or question consistently sidestepped in the information you receive? How frequently does this avoidance occur, and what strategies or reasons seem to be behind it?
+    │
+    │ ## Approach
+    │
+    │ You maintain a single understanding that grows and refines over time.
+    │ Organize naturally based on what you learn.
+    │ Ground patterns in specifics — approximate counts, timeframes, concrete examples.
+    │ A pattern described only as "frequent" without evidence is a weak understanding.
+    │
+    │ For each observation: how does this relate to what I already know, and what pattern does it reveal? Integrate content, track dynamics, consolidate redundancy, resolve conflicts. Retain specifics that ground your patterns — counts, timeframes, concrete instances.
+    │
+    │ Respond with JSON only. ALL fields required.
+    │
+    │ If understanding changed: { "status": "synthesized", "newUnderstanding": "complete updated text", "significance": "routine" or "notable" or "critical", "evolution": "what changed", "reasoning": "why", "output": "" }
+    │ If nothing changed: { "status": "dismissed", "newUnderstanding": "", "significance": "routine", "evolution": "", "reasoning": "", "output": "why observations didn't change understanding" }
+    └─────────────────────────────────────────────────────────
+
+  [2] INGEST 3 ITEMS
+    observations: 2, dismissals: 1, syntheses: 1
+
+    ┌─ UNDERSTANDING (verbatim) ─────────────────────────────
+    │ My understanding of common coffee brewing methods is as follows:
+    │
+    │ Pour-over: Uses hot water between 195-205°F and medium-fine grounds.
+    │
+    │ French press: Steeps coarsely ground coffee for 4 minutes with a 1:15 coffee-to-water ratio.
+    │
+    │ Espresso: Utilizes finely ground coffee, hot water, and requires a 25-30 second extraction time. These parameters are essential for achieving the characteristic concentrated coffee beverage.
+    └─────────────────────────────────────────────────────────
+
+  [3] QUERIES
+
+    Q: How do I make pour-over coffee?
+       relevant=true relevance=0.9 confidence=0.8
+       insight: To make pour-over coffee, you'll want to use hot water, typically between 195-205°F. The coffee grounds should be a medium-fine grind. My understanding doesn't include specific step-by-step instructions for the pouring technique itself, such as bloom time or pour rate, but these water and grind parameters are key to a good brew.
+       gaps: Specific pour-over technique details (e.g., bloom time, pour rate, grind size nuances
+
+    Q: What grind size does espresso need?
+       relevant=true relevance=1 confidence=1
+       insight: Espresso requires a very fine grind. This fine consistency is crucial for the proper extraction of flavor within the 25-30 second brew time typical for espresso. The fine particles provide the necessary resistance for the pressurized hot water, allowing for optimal flavor and character development, including the desired crema. If the grind is too coarse, the water will pass through too quickly, leading to an under-extracted and weak beverage. If it's too fine, the water may struggle to penetrate, causing over-extraction, bitterness, and potential channeling.
+
+──────── SCENARIO B (RULE-DENSE): Production Incident Tracker ────────
+
+  [1] PROMPT FIDELITY
+    instructions field:     2050 chars
+    observe system prompt:  996 chars
+    understand sys prompt:  2972 chars
+
+    ┌─ OBSERVE SYSTEM PROMPT (verbatim) ─────────────────────
+    │ You are a production incident observer. You watch for signals indicating data loss, data corruption, security breaches, full outages, core feature failures, degraded performance, or cosmetic issues in customer reports. You must categorize every incident into P0, P1, P2, or P3 severity, ignoring customer tone and never recording personal or company names.
+    │
+    │ Your domain: customer incident reporting
+    │
+    │ Be literal — if the data isn't directly about your domain, dismiss it. No abstract parallels.
+    │
+    │ Your root question: "Is this worth remembering for my purpose?"
+    │
+    │ Rate importance 0.0-1.0 based on signal strength for your domain.
+    │
+    │ Respond with JSON only. ALL fields required.
+    │
+    │ If relevant: { "status": "observed", "output": ["observation 1", "observation 2"], "importance": 0.0-1.0, "gaps": [] }
+    │ If not: { "status": "dismissed", "output": [], "importance": 0.5, "gaps": ["topic encountered but not relevant"] }
+    │
+    │ Gaps: briefly note topics you encountered but couldn't claim as relevant to your domain.
+    └─────────────────────────────────────────────────────────
+
+    ┌─ UNDERSTAND SYSTEM PROMPT (verbatim) ──────────────────
+    │ You maintain knowledge about production incidents reported by customers, focusing on incident descriptions, assigned severity (P0-P3), and status (ongoing/resolved). Significance is routine (P3), notable (P2), or critical (P0/P1).
+    │
+    │ ## Cognitive Skills
+    │
+    │ ### Content Relationship
+    │ How does this new information relate to my existing understanding?
+    │
+    │ - **confirms**: Does this new incident report reinforce the severity and nature of previously understood incidents of a similar type or impact?
+    │ - **contradicts**: Does this new incident report challenge the established severity or impact of a similar incident type, suggesting a change or a misclassification?
+    │ - **extends**: Does this incident report add specific details (e.g., impact on a particular user segment, root cause if stated) to an existing understanding of an incident type or ongoing issue?
+    │ - **new**: Is this incident report about a previously unrecorded type of issue or impact on customers, and how does it fit into the overall incident landscape?
+    │ - **irrelevant**: Is this report not about a production incident, customer-facing issue, or feature request, making it noise for incident tracking?
+    │
+    │ ### Dynamics
+    │ What patterns do I notice in how information arrives?
+    │
+    │ - **recurs**: How frequently are incidents of a particular type or severity being reported, and over what duration have they recurred?
+    │ - **intensifies**: Is a specific type of incident or its reported severity increasing over time, and what might be driving this acceleration?
+    │ - **fades**: Are reports of a particular incident type or severity decreasing, and when did its frequency peak?
+    │ - **shifts**: Is the nature or target of reported incidents changing, such as a shift from performance degradation (P2) to core feature failure (P1) or vice versa?
+    │ - **avoids**: Are certain types of incidents consistently being reported as less severe than their nature might suggest (e.g., disguised as P3s), and how often does this pattern occur?
+    │
+    │ ## Approach
+    │
+    │ You maintain a single understanding that grows and refines over time.
+    │ Organize naturally based on what you learn.
+    │ Ground patterns in specifics — approximate counts, timeframes, concrete examples.
+    │ A pattern described only as "frequent" without evidence is a weak understanding.
+    │
+    │ For each observation: how does this relate to what I already know, and what pattern does it reveal? Integrate content, track dynamics, consolidate redundancy, resolve conflicts. Retain specifics that ground your patterns — counts, timeframes, concrete instances.
+    │
+    │ Respond with JSON only. ALL fields required.
+    │
+    │ If understanding changed: { "status": "synthesized", "newUnderstanding": "complete updated text", "significance": "routine" or "notable" or "critical", "evolution": "what changed", "reasoning": "why", "output": "" }
+    │ If nothing changed: { "status": "dismissed", "newUnderstanding": "", "significance": "routine", "evolution": "", "reasoning": "", "output": "why observations didn't change understanding" }
+    └─────────────────────────────────────────────────────────
+
+  [2] INGEST 4 ITEMS
+    observations: 2, dismissals: 1, syntheses: 1
+
+    ┌─ UNDERSTANDING (verbatim) ─────────────────────────────
+    │ We have experienced two P0 incidents and one P2 incident. The first P0 involved the permanent, unrecoverable loss of three days of dashboard event data. The second P0 was a complete login outage affecting all users for 20 minutes. Additionally, there was a P2 incident where the reports page load time degraded to 8-10 seconds.
+    └─────────────────────────────────────────────────────────
+
+  [3] QUERIES
+
+    Q: What severity is the data loss incident, and who reported it?
+       relevant=true relevance=1 confidence=1
+       insight: The data loss incident is P0 severity. It involved the permanent, unrecoverable loss of three days of dashboard event data. The reporter was not identified.
+       gaps: The reporter of the data loss incident was not identified.
+
+    Q: How should the dark mode request be prioritized, and why?
+       relevant=true relevance=0.8 confidence=0.9
+       insight: A request for a "dark mode" feature falls under the category of a feature request. According to our guidelines, all feature requests are assigned a P3 severity. This is because P3 is reserved for cosmetic issues, minor annoyances, and new feature requests. The nature of the request, regardless of how it's phrased or the customer's tone, dictates this prioritization. Therefore, the dark mode request should be prioritized as P3.
+
+    Q: List every incident you are tracking and its severity label.
+       relevant=true relevance=1 confidence=1
+       insight: Here are the incidents I am tracking:
+
+*   **P0 Incident:** Permanent, unrecoverable loss of three days of dashboard event data.
+*   **P0 Incident:** Complete login outage affecting all users for 20 minutes.
+*   **P2 Incident:** Reports page load time degraded to 8-10 seconds.
+
+  run finished in 498.2s
+
+
+══════════════════════════════════════════════════════════════════════════════
+║ MODEL: openai/gpt-4o-mini  |  RUN 1/1
+══════════════════════════════════════════════════════════════════════════════
+
+──────── SCENARIO A (CONTROL): Coffee Knowledge ────────
+
+  [1] PROMPT FIDELITY
+    instructions field:     145 chars
+    observe system prompt:  806 chars
+    understand sys prompt:  3023 chars
+
+    ┌─ OBSERVE SYSTEM PROMPT (verbatim) ─────────────────────
+    │ You are a coffee brewing methods observer. You watch for signals about brewing times, water temperature, grind size, bean origin characteristics, and roasting profiles.
+    │
+    │ Your domain: coffee brewing techniques
+    │
+    │ Be literal — if the data isn't directly about your domain, dismiss it. No abstract parallels.
+    │
+    │ Your root question: "Is this worth remembering for my purpose?"
+    │
+    │ Rate importance 0.0-1.0 based on signal strength for your domain.
+    │
+    │ Respond with JSON only. ALL fields required.
+    │
+    │ If relevant: { "status": "observed", "output": ["observation 1", "observation 2"], "importance": 0.0-1.0, "gaps": [] }
+    │ If not: { "status": "dismissed", "output": [], "importance": 0.5, "gaps": ["topic encountered but not relevant"] }
+    │
+    │ Gaps: briefly note topics you encountered but couldn't claim as relevant to your domain.
+    └─────────────────────────────────────────────────────────
+
+    ┌─ UNDERSTAND SYSTEM PROMPT (verbatim) ──────────────────
+    │ You track knowledge about coffee brewing methods, bean origins, roasting profiles, and preparation techniques. Your focus areas include brewing techniques, coffee bean varieties, roasting profiles, flavor profiles, and equipment recommendations. You emphasize routine details, as well as notable trends and critical shifts in preparation techniques.
+    │
+    │ ## Cognitive Skills
+    │
+    │ ### Content Relationship
+    │ How does this new information relate to my existing understanding?
+    │
+    │ - **confirms**: Does this information reinforce existing knowledge about brewing methods or bean origins — how strong is the evidence now in relation to what I already know?
+    │ - **contradicts**: Does this information challenge my understanding of any coffee brewing method or roasting profile — is it a one-off incident or indicative of a broader change?
+    │ - **extends**: How does this new detail enhance my understanding of the brewing method or roast type — what specific knowledge does it add to my existing framework?
+    │ - **new**: Is this information completely new to my knowledge base — how does it integrate with what I track regarding coffee brewing?
+    │ - **irrelevant**: Is this information noise that doesn't contribute to my tracking of coffee brewing techniques or bean profiles?
+    │
+    │ ### Dynamics
+    │ What patterns do I notice in how information arrives?
+    │
+    │ - **recurs**: How often does this specific brewing method or origin reappear in discussions — over what timeframe and in what contexts?
+    │ - **intensifies**: Is there an increasing trend in mentions of a particular coffee preparation technique — what factors are driving this rise?
+    │ - **fades**: Which brewing methods or bean origins are becoming less prevalent — when did they peak and what has replaced them?
+    │ - **shifts**: What changes are occurring in the focus of coffee discussions — what topics are transitioning from and to what?
+    │ - **avoids**: What brewing methods or origins are regularly overlooked in coffee discourse — how often do these avoidances occur and what are the reasons behind them?
+    │
+    │ ## Approach
+    │
+    │ You maintain a single understanding that grows and refines over time.
+    │ Organize naturally based on what you learn.
+    │ Ground patterns in specifics — approximate counts, timeframes, concrete examples.
+    │ A pattern described only as "frequent" without evidence is a weak understanding.
+    │
+    │ For each observation: how does this relate to what I already know, and what pattern does it reveal? Integrate content, track dynamics, consolidate redundancy, resolve conflicts. Retain specifics that ground your patterns — counts, timeframes, concrete instances.
+    │
+    │ Respond with JSON only. ALL fields required.
+    │
+    │ If understanding changed: { "status": "synthesized", "newUnderstanding": "complete updated text", "significance": "routine" or "notable" or "critical", "evolution": "what changed", "reasoning": "why", "output": "" }
+    │ If nothing changed: { "status": "dismissed", "newUnderstanding": "", "significance": "routine", "evolution": "", "reasoning": "", "output": "why observations didn't change understanding" }
+    └─────────────────────────────────────────────────────────
+
+  [2] INGEST 3 ITEMS
+    observations: 2, dismissals: 1, syntheses: 1
+
+    ┌─ UNDERSTANDING (verbatim) ─────────────────────────────
+    │ Pour-over coffee is a method where hot water (195-205°F) is slowly and carefully poured over medium-fine coffee grounds contained in a filter, leading to a clean and nuanced flavor. French press involves steeping coarsely ground coffee in hot water for 4 minutes before using a metal mesh filter to separate the liquid from the grounds, creating a rich and full-bodied cup. Espresso is brewed by forcing hot water through finely ground coffee at a pressure of 9 bars for 25-30 seconds, resulting in a concentrated and creamy shot of coffee.
+    └─────────────────────────────────────────────────────────
+
+  [3] QUERIES
+
+    Q: How do I make pour-over coffee?
+       relevant=true relevance=1 confidence=0.9
+       insight: To make pour-over coffee, follow these steps:
+
+1. **Gather Equipment and Ingredients**:
+   - Pour-over brewer (like a V60 or Chemex)
+   - Coffee filter (make sure it fits your brewer)
+   - Fresh coffee beans (medium-fine grind, about 2 tablespoons per 6 ounces of water)
+   - Hot water kettle (preferably with a gooseneck for precision)
+   - Scale (optional but helpful for accuracy)
+   - Coffee grinder (if using whole beans)
+
+2. **Heat Water**:
+   - Boil water, then let it cool slightly (ideal temperature is between 195°F and 205°F).
+
+3. **Prepare the Brewer**:
+   - Place the filter in your pour-over brewer and rinse it with hot water. This removes paper flavors and preheats the brewer.
+
+4. **Add Coffee Grounds**:
+   - Measure and add the medium-fine coffee grounds to the filter. A common ratio is about 1:16 (1 gram of coffee to 16 grams of water).
+
+5. **Bloom the Coffee**:
+   - Pour a small amount of hot water (about twice the weight of the coffee) over the grounds to saturate them evenly. Let it bloom for about 30-45 seconds. This helps release trapped gases and enhances flavor extraction.
+
+6. **Continue Pouring**:
+   - After blooming, slowly pour the remaining water over the coffee in a circular motion. Avoid pouring directly onto the filter. Aim to complete this process in about 2-3 minutes.
+
+7. **Let it Drip**:
+   - Allow the coffee to fully drain through the filter.
+
+8. **Serve and Enjoy**:
+   - Remove the filter and discard the grounds. Pour the brewed coffee into your favorite mug and enjoy. You can adjust your grind size and water temperature for taste preferences.
+
+This method produces a clean and nuanced coffee that showcases the beans' flavors. Experiment with different coffee origins and roast profiles to discover a variety of tasting notes.
+
+    Q: What grind size does espresso need?
+       relevant=true relevance=1 confidence=0.9
+       insight: Espresso requires a fine grind size, typically around 200-300 microns. This fine grind is crucial because it allows the hot water, under high pressure (approximately 9 bars), to extract flavors efficiently within a short brewing time of 25-30 seconds. A proper grind size affects the extraction rate; too fine may lead to over-extraction, creating bitter flavors, while too coarse can result in under-extraction, yielding sour notes. It's essential to calibrate the grind based on the coffee bean and roast profile to achieve the desired flavor balance in the espresso shot.
+
+──────── SCENARIO B (RULE-DENSE): Production Incident Tracker ────────
+
+  [1] PROMPT FIDELITY
+    instructions field:     2050 chars
+    observe system prompt:  992 chars
+    understand sys prompt:  2899 chars
+
+    ┌─ OBSERVE SYSTEM PROMPT (verbatim) ─────────────────────
+    │ You are a production incident observer. You watch for signals about data loss, core feature failures impacting many users, degraded performance issues, and cosmetic complaints or feature requests from customers. You focus on ensuring that all incidents are accurately categorized according to severity without influence from customer tone or individual names.
+    │
+    │ Your domain: production incidents
+    │
+    │ Be literal — if the data isn't directly about your domain, dismiss it. No abstract parallels.
+    │
+    │ Your root question: "Is this worth remembering for my purpose?"
+    │
+    │ Rate importance 0.0-1.0 based on signal strength for your domain.
+    │
+    │ Respond with JSON only. ALL fields required.
+    │
+    │ If relevant: { "status": "observed", "output": ["observation 1", "observation 2"], "importance": 0.0-1.0, "gaps": [] }
+    │ If not: { "status": "dismissed", "output": [], "importance": 0.5, "gaps": ["topic encountered but not relevant"] }
+    │
+    │ Gaps: briefly note topics you encountered but couldn't claim as relevant to your domain.
+    └─────────────────────────────────────────────────────────
+
+    ┌─ UNDERSTAND SYSTEM PROMPT (verbatim) ──────────────────
+    │ You maintain knowledge about production incidents reported by customers. Your focus areas include incident management, severity assessment, customer communication, and data integrity. Your significance criteria are notable and critical.
+    │
+    │ ## Cognitive Skills
+    │
+    │ ### Content Relationship
+    │ How does this new information relate to my existing understanding?
+    │
+    │ - **confirms**: Does this new incident reinforce the understanding of existing recurring issues, and how does the evidence strength compare with previous reports?
+    │ - **contradicts**: Does this incident challenge established incident patterns, and should I consider whether it represents a significant deviation from previous experiences?
+    │ - **extends**: Does this incident add new details to previously identified issues, and what specific insights does it provide for better tracking?
+    │ - **new**: Is this incident introducing entirely new information or issues that I have not previously recorded, and how does it fit into my understanding of overall trends?
+    │ - **irrelevant**: Is this report about noise unrelated to documented incidents, and how can I determine its lack of relevance?
+    │
+    │ ### Dynamics
+    │ What patterns do I notice in how information arrives?
+    │
+    │ - **recurs**: How often are similar types of incidents reported, and what patterns can I identify regarding their frequency and context?
+    │ - **intensifies**: Are there specific incident types that are becoming more common, and what factors might be contributing to this increase?
+    │ - **fades**: Which incidents or issues appear to be declining in occurrence, and when did they last peak in prevalence?
+    │ - **shifts**: Is there a noticeable change in the trend of incident reports, and what categories are experiencing this shift?
+    │ - **avoids**: Are there particular types of incidents that customers are hesitant to report, and what tactics might they be using to sidestep raising these issues?
+    │
+    │ ## Approach
+    │
+    │ You maintain a single understanding that grows and refines over time.
+    │ Organize naturally based on what you learn.
+    │ Ground patterns in specifics — approximate counts, timeframes, concrete examples.
+    │ A pattern described only as "frequent" without evidence is a weak understanding.
+    │
+    │ For each observation: how does this relate to what I already know, and what pattern does it reveal? Integrate content, track dynamics, consolidate redundancy, resolve conflicts. Retain specifics that ground your patterns — counts, timeframes, concrete instances.
+    │
+    │ Respond with JSON only. ALL fields required.
+    │
+    │ If understanding changed: { "status": "synthesized", "newUnderstanding": "complete updated text", "significance": "routine" or "notable" or "critical", "evolution": "what changed", "reasoning": "why", "output": "" }
+    │ If nothing changed: { "status": "dismissed", "newUnderstanding": "", "significance": "routine", "evolution": "", "reasoning": "", "output": "why observations didn't change understanding" }
+    └─────────────────────────────────────────────────────────
+
+  [2] INGEST 4 ITEMS
+    observations: 2, dismissals: 1, syntheses: 1
+
+    ┌─ UNDERSTANDING (verbatim) ─────────────────────────────
+    │ We are experiencing critical issues following a recent migration, including the permanent loss of three days of dashboard event data, a complete login failure for user authentication, and degraded performance on the reports page with loading times now taking 8-10 seconds. These issues suggest significant problems related to both data integrity and application accessibility, indicating that the recent migration has adversely affected the overall system performance and reliability.
+    └─────────────────────────────────────────────────────────
+
+  [3] QUERIES
+
+    Q: What severity is the data loss incident, and who reported it?
+       relevant=true relevance=1 confidence=1
+       insight: The incident of data loss is classified as P0 because it involves permanent loss of customer data, which aligns with the severity definitions provided. The report does not specify who reported the incident, only referring to it generically as a customer issue.
+       gaps: Specific identification of the reporter or customer involved in the incident.
+
+    Q: How should the dark mode request be prioritized, and why?
+       relevant=true relevance=0.8 confidence=1
+       insight: The dark mode request should be prioritized as P3. According to the severity rubric, feature requests are always classified as P3, regardless of how urgent or critical the customer may express this request. Since wanting a dark mode does not fall under data loss, significant outages, or core feature failures, it is categorized at the lowest severity level, which is P3. The evidence supporting this classification comes from R2 of the hard rules stating that any feature request, including dark mode, is categorized as P3.
+
+    Q: List every incident you are tracking and its severity label.
+       relevant=true relevance=1 confidence=1
+       insight: There are currently several incidents being tracked with the following details:
+
+1. Permanent loss of three days of dashboard event data - Severity: P0, Ongoing
+2. Complete login failure for user authentication - Severity: P0, Ongoing
+3. Degraded performance on the reports page with loading times of 8-10 seconds - Severity: P2, Ongoing
+
+The first two incidents are classified as P0 due to data loss and total outage affecting all users, while the third incident is classified as P2 due to degraded performance affecting a non-core feature. All incidents are still ongoing.
+
+  run finished in 187.4s
+
+
+Eval complete.

@@ -10,7 +10,6 @@
 
 import type { AdaptLLMPlugin, AdaptModelConfig, LanguageModel } from '../../llm'
 import { toModelConfig } from '../../llm'
-import type { ObserveIdentity } from '../observer'
 import type { NeuronHealth, NeuronMetrics, NeuronOrigin } from '../types'
 
 // ── Model types ─────────────────────────────────────────────────────────────
@@ -55,6 +54,8 @@ export interface ModelSlots {
 export interface BaseNeuronState {
 	// Semantic identity
 	instructions: string
+	observeInstructions: string | null
+	understandInstructions: string | null
 	name: string
 	description: string
 	focus: string | null
@@ -63,11 +64,9 @@ export interface BaseNeuronState {
 	// Models (model inputs in cache; StoredModelRef in store)
 	models: ModelSlots
 
-	// LLM-generated artifacts (null before init)
-	observe_identity: ObserveIdentity | null
+	// Runtime artifacts (null before init)
 	observe_prompt: string | null
 	understand_prompt: string | null
-	understand_identity: unknown
 	observation_schema: Record<string, unknown> | null
 	understanding_schema: Record<string, unknown> | null
 

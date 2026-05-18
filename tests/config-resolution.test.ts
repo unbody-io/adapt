@@ -50,6 +50,21 @@ describe('resolveTextNeuronConfig', () => {
 		expect(result.instructions).toBe('Track coding patterns.')
 	})
 
+	it('normalizes phase instruction overrides', () => {
+		const result = resolveTextNeuronConfig({
+			model,
+			instructions: 'shared',
+			observeInstructions: 'observe only',
+			understandInstructions: 'understand only',
+		})
+		expect(result.observeInstructions).toBe('observe only')
+		expect(result.understandInstructions).toBe('understand only')
+
+		const fallback = resolveTextNeuronConfig({ model, instructions: 'shared' })
+		expect(fallback.observeInstructions).toBeNull()
+		expect(fallback.understandInstructions).toBeNull()
+	})
+
 	// ── Model cascade ──
 
 	it('cascades blueprintModel: config > parent > config.model > parent.model', () => {
@@ -159,6 +174,21 @@ describe('resolveListNeuronConfig', () => {
 	it('defaults origin to developer', () => {
 		const result = resolveListNeuronConfig({ model, instructions: 'test' } as any)
 		expect(result.origin).toBe(LIST_NEURON_DEFAULTS.origin)
+	})
+
+	it('normalizes phase instruction overrides', () => {
+		const result = resolveListNeuronConfig({
+			model,
+			instructions: 'shared',
+			observeInstructions: 'observe only',
+			understandInstructions: 'understand only',
+		} as any)
+		expect(result.observeInstructions).toBe('observe only')
+		expect(result.understandInstructions).toBe('understand only')
+
+		const fallback = resolveListNeuronConfig({ model, instructions: 'shared' } as any)
+		expect(fallback.observeInstructions).toBeNull()
+		expect(fallback.understandInstructions).toBeNull()
 	})
 
 	// ── Model cascade (same pattern as text) ──

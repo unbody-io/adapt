@@ -26,6 +26,18 @@ Watch for:
 Track answers to:
 - [Question 1]
 - [Question 2]`),
+	observeInstructions: z
+		.string()
+		.nullable()
+		.describe(
+			'Optional observe-phase-only instructions. Return null unless the observe phase needs different verbatim developer instructions than the shared instructions.',
+		),
+	understandInstructions: z
+		.string()
+		.nullable()
+		.describe(
+			'Optional understand-phase-only instructions. Return null unless the understand phase needs different verbatim developer instructions than the shared instructions.',
+		),
 	focus: z
 		.string()
 		.nullable()
@@ -43,7 +55,14 @@ Track answers to:
  * Full neuron config type — extends LLM schema with optional governance
  * for programmatic use (explicit neurons, evolution handlers, etc.).
  */
-export type GeneratedNeuronConfig = z.infer<typeof neuronConfigSchema> & {
+type GeneratedNeuronConfigFromSchema = z.infer<typeof neuronConfigSchema>
+
+export type GeneratedNeuronConfig = Omit<
+	GeneratedNeuronConfigFromSchema,
+	'observeInstructions' | 'understandInstructions'
+> & {
+	observeInstructions?: string | null
+	understandInstructions?: string | null
 	governance?: Record<string, unknown>
 	skipObservation?: boolean
 	/** Custom observation schema — skips LLM generation when provided */

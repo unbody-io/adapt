@@ -2,7 +2,7 @@
  * Text understand phase
  *
  * Updates understanding based on buffered observations.
- * Uses identity generation + system prompt pattern.
+ * Uses verbatim instructions plus cognitive skill customization.
  */
 
 import { z } from 'zod'
@@ -59,13 +59,17 @@ export async function initUnderstand(
 		...repairOptions,
 	})
 
-	const systemPrompt = understandSystemPromptTemplate(identity, strategy)
+	const systemPrompt = understandSystemPromptTemplate(
+		instructions,
+		identity,
+		strategy,
+	)
 
 	return { identity, systemPrompt }
 }
 
 /**
- * Adjust text understand phase — evolves identity from a directive
+ * Adjust text understand phase — evolves cognitive skill prompts from a directive
  *
  * Unlike initUnderstand (which generates from scratch), this shows the LLM
  * the current identity so it can make incremental adjustments.
@@ -73,7 +77,7 @@ export async function initUnderstand(
  * @param model - Language model to use
  * @param directive - Natural language directive describing what to change
  * @param newInstructions - The already-resolved new instructions
- * @param currentIdentity - The current understand identity
+ * @param currentIdentity - The current cognitive skill customization
  * @param strategy - The synthesis strategy
  * @returns Adjusted identity and system prompt
  */
@@ -101,7 +105,11 @@ export async function adjustUnderstand(
 		...repairOptions,
 	})
 
-	const systemPrompt = understandSystemPromptTemplate(identity, strategy)
+	const systemPrompt = understandSystemPromptTemplate(
+		newInstructions,
+		identity,
+		strategy,
+	)
 
 	return { identity, systemPrompt }
 }

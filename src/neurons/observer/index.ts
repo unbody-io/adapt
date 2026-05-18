@@ -2,11 +2,10 @@
  * Shared observer module — type-agnostic observe phase
  *
  * Extracts what's relevant to purpose from data.
- * Uses identity generation + system prompt pattern.
+ * Uses deterministic 3-layer system prompt assembly.
  * Shared across all neuron types (text, list, etc.).
  */
 
-import { z } from 'zod'
 import {
 	type AdaptLLMPlugin,
 	type AdaptRepairOptions,
@@ -14,119 +13,23 @@ import {
 	type LanguageModel,
 	Output,
 } from '../../llm'
-import { observeAdjustPromptTemplate } from './prompts/adjust'
-import { observeIdentityPromptTemplate } from './prompts/identity'
 import { observeSystemPromptTemplate } from './prompts/system'
 import { observeUserPromptTemplate } from './prompts/user'
-import type { ObserveIdentity } from './schema.identity'
-import { observeIdentitySchema } from './schema.identity'
 import { buildObserveOutputSchema, observeOutputSchema } from './schema.output'
 import type { ObserveCallbacks, ObserveContext, ObserveOutput } from './types'
-
-/**
- * Schema for adjust output — identity fields + resolved instructions
- */
-const adjustObserveOutputSchema = observeIdentitySchema.extend({
-	instructions: z
-		.string()
-		.describe('The updated instructions after applying the directive'),
-})
 
 /**
  * Result from observe init
  */
 export interface ObserveInitResult {
-	identity: ObserveIdentity
 	systemPrompt: string
 }
 
 /**
- * Initialize observe phase - generates identity and system prompt
- *
- * @param model - Language model to use
- * @param instructions - Neuron's purpose/instructions
- * @param focus - Optional focus areas to narrow observation filtering
- * @returns Generated identity and system prompt
+ * Initialize observe phase deterministically.
  */
-export async function initObserve(
-	llm: AdaptLLMPlugin,
-	model: LanguageModel,
-	instructions: string,
-	focus?: string,
-	repairOptions?: AdaptRepairOptions,
-): Promise<ObserveInitResult> {
-	const prompt = observeIdentityPromptTemplate(instructions, focus)
-
-	const { output: identity } = await generate({
-		llm,
-		model,
-		prompt,
-		output: Output.object({ schema: observeIdentitySchema }),
-		repairSchema: observeIdentitySchema,
-		...repairOptions,
-	})
-
-	const systemPrompt = observeSystemPromptTemplate(identity)
-
-	return { identity, systemPrompt }
-}
-
-/**
- * Result from observe adjust
- */
-export interface AdjustObserveResult {
-	newInstructions: string
-	identity: ObserveIdentity
-	systemPrompt: string
-}
-
-/**
- * Adjust observe phase — evolves identity and resolves new instructions from a directive
- *
- * Unlike initObserve (which generates from scratch), this shows the LLM
- * the current state so it can make incremental adjustments.
- *
- * @param model - Language model to use
- * @param directive - Natural language directive describing what to change
- * @param currentInstructions - The neuron's current instructions
- * @param currentIdentity - The current observer identity
- * @param focus - Optional focus areas
- * @returns New instructions, adjusted identity, and system prompt
- */
-export async function adjustObserve(
-	llm: AdaptLLMPlugin,
-	model: LanguageModel,
-	directive: string,
-	currentInstructions: string,
-	currentIdentity: ObserveIdentity,
-	focus?: string,
-	repairOptions?: AdaptRepairOptions,
-): Promise<AdjustObserveResult> {
-	const prompt = observeAdjustPromptTemplate(
-		directive,
-		currentInstructions,
-		currentIdentity,
-		focus,
-	)
-
-	const { output } = await generate({
-		llm,
-		model,
-		prompt,
-		output: Output.object({ schema: adjustObserveOutputSchema }),
-		repairSchema: adjustObserveOutputSchema,
-		...repairOptions,
-	})
-
-	const newInstructions = output.instructions
-	const identity: ObserveIdentity = {
-		identity: output.identity,
-		domain: output.domain,
-	}
-
-	const systemPrompt = observeSystemPromptTemplate(identity)
-
-	return { newInstructions, identity, systemPrompt }
+export function initObserve(instructions: string): ObserveInitResult {
+	return { systemPrompt: observeSystemPromptTemplate(instructions) }
 }
 
 /**
@@ -197,9 +100,6 @@ export async function observe(
 	}
 }
 
-// Re-export types and utilities
-export type { ObserveIdentity } from './schema.identity'
-export { observeIdentitySchema } from './schema.identity'
 export { observeOutputSchema } from './schema.output'
 export type {
 	ObserveCallbacks,

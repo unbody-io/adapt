@@ -1,0 +1,191 @@
+import { describe, expect, it } from 'vitest'
+import type { LanguageModel } from 'ai'
+import type {
+	LanguageModelV3,
+	LanguageModelV3CallOptions,
+	LanguageModelV3GenerateResult,
+} from '@ai-sdk/provider'
+import { MemoryNeuronStore, TextNeuron } from '../src'
+
+function createQueuedJsonModel(responses: unknown[]) {
+	let callCount = 0
+	const prompts: Array<{ system?: string; prompt: string }> = []
+	const usage: LanguageModelV3GenerateResult['usage'] = {
+		inputTokens: { total: 0, noCache: 0, cacheRead: 0, cacheWrite: 0 },
+		outputTokens: { total: 0, text: 0, reasoning: 0 },
+	}
+	const model: LanguageModelV3 = {
+		specificationVersion: 'v3',
+		provider: 'test',
+		modelId: 'honest-instructions',
+		supportedUrls: {},
+		async doGenerate(
+			opts: LanguageModelV3CallOptions,
+		): Promise<LanguageModelV3GenerateResult> {
+			prompts.push({
+				system:
+					typeof opts.prompt?.[0]?.content === 'string'
+						? opts.prompt[0].content
+						: undefined,
+				prompt: JSON.stringify(opts.prompt),
+			})
+			const response = responses[callCount++]
+			if (!response) {
+				throw new Error(`No queued response for call ${callCount}`)
+			}
+			return {
+				content: [{ type: 'text', text: JSON.stringify(response) }],
+				finishReason: { unified: 'stop', raw: 'stop' },
+				usage,
+				warnings: [],
+				request: {},
+				response: {
+					id: `r-${callCount}`,
+					timestamp: new Date(),
+					modelId: 'honest-instructions',
+				},
+			}
+		},
+		async doStream(): Promise<never> {
+			throw new Error('not implemented')
+		},
+	}
+	return {
+		model: model as unknown as LanguageModel,
+		getCallCount: () => callCount,
+		getPrompts: () => prompts,
+	}
+}
+
+function skillsResponse() {
+	return { skills: [], dynamicsSkills: [] }
+}
+
+describe('honest neuron instructions', () => {
+	it('puts verbatim phase instructions into runtime prompts', async () => {
+		const instructions = 'Shared rule R0. NEVER invent facts.'
+		const observeInstructions = 'Observe rule R1. Keep feature requests as P3.'
+		const understandInstructions =
+			'Understand rule R2. DATA LOSS IS ALWAYS P0.'
+		const focus = 'Focus rule R3. Ignore customer tone.'
+		const { model } = createQueuedJsonModel([skillsResponse()])
+
+		const neuron = await TextNeuron.create({
+			id: 'incidents',
+			model,
+			store: new MemoryNeuronStore(),
+			instructions,
+			observeInstructions,
+			understandInstructions,
+			focus,
+		})
+
+		const observePrompt = neuron.getObserveSystemPrompt() ?? ''
+		const understandPrompt = neuron.getUnderstandSystemPrompt() ?? ''
+
+		expect(observePrompt).toContain(observeInstructions)
+		expect(observePrompt).toContain(focus)
+		expect(observePrompt).not.toContain(understandInstructions)
+		expect(understandPrompt).toContain(understandInstructions)
+		expect(understandPrompt).not.toContain(observeInstructions)
+		expect(understandPrompt).not.toContain(focus)
+	})
+
+	it('omits the developer-instructions layer when resolved instructions are empty', async () => {
+		const { model } = createQueuedJsonModel([skillsResponse()])
+
+		const neuron = await TextNeuron.create({
+			id: 'empty',
+			model,
+			store: new MemoryNeuronStore(),
+			instructions: '',
+		})
+
+		expect(neuron.getObserveSystemPrompt()).toContain('observe phase')
+		expect(neuron.getObserveSystemPrompt()).not.toContain(
+			'## Developer Instructions',
+		)
+		expect(neuron.getUnderstandSystemPrompt()).toContain('understand phase')
+		expect(neuron.getUnderstandSystemPrompt()).not.toContain(
+			'## Developer Instructions',
+		)
+	})
+
+	it('regenerates only affected prompts for phase-instruction updates', async () => {
+		const queued = createQueuedJsonModel([
+			skillsResponse(),
+			skillsResponse(),
+			skillsResponse(),
+		])
+
+		const neuron = await TextNeuron.create({
+			id: 'updates',
+			model: queued.model,
+			store: new MemoryNeuronStore(),
+			instructions: 'Shared R0.',
+			observeInstructions: 'Observe R1.',
+			understandInstructions: 'Understand R2.',
+			focus: 'Focus R3.',
+		})
+		expect(queued.getCallCount()).toBe(1)
+
+		const initialUnderstand = neuron.getUnderstandSystemPrompt()
+		await neuron.update({ observeInstructions: 'Observe R1 updated.' })
+		expect(queued.getCallCount()).toBe(1)
+		expect(neuron.getObserveSystemPrompt()).toContain('Observe R1 updated.')
+		expect(neuron.getUnderstandSystemPrompt()).toBe(initialUnderstand)
+
+		const observeAfterObserveUpdate = neuron.getObserveSystemPrompt()
+		await neuron.update({ understandInstructions: 'Understand R2 updated.' })
+		expect(queued.getCallCount()).toBe(2)
+		expect(neuron.getUnderstandSystemPrompt()).toContain(
+			'Understand R2 updated.',
+		)
+		expect(neuron.getObserveSystemPrompt()).toBe(observeAfterObserveUpdate)
+
+		await neuron.update({ instructions: 'Shared R0 updated.' })
+		expect(queued.getCallCount()).toBe(3)
+		expect(neuron.getObserveSystemPrompt()).toContain('Observe R1 updated.')
+		expect(neuron.getObserveSystemPrompt()).not.toContain('Shared R0 updated.')
+		expect(neuron.getUnderstandSystemPrompt()).toContain(
+			'Understand R2 updated.',
+		)
+		expect(neuron.getUnderstandSystemPrompt()).not.toContain(
+			'Shared R0 updated.',
+		)
+	})
+
+	it('adjusts raw instruction fields and rebuilds prompts without observe identity', async () => {
+		const queued = createQueuedJsonModel([
+			skillsResponse(),
+			{
+				adjustConfig: true,
+				adjustUnderstanding: false,
+				reasoning: 'Directive changes behavior only.',
+			},
+			{
+				instructions: 'Shared v2.',
+				observeInstructions: 'Observe v2 R1.',
+				understandInstructions: 'Understand v2 R2.',
+				focus: 'Focus v2 R3.',
+			},
+			skillsResponse(),
+		])
+
+		const neuron = await TextNeuron.create({
+			id: 'adjust',
+			model: queued.model,
+			store: new MemoryNeuronStore(),
+			instructions: 'Shared v1.',
+		})
+
+		const result = await neuron.adjust('Track the new incident rubric.')
+
+		expect(result.adjustedConfig).toBe(true)
+		expect(result.adjustedUnderstanding).toBe(false)
+		expect(neuron.getObserveSystemPrompt()).toContain('Observe v2 R1.')
+		expect(neuron.getObserveSystemPrompt()).toContain('Focus v2 R3.')
+		expect(neuron.getUnderstandSystemPrompt()).toContain('Understand v2 R2.')
+		expect(neuron.getObserveSystemPrompt()).not.toContain('identity')
+	})
+})

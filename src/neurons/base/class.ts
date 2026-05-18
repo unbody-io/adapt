@@ -37,7 +37,7 @@ import type {
 	QueryOptions,
 	QueryResult,
 } from '../base/query'
-import { adjustObserve, initObserve, observe } from '../observer'
+import { initObserve, observe } from '../observer'
 import type {
 	Neuron,
 	NeuronHealth,
@@ -53,6 +53,10 @@ import type {
 	StoredModelRef,
 } from './state'
 import { deserializeModelSlots, serializeModelSlots } from './state'
+import {
+	resolveObserveInstructions,
+	resolveUnderstandInstructions,
+} from './instructions'
 import type { BaseNeuronUpdateInput, SharedNeuronEventMap } from './types'
 
 /**
@@ -161,6 +165,28 @@ const adjustClassificationSchema = z.object({
 			"Whether the directive changes, corrects, or removes something in the node's accumulated knowledge",
 		),
 	reasoning: z.string().describe('Brief explanation of the classification'),
+})
+
+const adjustConfigSchema = z.object({
+	instructions: z
+		.string()
+		.describe('Updated shared developer instructions after applying the directive'),
+	observeInstructions: z
+		.string()
+		.nullable()
+		.describe(
+			'Updated observe-phase override, or null to use shared instructions',
+		),
+	understandInstructions: z
+		.string()
+		.nullable()
+		.describe(
+			'Updated understand-phase override, or null to use shared instructions',
+		),
+	focus: z
+		.string()
+		.nullable()
+		.describe('Updated observe-only focus, or null if none'),
 })
 
 /**
@@ -379,6 +405,10 @@ export abstract class BaseNeuron<
 		const records = await this.store.state.list()
 		if (records.length === 0) return false
 		for (const record of records) {
+			if (record.id === 'observe_identity') continue
+			if (record.id === 'understand_identity' && !(record.id in this.state)) {
+				continue
+			}
 			const transform = this.stateTransforms[record.id]
 			;(this.state as Record<string, unknown>)[record.id] = transform
 				? transform.deserialize(record.value)
@@ -419,22 +449,17 @@ export abstract class BaseNeuron<
 
 			if (!restored) {
 				if (!this.state.skipObservation) {
-					// Generate observe identity + prompt via LLM
-					const observeResult = await initObserve(
-						this.llm,
-						this.state.models.observer_blueprint,
-						this.state.instructions,
-						this.state.focus || undefined,
-						this.llmRepairOptions,
+					// Build observe prompt deterministically from verbatim instructions
+					const observeResult = initObserve(
+						resolveObserveInstructions(this.state),
 					)
-					this.state.observe_identity = observeResult.identity
 					this.state.observe_prompt = observeResult.systemPrompt
 				}
 
-				// Generate understand identity + prompt (type-specific)
+				// Generate understand prompt (type-specific)
 				await this.regenUnderstandPrompt(
 					this.state.models.understand_blueprint,
-					this.state.instructions,
+					resolveUnderstandInstructions(this.state),
 				)
 
 				// Generate schemas only if not already provided via config
@@ -444,7 +469,7 @@ export abstract class BaseNeuron<
 				) {
 					const schemas = await this.generateSchemas(
 						this.state.models.blueprint,
-						this.state.instructions,
+						this.schemaInstructions(),
 					)
 					if (this.state.observation_schema === null) {
 						this.state.observation_schema = schemas.observationSchema as Record<
@@ -507,6 +532,14 @@ export abstract class BaseNeuron<
 		return this.state.instructions
 	}
 
+	get observeInstructions(): string | null {
+		return this.state.observeInstructions
+	}
+
+	get understandInstructions(): string | null {
+		return this.state.understandInstructions
+	}
+
 	get name(): string {
 		return this.state.name
 	}
@@ -543,6 +576,14 @@ export abstract class BaseNeuron<
 
 	getUnderstandSystemPrompt(): string | null {
 		return this.state.understand_prompt
+	}
+
+	private schemaInstructions(): string {
+		return (
+			resolveObserveInstructions(this.state) ||
+			resolveUnderstandInstructions(this.state) ||
+			this.state.instructions
+		)
 	}
 
 	getUnderstandThresholds() {
@@ -1073,12 +1114,35 @@ export abstract class BaseNeuron<
 			needsSchemaRegen = true
 		}
 
+		if (
+			updates.observeInstructions !== undefined &&
+			updates.observeInstructions !== this.state.observeInstructions
+		) {
+			;(stateUpdates as Record<string, unknown>).observeInstructions =
+				updates.observeInstructions
+			changedFields.push('observeInstructions')
+			needsObserveRegen = true
+			needsSchemaRegen = true
+		}
+
+		if (
+			updates.understandInstructions !== undefined &&
+			updates.understandInstructions !== this.state.understandInstructions
+		) {
+			;(stateUpdates as Record<string, unknown>).understandInstructions =
+				updates.understandInstructions
+			changedFields.push('understandInstructions')
+			needsUnderstandRegen = true
+			needsSchemaRegen = true
+		}
+
 		// ── Focus (reactive) ──
 
 		if (updates.focus !== undefined && updates.focus !== this.state.focus) {
 			;(stateUpdates as Record<string, unknown>).focus = updates.focus
 			changedFields.push('focus')
 			needsObserveRegen = true
+			needsSchemaRegen = true
 		}
 
 		// ── Thresholds ──
@@ -1153,27 +1217,16 @@ export abstract class BaseNeuron<
 			const regenUpdates: Partial<TState> = {} as Partial<TState>
 
 			if (needsObserveRegen) {
-				promises.push(
-					initObserve(
-						this.llm,
-						this.state.models.observer_blueprint,
-						this.state.instructions,
-						this.state.focus || undefined,
-						this.llmRepairOptions,
-					).then((result) => {
-						;(regenUpdates as Record<string, unknown>).observe_identity =
-							result.identity
-						;(regenUpdates as Record<string, unknown>).observe_prompt =
-							result.systemPrompt
-					}),
-				)
+				const result = initObserve(resolveObserveInstructions(this.state))
+				;(regenUpdates as Record<string, unknown>).observe_prompt =
+					result.systemPrompt
 			}
 
 			if (needsUnderstandRegen) {
 				promises.push(
 					this.regenUnderstandPrompt(
 						this.state.models.understand_blueprint,
-						this.state.instructions,
+						resolveUnderstandInstructions(this.state),
 					),
 				)
 			}
@@ -1184,7 +1237,7 @@ export abstract class BaseNeuron<
 			if (needsSchemaRegen) {
 				const schemas = await this.generateSchemas(
 					this.state.models.blueprint,
-					this.state.instructions,
+					this.schemaInstructions(),
 				)
 				;(regenUpdates as Record<string, unknown>).observation_schema =
 					schemas.observationSchema
@@ -1256,31 +1309,57 @@ What does this directive touch?`,
 
 		// 2. Config adjustment (existing logic)
 		if (classification.adjustConfig) {
-			const observeResult = await adjustObserve(
-				this.llm,
-				this.state.models.observer_blueprint,
-				directive,
-				this.state.instructions,
-				this.state.observe_identity!,
-				this.state.focus || undefined,
-				this.llmRepairOptions,
-			)
+			const { output } = await generate({
+				llm: this.llm,
+				model: this.state.models.blueprint,
+				prompt: `You update a neuron's raw developer instruction fields from a directive.
+
+Preserve existing text unless the directive clearly changes it. Do not summarize, invent identity text, or convert instructions into a role description.
+
+Current shared instructions:
+"${this.state.instructions}"
+
+Current observe-only instructions:
+${this.state.observeInstructions === null ? 'null' : `"${this.state.observeInstructions}"`}
+
+Current understand-only instructions:
+${this.state.understandInstructions === null ? 'null' : `"${this.state.understandInstructions}"`}
+
+Current observe focus:
+${this.state.focus === null ? 'null' : `"${this.state.focus}"`}
+
+Directive:
+"${directive}"
+
+Return the updated raw fields. Use null for a phase-specific field when it should inherit the shared instructions.`,
+				output: Output.object({ schema: adjustConfigSchema }),
+				repairSchema: adjustConfigSchema,
+				...this.llmRepairOptions,
+			})
 
 			await this.setState({
-				instructions: observeResult.newInstructions,
-				observe_identity: observeResult.identity,
-				observe_prompt: observeResult.systemPrompt,
+				instructions: output.instructions,
+				observeInstructions: output.observeInstructions,
+				understandInstructions: output.understandInstructions,
+				focus: output.focus,
 			} as Partial<TState>)
+
+			if (!this.state.skipObservation) {
+				const observeResult = initObserve(resolveObserveInstructions(this.state))
+				await this.setState({
+					observe_prompt: observeResult.systemPrompt,
+				} as Partial<TState>)
+			}
 
 			await this.adjustUnderstandPrompt(
 				this.state.models.understand_blueprint,
 				directive,
-				observeResult.newInstructions,
+				resolveUnderstandInstructions(this.state),
 			)
 
 			const schemas = await this.generateSchemas(
 				this.state.models.blueprint,
-				observeResult.newInstructions,
+				this.schemaInstructions(),
 			)
 			await this.setState({
 				observation_schema: schemas.observationSchema,
@@ -1289,9 +1368,10 @@ What does this directive touch?`,
 
 			changedFields.push(
 				'instructions',
-				'observe_identity',
+				'observeInstructions',
+				'understandInstructions',
+				'focus',
 				'observe_prompt',
-				'understand_identity',
 				'understand_prompt',
 				'observation_schema',
 				'understanding_schema',

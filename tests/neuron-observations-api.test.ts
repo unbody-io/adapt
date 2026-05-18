@@ -9,10 +9,7 @@ import { TextNeuron, MemoryNeuronStore } from '../src'
 import type { ObservationRecord } from '../src/stores'
 
 function initOnlyModel(): LanguageModel {
-	const responses = [
-		{ identity: 'You observe test data.', domain: 'test' },
-		{ identity: 'You synthesize test data.', skills: [], dynamicsSkills: [] },
-	]
+	const responses = [{ skills: [], dynamicsSkills: [] }]
 	let callCount = 0
 	const usage: LanguageModelV3GenerateResult['usage'] = {
 		inputTokens: { total: 0, noCache: 0, cacheRead: 0, cacheWrite: 0 },

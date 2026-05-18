@@ -163,10 +163,8 @@ function createScriptedBrainModel(): ScriptedModelHandle {
 			const promptText = getPromptText(options)
 			const systemText = getSystemText(options)
 
-			if (promptText.includes('You are generating the identity for a Synthesizer')) {
+			if (promptText.includes('customizing cognitive skill prompts')) {
 				return createJsonResult({
-					identity:
-						'You track engineering decisions, runtime constraints, persistence tradeoffs, and implementation rationale.',
 					skills: compareSkills,
 					dynamicsSkills,
 				})

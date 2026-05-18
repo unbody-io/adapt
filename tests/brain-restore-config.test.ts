@@ -47,8 +47,7 @@ function createQueuedJsonModel(responses: unknown[]) {
 }
 
 const initResponses = () => [
-	{ identity: 'You observe coding notes.', domain: 'coding' },
-	{ identity: 'You synthesize coding preferences.', skills: [], dynamicsSkills: [] },
+	{ skills: [], dynamicsSkills: [] },
 	{
 		purpose: 'Track coding preferences and patterns.',
 		evolutionGuidance: null,
@@ -247,14 +246,13 @@ describe.each(scenarios)('Brain restore config precedence ($name)', ({ factory }
 					let body: unknown = {}
 					let phase = 'unknown'
 					if (
-						promptText.includes('You are generating the identity for a Synthesizer')
+						promptText.includes('customizing cognitive skill prompts')
 					) {
 						body = {
-							identity: 'You synthesize coding preferences.',
 							skills: [],
 							dynamicsSkills: [],
 						}
-						phase = 'understand-identity'
+						phase = 'understand-skills'
 					} else if (
 						promptText.includes('You are analyzing a user-authored prompt')
 					) {
@@ -356,11 +354,10 @@ describe.each(scenarios)('Brain restore config precedence ($name)', ({ factory }
 					let body: unknown = {}
 					if (
 						promptText.includes(
-							'You are generating the identity for a Synthesizer',
+							'customizing cognitive skill prompts',
 						)
 					) {
 						body = {
-							identity: 'You synthesize coding preferences.',
 							skills: [],
 							dynamicsSkills: [],
 						}

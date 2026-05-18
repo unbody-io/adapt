@@ -251,7 +251,7 @@ async function testTextPipeline(createStore: CreateNeuronStore) {
 
 	// 1. Store initial state
 	await store.state.add(makeState('instructions', 'Track TypeScript best practices'))
-	await store.state.add(makeState('observe_identity', { identity: 'You are a TypeScript observer', domain: 'typescript' }))
+	await store.state.add(makeState('observe_prompt', 'Observe TypeScript best practices'))
 
 	assertEqual(await store.state.count(), 2, 'state has 2 entries after init')
 

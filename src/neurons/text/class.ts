@@ -4,6 +4,7 @@ import type { NeuronStore } from '../../stores'
 import type { ParentModels } from '../../types/config'
 import type { UnderstandCallResult } from '../base/class'
 import { BaseNeuron } from '../base/class'
+import { resolveUnderstandInstructions } from '../base/instructions'
 import type { QueryMethod } from '../base/query'
 import { DirectMethod, ToolBasedMethod } from '../base/query'
 import type { Significance } from '../types'
@@ -57,6 +58,8 @@ export class TextNeuron extends BaseNeuron<string, TextNeuronState> {
 
 		const initialState: TextNeuronState = {
 			instructions: config.instructions,
+			observeInstructions: config.observeInstructions,
+			understandInstructions: config.understandInstructions,
 			name: rawConfig.name || config.id,
 			description: rawConfig.description ?? '',
 			focus: rawConfig.focus ?? null,
@@ -70,7 +73,6 @@ export class TextNeuron extends BaseNeuron<string, TextNeuronState> {
 				understand_blueprint: config.understand.blueprintModel,
 				query: config.query.model,
 			},
-			observe_identity: null,
 			observe_prompt: null,
 			understand_prompt: null,
 			understand_identity: null,
@@ -208,7 +210,7 @@ export class TextNeuron extends BaseNeuron<string, TextNeuronState> {
 			model,
 			directive,
 			currentUnderstanding,
-			this.state.instructions,
+			resolveUnderstandInstructions(this.state),
 			this.llmRepairOptions,
 		)
 
@@ -315,10 +317,6 @@ export class TextNeuron extends BaseNeuron<string, TextNeuronState> {
 	}
 
 	// ── Text-specific accessors ────────────────────────────────────────────────
-
-	getObserveIdentity() {
-		return this.state.observe_identity
-	}
 
 	getUnderstandIdentity() {
 		return this.state.understand_identity

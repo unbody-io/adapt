@@ -106,8 +106,7 @@ function wrapLiveModel(model: LanguageModel, log: CallLog[], slot: 'A' | 'B'): L
 
 function phaseFromOpts(opts: LanguageModelV3CallOptions): string {
 	const text = JSON.stringify(opts.prompt ?? '').slice(0, 800)
-	if (text.includes('You are generating the identity for a Synthesizer')) return 'observer-init'
-	if (text.includes('You are generating the identity for an Observer')) return 'observer-init'
+	if (text.includes('customizing cognitive skill prompts')) return 'understand-skills'
 	if (text.includes('You are analyzing a user-authored prompt')) return 'prompt-decomp'
 	if (text.includes('decomposition') || text.includes('Decompose')) return 'blueprint'
 	if (text.includes('synthesize') || text.includes('Synthesize')) return 'understand'

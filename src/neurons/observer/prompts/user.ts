@@ -14,5 +14,5 @@ export function observeUserPromptTemplate(data: unknown[]): string {
 
 ${JSON.stringify(data, null, 2)}
 
-What do you observe that's relevant to your purpose?`
+Review each item against the operator's instructions. What should be kept as relevant evidence?`
 }

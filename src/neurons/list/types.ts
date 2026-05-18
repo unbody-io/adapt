@@ -15,7 +15,6 @@ import type {
 	UnderstandThresholds,
 } from '../base/types'
 import type { NeuronHealth, NeuronOrigin, Significance } from '../types'
-import type { UnderstandIdentity } from './understand'
 
 // ── Core types ─────────────────────────────────────────────────────────────
 
@@ -105,8 +104,12 @@ export interface ListNeuronConfig extends CascadableConfig, AdaptRepairOptions {
 	model: LanguageModel
 	/** Natural language instructions for what items this neuron tracks */
 	instructions: string
+	/** Optional observe-phase-only instructions */
+	observeInstructions?: string | null
+	/** Optional understand-phase-only instructions */
+	understandInstructions?: string | null
 	/** Optional focus areas to narrow observation filtering */
-	focus?: string
+	focus?: string | null
 	/** Optional unique identifier */
 	id?: string
 	/** Optional display name */
@@ -153,6 +156,5 @@ export interface ListNeuronUpdateResult {
 // ── State ──────────────────────────────────────────────────────────────────
 
 export interface ListNeuronState extends BaseNeuronState {
-	understand_identity: UnderstandIdentity | null
 	governance: ResolvedListGovernanceConfig
 }

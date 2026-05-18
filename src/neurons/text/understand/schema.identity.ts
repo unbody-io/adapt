@@ -6,11 +6,6 @@ import { z } from 'zod'
 import { compare, dynamics } from '../cognitive-skills'
 
 export const understandIdentitySchema = z.object({
-	identity: z
-		.string()
-		.describe(
-			'Plain text identity: who you are (second person), your focus areas, and significance criteria (routine/notable/critical)',
-		),
 	skills: z
 		.array(
 			z.object({

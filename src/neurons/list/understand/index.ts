@@ -14,7 +14,6 @@ import {
 	type AdaptRepairOptions,
 	generate,
 	type LanguageModel,
-	Output,
 	stepCountIs,
 	tool,
 } from '../../../llm'
@@ -32,40 +31,16 @@ import type {
 
 const MAX_STEPS = 30
 
-// ── Identity schema ────────────────────────────────────────────────────────
-
-const understandIdentitySchema = z.object({
-	identity: z
-		.string()
-		.describe(
-			'Second-person description of the synthesizer. What items to maintain, how to determine add vs update vs remove, significance criteria.',
-		),
-})
-
-export type UnderstandIdentity = z.infer<typeof understandIdentitySchema>
-
-// ── Identity prompt ────────────────────────────────────────────────────────
-
-function identityPrompt(instructions: string): string {
-	return `You are creating a Synthesizer identity for a collection-tracking agent.
-
-Root question: "Does this observation add, update, or change something in my collection?"
-
-The agent's purpose:
-"${instructions}"
-
-The identity should specify: what items you maintain, how you match duplicates, when to add vs update vs remove, significance criteria (routine/notable/critical). Write in second person.
-
-Respond with JSON only:
-{
-  "identity": "You maintain ..."
-}`
-}
-
 // ── System prompt ──────────────────────────────────────────────────────────
 
-function systemPrompt(identity: UnderstandIdentity): string {
-	return `${identity.identity}
+function systemPrompt(instructions: string): string {
+	const instructionsSection = instructions
+		? `\n\n## Developer Instructions\n\n${instructions}`
+		: ''
+
+	return `You are the understand phase of a list neuron. Your job right now is to maintain a curated collection from observed evidence for the operator's instructions.
+
+Observation filtering already happened in an earlier phase. Focus on collection synthesis: add distinct items, update existing items, remove stale items only when evidence supports that, and preserve items the observations do not address.${instructionsSection}
 
 Your root question for each observation: "What does this tell me — is it new, does it update something I track, or does it change a status or priority?"
 
@@ -324,83 +299,11 @@ function createUnderstandTools(
 // ── Public API ─────────────────────────────────────────────────────────────
 
 export interface UnderstandInitResult {
-	identity: UnderstandIdentity
 	systemPrompt: string
 }
 
-export async function initUnderstand(
-	llm: AdaptLLMPlugin,
-	model: LanguageModel,
-	instructions: string,
-	repairOptions?: AdaptRepairOptions,
-): Promise<UnderstandInitResult> {
-	const prompt = identityPrompt(instructions)
-
-	const { output: identity } = await generate({
-		llm,
-		model,
-		prompt,
-		output: Output.object({ schema: understandIdentitySchema }),
-		repairSchema: understandIdentitySchema,
-		...repairOptions,
-	})
-
-	return { identity, systemPrompt: '' }
-}
-
-// ── Adjust prompt ─────────────────────────────────────────────────────────
-
-function adjustIdentityPrompt(
-	directive: string,
-	newInstructions: string,
-	currentIdentity: UnderstandIdentity,
-): string {
-	return `You are adjusting a Synthesizer's identity for a collection-tracking agent.
-
-## Current State
-
-**Instructions**: "${newInstructions}"
-**Identity**: "${currentIdentity.identity}"
-
-## Directive
-
-"${directive}"
-
-Adjust incrementally — preserve criteria that still apply, update for the new scope. If ambiguous, preserve more rather than less.
-
-Respond with JSON only:
-{
-  "identity": "You maintain ..."
-}`
-}
-
-/**
- * Adjust list understand phase — evolves identity from a directive
- */
-export async function adjustUnderstand(
-	llm: AdaptLLMPlugin,
-	model: LanguageModel,
-	directive: string,
-	newInstructions: string,
-	currentIdentity: UnderstandIdentity,
-	repairOptions?: AdaptRepairOptions,
-): Promise<UnderstandInitResult> {
-	const prompt = adjustIdentityPrompt(
-		directive,
-		newInstructions,
-		currentIdentity,
-	)
-
-	const { output: identity } = await generate({
-		llm,
-		model,
-		prompt,
-		output: Output.object({ schema: understandIdentitySchema }),
-		repairSchema: understandIdentitySchema,
-		...repairOptions,
-	})
-
-	return { identity, systemPrompt: '' }
+export function initUnderstand(instructions: string): UnderstandInitResult {
+	return { systemPrompt: systemPrompt(instructions) }
 }
 
 /**
@@ -411,7 +314,7 @@ export async function adjustUnderstand(
 export async function adjustUnderstandingContent(
 	llm: AdaptLLMPlugin,
 	model: LanguageModel,
-	identity: UnderstandIdentity,
+	instructions: string,
 	directive: string,
 	collection: NeuronCollection<UnderstandingRecord>,
 	understandingSchema?: Record<string, unknown>,
@@ -425,7 +328,7 @@ export async function adjustUnderstandingContent(
 			changes,
 		)
 
-		const system = systemPrompt(identity)
+		const system = systemPrompt(instructions)
 		const prompt = `Adjustment directive: "${directive}"
 
 Sense your collection, then make the requested changes.
@@ -522,7 +425,7 @@ Preserve items the directive doesn't address.`
 export async function understand(
 	llm: AdaptLLMPlugin,
 	model: LanguageModel,
-	identity: UnderstandIdentity,
+	instructions: string,
 	context: UnderstandContext,
 	collection: NeuronCollection<UnderstandingRecord>,
 	understandingSchema?: Record<string, unknown>,
@@ -537,7 +440,7 @@ export async function understand(
 			changes,
 		)
 
-		const system = systemPrompt(identity)
+		const system = systemPrompt(instructions)
 		const prompt = `New observations to integrate:\n\n${context.observations.map((o, i) => `${i + 1}. ${o}`).join('\n')}\n\nProcess these observations using your tools.`
 
 		interface CompleteResult {

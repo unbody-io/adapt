@@ -28,6 +28,8 @@ export function resolveListNeuronConfig(
 		model,
 		blueprintModel,
 		instructions: config.instructions,
+		observeInstructions: config.observeInstructions ?? null,
+		understandInstructions: config.understandInstructions ?? null,
 		id: config.id ?? `neuron_${nanoid()}`,
 		origin: config.origin ?? LIST_NEURON_DEFAULTS.origin,
 		observer: {

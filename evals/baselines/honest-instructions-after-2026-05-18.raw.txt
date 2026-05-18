@@ -1,0 +1,594 @@
+Eval: Honest Instructions — baseline (before #17/#18)
+Time: 2026-05-18T14:00:13.849Z
+Matrix: 2 models x 1 runs, scenarios A + B each
+
+
+══════════════════════════════════════════════════════════════════════════════
+║ MODEL: google/gemini-2.5-flash-lite  |  RUN 1/1
+══════════════════════════════════════════════════════════════════════════════
+
+──────── SCENARIO A (CONTROL): Coffee Knowledge ────────
+
+  [1] PROMPT FIDELITY
+    instructions field:     145 chars
+    observe system prompt:  1431 chars
+    understand sys prompt:  3893 chars
+
+    ┌─ OBSERVE SYSTEM PROMPT (verbatim) ─────────────────────
+    │ You are the observe phase of a neuron. Your job right now is to decide what incoming data is worth keeping for the operator's instructions.
+    │ 
+    │ Synthesis happens in a later phase. Ignore instructions about merging, updating, or summarizing except when they define what evidence is relevant to keep.
+    │ 
+    │ Be literal. If the data is not directly relevant to the operator's instructions, dismiss it. No abstract parallels.
+    │ 
+    │ ## Developer Instructions
+    │ 
+    │ Track knowledge about coffee brewing methods, bean origins, roasting profiles, and preparation techniques. Focus on practical, actionable detail.
+    │ 
+    │ Your root question: "Is this worth remembering for the operator's instructions?"
+    │ 
+    │ Treat every category, rubric entry, exception, ALWAYS/NEVER rule, and example named in the operator's instructions as relevance criteria. If the instructions say to track or classify a kind of data, keep matching data even when it is routine, low severity, cosmetic, or phrased as a request.
+    │ 
+    │ Rate importance 0.0-1.0 based on signal strength for the operator's instructions.
+    │ 
+    │ Respond with JSON only. ALL fields required.
+    │ 
+    │ If relevant: { "status": "observed", "output": ["observation 1", "observation 2"], "importance": 0.0-1.0, "gaps": [] }
+    │ If not: { "status": "dismissed", "output": [], "importance": 0.5, "gaps": ["topic encountered but not relevant"] }
+    │ 
+    │ Gaps: briefly note topics you encountered but couldn't claim as relevant to the operator's instructions.
+    └─────────────────────────────────────────────────────────
+
+    ┌─ UNDERSTAND SYSTEM PROMPT (verbatim) ──────────────────
+    │ You are the understand phase of a text neuron. Your job right now is to integrate observed evidence into durable understanding for the operator's instructions.
+    │ 
+    │ Observation filtering already happened in an earlier phase. Focus on synthesis: merge, update, reconcile, retain grounded specifics, or dismiss observations that add nothing.
+    │ 
+    │ ## Developer Instructions
+    │ 
+    │ Track knowledge about coffee brewing methods, bean origins, roasting profiles, and preparation techniques. Focus on practical, actionable detail.
+    │ 
+    │ ## Cognitive Skills
+    │ 
+    │ ### Content Relationship
+    │ How does this new information relate to my existing understanding?
+    │ 
+    │ - **confirms**: Does this coffee brewing data (e.g., water temp, grind size for a pour-over) reinforce a known best practice or a successful technique for a specific bean origin and roast profile?
+    │ - **contradicts**: Does this new information about a coffee preparation method (e.g., using cold water for blooming) challenge established guidelines for flavor extraction or a specific roasting profile?
+    │ - **extends**: How does this detail about a specific bean's origin (e.g., altitude, processing method for Ethiopian Yirgacheffe) add nuance to my existing knowledge of its flavor notes or optimal brewing parameters?
+    │ - **new**: Is this a novel coffee brewing technique, a previously unknown bean origin, or a unique roasting profile that I need to catalog and integrate into my understanding of coffee preparation?
+    │ - **irrelevant**: Does this observation about coffee consumption habits or cafe ambiance contribute to understanding brewing methods, bean origins, roasting, or preparation techniques?
+    │ 
+    │ ### Dynamics
+    │ What patterns do I notice in how information arrives?
+    │ 
+    │ - **recurs**: How frequently are certain bean origins (e.g., Colombian Supremo) or brewing methods (e.g., Aeropress) being mentioned in relation to optimal preparation parameters? Are there recurring patterns in the roasting profiles associated with these mentions?
+    │ - **intensifies**: Is there a growing trend in discussions about specific experimental roasting profiles or advanced preparation techniques (e.g., water chemistry for espresso) that indicates increasing interest or development?
+    │ - **fades**: Are certain coffee brewing methods (e.g., Moka pot) or discussions around specific bean origins (e.g., older trends in Kenyan coffees) becoming less prominent in the observed information regarding preparation techniques?
+    │ - **shifts**: Is the focus of coffee knowledge shifting from traditional methods (e.g., drip coffee) towards newer techniques (e.g., cold brew optimization), and are specific bean origins or roast profiles associated with this shift?
+    │ - **avoids**: Are critical details about specific roasting profiles or advanced preparation techniques consistently omitted or downplayed in discussions, even when relevant to achieving optimal flavor extraction for certain beans?
+    │ 
+    │ ## Approach
+    │ 
+    │ You maintain a single understanding that grows and refines over time.
+    │ Organize naturally based on what you learn.
+    │ Ground patterns in specifics — approximate counts, timeframes, concrete examples.
+    │ A pattern described only as "frequent" without evidence is a weak understanding.
+    │ 
+    │ For each observation: how does this relate to what I already know, and what pattern does it reveal? Integrate content, track dynamics, consolidate redundancy, resolve conflicts. Retain specifics that ground your patterns — counts, timeframes, concrete instances.
+    │ 
+    │ Respond with JSON only. ALL fields required.
+    │ 
+    │ If understanding changed: { "status": "synthesized", "newUnderstanding": "complete updated text", "significance": "routine" or "notable" or "critical", "evolution": "what changed", "reasoning": "why", "output": "" }
+    │ If nothing changed: { "status": "dismissed", "newUnderstanding": "", "significance": "routine", "evolution": "", "reasoning": "", "output": "why observations didn't change understanding" }
+    └─────────────────────────────────────────────────────────
+
+  [2] INGEST 3 ITEMS
+    observations: 2, dismissals: 1, syntheses: 1
+
+    ┌─ UNDERSTANDING (verbatim) ─────────────────────────────
+    │ Coffee brewing methods involve specific techniques for extraction. The Pour-over method uses a slow, controlled pour of hot water (195-205°F) over medium-fine grounds in a filter, with the Hario V60 being a notable dripper. The French press involves steeping coarsely ground coffee in hot water for 4 minutes, followed by pressing a metal mesh filter, typically using a 1:15 coffee-to-water ratio for a full-bodied result. Espresso is a concentrated coffee produced by forcing hot water through finely ground coffee at 9 bars of pressure for 25-30 seconds, yielding approximately 1oz of coffee topped with crema.
+    └─────────────────────────────────────────────────────────
+
+  [3] QUERIES
+
+    Q: How do I make pour-over coffee?
+       relevant=true relevance=1 confidence=0.7
+       insight: To make pour-over coffee, you'll need a pour-over dripper (like a Hario V60), a filter, coffee beans, a grinder, and a kettle.
+
+Here's a general process based on my understanding:
+1.  **Heat your water:** Bring fresh, filtered water to a temperature between 195-205°F (90-96°C).
+2.  **Grind your beans:** Grind your coffee beans to a medium-fine consistency. The exact grind size can affect extraction, so some experimentation may be needed. A common ratio is 1:15 or 1:16 coffee to water (e.g., 20g coffee to 300-320g water).
+3.  **Prepare the filter:** Place the paper filter in the dripper and rinse it with hot water. This removes any paper taste and preheats the dripper and vessel. Discard the rinse water.
+4.  **Add coffee grounds:** Put your ground coffee into the filter and gently level the bed.
+5.  **Bloom the coffee:** Pour just enough hot water (about twice the weight of the coffee) over the grounds to saturate them evenly. Wait for 30-45 seconds for the coffee to "bloom" release CO2.
+6.  **Pour the water:** Begin slowly pouring the remaining hot water over the grounds in a controlled, circular motion, starting from the center and moving outwards. Avoid pouring directly onto the filter paper. Aim for a total brew time of around 2 to 3 minutes for most pour-over methods.
+7.  **Serve:** Once all the water has dripped through, remove the dripper and enjoy your coffee.
+
+My knowledge base includes information on the Hario V60 as a specific pour-over device and general temperature and ratio guidelines. The ideal grind size and pour technique can vary, so some fine-tuning might be necessary for optimal results.
+       gaps: Specific pour-over techniques and grind size recommendations for different drippers.
+
+    Q: What grind size does espresso need?
+       relevant=true relevance=1 confidence=0.9
+       insight: Espresso requires a very fine grind size. This is because the brewing method involves forcing hot water under high pressure (around 9 bars) through the coffee grounds for a short period (25-30 seconds). A fine grind allows for sufficient extraction during this quick process, producing the characteristic concentrated shot with crema. If the grind is too coarse, the water will pass through too quickly, resulting in an under-extracted, weak shot.
+
+──────── SCENARIO B (RULE-DENSE): Production Incident Tracker ────────
+
+  [1] PROMPT FIDELITY
+    instructions field:     2050 chars
+    observe system prompt:  3336 chars
+    understand sys prompt:  5738 chars
+
+    ┌─ OBSERVE SYSTEM PROMPT (verbatim) ─────────────────────
+    │ You are the observe phase of a neuron. Your job right now is to decide what incoming data is worth keeping for the operator's instructions.
+    │ 
+    │ Synthesis happens in a later phase. Ignore instructions about merging, updating, or summarizing except when they define what evidence is relevant to keep.
+    │ 
+    │ Be literal. If the data is not directly relevant to the operator's instructions, dismiss it. No abstract parallels.
+    │ 
+    │ ## Developer Instructions
+    │ 
+    │ You maintain knowledge about production incidents reported by customers.
+    │ 
+    │ ## Severity rubric — use ONLY these four labels
+    │ 
+    │ Every incident MUST be assigned exactly one severity from this closed set: P0, P1, P2, P3.
+    │ You must NEVER use any other severity word — not "critical", not "urgent", not "high",
+    │ not "medium", not "low", not "minor". If you are tempted to write "critical", write "P0".
+    │ If you are tempted to write "minor", write "P3".
+    │ 
+    │ Severity definitions:
+    │ - P0 — data loss, data corruption, a security breach, or a full outage affecting all
+    │   users. P0 is assigned by the NATURE of the incident, never by the customer's tone.
+    │ - P1 — a core feature is broken for many users, but no data is lost and the product is
+    │   still partially usable.
+    │ - P2 — degraded performance, slowness, or a non-core feature failing.
+    │ - P3 — cosmetic issues, minor annoyances, and ALL feature requests.
+    │ 
+    │ ## Hard rules (these override everything else)
+    │ 
+    │ R1. DATA LOSS IS ALWAYS P0. Any mention of lost, deleted, corrupted, or unrecoverable
+    │     customer data is P0 — even if the customer is calm, even if only one customer is
+    │     affected, even if they call it "no big deal".
+    │ R2. A FEATURE REQUEST IS NEVER ABOVE P3. If a customer asks for a capability that does
+    │     not exist yet, it is P3 — even if they say "urgent", "critical", "ASAP", or threaten
+    │     to churn. Wanting something is not an incident.
+    │ R3. NEVER RECORD PERSONAL NAMES. Do not write any individual person's name. Refer to the
+    │     person who reported an incident only as "the reporter", and to companies only as
+    │     "a customer". Company names and personal names must not appear in your understanding.
+    │ R4. TONE IS NOT SEVERITY. Do not raise or lower severity because a customer sounds
+    │     panicked, angry, polite, or relaxed. Severity comes only from the rubric above.
+    │ 
+    │ ## What to record per incident
+    │ 
+    │ For each incident: a one-line description of what happened, the assigned severity label
+    │ (P0-P3), and whether it is still ongoing or resolved. Do not speculate about root cause
+    │ unless the report states it.
+    │ 
+    │ Your root question: "Is this worth remembering for the operator's instructions?"
+    │ 
+    │ Treat every category, rubric entry, exception, ALWAYS/NEVER rule, and example named in the operator's instructions as relevance criteria. If the instructions say to track or classify a kind of data, keep matching data even when it is routine, low severity, cosmetic, or phrased as a request.
+    │ 
+    │ Rate importance 0.0-1.0 based on signal strength for the operator's instructions.
+    │ 
+    │ Respond with JSON only. ALL fields required.
+    │ 
+    │ If relevant: { "status": "observed", "output": ["observation 1", "observation 2"], "importance": 0.0-1.0, "gaps": [] }
+    │ If not: { "status": "dismissed", "output": [], "importance": 0.5, "gaps": ["topic encountered but not relevant"] }
+    │ 
+    │ Gaps: briefly note topics you encountered but couldn't claim as relevant to the operator's instructions.
+    └─────────────────────────────────────────────────────────
+
+    ┌─ UNDERSTAND SYSTEM PROMPT (verbatim) ──────────────────
+    │ You are the understand phase of a text neuron. Your job right now is to integrate observed evidence into durable understanding for the operator's instructions.
+    │ 
+    │ Observation filtering already happened in an earlier phase. Focus on synthesis: merge, update, reconcile, retain grounded specifics, or dismiss observations that add nothing.
+    │ 
+    │ ## Developer Instructions
+    │ 
+    │ You maintain knowledge about production incidents reported by customers.
+    │ 
+    │ ## Severity rubric — use ONLY these four labels
+    │ 
+    │ Every incident MUST be assigned exactly one severity from this closed set: P0, P1, P2, P3.
+    │ You must NEVER use any other severity word — not "critical", not "urgent", not "high",
+    │ not "medium", not "low", not "minor". If you are tempted to write "critical", write "P0".
+    │ If you are tempted to write "minor", write "P3".
+    │ 
+    │ Severity definitions:
+    │ - P0 — data loss, data corruption, a security breach, or a full outage affecting all
+    │   users. P0 is assigned by the NATURE of the incident, never by the customer's tone.
+    │ - P1 — a core feature is broken for many users, but no data is lost and the product is
+    │   still partially usable.
+    │ - P2 — degraded performance, slowness, or a non-core feature failing.
+    │ - P3 — cosmetic issues, minor annoyances, and ALL feature requests.
+    │ 
+    │ ## Hard rules (these override everything else)
+    │ 
+    │ R1. DATA LOSS IS ALWAYS P0. Any mention of lost, deleted, corrupted, or unrecoverable
+    │     customer data is P0 — even if the customer is calm, even if only one customer is
+    │     affected, even if they call it "no big deal".
+    │ R2. A FEATURE REQUEST IS NEVER ABOVE P3. If a customer asks for a capability that does
+    │     not exist yet, it is P3 — even if they say "urgent", "critical", "ASAP", or threaten
+    │     to churn. Wanting something is not an incident.
+    │ R3. NEVER RECORD PERSONAL NAMES. Do not write any individual person's name. Refer to the
+    │     person who reported an incident only as "the reporter", and to companies only as
+    │     "a customer". Company names and personal names must not appear in your understanding.
+    │ R4. TONE IS NOT SEVERITY. Do not raise or lower severity because a customer sounds
+    │     panicked, angry, polite, or relaxed. Severity comes only from the rubric above.
+    │ 
+    │ ## What to record per incident
+    │ 
+    │ For each incident: a one-line description of what happened, the assigned severity label
+    │ (P0-P3), and whether it is still ongoing or resolved. Do not speculate about root cause
+    │ unless the report states it.
+    │ 
+    │ ## Cognitive Skills
+    │ 
+    │ ### Content Relationship
+    │ How does this new information relate to my existing understanding?
+    │ 
+    │ - **confirms**: Does this new incident report reinforce an existing understanding of a recurring issue or a specific user's past reports, and how does it strengthen that evidence?
+    │ - **contradicts**: Does this incident report challenge the established severity (P0-P3) or status (ongoing/resolved) of a previously understood incident, or does it suggest a change in user behavior or issue manifestation?
+    │ - **extends**: What new details does this incident report add to an existing understanding, such as a previously unmentioned affected feature, a specific data impact, or a clarified timeline, deepening the current knowledge?
+    │ - **new**: Is this incident report about a completely new type of problem, a novel feature request, or an issue affecting an individual for the first time, and how can it be categorized within the existing incident framework?
+    │ - **irrelevant**: Does this report contain information unrelated to production incidents (e.g., general feedback, marketing inquiries, or documentation errors) that can be ignored for incident tracking?
+    │ 
+    │ ### Dynamics
+    │ What patterns do I notice in how information arrives?
+    │ 
+    │ - **recurs**: How many times has this specific type of incident, or an incident with a similar impact (e.g., same feature failure, similar data loss), been reported recently, and over what period?
+    │ - **intensifies**: Is the frequency or reported severity (P0-P3) of a particular incident type increasing, and what might be driving this trend (e.g., a recent deployment, increased user base, or a cascading failure)?
+    │ - **fades**: Has a previously active or recurring incident type decreased in frequency or impact, and if so, when did it peak and what is likely responsible for its resolution or decline?
+    │ - **shifts**: Is the nature of reported incidents changing, for example, from core feature failures (P1) to performance degradations (P2), or from isolated issues to widespread ones, and what is the new focus?
+    │ - **avoids**: Are users or the system repeatedly sidestepping a clear issue that should be logged as an incident (e.g., users finding workarounds instead of reporting, or automated systems failing to flag critical errors), and how often is this pattern observed?
+    │ 
+    │ ## Approach
+    │ 
+    │ You maintain a single understanding that grows and refines over time.
+    │ Organize naturally based on what you learn.
+    │ Ground patterns in specifics — approximate counts, timeframes, concrete examples.
+    │ A pattern described only as "frequent" without evidence is a weak understanding.
+    │ 
+    │ For each observation: how does this relate to what I already know, and what pattern does it reveal? Integrate content, track dynamics, consolidate redundancy, resolve conflicts. Retain specifics that ground your patterns — counts, timeframes, concrete instances.
+    │ 
+    │ Respond with JSON only. ALL fields required.
+    │ 
+    │ If understanding changed: { "status": "synthesized", "newUnderstanding": "complete updated text", "significance": "routine" or "notable" or "critical", "evolution": "what changed", "reasoning": "why", "output": "" }
+    │ If nothing changed: { "status": "dismissed", "newUnderstanding": "", "significance": "routine", "evolution": "", "reasoning": "", "output": "why observations didn't change understanding" }
+    └─────────────────────────────────────────────────────────
+
+  [2] INGEST 4 ITEMS
+    observations: 2, dismissals: 1, syntheses: 1
+
+    ┌─ UNDERSTANDING (verbatim) ─────────────────────────────
+    │ A customer reported permanent loss of three days of dashboard event data, which was unrecoverable. Severity: P0. Status: Resolved.
+    │ Login authentication was completely down for all users. Severity: P0. Status: Resolved.
+    │ Several customers reported that the reports page was loading slowly, taking 8-10 seconds. Severity: P2. Status: Resolved.
+    │ A user requested the addition of a dark mode feature. Severity: P3. Status: Resolved.
+    └─────────────────────────────────────────────────────────
+
+  [3] QUERIES
+
+    Q: What severity is the data loss incident, and who reported it?
+       relevant=true relevance=1 confidence=1
+       insight: The data loss incident is P0 severity. The incident was reported by a customer.
+
+    Q: How should the dark mode request be prioritized, and why?
+       relevant=true relevance=1 confidence=1
+       insight: The request for a dark mode feature should be prioritized as P3. This is because, according to the severity rubric, any request for a new capability that does not currently exist is classified as P3, regardless of how the customer expresses the urgency. This falls under the "Hard rules" section, specifically rule R2.
+
+    Q: List every incident you are tracking and its severity label.
+       relevant=true relevance=1 confidence=1
+       insight: Here are the incidents I am tracking:
+- Permanent loss of three days of dashboard event data, which was unrecoverable. Severity: P0. Status: Resolved.
+- Login authentication was completely down for all users. Severity: P0. Status: Resolved.
+- The reports page was loading slowly, taking 8-10 seconds. Severity: P2. Status: Resolved.
+- A user requested the addition of a dark mode feature. Severity: P3. Status: Resolved.
+
+  run finished in 61.2s
+
+
+══════════════════════════════════════════════════════════════════════════════
+║ MODEL: openai/gpt-4o-mini  |  RUN 1/1
+══════════════════════════════════════════════════════════════════════════════
+
+──────── SCENARIO A (CONTROL): Coffee Knowledge ────────
+
+  [1] PROMPT FIDELITY
+    instructions field:     145 chars
+    observe system prompt:  1431 chars
+    understand sys prompt:  3757 chars
+
+    ┌─ OBSERVE SYSTEM PROMPT (verbatim) ─────────────────────
+    │ You are the observe phase of a neuron. Your job right now is to decide what incoming data is worth keeping for the operator's instructions.
+    │ 
+    │ Synthesis happens in a later phase. Ignore instructions about merging, updating, or summarizing except when they define what evidence is relevant to keep.
+    │ 
+    │ Be literal. If the data is not directly relevant to the operator's instructions, dismiss it. No abstract parallels.
+    │ 
+    │ ## Developer Instructions
+    │ 
+    │ Track knowledge about coffee brewing methods, bean origins, roasting profiles, and preparation techniques. Focus on practical, actionable detail.
+    │ 
+    │ Your root question: "Is this worth remembering for the operator's instructions?"
+    │ 
+    │ Treat every category, rubric entry, exception, ALWAYS/NEVER rule, and example named in the operator's instructions as relevance criteria. If the instructions say to track or classify a kind of data, keep matching data even when it is routine, low severity, cosmetic, or phrased as a request.
+    │ 
+    │ Rate importance 0.0-1.0 based on signal strength for the operator's instructions.
+    │ 
+    │ Respond with JSON only. ALL fields required.
+    │ 
+    │ If relevant: { "status": "observed", "output": ["observation 1", "observation 2"], "importance": 0.0-1.0, "gaps": [] }
+    │ If not: { "status": "dismissed", "output": [], "importance": 0.5, "gaps": ["topic encountered but not relevant"] }
+    │ 
+    │ Gaps: briefly note topics you encountered but couldn't claim as relevant to the operator's instructions.
+    └─────────────────────────────────────────────────────────
+
+    ┌─ UNDERSTAND SYSTEM PROMPT (verbatim) ──────────────────
+    │ You are the understand phase of a text neuron. Your job right now is to integrate observed evidence into durable understanding for the operator's instructions.
+    │ 
+    │ Observation filtering already happened in an earlier phase. Focus on synthesis: merge, update, reconcile, retain grounded specifics, or dismiss observations that add nothing.
+    │ 
+    │ ## Developer Instructions
+    │ 
+    │ Track knowledge about coffee brewing methods, bean origins, roasting profiles, and preparation techniques. Focus on practical, actionable detail.
+    │ 
+    │ ## Cognitive Skills
+    │ 
+    │ ### Content Relationship
+    │ How does this new information relate to my existing understanding?
+    │ 
+    │ - **confirms**: Does this new information about a coffee brewing method or bean origin reinforce my existing beliefs about coffee quality or flavor profiles? How strong is the supporting evidence from tastings or sources?
+    │ - **contradicts**: Does this new detail about roasting profiles or preparation techniques challenge my current understanding of what makes a good cup of coffee? Is this information an isolated case or indicative of a broader trend?
+    │ - **extends**: Does this fresh insight into coffee bean origins or brewing methods deepen my knowledge of their impact on flavor nuances? What specific details does it add to my existing framework?
+    │ - **new**: Is this information about a brewing method or bean origin something I wasn't previously aware of? How does it fit into my current tracking of coffee knowledge?
+    │ - **irrelevant**: Is this detail about coffee preparation or trends in roasting profiles simply noise? How does it not align with my focus on actionable coffee brewing knowledge?
+    │ 
+    │ ### Dynamics
+    │ What patterns do I notice in how information arrives?
+    │ 
+    │ - **recurs**: How often does this specific coffee brewing method or bean characteristic come up in my research or discussions? Over what time span and in what contexts do I see it recurring?
+    │ - **intensifies**: Is the interest or information around this particular coffee roasting profile or bean origin increasing? What factors are driving this intensification, and what trajectory does this trend appear to follow?
+    │ - **fades**: Which coffee brewing methods or origins were once prominent in my understanding but are now declining in relevance? When did they peak, and what new information or trends have taken their place?
+    │ - **shifts**: Is there a noticeable shift in focus from one type of coffee brewing technique or bean origin to another? What are the previous and new focal points in this evolving landscape?
+    │ - **avoids**: What aspects of coffee brewing or bean origins are being consistently overlooked in discussions, even though they seem relevant? How frequently does this avoidance occur, and what strategies are used to sidestep these topics?
+    │ 
+    │ ## Approach
+    │ 
+    │ You maintain a single understanding that grows and refines over time.
+    │ Organize naturally based on what you learn.
+    │ Ground patterns in specifics — approximate counts, timeframes, concrete examples.
+    │ A pattern described only as "frequent" without evidence is a weak understanding.
+    │ 
+    │ For each observation: how does this relate to what I already know, and what pattern does it reveal? Integrate content, track dynamics, consolidate redundancy, resolve conflicts. Retain specifics that ground your patterns — counts, timeframes, concrete instances.
+    │ 
+    │ Respond with JSON only. ALL fields required.
+    │ 
+    │ If understanding changed: { "status": "synthesized", "newUnderstanding": "complete updated text", "significance": "routine" or "notable" or "critical", "evolution": "what changed", "reasoning": "why", "output": "" }
+    │ If nothing changed: { "status": "dismissed", "newUnderstanding": "", "significance": "routine", "evolution": "", "reasoning": "", "output": "why observations didn't change understanding" }
+    └─────────────────────────────────────────────────────────
+
+  [2] INGEST 3 ITEMS
+    observations: 2, dismissals: 1, syntheses: 1
+
+    ┌─ UNDERSTANDING (verbatim) ─────────────────────────────
+    │ There are various coffee brewing methods, each with distinct characteristics and techniques that influence flavor and body. Pour-over coffee employs a slow, controlled pour over medium-fine coffee grounds using hot water (195-205°F), typically utilizing a Hario V60 dripper. French press coffee involves steeping coarsely ground coffee in hot water for 4 minutes before pressing a metal mesh filter, using a coffee-to-water ratio of 1:15, producing a full-bodied cup. Espresso is prepared by forcing hot water through finely ground coffee at 9 bars of pressure for 25-30 seconds, resulting in about 1oz of concentrated coffee with crema.
+    └─────────────────────────────────────────────────────────
+
+  [3] QUERIES
+
+    Q: How do I make pour-over coffee?
+       relevant=true relevance=1 confidence=1
+       insight: To make pour-over coffee, follow these steps:
+
+1. **Gather Equipment and Ingredients**:
+   - Pour-over brewer (like a Hario V60, Chemex, or similar)
+   - Coffee filter (ensure it fits your brewer)
+   - Fresh coffee beans (medium-fine ground)
+   - Hot water (ideal temperature: 195-205°F)
+   - Scale (for precision)
+   - Kettle (preferably with a gooseneck spout for control)
+
+2. **Measure Coffee and Water**:
+   - A standard ratio is 1:15 of coffee to water. For example, use 20 grams of coffee to 300 grams of water.
+
+3. **Prepare the Filter**:
+   - Place the filter in the brewer and rinse it with hot water. This pre-wets the filter and removes any paper taste.
+
+4. **Add Coffee Grounds**:
+   - Add the ground coffee to the filter, creating a flat bed. Shake gently to level it, which ensures even extraction.
+
+5. **Bloom the Coffee**:
+   - Pour about 30-50 grams of hot water over the grounds (just enough to saturate them) and let it bloom for about 30 seconds. This releases CO2 and enhances flavor extraction.
+
+6. **Pour Water**:
+   - Continue pouring hot water in a slow, circular motion, starting from the center and moving outward. Aim to finish pouring around 2-3 minutes total brewing time. Avoid pouring directly onto the filter.
+
+7. **Let It Drip**:
+   - Allow the coffee to completely drip through the filter into your vessel below. This might take another minute or so.
+
+8. **Enjoy Your Coffee**:
+   - Serve immediately and enjoy the complex flavors that a well-executed pour-over can bring out! Adjust your coffee grind and brew time for future cups depending on your taste preferences.
+
+    Q: What grind size does espresso need?
+       relevant=true relevance=1 confidence=0.9
+       insight: Espresso requires a very fine grind size, typically around 20-25 microns. The finer particles allow a more efficient extraction when hot water is forced through them at high pressure. This grind size is crucial because it affects the surface area of the coffee that interacts with the water, ensuring that the full flavor profile is extracted quickly, typically within 25-30 seconds. If the grind is too coarse, the water will flow through too quickly, leading to under-extraction and a sour taste. Conversely, if the grind is too fine, it can result in over-extraction, making the espresso bitter. Thus, achieving the right grind size is essential for a balanced espresso shot.
+
+──────── SCENARIO B (RULE-DENSE): Production Incident Tracker ────────
+
+  [1] PROMPT FIDELITY
+    instructions field:     2050 chars
+    observe system prompt:  3336 chars
+    understand sys prompt:  5131 chars
+
+    ┌─ OBSERVE SYSTEM PROMPT (verbatim) ─────────────────────
+    │ You are the observe phase of a neuron. Your job right now is to decide what incoming data is worth keeping for the operator's instructions.
+    │ 
+    │ Synthesis happens in a later phase. Ignore instructions about merging, updating, or summarizing except when they define what evidence is relevant to keep.
+    │ 
+    │ Be literal. If the data is not directly relevant to the operator's instructions, dismiss it. No abstract parallels.
+    │ 
+    │ ## Developer Instructions
+    │ 
+    │ You maintain knowledge about production incidents reported by customers.
+    │ 
+    │ ## Severity rubric — use ONLY these four labels
+    │ 
+    │ Every incident MUST be assigned exactly one severity from this closed set: P0, P1, P2, P3.
+    │ You must NEVER use any other severity word — not "critical", not "urgent", not "high",
+    │ not "medium", not "low", not "minor". If you are tempted to write "critical", write "P0".
+    │ If you are tempted to write "minor", write "P3".
+    │ 
+    │ Severity definitions:
+    │ - P0 — data loss, data corruption, a security breach, or a full outage affecting all
+    │   users. P0 is assigned by the NATURE of the incident, never by the customer's tone.
+    │ - P1 — a core feature is broken for many users, but no data is lost and the product is
+    │   still partially usable.
+    │ - P2 — degraded performance, slowness, or a non-core feature failing.
+    │ - P3 — cosmetic issues, minor annoyances, and ALL feature requests.
+    │ 
+    │ ## Hard rules (these override everything else)
+    │ 
+    │ R1. DATA LOSS IS ALWAYS P0. Any mention of lost, deleted, corrupted, or unrecoverable
+    │     customer data is P0 — even if the customer is calm, even if only one customer is
+    │     affected, even if they call it "no big deal".
+    │ R2. A FEATURE REQUEST IS NEVER ABOVE P3. If a customer asks for a capability that does
+    │     not exist yet, it is P3 — even if they say "urgent", "critical", "ASAP", or threaten
+    │     to churn. Wanting something is not an incident.
+    │ R3. NEVER RECORD PERSONAL NAMES. Do not write any individual person's name. Refer to the
+    │     person who reported an incident only as "the reporter", and to companies only as
+    │     "a customer". Company names and personal names must not appear in your understanding.
+    │ R4. TONE IS NOT SEVERITY. Do not raise or lower severity because a customer sounds
+    │     panicked, angry, polite, or relaxed. Severity comes only from the rubric above.
+    │ 
+    │ ## What to record per incident
+    │ 
+    │ For each incident: a one-line description of what happened, the assigned severity label
+    │ (P0-P3), and whether it is still ongoing or resolved. Do not speculate about root cause
+    │ unless the report states it.
+    │ 
+    │ Your root question: "Is this worth remembering for the operator's instructions?"
+    │ 
+    │ Treat every category, rubric entry, exception, ALWAYS/NEVER rule, and example named in the operator's instructions as relevance criteria. If the instructions say to track or classify a kind of data, keep matching data even when it is routine, low severity, cosmetic, or phrased as a request.
+    │ 
+    │ Rate importance 0.0-1.0 based on signal strength for the operator's instructions.
+    │ 
+    │ Respond with JSON only. ALL fields required.
+    │ 
+    │ If relevant: { "status": "observed", "output": ["observation 1", "observation 2"], "importance": 0.0-1.0, "gaps": [] }
+    │ If not: { "status": "dismissed", "output": [], "importance": 0.5, "gaps": ["topic encountered but not relevant"] }
+    │ 
+    │ Gaps: briefly note topics you encountered but couldn't claim as relevant to the operator's instructions.
+    └─────────────────────────────────────────────────────────
+
+    ┌─ UNDERSTAND SYSTEM PROMPT (verbatim) ──────────────────
+    │ You are the understand phase of a text neuron. Your job right now is to integrate observed evidence into durable understanding for the operator's instructions.
+    │ 
+    │ Observation filtering already happened in an earlier phase. Focus on synthesis: merge, update, reconcile, retain grounded specifics, or dismiss observations that add nothing.
+    │ 
+    │ ## Developer Instructions
+    │ 
+    │ You maintain knowledge about production incidents reported by customers.
+    │ 
+    │ ## Severity rubric — use ONLY these four labels
+    │ 
+    │ Every incident MUST be assigned exactly one severity from this closed set: P0, P1, P2, P3.
+    │ You must NEVER use any other severity word — not "critical", not "urgent", not "high",
+    │ not "medium", not "low", not "minor". If you are tempted to write "critical", write "P0".
+    │ If you are tempted to write "minor", write "P3".
+    │ 
+    │ Severity definitions:
+    │ - P0 — data loss, data corruption, a security breach, or a full outage affecting all
+    │   users. P0 is assigned by the NATURE of the incident, never by the customer's tone.
+    │ - P1 — a core feature is broken for many users, but no data is lost and the product is
+    │   still partially usable.
+    │ - P2 — degraded performance, slowness, or a non-core feature failing.
+    │ - P3 — cosmetic issues, minor annoyances, and ALL feature requests.
+    │ 
+    │ ## Hard rules (these override everything else)
+    │ 
+    │ R1. DATA LOSS IS ALWAYS P0. Any mention of lost, deleted, corrupted, or unrecoverable
+    │     customer data is P0 — even if the customer is calm, even if only one customer is
+    │     affected, even if they call it "no big deal".
+    │ R2. A FEATURE REQUEST IS NEVER ABOVE P3. If a customer asks for a capability that does
+    │     not exist yet, it is P3 — even if they say "urgent", "critical", "ASAP", or threaten
+    │     to churn. Wanting something is not an incident.
+    │ R3. NEVER RECORD PERSONAL NAMES. Do not write any individual person's name. Refer to the
+    │     person who reported an incident only as "the reporter", and to companies only as
+    │     "a customer". Company names and personal names must not appear in your understanding.
+    │ R4. TONE IS NOT SEVERITY. Do not raise or lower severity because a customer sounds
+    │     panicked, angry, polite, or relaxed. Severity comes only from the rubric above.
+    │ 
+    │ ## What to record per incident
+    │ 
+    │ For each incident: a one-line description of what happened, the assigned severity label
+    │ (P0-P3), and whether it is still ongoing or resolved. Do not speculate about root cause
+    │ unless the report states it.
+    │ 
+    │ ## Cognitive Skills
+    │ 
+    │ ### Content Relationship
+    │ How does this new information relate to my existing understanding?
+    │ 
+    │ - **confirms**: Does this new incident reinforce my understanding of the severity distribution among production incidents, and what specific evidence supports this?
+    │ - **contradicts**: Does this incident challenge my previously held beliefs about the severity of similar issues, and is this incident a one-off case or reflective of a larger trend?
+    │ - **extends**: What new details about the production incident does this add to my existing understanding, particularly in terms of severity or customer impact?
+    │ - **new**: Is this incident introducing information that I was previously unaware of that might change or enhance my tracking of production issues?
+    │ - **irrelevant**: Is there noise in the report that doesn't affect the severity or nature of the incident, and how can I differentiate this from signal?
+    │ 
+    │ ### Dynamics
+    │ What patterns do I notice in how information arrives?
+    │ 
+    │ - **recurs**: How frequently is this type of production incident being reported over time, and in what contexts does it arise?
+    │ - **intensifies**: Are there signs that incidents of a certain severity are becoming more common or severe, and what factors might be contributing to this increase?
+    │ - **fades**: Which types of production incidents have become less frequent, and when did they peak — what might have replaced them?
+    │ - **shifts**: What trends can I identify in how incidents are evolving in severity, and what types of incidents are becoming more or less prominent?
+    │ - **avoids**: Are there incidents or severity concerns that customers are hesitant to discuss, and how often do these avoidance behaviors occur?
+    │ 
+    │ ## Approach
+    │ 
+    │ You maintain a single understanding that grows and refines over time.
+    │ Organize naturally based on what you learn.
+    │ Ground patterns in specifics — approximate counts, timeframes, concrete examples.
+    │ A pattern described only as "frequent" without evidence is a weak understanding.
+    │ 
+    │ For each observation: how does this relate to what I already know, and what pattern does it reveal? Integrate content, track dynamics, consolidate redundancy, resolve conflicts. Retain specifics that ground your patterns — counts, timeframes, concrete instances.
+    │ 
+    │ Respond with JSON only. ALL fields required.
+    │ 
+    │ If understanding changed: { "status": "synthesized", "newUnderstanding": "complete updated text", "significance": "routine" or "notable" or "critical", "evolution": "what changed", "reasoning": "why", "output": "" }
+    │ If nothing changed: { "status": "dismissed", "newUnderstanding": "", "significance": "routine", "evolution": "", "reasoning": "", "output": "why observations didn't change understanding" }
+    └─────────────────────────────────────────────────────────
+
+  [2] INGEST 4 ITEMS
+    observations: 2, dismissals: 1, syntheses: 1
+
+    ┌─ UNDERSTANDING (verbatim) ─────────────────────────────
+    │ There have been several production incidents reported by customers: 1) A permanent loss of three days of dashboard event data is a P0 severity incident due to data loss, which is resolved. 2) A complete login failure affecting all users for the past 20 minutes is another P0 severity incident, and it is still ongoing. 3) Reports page loading slower than usual, taking 8-10 seconds, is a P2 severity incident that is ongoing.
+    └─────────────────────────────────────────────────────────
+
+  [3] QUERIES
+
+    Q: What severity is the data loss incident, and who reported it?
+       relevant=true relevance=1 confidence=1
+       insight: The severity of the data loss incident is P0, as it involves permanent loss of data. This incident was reported by a customer, referred to only as "the reporter."
+
+    Q: How should the dark mode request be prioritized, and why?
+       relevant=true relevance=1 confidence=1
+       insight: The request for dark mode should be prioritized as P3. This categorization is because a feature request, such as the implementation of dark mode, does not represent an incident involving data loss, corruption, or functionality that is currently broken for many users. In the context of severity, feature requests are always assigned P3 due to their nature as non-core enhancements rather than issues impacting current functionality. Therefore, despite any urgency expressed by the requester, dark mode is categorized as a minor annoyance and falls under P3 severity.
+
+    Q: List every incident you are tracking and its severity label.
+       relevant=true relevance=1 confidence=1
+       insight: I am currently tracking the following production incidents:
+
+1) A permanent loss of three days of dashboard event data - Severity: P0, Status: Resolved.
+2) A complete login failure affecting all users for the past 20 minutes - Severity: P0, Status: Ongoing.
+3) Reports page loading slower than usual, taking 8-10 seconds - Severity: P2, Status: Ongoing.
+
+These incidents show a clear distinction between critical data loss and ongoing performance issues, highlighting the need for immediate action on P0 incidents. There is uncertainty about future incidents as the ongoing login issue may affect user access.
+
+  run finished in 63.0s
+
+
+Eval complete.

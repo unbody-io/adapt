@@ -118,3 +118,38 @@ at all. Gemini's understanding stayed within P0/P2.
 - R3: stays 2/2.
 - Closed label set: only P0–P3 in the understanding, no "critical"/"urgent"/etc.;
   every incident carries a P-label.
+
+## Post-refactor result (2026-05-18)
+
+Re-ran the same eval after the 3-layer refactor landed.
+Raw output: [honest-instructions-after-2026-05-18.raw.txt](./honest-instructions-after-2026-05-18.raw.txt).
+
+**Prompt fidelity — fully fixed.** Scenario B observe prompt went 996 → 3336
+chars; understand prompt → ~5.1–5.7K. Both now contain the **full 2050-char
+`instructions` verbatim** — R1–R4 and the complete severity rubric present, under
+a `## Developer Instructions` heading, framed by a static role frame and with the
+JSON mechanics last. Scenario A: the 145-char instruction appears verbatim with
+**no invented specifics** (the baseline's fabricated "light roast for Kenya" is
+gone).
+
+| Rule | Baseline | Post-refactor | Δ |
+| --- | --- | --- | --- |
+| R1 data-loss=P0 | 1/2 | **2/2** | fixed |
+| R2 feature-req=P3 | 0/2 | **1/2** | partial — see below |
+| R3 no names | 2/2 | 2/2 | held |
+| closed label set | 1/2 | **2/2** | fixed |
+| A control parity | 2/2 | 2/2 | no regression |
+| R1–R4 in runtime prompts | absent | **present verbatim** | fixed |
+
+**Remaining gap (R2, partial).** Gemini now keeps the dark-mode feature request
+and labels it **P3** in the understanding — R2 satisfied. gpt-4o-mini still
+dismisses it at the observe phase (3 incidents tracked, not 4). The tightened
+observe role frame ("treat … ALWAYS/NEVER rules and examples as relevance
+criteria; keep matching data even when phrased as a request") fixed Gemini but not
+gpt-4o-mini. This is the **known weak-model soft-degrade** documented in spec §4.5
+— the role frame is a soft guardrail, not a guarantee. Not a regression.
+
+**Verdict:** the refactor does what the spec promised — developer instructions
+reach the runtime observe/understand prompts verbatim, the compression and
+fabrication are both gone, and rule adherence improved on every axis with no
+control regression.

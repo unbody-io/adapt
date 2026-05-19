@@ -1,5 +1,7 @@
 # Adapt
 
+![Adapt — a memory layer that grows and reshapes over time](https://raw.githubusercontent.com/unbody-io/adapt/main/assets/hero.jpg)
+
 [![npm](https://img.shields.io/npm/v/@unbody-io/adapt?style=flat-square&color=blue)](https://www.npmjs.com/package/@unbody-io/adapt)
 [![license](https://img.shields.io/npm/l/@unbody-io/adapt?style=flat-square)](./LICENSE)
 [![GitHub stars](https://img.shields.io/github/stars/unbody-io/adapt?style=flat-square)](https://github.com/unbody-io/adapt)

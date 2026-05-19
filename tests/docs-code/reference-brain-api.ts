@@ -42,6 +42,21 @@ async function main() {
 	assert(typeof Brain.restore === 'function', 'Brain.restore() exists')
 	assert(typeof brain.dispose === 'function', 'brain.dispose() exists')
 
+	// onEvent — pre-init event subscription
+	const onEventTypes: string[] = []
+	const onEventBrain = await Brain.create({
+		prompt: 'Track onEvent reference test.',
+		model,
+		autoSetup: false,
+		evolution: { enabled: false },
+		neurons: [
+			{ id: 'oe', type: 'text', name: 'OE', description: 'onEvent test', instructions: 'Track onEvent patterns.' },
+		],
+		onEvent: (event) => { onEventTypes.push(event.type) },
+	})
+	assert(onEventTypes.includes('brain:init:started'), 'onEvent catches brain:init:started')
+	await onEventBrain.dispose()
+
 	// ── Data Methods ─────────────────────────────────────────────────────
 	section('Data Methods')
 

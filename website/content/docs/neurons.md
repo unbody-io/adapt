@@ -65,6 +65,32 @@ The `model` argument rehydrates persisted model refs through the LLM plugin. See
 
 `ListNeuron` exposes the same `create` / `restore` shape. Constructors are private — `create` and `restore` are the only public entry points, and both fully initialize the neuron (no separate `init()` call).
 
+### Phase Instructions
+
+A neuron's `instructions` feed both the observe and understand phases verbatim. You can override either phase independently, and skip a phase entirely:
+
+```typescript
+const neuron = await TextNeuron.create({
+  model: openai('gpt-4o'),
+  instructions: 'Track product design principles and user research insights.',
+  store: new MemoryNeuronStore(),
+  observeInstructions: 'Keep any data about design decisions, user research, or accessibility.',
+  understandInstructions: 'Synthesize into a coherent set of design principles with evidence.',
+  focus: 'design systems and component libraries',
+})
+```
+
+| Field | Phase | Effect |
+|---|---|---|
+| `instructions` | both | Required. Shared verbatim instructions used by observe and understand. |
+| `observeInstructions` | observe | Optional. Overrides the verbatim instructions for the observe prompt. Falls back to `instructions` when omitted or `null`. |
+| `understandInstructions` | understand | Optional. Overrides the verbatim instructions for the understand prompt. Falls back to `instructions` when omitted or `null`. |
+| `focus` | observe | Optional. Appended to the observe instructions to narrow relevance filtering. |
+| `skipObservation` | — | When `true`, the observe phase is skipped — data goes straight into the understanding buffer unfiltered. |
+| `skipUnderstand` | — | When `true`, the observe phase runs and observations are retained, but understanding is **never** synthesized — not on threshold, not on `forceSynthesize`. The symmetric counterpart of `skipObservation`. |
+
+A `skipUnderstand` neuron is a pure observation collector: query it, inspect its buffer, and drive synthesis externally via `setUnderstanding()` if needed. No understand prompt is built for it.
+
 ### Cognitive Skills
 
 A TextNeuron's synthesizer applies two built-in skill sets when integrating observations — automatic, not configurable. Instructions influence *what domain* the skills are applied to (see [Prompt Design](./prompt-design)).
@@ -230,7 +256,9 @@ await neuron.update({ instructions: '...' })
 // Identity
 neuron.id                                    // string
 neuron.name                                  // string
-neuron.instructions                          // string
+neuron.instructions                          // string — shared verbatim instructions
+neuron.observeInstructions                   // string | null — observe-phase override
+neuron.understandInstructions                // string | null — understand-phase override
 neuron.description                           // string
 neuron.type                                  // 'text' | 'list'
 neuron.focus                                 // string | null

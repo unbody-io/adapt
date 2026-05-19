@@ -9,13 +9,15 @@ Prompts and instructions are the single most important inputs to the system. The
 Brain prompt  → Decomposition (what neurons are created, how many)
                → Evolution context (how the brain reshapes itself)
 
-Neuron instructions → Observer identity (what data is relevant?)
+Neuron instructions → Observe prompt (what data is relevant?)
                     → Schema generation (ListNeuron: what fields exist?)
-                    → Understand identity (how to synthesize?)
+                    → Understand prompt (how to synthesize?)
                     → Query behavior (how to answer questions?)
 ```
 
 A vague prompt produces a vague system. A specific prompt with clear decomposition guidance produces focused specialists that build deep, evidence-backed knowledge.
+
+> **Instructions reach the LLM verbatim.** A neuron's `instructions` are not paraphrased or compressed — they are inserted directly into the observe and understand system prompts under a `## Developer Instructions` heading. The runtime prompt is assembled deterministically in three layers: (1) a static framework role frame, (2) your verbatim instructions, (3) framework mechanics (JSON envelope, importance scale, cognitive skills). No LLM call rewrites your text. This makes the wording of your instructions directly load-bearing — what you write is what the model sees.
 
 ## Brain Prompt
 
@@ -134,6 +136,16 @@ Watch for:
 
 The "Track answers to" section is the most important part. It gives the neuron a purpose beyond collecting data.
 
+### Per-phase instructions
+
+By default the shared `instructions` field feeds both the observe phase (relevance filtering) and the understand phase (synthesis). When a phase needs different wording, override it:
+
+- **`observeInstructions`** — replaces the verbatim instructions used by the observe prompt only. Use it when the relevance criteria should read differently from the synthesis directive.
+- **`understandInstructions`** — replaces the verbatim instructions used by the understand prompt only.
+- **`focus`** — observe-only. Appended to the observe instructions under a `Focus:` heading to narrow what data is kept.
+
+When an override is omitted or set to `null`, that phase falls back to the shared `instructions`. These fields exist on `TextNeuron`/`ListNeuron` configs and on Brain explicit-neuron configs.
+
 ## Instructions for TextNeuron
 
 TextNeuron instructions shape how cognitive skills are applied to your domain. The neuron automatically detects confirmation, contradiction, recurrence, intensification, avoidance, etc. — your instructions determine *what* it applies these skills to.
@@ -246,4 +258,4 @@ await brain.adjustNeuron('patterns', 'Be stricter about what counts as a distinc
 await brain.adjustNeuron('trends', 'Weight recent observations more heavily')
 ```
 
-The LLM sees the neuron's current instructions and identity, then evolves them incrementally. If the directive is ambiguous, it preserves more rather than less.
+The LLM sees the neuron's current raw instruction fields (`instructions`, `observeInstructions`, `understandInstructions`, `focus`), then evolves them incrementally — preserving existing text unless the directive clearly changes it. The updated instructions are re-inserted verbatim into the observe and understand prompts. If the directive is ambiguous, it preserves more rather than less.

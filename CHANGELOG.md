@@ -4,6 +4,23 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.0.6] - 2026-05-18
+
+### Changed
+
+- **Honest instructions.** Developer `instructions` now reach the runtime observe and understand prompts **verbatim**, instead of being LLM-compressed into a short identity blurb. Runtime prompts are assembled deterministically in three layers — a static framework role frame, the verbatim developer instructions, and framework mechanics (JSON envelope, importance scale, cognitive skills) last — with no LLM call. Observe identity generation and list-neuron understand identity generation are removed; text neurons keep a slimmed cognitive-skill customization call. The derived `domain` dismissal gate is dropped — relevance now rests on the verbatim instructions. Closes [#17](https://github.com/unbody-io/adapt/issues/17) and [#18](https://github.com/unbody-io/adapt/issues/18).
+- Neurons restored from a pre-0.0.6 store recompute their observe/understand prompts from structured state on restore, so legacy persisted prompts are replaced with the new 3-layer prompts deterministically (no LLM call).
+
+### Added
+
+- Optional per-phase instruction overrides — `observeInstructions` and `understandInstructions` on neuron configs and generated neuron configs. The shared `instructions` field remains the fallback when a phase-specific field is omitted; `focus` stays observe-only.
+- `skipUnderstand` — observer-only neurons. A neuron created with `skipUnderstand: true` runs the observe phase and retains observations but never synthesizes understanding, even under `forceSynthesize`. Symmetric to `skipObservation`. Closes [#20](https://github.com/unbody-io/adapt/issues/20).
+- `onEvent` pre-init subscription hook on `Brain.create` / `Brain.restore` and `TextNeuron` / `ListNeuron` `create` / `restore`. The handler is attached before initialization runs, so `init` events are observable through the public API without bypassing private constructors. Closes [#19](https://github.com/unbody-io/adapt/issues/19).
+
+### Fixed
+
+- `skipUnderstand` neurons no longer rebuild an understand prompt when `update()` changes `instructions` in the same call.
+
 ## [0.0.5] - 2026-05-06
 
 ### Changed

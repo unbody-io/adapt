@@ -689,7 +689,7 @@ function buildUseCaseCode(useCase: UseCase): string {
 	const evolutionModel = modelName(useCase.evolution?.model)
 
 	const lines = [
-		'import { Brain, MemoryBrainStore, MemoryNeuronStore } from "@unbody-io/adapt"',
+		'import { Brain, MemoryBrainStore } from "@unbody-io/adapt"',
 		'import { createOpenRouter } from "@openrouter/ai-sdk-provider"',
 		"",
 		"const openrouter = createOpenRouter({",
@@ -699,15 +699,14 @@ function buildUseCaseCode(useCase: UseCase): string {
 		"",
 		"const model = (id: string) => openrouter(id)",
 		"",
-		"const brain = new Brain({",
+		"const brain = await Brain.create({",
 		`  prompt: ${JSON.stringify(useCase.prompt)},`,
 		`  autoSetup: ${JSON.stringify(useCase.autoSetup ?? true)},`,
 		`  model: model(${JSON.stringify(mainModel)}),`,
-		`  blueprintModel: model(${JSON.stringify(blueprintModel ?? mainModel)}),`,
+		`  init: { model: model(${JSON.stringify(blueprintModel ?? mainModel)}) },`,
 		"  store: new MemoryBrainStore(),",
 		`  ingest: ${formatJson(useCase.ingest ?? {})},`,
 		"  learning: {",
-		"    store: () => new MemoryNeuronStore(),",
 		...(useCase.learning ? indentLines(formatJson(useCase.learning), 4, true) : ["    // add thresholds or governance here"]),
 		"  },",
 		...(useCase.evolution
@@ -721,8 +720,6 @@ function buildUseCaseCode(useCase: UseCase): string {
 			]
 			: []),
 		"})",
-		"",
-		"await brain.initialize()",
 		"",
 		`const dataPaths = ${formatJson(useCase.dataPaths)}`,
 		"",

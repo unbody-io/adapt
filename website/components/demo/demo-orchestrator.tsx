@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useEffect } from "react"
 import { createOpenRouter } from "@openrouter/ai-sdk-provider"
+import { createGoogleGenerativeAI } from "@ai-sdk/google"
 import type { LanguageModel } from "ai"
 import type { UseCase, ModelRef } from "../../lib/demo/use-cases"
 import type { DataSource } from "../../lib/demo/types"
@@ -12,24 +13,32 @@ import { QueryBar } from "./query-bar"
 import { StatusDisplay } from "./status-display"
 import { DemoBreadcrumb } from "./breadcrumb"
 
-// --- Model Factory (mirrors playground's createModel) ---
+// --- Model Factory ---
+// Provider is config-driven (see ModelRef.provider). Each provider points its
+// native AI SDK client at a local proxy route that injects the real API key, so
+// keys never reach the browser. Switching a slot's provider is a config change.
 
-const openrouter = createOpenRouter({
-	baseURL: "/api/llm-proxy",
-	apiKey: "proxy",
-})
+const PROVIDERS = {
+	openrouter: createOpenRouter({ baseURL: "/api/llm-proxy", apiKey: "proxy" }),
+	google: createGoogleGenerativeAI({ baseURL: "/api/gemini-proxy/v1beta", apiKey: "proxy" }),
+} as const
 
-function resolveModelRef(
-	slot: string | ModelRef | undefined,
-	defaultModel: string,
-): string {
-	if (!slot) return defaultModel
-	if (typeof slot === "string") return slot
-	return slot.model
+type ProviderId = keyof typeof PROVIDERS
+
+const DEFAULT_PROVIDER: ProviderId = "openrouter"
+const DEFAULT_MODEL = "google/gemini-2.5-flash"
+
+function isProviderId(value: string | undefined): value is ProviderId {
+	return value === "openrouter" || value === "google"
 }
 
-function createModel(slot?: string | ModelRef, defaultModel = "google/gemini-2.5-flash"): LanguageModel {
-	return openrouter(resolveModelRef(slot, defaultModel))
+function createModel(
+	slot?: string | ModelRef,
+	defaults?: { provider?: string; model?: string },
+): LanguageModel {
+	const name = !slot ? (defaults?.model ?? DEFAULT_MODEL) : typeof slot === "string" ? slot : slot.model
+	const provider = (typeof slot === "object" ? slot.provider : undefined) ?? defaults?.provider
+	return PROVIDERS[isProviderId(provider) ? provider : DEFAULT_PROVIDER](name)
 }
 
 // ---
@@ -44,12 +53,13 @@ export function DemoOrchestrator() {
 		setLive(true)
 		setActiveUseCase(useCase)
 
-		const model = createModel(useCase.model)
+		const defaults = { provider: useCase.provider }
+		const model = createModel(useCase.model, defaults)
 
 		await start({
 			prompt,
 			model,
-			blueprintModel: useCase.blueprintModel ? createModel(useCase.blueprintModel) : model,
+			blueprintModel: useCase.blueprintModel ? createModel(useCase.blueprintModel, defaults) : model,
 			autoSetup: useCase.autoSetup,
 			learning: useCase.learning,
 			evolution: useCase.evolution ? {
@@ -57,7 +67,7 @@ export function DemoOrchestrator() {
 				autoEvaluate: useCase.evolution.autoEvaluate,
 				evaluatorSignalThreshold: useCase.evolution.evaluatorSignalThreshold,
 				...(useCase.evolution.model
-					? { model: createModel(useCase.evolution.model) }
+					? { model: createModel(useCase.evolution.model, defaults) }
 					: {}),
 			} : undefined,
 			ingest: useCase.ingest,

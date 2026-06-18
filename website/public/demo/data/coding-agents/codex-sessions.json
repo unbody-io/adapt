@@ -1,0 +1,146 @@
+{
+	"id": "codex-sessions",
+	"source": "codex-sessions",
+	"label": "Codex Sessions",
+	"summary": "Implementation and execution sessions with Codex across repos after specs or debugging goals were established.",
+	"description": "Simulated developer conversations where Codex reads code, edits files, runs tests, debugs failures, and reports concrete outcomes.",
+	"items": [
+		{
+			"id": "cx-2026-04-04-brain-evolution-handlers",
+			"label": "Codex: brain-v0 evolution handlers",
+			"data": {
+				"type": "coding-agent-session",
+				"agent": "Codex",
+				"agent_focus": "implementation/execution",
+				"repo": "brain-v0",
+				"project": "Adapt Brain",
+				"session_id": "brain-v0-codex-2026-04-04",
+				"date": "2026-04-04",
+				"occasion": "Implementing the Brain evolution action handlers",
+				"input_from": "brain-v0-claude-2026-04-03",
+				"developer_goal": "Turn the Claude Code evolution spec into actual handler modules and tests.",
+				"conversation": "Codex inspected the brain evolution folder, found the base handler pattern, and added create, update, merge, split, and delete handlers without changing unrelated neuron code. It wired the orchestrator to emit events that the website demo could narrate. The first test run exposed a config merge bug where updated prompts overwrote learning thresholds. Codex fixed that by preserving existing config fields unless an action explicitly changed them.",
+				"files_touched": [
+					"src/brain/evolution/orchestrator.ts",
+					"src/brain/evolution/handlers/create.ts",
+					"src/brain/evolution/handlers/update.ts",
+					"tests/brain-config.test.ts"
+				],
+				"verification": [
+					"npm test -- tests/brain-config.test.ts",
+					"npm test -- tests/brain-restore-config.test.ts"
+				],
+				"outcome": "Evolution actions became executable and test-covered, but split behavior still needed a better prompt."
+			}
+		},
+		{
+			"id": "cx-2026-04-09-mycelium-extension-shell",
+			"label": "Codex: Mycelium extension shell",
+			"data": {
+				"type": "coding-agent-session",
+				"agent": "Codex",
+				"agent_focus": "implementation/execution",
+				"repo": "mycelium-browser",
+				"project": "Mycelium",
+				"session_id": "mycelium-codex-2026-04-09",
+				"date": "2026-04-09",
+				"occasion": "Building the first browser extension capture slice",
+				"input_from": "mycelium-claude-2026-04-08",
+				"developer_goal": "Create a working extension panel that captures the current page, selected text, and a note.",
+				"conversation": "Codex scaffolded the extension entrypoints, popup UI, and content script bridge. It used the existing React/Vite setup instead of adding a new framework. The implementation kept persistence mocked but typed the capture payload so the later Brain endpoint would be easy to add. A Playwright check initially failed because selected text was not available when the popup opened; Codex added a message from content script to popup and cached the last selection.",
+				"files_touched": [
+					"src/extension/popup/CapturePanel.tsx",
+					"src/extension/content/selection.ts",
+					"src/lib/capture-client.ts",
+					"tests/capture-panel.test.ts"
+				],
+				"verification": [
+					"npm run lint",
+					"npm test -- capture-panel"
+				],
+				"outcome": "The extension could capture tab metadata, selected text, and a developer note into a mocked local store."
+			}
+		},
+		{
+			"id": "cx-2026-04-13-cibil-sessionization",
+			"label": "Codex: Cibil sessionization utility",
+			"data": {
+				"type": "coding-agent-session",
+				"agent": "Codex",
+				"agent_focus": "implementation/execution",
+				"repo": "cibil-analytics",
+				"project": "Cibil",
+				"session_id": "cibil-codex-2026-04-13",
+				"date": "2026-04-13",
+				"occasion": "Implementing analytics session duration from event streams",
+				"input_from": "cibil-claude-2026-04-12",
+				"developer_goal": "Write the sessionization logic and protect the product definition with unit tests.",
+				"conversation": "Codex read the analytics event schema, added a pure sessionizeEvents utility, and wrote tests for 30 minute gaps, midnight crossing, anonymous users, and ignored background polling. The first implementation sorted only by timestamp, which mixed users together. Codex caught it in the multi-user test and changed the algorithm to group by account and anonymous visitor id before computing sessions.",
+				"files_touched": [
+					"src/analytics/sessionize.ts",
+					"src/analytics/session-duration.ts",
+					"tests/sessionize.test.ts"
+				],
+				"verification": [
+					"npm test -- sessionize",
+					"npm run typecheck"
+				],
+				"outcome": "Session duration metrics matched the Claude-defined product rules and handled edge cases."
+			}
+		},
+		{
+			"id": "cx-2026-04-19-website-usecase-data",
+			"label": "Codex: website use case data",
+			"data": {
+				"type": "coding-agent-session",
+				"agent": "Codex",
+				"agent_focus": "implementation/execution",
+				"repo": "brain-v0",
+				"project": "Adapt Website",
+				"session_id": "website-codex-2026-04-19",
+				"date": "2026-04-19",
+				"occasion": "Adding another data-driven website demo scenario",
+				"input_from": "website-claude-2026-04-18",
+				"developer_goal": "Add a new use case without changing the demo runtime.",
+				"conversation": "Codex found that the demo selector was driven by USE_CASES and that data source JSON files only needed id, label, summary, description, and items. It added the config entry, created new dataset files, and checked that the four-card selector still formed a two-by-two grid on desktop. No runtime code changes were needed because loadDataSources already accepts any number of paths.",
+				"files_touched": [
+					"website/lib/demo/use-cases.ts",
+					"website/public/demo/data/coding-agents/claude-code-sessions.json",
+					"website/public/demo/data/coding-agents/codex-sessions.json",
+					"website/public/demo/data/coding-agents/handoffs.json"
+				],
+				"verification": [
+					"npm run lint",
+					"npm run typecheck"
+				],
+				"outcome": "The website gained a fourth scenario centered on multi-agent coding work."
+			}
+		},
+		{
+			"id": "cx-2026-04-24-agent-memory-importer",
+			"label": "Codex: agent memory importer",
+			"data": {
+				"type": "coding-agent-session",
+				"agent": "Codex",
+				"agent_focus": "implementation/execution",
+				"repo": "agent-memory-lab",
+				"project": "Agent Memory Lab",
+				"session_id": "agent-memory-codex-2026-04-24",
+				"date": "2026-04-24",
+				"occasion": "Building a JSON importer for coding-agent session records",
+				"input_from": "agent-memory-claude-2026-04-22",
+				"developer_goal": "Make the session taxonomy usable by importing records into a local Adapt Brain.",
+				"conversation": "Codex implemented a small importer that validates session records, normalizes agent names, and injects them into a Brain instance in batches. The first version treated handoff notes as plain text. After reading the Claude taxonomy again, Codex promoted handoff fields to first-class metadata so queries could ask which agent defined work and which agent executed it.",
+				"files_touched": [
+					"src/import/session-schema.ts",
+					"src/import/import-agent-sessions.ts",
+					"tests/import-agent-sessions.test.ts"
+				],
+				"verification": [
+					"npm test -- import-agent-sessions"
+				],
+				"outcome": "Agent session records could be loaded into memory with structured links between planning and execution."
+			}
+		}
+	]
+}

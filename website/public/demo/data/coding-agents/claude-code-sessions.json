@@ -1,0 +1,124 @@
+{
+	"id": "claude-code-sessions",
+	"source": "claude-code-sessions",
+	"label": "Claude Code Sessions",
+	"summary": "Conceptual and specification sessions with Claude Code across product, architecture, and implementation planning.",
+	"description": "Simulated developer conversations where Claude Code helps define concepts, specs, tradeoffs, and handoff notes before implementation.",
+	"items": [
+		{
+			"id": "cc-2026-04-03-brain-evolution-spec",
+			"label": "Claude Code: brain-v0 evolution spec",
+			"data": {
+				"type": "coding-agent-session",
+				"agent": "Claude Code",
+				"agent_focus": "conceptual/specification",
+				"repo": "brain-v0",
+				"project": "Adapt Brain",
+				"session_id": "brain-v0-claude-2026-04-03",
+				"date": "2026-04-03",
+				"occasion": "Designing how Brain specialists should evolve over time",
+				"developer_goal": "Define when neurons should split, merge, update, or be created without making the system feel arbitrary.",
+				"conversation": "I asked Claude Code to reason about the Brain as a living memory system instead of a static classifier. We discussed evaluator thresholds, ignored-data reports, and when repeated dismissals should become a new specialist. Claude pushed for explicit actions: create, update, merge, split, and delete. The useful part was separating evidence collection from mutation. The Brain should first notice pressure, then evaluate whether topology should change, then execute a small mutation with a written rationale.",
+				"decisions": [
+					"Treat evolution as a separate evaluator loop rather than embedding it inside observation.",
+					"Require each topology change to include a rationale and source evidence.",
+					"Prefer small specialist changes over broad prompt rewrites."
+				],
+				"handoff_to": "Codex",
+				"handoff_note": "Implement an evolution orchestrator with handlers for create, update, merge, split, and delete. Keep the surface event-driven so the demo can narrate changes."
+			}
+		},
+		{
+			"id": "cc-2026-04-08-mycelium-browser-scope",
+			"label": "Claude Code: Mycelium browser scope",
+			"data": {
+				"type": "coding-agent-session",
+				"agent": "Claude Code",
+				"agent_focus": "conceptual/specification",
+				"repo": "mycelium-browser",
+				"project": "Mycelium",
+				"session_id": "mycelium-claude-2026-04-08",
+				"date": "2026-04-08",
+				"occasion": "Scoping a browser extension prototype for saving pages into personal memory",
+				"developer_goal": "Decide what the first working slice should do without turning it into a full bookmarking product.",
+				"conversation": "The session stayed high level. I described the friction as context switching: copying links, notes, product ideas, and code references between tools. Claude Code helped turn that into a narrow slice: capture the current tab, let me add a short note, attach source metadata, and send it to a local memory endpoint. It argued against building collections, folders, and sharing first. The spec focused on one repeated moment: saving a thing while staying in flow.",
+				"decisions": [
+					"Prototype a capture panel, not a full library UI.",
+					"Store title, URL, selected text, note, timestamp, and inferred source type.",
+					"Defer organization features until the Brain can suggest threads from saved items."
+				],
+				"handoff_to": "Codex",
+				"handoff_note": "Create the extension shell, capture panel, content-script selection bridge, and a typed local API client. Use mocked persistence first."
+			}
+		},
+		{
+			"id": "cc-2026-04-12-cibil-session-analytics",
+			"label": "Claude Code: Cibil session analytics definition",
+			"data": {
+				"type": "coding-agent-session",
+				"agent": "Claude Code",
+				"agent_focus": "conceptual/specification",
+				"repo": "cibil-analytics",
+				"project": "Cibil",
+				"session_id": "cibil-claude-2026-04-12",
+				"date": "2026-04-12",
+				"occasion": "Defining session duration analytics",
+				"developer_goal": "Clarify what counts as a session and how to compute duration from existing events.",
+				"conversation": "I asked Claude Code to help define analytics language before anyone touched the code. The important distinction was that product people say session, while the database only has page views, chat turns, module events, and account ids. Claude proposed a rule: a session starts with the first activity after 30 minutes of inactivity and ends at the last activity before the next gap. We also defined edge cases for midnight, anonymous users, and background polling.",
+				"decisions": [
+					"Use a 30 minute inactivity window for session boundaries.",
+					"Exclude background polling events from duration calculations.",
+					"Expose both per-session duration and aggregate average duration."
+				],
+				"handoff_to": "Codex",
+				"handoff_note": "Implement a sessionization utility with tests for gaps, midnight crossing, anonymous users, and ignored event types."
+			}
+		},
+		{
+			"id": "cc-2026-04-18-website-demo-story",
+			"label": "Claude Code: website demo narrative",
+			"data": {
+				"type": "coding-agent-session",
+				"agent": "Claude Code",
+				"agent_focus": "conceptual/specification",
+				"repo": "brain-v0",
+				"project": "Adapt Website",
+				"session_id": "website-claude-2026-04-18",
+				"date": "2026-04-18",
+				"occasion": "Choosing which demo use cases communicate the Brain clearly",
+				"developer_goal": "Make the website demo feel concrete without overexplaining the library internals.",
+				"conversation": "Claude Code helped compare candidate demos: product feedback, daily standups, personal bookmarks, coding-agent sessions, and incident reports. It recommended using scenarios where the Brain's evolution is visible: multiple sources, repeated signals, changing interpretations, and questions a user would naturally ask afterward. It also warned that the demo should not become a marketing page; the first screen should be the working experience.",
+				"decisions": [
+					"Use several small datasets rather than one huge transcript.",
+					"Make scenarios familiar enough that users can judge the Brain's behavior.",
+					"Show suggested ask and signal prompts after ingestion starts."
+				],
+				"handoff_to": "Codex",
+				"handoff_note": "Add data-driven use case entries and keep the selector layout stable with four cards."
+			}
+		},
+		{
+			"id": "cc-2026-04-22-agent-memory-taxonomy",
+			"label": "Claude Code: agent memory taxonomy",
+			"data": {
+				"type": "coding-agent-session",
+				"agent": "Claude Code",
+				"agent_focus": "conceptual/specification",
+				"repo": "agent-memory-lab",
+				"project": "Agent Memory Lab",
+				"session_id": "agent-memory-claude-2026-04-22",
+				"date": "2026-04-22",
+				"occasion": "Exploring how to store memories about multi-agent coding work",
+				"developer_goal": "Figure out what should be remembered from conversations with different coding agents.",
+				"conversation": "This was mostly taxonomy work. I wanted memory that can tell me how I work with agents, not just search old chats. Claude Code proposed separating agent identity, repo context, session occasion, conceptual decision, implementation action, verification result, and unresolved follow-up. The distinction that stuck: Claude Code often produces intent and shape, while Codex produces changed files and test evidence. A useful memory has to connect both sides.",
+				"decisions": [
+					"Represent agent conversations as sessions with explicit occasion and outcome fields.",
+					"Track handoff quality separately from task success.",
+					"Preserve repo names because the same pattern means different things in different codebases."
+				],
+				"handoff_to": "Codex",
+				"handoff_note": "Create sample data that includes multiple agents, multiple repos, multiple sessions, and explicit Claude-to-Codex handoffs."
+			}
+		}
+	]
+}

@@ -37,7 +37,7 @@ export function ConversationFlow({ onStart }: Props) {
 
 	const handleSelect = useCallback((uc: UseCase) => {
 		setSelectedUseCase(uc)
-		setPrompt("")
+		setPrompt(uc.prompt)
 		setTimeout(() => {
 			setRevealDone(false)
 			setStep("prompt")
@@ -253,8 +253,7 @@ export function ConversationFlow({ onStart }: Props) {
 								ref={textareaRef}
 								value={prompt}
 								onChange={(e) => setPrompt(e.target.value)}
-								placeholder={selectedUseCase?.prompt}
-								className="min-h-[40dvh] md:min-h-0"
+								className="min-h-[55dvh] md:min-h-[240px]"
 								rows={5}
 								style={{
 									flex: 1,
@@ -263,7 +262,7 @@ export function ConversationFlow({ onStart }: Props) {
 									border: "none",
 									outline: "none",
 									resize: "none",
-									fontSize: "0.95rem",
+									fontSize: "calc(0.95rem + 1px)",
 									fontFamily: "Georgia, 'Times New Roman', serif",
 									color: "#1a1a1f",
 									lineHeight: 1.7,

@@ -171,4 +171,46 @@ export const USE_CASES: UseCase[] = [
 			],
 		},
 	},
+	{
+		id: "coding-agents",
+		title: "Coding Agents",
+		description: "Watch a Brain learn how a developer collaborates with Claude Code and Codex across repos and sessions.",
+		prompt: "You are watching and learning from my interactions with coding agents across different repos and sessions.\n\nNotice how I use each agent. Claude Code is usually where I think through concepts, architecture, specs, and tradeoffs. Codex is usually where I execute: editing code, running tests, debugging, and verifying the work.\n\nTrack the projects, agents, sessions, decisions, handoffs, and recurring patterns in how I work.",
+		provider: "google",
+		model: "gemini-3.1-flash-lite",
+		autoSetup: true,
+		ingest: { batchSize: 3 },
+		appBatchSize: 8,
+		duration: "~2 min",
+		learning: {
+			understand: {
+				thresholds: {
+					maxObservations: 4,
+					minImportance: 0.1,
+				},
+			},
+		},
+		evolution: {
+			enabled: true,
+			autoEvaluate: true,
+			evaluatorSignalThreshold: 5,
+			model: { provider: "openrouter", model: "x-ai/grok-4.3" },
+		},
+		dataPaths: [
+			"/demo/data/coding-agents/claude-code-sessions.json",
+			"/demo/data/coding-agents/codex-sessions.json",
+			"/demo/data/coding-agents/handoffs.json",
+		],
+		suggestions: {
+			ask: [
+				"Which projects did I work on with each coding agent?",
+				"Where did Claude Code define specs that Codex later implemented?",
+				"What collaboration patterns are recurring across sessions?",
+			],
+			signal: [
+				"Separate conceptual planning from implementation execution",
+				"Track handoff quality between Claude Code and Codex",
+			],
+		},
+	},
 ]

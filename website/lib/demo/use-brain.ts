@@ -223,42 +223,17 @@ export function useBrain() {
 	}, [])
 
 	const start = useCallback(async (options: UseBrainOptions) => {
-		const { Brain, MemoryBrainStore, MemoryNeuronStore } = await import("@unbody-io/adapt")
+		const { Brain, MemoryBrainStore } = await import("@unbody-io/adapt")
 
 		startTimeRef.current = Date.now()
 		timelineRef.current = []
 		narratedInternalSetupRef.current = false
 		setState({ ...initialState, phase: "initializing", activity: "Creating brain..." })
 
-		const brain = new Brain({
-			prompt: options.prompt,
-			autoSetup: options.autoSetup ?? true,
-			model: options.model,
-			blueprintModel: options.blueprintModel ?? options.model,
-			store: new MemoryBrainStore(),
-			ingest: options.ingest,
-			learning: {
-				store: () => new MemoryNeuronStore(),
-				understand: options.learning?.understand,
-				governance: options.learning?.governance,
-			},
-			evolution: options.evolution ? {
-				enabled: options.evolution.enabled,
-				autoEvaluate: options.evolution.autoEvaluate,
-				evaluatorSignalThreshold: options.evolution.evaluatorSignalThreshold,
-				model: options.evolution.model ?? options.model,
-			} : undefined,
-		})
+		const flags = { get narratedInternalSetup() { return narratedInternalSetupRef.current }, set narratedInternalSetup(v: boolean) { narratedInternalSetupRef.current = v } }
 
-		brainRef.current = brain
-
-		// Log ALL brain events to timeline
-		;(brain as unknown as { on(fn: (event: { type: string; payload: unknown }) => void): void }).on((event) => {
-			timelineRef.current.push({ t: Date.now() - startTimeRef.current, event: event.type, payload: event.payload as Record<string, unknown> })
-		})
-
-		// Wire up brain events → React state
-		const eventTypes = [
+		// Events of interest (drive React state, activity labels, commentary).
+		const eventTypes = new Set([
 			"brain:init:started",
 			"brain:init:completed",
 			"brain:init:config:generated",
@@ -284,138 +259,151 @@ export function useBrain() {
 			"evolution:action:executed",
 			"evolution:action:failed",
 			"evaluator:evaluation:failed",
-		]
+		])
 
-		const flags = { get narratedInternalSetup() { return narratedInternalSetupRef.current }, set narratedInternalSetup(v: boolean) { narratedInternalSetupRef.current = v } }
+		// Single handler attached BEFORE init via Brain.create's `onEvent` hook, so
+		// init events (brain:init:*, neuron:init:*) are observed. `brainRef.current`
+		// is still null while init runs — the helpers below tolerate a null brain and
+		// degrade gracefully (payload-only labels); the final syncNeurons after
+		// create() fills in the neuron list.
+		const handleBrainEvent = (event: { type: string; payload: Record<string, unknown> }) => {
+			const eventType = event.type
+			const payload = event.payload as Record<string, unknown>
 
-		for (const eventType of eventTypes) {
-			(brain as unknown as { on(event: string, fn: (payload: Record<string, unknown>) => void): void }).on(eventType, (payload: Record<string, unknown>) => {
-				addEvent(eventType, payload)
+			// Log ALL brain events to timeline
+			timelineRef.current.push({ t: Date.now() - startTimeRef.current, event: eventType, payload })
 
-				// Activity label
-				const activity = activityFromEvent(eventType, payload, brain)
-				if (activity) {
-					if (activity.category === "evolution") {
-						if (evoActivityTimerRef.current) {
-							clearTimeout(evoActivityTimerRef.current)
+			if (!eventTypes.has(eventType)) return
+			const brain = brainRef.current
+
+			addEvent(eventType, payload)
+
+			// Activity label
+			const activity = activityFromEvent(eventType, payload, brain)
+			if (activity) {
+				if (activity.category === "evolution") {
+					if (evoActivityTimerRef.current) {
+						clearTimeout(evoActivityTimerRef.current)
+						evoActivityTimerRef.current = null
+					}
+					setState((prev) => ({ ...prev, evolutionActivity: activity.text }))
+					// Signal received is transient — auto-clear unless evaluation starts
+					if (eventType === "brain:signal:received") {
+						evoActivityTimerRef.current = setTimeout(() => {
 							evoActivityTimerRef.current = null
+							setState((prev) => ({ ...prev, evolutionActivity: "" }))
+						}, 3000)
+					}
+				} else {
+					setState((prev) => ({ ...prev, activity: activity.text }))
+				}
+			}
+
+			// Commentary
+			const comment = commentaryFromEvent(eventType, payload, brain, flags)
+			if (comment) {
+				enqueueCommentary(comment.text, comment.priority, comment.category)
+			}
+
+			// Full log
+			const t = ((Date.now() - startTimeRef.current) / 1000).toFixed(1)
+			const lines = [
+				`[${t}s] ${eventType}`,
+				`  payload: ${JSON.stringify(payload, null, 2).replace(/\n/g, "\n  ")}`,
+			]
+			if (activity) lines.push(`  → activity [${activity.category}]: "${activity.text}"`)
+			if (comment) lines.push(`  → commentary [${comment.category}]: "${comment.text}"`)
+			fullLogRef.current.push(lines.join("\n"))
+
+			// Per-neuron tracking
+			const neuronId = payload.neuronId as string | undefined
+			if (neuronId) {
+				const internal = isInternalNeuron(neuronId)
+
+				switch (eventType) {
+					case "neuron:observe:started":
+						if (!internal) {
+							patchNeuron(neuronId, { activity: "observing" })
 						}
-						setState((prev) => ({ ...prev, evolutionActivity: activity.text }))
-						// Signal received is transient — auto-clear unless evaluation starts
-						if (eventType === "brain:signal:received") {
-							evoActivityTimerRef.current = setTimeout(() => {
-								evoActivityTimerRef.current = null
-								setState((prev) => ({ ...prev, evolutionActivity: "" }))
-							}, 3000)
+						break
+					case "neuron:observe:thinking":
+						if (!internal) {
+							patchNeuron(neuronId, { activity: "thinking" })
 						}
-					} else {
-						setState((prev) => ({ ...prev, activity: activity.text }))
-					}
+						break
+					case "neuron:observed":
+						incrementMetric(neuronId, "observations")
+						if (!internal) {
+							patchNeuron(neuronId, { activity: "idle" })
+						}
+						break
+					case "neuron:observe:dismissed":
+						incrementMetric(neuronId, "dismissals")
+						break
+					case "neuron:synthesize:started":
+						if (!internal) {
+							patchNeuron(neuronId, { activity: "synthesizing" })
+						}
+						break
+					case "neuron:synthesized":
+						incrementMetric(neuronId, "syntheses")
+						if (!internal) {
+							patchNeuron(neuronId, { activity: "idle" })
+						}
+						break
+					case "neuron:query:started":
+						incrementMetric(neuronId, "queries")
+						if (!internal) {
+							patchNeuron(neuronId, { activity: "querying" })
+						}
+						break
+					case "neuron:query:completed":
+						if (!internal) {
+							patchNeuron(neuronId, { activity: "idle" })
+						}
+						break
+					case "neuron:health:updated":
+						if (!internal) {
+							patchNeuron(neuronId, {
+								health: {
+									activation: (payload.activation as number) ?? 0.5,
+									status: (payload.status as string) ?? "active",
+								},
+							})
+						}
+						break
 				}
+			}
 
-				// Commentary
-				const comment = commentaryFromEvent(eventType, payload, brain, flags)
-				if (comment) {
-					enqueueCommentary(comment.text, comment.priority, comment.category)
-				}
+			// Reset activity on top-level completion events
+			if (
+				eventType === "brain:init:completed" ||
+				eventType === "brain:inject:completed"
+			) {
+				setState((prev) => ({ ...prev, activity: "Ready" }))
+			}
 
-				// Full log
-				const t = ((Date.now() - startTimeRef.current) / 1000).toFixed(1)
-				const lines = [
-					`[${t}s] ${eventType}`,
-					`  payload: ${JSON.stringify(payload, null, 2).replace(/\n/g, "\n  ")}`,
-				]
-				if (activity) lines.push(`  → activity [${activity.category}]: "${activity.text}"`)
-				if (comment) lines.push(`  → commentary [${comment.category}]: "${comment.text}"`)
-				fullLogRef.current.push(lines.join("\n"))
-
-				// Per-neuron tracking
-				const neuronId = payload.neuronId as string | undefined
-				if (neuronId) {
-					const internal = isInternalNeuron(neuronId)
-
-					switch (eventType) {
-						case "neuron:observe:started":
-							if (!internal) {
-								patchNeuron(neuronId, { activity: "observing" })
-							}
-							break
-						case "neuron:observe:thinking":
-							if (!internal) {
-								patchNeuron(neuronId, { activity: "thinking" })
-							}
-							break
-						case "neuron:observed":
-							incrementMetric(neuronId, "observations")
-							if (!internal) {
-								patchNeuron(neuronId, { activity: "idle" })
-							}
-							break
-						case "neuron:observe:dismissed":
-							incrementMetric(neuronId, "dismissals")
-							break
-						case "neuron:synthesize:started":
-							if (!internal) {
-								patchNeuron(neuronId, { activity: "synthesizing" })
-							}
-							break
-						case "neuron:synthesized":
-							incrementMetric(neuronId, "syntheses")
-							if (!internal) {
-								patchNeuron(neuronId, { activity: "idle" })
-							}
-							break
-						case "neuron:query:started":
-							incrementMetric(neuronId, "queries")
-							if (!internal) {
-								patchNeuron(neuronId, { activity: "querying" })
-							}
-							break
-						case "neuron:query:completed":
-							if (!internal) {
-								patchNeuron(neuronId, { activity: "idle" })
-							}
-							break
-						case "neuron:health:updated":
-							if (!internal) {
-								patchNeuron(neuronId, {
-									health: {
-										activation: (payload.activation as number) ?? 0.5,
-										status: (payload.status as string) ?? "active",
-									},
-								})
-							}
-							break
-					}
-				}
-
-				// Reset activity on top-level completion events
-				if (
-					eventType === "brain:init:completed" ||
-					eventType === "brain:inject:completed"
-				) {
-					setState((prev) => ({ ...prev, activity: "Ready" }))
-				}
-
-				// Evolution action tracking
-				if (eventType === "evaluator:evaluation:completed") {
-					pendingEvolutionRef.current = payload.decisionCount as number
-					if (pendingEvolutionRef.current === 0) {
-						setState((prev) => ({ ...prev, activity: "Ready", evolutionActivity: "" }))
-					}
-				}
-				if (eventType === "evolution:action:executed" || eventType === "evolution:action:failed") {
-					pendingEvolutionRef.current = Math.max(0, pendingEvolutionRef.current - 1)
-					if (pendingEvolutionRef.current === 0) {
-						setState((prev) => ({ ...prev, activity: "Ready", evolutionActivity: "" }))
-					}
-				}
-				if (eventType === "evaluator:evaluation:failed") {
-					pendingEvolutionRef.current = 0
+			// Evolution action tracking
+			if (eventType === "evaluator:evaluation:completed") {
+				pendingEvolutionRef.current = payload.decisionCount as number
+				if (pendingEvolutionRef.current === 0) {
 					setState((prev) => ({ ...prev, activity: "Ready", evolutionActivity: "" }))
 				}
+			}
+			if (eventType === "evolution:action:executed" || eventType === "evolution:action:failed") {
+				pendingEvolutionRef.current = Math.max(0, pendingEvolutionRef.current - 1)
+				if (pendingEvolutionRef.current === 0) {
+					setState((prev) => ({ ...prev, activity: "Ready", evolutionActivity: "" }))
+				}
+			}
+			if (eventType === "evaluator:evaluation:failed") {
+				pendingEvolutionRef.current = 0
+				setState((prev) => ({ ...prev, activity: "Ready", evolutionActivity: "" }))
+			}
 
-				// Structural changes → sync neuron list
+			// Structural changes → sync neuron list.
+			if (brain) {
+				// Post-init: reconcile the full list from the live brain.
 				if (
 					eventType === "brain:init:completed" ||
 					eventType === "brain:neuron:added" ||
@@ -424,43 +412,92 @@ export function useBrain() {
 				) {
 					syncNeurons(brain)
 				}
+			} else if (eventType === "brain:neuron:added") {
+				// During init the brain instance isn't returned yet, so syncNeurons
+				// can't run. Add the neuron incrementally from the event payload so
+				// they appear one-by-one during birth; the post-create syncNeurons
+				// then reconciles type/description.
+				addNeuronFromEvent(payload)
+			}
 
-				// Injection batch progress
-				if (eventType === "brain:inject:started") {
-					setState((prev) => ({
-						...prev,
-						injectionProgress: prev.injectionProgress
-							? {
-								...prev.injectionProgress,
-								batchCount: payload.batchCount as number,
-							}
-							: prev.injectionProgress,
-					}))
-				}
-				if (eventType === "brain:inject:batch:completed") {
-					setState((prev) => ({
-						...prev,
-						injectionProgress: prev.injectionProgress
-							? {
-								...prev.injectionProgress,
-								batchIndex: (payload.batchIndex as number) + 1,
-							}
-							: prev.injectionProgress,
-					}))
-				}
-			})
+			// Injection batch progress
+			if (eventType === "brain:inject:started") {
+				setState((prev) => ({
+					...prev,
+					injectionProgress: prev.injectionProgress
+						? {
+							...prev.injectionProgress,
+							batchCount: payload.batchCount as number,
+						}
+						: prev.injectionProgress,
+				}))
+			}
+			if (eventType === "brain:inject:batch:completed") {
+				setState((prev) => ({
+					...prev,
+					injectionProgress: prev.injectionProgress
+						? {
+							...prev.injectionProgress,
+							batchIndex: (payload.batchIndex as number) + 1,
+						}
+						: prev.injectionProgress,
+				}))
+			}
 		}
 
-		// Initialize
-		try {
-			await retryAsync(() => brain.initialize(), 3)
-			syncNeurons(brain)
-			setState((prev) => ({ ...prev, phase: "ready" }))
-		} catch (err) {
-			console.error("[useBrain] Init failed:", err)
-			setState((prev) => ({ ...prev, phase: "error", activity: String(err) }))
-		}
+		const brain = await retryAsync(() =>
+			Brain.create({
+				prompt: options.prompt,
+				autoSetup: options.autoSetup ?? true,
+				model: options.model,
+				init: { model: options.blueprintModel ?? options.model },
+				store: new MemoryBrainStore(),
+				ingest: options.ingest,
+				learning: {
+					understand: options.learning?.understand,
+					governance: options.learning?.governance,
+				},
+				evolution: options.evolution ? {
+					enabled: options.evolution.enabled,
+					autoEvaluate: options.evolution.autoEvaluate,
+					evaluatorSignalThreshold: options.evolution.evaluatorSignalThreshold,
+					model: options.evolution.model ?? options.model,
+				} : undefined,
+				onEvent: handleBrainEvent,
+			}), 3)
+
+		brainRef.current = brain
+
+		syncNeurons(brain)
+		setState((prev) => ({ ...prev, phase: "ready", activity: "Brain ready" }))
 	}, [addEvent, patchNeuron, incrementMetric, enqueueCommentary])
+
+	// Incrementally append a neuron from a brain:neuron:added payload. Used during
+	// init (before the brain instance is available); syncNeurons reconciles later.
+	const addNeuronFromEvent = (payload: Record<string, unknown>) => {
+		const id = payload.neuronId as string | undefined
+		const name = payload.name as string | undefined
+		if (!id || !name || name.startsWith("__internal")) return
+		setState((prev) => {
+			if (prev.neurons.some((n) => n.id === id)) return prev
+			return {
+				...prev,
+				neurons: [
+					...prev.neurons,
+					{
+						id,
+						name,
+						type: "text",
+						description: (payload.instructions as string) ?? "",
+						understandingSize: 0,
+						activity: "idle",
+						metrics: { ...defaultMetrics },
+						health: { ...defaultHealth },
+					},
+				],
+			}
+		})
+	}
 
 	const syncNeurons = (brain: import("@unbody-io/adapt").Brain) => {
 		const neuronMap = brain.neurons
@@ -593,7 +630,7 @@ interface ActivityResult {
 function activityFromEvent(
 	type: string,
 	payload: Record<string, unknown>,
-	brain: import("@unbody-io/adapt").Brain,
+	brain: import("@unbody-io/adapt").Brain | null,
 ): ActivityResult | null {
 	switch (type) {
 		case "brain:init:started": return { text: "Analyzing prompt...", category: "progress" }
@@ -605,7 +642,7 @@ function activityFromEvent(
 		case "neuron:init:started": {
 			const neuronId = payload.neuronId as string
 			if (isInternalNeuron(neuronId)) return null
-			const neuron = brain.getNeuron(neuronId)
+			const neuron = brain?.getNeuron(neuronId)
 			return { text: `Setting up "${neuron?.name ?? neuronId}"...`, category: "progress" }
 		}
 		case "brain:init:completed": return { text: "Brain ready", category: "progress" }

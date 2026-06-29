@@ -33,8 +33,8 @@ export function truncate(s: string, max: number): string {
 	return s.length > max ? `${s.slice(0, max)}...` : s
 }
 
-function resolveName(brain: Brain, id: string): string {
-	const neuron = brain.getNeuron(id)
+function resolveName(brain: Brain | null, id: string): string {
+	const neuron = brain?.getNeuron(id)
 	if (neuron?.name) return neuron.name
 	if (neuron?.description) return `the one tracking ${neuron.description.slice(0, 60)}`
 	return "an unnamed area"
@@ -57,7 +57,7 @@ export interface CommentaryResult {
 export function commentaryFromEvent(
 	type: string,
 	payload: Record<string, unknown>,
-	brain: Brain,
+	brain: Brain | null,
 	flags: { narratedInternalSetup: boolean },
 ): CommentaryResult | null {
 	switch (type) {
@@ -74,7 +74,7 @@ export function commentaryFromEvent(
 			const name = payload.name as string
 			if (name?.startsWith("__internal")) return null
 			const neuronId = payload.neuronId as string
-			const neuron = brain.getNeuron(neuronId)
+			const neuron = brain?.getNeuron(neuronId)
 			const desc = neuron?.description
 			const instructions = payload.instructions as string | undefined
 			const detail = desc || instructions?.replace(/[\n\r]+/g, " ").replace(/\s+/g, " ").trim()

@@ -1,0 +1,134 @@
+{
+	"id": "agent-handoffs",
+	"source": "agent-handoffs",
+	"label": "Agent Handoffs",
+	"summary": "Cross-session handoff notes showing how conceptual Claude Code work became Codex implementation work.",
+	"description": "Simulated notes kept by the developer after switching between coding agents, projects, and sessions.",
+	"items": [
+		{
+			"id": "handoff-brain-v0-evolution",
+			"label": "Handoff: Brain evolution spec to implementation",
+			"data": {
+				"type": "coding-agent-handoff",
+				"repo": "brain-v0",
+				"project": "Adapt Brain",
+				"from_agent": "Claude Code",
+				"to_agent": "Codex",
+				"from_session": "brain-v0-claude-2026-04-03",
+				"to_session": "brain-v0-codex-2026-04-04",
+				"handoff_quality": "strong",
+				"date": "2026-04-04",
+				"summary": "Claude Code defined the conceptual model for Brain evolution and Codex implemented it mostly as specified.",
+				"what_transferred_well": [
+					"The list of allowed actions was concrete.",
+					"The event-driven surface gave Codex a clear integration point.",
+					"The rationale requirement made tests easier to design."
+				],
+				"what_changed_during_execution": [
+					"Codex discovered config updates needed merge semantics to avoid losing thresholds.",
+					"Split behavior needed a more constrained prompt than the initial spec provided."
+				],
+				"developer_note": "Best handoffs happen when Claude Code leaves both a concept and a small implementation contract."
+			}
+		},
+		{
+			"id": "handoff-mycelium-capture",
+			"label": "Handoff: Mycelium capture slice",
+			"data": {
+				"type": "coding-agent-handoff",
+				"repo": "mycelium-browser",
+				"project": "Mycelium",
+				"from_agent": "Claude Code",
+				"to_agent": "Codex",
+				"from_session": "mycelium-claude-2026-04-08",
+				"to_session": "mycelium-codex-2026-04-09",
+				"handoff_quality": "medium",
+				"date": "2026-04-09",
+				"summary": "Claude Code scoped the product slice clearly, but Codex had to resolve browser-extension mechanics during implementation.",
+				"what_transferred_well": [
+					"The capture payload fields were clear.",
+					"The decision to avoid collections and sharing kept the implementation small."
+				],
+				"what_changed_during_execution": [
+					"Selected text required content-script messaging and cached state.",
+					"The mocked persistence layer needed typed boundaries earlier than expected."
+				],
+				"developer_note": "For browser work, conceptual specs should mention extension lifecycle constraints because execution depends on them."
+			}
+		},
+		{
+			"id": "handoff-cibil-sessionization",
+			"label": "Handoff: Cibil session analytics",
+			"data": {
+				"type": "coding-agent-handoff",
+				"repo": "cibil-analytics",
+				"project": "Cibil",
+				"from_agent": "Claude Code",
+				"to_agent": "Codex",
+				"from_session": "cibil-claude-2026-04-12",
+				"to_session": "cibil-codex-2026-04-13",
+				"handoff_quality": "strong",
+				"date": "2026-04-13",
+				"summary": "Claude Code's product definition translated directly into Codex tests and implementation.",
+				"what_transferred_well": [
+					"The 30 minute inactivity rule was precise.",
+					"The excluded event types were named before implementation.",
+					"The edge cases became a ready-made test list."
+				],
+				"what_changed_during_execution": [
+					"Codex discovered sessions must be grouped by account or visitor before timestamp sorting."
+				],
+				"developer_note": "When Claude Code defines acceptance cases, Codex can move quickly and catch hidden data-shape issues."
+			}
+		},
+		{
+			"id": "handoff-website-demo",
+			"label": "Handoff: website demo use case",
+			"data": {
+				"type": "coding-agent-handoff",
+				"repo": "brain-v0",
+				"project": "Adapt Website",
+				"from_agent": "Claude Code",
+				"to_agent": "Codex",
+				"from_session": "website-claude-2026-04-18",
+				"to_session": "website-codex-2026-04-19",
+				"handoff_quality": "strong",
+				"date": "2026-04-19",
+				"summary": "Claude Code clarified the narrative purpose of the demo and Codex found the smallest data-driven implementation path.",
+				"what_transferred_well": [
+					"The scenario requirements were concrete: agents, repos, sessions, handoffs.",
+					"The instruction to keep the first screen as the working demo matched the existing UI."
+				],
+				"what_changed_during_execution": [
+					"Codex avoided runtime changes because the existing data loader already supported the use case."
+				],
+				"developer_note": "For website demos, Claude Code is useful for story and information shape; Codex is better at fitting that story into the existing code path."
+			}
+		},
+		{
+			"id": "handoff-agent-memory-importer",
+			"label": "Handoff: agent memory taxonomy to importer",
+			"data": {
+				"type": "coding-agent-handoff",
+				"repo": "agent-memory-lab",
+				"project": "Agent Memory Lab",
+				"from_agent": "Claude Code",
+				"to_agent": "Codex",
+				"from_session": "agent-memory-claude-2026-04-22",
+				"to_session": "agent-memory-codex-2026-04-24",
+				"handoff_quality": "medium",
+				"date": "2026-04-24",
+				"summary": "Claude Code produced a useful taxonomy, but Codex had to make the schema stricter during importer implementation.",
+				"what_transferred_well": [
+					"Agent identity, repo context, occasion, outcome, and handoff fields were already separated.",
+					"The taxonomy made it obvious that handoffs should be queryable."
+				],
+				"what_changed_during_execution": [
+					"Codex normalized agent names to prevent Claude, Claude Code, and claude-code from becoming separate concepts.",
+					"Handoff notes became structured metadata rather than only prose."
+				],
+				"developer_note": "Taxonomy sessions need a follow-up execution pass because schemas reveal ambiguities that conceptual work can hide."
+			}
+		}
+	]
+}

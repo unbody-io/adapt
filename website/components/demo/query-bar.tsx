@@ -416,13 +416,10 @@ export function QueryBar({ neurons, disabled, brainRef, onActiveChange, suggesti
 					setResult((prev) => ({ ...prev, insight: accumulated, status: undefined }))
 				}
 
-				const final = await streamResult.response
-				const sources = (final as Record<string, unknown>).sources as Source[] | undefined
-
 				setResult((prev) => ({
 					...prev,
 					insight: accumulated,
-					sources: sources ?? [],
+					sources: [],
 					status: undefined,
 				}))
 			}
